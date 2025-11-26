@@ -1,0 +1,25 @@
+{
+  "name": "schach9x9",
+  "version": "1.0.0",
+  "description": "Schach 9x9 Spiel",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "train": "node opening-book-trainer.cjs",
+    "train:fast": "node opening-book-trainer.cjs --games 50",
+    "train:thorough": "node opening-book-trainer.cjs --games 500",
+    "start": "npx serve ."
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "husky": "^8.0.0",
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "jsdoc": "^4.0.5",
+    "prettier": "^3.0.0"
+  }
+}

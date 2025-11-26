@@ -1,0 +1,7 @@
+{
+  "source": ["gameEngine.js", "ui.js"],
+  "opts": {
+    "destination": "docs",
+    "recurse": true
+  }
+}

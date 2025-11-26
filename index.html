@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Ein Schachspiel auf einem 9x9 Brett mit neuen Figuren und Regeln."
+    />
+    <meta name="theme-color" content="#2196f3" />
+    <title>Schach 9x9</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="coordinates.css" />
+  </head>
+
+  <body>
+    <div
+      id="spinner-overlay"
+      style="
+        display: none;
+        position: fixed;
+        z-index: 9998;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.3);
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        class="ai-thinking-panel"
+        style="
+          background: #222;
+          padding: 30px 40px;
+          border-radius: 16px;
+          box-shadow: 0 0 16px #000;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          min-width: 300px;
+        "
+      >
+        <div
+          class="spinner"
+          style="
+            width: 48px;
+            height: 48px;
+            border: 6px solid #eee;
+            border-top: 6px solid #2196f3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          "
+        ></div>
+        <div style="margin-top: 16px; font-size: 1.2em">KI denkt nach...</div>
+
+        <!-- AI Progress Info -->
+        <div class="ai-status" style="margin-top: 20px; text-align: center; width: 100%">
+          <div id="ai-depth" style="font-size: 0.95em; color: #ddd; margin-bottom: 8px">
+            Calculating...
+          </div>
+          <div id="ai-nodes" style="font-size: 0.9em; color: #aaa; margin-bottom: 8px">
+            0 Positionen
+          </div>
+          <div id="ai-best-move" style="font-size: 0.85em; color: #888; margin-bottom: 12px"></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div
+          class="progress-bar"
+          style="
+            width: 100%;
+            height: 6px;
+            background: #444;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+          "
+        >
+          <div
+            id="progress-fill"
+            style="
+              height: 100%;
+              width: 0%;
+              background: linear-gradient(90deg, #2196f3, #21cbf3);
+              transition: width 0.3s ease;
+            "
+          ></div>
+        </div>
+      </div>
+    </div>
+    <style>
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <div
+      id="error-overlay"
+      style="
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        text-align: center;
+      "
+    >
+      <div>
+        <strong>Ein Fehler ist aufgetreten:</strong>
+        <div id="error-message"></div>
+        <button onclick="document.getElementById('error-overlay').style.display='none'">
+          Schließen
+        </button>
+      </div>
+    </div>
+    <script>
+      window.addEventListener('error', function (e) {
+        var overlay = document.getElementById('error-overlay');
+        var msg = document.getElementById('error-message');
+        if (overlay && msg) {
+          msg.textContent = e.message + (e.filename ? '\n' + e.filename + ':' + e.lineno : '');
+          overlay.style.display = 'flex';
+        }
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('service-worker.js')
+            .then(reg => console.log('[SW] Registered:', reg.scope))
+            .catch(err => console.error('[SW] Registration failed:', err));
+        });
+      }
+    </script>
+    <div id="game-container">
+      <header>
+        <h1>♟️ Schach 9x9</h1>
+
+        <div class="controls-container">
+          <!-- Game Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Spielmodus</label>
+            <div class="control-items">
+              <label class="checkbox-label">
+                <input type="checkbox" id="ai-toggle" checked />
+                <span>🤖 Gegen Computer</span>
+              </label>
+              <select id="difficulty-select" class="select-input">
+                <option value="beginner" selected>🎯 Anfänger</option>
+                <option value="easy">🟢 Einfach</option>
+                <option value="medium">🟡 Mittel</option>
+                <option value="hard">🔴 Schwer</option>
+                <option value="expert">⚫ Experte</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Clock Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Zeitkontrolle</label>
+            <div class="control-items">
+              <label class="checkbox-label">
+                <input type="checkbox" id="clock-toggle" />
+                <span>⏱️ Schachuhr</span>
+              </label>
+              <select id="time-control-select" class="select-input">
+                <option value="blitz3">Blitz 3+2</option>
+                <option value="blitz5" selected>Blitz 5+3</option>
+                <option value="rapid10">Rapid 10+0</option>
+                <option value="rapid15">Rapid 15+10</option>
+                <option value="classical30">Klassisch 30+0</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Visual Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Darstellung</label>
+            <div class="control-items">
+              <select id="theme-select" class="select-input">
+                <option value="classic" selected>🎨 Klassisch</option>
+                <option value="blue">🔵 Blau</option>
+                <option value="green">🟢 Grün</option>
+                <option value="dark">🌑 Dunkel</option>
+                <option value="wood">🪵 Holz</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sound Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Sound</label>
+            <div class="control-items">
+              <label class="checkbox-label">
+                <input type="checkbox" id="sound-toggle" checked />
+                <span>🔊 Sound aktiviert</span>
+              </label>
+              <div class="volume-control">
+                <span class="volume-icon">🔉</span>
+                <input
+                  type="range"
+                  id="volume-slider"
+                  class="volume-slider"
+                  min="0"
+                  max="100"
+                  value="30"
+                  title="Lautstärke"
+                  aria-label="Lautstärke"
+                />
+                <span class="volume-icon">🔊</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons Group -->
+          <div class="control-group">
+            <label class="control-label">Aktionen</label>
+            <div class="control-items button-row">
+              <button
+                id="hint-btn"
+                class="action-btn hint-btn"
+                aria-label="Tipp anzeigen"
+                title="Tipp anzeigen (H)"
+              >
+                💡 Tipp
+              </button>
+              <button
+                id="resign-btn"
+                class="action-btn resign-btn"
+                aria-label="Aufgeben"
+                title="Aufgeben"
+              >
+                🏳️ Aufgeben
+              </button>
+              <button
+                id="draw-offer-btn"
+                class="action-btn draw-btn"
+                aria-label="Remis anbieten"
+                title="Remis anbieten"
+              >
+                🤝 Remis
+              </button>
+              <button
+                id="save-btn"
+                class="action-btn save-btn"
+                aria-label="Spiel speichern"
+                title="Spiel speichern (Strg+S)"
+              >
+                💾
+              </button>
+              <button
+                id="load-btn"
+                class="action-btn load-btn"
+                aria-label="Spiel laden"
+                title="Spiel laden (Strg+L)"
+              >
+                📂
+              </button>
+              <button
+                id="help-btn"
+                class="action-btn help-btn"
+                aria-label="Tutorial anzeigen"
+                title="Tutorial anzeigen (?)"
+              >
+                📖 Tutorial
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chess Clock Display -->
+        <div id="chess-clock" class="hidden">
+          <div class="clock-display" id="clock-white">
+            <div class="clock-label">Weiß</div>
+            <div class="clock-time">5:00</div>
+          </div>
+          <div class="clock-display" id="clock-black">
+            <div class="clock-label">Schwarz</div>
+            <div class="clock-time">5:00</div>
+          </div>
+        </div>
+        <div id="status-display">Status: Initialisiere...</div>
+      </header>
+
+      <div id="main-area">
+        <div id="board-container">
+          <div id="board-wrapper" aria-label="Schachbrett" role="region">
+            <div id="board">
+              <!-- Board cells will be generated by JS -->
+            </div>
+            <div id="coordinates-horizontal"></div>
+            <div id="coordinates-vertical"></div>
+          </div>
+          <div
+            id="game-over-overlay"
+            class="hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="winner-text"
+          >
+            <h2 id="winner-text">Weiß gewinnt!</h2>
+            <button id="restart-btn">Neues Spiel</button>
+          </div>
+          <div
+            id="promotion-overlay"
+            class="hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="promotion-options"
+          >
+            <h2>Beförderung wählen</h2>
+            <div id="promotion-options">
+              <!-- Options generated by JS -->
+            </div>
+          </div>
+          <div
+            id="help-overlay"
+            class="hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="help-content"
+          >
+            <div id="help-content">
+              <h2>Spielregeln Schach 9x9</h2>
+              <h3>Phase 1: Setup</h3>
+              <p>Platziere deinen König in einem der drei 3x3 Korridore auf deiner Seite.</p>
+              <h3>Phase 2: Truppen kaufen</h3>
+              <p>Du hast <strong>15 Punkte</strong>, um Figuren zu kaufen:</p>
+              <ul>
+                <li>Bauer: 1 Punkt</li>
+                <li>Springer / Läufer: 3 Punkte</li>
+                <li>Turm: 5 Punkte</li>
+                <li>Erzbischof: 7 Punkte (Läufer + Springer)</li>
+                <li>Dame / Kanzler: 9 Punkte (Kanzler = Turm + Springer)</li>
+              </ul>
+              <p>Platzierte Figuren müssen im selben Korridor wie der König stehen.</p>
+              <h3>Phase 3: Spiel</h3>
+              <p>Es gelten die normalen Schachregeln (Schach, Matt, Rochade, En Passant).</p>
+              <p>
+                <strong>Tipp:</strong> Klicke auf gegnerische Figuren, um ihre möglichen Züge zu
+                sehen!
+              </p>
+              <h3>Tastenkürzel</h3>
+              <ul>
+                <li><strong>H</strong> - Tipp anzeigen</li>
+                <li><strong>U</strong> - Zug rückgängig</li>
+                <li><strong>Strg+S</strong> - Spiel speichern</li>
+                <li><strong>Strg+L</strong> - Spiel laden</li>
+                <li><strong>Strg+Z</strong> - Zug rückgängig</li>
+                <li><strong>?</strong> - Hilfe anzeigen</li>
+                <li><strong>ESC</strong> - Auswahl abwählen / Hilfe schließen</li>
+                <li><strong>Pfeiltasten</strong> - Feld-Navigation</li>
+                <li><strong>Enter/Space</strong> - Feld auswählen</li>
+              </ul>
+              <p><em>Hinweis: Das Spiel wird automatisch alle 5 Züge gespeichert.</em></p>
+              <button id="close-help-btn">Schließen</button>
+            </div>
+          </div>
+
+          <!-- Points Selection Overlay -->
+          <div id="points-selection-overlay" class="modal-overlay">
+            <div class="modal-content">
+              <h2>Wähle deine Punkte</h2>
+              <p style="color: var(--text-secondary); margin-bottom: 2rem">
+                Wie viele Punkte sollen im Shop zur Verfügung stehen?
+              </p>
+              <div class="dialog-buttons">
+                <button class="btn-primary points-btn" data-points="12">12 Punkte</button>
+                <button class="btn-primary points-btn" data-points="15">15 Punkte</button>
+                <button class="btn-primary points-btn" data-points="18">18 Punkte</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Promotion Overlay -->
+          <div id="tutorial-overlay" class="hidden" role="dialog" aria-modal="true">
+            <div id="tutorial-content">
+              <button id="tutorial-close" class="tutorial-close" aria-label="Tutorial schließen">
+                ×
+              </button>
+              <div id="tutorial-steps">
+                <!-- Steps will be generated by JS -->
+              </div>
+              <div id="tutorial-navigation">
+                <button id="tutorial-prev" class="tutorial-nav-btn">◀ Zurück</button>
+                <div id="tutorial-progress">
+                  <span id="tutorial-current-step">1</span> /
+                  <span id="tutorial-total-steps">5</span>
+                </div>
+                <button id="tutorial-next" class="tutorial-nav-btn">Weiter ▶</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Draw Offer Overlay -->
+          <div id="draw-offer-overlay" class="hidden" role="dialog" aria-modal="true">
+            <div class="dialog-content">
+              <h2>Remis-Angebot</h2>
+              <p id="draw-offer-message">Dein Gegner bietet Remis an.</p>
+              <div class="dialog-buttons">
+                <button id="accept-draw-btn" class="primary-btn">✅ Annehmen</button>
+                <button id="decline-draw-btn" class="secondary-btn">❌ Ablehnen</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirmation Overlay -->
+          <div id="confirmation-overlay" class="hidden" role="dialog" aria-modal="true">
+            <div class="dialog-content">
+              <h2 id="confirmation-title">Bestätigung</h2>
+              <p id="confirmation-message">Bist du sicher?</p>
+              <div class="dialog-buttons">
+                <button id="confirm-yes-btn" class="primary-btn">✅ Ja</button>
+                <button id="confirm-no-btn" class="secondary-btn">❌ Nein</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="sidebar">
+          <div id="shop-panel" class="hidden">
+            <h2>Truppen anheuern</h2>
+            <p>Punkte übrig: <span id="points-display">15</span></p>
+            <div id="shop-buttons">
+              <button class="shop-btn" data-piece="pawn" data-cost="1">Bauer (1)</button>
+              <button class="shop-btn" data-piece="knight" data-cost="3">Springer (3)</button>
+              <button class="shop-btn" data-piece="bishop" data-cost="3">Läufer (3)</button>
+              <button class="shop-btn" data-piece="rook" data-cost="5">Turm (5)</button>
+              <button class="shop-btn" data-piece="archbishop" data-cost="7">Erzbischof (7)</button>
+              <button class="shop-btn" data-piece="chancellor" data-cost="9">Kanzler (9)</button>
+              <button class="shop-btn" data-piece="queen" data-cost="9">Dame (9)</button>
+            </div>
+            <div id="selected-piece-display">Ausgewählt: Nichts</div>
+            <button id="finish-setup-btn" disabled>Fertig</button>
+          </div>
+
+          <div id="captured-pieces-panel" class="hidden">
+            <h3>Geschlagene Figuren</h3>
+            <div class="captured-row">
+              <span>Weiß:</span>
+              <div id="captured-white"></div>
+            </div>
+            <div class="captured-row">
+              <span>Schwarz:</span>
+              <div id="captured-black"></div>
+            </div>
+          </div>
+
+          <div id="move-history-panel" class="hidden">
+            <h3>Zughistorie</h3>
+            <div id="replay-controls">
+              <button id="replay-first" title="Zum Anfang">⏮</button>
+              <button id="replay-prev" title="Vorheriger Zug">◀</button>
+              <button id="replay-next" title="Nächster Zug">▶</button>
+              <button id="replay-last" title="Zum Ende">⏭</button>
+              <button id="replay-exit" class="hidden">❌ Replay beenden</button>
+            </div>
+            <div id="replay-status" class="hidden">
+              Replay-Modus: Zug <span id="replay-move-num">0</span>
+            </div>
+            <div class="undo-redo-container">
+              <button id="undo-btn" disabled title="Zug rückgängig (U oder Strg+Z)">
+                ⏮ Rückgängig
+              </button>
+              <button id="redo-btn" disabled title="Wiederholen (Strg+Y)">⏭ Wiederholen</button>
+            </div>
+            <div id="move-history"></div>
+          </div>
+
+          <div id="tutor-panel" class="hidden">
+            <h3>🎓 Tutor Empfehlungen</h3>
+            <div id="tutor-suggestions"></div>
+          </div>
+
+          <div id="stats-panel" class="hidden">
+            <h3>📊 Statistiken</h3>
+            <div class="stat-row">
+              <span class="stat-label">Züge:</span>
+              <span id="stat-moves">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Deine Genauigkeit:</span>
+              <span id="stat-accuracy">--%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Material:</span>
+              <span id="stat-material">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Beste Züge:</span>
+              <span id="stat-best-moves">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Captures:</span>
+              <span id="stat-captures">0</span>
+            </div>
+          </div>
+
+          <div id="info-panel">
+            <h3>Spielinfo</h3>
+            <p id="turn-info">Warte auf Spielstart...</p>
+            <div id="log"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="main.js?v=27"></script>
+  </body>
+</html>
