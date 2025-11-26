@@ -22,11 +22,14 @@ const LOG_STYLES = {
 
 class Logger {
   constructor() {
+    // Check if localStorage is available
+    this.hasLocalStorage = typeof localStorage !== 'undefined';
+
     // Load settings from localStorage or use defaults
-    const savedLevel = localStorage.getItem('logLevel');
+    const savedLevel = this.hasLocalStorage ? localStorage.getItem('logLevel') : null;
     this.level = savedLevel !== null ? parseInt(savedLevel, 10) : LOG_LEVELS.DEBUG;
 
-    const savedEnabled = localStorage.getItem('loggingEnabled');
+    const savedEnabled = this.hasLocalStorage ? localStorage.getItem('loggingEnabled') : null;
     this.enabled = savedEnabled !== null ? savedEnabled === 'true' : true;
   }
 
@@ -36,7 +39,9 @@ class Logger {
    */
   setLevel(level) {
     this.level = level;
-    localStorage.setItem('logLevel', level.toString());
+    if (this.hasLocalStorage) {
+      localStorage.setItem('logLevel', level.toString());
+    }
   }
 
   /**
@@ -45,7 +50,9 @@ class Logger {
    */
   setEnabled(enabled) {
     this.enabled = enabled;
-    localStorage.setItem('loggingEnabled', enabled.toString());
+    if (this.hasLocalStorage) {
+      localStorage.setItem('loggingEnabled', enabled.toString());
+    }
   }
 
   /**

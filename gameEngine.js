@@ -56,6 +56,18 @@ export class Game {
     this.drawOffered = false;
     this.drawOfferedBy = null;
   }
+
+  log(message) {
+    const logPanel = document.getElementById('log-panel');
+    if (!logPanel) return;
+
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    logPanel.appendChild(entry);
+    logPanel.scrollTop = logPanel.scrollHeight;
+  }
+
   // ...weitere Methoden wie in main.js...
   /**
    * Returns all LEGAL moves (handling check)

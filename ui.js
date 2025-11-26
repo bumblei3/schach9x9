@@ -513,15 +513,31 @@ export function renderBoard(game) {
       if (!cell) continue;
 
       // Apply corridor highlighting based on current phase
-      if (game.phase === PHASES.SETUP_WHITE_KING || game.phase === PHASES.SETUP_BLACK_KING) {
-        const isWhite = game.phase === PHASES.SETUP_WHITE_KING;
+
+      // 1. King Setup Phase (Choosing a corridor)
+      // Only show options if it's a human player's turn
+      const isSetupWhite = game.phase === PHASES.SETUP_WHITE_KING;
+      const isSetupBlack = game.phase === PHASES.SETUP_BLACK_KING;
+      const isHumanTurn = isSetupWhite || (isSetupBlack && !game.isAI);
+
+      if (isHumanTurn) {
+        const isWhite = isSetupWhite;
         const rowStart = isWhite ? 6 : 0;
+        // Highlight all three 3x3 corridors for king placement
         if (r >= rowStart && r < rowStart + 3) {
-          if (c < 3 || (c >= 3 && c < 6) || c >= 6) {
+          // Corridor 1: columns 0-2, Corridor 2: columns 3-5, Corridor 3: columns 6-8
+          const inCorridor = (c >= 0 && c <= 2) || (c >= 3 && c <= 5) || (c >= 6 && c <= 8);
+          if (inCorridor) {
             cell.classList.add('selectable-corridor');
           }
         }
-      } else if (game.phase === PHASES.SETUP_WHITE_PIECES && game.whiteCorridor) {
+      }
+
+      // 2. Piece Setup Phase (Selected corridor highlighting)
+      // Only highlight the corridor for the player currently setting up pieces
+      // AND allow seeing own corridor while waiting for opponent king setup
+
+      if (game.whiteCorridor && (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)) {
         if (
           r >= game.whiteCorridor.rowStart &&
           r < game.whiteCorridor.rowStart + 3 &&
@@ -530,7 +546,9 @@ export function renderBoard(game) {
         ) {
           cell.classList.add('selectable-corridor');
         }
-      } else if (game.phase === PHASES.SETUP_BLACK_PIECES && game.blackCorridor) {
+      }
+
+      if (game.blackCorridor && game.phase === PHASES.SETUP_BLACK_PIECES) {
         if (
           r >= game.blackCorridor.rowStart &&
           r < game.blackCorridor.rowStart + 3 &&
@@ -561,15 +579,27 @@ export function renderBoard(game) {
         cell.classList.remove('selectable-corridor');
 
         // Re-apply corridor highlighting for setup phases
-        if (game.phase === PHASES.SETUP_WHITE_KING || game.phase === PHASES.SETUP_BLACK_KING) {
-          const isWhite = game.phase === PHASES.SETUP_WHITE_KING;
+
+        // 1. King Setup Phase
+        const isSetupWhite = game.phase === PHASES.SETUP_WHITE_KING;
+        const isSetupBlack = game.phase === PHASES.SETUP_BLACK_KING;
+        const isHumanTurn = isSetupWhite || (isSetupBlack && !game.isAI);
+
+        if (isHumanTurn) {
+          const isWhite = isSetupWhite;
           const rowStart = isWhite ? 6 : 0;
+          // Highlight all three 3x3 corridors for king placement
           if (r >= rowStart && r < rowStart + 3) {
-            if (c < 3 || (c >= 3 && c < 6) || c >= 6) {
+            // Corridor 1: columns 0-2, Corridor 2: columns 3-5, Corridor 3: columns 6-8
+            const inCorridor = (c >= 0 && c <= 2) || (c >= 3 && c <= 5) || (c >= 6 && c <= 8);
+            if (inCorridor) {
               cell.classList.add('selectable-corridor');
             }
           }
-        } else if (game.phase === PHASES.SETUP_WHITE_PIECES && game.whiteCorridor) {
+        }
+
+        // 2. Selected Corridor Highlighting
+        if (game.whiteCorridor && (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)) {
           if (
             r >= game.whiteCorridor.rowStart &&
             r < game.whiteCorridor.rowStart + 3 &&
@@ -578,7 +608,9 @@ export function renderBoard(game) {
           ) {
             cell.classList.add('selectable-corridor');
           }
-        } else if (game.phase === PHASES.SETUP_BLACK_PIECES && game.blackCorridor) {
+        }
+
+        if (game.blackCorridor && game.phase === PHASES.SETUP_BLACK_PIECES) {
           if (
             r >= game.blackCorridor.rowStart &&
             r < game.blackCorridor.rowStart + 3 &&
@@ -639,24 +671,24 @@ export function updateStatus(game) {
 
   let text = '';
   switch (game.phase) {
-  case PHASES.SETUP_WHITE_KING:
-    text = 'Weiß: Wähle einen Korridor für den König';
-    break;
-  case PHASES.SETUP_BLACK_KING:
-    text = 'Schwarz: Wähle einen Korridor für den König';
-    break;
-  case PHASES.SETUP_WHITE_PIECES:
-    text = 'Weiß: Kaufe Truppen';
-    break;
-  case PHASES.SETUP_BLACK_PIECES:
-    text = 'Schwarz: Kaufe Truppen';
-    break;
-  case PHASES.PLAY:
-    text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
-    break;
-  case PHASES.GAME_OVER:
-    text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
-    break;
+    case PHASES.SETUP_WHITE_KING:
+      text = 'Weiß: Wähle einen Korridor für den König';
+      break;
+    case PHASES.SETUP_BLACK_KING:
+      text = 'Schwarz: Wähle einen Korridor für den König';
+      break;
+    case PHASES.SETUP_WHITE_PIECES:
+      text = 'Weiß: Kaufe Truppen';
+      break;
+    case PHASES.SETUP_BLACK_PIECES:
+      text = 'Schwarz: Kaufe Truppen';
+      break;
+    case PHASES.PLAY:
+      text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+      break;
+    case PHASES.GAME_OVER:
+      text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
+      break;
   }
   statusEl.textContent = text;
 }
