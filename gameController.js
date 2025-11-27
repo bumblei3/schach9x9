@@ -6,6 +6,7 @@ import { PIECE_SVGS } from './chess-pieces.js';
 import { logger } from './logger.js';
 import { Tutorial } from './tutorial.js';
 import { ArrowRenderer } from './arrows.js';
+import { StatisticsManager } from './statisticsManager.js';
 
 // Piece values for shop
 const PIECES = SHOP_PIECES;
@@ -14,6 +15,8 @@ export class GameController {
     constructor(game) {
         this.game = game;
         this.clockInterval = null;
+        this.statisticsManager = new StatisticsManager();
+        this.gameStartTime = null;
     }
 
     initGame(initialPoints) {
@@ -257,22 +260,24 @@ export class GameController {
             this.game.phase = PHASES.PLAY;
             this.showShop(false);
 
+            // Track game start time for statistics
+            this.gameStartTime = Date.now();
+
             document.querySelectorAll('.cell.selectable-corridor').forEach(cell => {
                 cell.classList.remove('selectable-corridor');
             });
             logger.debug('Removed all corridor highlighting for PLAY phase');
 
-            const moveHistoryPanel = document.getElementById('move-history-panel');
-            if (moveHistoryPanel) {
-                moveHistoryPanel.classList.remove('hidden');
+            // Show tabbed info panel instead of individual panels
+            const infoTabsContainer = document.getElementById('info-tabs-container');
+            if (infoTabsContainer) {
+                infoTabsContainer.classList.remove('hidden');
             }
-            const capturedPanel = document.getElementById('captured-pieces-panel');
-            if (capturedPanel) {
-                capturedPanel.classList.remove('hidden');
-            }
-            const statsPanel = document.getElementById('stats-panel');
-            if (statsPanel) {
-                statsPanel.classList.remove('hidden');
+
+            // Show quick action buttons
+            const quickActions = document.getElementById('quick-actions');
+            if (quickActions) {
+                quickActions.classList.remove('hidden');
             }
 
             this.game.log('Spiel beginnt! Weiß ist am Zug.');
@@ -352,6 +357,9 @@ export class GameController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Schwarz gewinnt durch Zeitüberschreitung!';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            this.saveGameToStatistics('loss', 'white');
         } else if (this.game.blackTime <= 0) {
             this.stopClock();
             this.game.phase = PHASES.GAME_OVER;
@@ -360,6 +368,9 @@ export class GameController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Weiß gewinnt durch Zeitüberschreitung!';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            this.saveGameToStatistics('win', 'black');
         }
     }
 
@@ -404,6 +415,9 @@ export class GameController {
 
         soundManager.playGameOver();
         this.stopClock();
+
+        // Save game to statistics
+        this.saveGameToStatistics('loss', resigningColor);
     }
 
     offerDraw(color) {
@@ -471,6 +485,9 @@ export class GameController {
         const winnerText = document.getElementById('winner-text');
         winnerText.textContent = 'Remis vereinbart';
         gameOverOverlay.classList.remove('hidden');
+
+        // Save game to statistics
+        this.saveGameToStatistics('draw', null);
     }
 
     declineDraw() {
@@ -491,4 +508,292 @@ export class GameController {
             overlay.classList.add('hidden');
         }
     }
+
+    saveGame() {
+        const gameState = {
+            board: this.game.board,
+            turn: this.game.turn,
+            phase: this.game.phase,
+            whiteCorridor: this.game.whiteCorridor,
+            blackCorridor: this.game.blackCorridor,
+            points: this.game.points,
+            history: this.game.history,
+            capturedPieces: this.game.capturedPieces,
+            whiteTime: this.game.whiteTime,
+            blackTime: this.game.blackTime,
+            isAI: this.game.isAI,
+            difficulty: this.game.difficulty,
+            clockEnabled: this.game.clockEnabled,
+            timeControl: this.game.timeControl,
+            moveNumber: this.game.moveNumber,
+            halfMoveClock: this.game.halfMoveClock,
+            initialPoints: this.game.initialPoints
+        };
+
+        try {
+            localStorage.setItem('schach9x9_save', JSON.stringify(gameState));
+            this.game.log('💾 Spiel erfolgreich gespeichert!');
+            soundManager.playSound('move-self'); // Feedback sound
+        } catch (e) {
+            console.error('Save failed:', e);
+            this.game.log('❌ Fehler beim Speichern: ' + e.message);
+        }
+    }
+
+    loadGame() {
+        const saved = localStorage.getItem('schach9x9_save');
+        if (!saved) {
+            this.game.log('⚠️ Kein gespeichertes Spiel gefunden.');
+            return;
+        }
+
+        try {
+            const state = JSON.parse(saved);
+
+            // Stop any running clock before loading
+            this.stopClock();
+
+            // Restore state
+            Object.assign(this.game, state);
+
+            // Re-initialize UI components
+            UI.renderBoard(this.game);
+            UI.updateStatus(this.game);
+            UI.updateShopUI(this.game);
+            UI.updateStatistics(this.game);
+            UI.updateClockUI(this.game);
+            UI.updateClockDisplay(this.game);
+
+            // Restore captured pieces display
+            // We need to clear and re-add them
+            const whiteCaptured = document.getElementById('captured-white');
+            const blackCaptured = document.getElementById('captured-black');
+            if (whiteCaptured) whiteCaptured.innerHTML = '';
+            if (blackCaptured) blackCaptured.innerHTML = '';
+
+            // Re-populate captured pieces
+            if (this.game.capturedPieces) {
+                this.game.capturedPieces.forEach(piece => {
+                    UI.addCapturedPiece(piece);
+                });
+            }
+
+            // Restore move history panel
+            const moveHistoryPanel = document.getElementById('move-history-panel');
+            if (moveHistoryPanel) {
+                // Clear existing history
+                const historyList = document.getElementById('move-history');
+                if (historyList) historyList.innerHTML = '';
+
+                // Re-populate history
+                if (this.game.history) {
+                    this.game.history.forEach((move, index) => {
+                        UI.addMoveToHistory(move, index + 1);
+                    });
+                    // Scroll to bottom
+                    if (historyList) historyList.scrollTop = historyList.scrollHeight;
+                }
+
+                if (this.game.phase === PHASES.PLAY) {
+                    moveHistoryPanel.classList.remove('hidden');
+                }
+            }
+
+            // Restart clock if needed
+            if (this.game.phase === PHASES.PLAY && this.game.clockEnabled) {
+                this.startClock();
+            }
+
+            // Trigger AI actions if in setup phase
+            if (this.game.isAI) {
+                if (this.game.phase === PHASES.SETUP_BLACK_KING) {
+                    // AI needs to place black king
+                    setTimeout(() => {
+                        if (this.game.aiSetupKing) this.game.aiSetupKing();
+                    }, 1000);
+                } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
+                    // AI needs to place black pieces
+                    setTimeout(() => {
+                        if (this.game.aiSetupPieces) this.game.aiSetupPieces();
+                    }, 1000);
+                }
+            }
+
+            this.game.log('📂 Spiel erfolgreich geladen!');
+            soundManager.playSound('game-start'); // Feedback sound
+
+        } catch (e) {
+            console.error('Load failed:', e);
+            this.game.log('❌ Fehler beim Laden: ' + e.message);
+        }
+    }
+
+    // ===== ANALYSIS MODE METHODS =====
+
+    enterAnalysisMode() {
+        // Can only analyze during play phase
+        if (this.game.phase !== PHASES.PLAY) {
+            this.game.log('⚠️ Analyse-Modus nur während des Spiels verfügbar.');
+            return false;
+        }
+
+        // Save current game state
+        this.game.analysisBasePosition = {
+            board: JSON.parse(JSON.stringify(this.game.board)),
+            turn: this.game.turn,
+            moveHistory: [...this.game.moveHistory],
+            redoStack: [...this.game.redoStack],
+            lastMove: this.game.lastMove ? { ...this.game.lastMove } : null,
+            lastMoveHighlight: this.game.lastMoveHighlight ? { ...this.game.lastMoveHighlight } : null,
+            selectedSquare: this.game.selectedSquare,
+            validMoves: this.game.validMoves,
+            halfMoveClock: this.game.halfMoveClock,
+            positionHistory: [...this.game.positionHistory]
+        };
+
+        // Enter analysis mode
+        this.game.analysisMode = true;
+        this.game.phase = PHASES.ANALYSIS;
+
+        // Stop clock
+        this.stopClock();
+
+        // Clear selection
+        this.game.selectedSquare = null;
+        this.game.validMoves = null;
+
+        // Show analysis panel
+        const analysisPanel = document.getElementById('analysis-panel');
+        if (analysisPanel) {
+            analysisPanel.classList.remove('hidden');
+        }
+
+        UI.updateStatus(this.game);
+        UI.renderBoard(this.game);
+
+        this.game.log('🔍 Analyse-Modus aktiviert. Züge lösen keine KI-Reaktion aus.');
+
+        // Start continuous analysis if enabled
+        if (this.game.continuousAnalysis && this.game.aiController) {
+            this.requestPositionAnalysis();
+        }
+
+        return true;
+    }
+
+    exitAnalysisMode(restore = true) {
+        if (!this.game.analysisMode) {
+            return false;
+        }
+
+        if (restore && this.game.analysisBasePosition) {
+            // Restore saved position
+            this.game.board = JSON.parse(JSON.stringify(this.game.analysisBasePosition.board));
+            this.game.turn = this.game.analysisBasePosition.turn;
+            this.game.moveHistory = [...this.game.analysisBasePosition.moveHistory];
+            this.game.redoStack = [...this.game.analysisBasePosition.redoStack];
+            this.game.lastMove = this.game.analysisBasePosition.lastMove ? { ...this.game.analysisBasePosition.lastMove } : null;
+            this.game.lastMoveHighlight = this.game.analysisBasePosition.lastMoveHighlight ? { ...this.game.analysisBasePosition.lastMoveHighlight } : null;
+            this.game.selectedSquare = this.game.analysisBasePosition.selectedSquare;
+            this.game.validMoves = this.game.analysisBasePosition.validMoves;
+            this.game.halfMoveClock = this.game.analysisBasePosition.halfMoveClock;
+            this.game.positionHistory = [...this.game.analysisBasePosition.positionHistory];
+        }
+
+        // Exit analysis mode
+        this.game.analysisMode = false;
+        this.game.phase = PHASES.PLAY;
+        this.game.analysisBasePosition = null;
+        this.game.analysisVariations = [];
+
+        // Hide analysis panel
+        const analysisPanel = document.getElementById('analysis-panel');
+        if (analysisPanel) {
+            analysisPanel.classList.add('hidden');
+        }
+
+        // Restart clock if enabled
+        if (this.game.clockEnabled) {
+            this.startClock();
+        }
+
+        UI.updateStatus(this.game);
+        UI.renderBoard(this.game);
+
+        const message = restore ? '🔍 Analyse-Modus beendet. Position wiederhergestellt.' : '🔍 Analyse-Modus beendet. Aktuelle Position behalten.';
+        this.game.log(message);
+
+        return true;
+    }
+
+    requestPositionAnalysis() {
+        // Request analysis from AI controller
+        if (!this.game.aiController || !this.game.aiController.analyzePosition) {
+            return;
+        }
+
+        this.game.aiController.analyzePosition();
+    }
+
+    toggleContinuousAnalysis() {
+        this.game.continuousAnalysis = !this.game.continuousAnalysis;
+
+        if (this.game.continuousAnalysis && this.game.analysisMode) {
+            this.requestPositionAnalysis();
+            this.game.log('🔄 Kontinuierliche Analyse aktiviert.');
+        } else {
+            this.game.log('⏸️ Kontinuierliche Analyse deaktiviert.');
+        }
+    }
+
+    /**
+     * Saves completed game to statistics
+     * @param {string} result - 'win', 'loss', or 'draw'
+     * @param {string} losingColor - Color that lost (only for win/loss)
+     */
+    saveGameToStatistics(result, losingColor = null) {
+        if (!this.gameStartTime) {
+            logger.warn('Game start time not set, skipping statistics save');
+            return;
+        }
+
+        // Determine player color (assuming player is always white when playing against AI)
+        const playerColor = 'white';
+
+        // Determine opponent
+        let opponent = 'Human';
+        if (this.game.isAI) {
+            const difficultyMap = {
+                'beginner': 'AI-Anfänger',
+                'easy': 'AI-Einfach',
+                'medium': 'AI-Mittel',
+                'hard': 'AI-Schwer',
+                'expert': 'AI-Experte'
+            };
+            opponent = difficultyMap[this.game.difficulty] || 'AI';
+        }
+
+        // Determine actual result from player's perspective
+        let playerResult = result;
+        if (result === 'loss') {
+            // If player lost (white resigned or got mated)
+            playerResult = losingColor === 'white' ? 'loss' : 'win';
+        } else if (result === 'win') {
+            // If someone won
+            playerResult = losingColor === 'black' ? 'win' : 'loss';
+        }
+
+        const gameData = {
+            result: playerResult,
+            playerColor: playerColor,
+            opponent: opponent,
+            moveHistory: this.game.history || [],
+            duration: Date.now() - this.gameStartTime,
+            finalPosition: JSON.stringify(this.game.board)
+        };
+
+        this.statisticsManager.saveGame(gameData);
+        logger.info('Game saved to statistics:', playerResult, 'vs', opponent);
+    }
 }
+

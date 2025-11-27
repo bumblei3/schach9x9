@@ -19,6 +19,7 @@ export const PHASES = {
   SETUP_WHITE_PIECES: 'SETUP_WHITE_PIECES',
   SETUP_BLACK_PIECES: 'SETUP_BLACK_PIECES',
   PLAY: 'PLAY',
+  ANALYSIS: 'ANALYSIS',
   GAME_OVER: 'GAME_OVER',
 };
 
@@ -62,7 +63,7 @@ export const SHOP_PIECES = {
   ROOK: { points: 5, symbol: 'r', name: 'Turm' },
   ARCHBISHOP: { points: 7, symbol: 'a', name: 'Erzbischof' },
   QUEEN: { points: 9, symbol: 'q', name: 'Dame' },
-  CHANCELLOR: { points: 9, symbol: 'c', name: 'Kanzler' },
+  CHANCELLOR: { points: 8, symbol: 'c', name: 'Kanzler' },
 };
 
 /**

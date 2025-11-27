@@ -201,6 +201,11 @@ export class MoveController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Unentschieden (Ungenügendes Material)';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            if (this.game.gameController) {
+                this.game.gameController.saveGameToStatistics('draw', null);
+            }
             return;
         }
 
@@ -250,6 +255,12 @@ export class MoveController {
 
             UI.renderBoard(this.game);
             UI.updateStatus(this.game);
+
+            // Save to statistics
+            if (this.game.gameController) {
+                const losingColor = !whiteKingExists ? 'white' : 'black';
+                this.game.gameController.saveGameToStatistics('win', losingColor);
+            }
             return;
         }
 
@@ -289,6 +300,11 @@ export class MoveController {
 
             const isPlayerWin = (this.game.isAI && opponentColor === 'black') || !this.game.isAI;
             soundManager.playGameOver(isPlayerWin);
+
+            // Save to statistics
+            if (this.game.gameController) {
+                this.game.gameController.saveGameToStatistics('win', opponentColor);
+            }
             return;
         } else if (this.game.isStalemate(opponentColor)) {
             this.game.phase = PHASES.GAME_OVER;
@@ -299,6 +315,11 @@ export class MoveController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Unentschieden (Patt)';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            if (this.game.gameController) {
+                this.game.gameController.saveGameToStatistics('draw', null);
+            }
             return;
         } else if (this.checkDraw()) {
             return;
@@ -438,6 +459,11 @@ export class MoveController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Unentschieden (50-Züge-Regel)';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            if (this.game.gameController) {
+                this.game.gameController.saveGameToStatistics('draw', null);
+            }
             return true;
         }
 
@@ -452,6 +478,11 @@ export class MoveController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Unentschieden (Stellungswiederholung)';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            if (this.game.gameController) {
+                this.game.gameController.saveGameToStatistics('draw', null);
+            }
             return true;
         }
 
@@ -464,6 +495,11 @@ export class MoveController {
             const winnerText = document.getElementById('winner-text');
             winnerText.textContent = 'Unentschieden (Ungenügendes Material)';
             overlay.classList.remove('hidden');
+
+            // Save to statistics
+            if (this.game.gameController) {
+                this.game.gameController.saveGameToStatistics('draw', null);
+            }
             return true;
         }
 

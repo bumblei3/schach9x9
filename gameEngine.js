@@ -55,6 +55,11 @@ export class Game {
     this.bestMoves = [];
     this.drawOffered = false;
     this.drawOfferedBy = null;
+    // Analysis mode state
+    this.analysisMode = false;
+    this.analysisBasePosition = null; // Save point before entering analysis
+    this.analysisVariations = []; // Track explored variations
+    this.continuousAnalysis = false;
   }
 
   log(message) {
