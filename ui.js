@@ -675,7 +675,7 @@ export function updateStatus(game) {
       text = 'Weiß: Wähle einen Korridor für den König';
       break;
     case PHASES.SETUP_BLACK_KING:
-      text = 'Schwarz: Wähle einen Korridor für den König';
+      text = 'Schwarz: Wähle einen Korridor för den König';
       break;
     case PHASES.SETUP_WHITE_PIECES:
       text = 'Weiß: Kaufe Truppen';
@@ -685,6 +685,9 @@ export function updateStatus(game) {
       break;
     case PHASES.PLAY:
       text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+      break;
+    case PHASES.ANALYSIS:
+      text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
       break;
     case PHASES.GAME_OVER:
       text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
@@ -969,32 +972,75 @@ export function showTutorSuggestions(game) {
     game.arrowRenderer.clearArrows();
   }
 
+  suggestionsEl.innerHTML = '';
+
+  // Check for Setup Phase
+  if (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_PIECES) {
+    if (game.tutorController && game.tutorController.getSetupTemplates) {
+      const templates = game.tutorController.getSetupTemplates();
+
+      const header = document.createElement('h3');
+      header.textContent = '🏗️ Empfohlene Aufstellungen';
+      header.style.marginBottom = '1rem';
+      suggestionsEl.appendChild(header);
+
+      templates.forEach(template => {
+        const el = document.createElement('div');
+        el.className = 'setup-template';
+        el.style.cssText = `
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        `;
+        el.onmouseover = () => { el.style.background = 'rgba(34, 197, 94, 0.2)'; };
+        el.onmouseout = () => { el.style.background = 'rgba(34, 197, 94, 0.1)'; };
+
+        el.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">${template.name}</div>
+            <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.5rem;">${template.description}</div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">Kosten: ${template.cost} Punkte</div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem;">
+                <span>Enthält:</span>
+                ${template.pieces.map(p => `<span style="display: inline-block; width: 28px; height: 28px;">${window.PIECE_SVGS ? window.PIECE_SVGS[game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black'][p] : p}</span>`).join('')}
+            </div>
+        `;
+
+        el.onclick = () => {
+          if (confirm(`Möchtest du die Aufstellung "${template.name}" anwenden? Deine aktuelle Aufstellung wird überschrieben.`)) {
+            game.tutorController.applySetupTemplate(template.id);
+            // Close panel? Or keep open? Keep open to see result.
+            // Maybe flash success?
+          }
+        };
+
+        suggestionsEl.appendChild(el);
+      });
+
+      tutorPanel.classList.remove('hidden');
+      return;
+    }
+  }
+
   // Get tutor hints
   if (!game.getTutorHints) return;
   const hints = game.getTutorHints();
 
   if (hints.length === 0) {
-    suggestionsEl.innerHTML = '<p style="color: #888;">Keine Züge verfügbar</p>';
+    suggestionsEl.innerHTML = '<p style="padding: 1rem; color: #94a3b8;">Keine Vorschläge verfügbar.</p>';
     tutorPanel.classList.remove('hidden');
     return;
   }
 
-  // Clear and rebuild UI
-  suggestionsEl.innerHTML = '';
-
-  // Header
-  const header = document.createElement('div');
-  header.className = 'tutor-header';
-  header.style.cssText = `
-    padding-bottom: 0.75rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-  `;
+  const header = document.createElement('h3');
   header.innerHTML = `
-    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem;">💡 Empfohlene Züge</h4>
-    <p style="margin: 0; font-size: 0.8rem; color: #888;">
-      Klicke auf einen Zug für Details
-    </p>
+    🤖 Tutor Vorschläge
+    <span style="font-size: 0.8rem; font-weight: normal; color: #94a3b8; display: block; margin-top: 0.25rem;">
+      Beste Züge für ${game.turn === 'white' ? 'Weiß' : 'Schwarz'}
+    </span>
   `;
   suggestionsEl.appendChild(header);
 
@@ -1038,6 +1084,20 @@ export function showTutorSuggestions(game) {
       ${scoreDisplay}
     `;
     suggEl.appendChild(overview);
+
+    // Quality Label (New)
+    if (analysis.qualityLabel) {
+      const qualityEl = document.createElement('div');
+      qualityEl.style.cssText = `
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        padding: 0 0.75rem;
+        font-weight: 500;
+        color: ${analysis.category === 'excellent' ? '#fbbf24' : analysis.category === 'good' ? '#4ade80' : '#94a3b8'};
+      `;
+      qualityEl.textContent = analysis.qualityLabel;
+      suggEl.appendChild(qualityEl);
+    }
 
     // Action buttons
     const actionsEl = document.createElement('div');
@@ -1094,7 +1154,11 @@ export function showTutorSuggestions(game) {
     suggEl.appendChild(actionsEl);
 
     // Explanations section (expandable)
-    if (analysis.explanations.length > 0 || analysis.warnings.length > 0) {
+    const hasTactical = analysis.tacticalExplanations && analysis.tacticalExplanations.length > 0;
+    const hasStrategic = analysis.strategicExplanations && analysis.strategicExplanations.length > 0;
+    const hasWarnings = analysis.warnings && analysis.warnings.length > 0;
+
+    if (hasTactical || hasStrategic || hasWarnings) {
       const detailsEl = document.createElement('div');
       detailsEl.className = 'suggestion-details';
       detailsEl.style.cssText = `
@@ -1105,11 +1169,31 @@ export function showTutorSuggestions(game) {
         font-size: 0.85rem;
       `;
 
-      // Explanations
-      if (analysis.explanations.length > 0) {
-        const explDiv = document.createElement('div');
-        explDiv.className = 'suggestion-explanations';
-        analysis.explanations.forEach(expl => {
+      // Tactical Explanations
+      if (hasTactical) {
+        const tactDiv = document.createElement('div');
+        tactDiv.className = 'suggestion-tactical';
+        tactDiv.style.marginBottom = '0.5rem';
+        analysis.tacticalExplanations.forEach(expl => {
+          const explItem = document.createElement('div');
+          explItem.style.cssText = `
+            color: #fca5a5;
+            font-weight: 500;
+            margin: 0.25rem 0;
+            padding-left: 0.5rem;
+            border-left: 2px solid #ef4444;
+          `;
+          explItem.textContent = expl;
+          tactDiv.appendChild(explItem);
+        });
+        detailsEl.appendChild(tactDiv);
+      }
+
+      // Strategic Explanations
+      if (hasStrategic) {
+        const stratDiv = document.createElement('div');
+        stratDiv.className = 'suggestion-strategic';
+        analysis.strategicExplanations.forEach(expl => {
           const explItem = document.createElement('div');
           explItem.style.cssText = `
             color: #cbd5e1;
@@ -1117,13 +1201,13 @@ export function showTutorSuggestions(game) {
             padding-left: 0.5rem;
           `;
           explItem.textContent = expl;
-          explDiv.appendChild(explItem);
+          stratDiv.appendChild(explItem);
         });
-        detailsEl.appendChild(explDiv);
+        detailsEl.appendChild(stratDiv);
       }
 
       // Warnings
-      if (analysis.warnings.length > 0) {
+      if (hasWarnings) {
         const warnDiv = document.createElement('div');
         warnDiv.className = 'suggestion-warnings';
         warnDiv.style.marginTop = '0.5rem';
@@ -1136,7 +1220,7 @@ export function showTutorSuggestions(game) {
             border-radius: 4px;
             margin: 0.25rem 0;
           `;
-          warnItem.textContent = `⚠️ ${warn}`;
+          warnItem.textContent = warn; // Warning already has emoji
           warnDiv.appendChild(warnItem);
         });
         detailsEl.appendChild(warnDiv);
@@ -1239,6 +1323,87 @@ export function enterReplayMode(game) {
   updateReplayUI(game);
 }
 
+export function showSkinSelector(game) {
+  // Create overlay if it doesn't exist
+  let overlay = document.getElementById('skin-selector-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'skin-selector-overlay';
+    overlay.className = 'modal-overlay hidden';
+    overlay.innerHTML = `
+            <div class="modal-content">
+                <h2>Figuren-Design wählen</h2>
+                <div id="skin-list" class="skin-list"></div>
+                <div class="modal-buttons">
+                    <button id="close-skin-selector" class="btn secondary">Schließen</button>
+                </div>
+            </div>
+        `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('close-skin-selector').onclick = () => {
+      overlay.classList.add('hidden');
+    };
+  }
+
+  const skinList = document.getElementById('skin-list');
+  skinList.innerHTML = '';
+
+  import('./chess-pieces.js').then(module => {
+    const skins = module.getAvailableSkins();
+    const currentSkin = localStorage.getItem('schach9x9_skin') || 'classic';
+
+    skins.forEach(skin => {
+      const item = document.createElement('div');
+      item.className = `skin-item ${skin.id === currentSkin ? 'selected' : ''}`;
+
+      // Preview pieces (White Knight and Black Rook)
+      const previewWhite = module.PIECE_SETS[skin.id].white.n;
+      const previewBlack = module.PIECE_SETS[skin.id].black.r;
+
+      item.innerHTML = `
+                <div class="skin-preview">
+                    <div class="piece-preview white">${previewWhite}</div>
+                    <div class="piece-preview black">${previewBlack}</div>
+                </div>
+                <div class="skin-name">${skin.name}</div>
+            `;
+
+      item.onclick = () => {
+        module.setPieceSkin(skin.id);
+        localStorage.setItem('schach9x9_skin', skin.id);
+
+        // Update selection UI
+        document.querySelectorAll('.skin-item').forEach(el => el.classList.remove('selected'));
+        item.classList.add('selected');
+
+        // Clear SVG cache to force re-render of new skin
+        window._svgCache = {};
+
+        // Force full re-render of the board
+        game._forceFullRender = true;
+        renderBoard(game);
+
+        // Update captured pieces
+        updateCapturedUI(game);
+        // Assuming updateShopUI is defined elsewhere and needs 'game'
+        // If not, remove or adjust this line
+        // updateShopUI(game); 
+
+        // Update tutor suggestions if visible
+        // Update tutor suggestions if visible
+        const tutorPanel = document.getElementById('tutor-panel');
+        if (tutorPanel && !tutorPanel.classList.contains('hidden')) {
+          showTutorSuggestions(game);
+        }
+      };
+
+      skinList.appendChild(item);
+    });
+  });
+
+  overlay.classList.remove('hidden');
+}
 export function exitReplayMode(game) {
   if (!game.replayMode) return;
 

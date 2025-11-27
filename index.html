@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#2196f3" />
   <title>Schach 9x9</title>
   <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="coordinates.css" />
 </head>
@@ -114,114 +115,119 @@
       }
     });
   </script>
-  <script>
-    // Unregister all service workers to prevent fetch errors
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) {
-          registration.unregister().then(function (success) {
-            console.log('[SW] Unregistered:', success);
-          });
-        }
-      });
-    }
-  </script>
+
   <div id="game-container">
     <header>
-      <h1>♟️ Schach 9x9</h1>
+      <div class="header-top">
+        <h1>♟️ Schach 9x9</h1>
+        <button id="settings-toggle" class="settings-toggle-btn" aria-label="Einstellungen umschalten"
+          title="Einstellungen">
+          ⚙️
+        </button>
+      </div>
 
-      <div class="controls-container">
-        <!-- Game Settings Group -->
-        <div class="control-group">
-          <label class="control-label">Spielmodus</label>
-          <div class="control-items">
-            <label class="checkbox-label">
-              <input type="checkbox" id="ai-toggle" checked />
-              <span>🤖 Gegen Computer</span>
-            </label>
-            <select id="difficulty-select" class="select-input">
-              <option value="beginner" selected>🎯 Anfänger</option>
-              <option value="easy">🟢 Einfach</option>
-              <option value="medium">🟡 Mittel</option>
-              <option value="hard">🔴 Schwer</option>
-              <option value="expert">⚫ Experte</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Clock Settings Group -->
-        <div class="control-group">
-          <label class="control-label">Zeitkontrolle</label>
-          <div class="control-items">
-            <label class="checkbox-label">
-              <input type="checkbox" id="clock-toggle" />
-              <span>⏱️ Schachuhr</span>
-            </label>
-            <select id="time-control-select" class="select-input">
-              <option value="blitz3">Blitz 3+2</option>
-              <option value="blitz5" selected>Blitz 5+3</option>
-              <option value="rapid10">Rapid 10+0</option>
-              <option value="rapid15">Rapid 15+10</option>
-              <option value="classical30">Klassisch 30+0</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Visual Settings Group -->
-        <div class="control-group">
-          <label class="control-label">Darstellung</label>
-          <div class="control-items">
-            <select id="theme-select" class="select-input">
-              <option value="classic" selected>🎨 Klassisch</option>
-              <option value="blue">🔵 Blau</option>
-              <option value="green">🟢 Grün</option>
-              <option value="dark">🌑 Dunkel</option>
-              <option value="wood">🪵 Holz</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Sound Settings Group -->
-        <div class="control-group">
-          <label class="control-label">Sound</label>
-          <div class="control-items">
-            <label class="checkbox-label">
-              <input type="checkbox" id="sound-toggle" checked />
-              <span>🔊 Sound aktiviert</span>
-            </label>
-            <div class="volume-control">
-              <span class="volume-icon">🔉</span>
-              <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="30"
-                title="Lautstärke" aria-label="Lautstärke" />
-              <span class="volume-icon">🔊</span>
+      <div id="controls-wrapper" class="controls-wrapper">
+        <div class="controls-container">
+          <!-- Game Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Spielmodus</label>
+            <div class="control-items">
+              <label class="checkbox-label">
+                <input type="checkbox" id="ai-toggle" checked />
+                <span>🤖 Gegen Computer</span>
+              </label>
+              <select id="difficulty-select" class="select-input">
+                <option value="beginner" selected>🎯 Anfänger</option>
+                <option value="easy">🟢 Einfach</option>
+                <option value="medium">🟡 Mittel</option>
+                <option value="hard">🔴 Schwer</option>
+                <option value="expert">⚫ Experte</option>
+              </select>
             </div>
           </div>
-        </div>
 
-        <!-- Action Buttons Group -->
-        <div class="control-group">
-          <label class="control-label">Aktionen</label>
-          <div class="control-items button-row">
-            <button id="hint-btn" class="action-btn hint-btn" aria-label="Tipp anzeigen" title="Tipp anzeigen (H)">
-              💡 Tipp
-            </button>
-            <button id="resign-btn" class="action-btn resign-btn" aria-label="Aufgeben" title="Aufgeben">
-              🏳️ Aufgeben
-            </button>
-            <button id="draw-offer-btn" class="action-btn draw-btn" aria-label="Remis anbieten" title="Remis anbieten">
-              🤝 Remis
-            </button>
-            <button id="save-btn" class="action-btn save-btn" aria-label="Spiel speichern"
-              title="Spiel speichern (Strg+S)">
-              💾
-            </button>
-            <button id="load-btn" class="action-btn load-btn" aria-label="Spiel laden" title="Spiel laden (Strg+L)">
-              📂
-            </button>
-            <button id="help-btn" class="action-btn help-btn" aria-label="Tutorial anzeigen"
-              title="Tutorial anzeigen (?)">
-              📖 Tutorial
-            </button>
+          <!-- Clock Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Zeitkontrolle</label>
+            <div class="control-items">
+              <label class="checkbox-label">
+                <input type="checkbox" id="clock-toggle" />
+                <span>⏱️ Schachuhr</span>
+              </label>
+              <select id="time-control-select" class="select-input">
+                <option value="blitz3">Blitz 3+2</option>
+                <option value="blitz5" selected>Blitz 5+3</option>
+                <option value="rapid10">Rapid 10+0</option>
+                <option value="rapid15">Rapid 15+10</option>
+                <option value="classical30">Klassisch 30+0</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Visual Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Darstellung</label>
+            <div class="control-items">
+              <select id="theme-select" class="select-input">
+                <option value="classic" selected>🎨 Klassisch</option>
+                <option value="blue">🔵 Blau</option>
+                <option value="green">🟢 Grün</option>
+                <option value="dark">🌑 Dunkel</option>
+                <option value="wood">🪵 Holz</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sound Settings Group -->
+          <div class="control-group">
+            <label class="control-label">Sound</label>
+            <div class="control-items">
+              <label class="checkbox-label">
+                <input type="checkbox" id="sound-toggle" checked />
+                <span>🔊 Sound aktiviert</span>
+              </label>
+              <div class="volume-control">
+                <span class="volume-icon">🔉</span>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="30"
+                  title="Lautstärke" aria-label="Lautstärke" />
+                <span class="volume-icon">🔊</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons Group -->
+          <div class="control-group">
+            <label class="control-label">Aktionen</label>
+            <div class="control-items button-row">
+              <button id="hint-btn" class="action-btn hint-btn" aria-label="Tipp anzeigen" title="Tipp anzeigen (H)">
+                💡 Tipp
+              </button>
+              <button id="resign-btn" class="action-btn resign-btn" aria-label="Aufgeben" title="Aufgeben">
+                🏳️ Aufgeben
+              </button>
+              <button id="draw-offer-btn" class="action-btn draw-btn" aria-label="Remis anbieten"
+                title="Remis anbieten">
+                🤝 Remis
+              </button>
+              <button id="save-btn" class="action-btn save-btn" aria-label="Spiel speichern"
+                title="Spiel speichern (Strg+S)">
+                💾
+              </button>
+              <button id="load-btn" class="action-btn load-btn" aria-label="Spiel laden" title="Spiel laden (Strg+L)">
+                📂
+              </button>
+              <button id="help-btn" class="action-btn help-btn" aria-label="Tutorial anzeigen"
+                title="Tutorial anzeigen (?)">
+                📖 Tutorial
+              </button>
+              <button id="stats-btn" class="action-btn stats-btn" aria-label="Statistiken anzeigen"
+                title="Statistiken anzeigen">
+                📊 Stats
+              </button>
+              <button id="skins-btn" class="action-btn skins-btn" aria-label="Skins ändern" title="Skins ändern">
+                🎨 Skins
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -248,6 +254,19 @@
           </div>
           <div id="coordinates-horizontal"></div>
           <div id="coordinates-vertical"></div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div id="quick-actions" class="quick-actions hidden">
+          <button id="undo-btn-quick" class="quick-btn" disabled title="Rückgängig (U)">
+            ⏮ Undo
+          </button>
+          <button id="redo-btn-quick" class="quick-btn" disabled title="Wiederholen (Y)">
+            ⏭ Redo
+          </button>
+          <button id="hint-btn-quick" class="quick-btn" title="Tipp (H)">
+            💡 Hint
+          </button>
         </div>
         <div id="game-over-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="winner-text">
           <h2 id="winner-text">Weiß gewinnt!</h2>
@@ -355,6 +374,64 @@
             </div>
           </div>
         </div>
+
+        <!-- Statistics Overlay -->
+        <div id="statistics-overlay" class="hidden" role="dialog" aria-modal="true">
+          <div class="modal-content stats-modal">
+            <div class="modal-header">
+              <h2>📊 Spielstatistiken</h2>
+              <button id="close-stats-btn" class="close-btn" aria-label="Schließen">×</button>
+            </div>
+
+            <div class="stats-summary-grid">
+              <div class="stat-card total">
+                <div class="stat-value" id="stats-total-games">0</div>
+                <div class="stat-label">Spiele</div>
+              </div>
+              <div class="stat-card wins">
+                <div class="stat-value" id="stats-wins">0</div>
+                <div class="stat-label">Siege</div>
+              </div>
+              <div class="stat-card losses">
+                <div class="stat-value" id="stats-losses">0</div>
+                <div class="stat-label">Niederlagen</div>
+              </div>
+              <div class="stat-card draws">
+                <div class="stat-value" id="stats-draws">0</div>
+                <div class="stat-label">Remis</div>
+              </div>
+              <div class="stat-card winrate">
+                <div class="stat-value" id="stats-winrate">0%</div>
+                <div class="stat-label">Siegquote</div>
+              </div>
+            </div>
+
+            <div class="stats-history-section">
+              <h3>Letzte Spiele</h3>
+              <div class="table-container">
+                <table class="history-table">
+                  <thead>
+                    <tr>
+                      <th>Datum</th>
+                      <th>Gegner</th>
+                      <th>Ergebnis</th>
+                      <th>Züge</th>
+                      <th>Dauer</th>
+                    </tr>
+                  </thead>
+                  <tbody id="stats-history-body">
+                    <!-- History rows generated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="stats-actions">
+              <button id="export-stats-btn" class="secondary-btn">📤 Exportieren</button>
+              <button id="clear-stats-btn" class="danger-btn">🗑️ Reset</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="sidebar">
@@ -367,79 +444,113 @@
             <button class="shop-btn" data-piece="bishop" data-cost="3">Läufer (3)</button>
             <button class="shop-btn" data-piece="rook" data-cost="5">Turm (5)</button>
             <button class="shop-btn" data-piece="archbishop" data-cost="7">Erzbischof (7)</button>
-            <button class="shop-btn" data-piece="chancellor" data-cost="9">Kanzler (9)</button>
+            <button class="shop-btn" data-piece="chancellor" data-cost="8">Kanzler (8)</button>
             <button class="shop-btn" data-piece="queen" data-cost="9">Dame (9)</button>
           </div>
           <div id="selected-piece-display">Ausgewählt: Nichts</div>
           <button id="finish-setup-btn" disabled>Fertig</button>
         </div>
 
-        <div id="captured-pieces-panel" class="hidden">
-          <h3>Geschlagene Figuren</h3>
-          <div class="captured-row">
-            <span>Weiß:</span>
-            <div id="captured-white"></div>
-          </div>
-          <div class="captured-row">
-            <span>Schwarz:</span>
-            <div id="captured-black"></div>
-          </div>
-        </div>
 
-        <div id="move-history-panel" class="hidden">
-          <h3>Zughistorie</h3>
-          <div id="replay-controls">
-            <button id="replay-first" title="Zum Anfang">⏮</button>
-            <button id="replay-prev" title="Vorheriger Zug">◀</button>
-            <button id="replay-next" title="Nächster Zug">▶</button>
-            <button id="replay-last" title="Zum Ende">⏭</button>
-            <button id="replay-exit" class="hidden">❌ Replay beenden</button>
-          </div>
-          <div id="replay-status" class="hidden">
-            Replay-Modus: Zug <span id="replay-move-num">0</span>
-          </div>
-          <div class="undo-redo-container">
-            <button id="undo-btn" disabled title="Zug rückgängig (U oder Strg+Z)">
-              ⏮ Rückgängig
-            </button>
-            <button id="redo-btn" disabled title="Wiederholen (Strg+Y)">⏭ Wiederholen</button>
-          </div>
-          <div id="move-history"></div>
-        </div>
 
+        <!-- Tutor Panel -->
         <div id="tutor-panel" class="hidden">
-          <h3>🎓 Tutor Empfehlungen</h3>
           <div id="tutor-suggestions"></div>
         </div>
 
-        <div id="stats-panel" class="hidden">
-          <h3>📊 Statistiken</h3>
-          <div class="stat-row">
-            <span class="stat-label">Züge:</span>
-            <span id="stat-moves">0</span>
+        <!-- Unified Tabbed Info Panel -->
+        <div id="info-tabs-container" class="info-tabs-container hidden">
+          <div class="tab-nav">
+            <button class="tab-btn active" data-tab="captured">
+              ♟️ Gefangene
+            </button>
+            <button class="tab-btn" data-tab="history">
+              📜 Historie
+            </button>
+            <button class="tab-btn" data-tab="stats">
+              📊 Stats
+            </button>
+            <button class="tab-btn" data-tab="log">
+              📋 Log
+            </button>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Deine Genauigkeit:</span>
-            <span id="stat-accuracy">--%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Material:</span>
-            <span id="stat-material">0</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Beste Züge:</span>
-            <span id="stat-best-moves">0</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Captures:</span>
-            <span id="stat-captures">0</span>
+
+          <div class="tab-content-wrapper">
+            <!-- Captured Pieces Tab -->
+            <div id="tab-captured" class="tab-content active">
+              <h3>Geschlagene Figuren</h3>
+              <div class="captured-row">
+                <span>Weiß:</span>
+                <div id="captured-white"></div>
+              </div>
+              <div class="captured-row">
+                <span>Schwarz:</span>
+                <div id="captured-black"></div>
+              </div>
+            </div>
+
+            <!-- Move History Tab -->
+            <div id="tab-history" class="tab-content">
+              <h3>Zughistorie</h3>
+              <div id="replay-controls">
+                <button id="replay-first" title="Zum Anfang">⏮</button>
+                <button id="replay-prev" title="Vorheriger Zug">◀</button>
+                <button id="replay-next" title="Nächster Zug">▶</button>
+                <button id="replay-last" title="Zum Ende">⏭</button>
+                <button id="replay-exit" class="hidden">❌ Replay beenden</button>
+              </div>
+              <div id="replay-status" class="hidden">
+                Replay-Modus: Zug <span id="replay-move-num">0</span>
+              </div>
+              <div class="undo-redo-container">
+                <button id="undo-btn" disabled title="Zug rückgängig (U oder Strg+Z)">
+                  ⏮ Rückgängig
+                </button>
+                <button id="redo-btn" disabled title="Wiederholen (Strg+Y)">⏭ Wiederholen</button>
+              </div>
+              <div id="move-history"></div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div id="tab-stats" class="tab-content">
+              <h3>📊 Statistiken</h3>
+              <div class="stat-row">
+                <span class="stat-label">Züge:</span>
+                <span id="stat-moves">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Deine Genauigkeit:</span>
+                <span id="stat-accuracy">--%</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Material:</span>
+                <span id="stat-material">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Beste Züge:</span>
+                <span id="stat-best-moves">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Captures:</span>
+                <span id="stat-captures">0</span>
+              </div>
+            </div>
+
+            <!-- Log Tab -->
+            <div id="tab-log" class="tab-content">
+              <h3>Spielinfo</h3>
+              <p id="turn-info">Warte auf Spielstart...</p>
+              <div id="log-panel" class="log-container"></div>
+            </div>
           </div>
         </div>
 
-        <div id="info-panel">
-          <h3>Spielinfo</h3>
-          <p id="turn-info">Warte auf Spielstart...</p>
-          <div id="log"></div>
+        <!-- Keep old IDs for compatibility (hidden) -->
+        <div id="captured-pieces-panel" class="hidden" style="display: none !important;"></div>
+        <div id="move-history-panel" class="hidden" style="display: none !important;"></div>
+        <div id="stats-panel" class="hidden" style="display: none !important;"></div>
+        <div id="info-panel" class="hidden" style="display: none !important;">
+          <div id="log" style="display: none !important;"></div>
         </div>
       </div>
     </div>
