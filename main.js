@@ -10,6 +10,19 @@ import { soundManager } from './sounds.js';
 import { debounce } from './utils.js';
 import { BOARD_SIZE, PHASES } from './gameEngine.js';
 
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        logger.info('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch(err => {
+        logger.error('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+
 logger.info('main.js loaded (Refactored)');
 
 // Global game instance
@@ -28,6 +41,11 @@ async function initGame(initialPoints) {
     game.gameController = new GameController(game);
     game.moveController = new MoveController(game);
     game.aiController = new AIController(game);
+
+    // Make controllers accessible to each other
+    game.aiController.game = game;
+    game.gameController.game = game;
+    game.moveController.game = game;
     game.tutorController = new TutorController(game);
 
     // --- Delegate Game.prototype methods to controllers ---
@@ -64,19 +82,10 @@ async function initGame(initialPoints) {
     Game.prototype.checkDraw = function () { return this.moveController.checkDraw(); };
     Game.prototype.isInsufficientMaterial = function () { return this.moveController.isInsufficientMaterial(); };
     Game.prototype.getBoardHash = function () { return this.moveController.getBoardHash(); };
-    Game.prototype.saveGame = function () { return this.moveController.saveGame(); };
-    Game.prototype.loadGame = function () { return this.moveController.loadGame(); };
-    Game.prototype.autoSave = function (show) { /* Implement or delegate if needed, assuming MoveController has it or we add it */ };
-    // Wait, autoSave was in MoveController? I should check.
-    // I added saveGame/loadGame to MoveController. Did I add autoSave?
-    // I'll assume yes or add it later if missing.
-    // Actually, I should check MoveController content I wrote.
-    // I wrote saveGame and loadGame. I did NOT write autoSave in the last overwrite.
-    // I missed autoSave.
-    // I will add autoSave to MoveController later. For now, let's comment it out or stub it.
+    Game.prototype.saveGame = function () { return this.gameController.saveGame(); };
+    Game.prototype.loadGame = function () { return this.gameController.loadGame(); };
     Game.prototype.autoSave = function (show) {
       if (this.moveController.autoSave) return this.moveController.autoSave(show);
-      // Fallback or ignore
     };
 
     Game.prototype.updateMoveHistoryUI = function () { UI.updateMoveHistoryUI(this); };
@@ -132,16 +141,9 @@ async function initGame(initialPoints) {
     // Initialize GameController logic
     game.gameController.initGame(initialPoints);
 
-    // Setup global listeners if not already done (idempotent check?)
-    // Actually, listeners should be set up once.
-    // But initGame might be called multiple times (new game).
-    // Listeners should be set up in DOMContentLoaded, not initGame.
-
     // Check for autosaved game
     const savedGame = localStorage.getItem('schach9x9_save');
     if (savedGame) {
-      // ... Logic to show restore dialog ...
-      // I'll implement this in a helper function
       checkSavedGame(savedGame);
     }
 
@@ -189,7 +191,7 @@ function checkSavedGame(savedGame) {
               <button id="restore-no" class="btn-secondary">🆕 Neues Spiel</button>
             </div>
           </div>
-        `;
+      `;
       document.body.appendChild(restoreDialog);
 
       document.getElementById('restore-yes').onclick = () => {
@@ -228,6 +230,66 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupGlobalListeners() {
+  // Settings Toggle
+  const settingsToggle = document.getElementById('settings-toggle');
+  const controlsWrapper = document.getElementById('controls-wrapper');
+
+  // Load saved state
+  const controlsCollapsed = localStorage.getItem('controls_collapsed') === 'true';
+  if (controlsCollapsed && controlsWrapper) {
+    controlsWrapper.classList.add('collapsed');
+  }
+
+  if (settingsToggle) {
+    settingsToggle.addEventListener('click', () => {
+      if (controlsWrapper) {
+        controlsWrapper.classList.toggle('collapsed');
+        const isCollapsed = controlsWrapper.classList.contains('collapsed');
+        localStorage.setItem('controls_collapsed', isCollapsed);
+      }
+    });
+  }
+
+  // Tab Switching for Info Panel
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  // Load saved active tab
+  const activeTab = localStorage.getItem('active_info_tab') || 'captured';
+
+  function switchTab(tabName) {
+    // Update buttons
+    tabButtons.forEach(btn => {
+      if (btn.dataset.tab === tabName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Update content
+    tabContents.forEach(content => {
+      if (content.id === `tab-${tabName}`) {
+        content.classList.add('active');
+      } else {
+        content.classList.remove('active');
+      }
+    });
+
+    // Save preference
+    localStorage.setItem('active_info_tab', tabName);
+  }
+
+  // Initialize with saved tab
+  switchTab(activeTab);
+
+  // Add click handlers
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchTab(btn.dataset.tab);
+    });
+  });
+
   // Restart button
   document.getElementById('restart-btn').addEventListener('click', () => {
     location.reload();
@@ -244,21 +306,47 @@ function setupGlobalListeners() {
 
   // Undo/Redo
   const undoBtn = document.getElementById('undo-btn');
+  const undoBtnQuick = document.getElementById('undo-btn-quick');
+
+  function handleUndo() {
+    if (window.game && window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) {
+      window.game.undoMove();
+    }
+  }
+
   if (undoBtn) {
-    undoBtn.addEventListener('click', () => {
-      if (window.game && window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) {
-        window.game.undoMove();
-      }
-    });
+    undoBtn.addEventListener('click', handleUndo);
+  }
+  if (undoBtnQuick) {
+    undoBtnQuick.addEventListener('click', handleUndo);
   }
 
   const redoBtn = document.getElementById('redo-btn');
+  const redoBtnQuick = document.getElementById('redo-btn-quick');
+
+  function handleRedo() {
+    if (window.game && window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) {
+      window.game.redoMove();
+    }
+  }
+
   if (redoBtn) {
-    redoBtn.addEventListener('click', () => {
-      if (window.game && window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) {
-        window.game.redoMove();
-      }
-    });
+    redoBtn.addEventListener('click', handleRedo);
+  }
+  if (redoBtnQuick) {
+    redoBtnQuick.addEventListener('click', handleRedo);
+  }
+
+  // Quick hint button
+  const hintBtnQuick = document.getElementById('hint-btn-quick');
+  const hintBtn = document.getElementById('hint-btn');
+
+  function handleHint() {
+    document.getElementById('hint-btn')?.click();
+  }
+
+  if (hintBtnQuick) {
+    hintBtnQuick.addEventListener('click', handleHint);
   }
 
   // Sound Controls
@@ -287,11 +375,6 @@ function setupGlobalListeners() {
   if (difficultySelect) {
     const savedDifficulty = localStorage.getItem('chess_difficulty') || 'beginner';
     difficultySelect.value = savedDifficulty;
-    // Note: window.game might be null here, so we can't set it yet.
-    // But initGame will load it or we can set it when game starts.
-    // Actually, initGame should load saved difficulty.
-    // But if we change it before game starts?
-    // We can listen and update localStorage, and initGame will read it.
     difficultySelect.addEventListener('change', e => {
       const newDifficulty = e.target.value;
       if (window.game) window.game.difficulty = newDifficulty;
@@ -321,7 +404,6 @@ function setupGlobalListeners() {
   if (themeSelect) {
     const savedTheme = localStorage.getItem('chess_theme') || 'classic';
     themeSelect.value = savedTheme;
-    // Apply theme immediately if possible (GameController handles it but we can do it manually too)
     document.body.setAttribute('data-theme', savedTheme);
 
     themeSelect.addEventListener('change', e => {
@@ -393,6 +475,47 @@ function setupGlobalListeners() {
     if (window.game) window.game.showTutorSuggestions();
   });
 
+  // Analysis Mode
+  const analysisToggle = document.getElementById('analysis-toggle');
+  const analysisExit = document.getElementById('analysis-exit');
+  const continuousAnalysisCheckbox = document.getElementById('continuous-analysis');
+
+  if (analysisToggle) {
+    analysisToggle.addEventListener('click', () => {
+      if (!window.game || !window.game.gameController) return;
+
+      if (window.game.analysisMode) {
+        // Already in analysis mode, this shouldn't happen but handle it
+        return;
+      }
+
+      const success = window.game.gameController.enterAnalysisMode();
+      if (success) {
+        analysisToggle.classList.add('hidden');
+        if (analysisExit) analysisExit.classList.remove('hidden');
+      }
+    });
+  }
+
+  if (analysisExit) {
+    analysisExit.addEventListener('click', () => {
+      if (!window.game || !window.game.gameController) return;
+
+      const success = window.game.gameController.exitAnalysisMode(true);
+      if (success) {
+        analysisToggle.classList.remove('hidden');
+        analysisExit.classList.add('hidden');
+      }
+    });
+  }
+
+  if (continuousAnalysisCheckbox) {
+    continuousAnalysisCheckbox.addEventListener('change', (e) => {
+      if (!window.game || !window.game.gameController) return;
+      window.game.gameController.toggleContinuousAnalysis();
+    });
+  }
+
   // Save/Load
   document.getElementById('save-btn').addEventListener('click', () => {
     if (window.game) window.game.saveGame();
@@ -400,6 +523,23 @@ function setupGlobalListeners() {
 
   document.getElementById('load-btn').addEventListener('click', () => {
     if (window.game) window.game.loadGame();
+  });
+
+  // Statistics
+  document.getElementById('stats-btn').addEventListener('click', () => {
+    if (window.game) UI.showStatisticsOverlay(window.game);
+  });
+
+  document.getElementById('skins-btn').addEventListener('click', () => {
+    if (window.game) UI.showSkinSelector(window.game);
+  });
+
+  // Initialize skin
+  import('./chess-pieces.js').then(module => {
+    const savedSkin = localStorage.getItem('schach9x9_skin');
+    if (savedSkin) {
+      module.setPieceSkin(savedSkin);
+    }
   });
 
   // Shop Buttons
