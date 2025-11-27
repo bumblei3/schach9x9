@@ -81,10 +81,14 @@ export class TutorController {
                 continue;
             }
 
-            // Use shallow Minimax for Tutor
+            // Use deeper Minimax for better Tutor suggestions
+            // Depth 2-3 depending on game stage (early game = deeper, late = shallower for speed)
+            const moveCount = this.game.moveHistory?.length || 0;
+            const depth = moveCount < 10 ? 3 : 2; // More depth in opening
+
             // minimax returns score from Black's perspective.
             // We pass isMaximizing=true because after White moves, it's Black's turn (Maximizer).
-            const score = this.game.minimax(move, 1, true, -Infinity, Infinity);
+            const score = this.game.minimax(move, depth, true, -Infinity, Infinity);
 
             // Invert score for display (so + is good for White)
             const displayScore = -score;
@@ -199,6 +203,8 @@ export class TutorController {
         this.game.board[from.r][from.c] = null;
 
         try {
+            const opponentColor = piece.color === 'white' ? 'black' : 'white';
+
             // 1. FORK - Attacks 2+ valuable pieces
             const threatened = this.getThreatenedPieces(to, piece.color);
             const valuableThreatened = threatened.filter(t => t.type !== 'p');
@@ -223,7 +229,6 @@ export class TutorController {
             }
 
             // 3. CHECK - Threatening opponent's king
-            const opponentColor = piece.color === 'white' ? 'black' : 'white';
             if (this.game.isInCheck(opponentColor)) {
                 patterns.push({
                     type: 'check',
@@ -232,7 +237,29 @@ export class TutorController {
                 });
             }
 
-            // 4. DEFENSE - Defending a threatened piece
+            // 4. PIN - Piece is pinning an opponent piece
+            const pinned = this.detectPins(to, piece.color);
+            if (pinned.length > 0) {
+                const pinnedPiece = pinned[0];
+                patterns.push({
+                    type: 'pin',
+                    severity: 'high',
+                    explanation: `📌 Fesselung! ${pinnedPiece.pinnedName} kann nicht ziehen`,
+                });
+            }
+
+            // 5. DISCOVERED ATTACK - Moving reveals an attack
+            const discoveredAttacks = this.detectDiscoveredAttacks(from, to, piece.color);
+            if (discoveredAttacks.length > 0) {
+                const target = discoveredAttacks[0];
+                patterns.push({
+                    type: 'discovered',
+                    severity: 'high',
+                    explanation: `🌟 Abzugsangriff auf ${target.name}!`,
+                });
+            }
+
+            // 6. DEFENSE - Defending a threatened piece
             const defendedPieces = this.getDefendedPieces(to, piece.color);
             if (defendedPieces.length > 0 && defendedPieces.some(d => d.wasThreatened)) {
                 const defended = defendedPieces.find(d => d.wasThreatened);
@@ -250,6 +277,227 @@ export class TutorController {
 
         return patterns;
     }
+
+    /**
+     * Detect if a piece at the given position is pinning an opponent piece
+     * Returns array of pinned pieces
+     */
+    detectPins(pos, attackerColor) {
+        const pinned = [];
+        const piece = this.game.board[pos.r][pos.c];
+
+        if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
+            return pinned; // Only sliding pieces can pin
+        }
+
+        const opponentColor = attackerColor === 'white' ? 'black' : 'white';
+
+        // Check all directions this piece can move
+        const moves = this.game.getValidMoves(pos.r, pos.c, piece);
+
+        for (const move of moves) {
+            const targetPiece = this.game.board[move.r][move.c];
+            if (!targetPiece || targetPiece.color !== opponentColor) continue;
+
+            // Check if there's a more valuable piece behind this one in the same line
+            const dr = Math.sign(move.r - pos.r);
+            const dc = Math.sign(move.c - pos.c);
+
+            let r = move.r + dr;
+            let c = move.c + dc;
+
+            while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+                const behindPiece = this.game.board[r][c];
+                if (behindPiece) {
+                    if (behindPiece.color === opponentColor && behindPiece.type === 'k') {
+                        // Found a pin!
+                        pinned.push({
+                            pinnedPos: { r: move.r, c: move.c },
+                            pinnedPiece: targetPiece,
+                            pinnedName: this.getPieceName(targetPiece.type),
+                            behindPiece: behindPiece,
+                            behindName: this.getPieceName(behindPiece.type),
+                        });
+                    }
+                    break; // Stop at first piece
+                }
+                r += dr;
+                c += dc;
+            }
+        }
+
+        return pinned;
+    }
+
+    /**
+     * Detect discovered attacks - attacks revealed by moving a piece
+     */
+    detectDiscoveredAttacks(from, to, attackerColor) {
+        const discovered = [];
+        const opponentColor = attackerColor === 'white' ? 'black' : 'white';
+
+        // Check all our sliding pieces to see if moving from->to reveals an attack
+        for (let r = 0; r < BOARD_SIZE; r++) {
+            for (let c = 0; c < BOARD_SIZE; c++) {
+                const piece = this.game.board[r][c];
+                if (!piece || piece.color !== attackerColor) continue;
+                if (!['r', 'b', 'q', 'a', 'c'].includes(piece.type)) continue;
+                if (r === from.r && c === from.c) continue; // Skip the moving piece
+
+                // Check if 'from' is blocking this piece's attack
+                const dr = Math.sign(from.r - r);
+                const dc = Math.sign(from.c - c);
+
+                // Must be on same line
+                if (dr === 0 && dc === 0) continue;
+
+                // Check if piece can move in this direction
+                const canMoveInDirection = this.canPieceMove(piece.type, dr, dc);
+                if (!canMoveInDirection) continue;
+
+                // Trace the line and see if 'from' was blocking an attack
+                let checkR = r + dr;
+                let checkC = c + dc;
+                let foundFrom = false;
+
+                while (checkR >= 0 && checkR < BOARD_SIZE && checkC >= 0 && checkC < BOARD_SIZE) {
+                    if (checkR === from.r && checkC === from.c) {
+                        foundFrom = true;
+                        checkR += dr;
+                        checkC += dc;
+                        continue;
+                    }
+
+                    const targetPiece = this.game.board[checkR][checkC];
+                    if (targetPiece) {
+                        if (foundFrom && targetPiece.color === opponentColor && targetPiece.type !== 'p') {
+                            discovered.push({
+                                attackingPiece: piece,
+                                target: targetPiece,
+                                name: this.getPieceName(targetPiece.type),
+                            });
+                        }
+                        break;
+                    }
+
+                    checkR += dr;
+                    checkC += dc;
+                }
+            }
+        }
+
+        return discovered;
+    }
+
+    /**
+     * Helper to check if a piece type can move in a given direction
+     */
+    canPieceMove(type, dr, dc) {
+        if (type === 'r' || type === 'c') {
+            // Rook/Chancellor: orthogonal
+            return (dr === 0) !== (dc === 0);
+        }
+        if (type === 'b' || type === 'a') {
+            // Bishop/Archbishop: diagonal
+            return Math.abs(dr) === Math.abs(dc) && dr !== 0;
+        }
+        if (type === 'q') {
+            // Queen: both
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Detect threats to own pieces after making a move
+     */
+    detectThreatsAfterMove(move) {
+        const threats = [];
+        const from = move.from;
+        const to = move.to;
+        const piece = this.game.board[from.r][from.c];
+
+        if (!piece) return threats;
+
+        // Simulate the move
+        const capturedPiece = this.game.board[to.r][to.c];
+        this.game.board[to.r][to.c] = piece;
+        this.game.board[from.r][from.c] = null;
+
+        try {
+            const opponentColor = piece.color === 'white' ? 'black' : 'white';
+
+            // Check if any of our pieces are now under attack and undefended
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    const ownPiece = this.game.board[r][c];
+                    if (!ownPiece || ownPiece.color !== piece.color) continue;
+                    if (ownPiece.type === 'p') continue; // Don't warn about pawns
+
+                    // Is this piece under attack?
+                    const isUnderAttack = this.game.isSquareUnderAttack(r, c, opponentColor);
+                    if (isUnderAttack) {
+                        // Is it defended?
+                        const defenders = this.countDefenders(r, c, piece.color);
+                        const attackers = this.countAttackers(r, c, opponentColor);
+
+                        if (attackers > defenders) {
+                            threats.push({
+                                piece: ownPiece,
+                                pos: { r, c },
+                                warning: `⚠️ ${this.getPieceName(ownPiece.type)} wird ungeschützt!`,
+                            });
+                        }
+                    }
+                }
+            }
+        } finally {
+            // Restore board
+            this.game.board[from.r][from.c] = piece;
+            this.game.board[to.r][to.c] = capturedPiece;
+        }
+
+        return threats;
+    }
+
+    /**
+     * Count how many pieces defend a square
+     */
+    countDefenders(r, c, defenderColor) {
+        let count = 0;
+        for (let pr = 0; pr < BOARD_SIZE; pr++) {
+            for (let pc = 0; pc < BOARD_SIZE; pc++) {
+                const piece = this.game.board[pr][pc];
+                if (!piece || piece.color !== defenderColor) continue;
+
+                const moves = this.game.getValidMoves(pr, pc, piece);
+                if (moves.some(m => m.r === r && m.c === c)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Count how many pieces attack a square
+     */
+    countAttackers(r, c, attackerColor) {
+        let count = 0;
+        for (let pr = 0; pr < BOARD_SIZE; pr++) {
+            for (let pc = 0; pc < BOARD_SIZE; pc++) {
+                const piece = this.game.board[pr][pc];
+                if (!piece || piece.color !== attackerColor) continue;
+
+                const moves = this.game.getValidMoves(pr, pc, piece);
+                if (moves.some(m => m.r === r && m.c === c)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
 
     getDefendedPieces(pos, defenderColor) {
         const defended = [];
@@ -352,58 +600,253 @@ export class TutorController {
     }
 
     analyzeMoveWithExplanation(move, score, bestScore) {
-        const explanations = [];
+        const tacticalExplanations = [];
+        const strategicExplanations = [];
         const warnings = [];
         let category = 'normal';
 
         // Calculate difference from best move (relative quality)
         // score and bestScore are from perspective of player (higher is better)
         const diff = score - bestScore;
+        const diffPawns = (diff / 100).toFixed(1);
 
         // Categorize based on relative score
+        let qualityLabel = '';
         if (diff >= -0.5) {
             // Top tier move
             if (score >= 300) {
                 category = 'excellent';
-                explanations.push('⭐⭐⭐ Gewinnzug!');
+                qualityLabel = '⭐⭐⭐ Gewinnzug!';
             } else if (diff >= -0.1) {
                 category = 'excellent';
-                explanations.push('⭐⭐⭐ Bester Zug');
+                qualityLabel = '⭐⭐⭐ Bester Zug';
             } else {
                 category = 'good';
-                explanations.push('⭐⭐ Guter Zug');
+                qualityLabel = `⭐⭐ Guter Zug (${diffPawns} Bauern schwächer)`;
             }
         } else if (diff >= -1.5) {
             category = 'normal';
-            explanations.push('⭐ Solider Zug');
+            qualityLabel = `⭐ Solider Zug (${diffPawns} Bauern schwächer)`;
         } else if (diff >= -3.0) {
             category = 'questionable';
-            warnings.push('Fragwürdiger Zug');
+            qualityLabel = `⚠️ Fragwürdig (${diffPawns} Bauern schwächer)`;
+            warnings.push('Bessere Alternativen verfügbar');
         } else {
             category = 'mistake';
-            warnings.push('Fehler - Bessere Züge verfügbar');
+            qualityLabel = `❌ Fehler (${diffPawns} Bauern schwächer)`;
+            warnings.push('Deutlich bessere Züge vorhanden!');
         }
 
         // Detect tactical patterns
         const patterns = this.detectTacticalPatterns(move);
         patterns.forEach(pattern => {
-            explanations.push(pattern.explanation);
+            tacticalExplanations.push(pattern.explanation);
         });
 
         // Analyze strategic value
         const strategic = this.analyzeStrategicValue(move);
         strategic.forEach(s => {
-            explanations.push(s.explanation);
+            strategicExplanations.push(s.explanation);
         });
+
+        // Check for threats to own pieces after this move
+        const threats = this.detectThreatsAfterMove(move);
+        if (threats.length > 0) {
+            threats.forEach(threat => {
+                warnings.push(threat.warning);
+            });
+        }
 
         return {
             move,
             score,
             category,
-            explanations,
+            qualityLabel,
+            tacticalExplanations,
+            strategicExplanations,
             warnings,
             tacticalPatterns: patterns,
             strategicValue: strategic,
+            scoreDiff: diff,
         };
     }
+    getSetupTemplates() {
+        const points = this.game.initialPoints;
+
+        // Templates for 12 points
+        const templates12 = [
+            {
+                id: 'fortress_12',
+                name: '🏰 Die Festung',
+                description: 'Defensiv mit Turm und Läufern.',
+                pieces: ['r', 'b', 'b', 'p'], // 5+3+3+1 = 12
+                cost: 12
+            },
+            {
+                id: 'rush_12',
+                name: '⚡ Der Ansturm',
+                description: 'Aggressiv mit Dame und Bauern.',
+                pieces: ['q', 'p', 'p', 'p'], // 9+1+1+1 = 12
+                cost: 12
+            },
+            {
+                id: 'flexible_12',
+                name: '🔄 Flexibel',
+                description: 'Ausgewogen mit Springer und Läufer.',
+                pieces: ['n', 'n', 'b', 'p', 'p', 'p'], // 3+3+3+1+1+1 = 12
+                cost: 12
+            },
+            {
+                id: 'swarm_12',
+                name: '🐝 Der Schwarm',
+                description: 'Viele leichte Figuren.',
+                pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p'], // 3+3+1+1+1+1+1+1 = 12
+                cost: 12
+            }
+        ];
+
+        // Templates for 15 points
+        const templates15 = [
+            {
+                id: 'fortress_15',
+                name: '🏰 Die Festung',
+                description: 'Defensivstark mit 2 Türmen. Gut für Anfänger.',
+                pieces: ['r', 'r', 'b', 'p', 'p'], // 5+5+3+1+1 = 15
+                cost: 15
+            },
+            {
+                id: 'rush_15',
+                name: '⚡ Der Ansturm',
+                description: 'Aggressiv mit Dame und Springern. Für Taktiker.',
+                pieces: ['q', 'n', 'n'], // 9+3+3 = 15
+                cost: 15
+            },
+            {
+                id: 'flexible_15',
+                name: '🔄 Flexibel',
+                description: 'Ausgewogen mit Erzbischof und Turm.',
+                pieces: ['a', 'r', 'b'], // 7+5+3 = 15
+                cost: 15
+            },
+            {
+                id: 'swarm_15',
+                name: '🐝 Der Schwarm',
+                description: 'Viele Figuren für maximale Kontrolle.',
+                pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'], // 3+3+3+3+1+1+1 = 15
+                cost: 15
+            }
+        ];
+
+        // Templates for 18 points
+        const templates18 = [
+            {
+                id: 'fortress_18',
+                name: '🏰 Die Festung',
+                description: 'Maximale Defensive mit 2 Türmen und Erzbischof.',
+                pieces: ['r', 'r', 'a', 'p'], // 5+5+7+1 = 18
+                cost: 18
+            },
+            {
+                id: 'rush_18',
+                name: '⚡ Der Ansturm',
+                description: 'Doppelte Damen für maximalen Druck.',
+                pieces: ['q', 'q'], // 9+9 = 18
+                cost: 18
+            },
+            {
+                id: 'flexible_18',
+                name: '🔄 Flexibel',
+                description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
+                pieces: ['c', 'q', 'p'], // 8+9+1 = 18
+                cost: 18
+            },
+            {
+                id: 'swarm_18',
+                name: '🐝 Der Schwarm',
+                description: 'Erzbischof mit vielen leichten Figuren.',
+                pieces: ['a', 'n', 'n', 'b', 'p', 'p'], // 7+3+3+3+1+1 = 18
+                cost: 18
+            }
+        ];
+
+        // Return templates matching the current game's point budget
+        if (points === 12) return templates12;
+        if (points === 18) return templates18;
+        return templates15; // Default to 15 points
+    }
+
+    applySetupTemplate(templateId) {
+        const template = this.getSetupTemplates().find(t => t.id === templateId);
+        if (!template) return;
+
+        // Determine current corridor
+        const isWhite = this.game.phase === PHASES.SETUP_WHITE_PIECES;
+        const corridor = isWhite ? this.game.whiteCorridor : this.game.blackCorridor;
+        if (!corridor) return;
+
+        // Clear existing pieces in corridor (except King)
+        // And refund points
+        for (let r = corridor.rowStart; r < corridor.rowStart + 3; r++) {
+            for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
+                const piece = this.game.board[r][c];
+                if (piece && piece.type !== 'k') {
+                    // Refund
+                    const value = Object.values(this.game.SHOP_PIECES || {}).find(p => p.symbol === piece.type)?.points || 0;
+                    // Note: We need access to SHOP_PIECES, assuming it's available or we use hardcoded values
+                    // Better to rely on gameController logic or just reset points to 15
+                    this.game.board[r][c] = null;
+                }
+            }
+        }
+
+        // Reset points
+        this.game.points = this.game.initialPoints;
+
+        // Place pieces
+        // Simple heuristic: Fill from back to front, prioritizing corners for Rooks
+        const availableSquares = [];
+        for (let r = corridor.rowStart; r < corridor.rowStart + 3; r++) {
+            for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
+                if (!this.game.board[r][c]) {
+                    availableSquares.push({ r, c });
+                }
+            }
+        }
+
+        // Sort squares: Back row (relative to enemy) first
+        // White starts at row 6-8 (front is 6, back is 8)
+        // Black starts at row 0-2 (front is 2, back is 0)
+        availableSquares.sort((a, b) => {
+            if (isWhite) return b.r - a.r; // 8 -> 6
+            else return a.r - b.r; // 0 -> 2
+        });
+
+        // Sort pieces by value (descending) to put valuable pieces in back
+        // We need values for sorting
+        const getVal = (type) => {
+            const map = { q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1 };
+            return map[type] || 0;
+        };
+        const piecesToPlace = [...template.pieces].sort((a, b) => getVal(b) - getVal(a));
+
+        piecesToPlace.forEach((type, index) => {
+            if (index < availableSquares.length) {
+                const sq = availableSquares[index];
+                this.game.board[sq.r][sq.c] = {
+                    type: type,
+                    color: isWhite ? 'white' : 'black',
+                    hasMoved: false
+                };
+                this.game.points -= getVal(type);
+            }
+        });
+
+        // Update UI
+        UI.renderBoard(this.game);
+        UI.updateShopUI(this.game);
+
+        // Log
+        this.game.log(`Tutor: Aufstellung "${template.name}" angewendet.`);
+    }
 }
+

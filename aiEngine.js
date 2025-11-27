@@ -364,12 +364,26 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
 
     // Difficulty-based behavior
     if (difficulty === 'beginner') {
-      // Beginner: Almost completely random, very weak
-      if (Math.random() < 0.95) {
-        // 95% completely random move (including bad moves)
+      // Beginner: Very weak, makes many random moves and occasional blunders
+      const randomChance = Math.random();
+
+      if (randomChance < 0.85) {
+        // 85% completely random move
         return moves[Math.floor(Math.random() * moves.length)];
+      } else if (randomChance < 0.95) {
+        // 10% chance to deliberately pick a worse move (blunder)
+        // Evaluate all moves and pick one with lower score
+        const scoredMoves = moves.map(move => ({
+          move,
+          score: Math.random() - 0.5 // Random score to add variation
+        }));
+        // Sort by score ascending (worse moves first)
+        scoredMoves.sort((a, b) => a.score - b.score);
+        // Pick from bottom 30% of moves
+        const worstMoves = scoredMoves.slice(0, Math.max(1, Math.floor(moves.length * 0.3)));
+        return worstMoves[Math.floor(Math.random() * worstMoves.length)].move;
       }
-      // 5% use shallow search (depth 1)
+      // Only 5% use shallow search (depth 1)
       depth = 1;
     } else if (difficulty === 'easy') {
       // Easy: Random with strong capture preference, depth 2

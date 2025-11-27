@@ -1,6 +1,7 @@
 import { PHASES, BOARD_SIZE } from './gameEngine.js';
 import { SHOP_PIECES } from './config.js';
 import { logger } from './logger.js';
+import * as UI from './ui.js';
 
 // Piece values for shop
 const PIECES = SHOP_PIECES;
@@ -17,7 +18,7 @@ export class AIController {
         const randomCol = cols[Math.floor(Math.random() * cols.length)];
         // Black King goes to row 0-2 (top), specifically row 1, col randomCol+1
         this.game.placeKing(1, randomCol + 1, 'black');
-        if (this.game.renderBoard) this.game.renderBoard();
+        UI.renderBoard(this.game);
     }
 
     aiSetupPieces() {
@@ -509,5 +510,137 @@ export class AIController {
         }
 
         return false;
+    }
+
+    // ===== ANALYSIS MODE METHODS =====
+
+    analyzePosition() {
+        // Don't analyze if not in analysis mode
+        if (!this.game.analysisMode) {
+            return;
+        }
+
+        // Use Web Worker for analysis to prevent UI freezing
+        if (!this.aiWorker) {
+            this.aiWorker = new Worker('ai-worker.js', { type: 'module' });
+
+            // Load opening book if available
+            fetch('opening-book.json')
+                .then(r => r.json())
+                .then(book => {
+                    this.aiWorker.postMessage({ type: 'loadBook', book });
+                })
+                .catch(() => { });
+        }
+
+        // Prepare board state for worker
+        const boardCopy = JSON.parse(JSON.stringify(this.game.board));
+
+        // Analysis depth (can be higher than normal play since no time pressure)
+        const analysisDepth = 3; // Medium depth for responsive analysis
+
+        this.aiWorker.onmessage = e => {
+            const { type, data } = e.data;
+
+            if (type === 'analysis') {
+                // Update analysis UI with results
+                this.updateAnalysisUI(data);
+            } else if (type === 'progress') {
+                // Optionally show progress in analysis panel
+                // Could update a progress indicator
+            }
+        };
+
+        this.aiWorker.postMessage({
+            type: 'analyze',
+            data: {
+                board: boardCopy,
+                color: this.game.turn,
+                depth: analysisDepth,
+                topMovesCount: 5, // Get top 5 moves
+            },
+        });
+    }
+
+    updateAnalysisUI(analysis) {
+        if (!analysis) return;
+
+        // Update evaluation bar
+        const evalBar = document.getElementById('eval-bar');
+        const evalScore = document.getElementById('eval-score');
+
+        if (evalBar && evalScore) {
+            // Convert score to percentage (centipawns to %)
+            // Score ranges roughly from -1000 to +1000
+            // 0 = 50% (even), +1000 = 100% (white winning), -1000 = 0% (black winning)
+            const normalizedScore = Math.max(-1000, Math.min(1000, analysis.score));
+            const percentage = 50 + (normalizedScore / 1000) * 50;
+
+            evalBar.style.width = `${percentage}%`;
+
+            // Update numeric display
+            const scoreInPawns = (analysis.score / 100).toFixed(2);
+            evalScore.textContent = scoreInPawns;
+            evalScore.className = 'eval-score';
+            if (analysis.score > 0) evalScore.classList.add('positive');
+            if (analysis.score < 0) evalScore.classList.add('negative');
+        }
+
+        // Update top moves list
+        const topMovesContent = document.getElementById('top-moves-content');
+        if (topMovesContent && analysis.topMoves && analysis.topMoves.length > 0) {
+            topMovesContent.innerHTML = '';
+
+            analysis.topMoves.forEach((move, index) => {
+                const item = document.createElement('div');
+                item.className = 'top-move-item';
+                if (index === 0) item.classList.add('best');
+
+                // Convert move to algebraic notation
+                const fromFile = String.fromCharCode(97 + move.from.c);
+                const fromRank = BOARD_SIZE - move.from.r;
+                const toFile = String.fromCharCode(97 + move.to.c);
+                const toRank = BOARD_SIZE - move.to.r;
+                const notation = `${fromFile}${fromRank}-${toFile}${toRank}`;
+
+                const scoreInPawns = (move.score / 100).toFixed(2);
+
+                item.innerHTML = `
+                    <span class="top-move-notation">${notation}</span>
+                    <span class="top-move-score">${scoreInPawns > 0 ? '+' : ''}${scoreInPawns}</span>
+                `;
+
+                // Click to preview/highlight the move
+                item.onclick = () => this.highlightMove(move);
+
+                topMovesContent.appendChild(item);
+            });
+        }
+    }
+
+    highlightMove(move) {
+        // Clear previous highlights
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.classList.remove('analysis-from', 'analysis-to');
+        });
+
+        // Highlight the from and to squares
+        const fromCell = document.querySelector(`.cell[data-r="${move.from.r}"][data-c="${move.from.c}"]`);
+        const toCell = document.querySelector(`.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`);
+
+        if (fromCell) fromCell.classList.add('analysis-from');
+        if (toCell) toCell.classList.add('analysis-to');
+
+        // Optionally draw an arrow
+        if (this.game.arrowRenderer) {
+            this.game.arrowRenderer.clearArrows();
+            this.game.arrowRenderer.drawArrow(
+                move.from.r,
+                move.from.c,
+                move.to.r,
+                move.to.c,
+                'rgba(79, 156, 249, 0.7)'
+            );
+        }
     }
 }
