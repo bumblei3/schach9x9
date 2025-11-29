@@ -805,9 +805,9 @@ export class MoveController {
     }
 
     replayLast() {
-        if (this.game.replayMode) {
-            this.exitReplayMode();
-        }
+        if (!this.game.replayMode) this.enterReplayMode();
+        this.game.replayPosition = this.game.moveHistory.length - 1;
+        this.updateReplayUI();
     }
 
     updateReplayUI() {

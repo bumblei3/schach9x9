@@ -581,9 +581,16 @@ export class GameController {
 
             // Re-populate captured pieces
             if (this.game.capturedPieces) {
-                this.game.capturedPieces.forEach(piece => {
-                    UI.addCapturedPiece(piece);
-                });
+                if (this.game.capturedPieces.white) {
+                    this.game.capturedPieces.white.forEach(piece => {
+                        UI.addCapturedPiece(piece);
+                    });
+                }
+                if (this.game.capturedPieces.black) {
+                    this.game.capturedPieces.black.forEach(piece => {
+                        UI.addCapturedPiece(piece);
+                    });
+                }
             }
 
             // Restore move history panel

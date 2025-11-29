@@ -119,6 +119,14 @@ export class TutorController {
 
     getMoveNotation(move) {
         const piece = this.game.board[move.from.r][move.from.c];
+
+        // Handle null piece gracefully
+        if (!piece) {
+            const fromNotation = String.fromCharCode(97 + move.from.c) + (BOARD_SIZE - move.from.r);
+            const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
+            return `Zug ${fromNotation}→${toNotation}`;
+        }
+
         const targetPiece = this.game.board[move.to.r][move.to.c];
         const pieceSymbol = UI.getPieceText(piece);
         const fromNotation = String.fromCharCode(97 + move.from.c) + (BOARD_SIZE - move.from.r);
@@ -784,8 +792,11 @@ export class TutorController {
 
         // Clear existing pieces in corridor (except King)
         // And refund points
-        for (let r = corridor.rowStart; r < corridor.rowStart + 3; r++) {
-            for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
+        for (let r = corridor.rowStart; r < Math.min(corridor.rowStart + 3, BOARD_SIZE); r++) {
+            for (let c = corridor.colStart; c < Math.min(corridor.colStart + 3, BOARD_SIZE); c++) {
+                // Bounds check
+                if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
+
                 const piece = this.game.board[r][c];
                 if (piece && piece.type !== 'k') {
                     // Refund
@@ -842,6 +853,7 @@ export class TutorController {
 
         // Helper to get empty squares in a specific row
         const getEmptyInRow = (r) => {
+            if (r < 0 || r >= 9) return [];
             const squares = [];
             for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
                 if (!this.game.board[r][c]) squares.push({ r, c });

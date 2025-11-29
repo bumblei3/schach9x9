@@ -319,5 +319,161 @@ describe('TutorController', () => {
             expect(templates.length).toBeGreaterThan(0);
             expect(templates[0].cost).toBe(18);
         });
+
+        test('should handle unknown point values gracefully', () => {
+            game.initialPoints = 20; // Unsupported value
+            const templates = tutorController.getSetupTemplates();
+            // Should return empty array or default templates
+            expect(Array.isArray(templates)).toBe(true);
+        });
+    });
+
+    describe('applySetupTemplate - Edge Cases', () => {
+        beforeEach(() => {
+            game.phase = PHASES.SETUP_WHITE_PIECES;
+            game.initialPoints = 15;
+            game.points = 15;
+            game.whiteCorridor = { rowStart: 6, colStart: 3 };
+            game.blackCorridor = { rowStart: 0, colStart: 3 };
+            game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+        });
+
+        test('should handle invalid template ID', () => {
+            jest.spyOn(game, 'log');
+            tutorController.applySetupTemplate('invalid_template_id');
+            // Should not crash, may log an error
+            expect(game.points).toBe(15); // Points unchanged
+        });
+
+        test('should not apply template if insufficient points', () => {
+            const mockExpensiveTemplate = {
+                id: 'expensive',
+                name: 'Expensive',
+                pieces: ['q', 'q', 'q'], // 27 points
+                cost: 27
+            };
+            jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockExpensiveTemplate]);
+            game.points = 15;
+
+            tutorController.applySetupTemplate('expensive');
+            // Should handle gracefully
+            expect(game.points).toBeLessThanOrEqual(15);
+        });
+
+        test('should handle corridor placement at board edges', () => {
+            // Test with corridor at edge
+            game.whiteCorridor = { rowStart: 7, colStart: 0 };
+            const mockTemplate = {
+                id: 'edge_test',
+                name: 'Edge Test',
+                pieces: ['p', 'p', 'p'],
+                cost: 3
+            };
+            jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+
+            tutorController.applySetupTemplate('edge_test');
+            // Should not crash
+            expect(game.points).toBe(12);
+        });
+    });
+
+    describe('getMoveNotation - Edge Cases', () => {
+        test('should handle move with null piece gracefully', () => {
+            const move = {
+                from: { r: 6, c: 4 },
+                to: { r: 5, c: 4 },
+            };
+            game.board[6][4] = null;
+
+            const notation = tutorController.getMoveNotation(move);
+            expect(notation).toBeDefined();
+            expect(typeof notation).toBe('string');
+        });
+
+        test('should handle castling notation', () => {
+            const move = {
+                from: { r: 8, c: 4 },
+                to: { r: 8, c: 6 }, // Kingside castling
+            };
+            game.board[8][4] = { type: 'k', color: 'white' };
+
+            const notation = tutorController.getMoveNotation(move);
+            expect(notation).toContain('König');
+        });
+
+        test('should handle promotion move', () => {
+            const move = {
+                from: { r: 1, c: 4 },
+                to: { r: 0, c: 4 },
+            };
+            game.board[1][4] = { type: 'p', color: 'white' };
+
+            const notation = tutorController.getMoveNotation(move);
+            expect(notation).toContain('Bauer');
+        });
+    });
+
+    describe('getTutorHints - Advanced Scenarios', () => {
+        beforeEach(() => {
+            game.phase = PHASES.PLAY;
+            game.turn = 'white';
+            game.isAI = false;
+        });
+
+        test('should handle checkmate position', () => {
+            // Set up a checkmate scenario
+            game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+            game.board[0][0] = { type: 'k', color: 'black' };
+            game.board[8][8] = { type: 'k', color: 'white' };
+            game.board[7][7] = { type: 'q', color: 'white' }; // Threatening king
+
+            const hints = tutorController.getTutorHints();
+            // Should still return hints (unless no legal moves)
+            expect(Array.isArray(hints)).toBe(true);
+        });
+
+        test('should limit hints to maximum of 3', () => {
+            // Set up a position with many legal moves
+            game.board[4][4] = { type: 'q', color: 'white' }; // Queen in center has many moves
+
+            const hints = tutorController.getTutorHints();
+            expect(hints.length).toBeLessThanOrEqual(3);
+        });
+
+        test('should properly evaluate tactical moves', () => {
+            // Setup a position where white can win material
+            game.board[4][4] = { type: 'p', color: 'white' };
+            game.board[3][5] = { type: 'q', color: 'black' }; // Black queen can be captured
+
+            const hints = tutorController.getTutorHints();
+            expect(hints.length).toBeGreaterThan(0);
+            if (hints.length > 0) {
+                expect(hints[0]).toHaveProperty('score');
+            }
+        });
+    });
+
+    describe('updateBestMoves - Enhanced Tests', () => {
+        test('should handle board with only kings', () => {
+            game.phase = PHASES.PLAY;
+            game.turn = 'white';
+            game.isAI = false;
+            game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+            game.board[0][0] = { type: 'k', color: 'black' };
+            game.board[8][8] = { type: 'k', color: 'white' };
+
+            tutorController.updateBestMoves();
+            expect(game.bestMoves).toBeDefined();
+        });
+
+        test('should skip AI turns correctly', () => {
+            game.phase = PHASES.PLAY;
+            game.turn = 'black';
+            game.isAI = true;
+            game.board[4][4] = { type: 'p', color: 'black' };
+
+            tutorController.updateBestMoves();
+            expect(game.bestMoves).toEqual([]);
+        });
     });
 });

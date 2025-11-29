@@ -10,6 +10,7 @@ const mockOscillator = {
   connect: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
+  type: 'sine', // Added type property
   frequency: { setValueAtTime: jest.fn() },
 };
 

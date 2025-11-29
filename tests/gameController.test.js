@@ -70,54 +70,65 @@ describe('GameController', () => {
         game.gameController = gameController;
 
         // Mock DOM - use factory function for writable elements
-        const createMockElement = () => ({
-            classList: {
-                remove: jest.fn(),
-                add: jest.fn(),
-                contains: jest.fn(() => false),
-                toggle: jest.fn()
-            },
-            style: {},
-            disabled: false,
-            value: '',
-            checked: false,
-            scrollTop: 0,
-            scrollHeight: 100,
-            appendChild: jest.fn(),
-            innerHTML: '',
-            textContent: ''
+        const createMockElement = () => {
+            const element = {
+                classList: {
+                    remove: jest.fn(),
+                    add: jest.fn(),
+                    contains: jest.fn(() => false),
+                    toggle: jest.fn()
+                },
+                style: {},
+                disabled: false,
+                value: '',
+                checked: false,
+                scrollTop: 0,
+                scrollHeight: 100,
+                appendChild: jest.fn(),
+                dataset: {}
+            };
+
+            // Make innerHTML and textContent writable properties
+            let innerHTML = '';
+            let textContent = '';
+
+            Object.defineProperty(element, 'innerHTML', {
+                get: () => innerHTML,
+                set: (val) => { innerHTML = val; },
+                configurable: true
+            });
+
+            Object.defineProperty(element, 'textContent', {
+                get: () => textContent,
+                set: (val) => { textContent = val; },
+                configurable: true
+            });
+
+            return element;
+        };
+
+        // Use spyOn instead of overwriting global.document
+        jest.spyOn(document, 'getElementById').mockImplementation((id) => {
+            return createMockElement();
         });
 
-        global.document = {
-            getElementById: jest.fn((id) => {
-                const mockElement = createMockElement();
-                // Ensure writable properties for elements that need them
-                if (id === 'winner-text' || id === 'draw-offer-message' || id === 'shop-items') {
-                    Object.defineProperty(mockElement, 'textContent', {
-                        writable: true,
-                        value: ''
-                    });
-                    Object.defineProperty(mockElement, 'innerHTML', {
-                        writable: true,
-                        value: ''
-                    });
-                }
-                return mockElement;
-            }),
-            querySelector: jest.fn(() => ({
-                classList: { add: jest.fn(), remove: jest.fn() }
-            })),
-            querySelectorAll: jest.fn(() => [
-                { classList: { remove: jest.fn() } },
-                { classList: { remove: jest.fn() } }
-            ]),
-            body: { classList: { add: jest.fn(), remove: jest.fn() } },
-            createElement: jest.fn(() => ({
-                classList: { add: jest.fn() },
-                dataset: {},
-                addEventListener: jest.fn()
-            }))
-        };
+        jest.spyOn(document, 'querySelector').mockImplementation(() => ({
+            classList: { add: jest.fn(), remove: jest.fn() }
+        }));
+
+        jest.spyOn(document, 'querySelectorAll').mockImplementation(() => [
+            { classList: { remove: jest.fn() } },
+            { classList: { remove: jest.fn() } }
+        ]);
+
+        jest.spyOn(document.body.classList, 'add');
+        jest.spyOn(document.body.classList, 'remove');
+
+        jest.spyOn(document, 'createElement').mockImplementation(() => ({
+            classList: { add: jest.fn() },
+            dataset: {},
+            addEventListener: jest.fn()
+        }));
 
         global.alert = jest.fn();
         global.confirm = jest.fn(() => true);

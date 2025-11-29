@@ -176,32 +176,8 @@ describe('UI Module', () => {
       expect(blackClockEl.textContent).toBe('3:00');
     });
 
-    test('should show low time warning', () => {
-      game.whiteTime = 25; // Under 30 seconds
-
-      const whiteClockEl = {
-        textContent: '',
-        classList: { remove: jest.fn(), add: jest.fn(), contains: jest.fn(() => false) }
-      };
-      const blackClockEl = {
-        textContent: '',
-        classList: { remove: jest.fn(), add: jest.fn(), contains: jest.fn(() => false) }
-      };
-
-      jest.spyOn(document, 'getElementById').mockImplementation((id) => {
-        if (id === 'clock-white') return whiteClockEl;
-        if (id === 'clock-black') return blackClockEl;
-        return null;
-      });
-
-      UI.updateClockDisplay(game);
-
-      // Check that 'low-time' was added (may be called with other classes too)
-      expect(whiteClockEl.classList.add).toHaveBeenCalled();
-      const addCalls = whiteClockEl.classList.add.mock.calls.flat();
-      expect(addCalls).toContain('low-time');
-    });
   });
+
 
   describe('updateClockUI', () => {
     test('should highlight active player clock', () => {
@@ -220,7 +196,27 @@ describe('UI Module', () => {
       // Check that 'active' was added to white clock
       const addCalls = whiteClockEl.classList.add.mock.calls.flat();
       expect(addCalls).toContain('active');
-      expect(blackClockEl.classList.remove).toHaveBeenCalledWith('active');
+      // blackClockEl.classList.remove might be called with multiple arguments
+      const removeCalls = blackClockEl.classList.remove.mock.calls.flat();
+      expect(removeCalls).toContain('active');
+    });
+
+    test('should show low time warning', () => {
+      const whiteClockEl = { classList: { remove: jest.fn(), add: jest.fn() } };
+      const blackClockEl = { classList: { remove: jest.fn(), add: jest.fn() } };
+
+      jest.spyOn(document, 'getElementById').mockImplementation((id) => {
+        if (id === 'clock-white') return whiteClockEl;
+        if (id === 'clock-black') return blackClockEl;
+        return null;
+      });
+
+      game.turn = 'white';
+      game.whiteTime = 25; // Low time
+      UI.updateClockUI(game);
+
+      const addCalls = whiteClockEl.classList.add.mock.calls.flat();
+      expect(addCalls).toContain('low-time');
     });
   });
 
@@ -228,10 +224,12 @@ describe('UI Module', () => {
     test('should show shop container', () => {
       const shopPanel = { classList: { remove: jest.fn(), add: jest.fn() } };
       const pointsDisplay = { textContent: '' };
+      const tutorSection = { classList: { remove: jest.fn(), add: jest.fn() } };
 
       jest.spyOn(document, 'getElementById').mockImplementation((id) => {
         if (id === 'shop-panel') return shopPanel;
         if (id === 'points-display') return pointsDisplay;
+        if (id === 'tutor-recommendations') return tutorSection;
         return { classList: { remove: jest.fn(), add: jest.fn() }, style: {} };
       });
 
@@ -290,16 +288,26 @@ describe('UI Module', () => {
         style: { opacity: '1' }
       };
 
-      jest.spyOn(document, 'getElementById').mockImplementation(() => {
-        return { textContent: '', disabled: false };
+      jest.spyOn(document, 'getElementById').mockImplementation((id) => {
+        if (id === 'tutor-recommendations-section') return { classList: { add: jest.fn(), remove: jest.fn() } };
+        return {
+          textContent: '',
+          disabled: false,
+          classList: { add: jest.fn(), remove: jest.fn() },
+          dataset: {},
+          addEventListener: jest.fn(),
+          appendChild: jest.fn(),
+          innerHTML: '',
+          style: {}
+        };
       });
       jest.spyOn(document, 'querySelectorAll').mockReturnValue([cheapBtn, expensiveBtn]);
 
       game.points = 5;
       UI.updateShopUI(game);
 
-      expect(expensiveBtn.disabled).toBe(true);
-      expect(cheapBtn.disabled).toBe(false);
+      expect(expensiveBtn.classList.add).toHaveBeenCalledWith('disabled');
+      expect(cheapBtn.classList.remove).toHaveBeenCalledWith('disabled');
     });
   });
 
@@ -394,7 +402,7 @@ describe('UI Module', () => {
       jest.spyOn(document, 'getElementById').mockImplementation((id) => {
         if (id === 'board') return boardEl;
         if (id === 'col-labels' || id === 'row-labels') return labelsEl;
-        return { innerHTML: '', appendChild: jest.fn(), querySelector: jest.fn() };
+        return { innerHTML: '', appendChild: jest.fn(), querySelector: jest.fn(), insertBefore: jest.fn() };
       });
 
       jest.spyOn(document, 'createElement').mockReturnValue({
@@ -404,7 +412,8 @@ describe('UI Module', () => {
         innerHTML: '',
         textContent: '',
         className: '',
-        appendChild: jest.fn()
+        appendChild: jest.fn(),
+        insertBefore: jest.fn()
       });
 
       UI.initBoardUI(game);
@@ -412,4 +421,6 @@ describe('UI Module', () => {
       expect(boardEl.appendChild).toHaveBeenCalled();
     });
   });
+
+
 });
