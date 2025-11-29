@@ -5,73 +5,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Ein Schachspiel auf einem 9x9 Brett mit neuen Figuren und Regeln." />
-  <meta name="theme-color" content="#2196f3" />
+  <meta name="theme-color" content="#0a0e27" />
   <title>Schach 9x9</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" href="icon-192.png" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="coordinates.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <div id="spinner-overlay" style="
-        display: none;
-        position: fixed;
-        z-index: 9998;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.3);
-        align-items: center;
-        justify-content: center;
-      ">
-    <div class="ai-thinking-panel" style="
-          background: #222;
-          padding: 30px 40px;
-          border-radius: 16px;
-          box-shadow: 0 0 16px #000;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-width: 300px;
-        ">
-      <div class="spinner" style="
-            width: 48px;
-            height: 48px;
-            border: 6px solid #eee;
-            border-top: 6px solid #2196f3;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          "></div>
+  <!-- Spinner Overlay (unchanged) -->
+  <div id="spinner-overlay"
+    style="display: none; position: fixed; z-index: 9998; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.3); align-items: center; justify-content: center;">
+    <div class="ai-thinking-panel"
+      style="background: #222; padding: 30px 40px; border-radius: 16px; box-shadow: 0 0 16px #000; display: flex; flex-direction: column; align-items: center; min-width: 300px;">
+      <div class="spinner"
+        style="width: 48px; height: 48px; border: 6px solid #eee; border-top: 6px solid #2196f3; border-radius: 50%; animation: spin 1s linear infinite;">
+      </div>
       <div style="margin-top: 16px; font-size: 1.2em">KI denkt nach...</div>
-
-      <!-- AI Progress Info -->
       <div class="ai-status" style="margin-top: 20px; text-align: center; width: 100%">
-        <div id="ai-depth" style="font-size: 0.95em; color: #ddd; margin-bottom: 8px">
-          Calculating...
-        </div>
-        <div id="ai-nodes" style="font-size: 0.9em; color: #aaa; margin-bottom: 8px">
-          0 Positionen
-        </div>
+        <div id="ai-depth" style="font-size: 0.95em; color: #ddd; margin-bottom: 8px">Calculating...</div>
+        <div id="ai-nodes" style="font-size: 0.9em; color: #aaa; margin-bottom: 8px">0 Positionen</div>
         <div id="ai-best-move" style="font-size: 0.85em; color: #888; margin-bottom: 12px"></div>
       </div>
-
-      <!-- Progress Bar -->
-      <div class="progress-bar" style="
-            width: 100%;
-            height: 6px;
-            background: #444;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 8px;
-          ">
-        <div id="progress-fill" style="
-              height: 100%;
-              width: 0%;
-              background: linear-gradient(90deg, #2196f3, #21cbf3);
-              transition: width 0.3s ease;
-            "></div>
+      <div class="progress-bar"
+        style="width: 100%; height: 6px; background: #444; border-radius: 3px; overflow: hidden; margin-top: 8px;">
+        <div id="progress-fill"
+          style="height: 100%; width: 0%; background: linear-gradient(90deg, #2196f3, #21cbf3); transition: width 0.3s ease;">
+        </div>
       </div>
     </div>
   </div>
@@ -82,27 +47,14 @@
       }
     }
   </style>
-  <div id="error-overlay" style="
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5em;
-        text-align: center;
-      ">
+
+  <!-- Error Overlay (unchanged) -->
+  <div id="error-overlay"
+    style="display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); color: #fff; align-items: center; justify-content: center; font-size: 1.5em; text-align: center;">
     <div>
       <strong>Ein Fehler ist aufgetreten:</strong>
       <div id="error-message"></div>
-      <button onclick="document.getElementById('error-overlay').style.display='none'">
-        Schließen
-      </button>
+      <button onclick="document.getElementById('error-overlay').style.display='none'">Schließen</button>
     </div>
   </div>
   <script>
@@ -116,45 +68,184 @@
     });
   </script>
 
-  <div id="game-container">
-    <header>
-      <div class="header-top">
-        <h1>♟️ Schach 9x9</h1>
-        <button id="settings-toggle" class="settings-toggle-btn" aria-label="Einstellungen umschalten"
-          title="Einstellungen">
-          ⚙️
+  <div id="app-container">
+    <!-- Minimal Header -->
+    <header class="minimal-header">
+      <div class="logo">♟️ Schach 9x9</div>
+      <div id="status-display" class="status-pill">Initialisiere...</div>
+      <button id="menu-btn" class="icon-btn" aria-label="Menü öffnen">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="game-area">
+
+      <!-- Opponent Info / Clock -->
+      <div class="player-info opponent">
+        <div class="player-avatar">🤖</div>
+        <div class="player-details">
+          <div class="player-name">Gegner</div>
+          <div class="captured-pieces" id="captured-white"></div>
+        </div>
+        <div class="clock-display" id="clock-black">5:00</div>
+      </div>
+
+      <!-- Chess Board -->
+      <div id="board-container">
+        <div id="board-wrapper" aria-label="Schachbrett" role="region">
+          <div id="board">
+            <!-- Board cells generated by JS -->
+          </div>
+          <div id="coordinates-horizontal"></div>
+          <div id="coordinates-vertical"></div>
+        </div>
+      </div>
+
+      <!-- Player Info / Clock -->
+      <div class="player-info self">
+        <div class="player-avatar">👤</div>
+        <div class="player-details">
+          <div class="player-name">Du</div>
+          <div class="captured-pieces" id="captured-black"></div>
+        </div>
+        <div class="clock-display" id="clock-white">5:00</div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <button id="undo-btn" class="action-icon-btn" title="Rückgängig (U)">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M3 7v6h6"></path>
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+          </svg>
+        </button>
+        <button id="hint-btn" class="action-icon-btn" title="Tipp (H)">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path
+              d="M9.663 17h4.673M12 3v1M6.343 4.343l-.707-.707M17.657 4.343l.707-.707M4 12h1M19 12h1M12 21a9 9 0 0 0 9-9c0-4.97-4.03-9-9-9s-9 4.03-9 9a9 9 0 0 0 9 9z">
+            </path>
+          </svg>
+        </button>
+        <button id="info-toggle-btn" class="action-icon-btn" title="Info / Log">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
         </button>
       </div>
 
-      <div id="controls-wrapper" class="controls-wrapper">
-        <div class="controls-container">
-          <!-- Game Settings Group -->
-          <div class="control-group">
-            <label class="control-label">Spielmodus</label>
-            <div class="control-items">
-              <label class="checkbox-label">
-                <input type="checkbox" id="ai-toggle" checked />
-                <span>🤖 Gegen Computer</span>
-              </label>
-              <select id="difficulty-select" class="select-input">
-                <option value="beginner" selected>🎯 Anfänger</option>
-                <option value="easy">🟢 Einfach</option>
-                <option value="medium">🟡 Mittel</option>
-                <option value="hard">🔴 Schwer</option>
-                <option value="expert">⚫ Experte</option>
-              </select>
-            </div>
+    </main>
+
+    <!-- Shop Panel (Contextual) -->
+    <div id="shop-panel" class="shop-panel hidden">
+      <div class="shop-header">
+        <h2>Truppen anheuern</h2>
+        <div class="shop-points"><span id="points-display">15</span> Pkt</div>
+      </div>
+
+      <!-- Tutor Recommendations Section -->
+      <div id="tutor-recommendations-section" class="tutor-recommendations-section">
+        <button id="toggle-tutor-recommendations" class="btn-secondary full-width"
+          style="padding: 8px; font-size: 0.9rem; margin-bottom: 1rem;">
+          💡 KI-Vorlagen anzeigen
+        </button>
+        <div id="tutor-recommendations-container" class="tutor-recommendations-container hidden">
+          <!-- Templates will be injected here by JavaScript -->
+        </div>
+      </div>
+
+      <div id="shop-buttons" class="shop-grid">
+        <button class="shop-item" data-piece="p" data-cost="1">
+          <div class="shop-icon">♟️</div>
+          <div class="shop-cost">1</div>
+        </button>
+        <button class="shop-item" data-piece="n" data-cost="3">
+          <div class="shop-icon">♞</div>
+          <div class="shop-cost">3</div>
+        </button>
+        <button class="shop-item" data-piece="b" data-cost="3">
+          <div class="shop-icon">♝</div>
+          <div class="shop-cost">3</div>
+        </button>
+        <button class="shop-item" data-piece="r" data-cost="5">
+          <div class="shop-icon">♜</div>
+          <div class="shop-cost">5</div>
+        </button>
+        <button class="shop-item" data-piece="a" data-cost="7">
+          <div class="shop-icon">🏰</div>
+          <div class="shop-cost">7</div>
+        </button>
+        <button class="shop-item" data-piece="c" data-cost="8">
+          <div class="shop-icon">⚖️</div>
+          <div class="shop-cost">8</div>
+        </button>
+        <button class="shop-item" data-piece="q" data-cost="9">
+          <div class="shop-icon">♛</div>
+          <div class="shop-cost">9</div>
+        </button>
+        <button class="shop-item" data-piece="e" data-cost="12">
+          <div class="shop-icon">👼</div>
+          <div class="shop-cost">12</div>
+        </button>
+      </div>
+      <div id="selected-piece-display" class="shop-status">Wähle eine Figur</div>
+
+      <div id="selected-piece-display" class="shop-status">Wähle eine Figur</div>
+
+
+      <button id="finish-setup-btn" class="btn-primary full-width" disabled>Fertig</button>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div id="menu-overlay" class="fullscreen-overlay hidden">
+      <div class="menu-content">
+        <div class="menu-header">
+          <h2>Menü</h2>
+          <button id="menu-close-btn" class="close-icon-btn">×</button>
+        </div>
+
+        <div class="menu-grid">
+          <div class="menu-section">
+            <h3>Spiel</h3>
+            <button id="restart-btn" class="menu-item">🔄 Neues Spiel</button>
+            <button id="save-btn" class="menu-item">💾 Speichern</button>
+            <button id="load-btn" class="menu-item">📂 Laden</button>
+            <button id="resign-btn" class="menu-item danger">🏳️ Aufgeben</button>
+            <button id="draw-offer-btn" class="menu-item warning">🤝 Remis anbieten</button>
           </div>
 
-          <!-- Clock Settings Group -->
-          <div class="control-group">
-            <label class="control-label">Zeitkontrolle</label>
-            <div class="control-items">
-              <label class="checkbox-label">
-                <input type="checkbox" id="clock-toggle" />
-                <span>⏱️ Schachuhr</span>
-              </label>
-              <select id="time-control-select" class="select-input">
+          <div class="menu-section">
+            <h3>Einstellungen</h3>
+            <div class="setting-row">
+              <label>Thema</label>
+              <select id="theme-select" class="menu-select">
+                <option value="classic">Klassisch</option>
+                <option value="blue">Blau</option>
+                <option value="green">Grün</option>
+                <option value="dark">Dunkel</option>
+                <option value="wood">Holz</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <label>Schwierigkeit</label>
+              <select id="difficulty-select" class="menu-select">
+                <option value="beginner">Anfänger</option>
+                <option value="easy">Einfach</option>
+                <option value="medium">Mittel</option>
+                <option value="hard">Schwer</option>
+                <option value="expert">Experte</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <label>Zeit</label>
+              <select id="time-control-select" class="menu-select">
                 <option value="blitz3">Blitz 3+2</option>
                 <option value="blitz5" selected>Blitz 5+3</option>
                 <option value="rapid10">Rapid 10+0</option>
@@ -162,400 +253,152 @@
                 <option value="classical30">Klassisch 30+0</option>
               </select>
             </div>
-          </div>
-
-          <!-- Visual Settings Group -->
-          <div class="control-group">
-            <label class="control-label">Darstellung</label>
-            <div class="control-items">
-              <select id="theme-select" class="select-input">
-                <option value="classic" selected>🎨 Klassisch</option>
-                <option value="blue">🔵 Blau</option>
-                <option value="green">🟢 Grün</option>
-                <option value="dark">🌑 Dunkel</option>
-                <option value="wood">🪵 Holz</option>
-              </select>
+            <div class="setting-row">
+              <label>Sound</label>
+              <input type="checkbox" id="sound-toggle" checked>
             </div>
           </div>
 
-          <!-- Sound Settings Group -->
-          <div class="control-group">
-            <label class="control-label">Sound</label>
-            <div class="control-items">
-              <label class="checkbox-label">
-                <input type="checkbox" id="sound-toggle" checked />
-                <span>🔊 Sound aktiviert</span>
-              </label>
-              <div class="volume-control">
-                <span class="volume-icon">🔉</span>
-                <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="30"
-                  title="Lautstärke" aria-label="Lautstärke" />
-                <span class="volume-icon">🔊</span>
-              </div>
-            </div>
+          <div class="menu-section">
+            <h3>Extras</h3>
+            <button id="stats-btn" class="menu-item">📊 Statistiken</button>
+            <button id="skins-btn" class="menu-item">🎨 Figuren-Skins</button>
+            <button id="help-btn" class="menu-item">📖 Hilfe / Tutorial</button>
           </div>
-
-          <!-- Action Buttons Group -->
-          <div class="control-group">
-            <label class="control-label">Aktionen</label>
-            <div class="control-items button-row">
-              <button id="hint-btn" class="action-btn hint-btn" aria-label="Tipp anzeigen" title="Tipp anzeigen (H)">
-                💡 Tipp
-              </button>
-              <button id="resign-btn" class="action-btn resign-btn" aria-label="Aufgeben" title="Aufgeben">
-                🏳️ Aufgeben
-              </button>
-              <button id="draw-offer-btn" class="action-btn draw-btn" aria-label="Remis anbieten"
-                title="Remis anbieten">
-                🤝 Remis
-              </button>
-              <button id="save-btn" class="action-btn save-btn" aria-label="Spiel speichern"
-                title="Spiel speichern (Strg+S)">
-                💾
-              </button>
-              <button id="load-btn" class="action-btn load-btn" aria-label="Spiel laden" title="Spiel laden (Strg+L)">
-                📂
-              </button>
-              <button id="help-btn" class="action-btn help-btn" aria-label="Tutorial anzeigen"
-                title="Tutorial anzeigen (?)">
-                📖 Tutorial
-              </button>
-              <button id="stats-btn" class="action-btn stats-btn" aria-label="Statistiken anzeigen"
-                title="Statistiken anzeigen">
-                📊 Stats
-              </button>
-              <button id="skins-btn" class="action-btn skins-btn" aria-label="Skins ändern" title="Skins ändern">
-                🎨 Skins
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chess Clock Display -->
-      <div id="chess-clock" class="hidden">
-        <div class="clock-display" id="clock-white">
-          <div class="clock-label">Weiß</div>
-          <div class="clock-time">5:00</div>
-        </div>
-        <div class="clock-display" id="clock-black">
-          <div class="clock-label">Schwarz</div>
-          <div class="clock-time">5:00</div>
-        </div>
-      </div>
-      <div id="status-display">Status: Initialisiere...</div>
-    </header>
-
-    <div id="main-area">
-      <div id="board-container">
-        <div id="board-wrapper" aria-label="Schachbrett" role="region">
-          <div id="board">
-            <!-- Board cells will be generated by JS -->
-          </div>
-          <div id="coordinates-horizontal"></div>
-          <div id="coordinates-vertical"></div>
-        </div>
-
-        <!-- Quick Action Buttons -->
-        <div id="quick-actions" class="quick-actions hidden">
-          <button id="undo-btn-quick" class="quick-btn" disabled title="Rückgängig (U)">
-            ⏮ Undo
-          </button>
-          <button id="redo-btn-quick" class="quick-btn" disabled title="Wiederholen (Y)">
-            ⏭ Redo
-          </button>
-          <button id="hint-btn-quick" class="quick-btn" title="Tipp (H)">
-            💡 Hint
-          </button>
-        </div>
-        <div id="game-over-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="winner-text">
-          <h2 id="winner-text">Weiß gewinnt!</h2>
-          <button id="restart-btn">Neues Spiel</button>
-        </div>
-        <div id="promotion-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="promotion-options">
-          <h2>Beförderung wählen</h2>
-          <div id="promotion-options">
-            <!-- Options generated by JS -->
-          </div>
-        </div>
-        <div id="help-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="help-content">
-          <div id="help-content">
-            <h2>Spielregeln Schach 9x9</h2>
-            <h3>Phase 1: Setup</h3>
-            <p>Platziere deinen König in einem der drei 3x3 Korridore auf deiner Seite.</p>
-            <h3>Phase 2: Truppen kaufen</h3>
-            <p>Du hast <strong>15 Punkte</strong>, um Figuren zu kaufen:</p>
-            <ul>
-              <li>Bauer: 1 Punkt</li>
-              <li>Springer / Läufer: 3 Punkte</li>
-              <li>Turm: 5 Punkte</li>
-              <li>Erzbischof: 7 Punkte (Läufer + Springer)</li>
-              <li>Dame / Kanzler: 9 Punkte (Kanzler = Turm + Springer)</li>
-            </ul>
-            <p>Platzierte Figuren müssen im selben Korridor wie der König stehen.</p>
-            <h3>Phase 3: Spiel</h3>
-            <p>Es gelten die normalen Schachregeln (Schach, Matt, Rochade, En Passant).</p>
-            <p>
-              <strong>Tipp:</strong> Klicke auf gegnerische Figuren, um ihre möglichen Züge zu
-              sehen!
-            </p>
-            <h3>Tastenkürzel</h3>
-            <ul>
-              <li><strong>H</strong> - Tipp anzeigen</li>
-              <li><strong>U</strong> - Zug rückgängig</li>
-              <li><strong>Strg+S</strong> - Spiel speichern</li>
-              <li><strong>Strg+L</strong> - Spiel laden</li>
-              <li><strong>Strg+Z</strong> - Zug rückgängig</li>
-              <li><strong>?</strong> - Hilfe anzeigen</li>
-              <li><strong>ESC</strong> - Auswahl abwählen / Hilfe schließen</li>
-              <li><strong>Pfeiltasten</strong> - Feld-Navigation</li>
-              <li><strong>Enter/Space</strong> - Feld auswählen</li>
-            </ul>
-            <p><em>Hinweis: Das Spiel wird automatisch alle 5 Züge gespeichert.</em></p>
-            <button id="close-help-btn">Schließen</button>
-          </div>
-        </div>
-
-        <!-- Points Selection Overlay -->
-        <div id="points-selection-overlay" class="modal-overlay">
-          <div class="modal-content">
-            <h2>Wähle deine Punkte</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 2rem">
-              Wie viele Punkte sollen im Shop zur Verfügung stehen?
-            </p>
-            <div class="dialog-buttons">
-              <button class="btn-primary points-btn" data-points="12">12 Punkte</button>
-              <button class="btn-primary points-btn" data-points="15">15 Punkte</button>
-              <button class="btn-primary points-btn" data-points="18">18 Punkte</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Promotion Overlay -->
-        <div id="tutorial-overlay" class="hidden" role="dialog" aria-modal="true">
-          <div id="tutorial-content">
-            <button id="tutorial-close" class="tutorial-close" aria-label="Tutorial schließen">
-              ×
-            </button>
-            <div id="tutorial-steps">
-              <!-- Steps will be generated by JS -->
-            </div>
-            <div id="tutorial-navigation">
-              <button id="tutorial-prev" class="tutorial-nav-btn">◀ Zurück</button>
-              <div id="tutorial-progress">
-                <span id="tutorial-current-step">1</span> /
-                <span id="tutorial-total-steps">5</span>
-              </div>
-              <button id="tutorial-next" class="tutorial-nav-btn">Weiter ▶</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Draw Offer Overlay -->
-        <div id="draw-offer-overlay" class="hidden" role="dialog" aria-modal="true">
-          <div class="dialog-content">
-            <h2>Remis-Angebot</h2>
-            <p id="draw-offer-message">Dein Gegner bietet Remis an.</p>
-            <div class="dialog-buttons">
-              <button id="accept-draw-btn" class="primary-btn">✅ Annehmen</button>
-              <button id="decline-draw-btn" class="secondary-btn">❌ Ablehnen</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Confirmation Overlay -->
-        <div id="confirmation-overlay" class="hidden" role="dialog" aria-modal="true">
-          <div class="dialog-content">
-            <h2 id="confirmation-title">Bestätigung</h2>
-            <p id="confirmation-message">Bist du sicher?</p>
-            <div class="dialog-buttons">
-              <button id="confirm-yes-btn" class="primary-btn">✅ Ja</button>
-              <button id="confirm-no-btn" class="secondary-btn">❌ Nein</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Statistics Overlay -->
-        <div id="statistics-overlay" class="hidden" role="dialog" aria-modal="true">
-          <div class="modal-content stats-modal">
-            <div class="modal-header">
-              <h2>📊 Spielstatistiken</h2>
-              <button id="close-stats-btn" class="close-btn" aria-label="Schließen">×</button>
-            </div>
-
-            <div class="stats-summary-grid">
-              <div class="stat-card total">
-                <div class="stat-value" id="stats-total-games">0</div>
-                <div class="stat-label">Spiele</div>
-              </div>
-              <div class="stat-card wins">
-                <div class="stat-value" id="stats-wins">0</div>
-                <div class="stat-label">Siege</div>
-              </div>
-              <div class="stat-card losses">
-                <div class="stat-value" id="stats-losses">0</div>
-                <div class="stat-label">Niederlagen</div>
-              </div>
-              <div class="stat-card draws">
-                <div class="stat-value" id="stats-draws">0</div>
-                <div class="stat-label">Remis</div>
-              </div>
-              <div class="stat-card winrate">
-                <div class="stat-value" id="stats-winrate">0%</div>
-                <div class="stat-label">Siegquote</div>
-              </div>
-            </div>
-
-            <div class="stats-history-section">
-              <h3>Letzte Spiele</h3>
-              <div class="table-container">
-                <table class="history-table">
-                  <thead>
-                    <tr>
-                      <th>Datum</th>
-                      <th>Gegner</th>
-                      <th>Ergebnis</th>
-                      <th>Züge</th>
-                      <th>Dauer</th>
-                    </tr>
-                  </thead>
-                  <tbody id="stats-history-body">
-                    <!-- History rows generated by JS -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="stats-actions">
-              <button id="export-stats-btn" class="secondary-btn">📤 Exportieren</button>
-              <button id="clear-stats-btn" class="danger-btn">🗑️ Reset</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="sidebar">
-        <div id="shop-panel" class="hidden">
-          <h2>Truppen anheuern</h2>
-          <p>Punkte übrig: <span id="points-display">15</span></p>
-          <div id="shop-buttons">
-            <button class="shop-btn" data-piece="pawn" data-cost="1">Bauer (1)</button>
-            <button class="shop-btn" data-piece="knight" data-cost="3">Springer (3)</button>
-            <button class="shop-btn" data-piece="bishop" data-cost="3">Läufer (3)</button>
-            <button class="shop-btn" data-piece="rook" data-cost="5">Turm (5)</button>
-            <button class="shop-btn" data-piece="archbishop" data-cost="7">Erzbischof (7)</button>
-            <button class="shop-btn" data-piece="chancellor" data-cost="8">Kanzler (8)</button>
-            <button class="shop-btn" data-piece="queen" data-cost="9">Dame (9)</button>
-          </div>
-          <div id="selected-piece-display">Ausgewählt: Nichts</div>
-          <button id="finish-setup-btn" disabled>Fertig</button>
-        </div>
-
-
-
-        <!-- Tutor Panel -->
-        <div id="tutor-panel" class="hidden">
-          <div id="tutor-suggestions"></div>
-        </div>
-
-        <!-- Unified Tabbed Info Panel -->
-        <div id="info-tabs-container" class="info-tabs-container hidden">
-          <div class="tab-nav">
-            <button class="tab-btn active" data-tab="captured">
-              ♟️ Gefangene
-            </button>
-            <button class="tab-btn" data-tab="history">
-              📜 Historie
-            </button>
-            <button class="tab-btn" data-tab="stats">
-              📊 Stats
-            </button>
-            <button class="tab-btn" data-tab="log">
-              📋 Log
-            </button>
-          </div>
-
-          <div class="tab-content-wrapper">
-            <!-- Captured Pieces Tab -->
-            <div id="tab-captured" class="tab-content active">
-              <h3>Geschlagene Figuren</h3>
-              <div class="captured-row">
-                <span>Weiß:</span>
-                <div id="captured-white"></div>
-              </div>
-              <div class="captured-row">
-                <span>Schwarz:</span>
-                <div id="captured-black"></div>
-              </div>
-            </div>
-
-            <!-- Move History Tab -->
-            <div id="tab-history" class="tab-content">
-              <h3>Zughistorie</h3>
-              <div id="replay-controls">
-                <button id="replay-first" title="Zum Anfang">⏮</button>
-                <button id="replay-prev" title="Vorheriger Zug">◀</button>
-                <button id="replay-next" title="Nächster Zug">▶</button>
-                <button id="replay-last" title="Zum Ende">⏭</button>
-                <button id="replay-exit" class="hidden">❌ Replay beenden</button>
-              </div>
-              <div id="replay-status" class="hidden">
-                Replay-Modus: Zug <span id="replay-move-num">0</span>
-              </div>
-              <div class="undo-redo-container">
-                <button id="undo-btn" disabled title="Zug rückgängig (U oder Strg+Z)">
-                  ⏮ Rückgängig
-                </button>
-                <button id="redo-btn" disabled title="Wiederholen (Strg+Y)">⏭ Wiederholen</button>
-              </div>
-              <div id="move-history"></div>
-            </div>
-
-            <!-- Stats Tab -->
-            <div id="tab-stats" class="tab-content">
-              <h3>📊 Statistiken</h3>
-              <div class="stat-row">
-                <span class="stat-label">Züge:</span>
-                <span id="stat-moves">0</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Deine Genauigkeit:</span>
-                <span id="stat-accuracy">--%</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Material:</span>
-                <span id="stat-material">0</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Beste Züge:</span>
-                <span id="stat-best-moves">0</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Captures:</span>
-                <span id="stat-captures">0</span>
-              </div>
-            </div>
-
-            <!-- Log Tab -->
-            <div id="tab-log" class="tab-content">
-              <h3>Spielinfo</h3>
-              <p id="turn-info">Warte auf Spielstart...</p>
-              <div id="log-panel" class="log-container"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Keep old IDs for compatibility (hidden) -->
-        <div id="captured-pieces-panel" class="hidden" style="display: none !important;"></div>
-        <div id="move-history-panel" class="hidden" style="display: none !important;"></div>
-        <div id="stats-panel" class="hidden" style="display: none !important;"></div>
-        <div id="info-panel" class="hidden" style="display: none !important;">
-          <div id="log" style="display: none !important;"></div>
         </div>
       </div>
     </div>
+
+    <!-- Info Overlay (Log, History) -->
+    <div id="info-overlay" class="fullscreen-overlay hidden">
+      <div class="info-content">
+        <div class="menu-header">
+          <h2>Spielinfo</h2>
+          <button id="info-close-btn" class="close-icon-btn">×</button>
+        </div>
+        <div class="info-tabs">
+          <button class="tab-btn active" data-tab="history">Historie</button>
+          <button class="tab-btn" data-tab="log">Log</button>
+        </div>
+        <div id="tab-history" class="tab-pane active">
+          <div id="move-history" class="history-list"></div>
+        </div>
+        <div id="tab-log" class="tab-pane">
+          <div id="log-panel" class="log-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlays (Game Over, Promotion, etc.) -->
+    <div id="game-over-overlay" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2 id="winner-text">Spiel beendet</h2>
+        <button id="restart-btn-overlay" class="btn-primary">Neues Spiel</button>
+        <button id="close-game-over-btn" class="btn-secondary">Schließen</button>
+      </div>
+    </div>
+
+    <div id="promotion-overlay" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2>Beförderung</h2>
+        <div id="promotion-options" class="promotion-grid"></div>
+      </div>
+    </div>
+
+    <!-- Help Overlay -->
+    <div id="help-overlay" class="fullscreen-overlay hidden">
+      <div class="info-content">
+        <div class="menu-header">
+          <h2>Hilfe & Regeln</h2>
+          <button id="close-help-btn" class="close-icon-btn">×</button>
+        </div>
+        <div class="help-body" style="padding: 20px; overflow-y: auto; max-height: 70vh;">
+          <h3>Spielablauf</h3>
+          <p>Schach 9x9 ist eine Variante auf einem größeren Brett mit neuen Figuren.</p>
+          <h4>1. Setup-Phase</h4>
+          <ul>
+            <li><strong>König platzieren:</strong> Wähle einen 3x3 Bereich für deinen König.</li>
+            <li><strong>Truppen kaufen:</strong> Nutze deine Punkte, um Figuren zu kaufen.</li>
+            <li><strong>Aufstellung:</strong> Platziere deine gekauften Figuren in deinem Bereich.</li>
+          </ul>
+          <h4>2. Neue Figuren</h4>
+          <ul>
+            <li><strong>Kanzler (C):</strong> Zieht wie Turm + Springer.</li>
+            <li><strong>Erzbischof (A):</strong> Zieht wie Läufer + Springer.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Overlay -->
+    <div id="confirmation-overlay" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2 id="confirmation-title">Bestätigung</h2>
+        <p id="confirmation-message">Bist du sicher?</p>
+        <div class="modal-buttons">
+          <button id="confirm-yes-btn" class="btn-primary">Ja</button>
+          <button id="confirm-no-btn" class="btn-secondary">Nein</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Draw Offer Overlay -->
+    <div id="draw-offer-overlay" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2>Remis angeboten</h2>
+        <p>Dein Gegner bietet ein Unentschieden an.</p>
+        <div class="modal-buttons">
+          <button id="accept-draw-btn" class="btn-primary">Annehmen</button>
+          <button id="decline-draw-btn" class="btn-secondary">Ablehnen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="fullscreen-overlay hidden">
+      <div class="tutorial-content">
+        <div class="menu-header">
+          <h2>Tutorial</h2>
+          <button id="tutorial-close" class="close-icon-btn">×</button>
+        </div>
+        <div id="tutorial-steps" class="tutorial-body">
+          <!-- Steps injected by JS -->
+        </div>
+        <div class="tutorial-footer">
+          <div class="step-indicator">
+            Schritt <span id="tutorial-current-step">1</span> von <span id="tutorial-total-steps">5</span>
+          </div>
+          <div class="tutorial-controls">
+            <button id="tutorial-prev" class="btn-secondary">Zurück</button>
+            <button id="tutorial-next" class="btn-primary">Weiter ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="points-selection-overlay" class="modal-overlay">
+      <div class="modal-content">
+        <h2>Neues Spiel</h2>
+        <p>Wähle einen Modus:</p>
+        <button id="classic-mode-btn" class="btn-primary full-width mb-2">♟️ Klassisch (9x9)</button>
+        <div class="divider"><span>ODER</span></div>
+        <p class="small-text">Setup-Modus (Punkte wählen):</p>
+        <div class="points-grid">
+          <button class="btn-secondary points-btn" data-points="12">12</button>
+          <button class="btn-secondary points-btn" data-points="15">15</button>
+          <button class="btn-secondary points-btn" data-points="18">18</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden elements for compatibility if needed -->
+    <div id="controls-wrapper" class="hidden"></div>
+    <div id="quick-actions" class="hidden"></div>
+    <div id="info-tabs-container" class="hidden"></div>
+
   </div>
-  <script type="module" src="main.js?v=27"></script>
+  <script type="module" src="js/debug.js"></script>
+  <script type="module" src="js/main.js?v=28"></script>
 </body>
 
 </html>

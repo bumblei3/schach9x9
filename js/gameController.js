@@ -1,5 +1,5 @@
 import { PHASES, BOARD_SIZE } from './gameEngine.js';
-import { SHOP_PIECES } from './config.js';
+import { SHOP_PIECES, PIECE_VALUES } from './config.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
 import { PIECE_SVGS } from './chess-pieces.js';
@@ -19,11 +19,26 @@ export class GameController {
         this.gameStartTime = null;
     }
 
-    initGame(initialPoints) {
+    initGame(initialPoints, mode = 'setup') {
         // Initialize UI
         UI.initBoardUI(this.game);
         UI.updateStatus(this.game);
-        UI.updateShopUI(this.game);
+
+        if (mode === 'setup') {
+            UI.updateShopUI(this.game);
+        } else {
+            // In classic mode, we start directly in PLAY phase
+            this.game.gameStartTime = Date.now();
+            this.startClock();
+
+            // Show game controls immediately
+            const infoTabsContainer = document.getElementById('info-tabs-container');
+            if (infoTabsContainer) infoTabsContainer.classList.remove('hidden');
+
+            const quickActions = document.getElementById('quick-actions');
+            if (quickActions) quickActions.classList.remove('hidden');
+        }
+
         UI.updateStatistics(this.game);
         UI.updateClockUI(this.game);
         UI.updateClockDisplay(this.game);
@@ -73,7 +88,7 @@ export class GameController {
             }
         }, 100);
 
-        logger.info('Game initialized with', initialPoints, 'points');
+        logger.info('Game initialized with', initialPoints, 'points in mode:', mode);
     }
 
     handleCellClick(r, c) {
@@ -154,14 +169,13 @@ export class GameController {
 
     selectShopPiece(pieceType) {
         if (!pieceType) return;
-        const typeUpper = pieceType.toUpperCase();
-        const cost = PIECES[typeUpper].points;
+        const cost = PIECE_VALUES[pieceType];
         if (cost > this.game.points) {
             this.game.log('Nicht genug Punkte!');
             return;
         }
 
-        this.game.selectedShopPiece = typeUpper;
+        this.game.selectedShopPiece = pieceType;
 
         // Update UI
         document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('selected'));
@@ -169,8 +183,10 @@ export class GameController {
         if (btn) btn.classList.add('selected');
 
         const displayEl = document.getElementById('selected-piece-display');
-        const svg = PIECE_SVGS['white'][PIECES[typeUpper].symbol];
-        displayEl.innerHTML = `Ausgewählt: <div style="display:inline-block;width:30px;height:30px;vertical-align:middle;">${svg}</div> ${PIECES[typeUpper].name} (${cost})`;
+        // Find the piece info from SHOP_PIECES by matching the symbol
+        const pieceInfo = Object.values(PIECES).find(p => p.symbol === pieceType);
+        const svg = PIECE_SVGS['white'][pieceType];
+        displayEl.innerHTML = `Ausgewählt: <div style="display:inline-block;width:30px;height:30px;vertical-align:middle;">${svg}</div> ${pieceInfo ? pieceInfo.name : pieceType} (${cost})`;
     }
 
     placeShopPiece(r, c) {
@@ -181,7 +197,7 @@ export class GameController {
 
             if (piece && piece.color === color && piece.type !== 'k') {
                 const cost =
-                    PIECES[Object.keys(PIECES).find(k => PIECES[k].symbol === piece.type.toUpperCase())].points;
+                    PIECES[Object.keys(PIECES).find(k => PIECES[k].symbol === piece.type)].points;
                 this.game.points += cost;
                 this.game.board[r][c] = null;
                 this.updateShopUI();
@@ -211,10 +227,10 @@ export class GameController {
             return;
         }
 
-        const cost = PIECES[this.game.selectedShopPiece.toUpperCase()].points;
+        const cost = PIECE_VALUES[this.game.selectedShopPiece];
         if (this.game.points >= cost) {
             this.game.board[r][c] = {
-                type: PIECES[this.game.selectedShopPiece.toUpperCase()].symbol,
+                type: this.game.selectedShopPiece,
                 color: color,
                 hasMoved: false,
             };
@@ -268,17 +284,9 @@ export class GameController {
             });
             logger.debug('Removed all corridor highlighting for PLAY phase');
 
-            // Show tabbed info panel instead of individual panels
-            const infoTabsContainer = document.getElementById('info-tabs-container');
-            if (infoTabsContainer) {
-                infoTabsContainer.classList.remove('hidden');
-            }
-
-            // Show quick action buttons
-            const quickActions = document.getElementById('quick-actions');
-            if (quickActions) {
-                quickActions.classList.remove('hidden');
-            }
+            // Ensure Action Bar is visible (it's always visible in new UI, but good to be safe)
+            const actionBar = document.querySelector('.action-bar');
+            if (actionBar) actionBar.classList.remove('hidden');
 
             this.game.log('Spiel beginnt! Weiß ist am Zug.');
             if (this.game.updateBestMoves) this.game.updateBestMoves();

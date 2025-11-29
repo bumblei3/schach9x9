@@ -1,4 +1,4 @@
-import { createEmptyBoard, Game } from './gameEngine.js';
+import { createEmptyBoard, Game } from '../js/gameEngine.js';
 
 describe('getValidMoves', () => {
   it('should return valid knight moves in the center', () => {

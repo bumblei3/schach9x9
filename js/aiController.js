@@ -23,16 +23,27 @@ export class AIController {
 
     aiSetupPieces() {
         const corridor = this.game.blackCorridor;
-        const availablePieces = ['QUEEN', 'CHANCELLOR', 'ARCHBISHOP', 'ROOK', 'BISHOP', 'KNIGHT', 'PAWN'];
+        // Map piece names to their symbols
+        const pieceSymbols = {
+            'QUEEN': 'q',
+            'CHANCELLOR': 'c',
+            'ARCHBISHOP': 'a',
+            'ROOK': 'r',
+            'BISHOP': 'b',
+            'KNIGHT': 'n',
+            'PAWN': 'p'
+        };
 
         // Simple greedy strategy: buy expensive stuff first
         while (this.game.points > 0) {
             // Filter affordable pieces
-            const affordable = availablePieces.filter(p => PIECES[p].points <= this.game.points);
+            const pieceNames = ['QUEEN', 'CHANCELLOR', 'ARCHBISHOP', 'ROOK', 'BISHOP', 'KNIGHT', 'PAWN'];
+            const affordable = pieceNames.filter(name => PIECES[name].points <= this.game.points);
             if (affordable.length === 0) break;
 
             const choice = affordable[Math.floor(Math.random() * affordable.length)];
-            this.game.selectedShopPiece = choice;
+            const symbol = pieceSymbols[choice];
+            this.game.selectedShopPiece = symbol;
 
             // Find empty spot
             const emptySpots = [];
@@ -79,7 +90,7 @@ export class AIController {
 
         // Use Web Worker for AI calculations to prevent UI freezing
         if (!this.aiWorker) {
-            this.aiWorker = new Worker('ai-worker.js', { type: 'module' });
+            this.aiWorker = new Worker('js/ai-worker.js', { type: 'module' });
 
             // Load opening book if available
             fetch('opening-book.json')
@@ -101,7 +112,16 @@ export class AIController {
             hard: 4,
             expert: 5,
         };
-        const depth = depthMap[this.game.difficulty] || 3; // Default to medium if unknown
+
+        // In classic mode (AI vs AI), use lower depth for faster, watchable gameplay
+        let depth;
+        if (this.game.mode === 'classic') {
+            depth = 3; // Fixed at medium depth for classic mode
+            logger.debug(`[AI] Classic mode: using depth ${depth} for faster play`);
+        } else {
+            depth = depthMap[this.game.difficulty] || 3;
+            logger.debug(`[AI] Difficulty ${this.game.difficulty}: using depth ${depth}`);
+        }
 
         this.aiWorker.onmessage = e => {
             const { type, data } = e.data;
@@ -522,7 +542,7 @@ export class AIController {
 
         // Use Web Worker for analysis to prevent UI freezing
         if (!this.aiWorker) {
-            this.aiWorker = new Worker('ai-worker.js', { type: 'module' });
+            this.aiWorker = new Worker('js/ai-worker.js', { type: 'module' });
 
             // Load opening book if available
             fetch('opening-book.json')

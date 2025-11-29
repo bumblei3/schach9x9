@@ -32,7 +32,7 @@ const historyTable = {};
 
 // Initialize history table
 function initHistoryTable() {
-  const types = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c'];
+  const types = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e'];
   for (const type of types) {
     historyTable[type] = [];
     for (let fr = 0; fr < BOARD_SIZE; fr++) {
@@ -142,7 +142,7 @@ function updateHistory(piece, move, depth) {
  */
 function initializeZobrist() {
   const table = {};
-  const pieceTypes = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c'];
+  const pieceTypes = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e'];
   const colors = ['white', 'black'];
 
   // Simple pseudo-random number generator (seeded for consistency)
@@ -485,6 +485,47 @@ function sendProgress(maxDepth) {
 /**
  * Minimax algorithm with alpha-beta pruning and transposition table
  */
+/**
+ * Apply a move to the board and return undo information
+ */
+function makeMove(board, move) {
+  const fromPiece = board[move.from.r][move.from.c];
+  const capturedPiece = board[move.to.r][move.to.c];
+
+  const undoInfo = {
+    capturedPiece,
+    oldHasMoved: fromPiece ? fromPiece.hasMoved : false,
+    move
+  };
+
+  board[move.to.r][move.to.c] = fromPiece;
+  board[move.from.r][move.from.c] = null;
+
+  if (fromPiece) {
+    fromPiece.hasMoved = true;
+  }
+
+  return undoInfo;
+}
+
+/**
+ * Undo a move
+ */
+function undoMove(board, undoInfo) {
+  const { move, capturedPiece, oldHasMoved } = undoInfo;
+  const piece = board[move.to.r][move.to.c];
+
+  if (piece) {
+    piece.hasMoved = oldHasMoved;
+  }
+
+  board[move.from.r][move.from.c] = piece;
+  board[move.to.r][move.to.c] = capturedPiece;
+}
+
+/**
+ * Minimax algorithm with alpha-beta pruning and transposition table
+ */
 function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentHash) {
   // Track evaluated nodes
   nodesEvaluated++;
@@ -497,14 +538,8 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
     }
   }
 
-  // Simulate move
-  const newBoard = cloneBoard(board);
   const fromPiece = board[move.from.r][move.from.c]; // Get piece from original board
   const capturedPiece = board[move.to.r][move.to.c]; // Get captured piece from original board
-
-  // Apply move to new board
-  newBoard[move.to.r][move.to.c] = newBoard[move.from.r][move.from.c];
-  newBoard[move.from.r][move.from.c] = null;
 
   // INCREMENTAL HASH UPDATE
   let hash = parentHash;
@@ -513,10 +548,14 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
   hash ^= zobristTable.sideToMove;
 
   // 2. Remove moving piece from source
-  hash ^= zobristTable[fromPiece.color][fromPiece.type][move.from.r][move.from.c];
+  if (fromPiece) {
+    hash ^= zobristTable[fromPiece.color][fromPiece.type][move.from.r][move.from.c];
+  }
 
   // 3. Add moving piece to destination
-  hash ^= zobristTable[fromPiece.color][fromPiece.type][move.to.r][move.to.c];
+  if (fromPiece) {
+    hash ^= zobristTable[fromPiece.color][fromPiece.type][move.to.r][move.to.c];
+  }
 
   // 4. If capture, remove captured piece
   if (capturedPiece) {
@@ -529,17 +568,20 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
     return ttEntry.score;
   }
 
+  // Apply move
+  const undoInfo = makeMove(board, move);
+
   let score;
   let bestMove = null;
   let flag = TT_ALPHA; // Default: upper bound
 
   if (depth === 0) {
     // Use quiescence search at leaf nodes
-    score = quiescenceSearch(newBoard, alpha, beta, isMaximizing, aiColor);
+    score = quiescenceSearch(board, alpha, beta, isMaximizing, aiColor);
     flag = TT_EXACT;
   } else {
     const color = isMaximizing ? aiColor : aiColor === 'white' ? 'black' : 'white';
-    const moves = getAllLegalMoves(newBoard, color);
+    const moves = getAllLegalMoves(board, color);
 
     if (moves.length === 0) {
       // Game over
@@ -549,10 +591,10 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
       score = -Infinity;
       // Order moves with TT best move hint and current depth
       const ttBestMove = ttEntry ? ttEntry.bestMove : null;
-      const orderedMoves = orderMoves(newBoard, moves, ttBestMove, depth);
+      const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
 
       for (const nextMove of orderedMoves) {
-        const moveScore = minimax(newBoard, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
+        const moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
         if (moveScore > score) {
           score = moveScore;
           bestMove = nextMove;
@@ -564,7 +606,7 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
             addKillerMove(depth, nextMove);
           }
           // Update history heuristic
-          updateHistory(newBoard[nextMove.from.r][nextMove.from.c], nextMove, depth);
+          updateHistory(board[nextMove.from.r][nextMove.from.c], nextMove, depth);
           flag = TT_BETA; // Lower bound (fail-high)
           break;
         }
@@ -576,10 +618,10 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
       score = Infinity;
       // Order moves with TT best move hint and current depth
       const ttBestMove = ttEntry ? ttEntry.bestMove : null;
-      const orderedMoves = orderMoves(newBoard, moves, ttBestMove, depth);
+      const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
 
       for (const nextMove of orderedMoves) {
-        const moveScore = minimax(newBoard, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
+        const moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
         if (moveScore < score) {
           score = moveScore;
           bestMove = nextMove;
@@ -591,7 +633,7 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
             addKillerMove(depth, nextMove);
           }
           // Update history heuristic
-          updateHistory(newBoard[nextMove.from.r][nextMove.from.c], nextMove, depth);
+          updateHistory(board[nextMove.from.r][nextMove.from.c], nextMove, depth);
           flag = TT_BETA; // Lower bound (fail-high)
           break;
         }
@@ -602,6 +644,9 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
     }
   }
 
+  // Undo move
+  undoMove(board, undoInfo);
+
   // Store in transposition table
   storeTT(hash, depth, score, flag, bestMove);
 
@@ -611,7 +656,11 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
 /**
  * Quiescence search to avoid horizon effect
  */
+/**
+ * Quiescence search to avoid horizon effect
+ */
 function quiescenceSearch(board, alpha, beta, isMaximizing, aiColor) {
+  nodesEvaluated++;
   const standPat = evaluatePosition(board, aiColor);
 
   if (isMaximizing) {
@@ -624,27 +673,28 @@ function quiescenceSearch(board, alpha, beta, isMaximizing, aiColor) {
 
   // Find all capture moves
   const color = isMaximizing ? aiColor : aiColor === 'white' ? 'black' : 'white';
-  const moves = getAllLegalMoves(board, color);
-  const captureMoves = moves.filter(m => board[m.to.r][m.to.c] !== null);
+  const captureMoves = getAllCaptureMoves(board, color);
 
   if (isMaximizing) {
     for (const move of captureMoves) {
-      const newBoard = cloneBoard(board);
-      newBoard[move.to.r][move.to.c] = newBoard[move.from.r][move.from.c];
-      newBoard[move.from.r][move.from.c] = null;
+      const undoInfo = makeMove(board, move);
 
-      const score = quiescenceSearch(newBoard, alpha, beta, false, aiColor);
+      const score = quiescenceSearch(board, alpha, beta, false, aiColor);
+
+      undoMove(board, undoInfo);
+
       if (score >= beta) return beta;
       if (score > alpha) alpha = score;
     }
     return alpha;
   } else {
     for (const move of captureMoves) {
-      const newBoard = cloneBoard(board);
-      newBoard[move.to.r][move.to.c] = newBoard[move.from.r][move.from.c];
-      newBoard[move.from.r][move.from.c] = null;
+      const undoInfo = makeMove(board, move);
 
-      const score = quiescenceSearch(newBoard, alpha, beta, true, aiColor);
+      const score = quiescenceSearch(board, alpha, beta, true, aiColor);
+
+      undoMove(board, undoInfo);
+
       if (score <= alpha) return alpha;
       if (score < beta) beta = score;
     }
@@ -675,8 +725,8 @@ export function evaluatePosition(board, forColor) {
 
       // Mobility bonus (simplified - count pseudo-legal moves)
       if (piece.type !== 'p' && piece.type !== 'k') {
-        const moves = getPseudoLegalMoves(board, r, c, piece);
-        totalValue += moves.length * 2; // Small bonus for mobility
+        const mobility = countMobility(board, r, c, piece);
+        totalValue += mobility * 2; // Small bonus for mobility
       }
 
       if (piece.color === forColor) {
@@ -891,6 +941,33 @@ function isInCheck(board, color) {
 /**
  * Check if a square is attacked by a specific color
  */
+const KNIGHT_MOVES = [
+  [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+  [1, -2], [1, 2], [2, -1], [2, 1],
+];
+
+const DIAGONAL_DIRS = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+const ORTHOGONAL_DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+const KING_DIRS = [
+  [-1, -1], [-1, 0], [-1, 1],
+  [0, -1], [0, 1],
+  [1, -1], [1, 0], [1, 1]
+];
+
+const ATTACK_DIRECTIONS = [
+  { dr: -1, dc: -1, types: ['b', 'q', 'a', 'e'] }, // Diagonals
+  { dr: -1, dc: 1, types: ['b', 'q', 'a', 'e'] },
+  { dr: 1, dc: -1, types: ['b', 'q', 'a', 'e'] },
+  { dr: 1, dc: 1, types: ['b', 'q', 'a', 'e'] },
+  { dr: -1, dc: 0, types: ['r', 'q', 'c', 'e'] }, // Orthogonals
+  { dr: 1, dc: 0, types: ['r', 'q', 'c', 'e'] },
+  { dr: 0, dc: -1, types: ['r', 'q', 'c', 'e'] },
+  { dr: 0, dc: 1, types: ['r', 'q', 'c', 'e'] },
+];
+
+/**
+ * Check if a square is attacked by a specific color
+ */
 function isSquareAttacked(board, r, c, attackerColor) {
   const isInside = (r, c) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
 
@@ -908,17 +985,7 @@ function isSquareAttacked(board, r, c, attackerColor) {
   }
 
   // 2. Knight attacks
-  const knightMoves = [
-    [-2, -1],
-    [-2, 1],
-    [-1, -2],
-    [-1, 2],
-    [1, -2],
-    [1, 2],
-    [2, -1],
-    [2, 1],
-  ];
-  for (const [dr, dc] of knightMoves) {
+  for (const [dr, dc] of KNIGHT_MOVES) {
     const nr = r + dr;
     const nc = c + dc;
     if (isInside(nr, nc)) {
@@ -926,26 +993,15 @@ function isSquareAttacked(board, r, c, attackerColor) {
       if (
         piece &&
         piece.color === attackerColor &&
-        (piece.type === 'n' || piece.type === 'a' || piece.type === 'c')
+        (piece.type === 'n' || piece.type === 'a' || piece.type === 'c' || piece.type === 'e')
       ) {
-        return true; // Knight, Archbishop, Chancellor
+        return true; // Knight, Archbishop, Chancellor, Angel
       }
     }
   }
 
-  // 3. Sliding pieces (Bishop/Rook/Queen/Archbishop/Chancellor)
-  const directions = [
-    { dr: -1, dc: -1, types: ['b', 'q', 'a'] }, // Diagonals
-    { dr: -1, dc: 1, types: ['b', 'q', 'a'] },
-    { dr: 1, dc: -1, types: ['b', 'q', 'a'] },
-    { dr: 1, dc: 1, types: ['b', 'q', 'a'] },
-    { dr: -1, dc: 0, types: ['r', 'q', 'c'] }, // Orthogonals
-    { dr: 1, dc: 0, types: ['r', 'q', 'c'] },
-    { dr: 0, dc: -1, types: ['r', 'q', 'c'] },
-    { dr: 0, dc: 1, types: ['r', 'q', 'c'] },
-  ];
-
-  for (const { dr, dc, types } of directions) {
+  // 3. Sliding pieces (Bishop/Rook/Queen/Archbishop/Chancellor/Angel)
+  for (const { dr, dc, types } of ATTACK_DIRECTIONS) {
     let nr = r + dr;
     let nc = c + dc;
     while (isInside(nr, nc)) {
@@ -975,7 +1031,10 @@ function isSquareAttacked(board, r, c, attackerColor) {
 /**
  * Get pseudo-legal moves for a piece (ignoring check)
  */
-function getPseudoLegalMoves(board, r, c, piece) {
+/**
+ * Get pseudo-legal moves for a piece (ignoring check)
+ */
+function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
   const moves = [];
   const isInside = (r, c) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
   const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
@@ -984,15 +1043,9 @@ function getPseudoLegalMoves(board, r, c, piece) {
   if (piece.type === 'p') {
     const forward = piece.color === 'white' ? -1 : 1;
     // Move 1
-    if (isInside(r + forward, c) && isEmpty(r + forward, c)) {
+    if (!onlyCaptures && isInside(r + forward, c) && isEmpty(r + forward, c)) {
       moves.push({ from: { r, c }, to: { r: r + forward, c } });
-      // Move 2 (if not moved) - Simplified check (usually tracked by hasMoved flag, but here we assume starting rows)
-      const startRow = piece.color === 'white' ? 6 : 2; // Approximate starting rows
-      // Better: check if piece has moved (not available in simple board array)
-      // For AI, we can assume if it's on start row it might be able to move 2.
-      // But wait, the board state passed to AI doesn't have hasMoved flags usually?
-      // Actually, main game engine passes full objects. Let's check if board has objects with hasMoved.
-      // Yes, main.js passes objects.
+      // Move 2 (if not moved)
       if (piece.hasMoved === false && isInside(r + forward * 2, c) && isEmpty(r + forward * 2, c)) {
         moves.push({ from: { r, c }, to: { r: r + forward * 2, c } });
       }
@@ -1006,48 +1059,42 @@ function getPseudoLegalMoves(board, r, c, piece) {
   } else {
     // Other pieces
     const directions = [];
-    if (['b', 'q', 'a', 'k'].includes(piece.type)) {
-      // Diagonals
-      directions.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
+    if (['b', 'q', 'a', 'k', 'e'].includes(piece.type)) {
+      directions.push(...DIAGONAL_DIRS);
     }
-    if (['r', 'q', 'c', 'k'].includes(piece.type)) {
-      // Orthogonals
-      directions.push([-1, 0], [1, 0], [0, -1], [0, 1]);
+    if (['r', 'q', 'c', 'k', 'e'].includes(piece.type)) {
+      directions.push(...ORTHOGONAL_DIRS);
     }
-    if (['n', 'a', 'c'].includes(piece.type)) {
-      // Knight jumps
-      const jumps = [
-        [-2, -1],
-        [-2, 1],
-        [-1, -2],
-        [-1, 2],
-        [1, -2],
-        [1, 2],
-        [2, -1],
-        [2, 1],
-      ];
-      for (const [dr, dc] of jumps) {
+
+    // Knight jumps
+    if (['n', 'a', 'c', 'e'].includes(piece.type)) {
+      for (const [dr, dc] of KNIGHT_MOVES) {
         const nr = r + dr,
           nc = c + dc;
-        if (isInside(nr, nc) && (isEmpty(nr, nc) || isEnemy(nr, nc))) {
-          moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+        if (isInside(nr, nc)) {
+          if (isEnemy(nr, nc)) {
+            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+          } else if (!onlyCaptures && isEmpty(nr, nc)) {
+            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+          }
         }
       }
     }
 
     // Sliding moves
-    if (['b', 'r', 'q', 'a', 'c'].includes(piece.type)) {
+    if (['b', 'r', 'q', 'a', 'c', 'e'].includes(piece.type)) {
       const slidingDirs = [];
-      if (['b', 'q', 'a'].includes(piece.type))
-        slidingDirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
-      if (['r', 'q', 'c'].includes(piece.type)) slidingDirs.push([-1, 0], [1, 0], [0, -1], [0, 1]);
+      if (['b', 'q', 'a', 'e'].includes(piece.type)) slidingDirs.push(...DIAGONAL_DIRS);
+      if (['r', 'q', 'c', 'e'].includes(piece.type)) slidingDirs.push(...ORTHOGONAL_DIRS);
 
       for (const [dr, dc] of slidingDirs) {
         let nr = r + dr;
         let nc = c + dc;
         while (isInside(nr, nc)) {
           if (isEmpty(nr, nc)) {
-            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+            if (!onlyCaptures) {
+              moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+            }
           } else {
             if (isEnemy(nr, nc)) {
               moves.push({ from: { r, c }, to: { r: nr, c: nc } });
@@ -1060,23 +1107,17 @@ function getPseudoLegalMoves(board, r, c, piece) {
       }
     }
 
-    // King single steps (already handled by directions above if we treat King as sliding with range 1? No, separate logic usually)
+    // King single steps
     if (piece.type === 'k') {
-      const kingDirs = [
-        [-1, -1],
-        [-1, 0],
-        [-1, 1],
-        [0, -1],
-        [0, 1],
-        [1, -1],
-        [1, 0],
-        [1, 1],
-      ];
-      for (const [dr, dc] of kingDirs) {
+      for (const [dr, dc] of KING_DIRS) {
         const nr = r + dr,
           nc = c + dc;
-        if (isInside(nr, nc) && (isEmpty(nr, nc) || isEnemy(nr, nc))) {
-          moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+        if (isInside(nr, nc)) {
+          if (isEnemy(nr, nc)) {
+            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+          } else if (!onlyCaptures && isEmpty(nr, nc)) {
+            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
+          }
         }
       }
     }
@@ -1086,8 +1127,79 @@ function getPseudoLegalMoves(board, r, c, piece) {
 }
 
 /**
- * Clone board helper
+ * Get all capture moves for a color (validating checks)
  */
-function cloneBoard(board) {
-  return board.map(row => row.map(cell => (cell ? { ...cell } : null)));
+function getAllCaptureMoves(board, color) {
+  const moves = [];
+
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const piece = board[r][c];
+      if (piece && piece.color === color) {
+        const pieceMoves = getPseudoLegalMoves(board, r, c, piece, true); // onlyCaptures = true
+
+        for (const move of pieceMoves) {
+          const undoInfo = makeMove(board, move);
+
+          if (!isInCheck(board, color)) {
+            moves.push(move);
+          }
+
+          undoMove(board, undoInfo);
+        }
+      }
+    }
+  }
+
+  return moves;
+}
+
+
+
+/**
+ * Count pseudo-legal moves for mobility bonus (optimized, no object creation)
+ */
+function countMobility(board, r, c, piece) {
+  let count = 0;
+  const isInside = (r, c) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
+  const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
+  const isEmpty = (r, c) => !board[r][c];
+
+  // Knight jumps (N, A, C, E)
+  if (['n', 'a', 'c', 'e'].includes(piece.type)) {
+    for (const [dr, dc] of KNIGHT_MOVES) {
+      const nr = r + dr, nc = c + dc;
+      if (isInside(nr, nc) && (isEmpty(nr, nc) || isEnemy(nr, nc))) {
+        count++;
+      }
+    }
+  }
+
+  // Sliding moves
+  if (['b', 'r', 'q', 'a', 'c', 'e'].includes(piece.type)) {
+    const slidingDirs = [];
+    if (['b', 'q', 'a', 'e'].includes(piece.type)) // Diagonals
+      slidingDirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
+    if (['r', 'q', 'c', 'e'].includes(piece.type)) // Orthogonals
+      slidingDirs.push([-1, 0], [1, 0], [0, -1], [0, 1]);
+
+    for (const [dr, dc] of slidingDirs) {
+      let nr = r + dr;
+      let nc = c + dc;
+      while (isInside(nr, nc)) {
+        if (isEmpty(nr, nc)) {
+          count++;
+        } else {
+          if (isEnemy(nr, nc)) {
+            count++;
+          }
+          break;
+        }
+        nr += dr;
+        nc += dc;
+      }
+    }
+  }
+
+  return count;
 }

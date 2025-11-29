@@ -1,0 +1,1018 @@
+
+> schach9x9@1.0.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --coverage --verbose
+
+(node:40324) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/sounds.test.js
+  SoundManager
+    ✓ initial settings are loaded from localStorage or defaults (9 ms)
+    ✓ setVolume converts 0‑100 range to 0‑1 internally (1 ms)
+    ✓ toggle flips the enabled flag and persists it (1 ms)
+    ✓ playMove does not throw when disabled (2 ms)
+    ✕ should play capture sound when enabled (48 ms)
+    ✓ should play check sound when enabled (1 ms)
+    ✓ should play game start sound when enabled (2 ms)
+    ✓ should play game over sound when enabled (1 ms)
+
+  ● SoundManager › should play capture sound when enabled
+
+    expect(received).not.toThrow()
+
+    Error name:    "TypeError"
+    Error message: "osc.frequency.exponentialRampToValueAtTime is not a function"
+
+          92 |     osc.type = 'square';
+          93 |     osc.frequency.setValueAtTime(600, this.audioContext.currentTime);
+        > 94 |     osc.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.1);
+             |                   ^
+          95 |
+          96 |     gain.gain.setValueAtTime(this.volume * 0.8, this.audioContext.currentTime);
+          97 |     gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+
+      at SoundManager.exponentialRampToValueAtTime [as playCapture] (sounds.js:94:19)
+      at tests/sounds.test.js:83:26
+      at Object.<anonymous> (node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (tests/sounds.test.js:83:45)
+      at Object.<anonymous> (tests/sounds.test.js:83:45)
+
+  console.log
+    [INFO] 13:07:05.320 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.398 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.401 Loaded 1 games from storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.404 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.408 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.412 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.414 Game saved: win vs AI-Beginner (2 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.418 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+(node:40322) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/effects.test.js
+  ParticleSystem
+    ✓ should spawn particles (35 ms)
+    ✓ should create more particles for CAPTURE than MOVE (15 ms)
+    ✓ should start animation when spawning particles (8 ms)
+    ✓ should remove particles after animation completes (4 ms)
+    ✕ should handle empty particle array (9 ms)
+    ✓ should create particles with different types (10 ms)
+
+  ● ParticleSystem › should handle empty particle array
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: undefined
+
+      77 |
+      78 |         expect(newParticleSystem.particles.length).toBe(0);
+    > 79 |         expect(newParticleSystem.animating).toBe(false);
+         |                                             ^
+      80 |     });
+      81 |
+      82 |     test('should create particles with different types', () => {
+
+      at Object.<anonymous> (tests/effects.test.js:79:45)
+
+  console.log
+    [DEBUG] 13:07:05.421 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.423 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.425 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.427 Game saved: loss vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.429 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.431 Game saved: draw vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.476 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.492 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.506 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.520 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+(node:40323) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/gameEngine.rules.test.js
+  Game Engine Rules
+    Check Detection
+      ✓ should detect simple check from Rook (14 ms)
+      ✓ should NOT detect check if blocked (1 ms)
+      ✓ should detect Knight check (1 ms)
+    Checkmate Detection
+      ✓ should detect Back Rank Mate with two Rooks (5 ms)
+      ✓ should NOT be checkmate if piece can block the check (5 ms)
+      ✕ should detect checkmate with a Queen and Rook (6 ms)
+      ✓ should NOT be checkmate if king can move to a safe square (3 ms)
+      ✓ should NOT be checkmate if a piece can capture the checking piece (5 ms)
+    Castling
+      ✓ should allow kingside castling when conditions are met (2 ms)
+      ✓ should NOT allow castling if path is blocked (2 ms)
+      ✓ should NOT allow castling if king passes through check (8 ms)
+    En Passant
+      ✓ should allow en passant capture after double pawn push (2 ms)
+
+  ● Game Engine Rules › Checkmate Detection › should detect checkmate with a Queen and Rook
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      102 |
+      103 |       expect(game.isInCheck('white')).toBe(true);
+    > 104 |       expect(game.isCheckmate('white')).toBe(true);
+          |                                         ^
+      105 |     });
+      106 |
+      107 |     test('should NOT be checkmate if king can move to a safe square', () => {
+
+      at Object.<anonymous> (tests/gameEngine.rules.test.js:104:41)
+
+  console.log
+    [DEBUG] 13:07:05.529 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.577 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.586 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+(node:40321) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.log
+    [INFO] 13:07:05.588 Game saved: loss vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.594 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+FAIL tests/moveController.test.js
+  MoveController
+    ✓ should execute a simple move (29 ms)
+    ✓ should handle capture (11 ms)
+    ✓ should handle promotion (14 ms)
+    ✓ should handle undo move (22 ms)
+    ✓ should handle castling kingside (21 ms)
+    ✓ should handle en passant (15 ms)
+    ✓ should record move in history (5 ms)
+    ✕ should handle redo move (4 ms)
+    ✓ should clear redo stack when new move is made (4 ms)
+    ✓ should handle castling queenside (6 ms)
+    ✓ should set hasMoved flag on pieces (5 ms)
+    ✕ should handle multiple undo operations (17 ms)
+
+  ● MoveController › should handle redo move
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      209 |         // Redo the move
+      210 |         moveController.redoMove();
+    > 211 |         expect(game.board[5][4]).not.toBeNull();
+          |                                      ^
+      212 |         expect(game.board[6][4]).toBeNull();
+      213 |     });
+      214 |
+
+      at Object.<anonymous> (tests/moveController.test.js:211:38)
+
+  ● MoveController › should handle multiple undo operations
+
+    expect(received).toBeNull()
+
+    Received: {"color": "white", "hasMoved": undefined, "type": "p"}
+
+      275 |
+      276 |         // Should be back to initial state
+    > 277 |         expect(game.board[6][4]).toBeNull();  // First move undone
+          |                                  ^
+      278 |         expect(game.turn).toBe('white');  // Back to white's turn
+      279 |     });
+      280 | });
+
+      at Object.<anonymous> (tests/moveController.test.js:277:34)
+
+  console.log
+    [INFO] 13:07:05.596 Game saved: draw vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.603 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.607 Game saved: win vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.612 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.616 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.620 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.623 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.624 Game saved: loss vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.626 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.628 Game saved: draw vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.630 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.632 Game saved: win vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.634 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.637 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.639 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.641 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.643 Game saved: loss vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.644 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.647 Game saved: draw vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.648 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.652 Game saved: win vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.656 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.658 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.661 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.665 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.668 Game saved: loss vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.673 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.678 Game saved: draw vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.683 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.686 Game saved: win vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.692 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.698 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.703 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.707 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.715 Game saved: loss vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.719 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.723 Game saved: draw vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.726 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.728 Game saved: win vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.736 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.744 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.749 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.759 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.763 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.765 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.768 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.770 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.772 Game saved: loss vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.774 Exported 2 games
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.777 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.782 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.786 Game saved: win vs Original (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.793 Imported 1 new games (merged)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.797 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.804 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.806 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.826 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.828 Imported 1 games (replaced)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.833 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.838 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [ERROR] 13:07:05.843 Error importing games: SyntaxError: Unexpected token i in JSON at position 0
+        at JSON.parse (<anonymous>)
+        at StatisticsManager.parse [as importGames] (/home/tobber/.gemini/antigravity/scratch/schach/statisticsManager.js:183:37)
+        at Object.<anonymous> (/home/tobber/.gemini/antigravity/scratch/schach/tests/statisticsManager.test.js:223:37)
+        at Promise.then.completed (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/run.js:316:40)
+        at processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at _runTest (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/run.js:121:9)
+        at run (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-runner/build/runTest.js:444:34)
+        at Object.worker (/home/tobber/.gemini/antigravity/scratch/schach/node_modules/jest-runner/build/testWorker.js:106:12)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.896 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.900 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.906 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.910 Imported 0 new games (merged)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.915 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.921 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.923 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.927 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.802 [AI Worker] TT Hit Rate: 0.0% (0/14), Nodes: 14
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [WARN] 13:07:05.932 clearHistory called without confirmation
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.941 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+(node:40326) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.log
+    [DEBUG] 13:07:05.944 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+PASS tests/logger.test.js
+  Logger
+    ✓ should log info messages (6 ms)
+    ✓ should log debug messages (1 ms)
+    ✓ should log warning messages (1 ms)
+    ✓ should log error messages (1 ms)
+    ✓ should respect log level settings (33 ms)
+    ✓ should enable and disable logging (2 ms)
+    ✓ should create context logger (1 ms)
+    ✓ should format timestamps correctly (1 ms)
+
+PASS tests/arrows.test.js
+  ArrowRenderer
+    Initialization
+      ✓ should create SVG layer on initialization (82 ms)
+      ✓ should calculate cell size from board cells (38 ms)
+      ✓ should create arrowhead markers for each quality (107 ms)
+      ✓ should position SVG layer absolutely (23 ms)
+    Drawing Arrows
+      ✓ should draw arrow from one square to another (30 ms)
+      ✓ should draw arrows with correct color based on quality (26 ms)
+      ✓ should use correct marker-end for arrow quality (18 ms)
+      ✓ should default to gold quality if not specified (25 ms)
+    Clearing Arrows
+      ✓ should clear all arrows from SVG layer (28 ms)
+      ✓ should not throw error when clearing empty arrows (31 ms)
+    Highlight Move
+      ✓ should clear previous arrows and draw new one (29 ms)
+      ✓ should store last arrow for redraw (15 ms)
+    Redraw
+      ✓ should redraw last arrow after cell size update (39 ms)
+      ✓ should not throw error when redrawing with no last arrow (20 ms)
+    Destroy
+      ✓ should remove SVG layer from DOM (31 ms)
+      ✓ should not throw error when destroying already destroyed renderer (41 ms)
+    Coordinate Calculations
+      ✓ should calculate correct center positions for arrows (40 ms)
+
+  console.log
+    [INFO] 13:07:05.951 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.960 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.963 [AI Worker] TT Hit Rate: 0.0% (0/26), Nodes: 12
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.962 Game saved: loss vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.970 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.971 Game history cleared
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.980 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:05.988 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:05.998 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+PASS tests/gameEngine.pieces.test.js
+  getValidMoves - Pawn
+    ✓ should allow white pawn to move forward one square (26 ms)
+    ✓ should allow black pawn to move forward one square (7 ms)
+    ✓ should allow pawn to capture diagonally (1 ms)
+  getValidMoves - Rook
+    ✓ should allow rook to move in straight lines (11 ms)
+
+  console.log
+    [DEBUG] 13:07:06.000 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.009 Game saved: win vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:06.010 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.015 Game saved: loss vs Unknown (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.021 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:06.024 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.029 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:06.034 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.040 Game saved: win vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:06.065 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.069 Game saved: loss vs AI-Easy (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:06.074 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.076 Game saved: win vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.077 [AI Worker] TT Hit Rate: 3.6% (4/112), Nodes: 80
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [DEBUG] 13:07:06.082 Game history saved to storage
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.087 Game saved: loss vs AI-Hard (0 moves)
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.095 StatisticsManager initialized
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+(node:40327) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/statisticsManager.test.js
+  StatisticsManager
+    Initialization
+      ✓ should initialize with empty data (85 ms)
+      ✓ should load existing data from localStorage (11 ms)
+    saveGame
+      ✓ should save a game and update statistics (10 ms)
+      ✓ should calculate win rate correctly (57 ms)
+      ✓ should persist data to localStorage (44 ms)
+    getGameHistory
+      ✓ should return all games by default (92 ms)
+      ✓ should filter by result (22 ms)
+      ✓ should filter by opponent (21 ms)
+      ✓ should limit results (37 ms)
+      ✓ should sort by date (newest first) (42 ms)
+    getGameById
+      ✓ should return game by ID (21 ms)
+      ✓ should return null for non-existent ID (4 ms)
+    exportGames
+      ✓ should export games as JSON string (15 ms)
+    importGames
+      ✓ should import games (merge mode) (26 ms)
+      ✓ should import games (replace mode) (33 ms)
+      ✓ should handle invalid import data (59 ms)
+      ✓ should avoid duplicate IDs when merging (24 ms)
+    clearHistory
+      ✓ should not clear without confirmation (20 ms)
+      ✓ should clear all history with confirmation (40 ms)
+    getRecentStats
+      ✓ should get stats for recent games (38 ms)
+    getStatsByOpponent
+      ✓ should group statistics by opponent (73 ms)
+    recalculateStats
+      ✓ should recalculate statistics from game history (4 ms)
+
+  console.log
+    [INFO] 13:07:06.178 [AI Worker] TT Hit Rate: 1.9% (4/211), Nodes: 99
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.198 [AI Worker] TT Hit Rate: 1.7% (4/240), Nodes: 29
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+  console.log
+    [INFO] 13:07:06.296 [AI Worker] TT Hit Rate: 0.7% (4/605), Nodes: 365
+
+      at Logger.log [as _log] (logger.js:70:13)
+
+PASS tests/gameEngine.test.js
+  getValidMoves
+    ✓ should return valid knight moves in the center (9 ms)
+    ✓ should not allow moves off the board (1 ms)
+
+PASS tests/gameEngine.classic.test.js
+  Game Engine - Classic Mode
+    ✓ should initialize in PLAY phase (5 ms)
+    ✓ should setup pawns correctly (7 ms)
+    ✓ should setup pieces correctly (R N B Q K Q B N R) (15 ms)
+    ✓ should have empty rows in between (36 ms)
+
+PASS tests/aiEngine.test.js
+  AI Engine
+    evaluatePosition
+      ✓ should return 0 for empty board (5 ms)
+      ✓ should value material correctly (3 ms)
+      ✓ should favor material advantage (6 ms)
+    getAllLegalMoves
+      ✓ should find moves for a single piece (3 ms)
+    getBestMove
+      ✓ should find a simple capture (155 ms)
+      ✓ should avoid immediate capture (30 ms)
+    Zobrist Hashing
+      ✓ should produce same hash for same position (2 ms)
+      ✓ should produce different hash for different position (2 ms)
+      ✓ should produce different hash for different turn (1 ms)
+    Transposition Table (LRU)
+      ✓ should evict oldest entry when full (3 ms)
+      ✓ should update MRU on access (1 ms)
+    Advanced AI Scenarios
+      ✓ should find Mate in 1 (105 ms)
+      ✓ should avoid Stalemate when winning (100 ms)
+      ✓ should use Quiescence Search to see capture chains (19 ms)
+    Move Ordering and Optimization
+      ✓ should prioritize captures in move ordering (96 ms)
+      ✓ should evaluate center control (1 ms)
+      ✓ should handle positions with no legal moves (2 ms)
+
+PASS tests/ui.test.js
+  UI Module - initBoardUI
+    ✓ creates 9x9 cells with correct data attributes (93 ms)
+    ✓ adds column and row coordinate labels (94 ms)
+    ✓ clicking a cell calls game.handleCellClick with correct coordinates (59 ms)
+  UI Module - getPieceSymbol
+    ✓ should return correct SVG for white king (5 ms)
+    ✓ should return empty string for null piece
+
+PASS tests/gameEngine.additional.test.js
+  Game Engine Additional Tests
+    ✓ white pawn forward move and double step from starting row (9 ms)
+    ✓ black pawn forward move and double step from starting row (2 ms)
+    ✓ pawn captures diagonally when opponent pieces present (2 ms)
+    ✓ archbishop (bishop + knight) combines moves correctly (8 ms)
+    ✓ chancellor (rook + knight) combines moves correctly (4 ms)
+
+FAIL tests/utils.test.js
+  ● Test suite failed to run
+
+    ReferenceError: jest is not defined
+
+      3 | describe('Utils', () => {
+      4 |     describe('debounce', () => {
+    > 5 |         jest.useFakeTimers();
+        |         ^
+      6 |
+      7 |         test('should delay function execution', () => {
+      8 |             const mockFn = jest.fn();
+
+      at tests/utils.test.js:5:9
+      at tests/utils.test.js:4:5
+      at tests/utils.test.js:3:1
+
+(node:40325) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/tutorial.test.js
+  Tutorial
+    Initialization
+      ✓ should initialize with first step (281 ms)
+      ✓ should create tutorial steps (175 ms)
+      ✓ should have steps with title and content (83 ms)
+    Step Creation
+      ✓ should create Archbishop demo step (82 ms)
+      ✓ should create Chancellor demo step (126 ms)
+      ✓ should create corridor demo (74 ms)
+      ✓ should create shop demo (93 ms)
+    Move Grid Creation
+      ✓ should create move grid for Archbishop (143 ms)
+      ✓ should create move grid for Chancellor (49 ms)
+      ✓ should include piece SVG in grid (35 ms)
+    Move Type Detection
+      ✓ should detect bishop moves for Archbishop (39 ms)
+      ✓ should detect rook moves for Chancellor (25 ms)
+      ✓ should return empty string for invalid moves (19 ms)
+    Navigation
+      ✓ should navigate to next step (41 ms)
+      ✓ should close on last step next (20 ms)
+      ✓ should navigate to previous step (29 ms)
+      ✓ should not go before first step (27 ms)
+    Show and Hide
+      ✓ should show tutorial overlay (29 ms)
+      ✓ should hide tutorial overlay (32 ms)
+      ✓ should NOT reset to first step when closed (only on show) (26 ms)
+    Update Step Display
+      ✓ should update active step class when step changes (23 ms)
+      ✓ should update step indicator (26 ms)
+      ✓ should disable prev button on first step (33 ms)
+      ✓ should change next button text on last step (30 ms)
+    Piece Moves Logic
+      ✓ should return moves for Archbishop (22 ms)
+      ✓ should return moves for Chancellor (12 ms)
+      ✓ should return default moves (Chancellor) for unknown piece type (21 ms)
+
+----------------------|---------|----------|---------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------
+File                  | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                                                                            
+----------------------|---------|----------|---------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------
+All files             |   49.09 |    42.14 |      56 |   49.39 |                                                                                                                                                              
+ aiEngine.js          |    76.8 |    66.85 |      75 |   76.35 | 53-57,96-134,211,235-236,250-258,269,280,293-340,351,362,368-387,390-396,459-462,472-477,496,529,549-573,590-596,711,743-747,805-814,931,997                 
+ arrows.js            |   98.61 |    71.42 |     100 |   98.59 | 20                                                                                                                                                           
+ chess-pieces.js      |   36.36 |        0 |       0 |   36.36 | 163-173                                                                                                                                                      
+ config.js            |     100 |      100 |     100 |     100 |                                                                                                                                                              
+ effects.js           |   57.44 |       60 |      40 |   60.46 | 53-80                                                                                                                                                        
+ gameEngine.js        |   90.06 |    79.29 |     100 |   92.16 | 92-96,271-272,287-288,311-312,362-375,461,486                                                                                                                
+ logger.js            |   89.28 |     62.5 |   76.92 |   89.28 | 108-109,111                                                                                                                                                  
+ moveController.js    |   35.32 |    38.15 |   51.21 |   34.74 | 18-62,68,179-181,196-209,244-264,273-280,288-308,310-323,325,337,341,348,366-385,421,442-443,447-448,454-467,473-486,490-503,529,538,549-565,571-580,600-875 
+ sounds.js            |   62.28 |     40.9 |   82.35 |   64.22 | 22-27,39,56-57,62-78,96-100,176-190,202-208                                                                                                                  
+ statisticsManager.js |   96.03 |       85 |     100 |   95.55 | 40,64,186,304                                                                                                                                                
+ tutorial.js          |   88.37 |    79.62 |   81.81 |   91.13 | 278-284                                                                                                                                                      
+ ui.js                |     7.3 |     3.11 |    3.57 |    6.93 | 14-133,159-206,213-217,221-236,241,245-264,272-286,294-299,371-1586                                                                                          
+ utils.js             |    12.5 |        0 |      20 |   14.28 | 7-13,19-20                                                                                                                                                   
+----------------------|---------|----------|---------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Test Suites: 5 failed, 10 passed, 15 total
+Tests:       5 failed, 144 passed, 149 total
+Snapshots:   0 total
+Time:        3.607 s
+Ran all test suites.

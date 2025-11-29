@@ -1,15 +1,16 @@
 import { jest, describe, test, expect, beforeAll, beforeEach } from '@jest/globals';
 
 describe('Game Engine Rules', () => {
-  let Game, PHASES, BOARD_SIZE;
+  let Game, PHASES, BOARD_SIZE, createEmptyBoard;
   let game;
 
   beforeAll(async () => {
     // Import the module dynamically
-    const mod = await import('./gameEngine.js');
+    const mod = await import('../js/gameEngine.js');
     Game = mod.Game;
     PHASES = mod.PHASES;
     BOARD_SIZE = mod.BOARD_SIZE;
+    createEmptyBoard = mod.createEmptyBoard;
   });
 
   beforeEach(() => {
@@ -88,6 +89,78 @@ describe('Game Engine Rules', () => {
       expect(game.isInCheck('white')).toBe(true);
       expect(game.isCheckmate('white')).toBe(false);
     });
+
+    test('should detect checkmate with a Queen and Rook', () => {
+      game = new Game();
+      game.board = createEmptyBoard();
+      // White King at i1 (8, 8)
+      game.board[8][8] = { type: 'k', color: 'white', hasMoved: false };
+      // Black Queen at h2 (7, 7)
+      game.board[7][7] = { type: 'q', color: 'black', hasMoved: false };
+      // Black Rook at h8 (1, 7) protecting the Queen
+      game.board[1][7] = { type: 'r', color: 'black', hasMoved: false };
+
+      const moves = game.getAllLegalMoves('white');
+      // console.log('Legal moves for white:', JSON.stringify(moves, null, 2));
+
+      expect(game.isInCheck('white')).toBe(true);
+      expect(game.isCheckmate('white')).toBe(true);
+    });
+
+    test('should NOT be checkmate if king can move to a safe square', () => {
+      game = new Game();
+      game.board = createEmptyBoard();
+      // White King at h1 (8, 7)
+      game.board[8][7] = { type: 'k', color: 'white', hasMoved: false };
+      // Black Queen at g2 (7, 6)
+      game.board[7][6] = { type: 'q', color: 'black', hasMoved: false };
+      // No Rook at h8, so king can move to g1 (8, 6)
+      game.board[8][6] = null; // Ensure g1 is empty
+
+      expect(game.isInCheck('white')).toBe(true);
+      expect(game.isCheckmate('white')).toBe(false);
+    });
+
+    test('should NOT be checkmate if a piece can capture the checking piece', () => {
+      game = new Game();
+      game.board = createEmptyBoard();
+      // White King at e1 (8, 4)
+      game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
+      // Black Rook at e8 (1, 4) checking
+      game.board[1][4] = { type: 'r', color: 'black', hasMoved: false };
+      // White Rook at a4 (5, 0) can capture the black rook
+      game.board[5][0] = { type: 'r', color: 'white', hasMoved: false };
+
+      expect(game.isInCheck('white')).toBe(true);
+      expect(game.isCheckmate('white')).toBe(false);
+    });
+
+    test('should detect checkmate by double check (cannot block or capture)', () => {
+      game = new Game();
+      game.board = createEmptyBoard();
+      // White King at e1 (8, 4)
+      game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
+
+      // Black Rook at e8 (1, 4)
+      game.board[1][4] = { type: 'r', color: 'black', hasMoved: false };
+
+      // Black Knight at d3 (6, 3)
+      game.board[6][3] = { type: 'n', color: 'black', hasMoved: false };
+
+      // White Rook at a1 (8, 0) - could capture Knight but not Rook
+      game.board[8][0] = { type: 'r', color: 'white', hasMoved: false };
+
+      // In double check, King MUST move. If he can't, it's mate.
+      // Block squares around King
+      game.board[8][3] = { type: 'p', color: 'white' };
+      game.board[8][5] = { type: 'p', color: 'white' };
+      game.board[7][3] = { type: 'p', color: 'white' };
+      game.board[7][4] = { type: 'p', color: 'white' };
+      game.board[7][5] = { type: 'p', color: 'white' };
+
+      expect(game.isInCheck('white')).toBe(true);
+      expect(game.isCheckmate('white')).toBe(true);
+    });
   });
 
   describe('Castling', () => {
@@ -154,4 +227,31 @@ describe('Game Engine Rules', () => {
       expect(enPassantMove).toBeDefined();
     });
   });
+
+  describe('Stalemate', () => {
+    test('should detect stalemate', () => {
+      game = new Game();
+      game.board = createEmptyBoard();
+      game.turn = 'black';
+
+      // Black King at h8 (0, 8)
+      game.board[0][8] = { type: 'k', color: 'black', hasMoved: true };
+
+      // White Queen at g7 (2, 7) - confines King
+      game.board[2][7] = { type: 'q', color: 'white', hasMoved: true };
+
+      // White King at g7 (1, 6) - protects Queen and cuts off escape
+      game.board[1][6] = { type: 'k', color: 'white', hasMoved: true };
+
+      // Black King has no moves, but is NOT in check
+      expect(game.isInCheck('black')).toBe(false);
+      const legalMoves = game.getAllLegalMoves('black');
+      if (legalMoves.length > 0) {
+        console.log('Legal moves for black:', JSON.stringify(legalMoves, null, 2));
+      }
+      expect(legalMoves.length).toBe(0);
+      expect(game.isStalemate('black')).toBe(true);
+    });
+  });
 });
+

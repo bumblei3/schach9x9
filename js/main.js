@@ -32,9 +32,9 @@ let kbCol = 0;
 
 // --- Initialization ---
 
-async function initGame(initialPoints) {
+async function initGame(initialPoints, mode = 'setup') {
   try {
-    game = new Game(initialPoints);
+    game = new Game(initialPoints, mode);
     window.game = game;
 
     // Initialize controllers
@@ -139,7 +139,7 @@ async function initGame(initialPoints) {
     Game.prototype.analyzeMoveWithExplanation = function (move, score, best) { return this.tutorController.analyzeMoveWithExplanation(move, score, best); };
 
     // Initialize GameController logic
-    game.gameController.initGame(initialPoints);
+    game.gameController.initGame(initialPoints, mode);
 
     // Check for autosaved game
     const savedGame = localStorage.getItem('schach9x9_save');
@@ -221,153 +221,193 @@ document.addEventListener('DOMContentLoaded', () => {
       if (points) {
         pointsOverlay.classList.add('hidden');
         pointsOverlay.style.display = 'none';
-        initGame(points);
+        initGame(points, 'setup');
       }
     });
   });
+
+  const classicBtn = document.getElementById('classic-mode-btn');
+  if (classicBtn) {
+    classicBtn.addEventListener('click', () => {
+      pointsOverlay.classList.add('hidden');
+      pointsOverlay.style.display = 'none';
+      initGame(15, 'classic'); // Points don't matter for classic, but passing default
+    });
+  }
 
   setupGlobalListeners();
 });
 
 function setupGlobalListeners() {
-  // Settings Toggle
-  const settingsToggle = document.getElementById('settings-toggle');
-  const controlsWrapper = document.getElementById('controls-wrapper');
+  // --- Menu Overlay Logic ---
+  const menuBtn = document.getElementById('menu-btn');
+  const menuOverlay = document.getElementById('menu-overlay');
+  const menuCloseBtn = document.getElementById('menu-close-btn');
 
-  // Load saved state
-  const controlsCollapsed = localStorage.getItem('controls_collapsed') === 'true';
-  if (controlsCollapsed && controlsWrapper) {
-    controlsWrapper.classList.add('collapsed');
+  function toggleMenu(show) {
+    if (show) {
+      menuOverlay.classList.remove('hidden');
+    } else {
+      menuOverlay.classList.add('hidden');
+    }
   }
 
-  if (settingsToggle) {
-    settingsToggle.addEventListener('click', () => {
-      if (controlsWrapper) {
-        controlsWrapper.classList.toggle('collapsed');
-        const isCollapsed = controlsWrapper.classList.contains('collapsed');
-        localStorage.setItem('controls_collapsed', isCollapsed);
-      }
+  if (menuBtn) menuBtn.addEventListener('click', () => toggleMenu(true));
+  if (menuCloseBtn) menuCloseBtn.addEventListener('click', () => toggleMenu(false));
+
+  // Close menu when clicking outside content
+  if (menuOverlay) {
+    menuOverlay.addEventListener('click', (e) => {
+      if (e.target === menuOverlay) toggleMenu(false);
     });
   }
 
-  // Tab Switching for Info Panel
+  // --- Info Overlay Logic ---
+  const infoToggleBtn = document.getElementById('info-toggle-btn');
+  const infoOverlay = document.getElementById('info-overlay');
+  const infoCloseBtn = document.getElementById('info-close-btn');
+
+  function toggleInfo(show) {
+    if (show) {
+      infoOverlay.classList.remove('hidden');
+      // Refresh logs/history when opening
+      if (window.game) {
+        UI.updateMoveHistoryUI(window.game);
+        // UI.updateLogUI(window.game); // If you have a separate log update
+      }
+    } else {
+      infoOverlay.classList.add('hidden');
+    }
+  }
+
+  if (infoToggleBtn) infoToggleBtn.addEventListener('click', () => toggleInfo(true));
+  if (infoCloseBtn) infoCloseBtn.addEventListener('click', () => toggleInfo(false));
+
+  // Tab Switching for Info Overlay
   const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabContents = document.querySelectorAll('.tab-content');
+  const tabPanes = document.querySelectorAll('.tab-pane');
 
-  // Load saved active tab
-  const activeTab = localStorage.getItem('active_info_tab') || 'captured';
-
-  function switchTab(tabName) {
-    // Update buttons
-    tabButtons.forEach(btn => {
-      if (btn.dataset.tab === tabName) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-
-    // Update content
-    tabContents.forEach(content => {
-      if (content.id === `tab-${tabName}`) {
-        content.classList.add('active');
-      } else {
-        content.classList.remove('active');
-      }
-    });
-
-    // Save preference
-    localStorage.setItem('active_info_tab', tabName);
-  }
-
-  // Initialize with saved tab
-  switchTab(activeTab);
-
-  // Add click handlers
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      switchTab(btn.dataset.tab);
+      // Deactivate all
+      tabButtons.forEach(b => b.classList.remove('active'));
+      tabPanes.forEach(p => p.classList.remove('active'));
+
+      // Activate clicked
+      btn.classList.add('active');
+      const tabId = btn.dataset.tab;
+      const pane = document.getElementById(`tab-${tabId}`);
+      if (pane) pane.classList.add('active');
     });
   });
 
-  // Restart button
-  document.getElementById('restart-btn').addEventListener('click', () => {
-    location.reload();
-  });
-
-  // Help System
-  const helpOverlay = document.getElementById('help-overlay');
-  document.getElementById('help-btn').addEventListener('click', () => {
-    helpOverlay.classList.remove('hidden');
-  });
-  document.getElementById('close-help-btn').addEventListener('click', () => {
-    helpOverlay.classList.add('hidden');
-  });
-
-  // Undo/Redo
+  // --- Action Bar Buttons ---
   const undoBtn = document.getElementById('undo-btn');
-  const undoBtnQuick = document.getElementById('undo-btn-quick');
-
-  function handleUndo() {
-    if (window.game && window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) {
-      window.game.undoMove();
-    }
-  }
-
-  if (undoBtn) {
-    undoBtn.addEventListener('click', handleUndo);
-  }
-  if (undoBtnQuick) {
-    undoBtnQuick.addEventListener('click', handleUndo);
-  }
-
-  const redoBtn = document.getElementById('redo-btn');
-  const redoBtnQuick = document.getElementById('redo-btn-quick');
-
-  function handleRedo() {
-    if (window.game && window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) {
-      window.game.redoMove();
-    }
-  }
-
-  if (redoBtn) {
-    redoBtn.addEventListener('click', handleRedo);
-  }
-  if (redoBtnQuick) {
-    redoBtnQuick.addEventListener('click', handleRedo);
-  }
-
-  // Quick hint button
-  const hintBtnQuick = document.getElementById('hint-btn-quick');
   const hintBtn = document.getElementById('hint-btn');
 
-  function handleHint() {
-    document.getElementById('hint-btn')?.click();
-  }
-
-  if (hintBtnQuick) {
-    hintBtnQuick.addEventListener('click', handleHint);
-  }
-
-  // Sound Controls
-  const soundToggle = document.getElementById('sound-toggle');
-  const volumeSlider = document.getElementById('volume-slider');
-
-  if (soundToggle) {
-    soundToggle.checked = soundManager.enabled;
-    soundToggle.addEventListener('change', e => {
-      soundManager.setEnabled(e.target.checked);
+  if (undoBtn) {
+    undoBtn.addEventListener('click', () => {
+      if (window.game && window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) {
+        window.game.undoMove();
+      }
     });
   }
 
-  if (volumeSlider) {
-    volumeSlider.value = Math.round(soundManager.volume * 100);
-    volumeSlider.addEventListener(
-      'input',
-      debounce(e => {
-        soundManager.setVolume(parseInt(e.target.value));
-      }, 50)
-    );
+  if (hintBtn) {
+    hintBtn.addEventListener('click', () => {
+      if (window.game && window.game.phase === PHASES.PLAY) {
+        window.game.showTutorSuggestions();
+      }
+    });
+  }
+
+  // --- Menu Actions ---
+  document.getElementById('restart-btn').addEventListener('click', () => location.reload());
+
+  document.getElementById('save-btn').addEventListener('click', () => {
+    if (window.game) {
+      window.game.saveGame();
+      toggleMenu(false);
+    }
+  });
+
+  document.getElementById('load-btn').addEventListener('click', () => {
+    if (window.game) {
+      window.game.loadGame();
+      toggleMenu(false);
+    }
+  });
+
+  document.getElementById('resign-btn').addEventListener('click', () => {
+    if (window.game && window.game.phase === PHASES.PLAY) {
+      toggleMenu(false);
+      const overlay = document.getElementById('confirmation-overlay');
+      const message = document.getElementById('confirmation-message');
+      message.textContent = 'Möchtest du wirklich aufgeben?';
+      overlay.classList.remove('hidden');
+
+      window.game.pendingConfirmation = () => {
+        const color = window.game.isAI ? 'white' : window.game.turn;
+        window.game.resign(color);
+      };
+    } else {
+      alert('Du kannst nur während des Spiels aufgeben.');
+    }
+  });
+
+  document.getElementById('draw-offer-btn').addEventListener('click', () => {
+    if (window.game && window.game.phase === PHASES.PLAY) {
+      toggleMenu(false);
+      const overlay = document.getElementById('confirmation-overlay');
+      const message = document.getElementById('confirmation-message');
+      message.textContent = 'Möchtest du Remis anbieten?';
+      overlay.classList.remove('hidden');
+
+      window.game.pendingConfirmation = () => {
+        const color = window.game.isAI ? 'white' : window.game.turn;
+        window.game.offerDraw(color);
+      };
+    } else {
+      alert('Du kannst nur während des Spiels Remis anbieten.');
+    }
+  });
+
+  document.getElementById('stats-btn').addEventListener('click', () => {
+    toggleMenu(false);
+    if (window.game) UI.showStatisticsOverlay(window.game);
+  });
+
+  document.getElementById('skins-btn').addEventListener('click', () => {
+    toggleMenu(false);
+    if (window.game) UI.showSkinSelector(window.game);
+  });
+
+  document.getElementById('help-btn').addEventListener('click', () => {
+    toggleMenu(false);
+    document.getElementById('help-overlay').classList.remove('hidden');
+  });
+
+  // --- Settings ---
+  // Theme
+  const themeSelect = document.getElementById('theme-select');
+  if (themeSelect) {
+    const savedTheme = localStorage.getItem('chess_theme') || 'classic';
+    themeSelect.value = savedTheme;
+    // Apply theme immediately if possible, or wait for game init
+    // For now, we set a data attribute on body for CSS to pick up
+    // Note: The new CSS might not use data-theme on body directly for everything, 
+    // but let's keep it for compatibility or update UI.js to handle it.
+    // Actually, let's just set the class or attribute.
+    // The new style.css doesn't seem to rely on body[data-theme] for the main variables 
+    // unless we add those selectors back. 
+    // Let's assume we might need to add theme logic to UI.js or here.
+    // For now, let's just save it.
+
+    themeSelect.addEventListener('change', e => {
+      const theme = e.target.value;
+      localStorage.setItem('chess_theme', theme);
+      if (window.game) window.game.setTheme(theme);
+    });
   }
 
   // Difficulty
@@ -389,49 +429,25 @@ function setupGlobalListeners() {
     timeControlSelect.value = savedTimeControl;
     timeControlSelect.addEventListener('change', e => {
       const newTimeControl = e.target.value;
-      if (window.game) {
-        window.game.setTimeControl(newTimeControl);
-        if (window.game.phase !== PHASES.PLAY) {
-          window.game.updateClockDisplay();
-        }
-      }
+      if (window.game) window.game.setTimeControl(newTimeControl);
       localStorage.setItem('chess_time_control', newTimeControl);
     });
   }
 
-  // Theme
-  const themeSelect = document.getElementById('theme-select');
-  if (themeSelect) {
-    const savedTheme = localStorage.getItem('chess_theme') || 'classic';
-    themeSelect.value = savedTheme;
-    document.body.setAttribute('data-theme', savedTheme);
-
-    themeSelect.addEventListener('change', e => {
-      const theme = e.target.value;
-      if (window.game) window.game.setTheme(theme);
-      else document.body.setAttribute('data-theme', theme);
-      localStorage.setItem('chess_theme', theme);
+  // Sound
+  const soundToggle = document.getElementById('sound-toggle');
+  if (soundToggle) {
+    soundToggle.checked = soundManager.enabled;
+    soundToggle.addEventListener('change', e => {
+      soundManager.setEnabled(e.target.checked);
     });
   }
 
-  // Resign
-  document.getElementById('resign-btn').addEventListener('click', () => {
-    if (window.game && window.game.phase === PHASES.PLAY) {
-      const overlay = document.getElementById('confirmation-overlay');
-      const message = document.getElementById('confirmation-message');
-      message.textContent = 'Möchtest du wirklich aufgeben?';
-      overlay.classList.remove('hidden');
-
-      window.game.pendingConfirmation = () => {
-        const color = window.game.isAI ? 'white' : window.game.turn;
-        window.game.resign(color);
-      };
-    } else {
-      alert('Du kannst nur während des Spiels aufgeben.');
-    }
+  // --- Overlays ---
+  document.getElementById('close-help-btn').addEventListener('click', () => {
+    document.getElementById('help-overlay').classList.add('hidden');
   });
 
-  // Confirmation Modal
   document.getElementById('confirm-yes-btn').addEventListener('click', () => {
     if (window.game && window.game.pendingConfirmation) {
       window.game.pendingConfirmation();
@@ -445,108 +461,33 @@ function setupGlobalListeners() {
     document.getElementById('confirmation-overlay').classList.add('hidden');
   });
 
-  // Draw Offer
-  document.getElementById('draw-offer-btn').addEventListener('click', () => {
-    if (window.game && window.game.phase === PHASES.PLAY) {
-      const overlay = document.getElementById('confirmation-overlay');
-      const message = document.getElementById('confirmation-message');
-      message.textContent = 'Möchtest du Remis anbieten?';
-      overlay.classList.remove('hidden');
-
-      window.game.pendingConfirmation = () => {
-        const color = window.game.isAI ? 'white' : window.game.turn;
-        window.game.offerDraw(color);
-      };
-    } else {
-      alert('Du kannst nur während des Spiels Remis anbieten.');
-    }
-  });
-
   document.getElementById('accept-draw-btn').addEventListener('click', () => {
     if (window.game) window.game.acceptDraw();
+    document.getElementById('draw-offer-overlay').classList.add('hidden');
   });
 
   document.getElementById('decline-draw-btn').addEventListener('click', () => {
     if (window.game) window.game.declineDraw();
+    document.getElementById('draw-offer-overlay').classList.add('hidden');
   });
 
-  // Hint
-  document.getElementById('hint-btn').addEventListener('click', () => {
-    if (window.game) window.game.showTutorSuggestions();
+  document.getElementById('close-game-over-btn').addEventListener('click', () => {
+    document.getElementById('game-over-overlay').classList.add('hidden');
   });
 
-  // Analysis Mode
-  const analysisToggle = document.getElementById('analysis-toggle');
-  const analysisExit = document.getElementById('analysis-exit');
-  const continuousAnalysisCheckbox = document.getElementById('continuous-analysis');
-
-  if (analysisToggle) {
-    analysisToggle.addEventListener('click', () => {
-      if (!window.game || !window.game.gameController) return;
-
-      if (window.game.analysisMode) {
-        // Already in analysis mode, this shouldn't happen but handle it
-        return;
-      }
-
-      const success = window.game.gameController.enterAnalysisMode();
-      if (success) {
-        analysisToggle.classList.add('hidden');
-        if (analysisExit) analysisExit.classList.remove('hidden');
-      }
-    });
-  }
-
-  if (analysisExit) {
-    analysisExit.addEventListener('click', () => {
-      if (!window.game || !window.game.gameController) return;
-
-      const success = window.game.gameController.exitAnalysisMode(true);
-      if (success) {
-        analysisToggle.classList.remove('hidden');
-        analysisExit.classList.add('hidden');
-      }
-    });
-  }
-
-  if (continuousAnalysisCheckbox) {
-    continuousAnalysisCheckbox.addEventListener('change', (e) => {
-      if (!window.game || !window.game.gameController) return;
-      window.game.gameController.toggleContinuousAnalysis();
-    });
-  }
-
-  // Save/Load
-  document.getElementById('save-btn').addEventListener('click', () => {
-    if (window.game) window.game.saveGame();
+  document.getElementById('restart-btn-overlay').addEventListener('click', () => {
+    location.reload();
   });
 
-  document.getElementById('load-btn').addEventListener('click', () => {
-    if (window.game) window.game.loadGame();
-  });
-
-  // Statistics
-  document.getElementById('stats-btn').addEventListener('click', () => {
-    if (window.game) UI.showStatisticsOverlay(window.game);
-  });
-
-  document.getElementById('skins-btn').addEventListener('click', () => {
-    if (window.game) UI.showSkinSelector(window.game);
-  });
-
-  // Initialize skin
-  import('./chess-pieces.js').then(module => {
-    const savedSkin = localStorage.getItem('schach9x9_skin');
-    if (savedSkin) {
-      module.setPieceSkin(savedSkin);
-    }
-  });
-
-  // Shop Buttons
-  const shopButtons = document.querySelectorAll('.shop-btn');
+  // --- Shop ---
+  const shopButtons = document.querySelectorAll('.shop-item');
   shopButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       if (window.game) window.game.selectShopPiece(btn.dataset.piece);
+
+      // Visual feedback
+      shopButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
     });
   });
 
@@ -557,24 +498,7 @@ function setupGlobalListeners() {
     });
   }
 
-  // Replay
-  document.getElementById('replay-first').addEventListener('click', () => {
-    if (window.game) window.game.replayFirst();
-  });
-  document.getElementById('replay-prev').addEventListener('click', () => {
-    if (window.game) window.game.replayPrevious();
-  });
-  document.getElementById('replay-next').addEventListener('click', () => {
-    if (window.game) window.game.replayNext();
-  });
-  document.getElementById('replay-last').addEventListener('click', () => {
-    if (window.game) window.game.replayLast();
-  });
-  document.getElementById('replay-exit').addEventListener('click', () => {
-    if (window.game) window.game.exitReplayMode();
-  });
-
-  // Keyboard
+  // --- Keyboard ---
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
@@ -609,9 +533,11 @@ function setupGlobalListeners() {
             window.game.validMoves = null;
             UI.renderBoard(window.game);
           }
-          if (helpOverlay && !helpOverlay.classList.contains('hidden')) helpOverlay.classList.add('hidden');
+          // Close overlays
+          document.querySelectorAll('.fullscreen-overlay, .modal-overlay').forEach(el => {
+            if (!el.id.includes('points-selection')) el.classList.add('hidden');
+          });
           break;
-        case '?': if (helpOverlay) helpOverlay.classList.remove('hidden'); break;
       }
     }
 
@@ -628,6 +554,14 @@ function setupGlobalListeners() {
       e.preventDefault();
       const cell = document.querySelector(`.cell[data-r="${kbRow}"][data-c="${kbCol}"]`);
       if (cell) cell.click();
+    }
+  });
+
+  // Initialize skin
+  import('./chess-pieces.js').then(module => {
+    const savedSkin = localStorage.getItem('schach9x9_skin');
+    if (savedSkin) {
+      module.setPieceSkin(savedSkin);
     }
   });
 }

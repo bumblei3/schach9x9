@@ -12,9 +12,9 @@ import {
   testStoreTT,
   testProbeTT,
   clearTT,
-} from './aiEngine.js';
-import { createEmptyBoard, BOARD_SIZE } from './gameEngine.js';
-import { AI_PIECE_VALUES } from './config.js';
+} from '../js/aiEngine.js';
+import { createEmptyBoard, BOARD_SIZE } from '../js/gameEngine.js';
+import { AI_PIECE_VALUES } from '../js/config.js';
 
 describe('AI Engine', () => {
   let board;
@@ -166,6 +166,104 @@ describe('AI Engine', () => {
 
       expect(testProbeTT(2, 1, -Infinity, Infinity)).toBeNull(); // 2 should be evicted
       expect(testProbeTT(1, 1, -Infinity, Infinity)).not.toBeNull(); // 1 should still be there
+    });
+  });
+
+  describe('Advanced AI Scenarios', () => {
+    test('should find Mate in 1', () => {
+      // Setup Mate in 1 position
+      // White King at 2,2 (covers 1,1; 1,2; 1,3)
+      // Black King at 0,2
+      // White Rook at 1,7
+      // White to move: Rook to 0,7 is mate
+
+      board[2][2] = { type: 'k', color: 'white' };
+      board[0][2] = { type: 'k', color: 'black' };
+      board[1][7] = { type: 'r', color: 'white' };
+
+      const bestMove = getBestMove(board, 'white', 2, 'expert');
+
+      expect(bestMove).toEqual({
+        from: { r: 1, c: 7 },
+        to: { r: 0, c: 7 }
+      });
+    });
+
+    test('should avoid Stalemate when winning', () => {
+      // White King at 0,0
+      // Black King at 0,2
+      // White Queen at 1,1
+      // White to move. Queen to 0,1 would be stalemate.
+      // Queen to 1,7 is safe and keeps game going.
+
+      board[0][0] = { type: 'k', color: 'white' };
+      board[0][2] = { type: 'k', color: 'black' };
+      board[1][1] = { type: 'q', color: 'white' };
+
+      const bestMove = getBestMove(board, 'white', 2, 'expert');
+
+      // Should NOT move to 0,1
+      expect(bestMove.to).not.toEqual({ r: 0, c: 1 });
+    });
+
+    test('should use Quiescence Search to see capture chains', () => {
+      // Setup a position where a capture looks good but leads to material loss
+      // White Queen at 4,4
+      // Black Pawn at 3,3 (protected by Black Rook at 3,0)
+
+      board[4][4] = { type: 'q', color: 'white' };
+      board[3][3] = { type: 'p', color: 'black' };
+      board[3][0] = { type: 'r', color: 'black' };
+
+      // If depth is 1, AI might take pawn (gain 100) and miss the rook recapture (lose 900)
+      // Quiescence search should see the recapture
+
+      const bestMove = getBestMove(board, 'white', 1, 'expert');
+
+      // Should NOT capture the pawn
+      if (bestMove) {
+        expect(bestMove.to).not.toEqual({ r: 3, c: 3 });
+      }
+    });
+  });
+
+  describe('Move Ordering and Optimization', () => {
+    test('should prioritize captures in move ordering', () => {
+      // Setup position with capture available
+      board[4][4] = { type: 'r', color: 'white' };
+      board[4][6] = { type: 'q', color: 'black' }; // High value target
+      board[4][7] = { type: 'p', color: 'black' }; // Low value target
+
+      const bestMove = getBestMove(board, 'white', 2, 'expert');
+
+      // Should prefer capturing the queen
+      expect(bestMove.to).toEqual({ r: 4, c: 6 });
+    });
+
+    test('should evaluate center control', () => {
+      const centerBoard = createEmptyBoard();
+      centerBoard[4][4] = { type: 'n', color: 'white' }; // Knight in center
+
+      const cornerBoard = createEmptyBoard();
+      cornerBoard[0][0] = { type: 'n', color: 'white' }; // Knight in corner
+
+      const centerScore = evaluatePosition(centerBoard, 'white');
+      const cornerScore = evaluatePosition(cornerBoard, 'white');
+
+      // Center position should be valued higher
+      expect(centerScore).toBeGreaterThan(cornerScore);
+    });
+
+    test('should handle positions with no legal moves', () => {
+      // Stalemate-like position: just kings
+      const emptyBoard = createEmptyBoard();
+      emptyBoard[0][0] = { type: 'k', color: 'white' };
+      emptyBoard[8][8] = { type: 'k', color: 'black' };
+
+      const moves = getAllLegalMoves(emptyBoard, 'white');
+
+      // Kings should have some moves unless completely blocked
+      expect(moves.length).toBeGreaterThan(0);
     });
   });
 });

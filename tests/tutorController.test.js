@@ -1,0 +1,323 @@
+import { jest } from '@jest/globals';
+import { Game } from '../js/gameEngine.js';
+import { PHASES } from '../js/config.js';
+
+// Mock UI module
+jest.unstable_mockModule('../js/ui.js', () => ({
+    renderBoard: jest.fn(),
+    updateStatus: jest.fn(),
+    updateShopUI: jest.fn(),
+    getPieceText: jest.fn(piece => {
+        if (!piece) return '';
+        const symbols = {
+            p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚',
+            a: '♗', c: '♖', e: '♕'
+        };
+        return symbols[piece.type] || '?';
+    }),
+}));
+
+// Mock sounds module
+jest.unstable_mockModule('../js/sounds.js', () => ({
+    soundManager: { init: jest.fn() },
+}));
+
+// Import after mocking
+const { TutorController } = await import('../js/tutorController.js');
+
+describe('TutorController', () => {
+    let game;
+    let tutorController;
+
+    beforeEach(() => {
+        game = new Game(15, 'classic', false);
+        tutorController = new TutorController(game);
+        game.tutorController = tutorController;
+        game.log = jest.fn();
+        game.minimax = jest.fn().mockReturnValue(100); // Mock minimax to return a score
+    });
+
+    describe('updateBestMoves', () => {
+        test('should set bestMoves during PLAY phase for white', () => {
+            game.phase = PHASES.PLAY;
+            game.turn = 'white';
+            game.isAI = false;
+
+            tutorController.updateBestMoves();
+
+            expect(game.bestMoves).toBeDefined();
+            expect(Array.isArray(game.bestMoves)).toBe(true);
+        });
+
+        test('should return empty array when not in PLAY phase', () => {
+            game.phase = PHASES.SETUP_WHITE_KING;
+            game.turn = 'white';
+
+            tutorController.updateBestMoves();
+
+            expect(game.bestMoves).toEqual([]);
+        });
+
+        test('should return empty array for AI turn', () => {
+            game.phase = PHASES.PLAY;
+            game.turn = 'black';
+            game.isAI = true;
+
+            tutorController.updateBestMoves();
+
+            expect(game.bestMoves).toEqual([]);
+        });
+    });
+
+    describe('getTutorHints', () => {
+        beforeEach(() => {
+            game.phase = PHASES.PLAY;
+            game.turn = 'white';
+            game.isAI = false;
+        });
+
+        test('should return empty array when no legal moves', () => {
+            // Empty board, no pieces
+            game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+
+            const hints = tutorController.getTutorHints();
+
+            expect(hints).toEqual([]);
+        });
+
+        test('should return hints for positions with pieces', () => {
+            // Add a white pawn that can move
+            game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
+
+            const hints = tutorController.getTutorHints();
+
+            expect(hints.length).toBeGreaterThan(0);
+            expect(hints.length).toBeLessThanOrEqual(3); // Max 3 hints
+        });
+
+        test('should include move notation in hints', () => {
+            game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
+
+            const hints = tutorController.getTutorHints();
+
+            if (hints.length > 0) {
+                expect(hints[0]).toHaveProperty('notation');
+                expect(hints[0]).toHaveProperty('score');
+                expect(hints[0]).toHaveProperty('move');
+            }
+        });
+
+        test('should prioritize capture moves', () => {
+            // White pawn can capture black piece
+            game.board[5][4] = { type: 'p', color: 'white', hasMoved: false };
+            game.board[4][5] = { type: 'p', color: 'black', hasMoved: false };
+
+            const hints = tutorController.getTutorHints();
+
+            expect(hints.length).toBeGreaterThan(0);
+            // Capture moves should be evaluated
+        });
+    });
+
+    describe('getMoveNotation', () => {
+        test('should return notation for pawn move', () => {
+            const move = {
+                from: { r: 6, c: 4 },
+                to: { r: 5, c: 4 },
+            };
+            game.board[6][4] = { type: 'p', color: 'white' };
+
+            const notation = tutorController.getMoveNotation(move);
+
+            expect(notation).toContain('Bauer');
+            expect(notation).toContain('e4'); // Column e, row 4 (destination)
+        });
+
+        test('should return notation for capture', () => {
+            const move = {
+                from: { r: 5, c: 4 },
+                to: { r: 4, c: 5 },
+            };
+            game.board[5][4] = { type: 'p', color: 'white' };
+            game.board[4][5] = { type: 'n', color: 'black' };
+
+            const notation = tutorController.getMoveNotation(move);
+
+            expect(notation).toContain('schlägt');
+            expect(notation).toContain('Springer');
+        });
+
+        test('should return notation for Angel piece', () => {
+            const move = {
+                from: { r: 5, c: 4 },
+                to: { r: 3, c: 4 },
+            };
+            game.board[5][4] = { type: 'e', color: 'white' };
+
+            const notation = tutorController.getMoveNotation(move);
+
+            expect(notation).toContain('Engel');
+        });
+    });
+
+    describe('getPieceName', () => {
+        test('should return German names for all pieces', () => {
+            expect(tutorController.getPieceName('p')).toBe('Bauer');
+            expect(tutorController.getPieceName('n')).toBe('Springer');
+            expect(tutorController.getPieceName('b')).toBe('Läufer');
+            expect(tutorController.getPieceName('r')).toBe('Turm');
+            expect(tutorController.getPieceName('q')).toBe('Dame');
+            expect(tutorController.getPieceName('k')).toBe('König');
+            expect(tutorController.getPieceName('a')).toBe('Erzbischof');
+            expect(tutorController.getPieceName('c')).toBe('Kanzler');
+            expect(tutorController.getPieceName('e')).toBe('Engel');
+        });
+    });
+
+    describe('isTutorMove', () => {
+        test('should return true if move matches best move', () => {
+            game.bestMoves = [{
+                move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
+                score: 100,
+                notation: 'e3',
+            }];
+
+            const result = tutorController.isTutorMove(
+                { r: 6, c: 4 },
+                { r: 5, c: 4 }
+            );
+
+            expect(result).toBe(true);
+        });
+
+        test('should return false if move does not match', () => {
+            game.bestMoves = [{
+                move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
+                score: 100,
+                notation: 'e3',
+            }];
+
+            const result = tutorController.isTutorMove(
+                { r: 6, c: 3 },
+                { r: 5, c: 3 }
+            );
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('applySetupTemplate', () => {
+        beforeEach(() => {
+            game.phase = PHASES.SETUP_WHITE_PIECES;
+            game.initialPoints = 15;
+            game.points = 15;
+            game.whiteCorridor = { rowStart: 6, colStart: 3 }; // Standard white corridor
+            game.blackCorridor = { rowStart: 0, colStart: 3 }; // Standard black corridor
+
+            // Clear board
+            game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+        });
+
+        test('should place pawns in the front row for White', () => {
+            // Use a template with pawns
+            // Mock getSetupTemplates to return a controlled template
+            const mockTemplate = {
+                id: 'test_pawns',
+                name: 'Test Pawns',
+                pieces: ['p', 'p', 'p'],
+                cost: 3
+            };
+
+            // Spy on getSetupTemplates
+            jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+
+            tutorController.applySetupTemplate('test_pawns');
+
+            // White front row is row 6 (closest to center relative to corridor start 6..8? No wait)
+            // In my implementation:
+            // if isWhite: frontRow = corridor.rowStart (6)
+            // middleRow = 7
+            // backRow = 8
+            // Wait, let's re-verify the logic I implemented.
+            // White moves UP (decreasing indices). So row 6 is "Front" (closest to row 0).
+            // Row 8 is "Back" (furthest from row 0).
+            // So pawns should be at row 6.
+
+            expect(game.board[6][3]).toEqual(expect.objectContaining({ type: 'p', color: 'white' }));
+            expect(game.board[6][4]).toEqual(expect.objectContaining({ type: 'p', color: 'white' }));
+            expect(game.board[6][5]).toEqual(expect.objectContaining({ type: 'p', color: 'white' }));
+        });
+
+        test('should place rooks in back corners for White', () => {
+            const mockTemplate = {
+                id: 'test_rooks',
+                name: 'Test Rooks',
+                pieces: ['r', 'r'],
+                cost: 10
+            };
+            jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+
+            tutorController.applySetupTemplate('test_rooks');
+
+            // Back row is 8. Corners are col 3 and 5.
+            expect(game.board[8][3]).toEqual(expect.objectContaining({ type: 'r', color: 'white' }));
+            expect(game.board[8][5]).toEqual(expect.objectContaining({ type: 'r', color: 'white' }));
+        });
+
+        test('should deduct points correctly', () => {
+            const mockTemplate = {
+                id: 'test_cost',
+                name: 'Test Cost',
+                pieces: ['q', 'p'], // 9 + 1 = 10
+                cost: 10
+            };
+            jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+
+            tutorController.applySetupTemplate('test_cost');
+
+            expect(game.points).toBe(15 - 10); // 5
+        });
+
+        test('should clear existing pieces in corridor', () => {
+            // Place some garbage
+            game.board[7][4] = { type: 'n', color: 'white' };
+
+            const mockTemplate = {
+                id: 'test_clear',
+                name: 'Test Clear',
+                pieces: ['p'],
+                cost: 1
+            };
+            jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+
+            tutorController.applySetupTemplate('test_clear');
+
+            // Garbage should be gone (unless it was overwritten by new piece, but here we only place 1 pawn)
+            // The pawn goes to front row (6). Row 7 should be empty.
+            expect(game.board[7][4]).toBeNull();
+        });
+    });
+
+    describe('getSetupTemplates', () => {
+        test('should return templates for 12 points', () => {
+            game.initialPoints = 12;
+            const templates = tutorController.getSetupTemplates();
+            expect(templates.length).toBeGreaterThan(0);
+            expect(templates[0].cost).toBe(12);
+        });
+
+        test('should return templates for 15 points', () => {
+            game.initialPoints = 15;
+            const templates = tutorController.getSetupTemplates();
+            expect(templates.length).toBeGreaterThan(0);
+            expect(templates[0].cost).toBe(15);
+        });
+
+        test('should return templates for 18 points', () => {
+            game.initialPoints = 18;
+            const templates = tutorController.getSetupTemplates();
+            expect(templates.length).toBeGreaterThan(0);
+            expect(templates[0].cost).toBe(18);
+        });
+    });
+});

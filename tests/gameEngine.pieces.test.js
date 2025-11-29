@@ -1,4 +1,4 @@
-import { createEmptyBoard, Game } from './gameEngine.js';
+import { createEmptyBoard, Game } from '../js/gameEngine.js';
 
 describe('getValidMoves - Pawn', () => {
   it('should allow white pawn to move forward one square', () => {

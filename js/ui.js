@@ -6,6 +6,7 @@
  */
 import { BOARD_SIZE, PHASES, PIECE_VALUES } from './config.js';
 import { debounce } from './utils.js';
+import { particleSystem } from './effects.js';
 
 // ... (keep existing code until updateMoveHistoryUI)
 
@@ -20,7 +21,7 @@ export function updateMoveHistoryUI(game) {
       moveEl.className = 'move-entry';
 
       // Standard Algebraic Notation (SAN)
-      const pieceSymbols = { p: '', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K', a: 'A', c: 'C' };
+      const pieceSymbols = { p: '', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K', a: 'A', c: 'C', e: 'E' };
       const pieceChar = pieceSymbols[move.piece.type];
 
       const fromFile = String.fromCharCode(97 + move.from.c);
@@ -378,6 +379,7 @@ export function getPieceText(piece) {
       k: '♔',
       a: 'A',
       c: 'C',
+      e: 'E',
     },
     black: {
       p: '♟',
@@ -388,6 +390,7 @@ export function getPieceText(piece) {
       k: '♚',
       a: 'A',
       c: 'C',
+      e: 'E',
     },
   };
   return symbols[piece.color][piece.type];
@@ -721,8 +724,8 @@ export function updateClockDisplay(game) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const whiteEl = document.querySelector('#clock-white .clock-time');
-  const blackEl = document.querySelector('#clock-black .clock-time');
+  const whiteEl = document.getElementById('clock-white');
+  const blackEl = document.getElementById('clock-black');
 
   if (whiteEl) whiteEl.textContent = formatTime(game.whiteTime);
   if (blackEl) blackEl.textContent = formatTime(game.blackTime);
@@ -730,26 +733,123 @@ export function updateClockDisplay(game) {
 
 export function showShop(game, show) {
   const panel = document.getElementById('shop-panel');
-  if (show) panel.classList.remove('hidden');
-  else panel.classList.add('hidden');
+  if (show) {
+    panel.classList.remove('hidden');
+    // Ensure we are in setup mode UI-wise
+    document.body.classList.add('setup-mode');
+  } else {
+    panel.classList.add('hidden');
+    document.body.classList.remove('setup-mode');
+  }
   updateShopUI(game);
 }
 
 export function updateShopUI(game) {
-  document.getElementById('points-display').textContent = game.points;
+  const pointsDisplay = document.getElementById('points-display');
+  if (pointsDisplay) pointsDisplay.textContent = game.points;
 
   // Disable buttons if too expensive
-  document.querySelectorAll('.shop-btn').forEach(btn => {
+  document.querySelectorAll('.shop-item').forEach(btn => {
     const cost = parseInt(btn.dataset.cost);
-    btn.disabled = cost > game.points;
+    if (cost > game.points) {
+      btn.classList.add('disabled');
+      btn.style.opacity = '0.5';
+      btn.style.pointerEvents = 'none';
+    } else {
+      btn.classList.remove('disabled');
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    }
   });
 
   const finishBtn = document.getElementById('finish-setup-btn');
   if (finishBtn) {
     finishBtn.disabled = false;
-    console.log('[DEBUG] updateShopUI: Finish button enabled, points:', game.points);
-  } else {
-    console.warn('[WARN] updateShopUI: Finish button not found!');
+  }
+
+  const statusDisplay = document.getElementById('selected-piece-display');
+  if (statusDisplay) {
+    if (game.selectedShopPiece) {
+      statusDisplay.textContent = `Platziere: ${getPieceText({ type: game.selectedShopPiece, color: game.turn })} (${PIECE_VALUES[game.selectedShopPiece]} Pkt)`;
+    } else {
+      statusDisplay.textContent = 'Wähle eine Figur zum Kaufen';
+    }
+  }
+
+  // Update tutor recommendations section
+  updateTutorRecommendations(game);
+}
+
+function updateTutorRecommendations(game) {
+  const toggleBtn = document.getElementById('toggle-tutor-recommendations');
+  const container = document.getElementById('tutor-recommendations-container');
+
+  if (!toggleBtn || !container) return;
+
+  // Check if we're in setup phase and tutor is available
+  const inSetupPhase = game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_PIECES;
+  const tutorSection = document.getElementById('tutor-recommendations-section');
+
+  if (!inSetupPhase || !game.tutorController || !game.tutorController.getSetupTemplates) {
+    if (tutorSection) tutorSection.classList.add('hidden');
+    return;
+  }
+
+  if (tutorSection) tutorSection.classList.remove('hidden');
+
+  // Setup toggle button handler (only once)
+  if (!toggleBtn.dataset.initialized) {
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = container.classList.contains('hidden');
+      container.classList.toggle('hidden');
+      toggleBtn.textContent = isHidden ? '💡 KI-Empfehlungen ausblenden' : '💡 KI-Empfehlungen anzeigen';
+    });
+    toggleBtn.dataset.initialized = 'true';
+  }
+
+  // Populate templates if empty or needs refresh
+  if (container.children.length === 0) {
+    const templates = game.tutorController.getSetupTemplates();
+    container.innerHTML = '';
+
+    templates.forEach(template => {
+      const card = document.createElement('div');
+      card.className = 'setup-template-card';
+
+      // Build pieces preview using SVGs if available
+      const piecesPreview = template.pieces.map(pieceType => {
+        const color = game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
+        if (window.PIECE_SVGS && window.PIECE_SVGS[color] && window.PIECE_SVGS[color][pieceType]) {
+          return `<span class="template-piece-icon">${window.PIECE_SVGS[color][pieceType]}</span>`;
+        } else {
+          // Fallback to text symbols
+          const symbols = {
+            p: '♟', n: '♞', b: '♝', r: '♜', q: '♛',
+            k: '♚', a: '🏰', c: '⚖️', e: '👼'
+          };
+          return `<span class="template-piece-icon">${symbols[pieceType] || pieceType}</span>`;
+        }
+      }).join('');
+
+      card.innerHTML = `
+        <div class="template-name">${template.name}</div>
+        <div class="template-description">${template.description}</div>
+        <div class="template-pieces">
+          <span>Enthält:</span>
+          ${piecesPreview}
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (confirm(`Möchtest du die Aufstellung "${template.name}" anwenden?\n\nDeine aktuelle Aufstellung wird überschrieben und deine Punkte werden zurückgesetzt.`)) {
+          game.tutorController.applySetupTemplate(template.id);
+          // Refresh the shop UI to reflect the changes
+          updateShopUI(game);
+        }
+      });
+
+      container.appendChild(card);
+    });
   }
 }
 
@@ -759,6 +859,7 @@ export function showPromotionUI(game, r, c, color, moveRecord, callback) {
   optionsContainer.innerHTML = '';
 
   const options = [
+    { type: 'e', symbol: 'E' }, // Angel
     { type: 'q', symbol: color === 'white' ? '♕' : '♛' },
     { type: 'c', symbol: 'C' }, // Chancellor
     { type: 'a', symbol: 'A' }, // Archbishop
@@ -846,21 +947,44 @@ export async function animateMove(game, from, to, piece) {
     clone.offsetHeight;
 
     // Animate
-    clone.style.transition = 'all 0.3s ease-in-out';
+    // Calculate distance for dynamic duration? Or fixed?
+    // Fixed is usually more consistent for chess.
+    clone.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+
     const toRect = toCell.getBoundingClientRect();
-    clone.style.left = toRect.left + 'px';
-    clone.style.top = toRect.top + 'px';
+    const deltaX = toRect.left - fromRect.left;
+    const deltaY = toRect.top - fromRect.top;
+
+    clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+    // Spawn particles if capture (we need to know if it's a capture)
+    // We can check if toCell has a piece of opposite color
+    const targetPiece = game.board[to.r][to.c];
+    const isCapture = targetPiece && targetPiece.color !== piece.color;
 
     setTimeout(() => {
       if (document.body.contains(clone)) {
         document.body.removeChild(clone);
       }
+
       // Restore opacity (though board might be re-rendered anyway)
       if (pieceElement) pieceElement.style.opacity = originalOpacity;
 
+      if (isCapture) {
+        const centerX = toRect.left + toRect.width / 2;
+        const centerY = toRect.top + toRect.height / 2;
+        const color = targetPiece.color === 'white' ? '#e2e8f0' : '#1e293b';
+        particleSystem.spawn(centerX, centerY, 'CAPTURE', color);
+      }
+
+      // Move particles (dust)
+      // const fromCenterX = fromRect.left + fromRect.width / 2;
+      // const fromCenterY = fromRect.top + fromRect.height / 2;
+      // particleSystem.spawn(fromCenterX, fromCenterY, 'MOVE', '#888');
+
       game.isAnimating = false;
       resolve();
-    }, 300);
+    }, 250); // Match transition duration
   });
 }
 
@@ -962,8 +1086,74 @@ export function showTutorSuggestions(game) {
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');
 
-  if (!tutorPanel || !suggestionsEl) return;
+  // If old UI elements don't exist, use modal overlay instead
+  if (!tutorPanel || !suggestionsEl) {
+    // Get tutor hints
+    if (!game.tutorController || !game.tutorController.getTutorHints) {
+      alert('Tutor nicht verfügbar!');
+      return;
+    }
 
+    const hints = game.tutorController.getTutorHints();
+    if (hints.length === 0) {
+      alert('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
+      return;
+    }
+
+    // Create modal overlay
+    let overlay = document.getElementById('tutor-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'tutor-overlay';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+          <div class="menu-header">
+            <h2>💡 KI-Tipps</h2>
+            <button id="close-tutor-btn" class="close-icon-btn">×</button>
+          </div>
+          <div id="tutor-hints-body" style="max-height: 60vh; overflow-y: auto;"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      document.getElementById('close-tutor-btn').addEventListener('click', () => {
+        overlay.classList.add('hidden');
+      });
+    }
+
+    const body = document.getElementById('tutor-hints-body');
+    body.innerHTML = '';
+
+    hints.forEach((hint, index) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ' + (hint.analysis.scoreDiff > -0.5 ? '#10b981' : '#f59e0b') + '; cursor: pointer; transition: background 0.2s;';
+      div.onmouseover = () => { div.style.background = 'rgba(255,255,255,0.1)'; };
+      div.onmouseout = () => { div.style.background = 'rgba(255,255,255,0.05)'; };
+
+      div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong style="font-size: 1.1em;">${index + 1}. ${hint.notation}</strong>
+          <span style="font-size: 0.9em; color: ${hint.analysis.scoreDiff > -0.5 ? '#10b981' : '#f59e0b'}">${hint.analysis.qualityLabel}</span>
+        </div>
+        <div style="font-size: 0.9em; color: #ccc;">
+          ${hint.analysis.tacticalExplanations.map(e => `<div>${e}</div>`).join('')}
+          ${hint.analysis.strategicExplanations.map(e => `<div>${e}</div>`).join('')}
+        </div>
+      `;
+
+      div.addEventListener('click', () => {
+        overlay.classList.add('hidden');
+        game.executeMove(hint.move.from, hint.move.to);
+      });
+
+      body.appendChild(div);
+    });
+
+    overlay.classList.remove('hidden');
+    return;
+  }
+
+  // Original code for old UI
   // Clear previous highlights and arrows
   document.querySelectorAll('.suggestion-highlight').forEach(el => {
     el.classList.remove('suggestion-highlight');
@@ -1348,6 +1538,12 @@ export function showSkinSelector(game) {
 
   const skinList = document.getElementById('skin-list');
   skinList.innerHTML = '';
+  skinList.style.cssText = `
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    padding: 10px;
+  `;
 
   import('./chess-pieces.js').then(module => {
     const skins = module.getAvailableSkins();
@@ -1356,26 +1552,65 @@ export function showSkinSelector(game) {
     skins.forEach(skin => {
       const item = document.createElement('div');
       item.className = `skin-item ${skin.id === currentSkin ? 'selected' : ''}`;
+      item.style.cssText = `
+        padding: 15px;
+        margin: 10px;
+        border: 2px solid ${skin.id === currentSkin ? '#6366f1' : 'rgba(255,255,255,0.1)'};
+        border-radius: 12px;
+        background: ${skin.id === currentSkin ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)'};
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        min-width: 140px;
+      `;
 
       // Preview pieces (White Knight and Black Rook)
       const previewWhite = module.PIECE_SETS[skin.id].white.n;
       const previewBlack = module.PIECE_SETS[skin.id].black.r;
 
       item.innerHTML = `
-                <div class="skin-preview">
-                    <div class="piece-preview white">${previewWhite}</div>
-                    <div class="piece-preview black">${previewBlack}</div>
+                <div class="skin-preview" style="display: flex; gap: 15px; justify-content: center; align-items: center;">
+                    <div class="piece-preview white" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">${previewWhite}</div>
+                    <div class="piece-preview black" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">${previewBlack}</div>
                 </div>
-                <div class="skin-name">${skin.name}</div>
+                <div class="skin-name" style="font-size: 0.95em; font-weight: 500; text-align: center;">${skin.name}</div>
+                ${skin.id === currentSkin ? '<div style="color: #6366f1; font-size: 0.8em;">✓ Ausgewählt</div>' : ''}
             `;
+
+      // Add hover effects
+      item.onmouseenter = () => {
+        item.style.borderColor = '#6366f1';
+        item.style.background = 'rgba(99,102,241,0.15)';
+        item.style.transform = 'translateY(-2px)';
+        item.style.boxShadow = '0 4px 12px rgba(99,102,241,0.3)';
+      };
+
+      item.onmouseleave = () => {
+        if (skin.id !== currentSkin) {
+          item.style.borderColor = 'rgba(255,255,255,0.1)';
+          item.style.background = 'rgba(255,255,255,0.02)';
+        }
+        item.style.transform = 'translateY(0)';
+        item.style.boxShadow = 'none';
+      };
+
 
       item.onclick = () => {
         module.setPieceSkin(skin.id);
         localStorage.setItem('schach9x9_skin', skin.id);
 
         // Update selection UI
-        document.querySelectorAll('.skin-item').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.skin-item').forEach(el => {
+          el.classList.remove('selected');
+          el.style.borderColor = 'rgba(255,255,255,0.1)';
+          el.style.background = 'rgba(255,255,255,0.02)';
+        });
         item.classList.add('selected');
+        item.style.borderColor = '#6366f1';
+        item.style.background = 'rgba(99,102,241,0.1)';
 
         // Clear SVG cache to force re-render of new skin
         window._svgCache = {};
@@ -1386,11 +1621,7 @@ export function showSkinSelector(game) {
 
         // Update captured pieces
         updateCapturedUI(game);
-        // Assuming updateShopUI is defined elsewhere and needs 'game'
-        // If not, remove or adjust this line
-        // updateShopUI(game); 
 
-        // Update tutor suggestions if visible
         // Update tutor suggestions if visible
         const tutorPanel = document.getElementById('tutor-panel');
         if (tutorPanel && !tutorPanel.classList.contains('hidden')) {
@@ -1404,6 +1635,7 @@ export function showSkinSelector(game) {
 
   overlay.classList.remove('hidden');
 }
+
 export function exitReplayMode(game) {
   if (!game.replayMode) return;
 

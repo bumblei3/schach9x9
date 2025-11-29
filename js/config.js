@@ -24,6 +24,15 @@ export const PHASES = {
 };
 
 /**
+ * Spielmodi
+ * @enum {string}
+ */
+export const GAME_MODES = {
+  SETUP: 'setup', // Original mode with points and shop
+  CLASSIC: 'classic', // Fixed setup
+};
+
+/**
  * Materialwerte für die KI-Bewertung
  * @type {Object.<string, number>}
  */
@@ -33,8 +42,9 @@ export const PIECE_VALUES = {
   b: 3,
   r: 5,
   a: 7, // Archbishop (Bishop + Knight)
-  c: 9, // Chancellor (Rook + Knight)
+  c: 8, // Chancellor (Rook + Knight) - Fixed from 9 to 8
   q: 9,
+  e: 12, // Angel (Queen + Knight)
   k: 0, // King has no value for material count
 };
 
@@ -50,6 +60,7 @@ export const AI_PIECE_VALUES = {
   k: 20000,
   a: 650, // Archbishop (Bishop + Knight)
   c: 850, // Chancellor (Rook + Knight)
+  e: 1220, // Angel (Queen + Knight)
 };
 
 /**
@@ -64,6 +75,7 @@ export const SHOP_PIECES = {
   ARCHBISHOP: { points: 7, symbol: 'a', name: 'Erzbischof' },
   QUEEN: { points: 9, symbol: 'q', name: 'Dame' },
   CHANCELLOR: { points: 8, symbol: 'c', name: 'Kanzler' },
+  ANGEL: { points: 12, symbol: 'e', name: 'Engel' },
 };
 
 /**

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { StatisticsManager } from './statisticsManager.js';
+import { StatisticsManager } from '../js/statisticsManager.js';
 
 describe('StatisticsManager', () => {
     let manager;

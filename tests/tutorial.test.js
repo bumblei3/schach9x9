@@ -3,7 +3,7 @@
  * @jest-environment jsdom
  */
 
-import { Tutorial } from './tutorial.js';
+import { Tutorial } from '../js/tutorial.js';
 
 describe('Tutorial', () => {
   let tutorial;

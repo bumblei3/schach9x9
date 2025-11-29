@@ -19,11 +19,19 @@ export { BOARD_SIZE, PHASES, PIECE_VALUES };
  * Hauptklasse für die Spiellogik und den Spielzustand von Schach9x9
  */
 export class Game {
-  constructor(initialPoints = 15) {
+  constructor(initialPoints = 15, mode = 'setup') {
+    this.mode = mode;
     this.board = Array(BOARD_SIZE)
       .fill(null)
       .map(() => Array(BOARD_SIZE).fill(null));
-    this.phase = PHASES.SETUP_WHITE_KING;
+
+    if (this.mode === 'classic') {
+      this.phase = PHASES.PLAY;
+      this.setupClassicBoard();
+    } else {
+      this.phase = PHASES.SETUP_WHITE_KING;
+    }
+
     this.turn = 'white';
     this.points = initialPoints;
     this.initialPoints = initialPoints;
@@ -60,6 +68,21 @@ export class Game {
     this.analysisBasePosition = null; // Save point before entering analysis
     this.analysisVariations = []; // Track explored variations
     this.continuousAnalysis = false;
+  }
+
+  setupClassicBoard() {
+    // Setup Pawns
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      this.board[1][c] = { type: 'p', color: 'black', hasMoved: false };
+      this.board[BOARD_SIZE - 2][c] = { type: 'p', color: 'white', hasMoved: false };
+    }
+
+    // Setup Pieces: R N B Q K Q B N R
+    const pieces = ['r', 'n', 'b', 'q', 'k', 'q', 'b', 'n', 'r'];
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      this.board[0][c] = { type: pieces[c], color: 'black', hasMoved: false };
+      this.board[BOARD_SIZE - 1][c] = { type: pieces[c], color: 'white', hasMoved: false };
+    }
   }
 
   log(message) {
@@ -301,6 +324,30 @@ export class Game {
           moves.push({ r: nr, c: nc });
         }
       });
+    } else if (piece.type === 'e') {
+      // Angel: Queen + Knight
+      // Queen moves
+      directions['q'].forEach(([dr, dc]) => {
+        let nr = r + dr,
+          nc = c + dc;
+        while (isInside(nr, nc)) {
+          if (this.board[nr][nc]) {
+            if (isEnemy(nr, nc)) moves.push({ r: nr, c: nc });
+            break; // Blocked
+          }
+          moves.push({ r: nr, c: nc });
+          nr += dr;
+          nc += dc;
+        }
+      });
+      // Knight moves
+      directions['n'].forEach(([dr, dc]) => {
+        const nr = r + dr,
+          nc = c + dc;
+        if (isInside(nr, nc) && !isFriend(nr, nc)) {
+          moves.push({ r: nr, c: nc });
+        }
+      });
     } else if (piece.type === 'k') {
       directions['k'].forEach(([dr, dc]) => {
         const nr = r + dr,
@@ -395,7 +442,7 @@ export class Game {
         if (
           piece &&
           piece.color === attackerColor &&
-          (piece.type === 'n' || piece.type === 'a' || piece.type === 'c')
+          (piece.type === 'n' || piece.type === 'a' || piece.type === 'c' || piece.type === 'e')
         )
           return true;
       }
@@ -426,7 +473,7 @@ export class Game {
         if (piece) {
           if (
             piece.color === attackerColor &&
-            (piece.type === 'b' || piece.type === 'q' || piece.type === 'a')
+            (piece.type === 'b' || piece.type === 'q' || piece.type === 'a' || piece.type === 'e')
           )
             return true;
           if (
@@ -452,7 +499,7 @@ export class Game {
         if (piece) {
           if (
             piece.color === attackerColor &&
-            (piece.type === 'r' || piece.type === 'q' || piece.type === 'c')
+            (piece.type === 'r' || piece.type === 'q' || piece.type === 'c' || piece.type === 'e')
           )
             return true;
           if (
@@ -479,7 +526,7 @@ export class Game {
       while (isInside(nr, nc)) {
         const piece = this.board[nr][nc];
         if (piece) {
-          if (piece.color === attackerColor && piece.type === 'a') return true;
+          if (piece.color === attackerColor && (piece.type === 'a' || piece.type === 'e')) return true;
           break; // Blocked (already handled by previous loop, but we need to catch 'a' specifically if not caught by 'b'/'q')
           // Actually, the previous loop for 'b'/'q' stops at the first piece.
           // If that piece is 'a', we missed it in the previous loop because we only checked for 'b' and 'q'.
@@ -494,7 +541,7 @@ export class Game {
     for (const [dr, dc] of knightMoves) {
       if (isInside(r + dr, c + dc)) {
         const piece = this.board[r + dr][c + dc];
-        if (piece && piece.color === attackerColor && piece.type === 'a') return true;
+        if (piece && piece.color === attackerColor && (piece.type === 'a' || piece.type === 'e')) return true;
       }
     }
 

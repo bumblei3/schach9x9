@@ -97,6 +97,7 @@ export class MoveController {
                 rookFrom: { r: from.r, c: rookCol },
                 rookTo: { r: from.r, c: rookTargetCol },
                 rookHadMoved: rook.hasMoved,
+                rookType: rook.type, // FIX: Store rook type to prevent corruption
             };
 
             // Move Rook
@@ -175,14 +176,14 @@ export class MoveController {
         if (piece.type === 'p') {
             const promotionRow = piece.color === 'white' ? 0 : BOARD_SIZE - 1;
             if (to.r === promotionRow) {
-                if (this.game.isAI && this.game.turn === 'black') {
-                    piece.type = 'q';
-                    moveRecord.specialMove = { type: 'promotion', promotedTo: 'q' };
-                    this.game.log('Schwarzer Bauer zur Dame befördert!');
-                } else {
-                    this.game.moveHistory.push(moveRecord);
-                    this.showPromotionUI(to.r, to.c, piece.color, moveRecord);
-                    return;
+                if (to.r === promotionRow) {
+                    // Automatic promotion to Angel (Engel)
+                    piece.type = 'e';
+                    moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
+                    this.game.log(`${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`);
+
+                    // Play promotion sound if available, otherwise move sound
+                    soundManager.playMove();
                 }
             }
         }
@@ -354,20 +355,29 @@ export class MoveController {
         const piece = this.game.board[move.to.r][move.to.c];
         if (!piece) return;
 
+        // Restore the piece to its original position
         this.game.board[move.from.r][move.from.c] = piece;
         this.game.board[move.to.r][move.to.c] = move.capturedPiece
             ? { type: move.capturedPiece.type, color: move.capturedPiece.color, hasMoved: true }
             : null;
 
+        // Restore piece properties (hasMoved and type)
         piece.hasMoved = move.piece.hasMoved;
         piece.type = move.piece.type;
 
         if (move.specialMove) {
             if (move.specialMove.type === 'castling') {
+                // Undo rook movement
                 const rook = this.game.board[move.specialMove.rookTo.r][move.specialMove.rookTo.c];
-                this.game.board[move.specialMove.rookFrom.r][move.specialMove.rookFrom.c] = rook;
-                this.game.board[move.specialMove.rookTo.r][move.specialMove.rookTo.c] = null;
-                rook.hasMoved = move.specialMove.rookHadMoved;
+                if (rook) {
+                    this.game.board[move.specialMove.rookFrom.r][move.specialMove.rookFrom.c] = rook;
+                    this.game.board[move.specialMove.rookTo.r][move.specialMove.rookTo.c] = null;
+                    rook.hasMoved = move.specialMove.rookHadMoved;
+                    // FIX: Restore rook type to prevent it from being corrupted
+                    if (move.specialMove.rookType) {
+                        rook.type = move.specialMove.rookType;
+                    }
+                }
             } else if (move.specialMove.type === 'enPassant') {
                 this.game.board[move.specialMove.capturedPawnPos.r][move.specialMove.capturedPawnPos.c] = {
                     type: 'p',
@@ -375,15 +385,17 @@ export class MoveController {
                     hasMoved: true,
                 };
             }
-            if (move.capturedPiece) {
-                const capturerColor = move.piece.color;
-                this.game.capturedPieces[capturerColor].pop();
-                UI.updateCapturedUI(this.game);
-            } else if (move.specialMove && move.specialMove.type === 'enPassant') {
-                const capturerColor = move.piece.color;
-                this.game.capturedPieces[capturerColor].pop();
-                UI.updateCapturedUI(this.game);
-            }
+        }
+
+        // Handle captured pieces restoration
+        if (move.capturedPiece) {
+            const capturerColor = move.piece.color;
+            this.game.capturedPieces[capturerColor].pop();
+            UI.updateCapturedUI(this.game);
+        } else if (move.specialMove && move.specialMove.type === 'enPassant') {
+            const capturerColor = move.piece.color;
+            this.game.capturedPieces[capturerColor].pop();
+            UI.updateCapturedUI(this.game);
         }
 
         this.game.halfMoveClock = move.halfMoveClock;
@@ -416,7 +428,7 @@ export class MoveController {
         this.updateUndoRedoButtons();
     }
 
-    redoMove() {
+    async redoMove() {
         if (this.redoStack.length === 0 || this.game.phase !== PHASES.PLAY) {
             return;
         }
@@ -430,7 +442,7 @@ export class MoveController {
             this.game.board[move.from.r][move.from.c]
         );
 
-        this.executeMove(move.from, move.to);
+        await this.executeMove(move.from, move.to);
         this.updateUndoRedoButtons();
     }
 
@@ -715,6 +727,7 @@ export class MoveController {
             b: 3,
             r: 5,
             q: 9,
+            e: 12,
             k: 0,
             a: 7,
             c: 8

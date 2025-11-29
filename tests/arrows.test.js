@@ -3,7 +3,7 @@
  * @jest-environment jsdom
  */
 
-import { ArrowRenderer } from './arrows.js';
+import { ArrowRenderer } from '../js/arrows.js';
 
 describe('ArrowRenderer', () => {
   let boardElement;

@@ -1,6 +1,6 @@
 // gameEngine.additional.test.js
 // Additional tests for core game engine functions beyond the basic knight tests.
-import { createEmptyBoard, Game } from './gameEngine.js';
+import { createEmptyBoard, Game } from '../js/gameEngine.js';
 
 describe('Game Engine Additional Tests', () => {
   let game;

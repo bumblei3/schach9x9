@@ -35,66 +35,59 @@ export class TutorController {
 
     getTutorHints() {
         if (this.game.phase !== PHASES.PLAY) {
-            logger.debug('Tutor: Not in PLAY phase');
             return [];
         }
 
         // Only show hints when it's the human player's turn
         if (this.game.isAI && this.game.turn === 'black') {
-            logger.debug('Tutor: AI turn, no hints');
             return []; // Don't give hints for AI
         }
 
-        logger.debug(`Tutor: Getting hints for ${this.game.turn}`);
         const moves = this.game.getAllLegalMoves(this.game.turn);
-        logger.debug(`Tutor: Found ${moves.length} legal moves`);
 
         if (moves.length === 0) return [];
 
-        // Evaluate all moves with simpler method to avoid board corruption
-        const evaluatedMoves = [];
+        // Quick heuristic scoring for initial filtering (fast, no deep search)
+        const quickScored = [];
         for (const move of moves) {
-            // Verify the move is still valid
             const fromPiece = this.game.board[move.from.r][move.from.c];
-            if (!fromPiece) {
-                console.warn(`Tutor: No piece at from position ${move.from.r},${move.from.c}`);
-                continue;
-            }
-            if (fromPiece.color !== this.game.turn) {
-                console.warn(`Tutor: Wrong color piece at ${move.from.r},${move.from.c}`);
-                continue;
-            }
-            // Ensure target square is not occupied by own piece
+            if (!fromPiece || fromPiece.color !== this.game.turn) continue;
+
             const targetPiece = this.game.board[move.to.r][move.to.c];
-            if (targetPiece && targetPiece.color === this.game.turn) {
-                console.warn(`Tutor: Target square ${move.to.r},${move.to.c} occupied by own piece`);
-                continue;
+            if (targetPiece && targetPiece.color === this.game.turn) continue;
+
+            // Quick heuristic: captures > center control > other
+            let heuristic = 0;
+            if (targetPiece) {
+                const values = { p: 1, n: 3, b: 3, r: 5, q: 9, e: 12, a: 7, c: 8, k: 100 };
+                heuristic += values[targetPiece.type] * 100; // Prioritize captures
             }
-            // Double-check this move is in the original valid moves for this piece
+            // Center control bonus
+            if (move.to.r >= 3 && move.to.r <= 5 && move.to.c >= 3 && move.to.c <= 5) {
+                heuristic += 20;
+            }
+
+            quickScored.push({ move, heuristic });
+        }
+
+        // Sort by heuristic and take top 8 candidates for deep evaluation (reduced from 15)
+        quickScored.sort((a, b) => b.heuristic - a.heuristic);
+        const topCandidates = quickScored.slice(0, Math.min(8, quickScored.length));
+
+        // Evaluate top candidates with shallow Minimax (depth 1 only for speed)
+        const evaluatedMoves = [];
+        const depth = 1; // Always use depth 1 to prevent freezing
+
+        for (const { move } of topCandidates) {
+            const fromPiece = this.game.board[move.from.r][move.from.c];
             const validForPiece = this.game.getValidMoves(move.from.r, move.from.c, fromPiece);
             const isReallyValid = validForPiece.some(v => v.r === move.to.r && v.c === move.to.c);
 
-            if (!isReallyValid) {
-                console.warn(
-                    `Tutor: Move from ${move.from.r},${move.from.c} to ${move.to.r},${move.to.c} not in valid moves`
-                );
-                continue;
-            }
+            if (!isReallyValid) continue;
 
-            // Use deeper Minimax for better Tutor suggestions
-            // Depth 2-3 depending on game stage (early game = deeper, late = shallower for speed)
-            const moveCount = this.game.moveHistory?.length || 0;
-            const depth = moveCount < 10 ? 3 : 2; // More depth in opening
-
-            // minimax returns score from Black's perspective.
-            // We pass isMaximizing=true because after White moves, it's Black's turn (Maximizer).
             const score = this.game.minimax(move, depth, true, -Infinity, Infinity);
-
-            // Invert score for display (so + is good for White)
             const displayScore = -score;
             const notation = this.getMoveNotation(move);
-
-            logger.debug(`Tutor: Valid move: ${notation} (score: ${displayScore})`);
 
             evaluatedMoves.push({
                 move,
@@ -103,10 +96,13 @@ export class TutorController {
             });
         }
 
-        logger.debug(`Tutor: ${evaluatedMoves.length} valid evaluated moves`);
-
         // Sort by score (best first)
         evaluatedMoves.sort((a, b) => b.score - a.score);
+
+        // Log only summary
+        if (evaluatedMoves.length > 0) {
+            logger.debug(`Tutor: Evaluated ${evaluatedMoves.length}/${moves.length} moves, best: ${evaluatedMoves[0].notation} (${evaluatedMoves[0].score})`);
+        }
 
         // Get best score for relative comparison
         const bestScore = evaluatedMoves.length > 0 ? evaluatedMoves[0].score : 0;
@@ -138,6 +134,7 @@ export class TutorController {
             k: 'König',
             a: 'Erzbischof',
             c: 'Kanzler',
+            e: 'Engel', // Angel piece
         };
         const pieceName = pieceNames[piece.type];
 
@@ -163,6 +160,7 @@ export class TutorController {
             k: 'König',
             a: 'Erzbischof',
             c: 'Kanzler',
+            e: 'Engel', // Angel piece
         };
         return names[type] || type;
     }
@@ -802,42 +800,138 @@ export class TutorController {
         // Reset points
         this.game.points = this.game.initialPoints;
 
-        // Place pieces
-        // Simple heuristic: Fill from back to front, prioritizing corners for Rooks
-        const availableSquares = [];
-        for (let r = corridor.rowStart; r < corridor.rowStart + 3; r++) {
-            for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
-                if (!this.game.board[r][c]) {
-                    availableSquares.push({ r, c });
-                }
-            }
+        // Smart Placement Logic
+
+        // 1. Define Rows
+        const rows = [];
+        if (isWhite) {
+            rows.push(corridor.rowStart + 2); // Front (e.g. 6)
+            rows.push(corridor.rowStart + 1); // Middle (e.g. 7)
+            rows.push(corridor.rowStart);     // Back (e.g. 8)
+        } else {
+            rows.push(corridor.rowStart + 2); // Front (e.g. 2)
+            rows.push(corridor.rowStart + 1); // Middle (e.g. 1)
+            rows.push(corridor.rowStart);     // Back (e.g. 0)
+        }
+        // Actually, for White, rowStart is top-left of 3x3. 
+        // If whiteCorridor is rows 6-8:
+        // rowStart = 6.
+        // Front is 6 (closest to center? No, wait).
+        // Board is 0..8. 0 is Black side, 8 is White side.
+        // White pawns move UP (decreasing row index)? No, usually White is at bottom (rows 7-8) moving to 0.
+        // Let's check gameEngine.js or config.js for direction.
+        // Standard chess: White at 7,8 moving to 0.
+        // If White is at bottom (rows 6,7,8), then Front is 6, Back is 8.
+        // If Black is at top (rows 0,1,2), then Front is 2, Back is 0.
+
+        // Let's verify direction.
+        // In moveController/gameEngine:
+        // White pawns move -1 (up), Black pawns move +1 (down).
+        // So White is at bottom (high indices), Black at top (low indices).
+
+        let frontRow, middleRow, backRow;
+        if (isWhite) {
+            frontRow = corridor.rowStart;     // 6
+            middleRow = corridor.rowStart + 1; // 7
+            backRow = corridor.rowStart + 2;   // 8
+        } else {
+            frontRow = corridor.rowStart + 2; // 2
+            middleRow = corridor.rowStart + 1; // 1
+            backRow = corridor.rowStart;      // 0
         }
 
-        // Sort squares: Back row (relative to enemy) first
-        // White starts at row 6-8 (front is 6, back is 8)
-        // Black starts at row 0-2 (front is 2, back is 0)
-        availableSquares.sort((a, b) => {
-            if (isWhite) return b.r - a.r; // 8 -> 6
-            else return a.r - b.r; // 0 -> 2
-        });
+        // Helper to get empty squares in a specific row
+        const getEmptyInRow = (r) => {
+            const squares = [];
+            for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
+                if (!this.game.board[r][c]) squares.push({ r, c });
+            }
+            // Sort by distance from center column (4) to prioritize central placement?
+            // Or prioritize corners for rooks?
+            return squares;
+        };
 
-        // Sort pieces by value (descending) to put valuable pieces in back
-        // We need values for sorting
+        const frontSquares = getEmptyInRow(frontRow);
+        const middleSquares = getEmptyInRow(middleRow);
+        const backSquares = getEmptyInRow(backRow);
+
+        // Sort back squares to prioritize corners (first and last in list)
+        // Actually, just sorting by column distance from center might be enough
+        // But for Rooks, we want corners.
+
+        // Helper to get value for sorting
         const getVal = (type) => {
-            const map = { q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1 };
+            const map = { q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1, e: 12 };
             return map[type] || 0;
         };
-        const piecesToPlace = [...template.pieces].sort((a, b) => getVal(b) - getVal(a));
 
-        piecesToPlace.forEach((type, index) => {
-            if (index < availableSquares.length) {
-                const sq = availableSquares[index];
-                this.game.board[sq.r][sq.c] = {
-                    type: type,
-                    color: isWhite ? 'white' : 'black',
-                    hasMoved: false
-                };
-                this.game.points -= getVal(type);
+        // Separate pieces
+        const pawns = template.pieces.filter(p => p === 'p');
+        const others = template.pieces.filter(p => p !== 'p');
+
+        // Sort others by value (descending)
+        others.sort((a, b) => getVal(b) - getVal(a));
+
+        // Placement Queue
+        // 1. Pawns -> Front Row
+        // 2. Rooks/Chancellors -> Back Row Corners
+        // 3. Rest -> Back Row -> Middle Row -> Front Row
+
+        // 1. Place Pawns
+        pawns.forEach(p => {
+            if (frontSquares.length > 0) {
+                const sq = frontSquares.shift(); // Take from front row
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (middleSquares.length > 0) {
+                const sq = middleSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (backSquares.length > 0) {
+                const sq = backSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            }
+        });
+
+        // 2. Place Rooks/Chancellors (Corner preference)
+        const cornerPieces = others.filter(p => ['r', 'c'].includes(p));
+        const otherPieces = others.filter(p => !['r', 'c'].includes(p));
+
+        cornerPieces.forEach(p => {
+            // Try to find a corner in back row
+            // We can identify corners by checking column index relative to corridor
+            const corners = backSquares.filter(sq => sq.c === corridor.colStart || sq.c === corridor.colStart + 2);
+
+            if (corners.length > 0) {
+                // Pick a corner
+                const sq = corners[0];
+                // Remove from backSquares
+                const idx = backSquares.indexOf(sq);
+                if (idx > -1) backSquares.splice(idx, 1);
+
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (backSquares.length > 0) {
+                const sq = backSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (middleSquares.length > 0) {
+                const sq = middleSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (frontSquares.length > 0) {
+                const sq = frontSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            }
+        });
+
+        // 3. Place remaining pieces
+        otherPieces.forEach(p => {
+            // Fill Back -> Middle -> Front
+            if (backSquares.length > 0) {
+                const sq = backSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (middleSquares.length > 0) {
+                const sq = middleSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else if (frontSquares.length > 0) {
+                const sq = frontSquares.shift();
+                this.placePiece(sq.r, sq.c, p, isWhite);
             }
         });
 
@@ -847,6 +941,21 @@ export class TutorController {
 
         // Log
         this.game.log(`Tutor: Aufstellung "${template.name}" angewendet.`);
+    }
+
+    placePiece(r, c, type, isWhite) {
+        this.game.board[r][c] = {
+            type: type,
+            color: isWhite ? 'white' : 'black',
+            hasMoved: false
+        };
+
+        // Deduct points
+        const getVal = (type) => {
+            const map = { q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1, e: 12 };
+            return map[type] || 0;
+        };
+        this.game.points -= getVal(type);
     }
 }
 
