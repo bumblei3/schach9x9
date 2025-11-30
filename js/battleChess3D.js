@@ -410,12 +410,23 @@ export class BattleChess3D {
 
         this.animating = true;
 
+        // Convert board coordinates to world coordinates if needed
+        let startPos = attackerPos;
+        let endPos = defenderPos;
+
+        if (attackerPos.r !== undefined && attackerPos.c !== undefined) {
+            startPos = this.boardToWorld(attackerPos.r, attackerPos.c);
+        }
+        if (defenderPos.r !== undefined && defenderPos.c !== undefined) {
+            endPos = this.boardToWorld(defenderPos.r, defenderPos.c);
+        }
+
         try {
             await this.battleAnimator.playBattle(
                 attacker,
                 defender,
-                attackerPos,
-                defenderPos,
+                startPos,
+                endPos,
             );
         } catch (error) {
             logger.error('Battle animation failed:', error);
