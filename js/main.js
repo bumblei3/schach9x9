@@ -391,6 +391,88 @@ function setupGlobalListeners() {
     });
   }
 
+  // Unified Skin Selector (for both 2D and 3D)
+  const skinSelector = document.getElementById('skin-selector');
+  if (skinSelector) {
+    // Clean up old localStorage keys
+    const oldSkin1 = localStorage.getItem('chessSkin');
+    const oldSkin2 = localStorage.getItem('schach9x9_skin');
+
+    // Remove old keys if they exist
+    if (oldSkin1) localStorage.removeItem('chessSkin');
+    if (oldSkin2) localStorage.removeItem('schach9x9_skin');
+
+    // Get saved skin or default to 'classic'
+    let savedSkin = localStorage.getItem('selectedSkin');
+
+    // If no valid skin is saved, use 'classic' and persist it
+    if (!savedSkin) {
+      savedSkin = 'classic';
+      localStorage.setItem('selectedSkin', 'classic');
+      console.log('No saved skin found, defaulting to classic');
+    }
+
+    // Load chess pieces module and set skin
+    import('./chess-pieces.js').then(chessPiecesModule => {
+      window.setPieceSkin = chessPiecesModule.setPieceSkin;
+      window.getAvailableSkins = chessPiecesModule.getAvailableSkins;
+
+      // Apply saved or default skin
+      if (window.setPieceSkin) {
+        window.setPieceSkin(savedSkin);
+        console.log(`Loaded skin: ${savedSkin}`);
+      }
+
+      // Set initial value for the selector
+      skinSelector.value = savedSkin;
+
+      // Re-render 2D board if game exists
+      if (window.game) {
+        import('./ui.js').then(UI => UI.renderBoard(window.game));
+      }
+    });
+
+    if (window.battleChess3D) {
+      window.battleChess3D.currentSkin = savedSkin;
+    }
+
+    // Handle skin changes
+    skinSelector.addEventListener('change', (e) => {
+      const newSkin = e.target.value;
+
+      // Save to localStorage with consistent key
+      localStorage.setItem('selectedSkin', newSkin);
+      console.log(`Skin changed to: ${newSkin}`);
+
+      // Update 2D pieces
+      import('./chess-pieces.js').then(module => {
+        if (module.setPieceSkin(newSkin)) {
+          // Clear SVG cache to force re-render of new skin
+          window._svgCache = {};
+
+          // Force full re-render of the board
+          if (window.game) {
+            window.game._forceFullRender = true;
+            // Reset previous board state to ensure diffing triggers
+            window.game._previousBoardState = null;
+          }
+
+          // Re-render 2D board
+          import('./ui.js').then(UI => {
+            if (window.game) UI.renderBoard(window.game);
+          });
+        }
+      });
+
+      // Update 3D pieces
+      if (window.battleChess3D) {
+        window.battleChess3D.setSkin(newSkin);
+      }
+
+      soundManager.playMove();
+    });
+  }
+
 
   // --- Menu Actions ---
   document.getElementById('restart-btn').addEventListener('click', () => location.reload());
@@ -448,10 +530,7 @@ function setupGlobalListeners() {
     if (window.game) UI.showStatisticsOverlay(window.game);
   });
 
-  document.getElementById('skins-btn').addEventListener('click', () => {
-    toggleMenu(false);
-    if (window.game) UI.showSkinSelector(window.game);
-  });
+
 
   document.getElementById('help-btn').addEventListener('click', () => {
     toggleMenu(false);
@@ -459,27 +538,25 @@ function setupGlobalListeners() {
   });
 
   // --- Settings ---
-  // Theme
+  // Theme (Board Colors)
   const themeSelect = document.getElementById('theme-select');
   if (themeSelect) {
     const savedTheme = localStorage.getItem('chess_theme') || 'classic';
     themeSelect.value = savedTheme;
-    // Apply theme immediately if possible, or wait for game init
-    // For now, we set a data attribute on body for CSS to pick up
-    // Note: The new CSS might not use data-theme on body directly for everything, 
-    // but let's keep it for compatibility or update UI.js to handle it.
-    // Actually, let's just set the class or attribute.
-    // The new style.css doesn't seem to rely on body[data-theme] for the main variables 
-    // unless we add those selectors back. 
-    // Let's assume we might need to add theme logic to UI.js or here.
-    // For now, let's just save it.
+    document.body.setAttribute('data-theme', savedTheme);
 
     themeSelect.addEventListener('change', e => {
       const theme = e.target.value;
       localStorage.setItem('chess_theme', theme);
-      if (window.game) window.game.setTheme(theme);
+      document.body.setAttribute('data-theme', theme);
+
+      // Update 3D board theme as well
+      if (window.battleChess3D && window.battleChess3D.setTheme) {
+        window.battleChess3D.setTheme(theme);
+      }
     });
   }
+
 
   // Difficulty
   const difficultySelect = document.getElementById('difficulty-select');
@@ -626,14 +703,6 @@ function setupGlobalListeners() {
       e.preventDefault();
       const cell = document.querySelector(`.cell[data-r="${kbRow}"][data-c="${kbCol}"]`);
       if (cell) cell.click();
-    }
-  });
-
-  // Initialize skin
-  import('./chess-pieces.js').then(module => {
-    const savedSkin = localStorage.getItem('schach9x9_skin');
-    if (savedSkin) {
-      module.setPieceSkin(savedSkin);
     }
   });
 }

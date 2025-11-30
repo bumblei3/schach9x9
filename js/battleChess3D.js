@@ -22,22 +22,21 @@ export class BattleChess3D {
         this.camera = null;
         this.renderer = null;
         this.controls = null;
+        this.board = null;
+        this.pieces = {}; // map of "r,c" to 3D piece
+        this.highlightMarkers = [];
         this.battleAnimator = null;
+        this.animationFrameId = null;
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        this.clickHandler = null;
+        this.resizeHandler = null;
+        this.squareSize = 1;
 
-        // Game state
-        this.pieces = new Map(); // key: "r,c", value: THREE.Group
-        this.highlights = [];
-        this.selectedPiece = null;
+        // Skin system - use unified localStorage key
+        this.currentSkin = localStorage.getItem('chessSkin') || 'classic';
 
-        // Board helpers
-        this.boardGroup = null;
-        this.squareSize = 1.0;
-
-        // Animation
-        this.animating = false;
-        this.animationQueue = [];
-
-        logger.info('BattleChess3D initialized');
+        logger.info('[3D] BattleChess3D instance created');
     }
 
     /**
@@ -176,10 +175,25 @@ export class BattleChess3D {
     }
 
     /**
+     * Get theme colors
+     */
+    getThemeColors(theme) {
+        const themes = {
+            classic: { light: 0xe8dcc0, dark: 0x6b5d4f },
+            blue: { light: 0x87ceeb, dark: 0x4682b4 },
+            green: { light: 0x90ee90, dark: 0x228b22 },
+            wood: { light: 0xdeb887, dark: 0x8b4513 },
+            dark: { light: 0x4a4a4a, dark: 0x2a2a2a }
+        };
+        return themes[theme] || themes.classic;
+    }
+
+    /**
      * Create the 9x9 chess board
      */
     createBoard() {
         this.boardGroup = new THREE.Group();
+        this.currentTheme = localStorage.getItem('chess_theme') || 'classic';
 
         const squareGeometry = new THREE.BoxGeometry(
             this.squareSize,
@@ -187,13 +201,16 @@ export class BattleChess3D {
             this.squareSize,
         );
 
+        // Get theme colors
+        const colors = this.getThemeColors(this.currentTheme);
+
         // Create 9x9 grid
         for (let row = 0; row < BOARD_SIZE; row++) {
             for (let col = 0; col < BOARD_SIZE; col++) {
                 const isLight = (row + col) % 2 === 0;
 
                 const material = new THREE.MeshStandardMaterial({
-                    color: isLight ? 0xe8dcc0 : 0x6b5d4f,
+                    color: isLight ? colors.light : colors.dark,
                     roughness: 0.7,
                     metalness: 0.1,
                 });
@@ -205,8 +222,8 @@ export class BattleChess3D {
                 square.position.set(pos.x, -0.05, pos.z);
                 square.receiveShadow = true;
 
-                // Store board position for raycasting
-                square.userData = { row, col, type: 'square' };
+                // Store board position and light/dark info for raycasting
+                square.userData = { row, col, type: 'square', isLight };
 
                 this.boardGroup.add(square);
             }
@@ -249,11 +266,13 @@ export class BattleChess3D {
      * Update 3D board from game state
      */
     updateFromGameState(game) {
-        logger.info('Updating 3D board from game state');
+        if (!this.scene) return;
 
         // Clear existing pieces
-        this.pieces.forEach((piece) => this.scene.remove(piece));
-        this.pieces.clear();
+        Object.values(this.pieces).forEach((piece) => {
+            this.scene.remove(piece);
+        });
+        this.pieces = {};
 
         // Add pieces from game board
         for (let row = 0; row < BOARD_SIZE; row++) {
@@ -270,7 +289,7 @@ export class BattleChess3D {
      * Add a 3D piece to the board
      */
     addPiece(type, color, row, col) {
-        const piece3D = createPiece3D(type, color);
+        const piece3D = createPiece3D(type, color, this.currentSkin);
         if (!piece3D) return;
 
         const pos = this.boardToWorld(row, col);
@@ -278,7 +297,7 @@ export class BattleChess3D {
         piece3D.userData = { type, color, row, col };
 
         this.scene.add(piece3D);
-        this.pieces.set(`${row},${col}`, piece3D);
+        this.pieces[`${row},${col}`] = piece3D;
     }
 
     /**
@@ -286,10 +305,10 @@ export class BattleChess3D {
      */
     removePiece(row, col) {
         const key = `${row},${col}`;
-        const piece = this.pieces.get(key);
+        const piece = this.pieces[key];
         if (piece) {
             this.scene.remove(piece);
-            this.pieces.delete(key);
+            delete this.pieces[key];
         }
     }
 
@@ -334,7 +353,7 @@ export class BattleChess3D {
      */
     async animateMove(fromRow, fromCol, toRow, toCol, captured = false) {
         const key = `${fromRow},${fromCol}`;
-        const piece = this.pieces.get(key);
+        const piece = this.pieces[key];
         if (!piece) return;
 
         this.animating = true;
@@ -368,9 +387,9 @@ export class BattleChess3D {
                     piece.userData.row = toRow;
                     piece.userData.col = toCol;
 
-                    // Update map
-                    this.pieces.delete(key);
-                    this.pieces.set(`${toRow},${toCol}`, piece);
+                    // Update pieces tracking
+                    delete this.pieces[key];
+                    this.pieces[`${toRow},${toCol}`] = piece;
 
                     this.animating = false;
                     resolve();
@@ -421,10 +440,10 @@ export class BattleChess3D {
 
         // Check intersections with pieces and board
         const allObjects = [
-            ...Array.from(this.pieces.values()),
-            ...this.boardGroup.children,
-            ...this.highlights,
+            this.board,
+            ...Object.values(this.pieces),
         ];
+
         const intersects = this.raycaster.intersectObjects(allObjects, true);
 
         if (intersects.length > 0) {
@@ -438,14 +457,16 @@ export class BattleChess3D {
                             row: obj.userData.row,
                             col: obj.userData.col,
                             type: obj.userData.type,
-                        },
+                            color: obj.userData.color
+                        }
                     });
-                    this.container.dispatchEvent(clickEvent);
+                    window.dispatchEvent(clickEvent);
                     break;
                 }
             }
         }
     }
+
 
     /**
      * Handle window resize
@@ -496,6 +517,53 @@ export class BattleChess3D {
         } else {
             logger.info('3D mode disabled');
         }
+    }
+
+    /**
+     * Change the 3D piece skin
+     * @param {string} skinName - Name of the skin preset
+     */
+    setSkin(skinName) {
+        if (!this.scene) return;
+
+        this.currentSkin = skinName;
+        localStorage.setItem('chessSkin', skinName);
+
+        // Recreate all pieces with the new skin
+        const piecesToRecreate = [];
+        Object.entries(this.pieces).forEach(([key, piece]) => {
+            const { type, color, row, col } = piece.userData;
+            piecesToRecreate.push({ type, color, row, col });
+        });
+
+        // Remove and recreate
+        piecesToRecreate.forEach(({ type, color, row, col }) => {
+            this.removePiece(row, col);
+            this.addPiece(type, color, row, col);
+        });
+
+        logger.info(`3D skin changed to: ${skinName}`);
+    }
+
+    /**
+     * Change the board theme
+     * @param {string} themeName - Name of the theme (classic, blue, green, wood, dark)
+     */
+    setTheme(themeName) {
+        if (!this.boardGroup || !this.scene) return;
+
+        this.currentTheme = themeName;
+        const colors = this.getThemeColors(themeName);
+
+        // Update all board squares
+        this.boardGroup.children.forEach((square) => {
+            if (square.userData.type === 'square') {
+                const isLight = square.userData.isLight;
+                square.material.color.setHex(isLight ? colors.light : colors.dark);
+            }
+        });
+
+        logger.info(`3D board theme changed to: ${themeName}`);
     }
 
     /**
