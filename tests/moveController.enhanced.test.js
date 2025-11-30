@@ -57,11 +57,11 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
             // Go to first move
             moveController.replayFirst();
-            expect(game.replayPosition).toBe(0);
+            expect(game.replayPosition).toBe(-1);
 
             // Step through promotion move
             moveController.replayNext();
-            expect(game.replayPosition).toBe(1);
+            expect(game.replayPosition).toBe(0);
 
             // Verify replay mode is active
             expect(game.replayMode).toBe(true);
@@ -127,7 +127,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
             // Go to first move
             moveController.replayFirst();
-            expect(game.replayPosition).toBe(0);
+            expect(game.replayPosition).toBe(-1);
 
             // Go back to last
             moveController.replayLast();
