@@ -162,4 +162,209 @@ describe('Angel Piece and Promotion', () => {
         expect(promotedPiece.type).toBe('e');
         expect(promotedPiece.color).toBe('white');
     });
+
+    test('Black pawn should promote to Angel on last rank', async () => {
+        // Place black pawn near white's end
+        game.board[7][4] = { type: 'p', color: 'black', hasMoved: true };
+        game.board[8][4] = null;
+        game.turn = 'black';
+
+        await moveController.executeMove({ r: 7, c: 4 }, { r: 8, c: 4 });
+
+        const promotedPiece = game.board[8][4];
+        expect(promotedPiece).not.toBeNull();
+        expect(promotedPiece.type).toBe('e');
+        expect(promotedPiece.color).toBe('black');
+    });
+
+    describe('Angel Edge Cases', () => {
+        test('Angel can move from corner to opposite corner (Queen-like)', () => {
+            game.board[0][0] = { type: 'e', color: 'white', hasMoved: false };
+
+            const moves = game.getValidMoves(0, 0, game.board[0][0]);
+            const diagonalCorner = moves.find(m => m.r === 8 && m.c === 8);
+
+            expect(diagonalCorner).toBeDefined();
+        });
+
+        test('Angel can jump over pieces at board edge (Knight-like)', () => {
+            game.board[0][0] = { type: 'e', color: 'white', hasMoved: false };
+            // Place blocking pieces
+            game.board[0][1] = { type: 'p', color: 'white', hasMoved: false };
+            game.board[1][0] = { type: 'p', color: 'white', hasMoved: false };
+
+            const moves = game.getValidMoves(0, 0, game.board[0][0]);
+            // Knight jump from corner
+            const knightMove = moves.find(m => m.r === 2 && m.c === 1);
+
+            expect(knightMove).toBeDefined();
+        });
+
+        test('Angel in corner has both Queen and Knight moves', () => {
+            game.board[8][8] = { type: 'e', color: 'white', hasMoved: false };
+
+            const moves = game.getValidMoves(8, 8, game.board[8][8]);
+
+            // Should have diagonal moves (Queen-like)
+            const diagonalMove = moves.find(m => m.r === 7 && m.c === 7);
+            // Should have knight moves
+            const knightMove = moves.find(m => m.r === 6 && m.c === 7);
+
+            expect(diagonalMove).toBeDefined();
+            expect(knightMove).toBeDefined();
+            expect(moves.length).toBeGreaterThan(10);
+        });
+    });
+
+    describe('Angel Check and Checkmate Scenarios', () => {
+        test('Angel can deliver checkmate with King support', () => {
+            // Setup: White Angel and King vs Black King in corner
+            game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+            game.board[0][0] = { type: 'k', color: 'black', hasMoved: true };
+            game.board[1][2] = { type: 'e', color: 'white', hasMoved: true };
+            game.board[2][1] = { type: 'k', color: 'white', hasMoved: true };
+
+            expect(game.isInCheck('black')).toBe(true);
+            expect(game.isCheckmate('black')).toBe(true);
+        });
+
+        test('Angel cannot move if it would expose own King to check', () => {
+            // Setup: White Angel blocking check from Black Queen
+            game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+            game.board[4][4] = { type: 'k', color: 'white', hasMoved: true };
+            game.board[4][5] = { type: 'e', color: 'white', hasMoved: true };
+            game.board[4][8] = { type: 'q', color: 'black', hasMoved: true };
+            game.board[0][0] = { type: 'k', color: 'black', hasMoved: true };
+
+            const moves = game.getValidMoves(4, 5, game.board[4][5]);
+
+            // Angel can only move along the line between King and Queen
+            // or capture the Queen
+            const invalidMove = moves.find(m => m.r === 2 && m.c === 4);
+            expect(invalidMove).toBeUndefined();
+        });
+
+        test('Angel can block check with Queen-like move', () => {
+            game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+            game.board[4][4] = { type: 'k', color: 'white', hasMoved: true };
+            game.board[2][2] = { type: 'e', color: 'white', hasMoved: true };
+            game.board[0][4] = { type: 'r', color: 'black', hasMoved: true };
+            game.board[8][8] = { type: 'k', color: 'black', hasMoved: true };
+
+            const moves = game.getValidMoves(2, 2, game.board[2][2]);
+            // Can block at (1, 4), (2, 4), (3, 4)
+            const blockMove = moves.find(m => m.r === 2 && m.c === 4);
+
+            expect(blockMove).toBeDefined();
+        });
+
+        test('Angel can block check with Knight-like jump', () => {
+            game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+            // Setup: King at 0,0, Rook at 0,5 checking along rank 0
+            game.board[0][0] = { type: 'k', color: 'white', hasMoved: true };
+            game.board[0][5] = { type: 'r', color: 'black', hasMoved: true };
+
+            // Angel at 2,1 can jump to 0,2 (Knight move) to block
+            game.board[2][1] = { type: 'e', color: 'white', hasMoved: true };
+
+            // Add black king to avoid invalid board state
+            game.board[8][8] = { type: 'k', color: 'black', hasMoved: true };
+
+            const moves = game.getValidMoves(2, 1, game.board[2][1]);
+
+            // Knight jump to block at (0, 2)
+            // 0,2 is on the path between 0,0 and 0,5
+            const blockMove = moves.find(m => m.r === 0 && m.c === 2);
+
+            expect(blockMove).toBeDefined();
+        });
+    });
+
+    describe('Angel vs Angel', () => {
+        test('Angel can capture enemy Angel with Queen move', () => {
+            game.board[4][4] = { type: 'e', color: 'white', hasMoved: false };
+            game.board[4][7] = { type: 'e', color: 'black', hasMoved: false };
+
+            const moves = game.getValidMoves(4, 4, game.board[4][4]);
+            const captureMove = moves.find(m => m.r === 4 && m.c === 7);
+
+            expect(captureMove).toBeDefined();
+        });
+
+        test('Angel can capture enemy Angel with Knight jump', () => {
+            game.board[4][4] = { type: 'e', color: 'white', hasMoved: false };
+            game.board[6][5] = { type: 'e', color: 'black', hasMoved: false };
+
+            const moves = game.getValidMoves(4, 4, game.board[4][4]);
+            const captureMove = moves.find(m => m.r === 6 && m.c === 5);
+
+            expect(captureMove).toBeDefined();
+        });
+
+        test('Two Angels can coexist on the board', () => {
+            game.board[2][2] = { type: 'e', color: 'white', hasMoved: true };
+            game.board[6][6] = { type: 'e', color: 'black', hasMoved: true };
+
+            const whiteMoves = game.getValidMoves(2, 2, game.board[2][2]);
+            const blackMoves = game.getValidMoves(6, 6, game.board[6][6]);
+
+            expect(whiteMoves.length).toBeGreaterThan(0);
+            expect(blackMoves.length).toBeGreaterThan(0);
+        });
+    });
+
+    describe('Angel Performance and Move Generation', () => {
+        test('Angel move generation should be fast', () => {
+            game.board[4][4] = { type: 'e', color: 'white', hasMoved: false };
+
+            const startTime = performance.now();
+            const moves = game.getValidMoves(4, 4, game.board[4][4]);
+            const endTime = performance.now();
+
+            expect(endTime - startTime).toBeLessThan(10); // Should take less than 10ms
+            expect(moves.length).toBeGreaterThan(20); // Angel has many moves
+        });
+
+        test('Angel should have maximum moves in center of empty board', () => {
+            game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+            game.board[4][4] = { type: 'e', color: 'white', hasMoved: false };
+            // Add kings to avoid game-over logic
+            game.board[0][0] = { type: 'k', color: 'black', hasMoved: true };
+            game.board[8][8] = { type: 'k', color: 'white', hasMoved: true };
+
+            const moves = game.getValidMoves(4, 4, game.board[4][4]);
+
+            // Queen moves: 4 directions × 8 squares each (approx) + Knight moves: 8
+            // Total should be substantial
+            expect(moves.length).toBeGreaterThan(30);
+        });
+
+        test('Multiple promotions to Angel in same game', async () => {
+            // Promote first white pawn
+            game.board[1][0] = { type: 'p', color: 'white', hasMoved: true };
+            await moveController.executeMove({ r: 1, c: 0 }, { r: 0, c: 0 });
+            expect(game.board[0][0].type).toBe('e');
+
+            // Switch to black and promote
+            game.board[7][4] = { type: 'p', color: 'black', hasMoved: true };
+            game.turn = 'black';
+            await moveController.executeMove({ r: 7, c: 4 }, { r: 8, c: 4 });
+            expect(game.board[8][4].type).toBe('e');
+
+            // Promote second white pawn
+            game.board[1][8] = { type: 'p', color: 'white', hasMoved: true };
+            game.turn = 'white';
+            await moveController.executeMove({ r: 1, c: 8 }, { r: 0, c: 8 });
+            expect(game.board[0][8].type).toBe('e');
+
+            // Count Angels on board
+            let angelCount = 0;
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (game.board[r][c]?.type === 'e') angelCount++;
+                }
+            }
+            expect(angelCount).toBe(3);
+        });
+    });
 });

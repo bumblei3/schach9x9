@@ -9,6 +9,7 @@ import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
 import { debounce } from './utils.js';
 import { BOARD_SIZE, PHASES } from './gameEngine.js';
+import { BattleChess3D } from './battleChess3D.js';
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
@@ -29,6 +30,7 @@ logger.info('main.js loaded (Refactored)');
 let game = null;
 let kbRow = 0;
 let kbCol = 0;
+let battleChess3D = null; // 3D mode instance
 
 // --- Initialization ---
 
@@ -140,6 +142,21 @@ async function initGame(initialPoints, mode = 'setup') {
 
     // Initialize GameController logic
     game.gameController.initGame(initialPoints, mode);
+
+    // Initialize 3D Battle Chess mode
+    const container3D = document.getElementById('battle-chess-3d-container');
+    if (container3D && !battleChess3D) {
+      battleChess3D = new BattleChess3D(container3D);
+      window.battleChess3D = battleChess3D;
+
+      // Listen for 3D board clicks
+      container3D.addEventListener('board3dclick', (event) => {
+        const { row, col } = event.detail;
+        if (game && game.phase === PHASES.PLAY) {
+          game.handleCellClick(row, col);
+        }
+      });
+    }
 
     // Check for autosaved game
     const savedGame = localStorage.getItem('schach9x9_save');
@@ -320,6 +337,60 @@ function setupGlobalListeners() {
       }
     });
   }
+
+  // 3D Mode Toggle
+  const toggle3DBtn = document.getElementById('toggle-3d-btn');
+  if (toggle3DBtn) {
+    toggle3DBtn.addEventListener('click', () => {
+      if (!window.battleChess3D || !window.game) return;
+
+      const container3D = document.getElementById('battle-chess-3d-container');
+      const board2D = document.getElementById('board-wrapper');
+      const isEnabled = container3D.classList.contains('active');
+
+      if (isEnabled) {
+        // Disable 3D mode - show 2D board
+        container3D.classList.remove('active');
+        toggle3DBtn.classList.remove('active-3d');
+        window.battleChess3D.toggle(false);
+
+        // Fade out 3D, fade in 2D
+        setTimeout(() => {
+          if (board2D) board2D.style.opacity = '1';
+        }, 300);
+
+        soundManager.playMove();
+      } else {
+        // Enable 3D mode - hide 2D board
+        toggle3DBtn.classList.add('active-3d');
+
+        // Fade out 2D first
+        if (board2D) {
+          board2D.style.transition = 'opacity 0.3s';
+          board2D.style.opacity = '0';
+        }
+
+        // Show 3D after fade
+        setTimeout(() => {
+          container3D.classList.add('active');
+
+          // Initialize 3D scene if not already done
+          if (!window.battleChess3D.scene) {
+            window.battleChess3D.init().then(() => {
+              window.battleChess3D.updateFromGameState(window.game);
+              window.battleChess3D.toggle(true);
+            });
+          } else {
+            window.battleChess3D.updateFromGameState(window.game);
+            window.battleChess3D.toggle(true);
+          }
+        }, 300);
+
+        soundManager.playCapture();
+      }
+    });
+  }
+
 
   // --- Menu Actions ---
   document.getElementById('restart-btn').addEventListener('click', () => location.reload());
@@ -526,6 +597,7 @@ function setupGlobalListeners() {
       switch (e.key.toLowerCase()) {
         case 'h': if (window.game.phase === PHASES.PLAY) window.game.showTutorSuggestions(); break;
         case 'u': if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove(); break;
+        case '3': document.getElementById('toggle-3d-btn')?.click(); break; // Toggle 3D mode
         case 'escape':
         case 'esc':
           if (window.game.selectedSquare) {

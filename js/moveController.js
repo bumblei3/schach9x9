@@ -281,8 +281,39 @@ export class MoveController {
             UI.updateClockUI(this.game);
         }
 
+        // Add position to repetition history
         const currentHash = this.getBoardHash();
         this.game.positionHistory.push(currentHash);
+
+        // Update 3D board if active
+        if (window.battleChess3D && window.battleChess3D.enabled && this.game.moveHistory.length > 0) {
+            const lastMove = this.game.moveHistory[this.game.moveHistory.length - 1];
+            const piece = lastMove.piece;
+            const from = lastMove.from;
+            const to = lastMove.to;
+            const targetPiece = lastMove.capturedPiece;
+            const moveRecord = lastMove;
+
+            const captured = targetPiece || (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant');
+            if (captured) {
+                // Play battle animation on capture
+                const attackerData = { type: piece.type, color: piece.color };
+                const defenderData = targetPiece || moveRecord.specialMove.capturedPawn;
+                window.battleChess3D.playBattleSequence(
+                    attackerData,
+                    defenderData,
+                    from,
+                    to
+                ).then(() => {
+                    // After battle, update the board state
+                    window.battleChess3D.removePiece(to.r, to.c);
+                    window.battleChess3D.animateMove(from.r, from.c, to.r, to.c);
+                });
+            } else {
+                // Normal move animation
+                window.battleChess3D.animateMove(from.r, from.c, to.r, to.c);
+            }
+        }
 
         const opponentColor = this.game.turn;
         if (this.game.isCheckmate(opponentColor)) {
@@ -423,6 +454,11 @@ export class MoveController {
         UI.updateMoveHistoryUI(this.game);
         UI.updateStatus(this.game);
         this.game.log(`Zug ${move.piece.color === 'white' ? 'Weiß' : 'Schwarz'} zurückgenommen`);
+
+        // Update 3D board if active
+        if (window.battleChess3D && window.battleChess3D.enabled) {
+            window.battleChess3D.updateFromGameState(this.game);
+        }
 
         if (this.game.updateBestMoves) this.game.updateBestMoves();
         this.updateUndoRedoButtons();
@@ -636,7 +672,7 @@ export class MoveController {
         if (!savedData) {
             this.game.log('Kein gespeichertes Spiel gefunden.');
             alert('Kein gespeichertes Spiel gefunden.');
-            return;
+            return false;
         }
 
         try {
@@ -693,9 +729,11 @@ export class MoveController {
             }
 
             this.game.log('Spiel geladen! 📂');
+            return true;
         } catch (e) {
             console.error('Fehler beim Laden:', e);
             this.game.log('Fehler beim Laden des Spielstands.');
+            return false;
         }
     }
 

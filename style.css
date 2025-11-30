@@ -131,6 +131,7 @@ body {
   font-weight: 800;
   font-size: 1.25rem;
   background: linear-gradient(135deg, #fff, #94a3b8);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -227,6 +228,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  /* Added for 3D container positioning */
 }
 
 #board-wrapper {
@@ -354,6 +357,46 @@ body {
 .action-icon-btn:active {
   transform: translateY(0);
 }
+
+/* 3D mode active state */
+.action-icon-btn.active-3d {
+  background: var(--accent-primary);
+  color: white;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* --- 3D Battle Chess Container --- */
+#battle-chess-3d-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+#battle-chess-3d-container.active {
+  pointer-events: auto;
+  opacity: 1;
+  transform: scale(1);
+}
+
+#battle-chess-3d-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 4px;
+}
+
+/* Hide 2D board when 3D is active for cleaner look */
+#board-wrapper {
+  transition: opacity 0.3s ease;
+}
+
+
 
 /* --- Shop Panel --- */
 .shop-panel {

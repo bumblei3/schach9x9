@@ -72,7 +72,7 @@ export class GameController {
                         this.game.phase = PHASES.GAME_OVER;
                         this.game.log('Zeit abgelaufen! Schwarz gewinnt.');
                         UI.updateStatus(this.game);
-                        soundManager.playSound('game-end');
+                        soundManager.playGameOver(false);
                     }
                 } else {
                     this.game.blackTime = Math.max(0, this.game.blackTime - delta);
@@ -80,7 +80,7 @@ export class GameController {
                         this.game.phase = PHASES.GAME_OVER;
                         this.game.log('Zeit abgelaufen! Weiß gewinnt.');
                         UI.updateStatus(this.game);
-                        soundManager.playSound('game-end');
+                        soundManager.playGameOver(false);
                     }
                 }
                 UI.updateClockDisplay(this.game);
@@ -202,6 +202,11 @@ export class GameController {
                 this.game.board[r][c] = null;
                 this.updateShopUI();
                 this.game.log('Figur entfernt, Punkte erstattet.');
+
+                // Update 3D board if active
+                if (window.battleChess3D && window.battleChess3D.enabled) {
+                    window.battleChess3D.removePiece(r, c);
+                }
             } else {
                 this.game.log('Bitte zuerst eine Figur im Shop auswählen!');
             }
@@ -236,6 +241,11 @@ export class GameController {
             };
             this.game.points -= cost;
             this.updateShopUI();
+
+            // Update 3D board if active
+            if (window.battleChess3D && window.battleChess3D.enabled) {
+                window.battleChess3D.addPiece(this.game.selectedShopPiece, color, r, c);
+            }
         }
     }
 
@@ -541,7 +551,7 @@ export class GameController {
         try {
             localStorage.setItem('schach9x9_save', JSON.stringify(gameState));
             this.game.log('💾 Spiel erfolgreich gespeichert!');
-            soundManager.playSound('move-self'); // Feedback sound
+            soundManager.playMove(); // Feedback sound
         } catch (e) {
             console.error('Save failed:', e);
             this.game.log('❌ Fehler beim Speichern: ' + e.message);
@@ -635,7 +645,7 @@ export class GameController {
             }
 
             this.game.log('📂 Spiel erfolgreich geladen!');
-            soundManager.playSound('game-start'); // Feedback sound
+            soundManager.playGameStart(); // Feedback sound
 
         } catch (e) {
             console.error('Load failed:', e);
