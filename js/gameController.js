@@ -234,17 +234,26 @@ export class GameController {
 
         const cost = PIECE_VALUES[this.game.selectedShopPiece];
         if (this.game.points >= cost) {
+            const pieceType = this.game.selectedShopPiece; // Store before clearing
+
             this.game.board[r][c] = {
-                type: this.game.selectedShopPiece,
+                type: pieceType,
                 color: color,
                 hasMoved: false,
             };
             this.game.points -= cost;
+
+            // Clear selection after placing the piece
+            this.game.selectedShopPiece = null;
+
+            // Deselect all shop buttons
+            document.querySelectorAll('.shop-item').forEach(btn => btn.classList.remove('selected'));
+
             this.updateShopUI();
 
             // Update 3D board if active
             if (window.battleChess3D && window.battleChess3D.enabled) {
-                window.battleChess3D.addPiece(this.game.selectedShopPiece, color, r, c);
+                window.battleChess3D.addPiece(pieceType, color, r, c);
             }
         }
     }

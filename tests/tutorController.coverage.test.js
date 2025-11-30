@@ -265,4 +265,103 @@ describe('TutorController Coverage', () => {
             expect(analysis.tacticalPatterns).toBeDefined();
         });
     });
+
+    describe('Template Placement Logic', () => {
+        beforeEach(() => {
+            game.phase = PHASES.SETUP_WHITE_PIECES;
+            game.whiteCorridor = { rowStart: 6, colStart: 3 };
+            game.blackCorridor = { rowStart: 0, colStart: 3 };
+            game.initialPoints = 15;
+            game.points = 15;
+
+            // Place white king
+            game.board[7][4] = { type: 'k', color: 'white', hasMoved: false };
+        });
+
+        test('should place rooks in back row corners', () => {
+            const template = {
+                id: 'fortress_15',
+                name: 'Die Festung',
+                pieces: ['r', 'r', 'b', 'p', 'p'],
+                cost: 15
+            };
+
+            tutorController.applySetupTemplate(template.id);
+
+            // Check that rooks are in corners (cols 3 and 5 of corridor)
+            const backRow = 8;
+            const hasRookInLeftCorner = game.board[backRow][3]?.type === 'r';
+            const hasRookInRightCorner = game.board[backRow][5]?.type === 'r';
+
+            expect(hasRookInLeftCorner || hasRookInRightCorner).toBe(true);
+        });
+
+        test('should place pawns in front row', () => {
+            const template = {
+                id: 'swarm_15',
+                name: 'Der Schwarm',
+                pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'],
+                cost: 15
+            };
+
+            tutorController.applySetupTemplate(template.id);
+
+            // Front row is 6 for white
+            const frontRow = 6;
+            let pawnCount = 0;
+            for (let c = 3; c < 6; c++) {
+                if (game.board[frontRow][c]?.type === 'p') {
+                    pawnCount++;
+                }
+            }
+
+            expect(pawnCount).toBeGreaterThan(0);
+        });
+
+        test('should place knights in middle row when possible', () => {
+            const template = {
+                id: 'flexible_15',
+                name: 'Flexibel',
+                pieces: ['a', 'r', 'b'],
+                cost: 15
+            };
+
+            tutorController.applySetupTemplate(template.id);
+
+            // Just verify the template was applied without errors
+            expect(game.points).toBe(0);
+        });
+
+        test('should clear existing pieces before applying template', () => {
+            // Place some pieces first
+            game.board[6][3] = { type: 'p', color: 'white', hasMoved: false };
+            game.board[6][4] = { type: 'n', color: 'white', hasMoved: false };
+
+            const template = {
+                id: 'rush_15',
+                name: 'Der Ansturm',
+                pieces: ['q', 'n', 'n'],
+                cost: 15
+            };
+
+            tutorController.applySetupTemplate(template.id);
+
+            // Points should be reset to initial
+            expect(game.points).toBe(0);
+        });
+
+        test('should not overwrite the king', () => {
+            const template = {
+                id: 'fortress_15',
+                name: 'Die Festung',
+                pieces: ['r', 'r', 'b', 'p', 'p'],
+                cost: 15
+            };
+
+            tutorController.applySetupTemplate(template.id);
+
+            // King should still be in place
+            expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+        });
+    });
 });

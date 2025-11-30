@@ -291,4 +291,55 @@ describe('GameController Coverage', () => {
             expect(game.board[6][3]).toBeNull();
         });
     });
+
+    describe('Shop Points Fix', () => {
+        test('should clear selectedShopPiece after placing a piece', () => {
+            game.phase = PHASES.SETUP_WHITE_PIECES;
+            game.points = 15;
+            game.selectedShopPiece = 'p'; // Select pawn
+            game.board[6][3] = null;
+
+            gameController.placeShopPiece(6, 3);
+
+            expect(game.selectedShopPiece).toBeNull();
+            expect(game.points).toBe(14); // 15 - 1
+            expect(game.board[6][3]).toEqual({ type: 'p', color: 'white', hasMoved: false });
+        });
+
+        test('should deselect shop buttons after placement', () => {
+            game.phase = PHASES.SETUP_WHITE_PIECES;
+            game.points = 15;
+            game.selectedShopPiece = 'n'; // Select knight
+            game.board[6][3] = null;
+
+            const mockButtons = [
+                { classList: { remove: jest.fn() } },
+                { classList: { remove: jest.fn() } }
+            ];
+            jest.spyOn(document, 'querySelectorAll').mockReturnValue(mockButtons);
+
+            gameController.placeShopPiece(6, 3);
+
+            expect(mockButtons[0].classList.remove).toHaveBeenCalledWith('selected');
+            expect(mockButtons[1].classList.remove).toHaveBeenCalledWith('selected');
+        });
+
+        test('should not allow placing same piece twice without reselecting', () => {
+            game.phase = PHASES.SETUP_WHITE_PIECES;
+            game.points = 15;
+            game.selectedShopPiece = 'p';
+            game.board[6][3] = null;
+            game.board[6][4] = null;
+
+            // First placement
+            gameController.placeShopPiece(6, 3);
+            expect(game.selectedShopPiece).toBeNull();
+            expect(game.points).toBe(14);
+
+            // Try to place again without reselecting
+            gameController.placeShopPiece(6, 4);
+            expect(game.board[6][4]).toBeNull(); // Should not be placed
+            expect(game.points).toBe(14); // Points should not change
+        });
+    });
 });

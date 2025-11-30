@@ -147,12 +147,17 @@
           </svg>
         </button>
         <button id="toggle-3d-btn" class="action-icon-btn" title="3D Battle Modus (3)">
-          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-            <path d="M2 17l10 5 10-5"></path>
-            <path d="M2 12l10 5 10-5"></path>
-          </svg>
+          <span class="icon">🎮</span>
         </button>
+        <select id="skin-selector" class="skin-selector" title="Figuren-Skin auswählen">
+          <option value="classic">Klassisch</option>
+          <option value="modern">Modern</option>
+          <option value="pixel">Pixel</option>
+          <option value="infernale">Infernale</option>
+          <option value="wood">Holz</option>
+          <option value="neon">Neon</option>
+          <option value="minimalist">Minimalistisch</option>
+        </select>
         <button id="info-toggle-btn" class="action-icon-btn" title="Info / Log">
           <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
             <circle cx="12" cy="12" r="10"></circle>
@@ -241,8 +246,9 @@
 
           <div class="menu-section">
             <h3>Einstellungen</h3>
+
             <div class="setting-row">
-              <label>Thema</label>
+              <label>Brett-Design</label>
               <select id="theme-select" class="menu-select">
                 <option value="classic">Klassisch</option>
                 <option value="blue">Blau</option>
@@ -280,7 +286,7 @@
           <div class="menu-section">
             <h3>Extras</h3>
             <button id="stats-btn" class="menu-item">📊 Statistiken</button>
-            <button id="skins-btn" class="menu-item">🎨 Figuren-Skins</button>
+
             <button id="help-btn" class="menu-item">📖 Hilfe / Tutorial</button>
           </div>
         </div>

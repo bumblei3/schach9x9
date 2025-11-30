@@ -74,9 +74,9 @@ export class TutorController {
         quickScored.sort((a, b) => b.heuristic - a.heuristic);
         const topCandidates = quickScored.slice(0, Math.min(8, quickScored.length));
 
-        // Evaluate top candidates with shallow Minimax (depth 1 only for speed)
+        // Evaluate top candidates with shallow Minimax (depth 2 for better accuracy)
         const evaluatedMoves = [];
-        const depth = 1; // Always use depth 1 to prevent freezing
+        const depth = 2; // Depth 2 for better tactical awareness
 
         for (const { move } of topCandidates) {
             const fromPiece = this.game.board[move.from.r][move.from.c];
@@ -622,25 +622,25 @@ export class TutorController {
             // Top tier move
             if (score >= 300) {
                 category = 'excellent';
-                qualityLabel = '⭐⭐⭐ Gewinnzug!';
+                qualityLabel = '⭐⭐⭐ Gewinnzug! Diese Stellung ist entscheidend.';
             } else if (diff >= -0.1) {
                 category = 'excellent';
                 qualityLabel = '⭐⭐⭐ Bester Zug';
             } else {
                 category = 'good';
-                qualityLabel = `⭐⭐ Guter Zug (${diffPawns} Bauern schwächer)`;
+                qualityLabel = `⭐⭐ Guter Zug (minimal schwächer: ${Math.abs(parseFloat(diffPawns))} Bauern)`;
             }
         } else if (diff >= -1.5) {
             category = 'normal';
-            qualityLabel = `⭐ Solider Zug (${diffPawns} Bauern schwächer)`;
+            qualityLabel = `⭐ Solider Zug (${Math.abs(parseFloat(diffPawns))} Bauern schwächer als bester Zug)`;
         } else if (diff >= -3.0) {
             category = 'questionable';
-            qualityLabel = `⚠️ Fragwürdig (${diffPawns} Bauern schwächer)`;
-            warnings.push('Bessere Alternativen verfügbar');
+            qualityLabel = `⚠️ Fragwürdig (${Math.abs(parseFloat(diffPawns))} Bauern schlechter)`;
+            warnings.push('Es gibt deutlich bessere Züge! Überlege nochmal.');
         } else {
             category = 'mistake';
-            qualityLabel = `❌ Fehler (${diffPawns} Bauern schwächer)`;
-            warnings.push('Deutlich bessere Züge vorhanden!');
+            qualityLabel = `❌ Fehler (${Math.abs(parseFloat(diffPawns))} Bauern Nachteil)`;
+            warnings.push('⚠️ Dieser Zug verschenkt Material oder Position!');
         }
 
         // Detect tactical patterns
@@ -716,28 +716,28 @@ export class TutorController {
             {
                 id: 'fortress_15',
                 name: '🏰 Die Festung',
-                description: 'Defensivstark mit 2 Türmen. Gut für Anfänger.',
+                description: 'Defensive Strategie: 2 Türme kontrollieren wichtige Linien, Läufer unterstützt. Ideal gegen aggressive Gegner.',
                 pieces: ['r', 'r', 'b', 'p', 'p'], // 5+5+3+1+1 = 15
                 cost: 15
             },
             {
                 id: 'rush_15',
                 name: '⚡ Der Ansturm',
-                description: 'Aggressiv mit Dame und Springern. Für Taktiker.',
+                description: 'Offensive Strategie: Dame + 2 Springer für frühen Angriffsdruck. Für erfahrene Spieler, die schnell zuschlagen wollen.',
                 pieces: ['q', 'n', 'n'], // 9+3+3 = 15
                 cost: 15
             },
             {
                 id: 'flexible_15',
                 name: '🔄 Flexibel',
-                description: 'Ausgewogen mit Erzbischof und Turm.',
+                description: 'Ausgewogene Strategie: Erzbischof (Läufer+Springer-Hybrid) bietet Vielseitigkeit. Anpassbar  an jede Situation.',
                 pieces: ['a', 'r', 'b'], // 7+5+3 = 15
                 cost: 15
             },
             {
                 id: 'swarm_15',
                 name: '🐝 Der Schwarm',
-                description: 'Viele Figuren für maximale Kontrolle.',
+                description: 'Zahlenüberlegenheit: Viele leichte Figuren für Feldkontrolle und Flexibilität. Schwer für Gegner zu verteidigen.',
                 pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'], // 3+3+3+3+1+1+1 = 15
                 cost: 15
             }
@@ -799,10 +799,6 @@ export class TutorController {
 
                 const piece = this.game.board[r][c];
                 if (piece && piece.type !== 'k') {
-                    // Refund
-                    const value = Object.values(this.game.SHOP_PIECES || {}).find(p => p.symbol === piece.type)?.points || 0;
-                    // Note: We need access to SHOP_PIECES, assuming it's available or we use hardcoded values
-                    // Better to rely on gameController logic or just reset points to 15
                     this.game.board[r][c] = null;
                 }
             }
@@ -811,140 +807,134 @@ export class TutorController {
         // Reset points
         this.game.points = this.game.initialPoints;
 
-        // Smart Placement Logic
+        // --- Smarter Placement Logic ---
 
-        // 1. Define Rows
-        const rows = [];
-        if (isWhite) {
-            rows.push(corridor.rowStart + 2); // Front (e.g. 6)
-            rows.push(corridor.rowStart + 1); // Middle (e.g. 7)
-            rows.push(corridor.rowStart);     // Back (e.g. 8)
-        } else {
-            rows.push(corridor.rowStart + 2); // Front (e.g. 2)
-            rows.push(corridor.rowStart + 1); // Middle (e.g. 1)
-            rows.push(corridor.rowStart);     // Back (e.g. 0)
-        }
-        // Actually, for White, rowStart is top-left of 3x3. 
-        // If whiteCorridor is rows 6-8:
-        // rowStart = 6.
-        // Front is 6 (closest to center? No, wait).
-        // Board is 0..8. 0 is Black side, 8 is White side.
-        // White pawns move UP (decreasing row index)? No, usually White is at bottom (rows 7-8) moving to 0.
-        // Let's check gameEngine.js or config.js for direction.
-        // Standard chess: White at 7,8 moving to 0.
-        // If White is at bottom (rows 6,7,8), then Front is 6, Back is 8.
-        // If Black is at top (rows 0,1,2), then Front is 2, Back is 0.
-
-        // Let's verify direction.
-        // In moveController/gameEngine:
-        // White pawns move -1 (up), Black pawns move +1 (down).
-        // So White is at bottom (high indices), Black at top (low indices).
-
+        // 1. Define Rows based on color (Back, Middle, Front)
         let frontRow, middleRow, backRow;
         if (isWhite) {
+            // White is at bottom (rows 6,7,8). Front is 6 (closest to center).
             frontRow = corridor.rowStart;     // 6
             middleRow = corridor.rowStart + 1; // 7
             backRow = corridor.rowStart + 2;   // 8
         } else {
+            // Black is at top (rows 0,1,2). Front is 2 (closest to center).
             frontRow = corridor.rowStart + 2; // 2
             middleRow = corridor.rowStart + 1; // 1
             backRow = corridor.rowStart;      // 0
         }
 
-        // Helper to get empty squares in a specific row
-        const getEmptyInRow = (r) => {
-            if (r < 0 || r >= 9) return [];
+        // Helper to get available squares in a specific row
+        const getAvailableInRow = (r) => {
+            if (r < 0 || r >= BOARD_SIZE) return [];
             const squares = [];
             for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
-                if (!this.game.board[r][c]) squares.push({ r, c });
+                // Check if square is empty or has a piece we can overwrite (not King)
+                const piece = this.game.board[r][c];
+                if (!piece || piece.type !== 'k') {
+                    squares.push({ r, c });
+                }
             }
-            // Sort by distance from center column (4) to prioritize central placement?
-            // Or prioritize corners for rooks?
             return squares;
         };
 
-        const frontSquares = getEmptyInRow(frontRow);
-        const middleSquares = getEmptyInRow(middleRow);
-        const backSquares = getEmptyInRow(backRow);
+        let frontSquares = getAvailableInRow(frontRow);
+        let middleSquares = getAvailableInRow(middleRow);
+        let backSquares = getAvailableInRow(backRow);
 
-        // Sort back squares to prioritize corners (first and last in list)
-        // Actually, just sorting by column distance from center might be enough
-        // But for Rooks, we want corners.
-
-        // Helper to get value for sorting
-        const getVal = (type) => {
-            const map = { q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1, e: 12 };
-            return map[type] || 0;
+        // Helper to place a piece in the first available slot from a list
+        const placeInSlots = (pieceType, slots) => {
+            if (slots.length > 0) {
+                const sq = slots.shift();
+                this.placePiece(sq.r, sq.c, pieceType, isWhite);
+                return true;
+            }
+            return false;
         };
 
-        // Separate pieces
+        // Helper to place in specific priority: Back -> Middle -> Front
+        const placeAnywhere = (pieceType) => {
+            if (placeInSlots(pieceType, backSquares)) return;
+            if (placeInSlots(pieceType, middleSquares)) return;
+            if (placeInSlots(pieceType, frontSquares)) return;
+        };
+
+        // Categorize pieces from template
         const pawns = template.pieces.filter(p => p === 'p');
-        const others = template.pieces.filter(p => p !== 'p');
+        const rooks = template.pieces.filter(p => p === 'r' || p === 'c'); // Rooks and Chancellors prefer corners
+        const bishops = template.pieces.filter(p => p === 'b' || p === 'a'); // Bishops/Archbishops prefer diagonals
+        const knights = template.pieces.filter(p => p === 'n');
+        const queens = template.pieces.filter(p => p === 'q');
+        const others = template.pieces.filter(p => !['p', 'r', 'c', 'b', 'a', 'n', 'q'].includes(p));
 
-        // Sort others by value (descending)
-        others.sort((a, b) => getVal(b) - getVal(a));
+        // --- Execution Phase ---
 
-        // Placement Queue
-        // 1. Pawns -> Front Row
-        // 2. Rooks/Chancellors -> Back Row Corners
-        // 3. Rest -> Back Row -> Middle Row -> Front Row
-
-        // 1. Place Pawns
+        // 1. Pawns -> Front Row Shield
         pawns.forEach(p => {
-            if (frontSquares.length > 0) {
-                const sq = frontSquares.shift(); // Take from front row
-                this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (middleSquares.length > 0) {
-                const sq = middleSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (backSquares.length > 0) {
-                const sq = backSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
+            if (!placeInSlots(p, frontSquares)) {
+                // Overflow to middle if front is full
+                if (!placeInSlots(p, middleSquares)) {
+                    placeInSlots(p, backSquares);
+                }
             }
         });
 
-        // 2. Place Rooks/Chancellors (Corner preference)
-        const cornerPieces = others.filter(p => ['r', 'c'].includes(p));
-        const otherPieces = others.filter(p => !['r', 'c'].includes(p));
-
-        cornerPieces.forEach(p => {
-            // Try to find a corner in back row
-            // We can identify corners by checking column index relative to corridor
+        // 2. Rooks/Chancellors -> Back Row Corners
+        rooks.forEach(p => {
+            // Sort backSquares to find corners (cols 0 and 2 relative to corridor)
             const corners = backSquares.filter(sq => sq.c === corridor.colStart || sq.c === corridor.colStart + 2);
-
             if (corners.length > 0) {
-                // Pick a corner
+                // Take a corner
                 const sq = corners[0];
                 // Remove from backSquares
-                const idx = backSquares.indexOf(sq);
-                if (idx > -1) backSquares.splice(idx, 1);
-
+                backSquares = backSquares.filter(s => s !== sq);
                 this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (backSquares.length > 0) {
-                const sq = backSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (middleSquares.length > 0) {
-                const sq = middleSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (frontSquares.length > 0) {
-                const sq = frontSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
+            } else {
+                placeAnywhere(p);
             }
         });
 
-        // 3. Place remaining pieces
-        otherPieces.forEach(p => {
-            // Fill Back -> Middle -> Front
-            if (backSquares.length > 0) {
-                const sq = backSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (middleSquares.length > 0) {
-                const sq = middleSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
-            } else if (frontSquares.length > 0) {
-                const sq = frontSquares.shift();
-                this.placePiece(sq.r, sq.c, p, isWhite);
+        // 3. Bishops/Archbishops -> Back Row Center or Middle Row
+        bishops.forEach(p => {
+            // Try Back Row Center first (Col 1 relative to corridor)
+            const centerBack = backSquares.find(sq => sq.c === corridor.colStart + 1);
+            if (centerBack) {
+                backSquares = backSquares.filter(s => s !== centerBack);
+                this.placePiece(centerBack.r, centerBack.c, p, isWhite);
+            } else {
+                // Try Middle Row Corners (for fianchetto style)
+                const cornersMiddle = middleSquares.filter(sq => sq.c === corridor.colStart || sq.c === corridor.colStart + 2);
+                if (cornersMiddle.length > 0) {
+                    const sq = cornersMiddle[0];
+                    middleSquares = middleSquares.filter(s => s !== sq);
+                    this.placePiece(sq.r, sq.c, p, isWhite);
+                } else {
+                    placeAnywhere(p);
+                }
             }
+        });
+
+        // 4. Queens -> Best available (Back Center preference)
+        queens.forEach(p => {
+            // Try Back Row Center if still open
+            const centerBack = backSquares.find(sq => sq.c === corridor.colStart + 1);
+            if (centerBack) {
+                backSquares = backSquares.filter(s => s !== centerBack);
+                this.placePiece(centerBack.r, centerBack.c, p, isWhite);
+            } else {
+                placeAnywhere(p);
+            }
+        });
+
+        // 5. Knights -> Middle Row (Central control)
+        knights.forEach(p => {
+            if (!placeInSlots(p, middleSquares)) {
+                placeAnywhere(p);
+            }
+        });
+
+        // 6. Others (Angels, etc.) -> Anywhere
+        others.forEach(p => {
+            placeAnywhere(p);
         });
 
         // Update UI
