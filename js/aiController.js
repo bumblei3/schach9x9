@@ -218,6 +218,9 @@ export class AIController {
         // Simulate move
         const fromPiece = this.game.board[move.from.r][move.from.c];
         const toPiece = this.game.board[move.to.r][move.to.c];
+        // FIX: Save piece properties to prevent corruption during recursive simulation
+        const fromPieceType = fromPiece ? fromPiece.type : null;
+        const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
 
         this.game.board[move.to.r][move.to.c] = fromPiece;
         this.game.board[move.from.r][move.from.c] = null;
@@ -254,6 +257,11 @@ export class AIController {
         // Undo move
         this.game.board[move.from.r][move.from.c] = fromPiece;
         this.game.board[move.to.r][move.to.c] = toPiece;
+        // FIX: Restore piece properties to prevent corruption
+        if (fromPiece) {
+            fromPiece.type = fromPieceType;
+            fromPiece.hasMoved = fromPieceHasMoved;
+        }
 
         return score;
     }
@@ -284,6 +292,10 @@ export class AIController {
                 // Simulate
                 const fromPiece = this.game.board[move.from.r][move.from.c];
                 const toPiece = this.game.board[move.to.r][move.to.c];
+                // FIX: Save piece properties
+                const fromPieceType = fromPiece ? fromPiece.type : null;
+                const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
+
                 this.game.board[move.to.r][move.to.c] = fromPiece;
                 this.game.board[move.from.r][move.from.c] = null;
 
@@ -292,6 +304,11 @@ export class AIController {
                 // Undo
                 this.game.board[move.from.r][move.from.c] = fromPiece;
                 this.game.board[move.to.r][move.to.c] = toPiece;
+                // FIX: Restore piece properties
+                if (fromPiece) {
+                    fromPiece.type = fromPieceType;
+                    fromPiece.hasMoved = fromPieceHasMoved;
+                }
 
                 if (score >= beta) return beta;
                 if (score > alpha) alpha = score;
@@ -302,6 +319,10 @@ export class AIController {
                 // Simulate
                 const fromPiece = this.game.board[move.from.r][move.from.c];
                 const toPiece = this.game.board[move.to.r][move.to.c];
+                // FIX: Save piece properties
+                const fromPieceType = fromPiece ? fromPiece.type : null;
+                const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
+
                 this.game.board[move.to.r][move.to.c] = fromPiece;
                 this.game.board[move.from.r][move.from.c] = null;
 
@@ -310,6 +331,11 @@ export class AIController {
                 // Undo
                 this.game.board[move.from.r][move.from.c] = fromPiece;
                 this.game.board[move.to.r][move.to.c] = toPiece;
+                // FIX: Restore piece properties
+                if (fromPiece) {
+                    fromPiece.type = fromPieceType;
+                    fromPiece.hasMoved = fromPieceHasMoved;
+                }
 
                 if (score <= alpha) return alpha;
                 if (score < beta) beta = score;
