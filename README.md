@@ -13,6 +13,8 @@ Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer
 *   **Tutor-Modus**: Erhalte Tipps und Analysen während des Spiels.
 *   **PWA-Support**: Installiere das Spiel als App auf deinem Gerät und spiele offline.
 *   **Modernes UI**: Anpassbare Themes, Soundeffekte und flüssige Animationen.
+*   **3D-Schlachtmodus**: Erlebe epische Schlachten mit animierten 3D-Figuren und Kampfsequenzen (powered by Three.js).
+*   **Statistik-System**: Verfolge deine Fortschritte mit detaillierten Statistiken, Win/Loss-Tracking und Spielhistorie.
 
 ## 🚀 Installation & Start
 
@@ -58,7 +60,9 @@ Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer
 
 *   **KI-Training:**
     ```bash
-    npm run train
+    npm run train          # Standard Training
+    npm run train:fast     # Schnelles Training (50 Spiele)
+    npm run train:thorough # Gründliches Training (500 Spiele)
     ```
 
 ## 🎮 Spielregeln (Kurzfassung)
@@ -70,6 +74,7 @@ Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer
 ## 💻 Tech Stack
 
 *   **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
+*   **3D Engine**: Three.js
 *   **Testing**: Jest
 *   **Tools**: ESLint, Prettier, Husky
 
