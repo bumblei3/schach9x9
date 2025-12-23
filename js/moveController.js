@@ -4,6 +4,7 @@ import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
 import { PIECE_SVGS } from './chess-pieces.js';
 import { logger } from './logger.js';
+import { evaluatePosition } from './aiEngine.js';
 
 // Piece values for shop (needed for some logic?)
 const PIECES = SHOP_PIECES;
@@ -62,7 +63,19 @@ export class MoveController {
         UI.renderBoard(this.game);
     }
 
-    async executeMove(from, to) {
+    /**
+     * Executes a move on the board
+     * @param {Object} from Source square {r, c}
+     * @param {Object} to Destination square {r, c}
+     * @param {boolean} isUndoRedo Whether this move is from an undo/redo operation
+     */
+    async executeMove(from, to, isUndoRedo = false) {
+        // Clear redo stack if this is a new move
+        if (!isUndoRedo) {
+            this.redoStack = [];
+            this.updateUndoRedoButtons();
+        }
+
         // Clear tutor arrows when making a move
         if (this.game.arrowRenderer) {
             this.game.arrowRenderer.clearArrows();
@@ -185,6 +198,10 @@ export class MoveController {
                 soundManager.playMove();
             }
         }
+
+        // Calculate evaluation score (from white's perspective)
+        const evalScore = evaluatePosition(this.game.board, 'white');
+        moveRecord.evalScore = evalScore;
 
         // Add move to history
         this.game.moveHistory.push(moveRecord);
@@ -360,6 +377,7 @@ export class MoveController {
         }
 
         UI.updateStatus(this.game);
+        UI.renderEvalGraph(this.game);
         this.game.log(`${this.game.turn === 'white' ? 'Weiß' : 'Schwarz'} ist am Zug.`);
 
         if (this.game.isAI && this.game.turn === 'black' && this.game.phase === PHASES.PLAY) {
@@ -476,7 +494,7 @@ export class MoveController {
             this.game.board[move.from.r][move.from.c]
         );
 
-        await this.executeMove(move.from, move.to);
+        await this.executeMove(move.from, move.to, true);
         this.updateUndoRedoButtons();
     }
 

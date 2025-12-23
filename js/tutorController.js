@@ -1,19 +1,31 @@
 import { PHASES, BOARD_SIZE } from './gameEngine.js';
 import * as UI from './ui.js';
 import { logger } from './logger.js';
+import { debounce } from './utils.js';
 
 export class TutorController {
     constructor(game) {
         this.game = game;
+        // Debounce the heavy calculation part
+        this.debouncedGetTutorHints = debounce(() => {
+            this.game.bestMoves = this.getTutorHints();
+        }, 300);
     }
 
     updateBestMoves() {
+        // Disable tutor in classic mode (AI vs AI) to save performance
+        if (this.game.mode === 'classic') {
+            this.game.bestMoves = [];
+            return;
+        }
+
         if (this.game.phase === PHASES.PLAY && (!this.game.isAI || this.game.turn === 'white')) {
             const originalWarn = console.warn;
             console.warn = () => { };
 
             try {
-                this.game.bestMoves = this.getTutorHints();
+                // Use debounced version to avoid blocking the main thread too often
+                this.debouncedGetTutorHints();
             } finally {
                 console.warn = originalWarn;
             }

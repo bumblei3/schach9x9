@@ -34,6 +34,7 @@ jest.mock('../js/ui.js', () => ({
     updateClockUI: jest.fn(),
     animateCheck: jest.fn(),
     animateCheckmate: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 jest.mock('../js/sounds.js', () => ({

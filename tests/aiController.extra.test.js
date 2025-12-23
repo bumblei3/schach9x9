@@ -47,7 +47,7 @@ describe('AIController Ultimate Precision V5', () => {
             drawOfferedBy: 'white',
             mode: 'pve',
             placeKing: jest.fn(),
-            placeShopPiece: jest.fn(),
+            placeShopPiece: jest.fn(() => game.points--),
             finishSetupPhase: jest.fn(),
             resign: jest.fn(),
             offerDraw: jest.fn(),
@@ -64,7 +64,8 @@ describe('AIController Ultimate Precision V5', () => {
             difficulty: 'medium',
             getAllLegalMoves: jest.fn(() => []),
             arrowRenderer: { clearArrows: jest.fn(), drawArrow: jest.fn() },
-            halfMoveClock: 0
+            halfMoveClock: 0,
+            findKing: jest.fn(() => ({ r: 1, c: 4 })) // Add findKing mock
         };
         controller = new AIController(game);
         jest.clearAllMocks();
@@ -84,15 +85,23 @@ describe('AIController Ultimate Precision V5', () => {
         expect(game.offerDraw).toHaveBeenCalledWith('black');
     });
 
-    test('aiMove - bestMove null branch (Line 140)', () => {
+    test('aiMove - bestMove null branch (multi-worker)', () => {
         controller.aiMove();
-        controller.aiWorker.onmessage({ data: { type: 'bestMove', data: null } });
+        // With multi-worker, we have aiWorkers array
+        expect(controller.aiWorkers).toBeDefined();
+        expect(controller.aiWorkers.length).toBeGreaterThan(0);
+
+        // Simulate first worker returning null
+        const firstWorker = controller.aiWorkers[0];
+        if (firstWorker.onmessage) {
+            firstWorker.onmessage({ data: { type: 'bestMove', data: null } });
+        }
         expect(game.log).toHaveBeenCalledWith(expect.stringContaining('KI kann nicht ziehen'));
     });
 
     test('updateAIProgress - data null coverage (Line 163 reset)', () => {
         controller.updateAIProgress(null);
-        // Should not crash after my fix
+        // Should not crash after fix
     });
 
     test('highlightMove - arrowRenderer coverage (Line 682-683)', () => {

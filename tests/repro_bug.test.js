@@ -18,6 +18,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     updateClockUI: jest.fn(),
     showShop: jest.fn(),
     updateShopUI: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({

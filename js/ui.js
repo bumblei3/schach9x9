@@ -1082,6 +1082,119 @@ export function updateStatistics(game) {
   }
 }
 
+/**
+ * Rendert den Evaluationsgraphen basierend auf der Zughistorie.
+ * @param {object} game - Die Game-Instanz
+ */
+export function renderEvalGraph(game) {
+  // Optimization: Don't render if animating to save CPU performance
+  if (game.isAnimating) return;
+
+  const container = document.getElementById('eval-graph-container');
+  const svg = document.getElementById('eval-graph');
+  if (!container || !svg) return;
+
+  // Show container if in analysis or game over phase
+  if (game.phase === PHASES.ANALYSIS || game.phase === PHASES.GAME_OVER) {
+    container.classList.remove('hidden');
+  } else {
+    // container.classList.add('hidden'); // Optional: show always
+  }
+
+  const history = game.moveHistory;
+  if (history.length === 0) {
+    svg.innerHTML = '';
+    return;
+  }
+
+  // Extract scores, handle missing scores (fallback to 0)
+  // Include move 0 (initial position) if possible, but moveHistory starts from first move.
+  // We'll treat the start as 0.
+  const scores = [0, ...history.map(m => m.evalScore || 0)];
+
+  const width = 1000;
+  const height = 100;
+  const centerY = height / 2;
+  const maxEval = 1000; // Cap evaluation at 10.00 pawns for the graph
+
+  // Calculate points
+  const points = scores.map((score, i) => {
+    const x = (i / (scores.length - 1)) * width;
+    // Map score to Y: +1000 -> 0, 0 -> 50, -1000 -> 100
+    const normalizedScore = Math.max(-maxEval, Math.min(maxEval, score));
+    const y = centerY - (normalizedScore / maxEval) * (height / 2);
+    return { x, y, score, index: i - 1 };
+  });
+
+  // Generate SVG content
+  let svgContent = `
+    <defs>
+      <linearGradient id="eval-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#4ade80;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#4f9cf9;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#f87171;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#4ade80;stop-opacity:0.3" />
+        <stop offset="50%" style="stop-color:#4f9cf9;stop-opacity:0.1" />
+        <stop offset="100%" style="stop-color:#f87171;stop-opacity:0.3" />
+      </linearGradient>
+    </defs>
+    
+    <line x1="0" y1="${centerY}" x2="${width}" y2="${centerY}" class="eval-zero-line" />
+  `;
+
+  // Draw area
+  if (points.length > 1) {
+    let areaPath = `M ${points[0].x} ${centerY} `;
+    points.forEach(p => {
+      areaPath += `L ${p.x} ${p.y} `;
+    });
+    areaPath += `L ${points[points.length - 1].x} ${centerY} Z`;
+    svgContent += `<path d="${areaPath}" class="eval-area" />`;
+
+    // Draw line
+    let linePath = `M ${points[0].x} ${points[0].y} `;
+    for (let i = 1; i < points.length; i++) {
+      // Cubic Bezier for smooth curves (optional)
+      // For now, simple lines are clearer for chess evaluation
+      linePath += `L ${points[i].x} ${points[i].y} `;
+    }
+    svgContent += `<path d="${linePath}" class="eval-line" />`;
+  }
+
+  // Draw interactive points
+  points.forEach((p, i) => {
+    // Only draw every N points if history is very long to avoid DOM bloat
+    const skipFrequency = Math.ceil(points.length / 50);
+    if (i % skipFrequency === 0 || i === points.length - 1) {
+      svgContent += `
+        <circle cx="${p.x}" cy="${p.y}" r="3" class="eval-point" data-index="${p.index}">
+          <title>Zug ${i}: ${(p.score / 100).toFixed(2)}</title>
+        </circle>
+      `;
+    }
+  });
+
+  svg.innerHTML = svgContent;
+
+  // Use event delegation for better performance with many points
+  if (!svg.dataset.hasListener) {
+    svg.addEventListener('click', (e) => {
+      const point = e.target.closest('.eval-point');
+      if (!point) return;
+
+      const index = parseInt(point.dataset.index);
+      if (index >= 0 && game.gameController && game.gameController.jumpToMove) {
+        game.gameController.jumpToMove(index);
+      } else if (index === -1 && game.gameController && game.gameController.jumpToStart) {
+        game.gameController.jumpToStart();
+      }
+    });
+    svg.dataset.hasListener = 'true';
+  }
+}
+
 export function showTutorSuggestions(game) {
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');

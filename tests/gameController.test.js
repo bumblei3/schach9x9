@@ -13,6 +13,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     updateMoveHistoryUI: jest.fn(),
     updateCapturedUI: jest.fn(),
     updateStatistics: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({

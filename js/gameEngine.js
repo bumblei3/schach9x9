@@ -548,20 +548,25 @@ export class Game {
     return false;
   }
 
-  isInCheck(color) {
-    // Find King
-    let kingPos = null;
+  /**
+   * Find the position of the king for a given color
+   * @param {string} color - 'white' or 'black'
+   * @returns {object|null} Position {r, c} or null if not found
+   */
+  findKing(color) {
     for (let r = 0; r < BOARD_SIZE; r++) {
       for (let c = 0; c < BOARD_SIZE; c++) {
         const piece = this.board[r][c];
         if (piece && piece.color === color && piece.type === 'k') {
-          kingPos = { r, c };
-          break;
+          return { r, c };
         }
       }
-      if (kingPos) break;
     }
+    return null;
+  }
 
+  isInCheck(color) {
+    const kingPos = this.findKing(color);
     if (!kingPos) return false; // Should not happen
 
     const opponentColor = color === 'white' ? 'black' : 'white';

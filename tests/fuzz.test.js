@@ -15,10 +15,9 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     showPromotionUI: jest.fn(),
     animateMove: jest.fn().mockResolvedValue(),
     animateCheck: jest.fn(),
-    animateCheckmate: jest.fn(),
-    addCapturedPiece: jest.fn(),
     addMoveToHistory: jest.fn(),
     initBoardUI: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({

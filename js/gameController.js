@@ -704,6 +704,7 @@ export class GameController {
 
         UI.updateStatus(this.game);
         UI.renderBoard(this.game);
+        UI.renderEvalGraph(this.game);
 
         this.game.log('🔍 Analyse-Modus aktiviert. Züge lösen keine KI-Reaktion aus.');
 
@@ -753,6 +754,7 @@ export class GameController {
 
         UI.updateStatus(this.game);
         UI.renderBoard(this.game);
+        UI.renderEvalGraph(this.game);
 
         const message = restore ? '🔍 Analyse-Modus beendet. Position wiederhergestellt.' : '🔍 Analyse-Modus beendet. Aktuelle Position behalten.';
         this.game.log(message);
@@ -778,6 +780,41 @@ export class GameController {
         } else {
             this.game.log('⏸️ Kontinuierliche Analyse deaktiviert.');
         }
+    }
+
+    /**
+     * Jumps to a specific move in the game history (for analysis).
+     * @param {number} moveIndex - Index of the move in moveHistory
+     */
+    jumpToMove(moveIndex) {
+        if (!this.game.moveController || !this.game.moveController.reconstructBoardAtMove) {
+            return;
+        }
+
+        this.game.moveController.reconstructBoardAtMove(moveIndex);
+        this.game.replayPosition = moveIndex;
+
+        UI.renderBoard(this.game);
+        UI.updateStatus(this.game);
+
+        if (this.game.continuousAnalysis) {
+            this.requestPositionAnalysis();
+        }
+    }
+
+    /**
+     * Jumps to the initial game position (for analysis).
+     */
+    jumpToStart() {
+        if (!this.game.moveController || !this.game.moveController.reconstructBoardAtMove) {
+            return;
+        }
+
+        this.game.moveController.reconstructBoardAtMove(0);
+        this.game.replayPosition = -1;
+
+        UI.renderBoard(this.game);
+        UI.updateStatus(this.game);
     }
 
     /**

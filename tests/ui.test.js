@@ -423,46 +423,6 @@ describe('UI Module', () => {
     });
   });
 
-  describe.skip('showSkinSelector', () => {
-    test('should create and show skin selector overlay', () => {
-      const mockGetAvailableSkins = jest.fn(() => ['classic', 'wood', 'neon']);
-      const mockSetPieceSkin = jest.fn();
-
-      jest.spyOn(document, 'getElementById').mockImplementation((id) => {
-        if (id === 'skin-selector-overlay') return null;
-        if (id === 'skin-list') return {
-          innerHTML: '',
-          style: {},
-        };
-        if (id === 'close-skin-selector') return {
-          onclick: null,
-        };
-        return null;
-      });
-
-      jest.spyOn(document, 'createElement').mockReturnValue({
-        id: '',
-        className: '',
-        innerHTML: '',
-        classList: { add: jest.fn(), remove: jest.fn() },
-        onclick: null,
-        style: {},
-      });
-
-      jest.spyOn(document.body, 'appendChild').mockImplementation(() => { });
-
-      // Mock dynamic import
-      global.import = jest.fn(() => Promise.resolve({
-        getAvailableSkins: mockGetAvailableSkins,
-        setPieceSkin: mockSetPieceSkin,
-      }));
-
-      UI.showSkinSelector(game);
-
-      // Verify overlay creation was attempted
-      expect(document.createElement).toHaveBeenCalled();
-    });
-  });
 
   describe('animateCheck', () => {
     test('should add check animation class', () => {

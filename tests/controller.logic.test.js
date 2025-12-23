@@ -36,6 +36,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     addCapturedPiece: jest.fn(),
     showPromotionUI: jest.fn((game, r, c, color, moveRecord, callback) => callback()),
     showShop: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({

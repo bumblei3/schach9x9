@@ -7,6 +7,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     renderBoard: jest.fn(),
     updateShopUI: jest.fn(),
     updateStatus: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 // Mock sounds module

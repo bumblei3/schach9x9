@@ -233,11 +233,13 @@ export class AIController {
         const bestMoveEl = document.getElementById('ai-best-move');
         const progressFill = document.getElementById('progress-fill');
 
+        if (!data) return; // Guard against null data
+
         if (data && depthEl) {
             depthEl.textContent = `Tiefe ${data.depth}/${data.maxDepth}`;
         }
 
-        if (nodesEl) {
+        if (nodesEl && data.nodes !== undefined) {
             const nodesFormatted = data.nodes.toLocaleString('de-DE');
             nodesEl.textContent = `${nodesFormatted} Positionen`;
         }
@@ -291,18 +293,19 @@ export class AIController {
         // Simulate move
         const fromPiece = this.game.board[move.from.r][move.from.c];
         const toPiece = this.game.board[move.to.r][move.to.c];
-        // FIX: Save piece properties to prevent corruption during recursive simulation
-        const fromPieceType = fromPiece ? fromPiece.type : null;
+
+        // Save piece properties to prevent corruption during recursive simulation
         const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
 
         this.game.board[move.to.r][move.to.c] = fromPiece;
         this.game.board[move.from.r][move.from.c] = null;
+        if (fromPiece) fromPiece.hasMoved = true;
 
         let score;
 
         if (depth === 0) {
-            // Use Quiescence Search at leaf nodes
-            score = this.quiescenceSearch(alpha, beta, isMaximizing);
+            // Use Quiescence Search at leaf nodes (limit depth to 2 in UI thread)
+            score = this.quiescenceSearch(alpha, beta, isMaximizing, 0, 2);
         } else {
             const color = isMaximizing ? 'black' : 'white';
             const moves = this.game.getAllLegalMoves(color);
@@ -330,16 +333,15 @@ export class AIController {
         // Undo move
         this.game.board[move.from.r][move.from.c] = fromPiece;
         this.game.board[move.to.r][move.to.c] = toPiece;
-        // FIX: Restore piece properties to prevent corruption
+        // FIX: Restore piece properties
         if (fromPiece) {
-            fromPiece.type = fromPieceType;
             fromPiece.hasMoved = fromPieceHasMoved;
         }
 
         return score;
     }
 
-    quiescenceSearch(alpha, beta, isMaximizing) {
+    quiescenceSearch(alpha, beta, isMaximizing, qDepth = 0, maxQDepth = 2) {
         // Stand-pat score (evaluation of current position)
         const standPat = this.evaluatePosition('black');
 
@@ -347,13 +349,12 @@ export class AIController {
             if (standPat >= beta) return beta;
             if (alpha < standPat) alpha = standPat;
         } else {
-            // For minimizing player (White), we want low scores.
-            // But evaluatePosition returns Black's perspective (positive = good for Black).
-            // So minimizing player wants to MINIMIZE the score.
-            // Stand-pat logic for minimizer:
             if (standPat <= alpha) return alpha;
             if (beta > standPat) beta = standPat;
         }
+
+        // Limit depth to prevent hangs in the main thread
+        if (qDepth >= maxQDepth) return standPat;
 
         // Find all CAPTURE moves
         const color = isMaximizing ? 'black' : 'white';
@@ -372,7 +373,7 @@ export class AIController {
                 this.game.board[move.to.r][move.to.c] = fromPiece;
                 this.game.board[move.from.r][move.from.c] = null;
 
-                const score = this.quiescenceSearch(alpha, beta, false);
+                const score = this.quiescenceSearch(alpha, beta, false, qDepth + 1, maxQDepth);
 
                 // Undo
                 this.game.board[move.from.r][move.from.c] = fromPiece;
@@ -399,7 +400,7 @@ export class AIController {
                 this.game.board[move.to.r][move.to.c] = fromPiece;
                 this.game.board[move.from.r][move.from.c] = null;
 
-                const score = this.quiescenceSearch(alpha, beta, true);
+                const score = this.quiescenceSearch(alpha, beta, true, qDepth + 1, maxQDepth);
 
                 // Undo
                 this.game.board[move.from.r][move.from.c] = fromPiece;

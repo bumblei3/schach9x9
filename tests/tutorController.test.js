@@ -15,6 +15,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
         };
         return symbols[piece.type] || '?';
     }),
+    renderEvalGraph: jest.fn(),
 }));
 
 // Mock sounds module

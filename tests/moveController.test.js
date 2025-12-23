@@ -18,6 +18,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     showShop: jest.fn(),
     updateClockDisplay: jest.fn(),
     updateClockUI: jest.fn(),
+    renderEvalGraph: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({
@@ -331,9 +332,10 @@ describe('MoveController', () => {
         await moveController.executeMove({ r: 6, c: 3 }, { r: 5, c: 3 });
 
         // Redo should not work now
-        const initialLength = game.moveHistory.length;
+        expect(moveController.redoStack.length).toBe(0);
+        const initialHistoryLength = game.moveHistory.length;
         moveController.redoMove();
-        expect(game.moveHistory.length).toBe(initialLength);
+        expect(game.moveHistory.length).toBe(initialHistoryLength);
     });
 
     test('should handle castling queenside', async () => {
@@ -511,7 +513,7 @@ describe('MoveController', () => {
             expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('gespeichert'));
         });
 
-        test.skip('should successfully load a saved game', () => {
+        test('should successfully load a saved game', () => {
             const savedState = {
                 board: createEmptyBoard(),
                 phase: PHASES.PLAY,
@@ -527,6 +529,23 @@ describe('MoveController', () => {
 
             // Verify mock works in test scope
             console.log('Test Verify:', localStorage.getItem('schach9x9_save'));
+            // Explicitly mock getElementById for this test to avoid leakage issues
+            document.getElementById = jest.fn((id) => {
+                if (id === 'ai-toggle') return { checked: false, addEventListener: jest.fn() };
+                if (id === 'difficulty-select') return { value: 'medium', addEventListener: jest.fn() };
+                if (id === 'draw-offer-overlay') return { classList: { remove: jest.fn(), add: jest.fn() } };
+                if (id === 'move-history-panel') return { classList: { remove: jest.fn(), add: jest.fn() } };
+                if (id === 'captured-pieces-panel') return { classList: { remove: jest.fn(), add: jest.fn() } };
+                return {
+                    classList: { remove: jest.fn(), add: jest.fn() },
+                    style: {},
+                    textContent: '',
+                    value: '',
+                    checked: false,
+                    innerHTML: '',
+                    addEventListener: jest.fn()
+                };
+            });
 
             // Mock UI updates that are called during load
             // UI.updateShopUI is already mocked globally

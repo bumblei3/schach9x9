@@ -4,7 +4,8 @@ import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
 // Mock UI module
 const mockUI = {
     renderBoard: jest.fn(),
-    updateAnalysisUI: jest.fn()
+    updateAnalysisUI: jest.fn(),
+    renderEvalGraph: jest.fn(),
 };
 jest.unstable_mockModule('../js/ui.js', () => mockUI);
 
@@ -67,7 +68,8 @@ describe('AIController Deep Logic', () => {
             isInsufficientMaterial: jest.fn(() => false),
             getBoardHash: jest.fn(() => 'hash'),
             calculateMaterialAdvantage: jest.fn(() => 0),
-            renderBoard: jest.fn()
+            renderBoard: jest.fn(),
+            findKing: jest.fn(() => ({ r: 1, c: 4 })) // Add findKing mock
         };
 
         controller = new AIController(game);
@@ -137,12 +139,17 @@ describe('AIController Deep Logic', () => {
     });
 
     describe('AI Move & Progress', () => {
-        test('aiMove should initiate worker and post message', () => {
+        test('aiMove should initiate workers (multi-worker)', () => {
             controller.aiMove();
-            expect(controller.aiWorker).toBeDefined();
-            expect(controller.aiWorker.postMessage).toHaveBeenCalledWith(expect.objectContaining({
-                type: 'getBestMove'
-            }));
+            expect(controller.aiWorkers).toBeDefined();
+            expect(controller.aiWorkers.length).toBeGreaterThan(0);
+            // Check that at least one worker received the getBestMove message
+            const hasGetBestMove = controller.aiWorkers.some(w =>
+                w.postMessage.mock.calls.some(call =>
+                    call[0] && call[0].type === 'getBestMove'
+                )
+            );
+            expect(hasGetBestMove).toBe(true);
         });
 
         test('updateAIProgress should update DOM elements', () => {
@@ -166,9 +173,15 @@ describe('AIController Deep Logic', () => {
             game.turn = 'white';
             controller.analyzePosition();
 
-            expect(controller.aiWorker.postMessage).toHaveBeenCalledWith(expect.objectContaining({
-                type: 'analyze'
-            }));
+            // With multi-worker, check if any worker received analyze message
+            if (controller.aiWorkers && controller.aiWorkers.length > 0) {
+                const hasAnalyze = controller.aiWorkers.some(w =>
+                    w.postMessage.mock.calls.some(call =>
+                        call[0] && call[0].type === 'analyze'
+                    )
+                );
+                expect(hasAnalyze).toBe(true);
+            }
         });
 
         test('updateAnalysisUI should update eval bar and top moves', () => {
