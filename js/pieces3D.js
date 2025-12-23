@@ -156,26 +156,29 @@ export function createPiece3D(type, color, skinStyle = 'classic') {
 }
 
 /**
- * Create a Pawn
+ * Create a Pawn with LatheGeometry
  */
 function createPawn(group, material) {
+    const points = [];
     // Base
-    const baseGeo = new THREE.CylinderGeometry(0.25, 0.3, 0.15, 16);
-    const base = new THREE.Mesh(baseGeo, material);
-    base.position.y = 0.075;
-    group.add(base);
-
-    // Body
-    const bodyGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.6, 12);
-    const body = new THREE.Mesh(bodyGeo, material);
-    body.position.y = 0.45;
-    group.add(body);
-
+    points.push(new THREE.Vector2(0.26, 0.0));
+    points.push(new THREE.Vector2(0.26, 0.1));
+    points.push(new THREE.Vector2(0.22, 0.15));
+    // Body curve
+    points.push(new THREE.Vector2(0.12, 0.4));
+    points.push(new THREE.Vector2(0.08, 0.6));
+    // Collar
+    points.push(new THREE.Vector2(0.12, 0.62));
+    points.push(new THREE.Vector2(0.12, 0.65));
+    points.push(new THREE.Vector2(0.06, 0.68));
     // Head
-    const headGeo = new THREE.SphereGeometry(0.18, 12, 12);
-    const head = new THREE.Mesh(headGeo, material);
-    head.position.y = 0.85;
-    group.add(head);
+    points.push(new THREE.Vector2(0.14, 0.75));
+    points.push(new THREE.Vector2(0.14, 0.9));
+    points.push(new THREE.Vector2(0.0, 0.95));
+
+    const geometry = new THREE.LatheGeometry(points, 32);
+    const mesh = new THREE.Mesh(geometry, material);
+    group.add(mesh);
 }
 
 /**
@@ -218,65 +221,62 @@ function createKnight(group, material) {
 }
 
 /**
- * Create a Bishop
+ * Create a Bishop with LatheGeometry
  */
 function createBishop(group, material, accentMaterial) {
-    // Base
-    const baseGeo = new THREE.CylinderGeometry(0.27, 0.32, 0.15, 16);
-    const base = new THREE.Mesh(baseGeo, material);
-    base.position.y = 0.075;
-    group.add(base);
+    // Body Lathe
+    const points = [];
+    points.push(new THREE.Vector2(0.28, 0.0));
+    points.push(new THREE.Vector2(0.28, 0.1));
+    points.push(new THREE.Vector2(0.12, 0.3));
+    points.push(new THREE.Vector2(0.08, 0.6));
+    points.push(new THREE.Vector2(0.15, 0.8)); // Mitre bulge
+    points.push(new THREE.Vector2(0.12, 1.0));
+    points.push(new THREE.Vector2(0.0, 1.1)); // Tip
 
-    // Body (tapered)
-    const bodyGeo = new THREE.CylinderGeometry(0.12, 0.22, 0.7, 12);
-    const body = new THREE.Mesh(bodyGeo, material);
-    body.position.y = 0.5;
-    group.add(body);
+    const geometry = new THREE.LatheGeometry(points, 32);
+    const mesh = new THREE.Mesh(geometry, material);
+    group.add(mesh);
 
-    // Mitre (bishop hat)
-    const mitreGeo = new THREE.ConeGeometry(0.15, 0.35, 12);
-    const mitre = new THREE.Mesh(mitreGeo, material);
-    mitre.position.y = 1.025;
-    group.add(mitre);
-
-    // Top ball
-    const ballGeo = new THREE.SphereGeometry(0.08, 12, 12);
+    // Top ball (Accent)
+    const ballGeo = new THREE.SphereGeometry(0.06, 16, 16);
     const ball = new THREE.Mesh(ballGeo, accentMaterial);
-    ball.position.y = 1.25;
+    ball.position.y = 1.15;
     group.add(ball);
 
-    // Diagonal slash (mitre decoration)
-    const slashGeo = new THREE.BoxGeometry(0.25, 0.05, 0.05);
+    // Diagonal slash (Mitre decoration)
+    const slashGeo = new THREE.BoxGeometry(0.2, 0.04, 0.04);
     const slash = new THREE.Mesh(slashGeo, accentMaterial);
-    slash.position.set(0, 1.0, 0.08);
-    slash.rotation.z = Math.PI / 4;
+    slash.position.set(0, 0.9, 0.12);
+    slash.rotation.x = Math.PI / 6;
     group.add(slash);
 }
 
 /**
- * Create a Rook
+ * Create a Rook with LatheGeometry
  */
 function createRook(group, material) {
-    // Base
-    const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.15, 16);
-    const base = new THREE.Mesh(baseGeo, material);
-    base.position.y = 0.075;
-    group.add(base);
+    const points = [];
+    // Base to column
+    points.push(new THREE.Vector2(0.3, 0.0));
+    points.push(new THREE.Vector2(0.3, 0.15));
+    points.push(new THREE.Vector2(0.25, 0.2));
+    points.push(new THREE.Vector2(0.22, 0.7)); // Slight taper
+    points.push(new THREE.Vector2(0.28, 0.8)); // Flaring top
+    points.push(new THREE.Vector2(0.28, 0.95));
+    points.push(new THREE.Vector2(0.2, 0.95)); // Inner rim
 
-    // Tower body
-    const bodyGeo = new THREE.CylinderGeometry(0.25, 0.28, 0.8, 4);
-    const body = new THREE.Mesh(bodyGeo, material);
-    body.position.y = 0.55;
-    group.add(body);
+    const geometry = new THREE.LatheGeometry(points, 32);
+    const mesh = new THREE.Mesh(geometry, material);
+    group.add(mesh);
 
     // Battlements (top)
-    const battlementGeo = new THREE.BoxGeometry(0.08, 0.15, 0.08);
-
+    const battlementGeo = new THREE.BoxGeometry(0.08, 0.12, 0.08);
     const positions = [
-        [0.15, 1.05, 0.15],
-        [0.15, 1.05, -0.15],
-        [-0.15, 1.05, 0.15],
-        [-0.15, 1.05, -0.15],
+        [0.18, 1.0, 0.18],
+        [0.18, 1.0, -0.18],
+        [-0.18, 1.0, 0.18],
+        [-0.18, 1.0, -0.18],
     ];
 
     positions.forEach((pos) => {
@@ -287,80 +287,74 @@ function createRook(group, material) {
 }
 
 /**
- * Create a Queen
+ * Create a Queen with LatheGeometry
  */
 function createQueen(group, material, accentMaterial) {
-    // Base
-    const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.15, 16);
-    const base = new THREE.Mesh(baseGeo, material);
-    base.position.y = 0.075;
-    group.add(base);
+    const points = [];
+    points.push(new THREE.Vector2(0.32, 0.0));
+    points.push(new THREE.Vector2(0.32, 0.15));
+    points.push(new THREE.Vector2(0.18, 0.3));
+    points.push(new THREE.Vector2(0.12, 0.6));
+    points.push(new THREE.Vector2(0.15, 0.9)); // Flaring neck
+    points.push(new THREE.Vector2(0.25, 1.1)); // Crown flare
+    points.push(new THREE.Vector2(0.0, 1.15)); // Inner dip
 
-    // Body (elegant curve)
-    const bodyGeo = new THREE.CylinderGeometry(0.15, 0.27, 0.8, 16);
-    const body = new THREE.Mesh(bodyGeo, material);
-    body.position.y = 0.55;
-    group.add(body);
+    const geometry = new THREE.LatheGeometry(points, 32);
+    const mesh = new THREE.Mesh(geometry, material);
+    group.add(mesh);
 
-    // Crown base
-    const crownBaseGeo = new THREE.CylinderGeometry(0.2, 0.18, 0.15, 16);
-    const crownBase = new THREE.Mesh(crownBaseGeo, material);
-    crownBase.position.y = 1.05;
-    group.add(crownBase);
+    // Crown points (Accents)
+    const pointGeo = new THREE.ConeGeometry(0.05, 0.15, 8);
+    const angles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2, Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];
 
-    // Crown points
-    const pointGeo = new THREE.ConeGeometry(0.06, 0.25, 8);
-
-    const angles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
     angles.forEach((angle) => {
         const point = new THREE.Mesh(pointGeo, accentMaterial);
-        const radius = 0.15;
+        const radius = 0.2;
         point.position.set(
             Math.cos(angle) * radius,
-            1.25,
+            1.15,
             Math.sin(angle) * radius,
         );
+        point.rotation.x = -0.2; // Tilt out
         group.add(point);
     });
 
     // Central jewel
-    const jewelGeo = new THREE.SphereGeometry(0.08, 12, 12);
+    const jewelGeo = new THREE.SphereGeometry(0.09, 16, 16);
     const jewel = new THREE.Mesh(jewelGeo, accentMaterial);
-    jewel.position.y = 1.3;
+    jewel.position.y = 1.15;
     group.add(jewel);
 }
 
 /**
- * Create a King
+ * Create a King with LatheGeometry
  */
 function createKing(group, material, accentMaterial) {
-    // Base
-    const baseGeo = new THREE.CylinderGeometry(0.32, 0.36, 0.15, 16);
-    const base = new THREE.Mesh(baseGeo, material);
-    base.position.y = 0.075;
-    group.add(base);
+    const points = [];
+    points.push(new THREE.Vector2(0.35, 0.0));
+    points.push(new THREE.Vector2(0.35, 0.15));
+    points.push(new THREE.Vector2(0.2, 0.3));
+    points.push(new THREE.Vector2(0.15, 0.7));
+    points.push(new THREE.Vector2(0.22, 1.0)); // Crown base
+    points.push(new THREE.Vector2(0.25, 1.2)); // Crown flare
+    points.push(new THREE.Vector2(0.0, 1.25));
 
-    // Body
-    const bodyGeo = new THREE.CylinderGeometry(0.18, 0.28, 0.9, 16);
-    const body = new THREE.Mesh(bodyGeo, material);
-    body.position.y = 0.6;
-    group.add(body);
-
-    // Crown base (wider than queen)
-    const crownBaseGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.2, 16);
-    const crownBase = new THREE.Mesh(crownBaseGeo, material);
-    crownBase.position.y = 1.15;
-    group.add(crownBase);
+    const geometry = new THREE.LatheGeometry(points, 32);
+    const mesh = new THREE.Mesh(geometry, material);
+    group.add(mesh);
 
     // Cross on top
-    const crossVGeo = new THREE.BoxGeometry(0.06, 0.35, 0.06);
+    const crossWidth = 0.08;
+    const crossHeight = 0.3;
+
+    const crossVGeo = new THREE.BoxGeometry(crossWidth, crossHeight, crossWidth);
     const crossV = new THREE.Mesh(crossVGeo, accentMaterial);
-    crossV.position.y = 1.45;
+    crossV.position.y = 1.4;
     group.add(crossV);
 
-    const crossHGeo = new THREE.BoxGeometry(0.25, 0.06, 0.06);
+    const crossHGeo = new THREE.BoxGeometry(0.25, crossWidth, crossWidth);
     const crossH = new THREE.Mesh(crossHGeo, accentMaterial);
-    crossH.position.y = 1.5;
+    crossH.position.y = 1.45;
     group.add(crossH);
 }
 

@@ -145,33 +145,35 @@ export class BattleChess3D {
      * Setup scene lighting
      */
     setupLighting() {
-        // Strong ambient light for base visibility
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        this.scene.add(ambientLight);
+        // Hemisphere light for natural sky/ground ambient mix
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+        hemiLight.position.set(0, 20, 0);
+        this.scene.add(hemiLight);
 
-        // Main directional light (sun) - much brighter
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
-        mainLight.position.set(5, 10, 5);
+        // Main directional light (Sun)
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        mainLight.position.set(5, 15, 8);
         mainLight.castShadow = true;
-        mainLight.shadow.camera.left = -10;
-        mainLight.shadow.camera.right = 10;
-        mainLight.shadow.camera.top = 10;
-        mainLight.shadow.camera.bottom = -10;
+
+        // Optimize shadow map
         mainLight.shadow.mapSize.width = 2048;
         mainLight.shadow.mapSize.height = 2048;
+        mainLight.shadow.camera.near = 0.5;
+        mainLight.shadow.camera.far = 50;
+        mainLight.shadow.camera.left = -15;
+        mainLight.shadow.camera.right = 15;
+        mainLight.shadow.camera.top = 15;
+        mainLight.shadow.camera.bottom = -15;
+        mainLight.shadow.bias = -0.001; // Reduce shadow acne
+
         this.scene.add(mainLight);
 
-        // Fill light from other side
-        const fillLight = new THREE.DirectionalLight(0x4466ff, 0.6);
-        fillLight.position.set(-5, 5, -5);
-        this.scene.add(fillLight);
+        // Rim light (Backlight) for edge definition
+        const rimLight = new THREE.DirectionalLight(0x4466ff, 0.5);
+        rimLight.position.set(-5, 5, -10);
+        this.scene.add(rimLight);
 
-        // Additional top light for clear visibility
-        const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        topLight.position.set(0, 15, 0);
-        this.scene.add(topLight);
-
-        logger.info('3D lighting setup: High intensity for visibility');
+        logger.info('3D lighting setup: Enhanced with Hemisphere and Rim lights');
     }
 
     /**
