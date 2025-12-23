@@ -8,76 +8,54 @@ Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer
 *   **Neue Figuren**:
     *   **Erzbischof**: Kombiniert die Zugmöglichkeiten von Läufer und Springer.
     *   **Kanzler**: Kombiniert die Zugmöglichkeiten von Turm und Springer.
-*   **Setup-Phase**: Platziere deinen König und kaufe deine Armee mit einem Punktesystem.
-*   **KI-Gegner**: Spiele gegen einen Computergegner mit verschiedenen Schwierigkeitsstufen (Anfänger bis Experte).
-*   **Tutor-Modus**: Erhalte Tipps und Analysen während des Spiels.
-*   **PWA-Support**: Installiere das Spiel als App auf deinem Gerät und spiele offline.
-*   **Modernes UI**: Anpassbare Themes, Soundeffekte und flüssige Animationen.
-*   **3D-Schlachtmodus**: Erlebe epische Schlachten mit animierten 3D-Figuren und Kampfsequenzen (powered by Three.js).
-*   **Statistik-System**: Verfolge deine Fortschritte mit detaillierten Statistiken, Win/Loss-Tracking und Spielhistorie.
+    *   **Engel**: Eine mächtige Premium-Figur für fortgeschrittene Strategien.
+*   **Setup-Phase**: Platziere deinen König strategisch und stelle deine Armee mit einem Punktesystem (15 Punkte) zusammen.
+*   **Optimierte KI**: Leistungsstarker Gegner mit Alpha-Beta-Suche, Transposition Table und effizientem Move-Ordering.
+*   **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
+*   **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
+*   **Progressive Web App (PWA)**: Installierbar auf Desktop und Mobile, unterstützt Offline-Spiel.
+*   **Detaillierte Statistiken**: Umfassendes Tracking von Gewinnraten, Zügen und Spielhistorie.
+
+## 🧠 Technische Highlights
+
+### KI-Engine (`js/aiEngine.js`)
+*   **Alpha-Beta Pruning**: Hocheffiziente Suche im Spielbaum.
+*   **Transposition Table**: Depth-preferred Replacement-Strategie zur Minimierung redundanter Berechnungen.
+*   **Move Ordering**: Optimiert durch Killer Moves, MVV-LVA (Most Valuable Victim - Least Valuable Attacker) und TT-Hits.
+*   **Evaluation**: Nuancierte Stellungsbewertung inklusive Figurenwerten, Positionsboni und Königssicherheit.
+
+### 3D Rendering (`js/battleChess3D.js`)
+*   **Procedural Models**: Alle Schachfiguren werden prozedural generiert (`js/pieces3D.js`).
+*   **Skin-System**: Unterstützung für verschiedene Ästhetiken (Classic, Infernale, Neon).
+*   **Animationen**: Weiche Übergänge für Züge und Capture-Events durch integrierten `BattleAnimator`.
+
+## 🧪 Qualitätssicherung & Testing
+
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **550 automatisierten Tests** wird eine hohe Stabilität gewährleistet.
+
+| Modul | Coverage (Lines) | Beschreibung |
+|-------|------------------|--------------|
+| **AI Engine** | ~89% | Validierung von Suchalgorithmen und Bewertung. |
+| **3D Engine** | ~96% | Tests für Rendering-Initialisierung und Animationen. |
+| **Piece Generation** | ~98% | Verifizierung der prozeduralen Modellierung. |
+| **Core Logic** | ~95% | Spielregeln, Move-Validation und Game-State. |
+| **UI** | ~61% | Interaktionstests für Menüs, Shop und Overlays. |
 
 ## 🚀 Installation & Start
 
 ### Voraussetzungen
-
-*   Node.js (für Entwicklung und Tests)
+*   Node.js (v14+)
 
 ### Schritte
+1. **Repository klonen:** `git clone https://github.com/bumblei3/schach9x9.git`
+2. **Abhängigkeiten installieren:** `npm install`
+3. **Spiel starten:** `npm start` (Standard: `http://localhost:3000`)
 
-1.  **Repository klonen:**
-    ```bash
-    git clone https://github.com/bumblei3/schach9x9.git
-    cd schach9x9
-    ```
+## �️ Entwicklung
 
-2.  **Abhängigkeiten installieren:**
-    ```bash
-    npm install
-    ```
-
-3.  **Spiel starten:**
-    ```bash
-    npm start
-    ```
-    Das Spiel wird in deinem Standardbrowser geöffnet (standardmäßig unter `http://localhost:3000`).
-
-## 🛠️ Entwicklung
-
-*   **Tests ausführen:**
-    ```bash
-    npm test
-    ```
-
-*   **Linting:**
-    ```bash
-    npm run lint
-    ```
-
-*   **Formatierung:**
-    ```bash
-    npm run format
-    ```
-
-*   **KI-Training:**
-    ```bash
-    npm run train          # Standard Training
-    npm run train:fast     # Schnelles Training (50 Spiele)
-    npm run train:thorough # Gründliches Training (500 Spiele)
-    ```
-
-## 🎮 Spielregeln (Kurzfassung)
-
-1.  **Setup**: Wähle eine Startposition für deinen König in deinem Korridor.
-2.  **Kaufphase**: Nutze 15 Punkte, um Figuren zu kaufen (Bauer=1, Springer/Läufer=3, Turm=5, Erzbischof=7, Kanzler/Dame=9).
-3.  **Spiel**: Es gelten die üblichen Schachregeln (Schach, Matt, Rochade, En Passant). Ziel ist es, den gegnerischen König mattzusetzen.
-
-## 💻 Tech Stack
-
-*   **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
-*   **3D Engine**: Three.js
-*   **Testing**: Jest
-*   **Tools**: ESLint, Prettier, Husky
+*   **Tests:** `npm test`
+*   **Coverage:** `npm run test:coverage`
+*   **Linting & Format:** `npm run lint` / `npm run format`
 
 ## 📄 Lizenz
-
 Dieses Projekt ist unter der MIT Lizenz veröffentlicht.

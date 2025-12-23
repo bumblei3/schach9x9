@@ -160,7 +160,7 @@ export class AIController {
         const bestMoveEl = document.getElementById('ai-best-move');
         const progressFill = document.getElementById('progress-fill');
 
-        if (depthEl) {
+        if (data && depthEl) {
             depthEl.textContent = `Tiefe ${data.depth}/${data.maxDepth}`;
         }
 

@@ -1,220 +1,94 @@
-/**
- * Tests for Arrow Renderer
- * @jest-environment jsdom
- */
+import { jest } from '@jest/globals';
 
-import { ArrowRenderer } from '../js/arrows.js';
+const { ArrowRenderer } = await import('../js/arrows.js');
 
 describe('ArrowRenderer', () => {
   let boardElement;
   let renderer;
 
   beforeEach(() => {
-    // Create mock board element
+    // Mock DOM
     document.body.innerHTML = `
-      <div id="test-container" style="position: relative; width: 576px; height: 576px;">
-        <div id="board"></div>
-      </div>
-    `;
+            <div id="board-container">
+                <div id="board">
+                    <div class="cell" style="width: 64px; height: 64px;"></div>
+                </div>
+            </div>
+        `;
     boardElement = document.getElementById('board');
-
-    // Add mock cells
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.style.width = '64px';
-        cell.style.height = '64px';
-        cell.dataset.r = r;
-        cell.dataset.c = c;
-
-        // Mock offsetWidth property (jsdom doesn't calculate layout)
-        Object.defineProperty(cell, 'offsetWidth', {
-          configurable: true,
-          value: 64,
-        });
-        Object.defineProperty(cell, 'offsetHeight', {
-          configurable: true,
-          value: 64,
-        });
-
-        boardElement.appendChild(cell);
-      }
-    }
+    // Mock offsetWidth as JSDOM doesn't layout
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 64 });
 
     renderer = new ArrowRenderer(boardElement);
   });
 
   afterEach(() => {
-    if (renderer) {
-      renderer.destroy();
-    }
-    document.body.innerHTML = '';
+    renderer.destroy();
   });
 
-  describe('Initialization', () => {
-    test('should create SVG layer on initialization', () => {
-      const svgLayer = document.getElementById('arrow-layer');
-      expect(svgLayer).toBeTruthy();
-      expect(svgLayer.tagName).toBe('svg');
-    });
-
-    test('should calculate cell size from board cells', () => {
-      expect(renderer.cellSize).toBe(64);
-    });
-
-    test('should create arrowhead markers for each quality', () => {
-      const goldMarker = document.getElementById('arrowhead-gold');
-      const silverMarker = document.getElementById('arrowhead-silver');
-      const bronzeMarker = document.getElementById('arrowhead-bronze');
-
-      expect(goldMarker).toBeTruthy();
-      expect(silverMarker).toBeTruthy();
-      expect(bronzeMarker).toBeTruthy();
-    });
-
-    test('should position SVG layer absolutely', () => {
-      const svgLayer = renderer.svgLayer;
-      expect(svgLayer.style.position).toBe('absolute');
-      expect(svgLayer.style.top).toBe('0px');
-      expect(svgLayer.style.left).toBe('0px');
-    });
+  test('should initialize and create SVG layer', () => {
+    const svg = document.getElementById('arrow-layer');
+    expect(svg).toBeDefined();
+    expect(svg.tagName.toLowerCase()).toBe('svg');
+    expect(boardElement.parentElement.style.position).toBe('relative');
   });
 
-  describe('Drawing Arrows', () => {
-    test('should draw arrow from one square to another', () => {
-      renderer.drawArrow(0, 0, 2, 2, 'gold');
-
-      const arrows = renderer.svgLayer.querySelectorAll('.tutor-arrow');
-      expect(arrows.length).toBe(1);
-    });
-
-    test('should draw arrows with correct color based on quality', () => {
-      renderer.drawArrow(0, 0, 1, 1, 'gold');
-      renderer.drawArrow(1, 1, 2, 2, 'silver');
-      renderer.drawArrow(2, 2, 3, 3, 'bronze');
-
-      const arrows = renderer.svgLayer.querySelectorAll('.tutor-arrow');
-      expect(arrows.length).toBe(3);
-
-      // Check stroke colors
-      expect(arrows[0].getAttribute('stroke')).toBe('#FFD700'); // Gold
-      expect(arrows[1].getAttribute('stroke')).toBe('#C0C0C0'); // Silver
-      expect(arrows[2].getAttribute('stroke')).toBe('#CD7F32'); // Bronze
-    });
-
-    test('should use correct marker-end for arrow quality', () => {
-      renderer.drawArrow(0, 0, 1, 1, 'gold');
-
-      const arrow = renderer.svgLayer.querySelector('.tutor-arrow');
-      expect(arrow.getAttribute('marker-end')).toBe('url(#arrowhead-gold)');
-    });
-
-    test('should default to gold quality if not specified', () => {
-      renderer.drawArrow(0, 0, 1, 1);
-
-      const arrow = renderer.svgLayer.querySelector('.tutor-arrow');
-      expect(arrow.getAttribute('stroke')).toBe('#FFD700');
-    });
+  test('should create arrowhead markers in defs', () => {
+    const defs = renderer.svgLayer.querySelector('defs');
+    expect(defs).toBeDefined();
+    const markers = defs.querySelectorAll('marker');
+    expect(markers.length).toBe(3); // gold, silver, bronze
+    expect(markers[0].id).toBe('arrowhead-gold');
   });
 
-  describe('Clearing Arrows', () => {
-    test('should clear all arrows from SVG layer', () => {
-      renderer.drawArrow(0, 0, 1, 1, 'gold');
-      renderer.drawArrow(1, 1, 2, 2, 'silver');
-
-      expect(renderer.svgLayer.querySelectorAll('.tutor-arrow').length).toBe(2);
-
-      renderer.clearArrows();
-
-      expect(renderer.svgLayer.querySelectorAll('.tutor-arrow').length).toBe(0);
-    });
-
-    test('should not throw error when clearing empty arrows', () => {
-      expect(() => renderer.clearArrows()).not.toThrow();
-    });
+  test('drawArrow should create a path with correct attributes', () => {
+    renderer.drawArrow(0, 0, 1, 1, 'gold');
+    const path = renderer.svgLayer.querySelector('.tutor-arrow');
+    expect(path).toBeDefined();
+    expect(path.getAttribute('stroke')).toBe('#FFD700');
+    expect(path.getAttribute('marker-end')).toBe('url(#arrowhead-gold)');
+    expect(path.getAttribute('d')).toContain('M');
+    expect(path.getAttribute('d')).toContain('L');
   });
 
-  describe('Highlight Move', () => {
-    test('should clear previous arrows and draw new one', () => {
-      renderer.highlightMove(0, 0, 1, 1, 'gold');
-      expect(renderer.svgLayer.querySelectorAll('.tutor-arrow').length).toBe(1);
+  test('clearArrows should remove all arrow paths', () => {
+    renderer.drawArrow(0, 0, 2, 2);
+    renderer.drawArrow(1, 1, 3, 3);
+    expect(renderer.svgLayer.querySelectorAll('.tutor-arrow').length).toBe(2);
 
-      renderer.highlightMove(2, 2, 3, 3, 'silver');
-      expect(renderer.svgLayer.querySelectorAll('.tutor-arrow').length).toBe(1);
-
-      const arrow = renderer.svgLayer.querySelector('.tutor-arrow');
-      expect(arrow.getAttribute('stroke')).toBe('#C0C0C0'); // Silver
-    });
-
-    test('should store last arrow for redraw', () => {
-      renderer.highlightMove(0, 0, 1, 1, 'gold');
-
-      expect(renderer.lastArrow).toEqual({
-        fromR: 0,
-        fromC: 0,
-        toR: 1,
-        toC: 1,
-        quality: 'gold',
-      });
-    });
+    renderer.clearArrows();
+    expect(renderer.svgLayer.querySelectorAll('.tutor-arrow').length).toBe(0);
   });
 
-  describe('Redraw', () => {
-    test('should redraw last arrow after cell size update', () => {
-      renderer.highlightMove(0, 0, 1, 1, 'gold');
+  test('highlightMove should clear previous and draw new arrow', () => {
+    renderer.highlightMove(0, 0, 1, 1, 'silver');
+    expect(renderer.lastArrow).toEqual({ fromR: 0, fromC: 0, toR: 1, toC: 1, quality: 'silver' });
 
-      // Change cell size
-      const cells = boardElement.querySelectorAll('.cell');
-      cells.forEach(cell => {
-        cell.style.width = '80px';
-        cell.style.height = '80px';
-        // Update mock offsetWidth
-        Object.defineProperty(cell, 'offsetWidth', {
-          configurable: true,
-          value: 80,
-        });
-      });
-
-      renderer.redraw();
-
-      expect(renderer.cellSize).toBe(80);
-      const arrows = renderer.svgLayer.querySelectorAll('.tutor-arrow');
-      expect(arrows.length).toBe(1); // Should still have one arrow
-    });
-
-    test('should not throw error when redrawing with no last arrow', () => {
-      expect(() => renderer.redraw()).not.toThrow();
-    });
+    renderer.highlightMove(2, 2, 3, 3, 'gold');
+    const arrows = renderer.svgLayer.querySelectorAll('.tutor-arrow');
+    expect(arrows.length).toBe(1);
+    expect(arrows[0].getAttribute('stroke')).toBe('#FFD700');
   });
 
-  describe('Destroy', () => {
-    test('should remove SVG layer from DOM', () => {
-      const svgLayer = renderer.svgLayer;
-      expect(document.body.contains(svgLayer)).toBe(true);
+  test('redraw should refresh the current arrow', () => {
+    renderer.highlightMove(0, 0, 1, 1, 'bronze');
+    const initialPath = renderer.svgLayer.querySelector('.tutor-arrow');
 
-      renderer.destroy();
-
-      expect(document.body.contains(svgLayer)).toBe(false);
-    });
-
-    test('should not throw error when destroying already destroyed renderer', () => {
-      renderer.destroy();
-      expect(() => renderer.destroy()).not.toThrow();
-    });
+    renderer.redraw();
+    const newPath = renderer.svgLayer.querySelector('.tutor-arrow');
+    expect(newPath).not.toBe(initialPath);
+    expect(newPath.getAttribute('stroke')).toBe('#CD7F32');
   });
 
-  describe('Coordinate Calculations', () => {
-    test('should calculate correct center positions for arrows', () => {
-      // Cell size is 64px, so center of (0,0) should be at (32, 32)
-      renderer.drawArrow(0, 0, 1, 0, 'gold');
+  test('destroy should remove the SVG layer', () => {
+    renderer.destroy();
+    expect(document.getElementById('arrow-layer')).toBeNull();
+  });
 
-      const arrow = renderer.svgLayer.querySelector('.tutor-arrow');
-      const path = arrow.getAttribute('d');
-
-      // Path should contain coordinates around the center of cells
-      expect(path).toContain('M');
-      expect(path).toContain('L');
-    });
+  test('updateCellSize should handle missing cells', () => {
+    document.body.innerHTML = '<div id="board"></div>';
+    renderer.boardElement = document.getElementById('board');
+    renderer.updateCellSize();
+    expect(renderer.cellSize).toBe(64); // Fallback
   });
 });

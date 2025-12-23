@@ -1,4 +1,4 @@
-import { PHASES, BOARD_SIZE } from './gameEngine.js';
+import { PHASES, BOARD_SIZE, PIECE_VALUES } from './gameEngine.js';
 import { SHOP_PIECES } from './config.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
@@ -176,15 +176,13 @@ export class MoveController {
         if (piece.type === 'p') {
             const promotionRow = piece.color === 'white' ? 0 : BOARD_SIZE - 1;
             if (to.r === promotionRow) {
-                if (to.r === promotionRow) {
-                    // Automatic promotion to Angel (Engel)
-                    piece.type = 'e';
-                    moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
-                    this.game.log(`${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`);
+                // Automatic promotion to Angel (Engel)
+                piece.type = 'e';
+                moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
+                this.game.log(`${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`);
 
-                    // Play promotion sound if available, otherwise move sound
-                    soundManager.playMove();
-                }
+                // Play promotion sound if available, otherwise move sound
+                soundManager.playMove();
             }
         }
 
@@ -759,18 +757,7 @@ export class MoveController {
     }
 
     getMaterialValue(piece) {
-        const values = {
-            p: 1,
-            n: 3,
-            b: 3,
-            r: 5,
-            q: 9,
-            e: 12,
-            k: 0,
-            a: 7,
-            c: 8
-        };
-        return values[piece.type] || 0;
+        return PIECE_VALUES[piece.type] || 0;
     }
 
     enterReplayMode() {

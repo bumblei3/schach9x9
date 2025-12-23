@@ -58,14 +58,19 @@ self.onmessage = function (e) {
 
         // Evaluate each move
         const movesWithScores = allMoves.map(move => {
+          const fromPiece = board[move.from.r][move.from.c];
+          const targetPiece = board[move.to.r][move.to.c];
+
           // Simulate move
-          const boardCopy = JSON.parse(JSON.stringify(board));
-          const piece = boardCopy[move.from.r][move.from.c];
-          boardCopy[move.to.r][move.to.c] = piece;
-          boardCopy[move.from.r][move.from.c] = null;
+          board[move.to.r][move.to.c] = fromPiece;
+          board[move.from.r][move.from.c] = null;
 
           // Evaluate resulting position
-          const moveScore = evaluatePosition(boardCopy, color);
+          const moveScore = evaluatePosition(board, color);
+
+          // Undo move
+          board[move.from.r][move.from.c] = fromPiece;
+          board[move.to.r][move.to.c] = targetPiece;
 
           return {
             from: move.from,

@@ -199,15 +199,22 @@ export function computeZobristHash(board, colorToMove) {
  * Store position in transposition table
  */
 function storeTT(hash, depth, score, flag, bestMove) {
-  // Clear old entries if table is full (LRU eviction)
-  if (transpositionTable.size >= TT_MAX_SIZE && !transpositionTable.has(hash)) {
-    // Delete the oldest entry (first key in Map)
+  const existing = transpositionTable.get(hash);
+
+  // Depth-preferred replacement: only replace if the new entry is searched at least as deep
+  if (existing && existing.depth > depth) {
+    // We could potentially update the bestMove even if shallower, but usually deeper is better
+    return;
+  }
+
+  // Clear oldest entry if table is full (LRU eviction via Map insertion order)
+  if (!existing && transpositionTable.size >= TT_MAX_SIZE) {
     const oldestKey = transpositionTable.keys().next().value;
     transpositionTable.delete(oldestKey);
   }
 
-  // If the entry already exists, delete it first to update its position to MRU
-  if (transpositionTable.has(hash)) {
+  // Update entry (re-setting moves it to MRU position in Map)
+  if (existing) {
     transpositionTable.delete(hash);
   }
 
@@ -230,32 +237,28 @@ function probeTT(hash, depth, alpha, beta) {
     return null;
   }
 
-  // Only use entry if it was searched to at least the same depth
-  if (entry.depth < depth) {
-    ttMisses++;
-    return null;
-  }
-
-  // LRU: Move accessed entry to the end (mark as recently used)
-  // We delete and re-set it to update insertion order
+  // Update entry position to MRU
   transpositionTable.delete(hash);
   transpositionTable.set(hash, entry);
 
   ttHits++;
 
-  // Check if we can directly use this score
-  if (entry.flag === TT_EXACT) {
-    return { score: entry.score, bestMove: entry.bestMove };
-  }
-  if (entry.flag === TT_ALPHA && entry.score <= alpha) {
-    return { score: alpha, bestMove: entry.bestMove };
-  }
-  if (entry.flag === TT_BETA && entry.score >= beta) {
-    return { score: beta, bestMove: entry.bestMove };
+  // Always return the bestMove found so far as a hint for move ordering,
+  // even if the depth is insufficient for a score cutoff.
+  const result = { bestMove: entry.bestMove };
+
+  // Only use score if it was searched to at least the same depth
+  if (entry.depth >= depth) {
+    if (entry.flag === TT_EXACT) {
+      result.score = entry.score;
+    } else if (entry.flag === TT_ALPHA && entry.score <= alpha) {
+      result.score = alpha;
+    } else if (entry.flag === TT_BETA && entry.score >= beta) {
+      result.score = beta;
+    }
   }
 
-  // Can't use score, but we can use the best move for move ordering
-  return { bestMove: entry.bestMove };
+  return result;
 }
 
 // Progress tracking
@@ -454,12 +457,22 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
       `[AI Worker] TT Hit Rate: ${hitRate}% (${ttHits}/${ttTotal}), Nodes: ${nodesEvaluated}`
     );
 
+    // Strip the score property used for move ordering before returning
+    if (bestMove && bestMove._score !== undefined) {
+      delete bestMove._score;
+    }
+
     return bestMove;
   } catch (error) {
     logger.error('[AI Worker] Error in getBestMove:', error);
     // Fallback: return a random legal move
     const moves = getAllLegalMoves(board, color);
-    return moves.length > 0 ? moves[Math.floor(Math.random() * moves.length)] : null;
+    if (moves.length > 0) {
+      const move = moves[Math.floor(Math.random() * moves.length)];
+      if (move._score !== undefined) delete move._score;
+      return move;
+    }
+    return null;
   }
 }
 
@@ -826,9 +839,11 @@ function getPositionBonus(r, c, type) {
  * Priority: 1) TT best move, 2) Captures (MVV-LVA), 3) Killer moves, 4) History heuristic
  */
 function orderMoves(board, moves, ttBestMove, depth = 0) {
-  const scoredMoves = moves.map(move => {
+  for (let i = 0; i < moves.length; i++) {
+    const move = moves[i];
     let score = 0;
     const fromPiece = board[move.from.r][move.from.c];
+    if (!fromPiece) continue;
 
     // 1. TT move gets highest priority
     if (
@@ -847,38 +862,38 @@ function orderMoves(board, moves, ttBestMove, depth = 0) {
       const victimValue = PIECE_VALUES[targetPiece.type] || 0;
       const attackerValue = PIECE_VALUES[fromPiece.type] || 0;
       score += victimValue * 10 - attackerValue / 10;
-    }
+    } else {
+      // 3. Killer moves (non-capture moves that caused beta cutoffs)
+      const killers = killerMoves.get(depth);
+      if (killers) {
+        // Optimized check for MAX_KILLER_MOVES = 2
+        const k0 = killers[0];
+        if (k0 && move.from.r === k0.from.r && move.from.c === k0.from.c && move.to.r === k0.to.r && move.to.c === k0.to.c) {
+          score += 900;
+        } else {
+          const k1 = killers[1];
+          if (k1 && move.from.r === k1.from.r && move.from.c === k1.from.c && move.to.r === k1.to.r && move.to.c === k1.to.c) {
+            score += 800;
+          }
+        }
+      }
 
-    // 3. Killer moves (non-capture moves that caused beta cutoffs)
-    const killers = killerMoves.get(depth) || [];
-    for (let i = 0; i < killers.length; i++) {
-      const killer = killers[i];
-      if (
-        killer &&
-        move.from.r === killer.from.r &&
-        move.from.c === killer.from.c &&
-        move.to.r === killer.to.r &&
-        move.to.c === killer.to.c
-      ) {
-        score += 900 - i * 100; // First killer gets 900, second gets 800
-        break;
+      // 4. History heuristic
+      if (historyTable[fromPiece.type]) {
+        const historyValue = historyTable[fromPiece.type][move.from.r][move.from.c][move.to.r][move.to.c];
+        if (historyValue > 0) {
+          score += historyValue / 100;
+        }
       }
     }
 
-    // 4. History heuristic
-    if (fromPiece && historyTable[fromPiece.type]) {
-      const historyScore =
-        historyTable[fromPiece.type][move.from.r][move.from.c][move.to.r][move.to.c] || 0;
-      score += historyScore / 100; // Scale down history score
-    }
-
-    return { move, score };
-  });
+    move._score = score;
+  }
 
   // Sort by score (highest first)
-  scoredMoves.sort((a, b) => b.score - a.score);
+  moves.sort((a, b) => (b._score || 0) - (a._score || 0));
 
-  return scoredMoves.map(sm => sm.move);
+  return moves;
 }
 
 /**
@@ -886,6 +901,7 @@ function orderMoves(board, moves, ttBestMove, depth = 0) {
  */
 export function getAllLegalMoves(board, color) {
   const moves = [];
+  const kingPos = findKing(board, color);
 
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
@@ -894,18 +910,23 @@ export function getAllLegalMoves(board, color) {
         const pieceMoves = getPseudoLegalMoves(board, r, c, piece);
 
         // Filter out moves that leave king in check
-        for (const move of pieceMoves) {
+        for (let i = 0; i < pieceMoves.length; i++) {
+          const move = pieceMoves[i];
           // Apply move temporarily
+          const fromPiece = board[move.from.r][move.from.c];
           const targetPiece = board[move.to.r][move.to.c];
-          board[move.to.r][move.to.c] = board[move.from.r][move.from.c];
+          board[move.to.r][move.to.c] = fromPiece;
           board[move.from.r][move.from.c] = null;
 
-          if (!isInCheck(board, color)) {
+          // If king moves, pass the new position
+          const currentKingPos = fromPiece.type === 'k' ? { r: move.to.r, c: move.to.c } : kingPos;
+
+          if (!isInCheck(board, color, currentKingPos)) {
             moves.push(move);
           }
 
           // Undo move
-          board[move.from.r][move.from.c] = board[move.to.r][move.to.c];
+          board[move.from.r][move.from.c] = fromPiece;
           board[move.to.r][move.to.c] = targetPiece;
         }
       }
@@ -918,24 +939,30 @@ export function getAllLegalMoves(board, color) {
 /**
  * Check if a color is in check
  */
-function isInCheck(board, color) {
-  // Find King
-  let kingPos = null;
+/**
+ * Check if a color is in check
+ */
+export function isInCheck(board, color, knownKingPos) {
+  const kingPos = knownKingPos || findKing(board, color);
+  if (!kingPos) return false;
+
+  const opponentColor = color === 'white' ? 'black' : 'white';
+  return isSquareAttacked(board, kingPos.r, kingPos.c, opponentColor);
+}
+
+/**
+ * Find the king for a specific color
+ */
+function findKing(board, color) {
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       const piece = board[r][c];
       if (piece && piece.color === color && piece.type === 'k') {
-        kingPos = { r, c };
-        break;
+        return { r, c };
       }
     }
-    if (kingPos) break;
   }
-
-  if (!kingPos) return false; // Should not happen (king captured?)
-
-  const opponentColor = color === 'white' ? 'black' : 'white';
-  return isSquareAttacked(board, kingPos.r, kingPos.c, opponentColor);
+  return null;
 }
 
 /**
@@ -969,59 +996,67 @@ const ATTACK_DIRECTIONS = [
  * Check if a square is attacked by a specific color
  */
 function isSquareAttacked(board, r, c, attackerColor) {
-  const isInside = (r, c) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
-
   // 1. Pawn attacks
-  // If attacker is white, they attack from bottom (r+1). If black, from top (r-1).
-  // We check if there is a pawn at (r+1, c±1) for white attacker, etc.
   const pawnRow = attackerColor === 'white' ? 1 : -1;
-  for (const dc of [-1, 1]) {
-    const pr = r + pawnRow;
-    const pc = c + dc;
-    if (isInside(pr, pc)) {
-      const piece = board[pr][pc];
-      if (piece && piece.color === attackerColor && piece.type === 'p') return true;
+  const pr = r + pawnRow;
+  if (pr >= 0 && pr < BOARD_SIZE) {
+    for (const dc of [-1, 1]) {
+      const pc = c + dc;
+      if (pc >= 0 && pc < BOARD_SIZE) {
+        const piece = board[pr][pc];
+        if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
+      }
     }
   }
 
-  // 2. Knight attacks
-  for (const [dr, dc] of KNIGHT_MOVES) {
-    const nr = r + dr;
-    const nc = c + dc;
-    if (isInside(nr, nc)) {
+  // 2. Knight attacks (Knight, Archbishop, Chancellor, Angel)
+  for (let i = 0; i < KNIGHT_MOVES.length; i++) {
+    const move = KNIGHT_MOVES[i];
+    const nr = r + move[0];
+    const nc = c + move[1];
+    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
       const piece = board[nr][nc];
-      if (
-        piece &&
-        piece.color === attackerColor &&
-        (piece.type === 'n' || piece.type === 'a' || piece.type === 'c' || piece.type === 'e')
-      ) {
-        return true; // Knight, Archbishop, Chancellor, Angel
+      if (piece && piece.color === attackerColor) {
+        const t = piece.type;
+        if (t === 'n' || t === 'a' || t === 'c' || t === 'e') return true;
       }
     }
   }
 
   // 3. Sliding pieces (Bishop/Rook/Queen/Archbishop/Chancellor/Angel)
-  for (const { dr, dc, types } of ATTACK_DIRECTIONS) {
+  // and King attack (distance 1)
+  for (let i = 0; i < ATTACK_DIRECTIONS.length; i++) {
+    const dir = ATTACK_DIRECTIONS[i];
+    const { dr, dc, types } = dir;
     let nr = r + dr;
     let nc = c + dc;
-    while (isInside(nr, nc)) {
+
+    // First square in this direction
+    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
       const piece = board[nr][nc];
       if (piece) {
-        if (piece.color === attackerColor && types.includes(piece.type)) {
-          return true;
+        if (piece.color === attackerColor) {
+          const t = piece.type;
+          // Check for specific sliding types or king
+          if (t === 'k' || types.includes(t)) return true;
         }
-        if (
-          piece.color === attackerColor &&
-          piece.type === 'k' &&
-          Math.abs(nr - r) <= 1 &&
-          Math.abs(nc - c) <= 1
-        ) {
-          return true; // King attack
-        }
-        break; // Blocked
+        continue; // Blocked for further sliding
       }
+
+      // Keep sliding if first square was empty
       nr += dr;
       nc += dc;
+      while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+        const nextPiece = board[nr][nc];
+        if (nextPiece) {
+          if (nextPiece.color === attackerColor && types.includes(nextPiece.type)) {
+            return true;
+          }
+          break; // Blocked
+        }
+        nr += dr;
+        nc += dc;
+      }
     }
   }
 
