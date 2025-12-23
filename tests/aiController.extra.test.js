@@ -58,7 +58,7 @@ describe('AIController Ultimate Precision V5', () => {
             isInsufficientMaterial: jest.fn(() => false),
             getBoardHash: jest.fn(() => 'hash'),
             calculateMaterialAdvantage: jest.fn(() => 0),
-            renderBoard: jest.fn(),
+            renderBoard: jest.fn(), showModal: jest.fn(),
             continuousAnalysis: false,
             analysisMode: false,
             difficulty: 'medium',

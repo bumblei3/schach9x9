@@ -4,7 +4,7 @@ import { PHASES } from '../js/config.js';
 
 // Mock UI and SoundManager modules
 jest.unstable_mockModule('../js/ui.js', () => ({
-    renderBoard: jest.fn(),
+    renderBoard: jest.fn(), showModal: jest.fn(),
     showPromotionModal: jest.fn(),
     showPromotionUI: jest.fn(),
     animateMove: jest.fn().mockResolvedValue(),

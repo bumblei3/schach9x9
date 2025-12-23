@@ -23,7 +23,7 @@ import { MoveController } from '../js/moveController.js';
 import * as UI from '../js/ui.js';
 
 jest.mock('../js/ui.js', () => ({
-    renderBoard: jest.fn(),
+    renderBoard: jest.fn(), showModal: jest.fn(),
     updateCapturedUI: jest.fn(),
     updateMoveHistoryUI: jest.fn(),
     updateStatus: jest.fn(),

@@ -3,7 +3,7 @@ import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
 
 // Mock UI module
 const mockUI = {
-    renderBoard: jest.fn(),
+    renderBoard: jest.fn(), showModal: jest.fn(),
     updateAnalysisUI: jest.fn(),
     renderEvalGraph: jest.fn(),
 };
@@ -68,7 +68,7 @@ describe('AIController Deep Logic', () => {
             isInsufficientMaterial: jest.fn(() => false),
             getBoardHash: jest.fn(() => 'hash'),
             calculateMaterialAdvantage: jest.fn(() => 0),
-            renderBoard: jest.fn(),
+            renderBoard: jest.fn(), showModal: jest.fn(),
             findKing: jest.fn(() => ({ r: 1, c: 4 })) // Add findKing mock
         };
 

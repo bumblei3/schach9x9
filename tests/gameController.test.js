@@ -3,7 +3,7 @@ import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-    renderBoard: jest.fn(),
+    renderBoard: jest.fn(), showModal: jest.fn(),
     updateStatus: jest.fn(),
     updateShopUI: jest.fn(),
     updateClockUI: jest.fn(),

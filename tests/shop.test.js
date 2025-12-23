@@ -4,7 +4,7 @@ import { PHASES, PIECE_VALUES } from '../js/config.js';
 
 // Mock UI module
 jest.unstable_mockModule('../js/ui.js', () => ({
-    renderBoard: jest.fn(),
+    renderBoard: jest.fn(), showModal: jest.fn(),
     updateShopUI: jest.fn(),
     updateStatus: jest.fn(),
     renderEvalGraph: jest.fn(),

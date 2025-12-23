@@ -1660,3 +1660,41 @@ export function exitReplayMode(game) {
     game.startClock();
   }
 }
+
+/**
+ * Zeigt ein modales Dialogfenster an.
+ * @param {string} title - Der Titel des Modals
+ * @param {string} message - Die Nachricht
+ * @param {Array<{text: string, class: string, callback: Function}>} actions - Buttons
+ */
+export function showModal(title, message, actions = []) {
+  const modal = document.getElementById('generic-modal');
+  const titleEl = document.getElementById('modal-title');
+  const messageEl = document.getElementById('modal-message');
+  const actionsEl = document.getElementById('modal-actions');
+
+  if (!modal || !titleEl || !messageEl || !actionsEl) return;
+
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  actionsEl.innerHTML = '';
+
+  actions.forEach(action => {
+    const btn = document.createElement('button');
+    btn.textContent = action.text;
+    btn.className = action.class || 'btn-secondary';
+    btn.onclick = () => {
+      if (action.callback) action.callback();
+      closeModal();
+    };
+    actionsEl.appendChild(btn);
+  });
+
+  modal.style.display = 'flex';
+}
+
+export function closeModal() {
+  const modal = document.getElementById('generic-modal');
+  if (modal) modal.style.display = 'none';
+}
+

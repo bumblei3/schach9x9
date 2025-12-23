@@ -24,7 +24,7 @@ document.body.innerHTML = `
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-    renderBoard: jest.fn(),
+    renderBoard: jest.fn(), showModal: jest.fn(),
     updateStatus: jest.fn(),
     updateShopUI: jest.fn(),
     updateClockDisplay: jest.fn(),

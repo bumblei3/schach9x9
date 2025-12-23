@@ -258,18 +258,9 @@ export class GameController {
         }
     }
 
-    finishSetupPhase() {
+finishSetupPhase() {
+    const handleTransition = () => {
         if (this.game.phase === PHASES.SETUP_WHITE_PIECES) {
-            if (this.game.points > 0) {
-                alert(
-                    `Du hast noch ${this.game.points} Punkte übrig! Kaufe weitere Figuren oder klicke erneut auf "Fertig" um fortzufahren.`
-                );
-                this.game.log(`⚠️ Warnung: ${this.game.points} Punkte nicht ausgegeben!`);
-                if (!confirm(`Möchtest du wirklich mit ${this.game.points} ungenutzten Punkten fortfahren?`)) {
-                    return;
-                }
-            }
-
             this.game.phase = PHASES.SETUP_BLACK_PIECES;
             this.game.points = this.game.initialPoints;
             this.game.selectedShopPiece = null;
@@ -282,16 +273,6 @@ export class GameController {
                 }, 1000);
             }
         } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
-            if (this.game.points > 0 && !this.game.isAI) {
-                alert(
-                    `Du hast noch ${this.game.points} Punkte übrig! Kaufe weitere Figuren oder klicke erneut auf "Fertig" um fortzufahren.`
-                );
-                this.game.log(`⚠️ Warnung: ${this.game.points} Punkte nicht ausgegeben!`);
-                if (!confirm(`Möchtest du wirklich mit ${this.game.points} ungenutzten Punkten fortfahren?`)) {
-                    return;
-                }
-            }
-
             this.game.phase = PHASES.PLAY;
             this.showShop(false);
 
@@ -303,7 +284,7 @@ export class GameController {
             });
             logger.debug('Removed all corridor highlighting for PLAY phase');
 
-            // Ensure Action Bar is visible (it's always visible in new UI, but good to be safe)
+            // Ensure Action Bar is visible
             const actionBar = document.querySelector('.action-bar');
             if (actionBar) actionBar.classList.remove('hidden');
 
@@ -315,8 +296,25 @@ export class GameController {
         }
         UI.updateStatus(this.game);
         UI.renderBoard(this.game);
+    };
+
+    // Check for unspent points
+    if (this.game.points > 0) {
+        // Don't warn AI
+        if (this.game.phase === PHASES.SETUP_BLACK_PIECES && this.game.isAI) {
+            handleTransition();
+            return;
+        }
+
+        UI.showModal('Ungewutzte Punkte', `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`, [
+            { text: 'Abbrechen', class: 'btn-secondary' },
+            { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition }
+        ]);
+        return;
     }
 
+    handleTransition();
+}
     setTimeControl(mode) {
         const controls = {
             blitz3: { base: 180, increment: 2 },
