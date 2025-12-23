@@ -51,7 +51,7 @@ function runBenchmark() {
   console.log('');
 
   const position = createTacticalPosition();
-  const depths = [2, 3, 4];
+  const depths = [2, 3, 4, 5];
 
   console.log('Position: Tactical Midgame');
   console.log('-'.repeat(60));

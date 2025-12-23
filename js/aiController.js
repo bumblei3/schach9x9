@@ -55,7 +55,29 @@ export class AIController {
 
             if (emptySpots.length === 0) break;
 
-            const spot = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+            // Heuristic Placement Logic
+            let candidates = [];
+            const kingPos = this.game.findKing('black'); // Should be present from aiSetupKing
+
+            if (symbol === 'p' && kingPos) {
+                // Pawns prefer protecting the King (same col or adjacent) and being forward
+                candidates = emptySpots.filter(s => s.r > kingPos.r);
+                // Sort by closeness to King's column
+                candidates.sort((a, b) => Math.abs(a.c - kingPos.c) - Math.abs(b.c - kingPos.c));
+            } else if (symbol === 'r' || symbol === 'q') {
+                // Rooks/Queens prefer back rank
+                candidates = emptySpots.filter(s => s.r === corridor.rowStart);
+            } else if (symbol === 'n' || symbol === 'b') {
+                // Knights/Bishops prefer not to be on edges of valid area if possible
+                candidates = emptySpots.filter(s => s.r > corridor.rowStart);
+            }
+
+            // Fallback if no specific candidates found
+            if (candidates.length === 0) {
+                candidates = emptySpots;
+            }
+
+            const spot = candidates[Math.floor(Math.random() * candidates.length)];
             this.game.placeShopPiece(spot.r, spot.c);
         }
 
@@ -88,20 +110,27 @@ export class AIController {
         if (spinner) spinner.style.display = 'flex';
         console.time('KI-Zug');
 
-        // Use Web Worker for AI calculations to prevent UI freezing
-        if (!this.aiWorker) {
-            this.aiWorker = new Worker('js/ai-worker.js', { type: 'module' });
+        // MULTI-CORE PARALLEL SEARCH (Lazy SMP)
+        // Detect available CPU cores (cap at 4 for reasonable overhead)
+        const numWorkers = Math.min(navigator.hardwareConcurrency || 2, 4);
+        logger.debug(`[AI] Using ${numWorkers} parallel workers for search`);
 
-            // Load opening book if available
+        // Initialize workers array if needed
+        if (!this.aiWorkers) {
+            this.aiWorkers = [];
+            this.openingBookLoaded = false;
+
+            // Load opening book once
             fetch('opening-book.json')
                 .then(r => r.json())
                 .then(book => {
-                    this.aiWorker.postMessage({ type: 'loadBook', book });
+                    this.openingBook = book;
+                    this.openingBookLoaded = true;
                 })
                 .catch(() => { });
         }
 
-        // Prepare board state for worker (convert to serializable format)
+        // Prepare board state for workers (convert to serializable format)
         const boardCopy = JSON.parse(JSON.stringify(this.game.board));
 
         // Difficulty to depth mapping
@@ -116,42 +145,86 @@ export class AIController {
         // In classic mode (AI vs AI), use lower depth for faster, watchable gameplay
         let depth;
         if (this.game.mode === 'classic') {
-            depth = 3; // Fixed at medium depth for classic mode
+            depth = 3;
             logger.debug(`[AI] Classic mode: using depth ${depth} for faster play`);
         } else {
             depth = depthMap[this.game.difficulty] || 3;
             logger.debug(`[AI] Difficulty ${this.game.difficulty}: using depth ${depth}`);
         }
 
-        this.aiWorker.onmessage = e => {
-            const { type, data } = e.data;
+        // Results collection
+        const workerResults = [];
+        let completedWorkers = 0;
 
-            if (type === 'progress') {
-                // Update progress UI
-                this.updateAIProgress(data);
-            } else if (type === 'bestMove') {
-                console.timeEnd('KI-Zug');
-                if (spinner) spinner.style.display = 'none';
+        const processResults = () => {
+            console.timeEnd('KI-Zug');
+            if (spinner) spinner.style.display = 'none';
 
-                if (data) {
-                    this.game.executeMove(data.from, data.to);
-                    if (this.game.renderBoard) this.game.renderBoard();
-                } else {
-                    this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
-                }
+            // Terminate all workers
+            this.aiWorkers.forEach(w => w.terminate());
+            this.aiWorkers = [];
+
+            // Find best result (could be based on score, depth, etc.)
+            // For now, just take the first valid result
+            const bestResult = workerResults.find(r => r && r.from && r.to);
+
+            if (bestResult) {
+                this.game.executeMove(bestResult.from, bestResult.to);
+                if (this.game.renderBoard) this.game.renderBoard();
+            } else {
+                this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
             }
         };
 
-        this.aiWorker.postMessage({
-            type: 'getBestMove',
-            data: {
-                board: boardCopy,
-                color: 'black',
-                depth: depth,
-                difficulty: this.game.difficulty,
-                moveNumber: Math.floor(this.game.moveHistory.length / 2), // Black's move number
-            },
-        });
+        // Create and start workers
+        for (let i = 0; i < numWorkers; i++) {
+            const worker = new Worker('js/ai-worker.js', { type: 'module' });
+            this.aiWorkers.push(worker);
+
+            // Load opening book if available
+            if (this.openingBookLoaded) {
+                worker.postMessage({ type: 'loadBook', book: this.openingBook });
+            }
+
+            worker.onmessage = e => {
+                const { type, data } = e.data;
+
+                if (type === 'progress') {
+                    // Update progress UI (only from first worker to avoid flicker)
+                    if (i === 0) {
+                        this.updateAIProgress(data);
+                    }
+                } else if (type === 'bestMove') {
+                    workerResults[i] = data;
+                    completedWorkers++;
+
+                    // Use first result (fastest worker wins)
+                    if (completedWorkers === 1) {
+                        processResults();
+                    }
+                }
+            };
+
+            worker.onerror = err => {
+                logger.error(`[AI] Worker ${i} error:`, err);
+                completedWorkers++;
+                if (completedWorkers === numWorkers) {
+                    processResults();
+                }
+            };
+
+            // Send search request
+            worker.postMessage({
+                type: 'getBestMove',
+                data: {
+                    board: boardCopy,
+                    color: 'black',
+                    depth: depth,
+                    difficulty: this.game.difficulty,
+                    moveNumber: Math.floor(this.game.moveHistory.length / 2),
+                },
+            });
+        }
     }
 
     updateAIProgress(data) {

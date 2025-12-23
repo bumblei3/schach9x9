@@ -358,7 +358,7 @@ function getBestMove(game, depth) {
   return bestMove;
 }
 
-function minimax(game, depth, isMaximizing, aiColor) {
+function minimax(game, depth, isMaximizing, aiColor, alpha = -Infinity, beta = Infinity) {
   if (depth === 0 || game.gameOver) {
     return game.evaluate(aiColor);
   }
@@ -373,8 +373,10 @@ function minimax(game, depth, isMaximizing, aiColor) {
     for (const move of moves) {
       const newGame = game.clone();
       newGame.makeMove(move.from, move.to);
-      const score = minimax(newGame, depth - 1, false, aiColor);
+      const score = minimax(newGame, depth - 1, false, aiColor, alpha, beta);
       maxScore = Math.max(maxScore, score);
+      alpha = Math.max(alpha, score);
+      if (beta <= alpha) break; // Beta cutoff
     }
     return maxScore;
   } else {
@@ -382,8 +384,10 @@ function minimax(game, depth, isMaximizing, aiColor) {
     for (const move of moves) {
       const newGame = game.clone();
       newGame.makeMove(move.from, move.to);
-      const score = minimax(newGame, depth - 1, true, aiColor);
+      const score = minimax(newGame, depth - 1, true, aiColor, alpha, beta);
       minScore = Math.min(minScore, score);
+      beta = Math.min(beta, score);
+      if (beta <= alpha) break; // Alpha cutoff
     }
     return minScore;
   }

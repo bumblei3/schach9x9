@@ -406,6 +406,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
     // Iterative deepening: search from depth 1 up to target depth
     const useIterativeDeepening = difficulty === 'hard' || difficulty === 'expert';
     const startDepth = useIterativeDeepening ? 1 : depth;
+    let previousIterationScore = 0;
 
     for (let currentSearchDepth = startDepth; currentSearchDepth <= depth; currentSearchDepth++) {
       currentDepth = currentSearchDepth;
@@ -424,23 +425,63 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
       // Compute initial hash for the root position
       const rootHash = computeZobristHash(board, color);
 
-      for (const move of orderedMoves) {
-        // Pass rootHash to minimax, which will incrementally update it for the move
-        const score = minimax(
-          board,
-          move,
-          currentSearchDepth - 1,
-          false,
-          -Infinity,
-          Infinity,
-          color,
-          rootHash
-        );
-        if (score > bestScore) {
-          bestScore = score;
-          iterationBestMove = move;
-        }
+      let alpha = -Infinity;
+      let beta = Infinity;
+
+      // ASPIRATION WINDOWS
+      // Only use aspiration windows if we have a previous score (depth > 1)
+      if (currentSearchDepth > startDepth && Math.abs(previousIterationScore) < 5000) { // Don't use window if mate score
+        alpha = previousIterationScore - 50; // Window size 50
+        beta = previousIterationScore + 50;
       }
+
+      // Root Search Loop
+      // We might need to re-search if we fail low or high
+      while (true) {
+        let currentAlpha = alpha;
+        let currentBestScore = -Infinity;
+        let currentBestMove = moves[0];
+
+        for (const move of orderedMoves) {
+          const score = minimax(
+            board,
+            move,
+            currentSearchDepth - 1,
+            false,
+            currentAlpha,
+            beta,
+            color,
+            rootHash
+          );
+
+          if (score > currentBestScore) {
+            currentBestScore = score;
+            currentBestMove = move;
+          }
+          // Update alpha for PVS/Alpha-Beta at root
+          if (score > currentAlpha) {
+            currentAlpha = score;
+          }
+        }
+
+        // Check for Fail Low (score <= alpha)
+        if (currentBestScore <= alpha) {
+          alpha = -Infinity;
+          continue; // Re-search with full open alpha
+        }
+        // Check for Fail High (score >= beta)
+        if (currentBestScore >= beta) {
+          beta = Infinity;
+          continue; // Re-search with full open beta
+        }
+
+        // Success - within window
+        bestScore = currentBestScore;
+        iterationBestMove = currentBestMove;
+        break;
+      }
+
+      previousIterationScore = bestScore;
 
       // Update best move found so far
       bestMove = iterationBestMove;
@@ -501,7 +542,22 @@ function sendProgress(maxDepth) {
 /**
  * Apply a move to the board and return undo information
  */
+const MAX_PLY = 64; // Max depth
+const undoStack = new Array(MAX_PLY).fill(null).map(() => ({
+  capturedPiece: null,
+  oldHasMoved: false,
+  move: null
+}));
+
+/**
+ * Apply a move to the board and return undo information
+ */
+/**
+ * Apply a move to the board and return undo information
+ */
 function makeMove(board, move) {
+  if (move === null) return null;
+
   const fromPiece = board[move.from.r][move.from.c];
   const capturedPiece = board[move.to.r][move.to.c];
 
@@ -525,6 +581,8 @@ function makeMove(board, move) {
  * Undo a move
  */
 function undoMove(board, undoInfo) {
+  if (undoInfo === null) return;
+
   const { move, capturedPiece, oldHasMoved } = undoInfo;
   const piece = board[move.to.r][move.to.c];
 
@@ -534,6 +592,23 @@ function undoMove(board, undoInfo) {
 
   board[move.from.r][move.from.c] = piece;
   board[move.to.r][move.to.c] = capturedPiece;
+}
+
+/**
+ * Check if the side has major pieces (to avoid Zugzwang in endgames)
+ */
+function hasMajorPieces(board, color) {
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const piece = board[r][c];
+      if (piece && piece.color === color) {
+        if (piece.type !== 'p' && piece.type !== 'k') {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 /**
@@ -551,8 +626,8 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
     }
   }
 
-  const fromPiece = board[move.from.r][move.from.c]; // Get piece from original board
-  const capturedPiece = board[move.to.r][move.to.c]; // Get captured piece from original board
+  const fromPiece = move ? board[move.from.r][move.from.c] : null; // Get piece from original board
+  const capturedPiece = move ? board[move.to.r][move.to.c] : null; // Get captured piece from original board
 
   // INCREMENTAL HASH UPDATE
   let hash = parentHash;
@@ -560,19 +635,21 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
   // 1. Toggle side to move
   hash ^= zobristTable.sideToMove;
 
-  // 2. Remove moving piece from source
-  if (fromPiece) {
-    hash ^= zobristTable[fromPiece.color][fromPiece.type][move.from.r][move.from.c];
-  }
+  if (move) {
+    // 2. Remove moving piece from source
+    if (fromPiece) {
+      hash ^= zobristTable[fromPiece.color][fromPiece.type][move.from.r][move.from.c];
+    }
 
-  // 3. Add moving piece to destination
-  if (fromPiece) {
-    hash ^= zobristTable[fromPiece.color][fromPiece.type][move.to.r][move.to.c];
-  }
+    // 3. Add moving piece to destination
+    if (fromPiece) {
+      hash ^= zobristTable[fromPiece.color][fromPiece.type][move.to.r][move.to.c];
+    }
 
-  // 4. If capture, remove captured piece
-  if (capturedPiece) {
-    hash ^= zobristTable[capturedPiece.color][capturedPiece.type][move.to.r][move.to.c];
+    // 4. If capture, remove captured piece
+    if (capturedPiece) {
+      hash ^= zobristTable[capturedPiece.color][capturedPiece.type][move.to.r][move.to.c];
+    }
   }
 
   // Probe transposition table
@@ -593,7 +670,29 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
     score = quiescenceSearch(board, alpha, beta, isMaximizing, aiColor);
     flag = TT_EXACT;
   } else {
+    // NULL MOVE PRUNING
     const color = isMaximizing ? aiColor : aiColor === 'white' ? 'black' : 'white';
+
+    // Conditions: depth >= 3, not a null move itself, not in check, has pieces
+    if (depth >= 3 && move !== null && !isInCheck(board, color) && hasMajorPieces(board, color)) {
+      const R = 2;
+      // Search with reduced depth, passing null to skip move application
+      // Passing null means we pass the turn to the other side (!isMaximizing)
+      const nullScore = minimax(board, null, depth - 1 - R, !isMaximizing, alpha, beta, aiColor, hash);
+
+      if (isMaximizing) {
+        if (nullScore >= beta) {
+          undoMove(board, undoInfo);
+          return beta; // Cutoff
+        }
+      } else {
+        if (nullScore <= alpha) {
+          undoMove(board, undoInfo);
+          return alpha; // Cutoff
+        }
+      }
+    }
+
     const moves = getAllLegalMoves(board, color);
 
     if (moves.length === 0) {
@@ -606,8 +705,28 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
       const ttBestMove = ttEntry ? ttEntry.bestMove : null;
       const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
 
-      for (const nextMove of orderedMoves) {
-        const moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
+      for (let i = 0; i < orderedMoves.length; i++) {
+        const nextMove = orderedMoves[i];
+        let moveScore;
+
+        // LATE MOVE REDUCTION (LMR)
+        // If depth is high enough, and we search later moves, and it's not a capture (heuristically)
+        // Note: We check capture by looking at the target square on the board
+        const isCapture = board[nextMove.to.r][nextMove.to.c] !== null;
+
+        if (depth >= 3 && i >= 4 && !isCapture) {
+          // Reduce depth by 1 (effective depth - 2)
+          moveScore = minimax(board, nextMove, depth - 2, false, alpha, beta, aiColor, hash);
+
+          // If the move turns out to be good (beats alpha), re-search at full depth
+          if (moveScore > alpha) {
+            moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
+          }
+        } else {
+          // Normal search
+          moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
+        }
+
         if (moveScore > score) {
           score = moveScore;
           bestMove = nextMove;
@@ -633,8 +752,23 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
       const ttBestMove = ttEntry ? ttEntry.bestMove : null;
       const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
 
-      for (const nextMove of orderedMoves) {
-        const moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
+      for (let i = 0; i < orderedMoves.length; i++) {
+        const nextMove = orderedMoves[i];
+        let moveScore;
+
+        // LATE MOVE REDUCTION (LMR)
+        const isCapture = board[nextMove.to.r][nextMove.to.c] !== null;
+
+        if (depth >= 3 && i >= 4 && !isCapture) {
+          moveScore = minimax(board, nextMove, depth - 2, true, alpha, beta, aiColor, hash);
+
+          if (moveScore < beta) { // For minimizing, "good" means < beta (potentially updating beta)
+            moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
+          }
+        } else {
+          moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
+        }
+
         if (moveScore < score) {
           score = moveScore;
           bestMove = nextMove;
@@ -718,10 +852,16 @@ function quiescenceSearch(board, alpha, beta, isMaximizing, aiColor) {
 /**
  * Evaluate board position with advanced heuristics
  */
+const pawnColumnsWhite = new Int8Array(BOARD_SIZE);
+const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
+
 export function evaluatePosition(board, forColor) {
   let score = 0;
+  // Reset static arrays
+  pawnColumnsWhite.fill(0);
+  pawnColumnsBlack.fill(0);
 
-  // Material and position score
+  // Single pass board iteration
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       const piece = board[r][c];
@@ -731,15 +871,24 @@ export function evaluatePosition(board, forColor) {
       const positionBonus = getPositionBonus(r, c, piece.type);
       let totalValue = pieceValue + positionBonus;
 
-      // King Safety: Bonus for pawns around king
+      // King Safety
       if (piece.type === 'k') {
         totalValue += evaluateKingSafety(board, r, c, piece.color);
       }
 
-      // Mobility bonus (simplified - count pseudo-legal moves)
+      // Mobility bonus
       if (piece.type !== 'p' && piece.type !== 'k') {
         const mobility = countMobility(board, r, c, piece);
-        totalValue += mobility * 2; // Small bonus for mobility
+        totalValue += mobility * 2;
+      }
+
+      // Record pawn for structure eval
+      if (piece.type === 'p') {
+        if (piece.color === 'white') {
+          pawnColumnsWhite[c]++;
+        } else {
+          pawnColumnsBlack[c]++;
+        }
       }
 
       if (piece.color === forColor) {
@@ -750,8 +899,19 @@ export function evaluatePosition(board, forColor) {
     }
   }
 
-  // Pawn structure evaluation
-  score += evaluatePawnStructure(board, forColor);
+  // Apply pawn structure penalties efficiently
+  for (let c = 0; c < BOARD_SIZE; c++) {
+    // White
+    if (pawnColumnsWhite[c] > 1) {
+      const penalty = (pawnColumnsWhite[c] - 1) * 10;
+      if (forColor === 'white') score -= penalty; else score += penalty;
+    }
+    // Black
+    if (pawnColumnsBlack[c] > 1) {
+      const penalty = (pawnColumnsBlack[c] - 1) * 10;
+      if (forColor === 'black') score -= penalty; else score += penalty;
+    }
+  }
 
   return score;
 }
@@ -777,43 +937,6 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
   }
 
   return safety;
-}
-
-/**
- * Evaluate pawn structure (doubled pawns, isolated pawns)
- */
-function evaluatePawnStructure(board, forColor) {
-  let score = 0;
-  const pawnColumns = { white: {}, black: {} };
-
-  // Count pawns per column
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      const piece = board[r][c];
-      if (piece && piece.type === 'p') {
-        if (!pawnColumns[piece.color][c]) {
-          pawnColumns[piece.color][c] = 0;
-        }
-        pawnColumns[piece.color][c]++;
-      }
-    }
-  }
-
-  // Penalize doubled pawns
-  for (const color in pawnColumns) {
-    for (const col in pawnColumns[color]) {
-      if (pawnColumns[color][col] > 1) {
-        const penalty = (pawnColumns[color][col] - 1) * 10;
-        if (color === forColor) {
-          score -= penalty;
-        } else {
-          score += penalty;
-        }
-      }
-    }
-  }
-
-  return score;
 }
 
 /**
@@ -993,6 +1116,32 @@ const ATTACK_DIRECTIONS = [
 ];
 
 /**
+ * Static lookup tables for move generation
+ */
+const PIECE_SLIDING_DIRS = {
+  b: DIAGONAL_DIRS,
+  r: ORTHOGONAL_DIRS,
+  q: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS],
+  a: DIAGONAL_DIRS,
+  c: ORTHOGONAL_DIRS,
+  e: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS]
+};
+
+const PIECE_STEPPING_DIRS = {
+  n: KNIGHT_MOVES, // Knight
+  k: KING_DIRS,    // King
+  a: KNIGHT_MOVES, // Archbishop (N+B)
+  c: KNIGHT_MOVES, // Chancellor (N+R)
+  e: KNIGHT_MOVES  // Angel (Q+N)
+};
+
+/**
+ * Check if a square is attacked by a specific color
+ */
+const PIECE_ATTACKS_DIAGONALLY = { b: true, q: true, a: true, e: true };
+const PIECE_ATTACKS_ORTHOGONALLY = { r: true, q: true, c: true, e: true };
+
+/**
  * Check if a square is attacked by a specific color
  */
 function isSquareAttacked(board, r, c, attackerColor) {
@@ -1000,17 +1149,19 @@ function isSquareAttacked(board, r, c, attackerColor) {
   const pawnRow = attackerColor === 'white' ? 1 : -1;
   const pr = r + pawnRow;
   if (pr >= 0 && pr < BOARD_SIZE) {
-    for (const dc of [-1, 1]) {
-      const pc = c + dc;
-      if (pc >= 0 && pc < BOARD_SIZE) {
-        const piece = board[pr][pc];
-        if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
-      }
+    if (c > 0) {
+      const piece = board[pr][c - 1];
+      if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
+    }
+    if (c < BOARD_SIZE - 1) {
+      const piece = board[pr][c + 1];
+      if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
     }
   }
 
   // 2. Knight attacks (Knight, Archbishop, Chancellor, Angel)
-  for (let i = 0; i < KNIGHT_MOVES.length; i++) {
+  // Use unrolled loop for speed
+  for (let i = 0; i < 8; i++) {
     const move = KNIGHT_MOVES[i];
     const nr = r + move[0];
     const nc = c + move[1];
@@ -1025,37 +1176,63 @@ function isSquareAttacked(board, r, c, attackerColor) {
 
   // 3. Sliding pieces (Bishop/Rook/Queen/Archbishop/Chancellor/Angel)
   // and King attack (distance 1)
-  for (let i = 0; i < ATTACK_DIRECTIONS.length; i++) {
-    const dir = ATTACK_DIRECTIONS[i];
-    const { dr, dc, types } = dir;
-    let nr = r + dr;
-    let nc = c + dc;
 
-    // First square in this direction
+  // Diagonal
+  for (let i = 0; i < 4; i++) {
+    const dir = DIAGONAL_DIRS[i];
+    let nr = r + dir[0];
+    let nc = c + dir[1];
+
+    // King check
     if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
       const piece = board[nr][nc];
       if (piece) {
         if (piece.color === attackerColor) {
-          const t = piece.type;
-          // Check for specific sliding types or king
-          if (t === 'k' || types.includes(t)) return true;
+          if (piece.type === 'k' || PIECE_ATTACKS_DIAGONALLY[piece.type]) return true;
         }
-        continue; // Blocked for further sliding
-      }
-
-      // Keep sliding if first square was empty
-      nr += dr;
-      nc += dc;
-      while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
-        const nextPiece = board[nr][nc];
-        if (nextPiece) {
-          if (nextPiece.color === attackerColor && types.includes(nextPiece.type)) {
-            return true;
+      } else {
+        // Sliding
+        nr += dir[0];
+        nc += dir[1];
+        while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+          const nextPiece = board[nr][nc];
+          if (nextPiece) {
+            if (nextPiece.color === attackerColor && PIECE_ATTACKS_DIAGONALLY[nextPiece.type]) return true;
+            break;
           }
-          break; // Blocked
+          nr += dir[0];
+          nc += dir[1];
         }
-        nr += dr;
-        nc += dc;
+      }
+    }
+  }
+
+  // Orthogonal
+  for (let i = 0; i < 4; i++) {
+    const dir = ORTHOGONAL_DIRS[i];
+    let nr = r + dir[0];
+    let nc = c + dir[1];
+
+    // King check
+    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+      const piece = board[nr][nc];
+      if (piece) {
+        if (piece.color === attackerColor) {
+          if (piece.type === 'k' || PIECE_ATTACKS_ORTHOGONALLY[piece.type]) return true;
+        }
+      } else {
+        // Sliding
+        nr += dir[0];
+        nc += dir[1];
+        while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+          const nextPiece = board[nr][nc];
+          if (nextPiece) {
+            if (nextPiece.color === attackerColor && PIECE_ATTACKS_ORTHOGONALLY[nextPiece.type]) return true;
+            break;
+          }
+          nr += dir[0];
+          nc += dir[1];
+        }
       }
     }
   }
@@ -1092,20 +1269,12 @@ function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
       }
     }
   } else {
-    // Other pieces
-    const directions = [];
-    if (['b', 'q', 'a', 'k', 'e'].includes(piece.type)) {
-      directions.push(...DIAGONAL_DIRS);
-    }
-    if (['r', 'q', 'c', 'k', 'e'].includes(piece.type)) {
-      directions.push(...ORTHOGONAL_DIRS);
-    }
-
-    // Knight jumps
-    if (['n', 'a', 'c', 'e'].includes(piece.type)) {
-      for (const [dr, dc] of KNIGHT_MOVES) {
-        const nr = r + dr,
-          nc = c + dc;
+    // Stepping moves (Knight, King, and stepping components of hybrids)
+    const steppingDirs = PIECE_STEPPING_DIRS[piece.type];
+    if (steppingDirs) {
+      for (let i = 0; i < steppingDirs.length; i++) {
+        const [dr, dc] = steppingDirs[i];
+        const nr = r + dr, nc = c + dc;
         if (isInside(nr, nc)) {
           if (isEnemy(nr, nc)) {
             moves.push({ from: { r, c }, to: { r: nr, c: nc } });
@@ -1116,13 +1285,11 @@ function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
       }
     }
 
-    // Sliding moves
-    if (['b', 'r', 'q', 'a', 'c', 'e'].includes(piece.type)) {
-      const slidingDirs = [];
-      if (['b', 'q', 'a', 'e'].includes(piece.type)) slidingDirs.push(...DIAGONAL_DIRS);
-      if (['r', 'q', 'c', 'e'].includes(piece.type)) slidingDirs.push(...ORTHOGONAL_DIRS);
-
-      for (const [dr, dc] of slidingDirs) {
+    // Sliding moves (Bishop, Rook, Queen, and sliding components of hybrids)
+    const slidingDirs = PIECE_SLIDING_DIRS[piece.type];
+    if (slidingDirs) {
+      for (let i = 0; i < slidingDirs.length; i++) {
+        const [dr, dc] = slidingDirs[i];
         let nr = r + dr;
         let nc = c + dc;
         while (isInside(nr, nc)) {
@@ -1138,21 +1305,6 @@ function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
           }
           nr += dr;
           nc += dc;
-        }
-      }
-    }
-
-    // King single steps
-    if (piece.type === 'k') {
-      for (const [dr, dc] of KING_DIRS) {
-        const nr = r + dr,
-          nc = c + dc;
-        if (isInside(nr, nc)) {
-          if (isEnemy(nr, nc)) {
-            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
-          } else if (!onlyCaptures && isEmpty(nr, nc)) {
-            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
-          }
         }
       }
     }
@@ -1200,9 +1352,11 @@ function countMobility(board, r, c, piece) {
   const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
   const isEmpty = (r, c) => !board[r][c];
 
-  // Knight jumps (N, A, C, E)
-  if (['n', 'a', 'c', 'e'].includes(piece.type)) {
-    for (const [dr, dc] of KNIGHT_MOVES) {
+  // Stepping moves (Knight etc)
+  const steppingDirs = PIECE_STEPPING_DIRS[piece.type];
+  if (steppingDirs) {
+    for (let i = 0; i < steppingDirs.length; i++) {
+      const [dr, dc] = steppingDirs[i];
       const nr = r + dr, nc = c + dc;
       if (isInside(nr, nc) && (isEmpty(nr, nc) || isEnemy(nr, nc))) {
         count++;
@@ -1211,14 +1365,10 @@ function countMobility(board, r, c, piece) {
   }
 
   // Sliding moves
-  if (['b', 'r', 'q', 'a', 'c', 'e'].includes(piece.type)) {
-    const slidingDirs = [];
-    if (['b', 'q', 'a', 'e'].includes(piece.type)) // Diagonals
-      slidingDirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
-    if (['r', 'q', 'c', 'e'].includes(piece.type)) // Orthogonals
-      slidingDirs.push([-1, 0], [1, 0], [0, -1], [0, 1]);
-
-    for (const [dr, dc] of slidingDirs) {
+  const slidingDirs = PIECE_SLIDING_DIRS[piece.type];
+  if (slidingDirs) {
+    for (let i = 0; i < slidingDirs.length; i++) {
+      const [dr, dc] = slidingDirs[i];
       let nr = r + dr;
       let nc = c + dc;
       while (isInside(nr, nc)) {
