@@ -7,10 +7,117 @@ import { logger } from './logger.js';
 import { BOARD_SIZE, AI_PIECE_VALUES as PIECE_VALUES } from './config.js';
 
 // Position bonus tables (simplified, center control)
-const POSITION_BONUS = {
-  center: 10,
-  extended_center: 5,
-  edge: -5,
+// Piece-Square Tables (PST) for 9x9 board.
+// Values are from White's perspective. For Black, rows are mirrored.
+const PST = {
+  // Pawn: wants to advance, middle ones more
+  p: [
+    0, 0, 0, 0, 0, 0, 0, 0, 0,
+    50, 50, 50, 50, 50, 50, 50, 50, 50,
+    10, 10, 20, 30, 30, 30, 20, 10, 10,
+    5, 5, 10, 25, 25, 25, 10, 5, 5,
+    0, 0, 0, 20, 25, 20, 0, 0, 0,
+    5, -5, -10, 0, 10, 0, -10, -5, 5,
+    5, 10, 10, -20, -20, -20, 10, 10, 5,
+    0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0
+  ],
+  // Knight: dislikes edges
+  n: [
+    -50, -40, -30, -30, -30, -30, -30, -40, -50,
+    -40, -20, 0, 0, 0, 0, 0, -20, -40,
+    -30, 0, 10, 15, 15, 15, 10, 0, -30,
+    -30, 5, 15, 20, 20, 20, 15, 5, -30,
+    -30, 0, 15, 20, 25, 20, 15, 0, -30,
+    -30, 5, 15, 20, 20, 20, 15, 5, -30,
+    -30, 0, 10, 15, 15, 15, 10, 0, -30,
+    -40, -20, 0, 5, 5, 5, 0, -20, -40,
+    -50, -40, -30, -30, -30, -30, -30, -40, -50
+  ],
+  // Bishop: center control
+  b: [
+    -20, -10, -10, -10, -10, -10, -10, -10, -20,
+    -10, 0, 0, 0, 0, 0, 0, 0, -10,
+    -10, 0, 5, 10, 10, 10, 5, 0, -10,
+    -10, 5, 5, 10, 10, 10, 5, 5, -10,
+    -10, 0, 10, 10, 15, 10, 10, 0, -10,
+    -10, 10, 10, 10, 10, 10, 10, 10, -10,
+    -10, 5, 0, 0, 0, 0, 0, 5, -10,
+    -10, 0, 0, 0, 0, 0, 0, 0, -10,
+    -20, -10, -10, -10, -10, -10, -10, -10, -20
+  ],
+  // Rook: 7th/8th rank
+  r: [
+    0, 0, 0, 0, 0, 0, 0, 0, 0,
+    5, 10, 10, 10, 10, 10, 10, 10, 5,
+    -5, 0, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, 0, -5,
+    0, 0, 0, 5, 5, 5, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0
+  ],
+  // Queen: center
+  q: [
+    -20, -10, -10, -5, -5, -5, -10, -10, -20,
+    -10, 0, 0, 0, 0, 0, 0, 0, -10,
+    -10, 0, 5, 5, 5, 5, 5, 0, -10,
+    -5, 0, 5, 5, 5, 5, 5, 0, -5,
+    0, 0, 5, 5, 5, 5, 5, 0, -5,
+    -5, 0, 5, 5, 5, 5, 5, 0, -5,
+    -10, 0, 5, 5, 5, 5, 5, 0, -10,
+    -10, 0, 0, 0, 0, 0, 0, 0, -10,
+    -20, -10, -10, -5, -5, -5, -10, -10, -20
+  ],
+  // King: safety
+  k: [
+    -30, -40, -40, -50, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -50, -40, -40, -30,
+    -20, -30, -30, -40, -40, -40, -30, -30, -20,
+    20, 20, 0, 0, 0, 0, 0, 20, 20,
+    20, 30, 10, 0, 0, 0, 10, 30, 20
+  ],
+  // Archbishop (Bishop + Knight)
+  a: [
+    -20, -15, -10, -10, -10, -10, -10, -15, -20,
+    -15, -5, 0, 0, 0, 0, 0, -5, -15,
+    -10, 0, 10, 15, 15, 15, 10, 0, -10,
+    -10, 5, 15, 20, 20, 20, 15, 5, -10,
+    -10, 0, 15, 20, 25, 20, 15, 0, -10,
+    -10, 5, 15, 20, 20, 20, 15, 5, -10,
+    -10, 0, 10, 15, 15, 15, 10, 0, -10,
+    -15, -5, 0, 5, 5, 5, 0, -5, -15,
+    -20, -15, -10, -10, -10, -10, -10, -15, -20
+  ],
+  // Chancellor (Rook + Knight)
+  c: [
+    -10, -5, 0, 5, 5, 5, 0, -5, -10,
+    -5, 5, 10, 10, 10, 10, 10, 5, -5,
+    0, 10, 15, 20, 20, 20, 15, 10, 0,
+    5, 10, 20, 25, 25, 25, 20, 10, 5,
+    5, 10, 20, 25, 30, 25, 20, 10, 5,
+    5, 10, 20, 25, 25, 25, 20, 10, 5,
+    0, 10, 15, 20, 20, 20, 15, 10, 0,
+    -5, 5, 10, 10, 10, 10, 10, 5, -5,
+    -10, -5, 0, 5, 5, 5, 0, -5, -10
+  ],
+  // Angel (Queen + Knight)
+  e: [
+    -20, -15, -10, -10, -10, -10, -10, -15, -20,
+    -15, 0, 5, 10, 10, 10, 5, 0, -15,
+    -10, 5, 15, 20, 20, 20, 15, 5, -10,
+    -10, 10, 20, 30, 30, 30, 20, 10, -10,
+    -10, 10, 20, 30, 40, 30, 20, 10, -10,
+    -10, 10, 20, 30, 30, 30, 20, 10, -10,
+    -10, 5, 15, 20, 20, 20, 15, 5, -10,
+    -15, 0, 5, 10, 10, 10, 5, 0, -15,
+    -20, -15, -10, -10, -10, -10, -10, -15, -20
+  ]
 };
 
 // ========================================
@@ -429,53 +536,60 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
       let beta = Infinity;
 
       // ASPIRATION WINDOWS
-      // Only use aspiration windows if we have a previous score (depth > 1)
-      if (currentSearchDepth > startDepth && Math.abs(previousIterationScore) < 5000) { // Don't use window if mate score
-        alpha = previousIterationScore - 50; // Window size 50
-        beta = previousIterationScore + 50;
+      let windowSize = 40;
+      if (currentSearchDepth > startDepth && Math.abs(previousIterationScore) < 5000) {
+        alpha = previousIterationScore - windowSize;
+        beta = previousIterationScore + windowSize;
       }
 
       // Root Search Loop
-      // We might need to re-search if we fail low or high
       while (true) {
         let currentAlpha = alpha;
         let currentBestScore = -Infinity;
         let currentBestMove = moves[0];
 
-        for (const move of orderedMoves) {
-          const score = minimax(
-            board,
-            move,
-            currentSearchDepth - 1,
-            false,
-            currentAlpha,
-            beta,
-            color,
-            rootHash
-          );
+        for (let i = 0; i < orderedMoves.length; i++) {
+          const move = orderedMoves[i];
+          let score;
+
+          if (i === 0) {
+            // Full window search for first move (PV candidate)
+            score = minimax(board, move, currentSearchDepth - 1, false, currentAlpha, beta, color, rootHash);
+          } else {
+            // Null window search for moves after PV candidate
+            score = minimax(board, move, currentSearchDepth - 1, false, currentAlpha, currentAlpha + 1, color, rootHash);
+            if (score > currentAlpha && score < beta) {
+              // Re-search with full window if it fails high
+              score = minimax(board, move, currentSearchDepth - 1, false, currentAlpha, beta, color, rootHash);
+            }
+          }
 
           if (score > currentBestScore) {
             currentBestScore = score;
             currentBestMove = move;
           }
-          // Update alpha for PVS/Alpha-Beta at root
           if (score > currentAlpha) {
             currentAlpha = score;
           }
+
+          // If current score beats beta, we fail high early
+          if (score >= beta) break;
         }
 
-        // Check for Fail Low (score <= alpha)
+        // Fail Low: Expand window downwards
         if (currentBestScore <= alpha) {
-          alpha = -Infinity;
-          continue; // Re-search with full open alpha
+          alpha -= windowSize;
+          windowSize *= 2;
+          continue;
         }
-        // Check for Fail High (score >= beta)
+        // Fail High: Expand window upwards
         if (currentBestScore >= beta) {
-          beta = Infinity;
-          continue; // Re-search with full open beta
+          beta += windowSize;
+          windowSize *= 2;
+          continue;
         }
 
-        // Success - within window
+        // Within window
         bestScore = currentBestScore;
         iterationBestMove = currentBestMove;
         break;
@@ -701,30 +815,36 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
       flag = TT_EXACT;
     } else if (isMaximizing) {
       score = -Infinity;
-      // Order moves with TT best move hint and current depth
       const ttBestMove = ttEntry ? ttEntry.bestMove : null;
       const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
 
       for (let i = 0; i < orderedMoves.length; i++) {
         const nextMove = orderedMoves[i];
         let moveScore;
-
-        // LATE MOVE REDUCTION (LMR)
-        // If depth is high enough, and we search later moves, and it's not a capture (heuristically)
-        // Note: We check capture by looking at the target square on the board
         const isCapture = board[nextMove.to.r][nextMove.to.c] !== null;
 
-        if (depth >= 3 && i >= 4 && !isCapture) {
-          // Reduce depth by 1 (effective depth - 2)
-          moveScore = minimax(board, nextMove, depth - 2, false, alpha, beta, aiColor, hash);
+        if (i === 0) {
+          // PV move: search with full window
+          moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
+        } else {
+          // PVS / LMR search
+          let reduction = 0;
+          if (depth >= 3 && i >= 4 && !isCapture && !isInCheck(board, color)) {
+            reduction = 1;
+            if (i >= 12) reduction = 2; // Extra reduction for very late moves
+          }
 
-          // If the move turns out to be good (beats alpha), re-search at full depth
-          if (moveScore > alpha) {
+          // Search with zero window (Fail-soft)
+          moveScore = minimax(board, nextMove, depth - 1 - reduction, false, alpha, alpha + 1, aiColor, hash);
+
+          // Re-search if reduced depth was too deep
+          if (moveScore > alpha && reduction > 0) {
+            moveScore = minimax(board, nextMove, depth - 1, false, alpha, alpha + 1, aiColor, hash);
+          }
+          // Re-search with full window if PV candidate
+          if (moveScore > alpha && moveScore < beta) {
             moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
           }
-        } else {
-          // Normal search
-          moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
         }
 
         if (moveScore > score) {
@@ -733,40 +853,43 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
         }
         alpha = Math.max(alpha, score);
         if (beta <= alpha) {
-          // Beta cutoff - store as killer move (if not a capture)
-          if (!capturedPiece) {
-            addKillerMove(depth, nextMove);
-          }
-          // Update history heuristic
-          updateHistory(board[nextMove.from.r][nextMove.from.c], nextMove, depth);
+          if (!capturedPiece) addKillerMove(depth, nextMove);
+          updateHistory(fromPiece, nextMove, depth);
           flag = TT_BETA; // Lower bound (fail-high)
           break;
         }
       }
-      if (beta > alpha) {
-        flag = TT_EXACT; // Exact score
-      }
+      if (flag !== TT_BETA) flag = TT_EXACT;
     } else {
       score = Infinity;
-      // Order moves with TT best move hint and current depth
       const ttBestMove = ttEntry ? ttEntry.bestMove : null;
       const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
 
       for (let i = 0; i < orderedMoves.length; i++) {
         const nextMove = orderedMoves[i];
         let moveScore;
-
-        // LATE MOVE REDUCTION (LMR)
         const isCapture = board[nextMove.to.r][nextMove.to.c] !== null;
 
-        if (depth >= 3 && i >= 4 && !isCapture) {
-          moveScore = minimax(board, nextMove, depth - 2, true, alpha, beta, aiColor, hash);
+        if (i === 0) {
+          // PV move: full search
+          moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
+        } else {
+          // PVS / LMR search
+          let reduction = 0;
+          if (depth >= 3 && i >= 4 && !isCapture && !isInCheck(board, color)) {
+            reduction = 1;
+            if (i >= 12) reduction = 2;
+          }
 
-          if (moveScore < beta) { // For minimizing, "good" means < beta (potentially updating beta)
+          // Zero-window search (Fail-soft)
+          moveScore = minimax(board, nextMove, depth - 1 - reduction, true, beta - 1, beta, aiColor, hash);
+
+          if (moveScore < beta && reduction > 0) {
+            moveScore = minimax(board, nextMove, depth - 1, true, beta - 1, beta, aiColor, hash);
+          }
+          if (moveScore < beta && moveScore > alpha) {
             moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
           }
-        } else {
-          moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
         }
 
         if (moveScore < score) {
@@ -775,19 +898,13 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
         }
         beta = Math.min(beta, score);
         if (beta <= alpha) {
-          // Beta cutoff - store as killer move (if not a capture)
-          if (!capturedPiece) {
-            addKillerMove(depth, nextMove);
-          }
-          // Update history heuristic
-          updateHistory(board[nextMove.from.r][nextMove.from.c], nextMove, depth);
-          flag = TT_BETA; // Lower bound (fail-high)
+          if (!capturedPiece) addKillerMove(depth, nextMove);
+          updateHistory(fromPiece, nextMove, depth);
+          flag = TT_BETA;
           break;
         }
       }
-      if (beta > alpha) {
-        flag = TT_EXACT; // Exact score
-      }
+      if (flag !== TT_BETA) flag = TT_EXACT;
     }
   }
 
@@ -868,7 +985,7 @@ export function evaluatePosition(board, forColor) {
       if (!piece) continue;
 
       const pieceValue = PIECE_VALUES[piece.type] || 0;
-      const positionBonus = getPositionBonus(r, c, piece.type);
+      const positionBonus = getPositionBonus(r, c, piece.type, piece.color);
       let totalValue = pieceValue + positionBonus;
 
       // King Safety
@@ -940,21 +1057,15 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
 }
 
 /**
- * Get position bonus for piece placement
+ * Get position bonus for piece placement using PSTs
  */
-function getPositionBonus(r, c, type) {
-  // Center squares (3,3), (3,4), (3,5), (4,3), (4,4), (4,5), (5,3), (5,4), (5,5)
-  const isCenterSquare = r >= 3 && r <= 5 && c >= 3 && c <= 5;
-  const isExtendedCenter = r >= 2 && r <= 6 && c >= 2 && c <= 6;
-  const isEdge = r === 0 || r === BOARD_SIZE - 1 || c === 0 || c === BOARD_SIZE - 1;
+function getPositionBonus(r, c, type, color) {
+  const table = PST[type];
+  if (!table) return 0;
 
-  if (type === 'k') return 0; // King doesn't care about center in midgame
-
-  if (isCenterSquare) return POSITION_BONUS.center;
-  if (isExtendedCenter) return POSITION_BONUS.extended_center;
-  if (isEdge && (type === 'n' || type === 'b')) return POSITION_BONUS.edge;
-
-  return 0;
+  // Mirror row for black pieces (so they move 'down' the table correctly)
+  const perspectiveRow = color === 'white' ? r : (BOARD_SIZE - 1 - r);
+  return table[perspectiveRow * BOARD_SIZE + c];
 }
 
 /**

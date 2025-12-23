@@ -596,6 +596,10 @@ function setupGlobalListeners() {
     document.getElementById('help-overlay').classList.add('hidden');
   });
 
+  document.getElementById('stats-close-btn').addEventListener('click', () => {
+    document.getElementById('stats-overlay').classList.add('hidden');
+  });
+
   document.getElementById('confirm-yes-btn').addEventListener('click', () => {
     if (window.game && window.game.pendingConfirmation) {
       window.game.pendingConfirmation();

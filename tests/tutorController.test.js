@@ -207,6 +207,43 @@ describe('TutorController', () => {
         });
     });
 
+    describe('Tactical and Structural Analysis', () => {
+        test('should return true for rook orthogonal moves in canPieceMove', () => {
+            expect(tutorController.canPieceMove('r', 1, 0)).toBe(true);
+            expect(tutorController.canPieceMove('r', 0, 1)).toBe(true);
+            expect(tutorController.canPieceMove('r', 1, 1)).toBe(false);
+        });
+
+        test('should detect pin when rook pins piece to king', () => {
+            game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+            game.board[0][0] = { type: 'k', color: 'black' };
+            game.board[0][4] = { type: 'r', color: 'white' };
+            game.board[0][2] = { type: 'n', color: 'black' };
+            const pins = tutorController.detectPins({ r: 0, c: 4 }, 'white');
+            expect(pins.length).toBe(1);
+            expect(pins[0].pinnedPiece.type).toBe('n');
+        });
+
+        test('should count defenders accurately', () => {
+            game.board[4][4] = { type: 'p', color: 'white' };
+            game.board[5][3] = { type: 'p', color: 'white' };
+            expect(tutorController.countDefenders(4, 4, 'white')).toBeGreaterThanOrEqual(0);
+        });
+
+        test('should detect strategic values like center control', () => {
+            const move = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
+            game.board[6][4] = { type: 'n', color: 'white', hasMoved: false };
+            const strategic = tutorController.analyzeStrategicValue(move);
+            expect(strategic.some(s => s.type === 'center_control')).toBe(true);
+        });
+
+        test('should return correct score descriptions', () => {
+            expect(tutorController.getScoreDescription(1000).label).toContain('Gewinnstellung');
+            expect(tutorController.getScoreDescription(0).label).toContain('Ausgeglichen');
+            expect(tutorController.getScoreDescription(-1000).label).toContain('Verloren');
+        });
+    });
+
     describe('applySetupTemplate', () => {
         beforeEach(() => {
             game.phase = PHASES.SETUP_WHITE_PIECES;

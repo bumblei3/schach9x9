@@ -1082,4 +1082,42 @@ describe('MoveController', () => {
             expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Kein gespeichertes Spiel'));
         });
     });
+
+    describe('Game Over and Special States', () => {
+        test('should handle checkmate', async () => {
+            game.isCheckmate = jest.fn(() => true);
+            game.turn = 'white';
+
+            game.board[6][4] = { type: 'p', color: 'white' };
+            await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
+
+            expect(game.phase).toBe(PHASES.GAME_OVER);
+            expect(UI.animateCheckmate).toHaveBeenCalledWith(game, 'black');
+            expect(soundManager.playGameOver).toHaveBeenCalled();
+        });
+
+        test('should handle stalemate', async () => {
+            game.isStalemate = jest.fn(() => true);
+            game.turn = 'white';
+
+            game.board[6][4] = { type: 'p', color: 'white' };
+            await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
+
+            expect(game.phase).toBe(PHASES.GAME_OVER);
+            expect(game.log).toHaveBeenCalledWith(expect.stringContaining('PATT'));
+        });
+
+        test('should generate consistent board hash', () => {
+            game.board[0][0] = { type: 'k', color: 'black' };
+            game.board[8][8] = { type: 'k', color: 'white' };
+
+            const hash1 = moveController.getBoardHash();
+            const hash2 = moveController.getBoardHash();
+            expect(hash1).toBe(hash2);
+
+            game.board[4][4] = { type: 'p', color: 'white' };
+            const hash3 = moveController.getBoardHash();
+            expect(hash1).not.toBe(hash3);
+        });
+    });
 });

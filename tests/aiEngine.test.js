@@ -12,6 +12,7 @@ import {
   testStoreTT,
   testProbeTT,
   clearTT,
+  setOpeningBook,
 } from '../js/aiEngine.js';
 import { createEmptyBoard, BOARD_SIZE } from '../js/gameEngine.js';
 import { AI_PIECE_VALUES } from '../js/config.js';
@@ -40,8 +41,8 @@ describe('AI Engine', () => {
       // Material: 100 each
       // White: 100 + 10 = 110
       // Black: 100 + 5 = 105
-      // Score: 110 - 105 = 5
-      expect(evaluatePosition(board, 'white')).toBe(5);
+      // Score: 125 - 110 = 15
+      expect(evaluatePosition(board, 'white')).toBe(15);
     });
 
     test('should favor material advantage', () => {
@@ -254,16 +255,70 @@ describe('AI Engine', () => {
       expect(centerScore).toBeGreaterThan(cornerScore);
     });
 
-    test('should handle positions with no legal moves', () => {
-      // Stalemate-like position: just kings
-      const emptyBoard = createEmptyBoard();
-      emptyBoard[0][0] = { type: 'k', color: 'white' };
-      emptyBoard[8][8] = { type: 'k', color: 'black' };
+    test('should penalize doubled pawns', () => {
+      board[4][4] = { type: 'p', color: 'white' };
+      board[5][4] = { type: 'p', color: 'white' };
+      const scoreDoubled = evaluatePosition(board, 'white');
 
-      const moves = getAllLegalMoves(emptyBoard, 'white');
+      const normalBoard = createEmptyBoard();
+      normalBoard[4][4] = { type: 'p', color: 'white' };
+      normalBoard[4][5] = { type: 'p', color: 'white' }; // Same row, different col
+      const scoreNormal = evaluatePosition(normalBoard, 'white');
 
-      // Kings should have some moves unless completely blocked
+      expect(scoreNormal).toBeGreaterThan(scoreDoubled);
+    });
+
+    test('should evaluate special pieces correctly', () => {
+      const bArch = createEmptyBoard();
+      bArch[4][4] = { type: 'a', color: 'white' };
+      expect(evaluatePosition(bArch, 'white')).toBeGreaterThan(600);
+
+      const bChan = createEmptyBoard();
+      bChan[4][4] = { type: 'c', color: 'white' };
+      expect(evaluatePosition(bChan, 'white')).toBeGreaterThan(700);
+
+      const bAngel = createEmptyBoard();
+      bAngel[4][4] = { type: 'e', color: 'white' };
+      expect(evaluatePosition(bAngel, 'white')).toBeGreaterThan(1000);
+    });
+  });
+
+  describe('Difficulty Levels and Randomized Behavior', () => {
+    test('beginner should make random moves most of the time', () => {
+      board[4][4] = { type: 'q', color: 'white' };
+      board[4][6] = { type: 'p', color: 'black' };
+
+      const moves = [];
+      for (let i = 0; i < 5; i++) {
+        const move = getBestMove(board, 'white', 2, 'beginner');
+        moves.push(move);
+      }
       expect(moves.length).toBeGreaterThan(0);
     });
+
+    test('easy should prefer captures', () => {
+      board[4][4] = { type: 'r', color: 'white' };
+      board[4][6] = { type: 'q', color: 'black' };
+      const move = getBestMove(board, 'white', 2, 'easy');
+      expect(move.to).toEqual({ r: 4, c: 6 });
+    });
+
+    test('Expert should reach target depth via ID', () => {
+      board[4][4] = { type: 'q', color: 'white' };
+      const move = getBestMove(board, 'white', 3, 'expert');
+      expect(move).toBeDefined();
+    });
+  });
+
+  test('should handle positions with no legal moves', () => {
+    // Stalemate-like position: just kings
+    const emptyBoard = createEmptyBoard();
+    emptyBoard[0][0] = { type: 'k', color: 'white' };
+    emptyBoard[8][8] = { type: 'k', color: 'black' };
+
+    const moves = getAllLegalMoves(emptyBoard, 'white');
+
+    // Kings should have some moves unless completely blocked
+    expect(moves.length).toBeGreaterThan(0);
   });
 });

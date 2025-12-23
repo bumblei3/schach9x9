@@ -864,6 +864,7 @@ export class GameController {
         };
 
         this.statisticsManager.saveGame(gameData);
+        this.gameStartTime = null;
         logger.info('Game saved to statistics:', playerResult, 'vs', opponent);
     }
 }

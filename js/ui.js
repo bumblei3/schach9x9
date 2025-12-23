@@ -304,39 +304,34 @@ export function initBoardUI(game) {
   }
 
   // Add coordinate labels
-  // Column labels (a-i) at top
+  // Column labels (a-i)
   const colLabels = document.createElement('div');
   colLabels.className = 'col-labels';
   for (let c = 0; c < BOARD_SIZE; c++) {
     const label = document.createElement('span');
-    label.textContent = String.fromCharCode(97 + c); // a-i
+    label.textContent = String.fromCharCode(97 + c);
     label.className = 'coord-label';
     colLabels.appendChild(label);
   }
 
-  // Row labels (1-9) on left side
+  // Row labels (9-1)
   const rowLabels = document.createElement('div');
   rowLabels.className = 'row-labels';
   for (let r = 0; r < BOARD_SIZE; r++) {
     const label = document.createElement('span');
-    label.textContent = (BOARD_SIZE - r).toString(); // 9, 8, 7, ..., 1 from top to bottom
+    label.textContent = (BOARD_SIZE - r).toString();
     label.className = 'coord-label';
     rowLabels.appendChild(label);
   }
 
-  // Find board-wrapper and insert labels
   const boardWrapper = document.getElementById('board-wrapper');
   if (boardWrapper) {
-    // Remove existing labels if any
-    const existingColLabels = boardWrapper.querySelector('.col-labels');
-    const existingRowLabels = boardWrapper.querySelector('.row-labels');
-    if (existingColLabels) existingColLabels.remove();
-    if (existingRowLabels) existingRowLabels.remove();
+    // Clean up existing labels
+    boardWrapper.querySelectorAll('.col-labels, .row-labels').forEach(el => el.remove());
 
-    // Insert col labels before board
-    boardWrapper.insertBefore(colLabels, boardEl);
-    // Insert row labels before board
-    boardWrapper.insertBefore(rowLabels, boardEl);
+    // Insert new labels
+    boardWrapper.appendChild(colLabels);
+    boardWrapper.appendChild(rowLabels);
   }
   // shop listeners etc. can be added by the main script.
 }
@@ -1044,7 +1039,7 @@ export function updateStatistics(game) {
   if (movesEl) movesEl.textContent = game.stats.totalMoves;
 
   // Update captures
-  game.stats.captures = game.capturedPieces.white.length + game.capturedPieces.black.length;
+  game.stats.captures = (game.capturedPieces?.white?.length || 0) + (game.capturedPieces?.black?.length || 0);
   const capturesEl = document.getElementById('stat-captures');
   if (capturesEl) capturesEl.textContent = game.stats.captures;
 
@@ -1064,9 +1059,6 @@ export function updateStatistics(game) {
   if (bestMovesEl) bestMovesEl.textContent = game.stats.playerBestMoves;
 
   // Update material advantage
-  // We need calculateMaterialAdvantage from game or implement it here.
-  // It's pure logic, but let's assume game has it or we can compute it.
-  // For now, let's assume game has it or we skip it if not available.
   if (game.calculateMaterialAdvantage) {
     const materialAdvantage = game.calculateMaterialAdvantage();
     const materialEl = document.getElementById('stat-material');
@@ -1079,6 +1071,18 @@ export function updateStatistics(game) {
         materialEl.classList.add('negative');
       }
     }
+  }
+}
+
+/**
+ * Zeigt das Statistik-Overlay an.
+ * @param {object} game - Die Game-Instanz
+ */
+export function showStatisticsOverlay(game) {
+  const overlay = document.getElementById('stats-overlay');
+  if (overlay) {
+    updateStatistics(game);
+    overlay.classList.remove('hidden');
   }
 }
 
