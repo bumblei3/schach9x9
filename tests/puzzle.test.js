@@ -76,4 +76,46 @@ describe('PuzzleMode', () => {
     expect(result2).toBe('solved');
     expect(game.puzzleState.solved).toBe(true);
   });
+
+  test('should load Puzzle 3 (Archbishop)', () => {
+    const puzzle = puzzleManager.loadPuzzle(game, 2);
+    expect(puzzle.id).toBe('mate-in-1-arch');
+    expect(game.board[2][2].type).toBe('a');
+  });
+
+  test('should navigate to next puzzle', () => {
+    puzzleManager.loadPuzzle(game, 0);
+    const next = puzzleManager.nextPuzzle(game);
+    expect(next.id).toBe('mate-in-2-001');
+    expect(puzzleManager.currentPuzzleIndex).toBe(1);
+  });
+
+  test('should return null if no more puzzles', () => {
+    puzzleManager.loadPuzzle(game, puzzleManager.puzzles.length - 1);
+    const next = puzzleManager.nextPuzzle(game);
+    expect(next).toBeNull();
+  });
+
+  test('should find puzzle by id', () => {
+    const p = puzzleManager.getPuzzle('mate-in-1-arch');
+    expect(p).toBeDefined();
+    expect(p.title).toContain('Erzbischof');
+  });
+
+  test('should generate and load a mate in 1 puzzle', () => {
+    // Clear board
+    game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+
+    // Setup a simple mate in 1 on board
+    game.board[0][0] = { type: 'k', color: 'black' };
+    game.board[2][1] = { type: 'k', color: 'white' };
+    game.board[1][7] = { type: 'r', color: 'white' };
+    game.turn = 'white';
+
+    const puzzle = puzzleManager.generateAndLoad(game, 1);
+    expect(puzzle).not.toBeNull();
+    expect(puzzle.id).toContain('gen-');
+    expect(game.puzzleState.active).toBe(true);
+    expect(puzzle.solution.length).toBe(1);
+  });
 });

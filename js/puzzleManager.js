@@ -9,14 +9,8 @@ export class PuzzleManager {
         title: 'Puzzle 1: Der Gnadenstoß',
         description: 'Weiß zieht und setzt in 1 Zug matt.',
         difficulty: 'Einfach',
-        // White King at 2,2 (index 20); Black King at 0,2 (index 2); White Rook at 1,7 (index 16)
-        // Index 0-1: .. .. (2)
-        // Index 2: bk
-        // Index 3-15: (13 squares)
-        // Index 16: wr
-        // Index 17-19: (3 squares)
-        // Index 20: wk
-        setupStr: '....bk..........................wr......wk..................................................................................................................w',
+        // (0,2) bk (index 2); (1,7) wr (index 16); (2,2) wk (index 20)
+        setupStr: '..'.repeat(2) + 'bk' + '..'.repeat(13) + 'wr' + '..'.repeat(3) + 'wk' + '..'.repeat(81 - 21) + 'w',
         solution: [
           { from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }
         ]
@@ -26,16 +20,11 @@ export class PuzzleManager {
         title: 'Puzzle 2: Taktischer Schlag',
         description: 'Weiß am Zug. Matt in 2.',
         difficulty: 'Mittel',
-        // Black King at 0,4 (index 4); White King at 2,4 (index 22); Rook at 6,4 (index 58); Rook at 2,4? Wait, Rooks at 6,4 and 2,4 was the old description.
-        // Let's use: King at 0,4 (B), 2,4 (W). Rooks at 6,4 and 2,0.
-        // Index 4: bk
-        // Index 22: wk
-        // Index 58: wr
-        // Index 18: wr (2,0)
-        setupStr: '........bk....................wr......wk..........................................................wr........................................................w',
+        // (0,4) bk (index 4); (2,4) wk (index 22); (6,4) wr (index 58); (2,0) wr (index 18)
+        setupStr: '..'.repeat(4) + 'bk' + '..'.repeat(13) + 'wr' + '..'.repeat(3) + 'wk' + '..'.repeat(35) + 'wr' + '..'.repeat(81 - 59) + 'w',
         solution: [
           { from: { r: 6, c: 4 }, to: { r: 1, c: 4 } },
-          { from: { r: 2, c: 0 }, to: { r: 0, c: 0 } } // Adjust solution to match
+          { from: { r: 2, c: 0 }, to: { r: 0, c: 0 } }
         ]
       },
       {
@@ -43,8 +32,8 @@ export class PuzzleManager {
         title: 'Puzzle 3: Die Kraft des Erzbischofs',
         description: 'Weiß zieht. Setze matt mit dem Erzbischof.',
         difficulty: 'Mittel',
-        // White King at 2,3 (index 21); Archbishop at 2,2 (index 20); Black King at 0,3 (index 3)
-        setupStr: '......bk........................awkb........................................................................................................................w',
+        // (0,3) bk (index 3); (2,2) wa (index 20); (2,3) wk (index 21)
+        setupStr: '..'.repeat(3) + 'bk' + '..'.repeat(16) + 'wawk' + '..'.repeat(81 - 22) + 'w',
         solution: [
           { from: { r: 2, c: 2 }, to: { r: 1, c: 4 } }
         ]
@@ -97,10 +86,10 @@ export class PuzzleManager {
 
     // Simple coordinate check
     const isCorrectParams =
-            move.from.r === expectedMove.from.r &&
-            move.from.c === expectedMove.from.c &&
-            move.to.r === expectedMove.to.r &&
-            move.to.c === expectedMove.to.c;
+      move.from.r === expectedMove.from.r &&
+      move.from.c === expectedMove.from.c &&
+      move.to.r === expectedMove.to.r &&
+      move.to.c === expectedMove.to.c;
 
     if (isCorrectParams) {
       game.puzzleState.currentMoveIndex++;
