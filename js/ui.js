@@ -445,12 +445,14 @@ export function renderBoard(game) {
   }
 
   // Rendere nur geänderte Zellen (oder alle beim ersten Mal)
+  /* eslint-disable indent */
   const cellsToRender = game._forceFullRender
     ? Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => ({
         r: Math.floor(i / BOARD_SIZE),
         c: i % BOARD_SIZE,
       }))
     : changedCells;
+  /* eslint-enable indent */
 
   game._forceFullRender = false;
 

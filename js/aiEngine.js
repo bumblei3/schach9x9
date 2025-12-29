@@ -505,8 +505,8 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
       }
 
       // Root Search Loop
+      // eslint-disable-next-line no-constant-condition
       while (true) {
-        // eslint-disable-line no-constant-condition
         let currentAlpha = alpha;
         let currentBestScore = -Infinity;
         let currentBestMove = moves[0];

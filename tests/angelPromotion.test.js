@@ -11,15 +11,13 @@ global.window.AudioContext = jest.fn().mockImplementation(() => ({
       exponentialRampToValueAtTime: jest.fn(),
     },
   }),
-  createOscillator: jest
-    .fn()
-    .mockReturnValue({
-      connect: jest.fn(),
-      start: jest.fn(),
-      stop: jest.fn(),
-      frequency: { setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn() },
-      type: 'sine',
-    }),
+  createOscillator: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    frequency: { setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn() },
+    type: 'sine',
+  }),
   currentTime: 0,
   destination: {},
 }));
