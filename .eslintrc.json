@@ -12,10 +12,7 @@
   },
   "rules": {
     "indent": "off",
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
+    "linebreak-style": ["error", "unix"],
     "quotes": [
       "error",
       "single",
@@ -23,10 +20,7 @@
         "avoidEscape": true
       }
     ],
-    "semi": [
-      "error",
-      "always"
-    ],
+    "semi": ["error", "always"],
     "no-unused-vars": [
       "warn",
       {
@@ -46,22 +40,10 @@
         "max": 2
       }
     ],
-    "eol-last": [
-      "error",
-      "always"
-    ],
-    "comma-dangle": [
-      "error",
-      "only-multiline"
-    ],
-    "object-curly-spacing": [
-      "error",
-      "always"
-    ],
-    "array-bracket-spacing": [
-      "error",
-      "never"
-    ],
+    "eol-last": ["error", "always"],
+    "comma-dangle": ["error", "only-multiline"],
+    "object-curly-spacing": ["error", "always"],
+    "array-bracket-spacing": ["error", "never"],
     "space-before-function-paren": [
       "error",
       {

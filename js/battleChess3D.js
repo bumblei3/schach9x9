@@ -6,7 +6,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createPiece3D/*, PIECE_COLORS*/ } from './pieces3D.js';
+import { createPiece3D /*, PIECE_COLORS*/ } from './pieces3D.js';
 import { BattleAnimator } from './battleAnimations.js';
 import { logger } from './logger.js';
 import { BOARD_SIZE } from './config.js';

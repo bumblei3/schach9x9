@@ -1,4 +1,4 @@
-import { PHASES/*, BOARD_SIZE*/ } from './gameEngine.js';
+import { PHASES /*, BOARD_SIZE*/ } from './gameEngine.js';
 import { storageManager } from './storage.js';
 import { SHOP_PIECES, PIECE_VALUES } from './config.js';
 import * as UI from './ui.js';
