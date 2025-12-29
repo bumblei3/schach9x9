@@ -6,10 +6,16 @@ import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
 const localStorageMock = (function () {
   let store = {};
   return {
-    getItem: jest.fn((key) => store[key] || null),
-    setItem: jest.fn((key, value) => { store[key] = value.toString(); }),
-    removeItem: jest.fn((key) => { delete store[key]; }),
-    clear: jest.fn(() => { store = {}; })
+    getItem: jest.fn(key => store[key] || null),
+    setItem: jest.fn((key, value) => {
+      store[key] = value.toString();
+    }),
+    removeItem: jest.fn(key => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
   };
 })();
 
@@ -37,7 +43,7 @@ describe('StorageManager', () => {
       whiteTime: 300,
       blackTime: 300,
       clockEnabled: true,
-      lastMove: { from: { r: 1, c: 1 }, to: { r: 3, c: 1 } }
+      lastMove: { from: { r: 1, c: 1 }, to: { r: 3, c: 1 } },
     };
   });
 

@@ -25,9 +25,9 @@ export class StatisticsManager {
   }
 
   /**
-     * Loads data from localStorage
-     * @returns {Object} Game history data
-     */
+   * Loads data from localStorage
+   * @returns {Object} Game history data
+   */
   loadData() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -54,8 +54,8 @@ export class StatisticsManager {
   }
 
   /**
-     * Saves data to localStorage
-     */
+   * Saves data to localStorage
+   */
   saveData() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
@@ -66,15 +66,15 @@ export class StatisticsManager {
   }
 
   /**
-     * Saves a completed game to history
-     * @param {Object} gameData Game data object
-     * @param {string} gameData.result - 'win', 'loss', or 'draw'
-     * @param {string} gameData.playerColor - 'white' or 'black'
-     * @param {string} gameData.opponent - Opponent name (e.g., 'AI-Beginner')
-     * @param {Array} gameData.moveHistory - Array of moves
-     * @param {number} gameData.duration - Game duration in milliseconds
-     * @param {string} gameData.finalPosition - Final board position
-     */
+   * Saves a completed game to history
+   * @param {Object} gameData Game data object
+   * @param {string} gameData.result - 'win', 'loss', or 'draw'
+   * @param {string} gameData.playerColor - 'white' or 'black'
+   * @param {string} gameData.opponent - Opponent name (e.g., 'AI-Beginner')
+   * @param {Array} gameData.moveHistory - Array of moves
+   * @param {number} gameData.duration - Game duration in milliseconds
+   * @param {string} gameData.finalPosition - Final board position
+   */
   saveGame(gameData) {
     const game = {
       id: generateId(),
@@ -102,28 +102,28 @@ export class StatisticsManager {
 
     // Calculate win rate
     this.data.stats.winRate =
-            this.data.stats.totalGames > 0 ? this.data.stats.wins / this.data.stats.totalGames : 0;
+      this.data.stats.totalGames > 0 ? this.data.stats.wins / this.data.stats.totalGames : 0;
 
     this.saveData();
     logger.info(`Game saved: ${game.result} vs ${game.opponent} (${game.moves} moves)`);
   }
 
   /**
-     * Gets aggregate statistics
-     * @returns {Object} Statistics object
-     */
+   * Gets aggregate statistics
+   * @returns {Object} Statistics object
+   */
   getStatistics() {
     return { ...this.data.stats };
   }
 
   /**
-     * Gets game history with optional filters
-     * @param {Object} filters Filter options
-     * @param {string} filters.result - Filter by result ('win', 'loss', 'draw')
-     * @param {string} filters.opponent - Filter by opponent name
-     * @param {number} filters.limit - Limit number of results
-     * @returns {Array} Filtered game history
-     */
+   * Gets game history with optional filters
+   * @param {Object} filters Filter options
+   * @param {string} filters.result - Filter by result ('win', 'loss', 'draw')
+   * @param {string} filters.opponent - Filter by opponent name
+   * @param {number} filters.limit - Limit number of results
+   * @returns {Array} Filtered game history
+   */
   getGameHistory(filters = {}) {
     let games = [...this.data.games];
 
@@ -149,18 +149,18 @@ export class StatisticsManager {
   }
 
   /**
-     * Gets a specific game by ID
-     * @param {string} id Game ID
-     * @returns {Object|null} Game data or null if not found
-     */
+   * Gets a specific game by ID
+   * @param {string} id Game ID
+   * @returns {Object|null} Game data or null if not found
+   */
   getGameById(id) {
     return this.data.games.find(g => g.id === id) || null;
   }
 
   /**
-     * Exports all games as JSON
-     * @returns {string} JSON string of all game data
-     */
+   * Exports all games as JSON
+   * @returns {string} JSON string of all game data
+   */
   exportGames() {
     const exportData = {
       version: '1.0',
@@ -173,11 +173,11 @@ export class StatisticsManager {
   }
 
   /**
-     * Imports games from JSON
-     * @param {string} jsonData JSON string to import
-     * @param {boolean} merge If true, merge with existing data; if false, replace
-     * @returns {boolean} Success status
-     */
+   * Imports games from JSON
+   * @param {string} jsonData JSON string to import
+   * @param {boolean} merge If true, merge with existing data; if false, replace
+   * @returns {boolean} Success status
+   */
   importGames(jsonData, merge = true) {
     try {
       const importData = JSON.parse(jsonData);
@@ -210,8 +210,8 @@ export class StatisticsManager {
   }
 
   /**
-     * Recalculates statistics from game history
-     */
+   * Recalculates statistics from game history
+   */
   recalculateStats() {
     const stats = {
       totalGames: this.data.games.length,
@@ -232,9 +232,9 @@ export class StatisticsManager {
   }
 
   /**
-     * Clears all game history
-     * @param {boolean} confirm Confirmation flag
-     */
+   * Clears all game history
+   * @param {boolean} confirm Confirmation flag
+   */
   clearHistory(confirm = false) {
     if (!confirm) {
       logger.warn('clearHistory called without confirmation');
@@ -257,10 +257,10 @@ export class StatisticsManager {
   }
 
   /**
-     * Gets statistics for a specific time period
-     * @param {number} days Number of days to look back
-     * @returns {Object} Statistics for the period
-     */
+   * Gets statistics for a specific time period
+   * @param {number} days Number of days to look back
+   * @returns {Object} Statistics for the period
+   */
   getRecentStats(days = 30) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
@@ -280,9 +280,9 @@ export class StatisticsManager {
   }
 
   /**
-     * Gets statistics grouped by opponent
-     * @returns {Object} Stats by opponent
-     */
+   * Gets statistics grouped by opponent
+   * @returns {Object} Stats by opponent
+   */
   getStatsByOpponent() {
     const byOpponent = {};
 

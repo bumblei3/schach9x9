@@ -81,7 +81,9 @@ describe('Utils', () => {
     test('should preserve context when calling debounced function', () => {
       const obj = {
         value: 42,
-        method: jest.fn(function () { return this.value; })
+        method: jest.fn(function () {
+          return this.value;
+        }),
       };
       const debouncedMethod = debounce(obj.method.bind(obj), 100);
 
@@ -134,7 +136,7 @@ describe('Utils', () => {
         number: 123,
         boolean: true,
         array: [1, 2, 3],
-        nested: { a: 1, b: 2 }
+        nested: { a: 1, b: 2 },
       };
       const copy = deepCopy(obj);
 
@@ -158,11 +160,11 @@ describe('Utils', () => {
           level2: {
             level3: {
               level4: {
-                value: 'deep'
-              }
-            }
-          }
-        }
+                value: 'deep',
+              },
+            },
+          },
+        },
       };
       const copy = deepCopy(obj);
 
@@ -174,7 +176,7 @@ describe('Utils', () => {
     test('should handle arrays of objects', () => {
       const arr = [
         { id: 1, name: 'one' },
-        { id: 2, name: 'two' }
+        { id: 2, name: 'two' },
       ];
       const copy = deepCopy(arr);
 

@@ -33,7 +33,7 @@ describe('PuzzleGenerator', () => {
     expect(solution.length).toBe(1);
     expect(solution[0]).toEqual({
       from: { r: 1, c: 7 },
-      to: { r: 0, c: 7 }
+      to: { r: 0, c: 7 },
     });
   });
 

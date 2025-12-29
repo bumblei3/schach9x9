@@ -528,7 +528,8 @@ export class Game {
       while (isInside(nr, nc)) {
         const piece = this.board[nr][nc];
         if (piece) {
-          if (piece.color === attackerColor && (piece.type === 'a' || piece.type === 'e')) return true;
+          if (piece.color === attackerColor && (piece.type === 'a' || piece.type === 'e'))
+            return true;
           break; // Blocked (already handled by previous loop, but we need to catch 'a' specifically if not caught by 'b'/'q')
           // Actually, the previous loop for 'b'/'q' stops at the first piece.
           // If that piece is 'a', we missed it in the previous loop because we only checked for 'b' and 'q'.
@@ -543,7 +544,8 @@ export class Game {
     for (const [dr, dc] of knightMoves) {
       if (isInside(r + dr, c + dc)) {
         const piece = this.board[r + dr][c + dc];
-        if (piece && piece.color === attackerColor && (piece.type === 'a' || piece.type === 'e')) return true;
+        if (piece && piece.color === attackerColor && (piece.type === 'a' || piece.type === 'e'))
+          return true;
       }
     }
 

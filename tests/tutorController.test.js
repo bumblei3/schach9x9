@@ -4,14 +4,22 @@ import { PHASES } from '../js/config.js';
 
 // Mock UI module
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateStatus: jest.fn(),
   updateShopUI: jest.fn(),
   getPieceText: jest.fn(piece => {
     if (!piece) return '';
     const symbols = {
-      p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚',
-      a: '♗', c: '♖', e: '♕'
+      p: '♟',
+      n: '♞',
+      b: '♝',
+      r: '♜',
+      q: '♛',
+      k: '♚',
+      a: '♗',
+      c: '♖',
+      e: '♕',
     };
     return symbols[piece.type] || '?';
   }),
@@ -79,7 +87,9 @@ describe('TutorController', () => {
 
     test('should return empty array when no legal moves', () => {
       // Empty board, no pieces
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
 
       const hints = tutorController.getTutorHints();
 
@@ -177,31 +187,29 @@ describe('TutorController', () => {
 
   describe('isTutorMove', () => {
     test('should return true if move matches best move', () => {
-      game.bestMoves = [{
-        move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
-        score: 100,
-        notation: 'e3',
-      }];
+      game.bestMoves = [
+        {
+          move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
+          score: 100,
+          notation: 'e3',
+        },
+      ];
 
-      const result = tutorController.isTutorMove(
-        { r: 6, c: 4 },
-        { r: 5, c: 4 }
-      );
+      const result = tutorController.isTutorMove({ r: 6, c: 4 }, { r: 5, c: 4 });
 
       expect(result).toBe(true);
     });
 
     test('should return false if move does not match', () => {
-      game.bestMoves = [{
-        move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
-        score: 100,
-        notation: 'e3',
-      }];
+      game.bestMoves = [
+        {
+          move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
+          score: 100,
+          notation: 'e3',
+        },
+      ];
 
-      const result = tutorController.isTutorMove(
-        { r: 6, c: 3 },
-        { r: 5, c: 3 }
-      );
+      const result = tutorController.isTutorMove({ r: 6, c: 3 }, { r: 5, c: 3 });
 
       expect(result).toBe(false);
     });
@@ -215,7 +223,9 @@ describe('TutorController', () => {
     });
 
     test('should detect pin when rook pins piece to king', () => {
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       game.board[0][0] = { type: 'k', color: 'black' };
       game.board[0][4] = { type: 'r', color: 'white' };
       game.board[0][2] = { type: 'n', color: 'black' };
@@ -253,7 +263,9 @@ describe('TutorController', () => {
       game.blackCorridor = { rowStart: 0, colStart: 3 }; // Standard black corridor
 
       // Clear board
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
     });
 
     test('should place pawns in the front row for White', () => {
@@ -263,7 +275,7 @@ describe('TutorController', () => {
         id: 'test_pawns',
         name: 'Test Pawns',
         pieces: ['p', 'p', 'p'],
-        cost: 3
+        cost: 3,
       };
 
       // Spy on getSetupTemplates
@@ -291,7 +303,7 @@ describe('TutorController', () => {
         id: 'test_rooks',
         name: 'Test Rooks',
         pieces: ['r', 'r'],
-        cost: 10
+        cost: 10,
       };
       jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
@@ -307,7 +319,7 @@ describe('TutorController', () => {
         id: 'test_cost',
         name: 'Test Cost',
         pieces: ['q', 'p'], // 9 + 1 = 10
-        cost: 10
+        cost: 10,
       };
       jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
@@ -324,7 +336,7 @@ describe('TutorController', () => {
         id: 'test_clear',
         name: 'Test Clear',
         pieces: ['p'],
-        cost: 1
+        cost: 1,
       };
       jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
@@ -373,7 +385,9 @@ describe('TutorController', () => {
       game.points = 15;
       game.whiteCorridor = { rowStart: 6, colStart: 3 };
       game.blackCorridor = { rowStart: 0, colStart: 3 };
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
     });
 
     test('should handle invalid template ID', () => {
@@ -388,7 +402,7 @@ describe('TutorController', () => {
         id: 'expensive',
         name: 'Expensive',
         pieces: ['q', 'q', 'q'], // 27 points
-        cost: 27
+        cost: 27,
       };
       jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockExpensiveTemplate]);
       game.points = 15;
@@ -405,7 +419,7 @@ describe('TutorController', () => {
         id: 'edge_test',
         name: 'Edge Test',
         pieces: ['p', 'p', 'p'],
-        cost: 3
+        cost: 3,
       };
       jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
@@ -460,7 +474,9 @@ describe('TutorController', () => {
 
     test('should handle checkmate position', () => {
       // Set up a checkmate scenario
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       game.board[0][0] = { type: 'k', color: 'black' };
       game.board[8][8] = { type: 'k', color: 'white' };
       game.board[7][7] = { type: 'q', color: 'white' }; // Threatening king
@@ -496,7 +512,9 @@ describe('TutorController', () => {
       game.phase = PHASES.PLAY;
       game.turn = 'white';
       game.isAI = false;
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       game.board[0][0] = { type: 'k', color: 'black' };
       game.board[8][8] = { type: 'k', color: 'white' };
 

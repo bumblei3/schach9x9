@@ -26,9 +26,17 @@ describe('Game Engine - Classic Mode', () => {
 
     for (let c = 0; c < BOARD_SIZE; c++) {
       // Black pieces at row 0
-      expect(game.board[0][c]).toEqual({ type: expectedPieces[c], color: 'black', hasMoved: false });
+      expect(game.board[0][c]).toEqual({
+        type: expectedPieces[c],
+        color: 'black',
+        hasMoved: false,
+      });
       // White pieces at row 8 (BOARD_SIZE - 1)
-      expect(game.board[BOARD_SIZE - 1][c]).toEqual({ type: expectedPieces[c], color: 'white', hasMoved: false });
+      expect(game.board[BOARD_SIZE - 1][c]).toEqual({
+        type: expectedPieces[c],
+        color: 'white',
+        hasMoved: false,
+      });
     }
   });
 

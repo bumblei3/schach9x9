@@ -4,7 +4,8 @@ import { PHASES, PIECE_VALUES } from '../js/config.js';
 
 // Mock UI module
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateShopUI: jest.fn(),
   updateStatus: jest.fn(),
   renderEvalGraph: jest.fn(),
@@ -20,7 +21,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 // Mock DOM
 global.document = {
-  getElementById: jest.fn((id) => ({
+  getElementById: jest.fn(id => ({
     classList: { remove: jest.fn(), add: jest.fn() },
     style: {},
     textContent: '',
@@ -242,11 +243,11 @@ describe('Shop System', () => {
       document.querySelector = jest.fn(() => mockButton);
       document.querySelectorAll = jest.fn(() => [
         { classList: { remove: jest.fn() } },
-        { classList: { remove: jest.fn() } }
+        { classList: { remove: jest.fn() } },
       ]);
       document.getElementById = jest.fn(() => ({
         innerHTML: '',
-        style: {}
+        style: {},
       }));
 
       gameController.selectShopPiece('q');

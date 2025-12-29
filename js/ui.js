@@ -21,7 +21,17 @@ export function updateMoveHistoryUI(game) {
       moveEl.className = 'move-entry';
 
       // Standard Algebraic Notation (SAN)
-      const pieceSymbols = { p: '', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K', a: 'A', c: 'C', e: 'E' };
+      const pieceSymbols = {
+        p: '',
+        n: 'N',
+        b: 'B',
+        r: 'R',
+        q: 'Q',
+        k: 'K',
+        a: 'A',
+        c: 'C',
+        e: 'E',
+      };
       const pieceChar = pieceSymbols[move.piece.type];
 
       const fromFile = String.fromCharCode(97 + move.from.c);
@@ -437,9 +447,9 @@ export function renderBoard(game) {
   // Rendere nur geänderte Zellen (oder alle beim ersten Mal)
   const cellsToRender = game._forceFullRender
     ? Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => ({
-      r: Math.floor(i / BOARD_SIZE),
-      c: i % BOARD_SIZE,
-    }))
+        r: Math.floor(i / BOARD_SIZE),
+        c: i % BOARD_SIZE,
+      }))
     : changedCells;
 
   game._forceFullRender = false;
@@ -535,7 +545,10 @@ export function renderBoard(game) {
       // Only highlight the corridor for the player currently setting up pieces
       // AND allow seeing own corridor while waiting for opponent king setup
 
-      if (game.whiteCorridor && (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)) {
+      if (
+        game.whiteCorridor &&
+        (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)
+      ) {
         if (
           r >= game.whiteCorridor.rowStart &&
           r < game.whiteCorridor.rowStart + 3 &&
@@ -597,7 +610,10 @@ export function renderBoard(game) {
         }
 
         // 2. Selected Corridor Highlighting
-        if (game.whiteCorridor && (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)) {
+        if (
+          game.whiteCorridor &&
+          (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)
+        ) {
           if (
             r >= game.whiteCorridor.rowStart &&
             r < game.whiteCorridor.rowStart + 3 &&
@@ -669,27 +685,27 @@ export function updateStatus(game) {
 
   let text = '';
   switch (game.phase) {
-  case PHASES.SETUP_WHITE_KING:
-    text = 'Weiß: Wähle einen Korridor für den König';
-    break;
-  case PHASES.SETUP_BLACK_KING:
-    text = 'Schwarz: Wähle einen Korridor för den König';
-    break;
-  case PHASES.SETUP_WHITE_PIECES:
-    text = 'Weiß: Kaufe Truppen';
-    break;
-  case PHASES.SETUP_BLACK_PIECES:
-    text = 'Schwarz: Kaufe Truppen';
-    break;
-  case PHASES.PLAY:
-    text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
-    break;
-  case PHASES.ANALYSIS:
-    text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
-    break;
-  case PHASES.GAME_OVER:
-    text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
-    break;
+    case PHASES.SETUP_WHITE_KING:
+      text = 'Weiß: Wähle einen Korridor für den König';
+      break;
+    case PHASES.SETUP_BLACK_KING:
+      text = 'Schwarz: Wähle einen Korridor för den König';
+      break;
+    case PHASES.SETUP_WHITE_PIECES:
+      text = 'Weiß: Kaufe Truppen';
+      break;
+    case PHASES.SETUP_BLACK_PIECES:
+      text = 'Schwarz: Kaufe Truppen';
+      break;
+    case PHASES.PLAY:
+      text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+      break;
+    case PHASES.ANALYSIS:
+      text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+      break;
+    case PHASES.GAME_OVER:
+      text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
+      break;
   }
   statusEl.textContent = text;
 }
@@ -786,7 +802,8 @@ function updateTutorRecommendations(game) {
   if (!toggleBtn || !container) return;
 
   // Check if we're in setup phase and tutor is available
-  const inSetupPhase = game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_PIECES;
+  const inSetupPhase =
+    game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_PIECES;
   const tutorSection = document.getElementById('tutor-recommendations-section');
 
   if (!inSetupPhase || !game.tutorController || !game.tutorController.getSetupTemplates) {
@@ -801,7 +818,9 @@ function updateTutorRecommendations(game) {
     toggleBtn.addEventListener('click', () => {
       const isHidden = container.classList.contains('hidden');
       container.classList.toggle('hidden');
-      toggleBtn.textContent = isHidden ? '💡 KI-Empfehlungen ausblenden' : '💡 KI-Empfehlungen anzeigen';
+      toggleBtn.textContent = isHidden
+        ? '💡 KI-Empfehlungen ausblenden'
+        : '💡 KI-Empfehlungen anzeigen';
     });
     toggleBtn.dataset.initialized = 'true';
   }
@@ -816,19 +835,32 @@ function updateTutorRecommendations(game) {
       card.className = 'setup-template-card';
 
       // Build pieces preview using SVGs if available
-      const piecesPreview = template.pieces.map(pieceType => {
-        const color = game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
-        if (window.PIECE_SVGS && window.PIECE_SVGS[color] && window.PIECE_SVGS[color][pieceType]) {
-          return `<span class="template-piece-icon">${window.PIECE_SVGS[color][pieceType]}</span>`;
-        } else {
-          // Fallback to text symbols
-          const symbols = {
-            p: '♟', n: '♞', b: '♝', r: '♜', q: '♛',
-            k: '♚', a: '🏰', c: '⚖️', e: '👼'
-          };
-          return `<span class="template-piece-icon">${symbols[pieceType] || pieceType}</span>`;
-        }
-      }).join('');
+      const piecesPreview = template.pieces
+        .map(pieceType => {
+          const color = game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
+          if (
+            window.PIECE_SVGS &&
+            window.PIECE_SVGS[color] &&
+            window.PIECE_SVGS[color][pieceType]
+          ) {
+            return `<span class="template-piece-icon">${window.PIECE_SVGS[color][pieceType]}</span>`;
+          } else {
+            // Fallback to text symbols
+            const symbols = {
+              p: '♟',
+              n: '♞',
+              b: '♝',
+              r: '♜',
+              q: '♛',
+              k: '♚',
+              a: '🏰',
+              c: '⚖️',
+              e: '👼',
+            };
+            return `<span class="template-piece-icon">${symbols[pieceType] || pieceType}</span>`;
+          }
+        })
+        .join('');
 
       card.innerHTML = `
         <div class="template-name">${template.name}</div>
@@ -840,7 +872,11 @@ function updateTutorRecommendations(game) {
       `;
 
       card.addEventListener('click', () => {
-        if (confirm(`Möchtest du die Aufstellung "${template.name}" anwenden?\n\nDeine aktuelle Aufstellung wird überschrieben und deine Punkte werden zurückgesetzt.`)) {
+        if (
+          confirm(
+            `Möchtest du die Aufstellung "${template.name}" anwenden?\n\nDeine aktuelle Aufstellung wird überschrieben und deine Punkte werden zurückgesetzt.`
+          )
+        ) {
           game.tutorController.applySetupTemplate(template.id);
           // Refresh the shop UI to reflect the changes
           updateShopUI(game);
@@ -1043,7 +1079,8 @@ export function updateStatistics(game) {
   if (movesEl) movesEl.textContent = game.stats.totalMoves;
 
   // Update captures
-  game.stats.captures = (game.capturedPieces?.white?.length || 0) + (game.capturedPieces?.black?.length || 0);
+  game.stats.captures =
+    (game.capturedPieces?.white?.length || 0) + (game.capturedPieces?.black?.length || 0);
   const capturesEl = document.getElementById('stat-captures');
   if (capturesEl) capturesEl.textContent = game.stats.captures;
 
@@ -1188,7 +1225,7 @@ export function renderEvalGraph(game) {
 
   // Use event delegation for better performance with many points
   if (!svg.dataset.hasListener) {
-    svg.addEventListener('click', (e) => {
+    svg.addEventListener('click', e => {
       const point = e.target.closest('.eval-point');
       if (!point) return;
 
@@ -1247,9 +1284,16 @@ export function showTutorSuggestions(game) {
 
     hints.forEach((hint, index) => {
       const div = document.createElement('div');
-      div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ' + (hint.analysis.scoreDiff > -0.5 ? '#10b981' : '#f59e0b') + '; cursor: pointer; transition: background 0.2s;';
-      div.onmouseover = () => { div.style.background = 'rgba(255,255,255,0.1)'; };
-      div.onmouseout = () => { div.style.background = 'rgba(255,255,255,0.05)'; };
+      div.style.cssText =
+        'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ' +
+        (hint.analysis.scoreDiff > -0.5 ? '#10b981' : '#f59e0b') +
+        '; cursor: pointer; transition: background 0.2s;';
+      div.onmouseover = () => {
+        div.style.background = 'rgba(255,255,255,0.1)';
+      };
+      div.onmouseout = () => {
+        div.style.background = 'rgba(255,255,255,0.05)';
+      };
 
       div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -1307,8 +1351,12 @@ export function showTutorSuggestions(game) {
             cursor: pointer;
             transition: all 0.2s;
         `;
-        el.onmouseover = () => { el.style.background = 'rgba(34, 197, 94, 0.2)'; };
-        el.onmouseout = () => { el.style.background = 'rgba(34, 197, 94, 0.1)'; };
+        el.onmouseover = () => {
+          el.style.background = 'rgba(34, 197, 94, 0.2)';
+        };
+        el.onmouseout = () => {
+          el.style.background = 'rgba(34, 197, 94, 0.1)';
+        };
 
         el.innerHTML = `
             <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">${template.name}</div>
@@ -1321,7 +1369,11 @@ export function showTutorSuggestions(game) {
         `;
 
         el.onclick = () => {
-          if (confirm(`Möchtest du die Aufstellung "${template.name}" anwenden? Deine aktuelle Aufstellung wird überschrieben.`)) {
+          if (
+            confirm(
+              `Möchtest du die Aufstellung "${template.name}" anwenden? Deine aktuelle Aufstellung wird überschrieben.`
+            )
+          ) {
             game.tutorController.applySetupTemplate(template.id);
             // Close panel? Or keep open? Keep open to see result.
             // Maybe flash success?
@@ -1341,7 +1393,8 @@ export function showTutorSuggestions(game) {
   const hints = game.getTutorHints();
 
   if (hints.length === 0) {
-    suggestionsEl.innerHTML = '<p style="padding: 1rem; color: #94a3b8;">Keine Vorschläge verfügbar.</p>';
+    suggestionsEl.innerHTML =
+      '<p style="padding: 1rem; color: #94a3b8;">Keine Vorschläge verfügbar.</p>';
     tutorPanel.classList.remove('hidden');
     return;
   }
@@ -1466,7 +1519,8 @@ export function showTutorSuggestions(game) {
 
     // Explanations section (expandable)
     const hasTactical = analysis.tacticalExplanations && analysis.tacticalExplanations.length > 0;
-    const hasStrategic = analysis.strategicExplanations && analysis.strategicExplanations.length > 0;
+    const hasStrategic =
+      analysis.strategicExplanations && analysis.strategicExplanations.length > 0;
     const hasWarnings = analysis.warnings && analysis.warnings.length > 0;
 
     if (hasTactical || hasStrategic || hasWarnings) {
@@ -1634,7 +1688,6 @@ export function enterReplayMode(game) {
   updateReplayUI(game);
 }
 
-
 export function exitReplayMode(game) {
   if (!game.replayMode) return;
 
@@ -1701,7 +1754,6 @@ export function closeModal() {
   const modal = document.getElementById('generic-modal');
   if (modal) modal.style.display = 'none';
 }
-
 
 // --- Puzzle UI Helpers ---
 

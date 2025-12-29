@@ -8,15 +8,15 @@ const mockThree = {
     position: { set: jest.fn() },
     rotation: { set: jest.fn() },
     userData: {},
-    traverse: jest.fn((callback) => {
+    traverse: jest.fn(callback => {
       // No-op for now, or could simulate children
-    })
+    }),
   })),
   Mesh: jest.fn().mockImplementation(() => ({
     castShadow: false,
     receiveShadow: false,
     position: { set: jest.fn() },
-    rotation: { set: jest.fn(), x: 0, y: 0, z: 0 }
+    rotation: { set: jest.fn(), x: 0, y: 0, z: 0 },
   })),
   Vector2: jest.fn().mockImplementation((x, y) => ({ x, y })),
   LatheGeometry: jest.fn(),
@@ -25,8 +25,8 @@ const mockThree = {
   SphereGeometry: jest.fn(),
   ConeGeometry: jest.fn(),
   TorusGeometry: jest.fn(),
-  MeshStandardMaterial: jest.fn().mockImplementation((params) => params),
-  Color: jest.fn().mockImplementation((c) => ({ hex: c }))
+  MeshStandardMaterial: jest.fn().mockImplementation(params => params),
+  Color: jest.fn().mockImplementation(c => ({ hex: c })),
 };
 
 jest.unstable_mockModule('three', () => mockThree);
@@ -62,7 +62,7 @@ describe('pieces3D Module', () => {
 
   test('should handle unknown piece type gracefully', () => {
     // Depending on implementation, it might return empty group or throw
-    // Based on outline, it seems to just call sub-functions. 
+    // Based on outline, it seems to just call sub-functions.
     // Let's see if it returns something for 'x'
     const piece = createPiece3D('x', 'white');
     expect(piece).toBeDefined();

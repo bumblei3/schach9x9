@@ -40,8 +40,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Initialize the 3D scene
-     */
+   * Initialize the 3D scene
+   */
   async init() {
     try {
       logger.info('Setting up 3D scene...');
@@ -68,7 +68,6 @@ export class BattleChess3D {
       // Remove fog for clearer visibility
       // this.scene.fog = new THREE.Fog(0x0a0e27, 10, 50);
       logger.info('Scene created');
-
 
       // Camera
       const aspect = width / height;
@@ -118,10 +117,7 @@ export class BattleChess3D {
       // Raycasting for clicks
       this.raycaster = new THREE.Raycaster();
       this.mouse = new THREE.Vector2();
-      this.renderer.domElement.addEventListener(
-        'click',
-        this.onClick.bind(this),
-      );
+      this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
 
       // Start animation loop BEFORE toggling enabled
       this.animate();
@@ -142,8 +138,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Setup scene lighting
-     */
+   * Setup scene lighting
+   */
   setupLighting() {
     // Hemisphere light for natural sky/ground ambient mix
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
@@ -177,31 +173,27 @@ export class BattleChess3D {
   }
 
   /**
-     * Get theme colors
-     */
+   * Get theme colors
+   */
   getThemeColors(theme) {
     const themes = {
       classic: { light: 0xe8dcc0, dark: 0x6b5d4f },
       blue: { light: 0x87ceeb, dark: 0x4682b4 },
       green: { light: 0x90ee90, dark: 0x228b22 },
       wood: { light: 0xdeb887, dark: 0x8b4513 },
-      dark: { light: 0x4a4a4a, dark: 0x2a2a2a }
+      dark: { light: 0x4a4a4a, dark: 0x2a2a2a },
     };
     return themes[theme] || themes.classic;
   }
 
   /**
-     * Create the 9x9 chess board
-     */
+   * Create the 9x9 chess board
+   */
   createBoard() {
     this.boardGroup = new THREE.Group();
     this.currentTheme = localStorage.getItem('chess_theme') || 'classic';
 
-    const squareGeometry = new THREE.BoxGeometry(
-      this.squareSize,
-      0.1,
-      this.squareSize,
-    );
+    const squareGeometry = new THREE.BoxGeometry(this.squareSize, 0.1, this.squareSize);
 
     // Get theme colors
     const colors = this.getThemeColors(this.currentTheme);
@@ -238,8 +230,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Add coordinate labels to the board
-     */
+   * Add coordinate labels to the board
+   */
   addCoordinateLabels() {
     // TODO: Add text sprites for coordinates
     // For now, just add small markers at corners
@@ -253,8 +245,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Convert board coordinates [0-8][0-8] to 3D world position
-     */
+   * Convert board coordinates [0-8][0-8] to 3D world position
+   */
   boardToWorld(row, col) {
     // Center the board at origin
     // row 0 = z: -4, row 8 = z: 4
@@ -265,13 +257,13 @@ export class BattleChess3D {
   }
 
   /**
-     * Update 3D board from game state
-     */
+   * Update 3D board from game state
+   */
   updateFromGameState(game) {
     if (!this.scene) return;
 
     // Clear existing pieces
-    Object.values(this.pieces).forEach((piece) => {
+    Object.values(this.pieces).forEach(piece => {
       this.scene.remove(piece);
     });
     this.pieces = {};
@@ -288,8 +280,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Add a 3D piece to the board
-     */
+   * Add a 3D piece to the board
+   */
   addPiece(type, color, row, col) {
     const piece3D = createPiece3D(type, color, this.currentSkin);
     if (!piece3D) return;
@@ -303,8 +295,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Remove piece from 3D scene
-     */
+   * Remove piece from 3D scene
+   */
   removePiece(row, col) {
     const key = `${row},${col}`;
     const piece = this.pieces[key];
@@ -315,8 +307,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Highlight valid moves on the board
-     */
+   * Highlight valid moves on the board
+   */
   highlightMoves(moves) {
     // Clear previous highlights
     this.clearHighlights();
@@ -330,7 +322,7 @@ export class BattleChess3D {
       opacity: 0.6,
     });
 
-    moves.forEach((move) => {
+    moves.forEach(move => {
       const marker = new THREE.Mesh(geometry, material);
       const pos = this.boardToWorld(move.r, move.c);
       marker.position.set(pos.x, 0.05, pos.z);
@@ -343,16 +335,16 @@ export class BattleChess3D {
   }
 
   /**
-     * Clear move highlights
-     */
+   * Clear move highlights
+   */
   clearHighlights() {
-    this.highlights.forEach((h) => this.scene.remove(h));
+    this.highlights.forEach(h => this.scene.remove(h));
     this.highlights = [];
   }
 
   /**
-     * Animate a piece move
-     */
+   * Animate a piece move
+   */
   async animateMove(fromRow, fromCol, toRow, toCol, captured = false) {
     const key = `${fromRow},${fromCol}`;
     const piece = this.pieces[key];
@@ -367,16 +359,14 @@ export class BattleChess3D {
     const duration = 500; // ms
     const start = Date.now();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const moveAnimation = () => {
         const elapsed = Date.now() - start;
         const progress = Math.min(elapsed / duration, 1);
 
         // Easing function (ease-in-out)
         const eased =
-                    progress < 0.5
-                      ? 2 * progress * progress
-                      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+          progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
         piece.position.x = fromPos.x + (toPos.x - fromPos.x) * eased;
         piece.position.z = fromPos.z + (toPos.z - fromPos.z) * eased;
@@ -403,8 +393,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Play battle animation when piece is captured
-     */
+   * Play battle animation when piece is captured
+   */
   async playBattleSequence(attacker, defender, attackerPos, defenderPos) {
     logger.info('Playing battle sequence:', attacker.type, 'vs', defender.type);
 
@@ -424,12 +414,7 @@ export class BattleChess3D {
     }
 
     try {
-      await this.battleAnimator.playBattle(
-        attacker,
-        defender,
-        startPos,
-        endPos,
-      );
+      await this.battleAnimator.playBattle(attacker, defender, startPos, endPos);
     } catch (error) {
       logger.error('Battle animation failed:', error);
     }
@@ -438,8 +423,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Handle mouse clicks on the 3D scene
-     */
+   * Handle mouse clicks on the 3D scene
+   */
   onClick(event) {
     if (this.animating) return;
 
@@ -452,10 +437,7 @@ export class BattleChess3D {
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
     // Check intersections with pieces and board
-    const allObjects = [
-      this.board,
-      ...Object.values(this.pieces),
-    ];
+    const allObjects = [this.board, ...Object.values(this.pieces)];
 
     const intersects = this.raycaster.intersectObjects(allObjects, true);
 
@@ -470,8 +452,8 @@ export class BattleChess3D {
               row: obj.userData.row,
               col: obj.userData.col,
               type: obj.userData.type,
-              color: obj.userData.color
-            }
+              color: obj.userData.color,
+            },
           });
           window.dispatchEvent(clickEvent);
           break;
@@ -480,10 +462,9 @@ export class BattleChess3D {
     }
   }
 
-
   /**
-     * Handle window resize
-     */
+   * Handle window resize
+   */
   onWindowResize() {
     if (!this.camera || !this.renderer) return;
 
@@ -491,15 +472,12 @@ export class BattleChess3D {
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setSize(
-      this.container.clientWidth,
-      this.container.clientHeight,
-    );
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
   }
 
   /**
-     * Animation loop
-     */
+   * Animation loop
+   */
   animate() {
     requestAnimationFrame(this.animate.bind(this));
 
@@ -516,8 +494,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Toggle 3D mode on/off
-     */
+   * Toggle 3D mode on/off
+   */
   toggle(enabled) {
     this.enabled = enabled;
 
@@ -533,9 +511,9 @@ export class BattleChess3D {
   }
 
   /**
-     * Change the 3D piece skin
-     * @param {string} skinName - Name of the skin preset
-     */
+   * Change the 3D piece skin
+   * @param {string} skinName - Name of the skin preset
+   */
   setSkin(skinName) {
     if (!this.scene) return;
 
@@ -559,9 +537,9 @@ export class BattleChess3D {
   }
 
   /**
-     * Change the board theme
-     * @param {string} themeName - Name of the theme (classic, blue, green, wood, dark)
-     */
+   * Change the board theme
+   * @param {string} themeName - Name of the theme (classic, blue, green, wood, dark)
+   */
   setTheme(themeName) {
     if (!this.boardGroup || !this.scene) return;
 
@@ -569,7 +547,7 @@ export class BattleChess3D {
     const colors = this.getThemeColors(themeName);
 
     // Update all board squares
-    this.boardGroup.children.forEach((square) => {
+    this.boardGroup.children.forEach(square => {
       if (square.userData.type === 'square') {
         const isLight = square.userData.isLight;
         square.material.color.setHex(isLight ? colors.light : colors.dark);
@@ -580,8 +558,8 @@ export class BattleChess3D {
   }
 
   /**
-     * Cleanup and dispose
-     */
+   * Cleanup and dispose
+   */
   dispose() {
     logger.info('Disposing 3D scene');
 
@@ -597,11 +575,11 @@ export class BattleChess3D {
 
     // Clear scene
     if (this.scene) {
-      this.scene.traverse((object) => {
+      this.scene.traverse(object => {
         if (object.geometry) object.geometry.dispose();
         if (object.material) {
           if (Array.isArray(object.material)) {
-            object.material.forEach((m) => m.dispose());
+            object.material.forEach(m => m.dispose());
           } else {
             object.material.dispose();
           }

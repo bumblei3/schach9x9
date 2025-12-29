@@ -68,11 +68,11 @@ export class MoveController {
   }
 
   /**
-     * Executes a move on the board
-     * @param {Object} from Source square {r, c}
-     * @param {Object} to Destination square {r, c}
-     * @param {boolean} isUndoRedo Whether this move is from an undo/redo operation
-     */
+   * Executes a move on the board
+   * @param {Object} from Source square {r, c}
+   * @param {Object} to Destination square {r, c}
+   * @param {boolean} isUndoRedo Whether this move is from an undo/redo operation
+   */
   async executeMove(from, to, isUndoRedo = false) {
     // Clear redo stack if this is a new move
     if (!isUndoRedo) {
@@ -196,7 +196,9 @@ export class MoveController {
         // Automatic promotion to Angel (Engel)
         piece.type = 'e';
         moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
-        this.game.log(`${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`);
+        this.game.log(
+          `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`
+        );
 
         // Play promotion sound if available, otherwise move sound
         soundManager.playMove();
@@ -339,17 +341,13 @@ export class MoveController {
       const targetPiece = lastMove.capturedPiece;
       const moveRecord = lastMove;
 
-      const captured = targetPiece || (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant');
+      const captured =
+        targetPiece || (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant');
       if (captured) {
         // Play battle animation on capture
         const attackerData = { type: piece.type, color: piece.color };
         const defenderData = targetPiece || moveRecord.specialMove.capturedPawn;
-        window.battleChess3D.playBattleSequence(
-          attackerData,
-          defenderData,
-          from,
-          to
-        ).then(() => {
+        window.battleChess3D.playBattleSequence(attackerData, defenderData, from, to).then(() => {
           // After battle, update the board state
           window.battleChess3D.removePiece(to.r, to.c);
           window.battleChess3D.animateMove(from.r, from.c, to.r, to.c);
@@ -760,7 +758,10 @@ export class MoveController {
         }
       }
 
-      if (this.game.phase === PHASES.SETUP_WHITE_PIECES || this.game.phase === PHASES.SETUP_BLACK_PIECES) {
+      if (
+        this.game.phase === PHASES.SETUP_WHITE_PIECES ||
+        this.game.phase === PHASES.SETUP_BLACK_PIECES
+      ) {
         UI.showShop(this.game, true);
       } else {
         UI.showShop(this.game, false);

@@ -24,7 +24,8 @@ document.body.innerHTML = `
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateStatus: jest.fn(),
   updateShopUI: jest.fn(),
   updateClockDisplay: jest.fn(),
@@ -45,8 +46,8 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
     playCapture: jest.fn(),
     playGameOver: jest.fn(),
     playGameStart: jest.fn(),
-    init: jest.fn()
-  }
+    init: jest.fn(),
+  },
 }));
 
 const { Game } = await import('../js/gameEngine.js');
@@ -102,7 +103,9 @@ describe('Controller Logic Deep Dive', () => {
 
       expect(game.whiteTime).toBe(0);
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      expect(document.getElementById('winner-text').textContent).toContain('Schwarz gewinnt durch Zeitüberschreitung');
+      expect(document.getElementById('winner-text').textContent).toContain(
+        'Schwarz gewinnt durch Zeitüberschreitung'
+      );
     });
 
     test('should switch clocks on turn change', () => {

@@ -3,7 +3,8 @@ import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateStatus: jest.fn(),
   updateShopUI: jest.fn(),
   updateClockUI: jest.fn(),
@@ -35,7 +36,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 // Setup window globals
 global.window.PIECE_SVGS = {
   white: { p: 'p', r: 'r', n: 'n', b: 'b', q: 'q', k: 'k', a: 'a', c: 'c' },
-  black: { p: 'p', r: 'r', n: 'n', b: 'b', q: 'q', k: 'k', a: 'a', c: 'c' }
+  black: { p: 'p', r: 'r', n: 'n', b: 'b', q: 'q', k: 'k', a: 'a', c: 'c' },
 };
 global.window._svgCache = {};
 

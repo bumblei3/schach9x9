@@ -28,10 +28,14 @@ describe('Game Engine Rules', () => {
       const moves = game.getValidMoves(4, 4, game.board[4][4]);
       expect(moves).toEqual(
         expect.arrayContaining([
-          { r: 2, c: 3 }, { r: 2, c: 5 },
-          { r: 3, c: 2 }, { r: 3, c: 6 },
-          { r: 5, c: 2 }, { r: 5, c: 6 },
-          { r: 6, c: 3 }, { r: 6, c: 5 }
+          { r: 2, c: 3 },
+          { r: 2, c: 5 },
+          { r: 3, c: 2 },
+          { r: 3, c: 6 },
+          { r: 5, c: 2 },
+          { r: 5, c: 6 },
+          { r: 6, c: 3 },
+          { r: 6, c: 5 },
         ])
       );
     });
@@ -281,4 +285,3 @@ describe('Game Engine Rules', () => {
     });
   });
 });
-

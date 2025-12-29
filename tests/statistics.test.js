@@ -6,8 +6,8 @@ jest.unstable_mockModule('../js/logger.js', () => ({
     info: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
-    warn: jest.fn()
-  }
+    warn: jest.fn(),
+  },
 }));
 
 const { StatisticsManager } = await import('../js/statisticsManager.js');
@@ -37,7 +37,7 @@ describe('StatisticsManager', () => {
   test('should load existing data from storage', () => {
     const mockData = {
       games: [{ id: '1', result: 'win' }],
-      stats: { totalGames: 1, wins: 1, losses: 0, draws: 0, winRate: 1 }
+      stats: { totalGames: 1, wins: 1, losses: 0, draws: 0, winRate: 1 },
     };
     localStorageMock.getItem.mockReturnValue(JSON.stringify(mockData));
 
@@ -53,7 +53,7 @@ describe('StatisticsManager', () => {
       opponent: 'AI-Level1',
       moveHistory: [{}, {}, {}],
       duration: 120000,
-      finalPosition: 'fen-string'
+      finalPosition: 'fen-string',
     };
 
     stats.saveGame(gameData);
@@ -74,7 +74,7 @@ describe('StatisticsManager', () => {
   test('getGameHistory should filter and sort games', () => {
     stats.data.games = [
       { id: '1', result: 'win', opponent: 'AI-Expert', date: '2023-01-01T10:00:00Z' },
-      { id: '2', result: 'loss', opponent: 'AI-Beginner', date: '2023-01-02T10:00:00Z' }
+      { id: '2', result: 'loss', opponent: 'AI-Beginner', date: '2023-01-02T10:00:00Z' },
     ];
 
     const winGames = stats.getGameHistory({ result: 'win' });
@@ -152,7 +152,7 @@ describe('StatisticsManager', () => {
 
     stats.data.games = [
       { result: 'win', date: now.toISOString() },
-      { result: 'loss', date: oldDate.toISOString() }
+      { result: 'loss', date: oldDate.toISOString() },
     ];
 
     const recent = stats.getRecentStats(30);
@@ -164,7 +164,7 @@ describe('StatisticsManager', () => {
     stats.data.games = [
       { result: 'win', opponent: 'AI-1' },
       { result: 'loss', opponent: 'AI-1' },
-      { result: 'draw', opponent: 'AI-2' }
+      { result: 'draw', opponent: 'AI-2' },
     ];
 
     const byOpponent = stats.getStatsByOpponent();

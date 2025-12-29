@@ -31,7 +31,7 @@ describe('PuzzleMode', () => {
     // Correct move: R(1,7) -> R(0,7)
     const move = {
       from: { r: 1, c: 7 },
-      to: { r: 0, c: 7 }
+      to: { r: 0, c: 7 },
     };
 
     const result = puzzleManager.checkMove(game, move);
@@ -45,7 +45,7 @@ describe('PuzzleMode', () => {
     // Wrong move: R(1,7) -> R(1,6)
     const move = {
       from: { r: 1, c: 7 },
-      to: { r: 1, c: 6 }
+      to: { r: 1, c: 6 },
     };
 
     const result = puzzleManager.checkMove(game, move);
@@ -59,7 +59,7 @@ describe('PuzzleMode', () => {
     // Move 1: R(6,4) -> R(1,4)
     const move1 = {
       from: { r: 6, c: 4 },
-      to: { r: 1, c: 4 }
+      to: { r: 1, c: 4 },
     };
 
     const result1 = puzzleManager.checkMove(game, move1);
@@ -69,7 +69,7 @@ describe('PuzzleMode', () => {
     // Move 2: R(2,0) -> R(0,0)
     const move2 = {
       from: { r: 2, c: 0 },
-      to: { r: 0, c: 0 }
+      to: { r: 0, c: 0 },
     };
 
     const result2 = puzzleManager.checkMove(game, move2);
@@ -104,7 +104,9 @@ describe('PuzzleMode', () => {
 
   test('should generate and load a mate in 1 puzzle', () => {
     // Clear board
-    game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+    game.board = Array(BOARD_SIZE)
+      .fill(null)
+      .map(() => Array(BOARD_SIZE).fill(null));
 
     // Setup a simple mate in 1 on board
     game.board[0][0] = { type: 'k', color: 'black' };

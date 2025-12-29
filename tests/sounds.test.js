@@ -18,7 +18,7 @@ const mockGain = {
   connect: jest.fn(),
   gain: {
     setValueAtTime: jest.fn(),
-    exponentialRampToValueAtTime: jest.fn()
+    exponentialRampToValueAtTime: jest.fn(),
   },
 };
 
@@ -33,7 +33,7 @@ global.window.AudioContext = class MockAudioContext {
       frequency: {
         value: 440,
         setValueAtTime: jest.fn(),
-        exponentialRampToValueAtTime: jest.fn()
+        exponentialRampToValueAtTime: jest.fn(),
       },
     };
   }

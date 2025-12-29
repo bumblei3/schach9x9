@@ -67,7 +67,7 @@ export class DebugConsole {
   }
 
   initKeyboardShortcut() {
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       // Ctrl+D to toggle debug console
       if (e.ctrlKey && e.key === 'd') {
         e.preventDefault();

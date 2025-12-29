@@ -4,7 +4,6 @@
  * @module pieces3D
  */
 
-
 import * as THREE from 'three';
 
 // Skin preset configurations
@@ -13,79 +12,127 @@ export const SKIN_PRESETS = {
     name: 'Classic',
     white: {
       base: { color: 0xf0f0f0, roughness: 0.6, metalness: 0.2 },
-      accent: { color: 0xffd700, roughness: 0.4, metalness: 0.6 }
+      accent: { color: 0xffd700, roughness: 0.4, metalness: 0.6 },
     },
     black: {
       base: { color: 0x1a1a1a, roughness: 0.6, metalness: 0.2 },
-      accent: { color: 0x8b4513, roughness: 0.4, metalness: 0.6 }
-    }
+      accent: { color: 0x8b4513, roughness: 0.4, metalness: 0.6 },
+    },
   },
   modern: {
     name: 'Modern',
     white: {
       base: { color: 0xe0e0e0, roughness: 0.2, metalness: 0.9 },
-      accent: { color: 0xffd700, roughness: 0.15, metalness: 0.95 }
+      accent: { color: 0xffd700, roughness: 0.15, metalness: 0.95 },
     },
     black: {
       base: { color: 0x2a2a2a, roughness: 0.25, metalness: 0.85 },
-      accent: { color: 0xb8860b, roughness: 0.2, metalness: 0.9 }
-    }
+      accent: { color: 0xb8860b, roughness: 0.2, metalness: 0.9 },
+    },
   },
   pixel: {
     name: 'Pixel',
     white: {
       base: { color: 0xffffff, roughness: 0.9, metalness: 0.0 },
-      accent: { color: 0x4a90e2, roughness: 0.8, metalness: 0.0 }
+      accent: { color: 0x4a90e2, roughness: 0.8, metalness: 0.0 },
     },
     black: {
       base: { color: 0x000000, roughness: 0.9, metalness: 0.0 },
-      accent: { color: 0xff6b6b, roughness: 0.8, metalness: 0.0 }
-    }
+      accent: { color: 0xff6b6b, roughness: 0.8, metalness: 0.0 },
+    },
   },
   infernale: {
     name: 'Infernale',
     white: {
-      base: { color: 0xffcc00, roughness: 0.3, metalness: 0.4, emissive: 0xff9900, emissiveIntensity: 0.3 },
-      accent: { color: 0xff6600, roughness: 0.2, metalness: 0.5, emissive: 0xff3300, emissiveIntensity: 0.5 }
+      base: {
+        color: 0xffcc00,
+        roughness: 0.3,
+        metalness: 0.4,
+        emissive: 0xff9900,
+        emissiveIntensity: 0.3,
+      },
+      accent: {
+        color: 0xff6600,
+        roughness: 0.2,
+        metalness: 0.5,
+        emissive: 0xff3300,
+        emissiveIntensity: 0.5,
+      },
     },
     black: {
-      base: { color: 0x330000, roughness: 0.3, metalness: 0.4, emissive: 0x660000, emissiveIntensity: 0.3 },
-      accent: { color: 0xff0000, roughness: 0.2, metalness: 0.5, emissive: 0xcc0000, emissiveIntensity: 0.5 }
-    }
+      base: {
+        color: 0x330000,
+        roughness: 0.3,
+        metalness: 0.4,
+        emissive: 0x660000,
+        emissiveIntensity: 0.3,
+      },
+      accent: {
+        color: 0xff0000,
+        roughness: 0.2,
+        metalness: 0.5,
+        emissive: 0xcc0000,
+        emissiveIntensity: 0.5,
+      },
+    },
   },
   wood: {
     name: 'Wood',
     white: {
       base: { color: 0xdeb887, roughness: 0.8, metalness: 0.0 },
-      accent: { color: 0xd4af37, roughness: 0.6, metalness: 0.1 }
+      accent: { color: 0xd4af37, roughness: 0.6, metalness: 0.1 },
     },
     black: {
       base: { color: 0x3e2723, roughness: 0.75, metalness: 0.0 },
-      accent: { color: 0xcd7f32, roughness: 0.65, metalness: 0.05 }
-    }
+      accent: { color: 0xcd7f32, roughness: 0.65, metalness: 0.05 },
+    },
   },
   neon: {
     name: 'Neon',
     white: {
-      base: { color: 0x00ffff, roughness: 0.3, metalness: 0.4, emissive: 0x00cccc, emissiveIntensity: 0.5 },
-      accent: { color: 0x0099ff, roughness: 0.2, metalness: 0.5, emissive: 0x0066cc, emissiveIntensity: 0.7 }
+      base: {
+        color: 0x00ffff,
+        roughness: 0.3,
+        metalness: 0.4,
+        emissive: 0x00cccc,
+        emissiveIntensity: 0.5,
+      },
+      accent: {
+        color: 0x0099ff,
+        roughness: 0.2,
+        metalness: 0.5,
+        emissive: 0x0066cc,
+        emissiveIntensity: 0.7,
+      },
     },
     black: {
-      base: { color: 0xff00ff, roughness: 0.3, metalness: 0.4, emissive: 0xcc00cc, emissiveIntensity: 0.5 },
-      accent: { color: 0xff0099, roughness: 0.2, metalness: 0.5, emissive: 0xcc0066, emissiveIntensity: 0.7 }
-    }
+      base: {
+        color: 0xff00ff,
+        roughness: 0.3,
+        metalness: 0.4,
+        emissive: 0xcc00cc,
+        emissiveIntensity: 0.5,
+      },
+      accent: {
+        color: 0xff0099,
+        roughness: 0.2,
+        metalness: 0.5,
+        emissive: 0xcc0066,
+        emissiveIntensity: 0.7,
+      },
+    },
   },
   minimalist: {
     name: 'Minimalist',
     white: {
       base: { color: 0xe0f2ff, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.7 },
-      accent: { color: 0x3b82f6, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.8 }
+      accent: { color: 0x3b82f6, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.8 },
     },
     black: {
       base: { color: 0x1e1e1e, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.6 },
-      accent: { color: 0x6366f1, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.7 }
-    }
-  }
+      accent: { color: 0x6366f1, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.7 },
+    },
+  },
 };
 
 // Legacy color export for backwards compatibility
@@ -113,39 +160,39 @@ export function createPiece3D(type, color, skinStyle = 'classic') {
   const accentMaterial = new THREE.MeshStandardMaterial(colorScheme.accent);
 
   switch (type.toLowerCase()) {
-  case 'p': // Pawn
-    createPawn(pieceGroup, material);
-    break;
-  case 'n': // Knight
-    createKnight(pieceGroup, material);
-    break;
-  case 'b': // Bishop
-    createBishop(pieceGroup, material, accentMaterial);
-    break;
-  case 'r': // Rook
-    createRook(pieceGroup, material);
-    break;
-  case 'q': // Queen
-    createQueen(pieceGroup, material, accentMaterial);
-    break;
-  case 'k': // King
-    createKing(pieceGroup, material, accentMaterial);
-    break;
-  case 'a': // Archbishop (Bishop + Knight)
-    createArchbishop(pieceGroup, material, accentMaterial);
-    break;
-  case 'c': // Chancellor (Rook + Knight)
-    createChancellor(pieceGroup, material, accentMaterial);
-    break;
-  case 'e': // Angel
-    createAngel(pieceGroup, material, accentMaterial);
-    break;
-  default:
-    createPawn(pieceGroup, material);
+    case 'p': // Pawn
+      createPawn(pieceGroup, material);
+      break;
+    case 'n': // Knight
+      createKnight(pieceGroup, material);
+      break;
+    case 'b': // Bishop
+      createBishop(pieceGroup, material, accentMaterial);
+      break;
+    case 'r': // Rook
+      createRook(pieceGroup, material);
+      break;
+    case 'q': // Queen
+      createQueen(pieceGroup, material, accentMaterial);
+      break;
+    case 'k': // King
+      createKing(pieceGroup, material, accentMaterial);
+      break;
+    case 'a': // Archbishop (Bishop + Knight)
+      createArchbishop(pieceGroup, material, accentMaterial);
+      break;
+    case 'c': // Chancellor (Rook + Knight)
+      createChancellor(pieceGroup, material, accentMaterial);
+      break;
+    case 'e': // Angel
+      createAngel(pieceGroup, material, accentMaterial);
+      break;
+    default:
+      createPawn(pieceGroup, material);
   }
 
   // Make all pieces cast shadows
-  pieceGroup.traverse((child) => {
+  pieceGroup.traverse(child => {
     if (child.isMesh) {
       child.castShadow = true;
       child.receiveShadow = true;
@@ -279,7 +326,7 @@ function createRook(group, material) {
     [-0.18, 1.0, -0.18],
   ];
 
-  positions.forEach((pos) => {
+  positions.forEach(pos => {
     const battlement = new THREE.Mesh(battlementGeo, material);
     battlement.position.set(...pos);
     group.add(battlement);
@@ -305,16 +352,21 @@ function createQueen(group, material, accentMaterial) {
 
   // Crown points (Accents)
   const pointGeo = new THREE.ConeGeometry(0.05, 0.15, 8);
-  const angles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2, Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];
+  const angles = [
+    0,
+    Math.PI / 2,
+    Math.PI,
+    (3 * Math.PI) / 2,
+    Math.PI / 4,
+    (3 * Math.PI) / 4,
+    (5 * Math.PI) / 4,
+    (7 * Math.PI) / 4,
+  ];
 
-  angles.forEach((angle) => {
+  angles.forEach(angle => {
     const point = new THREE.Mesh(pointGeo, accentMaterial);
     const radius = 0.2;
-    point.position.set(
-      Math.cos(angle) * radius,
-      1.15,
-      Math.sin(angle) * radius,
-    );
+    point.position.set(Math.cos(angle) * radius, 1.15, Math.sin(angle) * radius);
     point.rotation.x = -0.2; // Tilt out
     group.add(point);
   });
@@ -429,7 +481,7 @@ function createChancellor(group, material, accentMaterial) {
     [-0.12, 0.8, 0.12],
   ];
 
-  batPositions.forEach((pos) => {
+  batPositions.forEach(pos => {
     const bat = new THREE.Mesh(battlementGeo, accentMaterial);
     bat.position.set(...pos);
     group.add(bat);

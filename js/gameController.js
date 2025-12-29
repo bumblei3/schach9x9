@@ -101,9 +101,9 @@ export class GameController {
     // Disable clicks if it's AI's turn
     if (
       this.game.isAI &&
-            (this.game.phase === PHASES.SETUP_BLACK_KING ||
-                this.game.phase === PHASES.SETUP_BLACK_PIECES ||
-                (this.game.phase === PHASES.PLAY && this.game.turn === 'black'))
+      (this.game.phase === PHASES.SETUP_BLACK_KING ||
+        this.game.phase === PHASES.SETUP_BLACK_PIECES ||
+        (this.game.phase === PHASES.PLAY && this.game.turn === 'black'))
     ) {
       return;
     }
@@ -116,7 +116,7 @@ export class GameController {
       this.placeKing(r, c, 'black');
     } else if (
       this.game.phase === PHASES.SETUP_WHITE_PIECES ||
-            this.game.phase === PHASES.SETUP_BLACK_PIECES
+      this.game.phase === PHASES.SETUP_BLACK_PIECES
     ) {
       this.placeShopPiece(r, c);
     } else if (this.game.phase === PHASES.PLAY) {
@@ -198,8 +198,7 @@ export class GameController {
       const color = isWhiteTurn ? 'white' : 'black';
 
       if (piece && piece.color === color && piece.type !== 'k') {
-        const cost =
-                    PIECES[Object.keys(PIECES).find(k => PIECES[k].symbol === piece.type)].points;
+        const cost = PIECES[Object.keys(PIECES).find(k => PIECES[k].symbol === piece.type)].points;
         this.game.points += cost;
         this.game.board[r][c] = null;
         this.updateShopUI();
@@ -221,9 +220,9 @@ export class GameController {
 
     if (
       r < corridor.rowStart ||
-            r >= corridor.rowStart + 3 ||
-            c < corridor.colStart ||
-            c >= corridor.colStart + 3
+      r >= corridor.rowStart + 3 ||
+      c < corridor.colStart ||
+      c >= corridor.colStart + 3
     ) {
       this.game.log('Muss im eigenen Korridor platziert werden!');
       return;
@@ -310,10 +309,14 @@ export class GameController {
         return;
       }
 
-      UI.showModal('Ungewutzte Punkte', `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`, [
-        { text: 'Abbrechen', class: 'btn-secondary' },
-        { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition }
-      ]);
+      UI.showModal(
+        'Ungewutzte Punkte',
+        `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
+        [
+          { text: 'Abbrechen', class: 'btn-secondary' },
+          { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition },
+        ]
+      );
       return;
     }
 
@@ -432,9 +435,9 @@ export class GameController {
     UI.updateStatus(this.game);
 
     const message =
-            resigningColor === 'white'
-              ? 'Weiß gibt auf! Schwarz gewinnt.'
-              : 'Schwarz gibt auf! Weiß gewinnt.';
+      resigningColor === 'white'
+        ? 'Weiß gibt auf! Schwarz gewinnt.'
+        : 'Schwarz gibt auf! Weiß gewinnt.';
     this.game.log(message);
 
     const overlay = document.getElementById('game-over-overlay');
@@ -525,7 +528,11 @@ export class GameController {
     }
 
     const decliningColor =
-            this.game.turn === this.game.drawOfferedBy ? (this.game.turn === 'white' ? 'black' : 'white') : this.game.turn;
+      this.game.turn === this.game.drawOfferedBy
+        ? this.game.turn === 'white'
+          ? 'black'
+          : 'white'
+        : this.game.turn;
     this.game.log(`${decliningColor === 'white' ? 'Weiß' : 'Schwarz'} lehnt das Remis-Angebot ab.`);
 
     this.game.drawOffered = false;
@@ -643,7 +650,6 @@ export class GameController {
 
     this.game.log('📂 Spiel erfolgreich geladen!');
     soundManager.playGameStart(); // Feedback sound
-
   }
 
   autoSave() {
@@ -681,7 +687,6 @@ export class GameController {
     location.reload();
   }
 
-
   // ===== ANALYSIS MODE METHODS =====
 
   enterAnalysisMode() {
@@ -702,7 +707,7 @@ export class GameController {
       selectedSquare: this.game.selectedSquare,
       validMoves: this.game.validMoves,
       halfMoveClock: this.game.halfMoveClock,
-      positionHistory: [...this.game.positionHistory]
+      positionHistory: [...this.game.positionHistory],
     };
 
     // Enter analysis mode
@@ -747,8 +752,12 @@ export class GameController {
       this.game.turn = this.game.analysisBasePosition.turn;
       this.game.moveHistory = [...this.game.analysisBasePosition.moveHistory];
       this.game.redoStack = [...this.game.analysisBasePosition.redoStack];
-      this.game.lastMove = this.game.analysisBasePosition.lastMove ? { ...this.game.analysisBasePosition.lastMove } : null;
-      this.game.lastMoveHighlight = this.game.analysisBasePosition.lastMoveHighlight ? { ...this.game.analysisBasePosition.lastMoveHighlight } : null;
+      this.game.lastMove = this.game.analysisBasePosition.lastMove
+        ? { ...this.game.analysisBasePosition.lastMove }
+        : null;
+      this.game.lastMoveHighlight = this.game.analysisBasePosition.lastMoveHighlight
+        ? { ...this.game.analysisBasePosition.lastMoveHighlight }
+        : null;
       this.game.selectedSquare = this.game.analysisBasePosition.selectedSquare;
       this.game.validMoves = this.game.analysisBasePosition.validMoves;
       this.game.halfMoveClock = this.game.analysisBasePosition.halfMoveClock;
@@ -776,7 +785,9 @@ export class GameController {
     UI.renderBoard(this.game);
     UI.renderEvalGraph(this.game);
 
-    const message = restore ? '🔍 Analyse-Modus beendet. Position wiederhergestellt.' : '🔍 Analyse-Modus beendet. Aktuelle Position behalten.';
+    const message = restore
+      ? '🔍 Analyse-Modus beendet. Position wiederhergestellt.'
+      : '🔍 Analyse-Modus beendet. Aktuelle Position behalten.';
     this.game.log(message);
 
     return true;
@@ -803,9 +814,9 @@ export class GameController {
   }
 
   /**
-     * Jumps to a specific move in the game history (for analysis).
-     * @param {number} moveIndex - Index of the move in moveHistory
-     */
+   * Jumps to a specific move in the game history (for analysis).
+   * @param {number} moveIndex - Index of the move in moveHistory
+   */
   jumpToMove(moveIndex) {
     if (!this.game.moveController || !this.game.moveController.reconstructBoardAtMove) {
       return;
@@ -823,8 +834,8 @@ export class GameController {
   }
 
   /**
-     * Jumps to the initial game position (for analysis).
-     */
+   * Jumps to the initial game position (for analysis).
+   */
   jumpToStart() {
     if (!this.game.moveController || !this.game.moveController.reconstructBoardAtMove) {
       return;
@@ -838,10 +849,10 @@ export class GameController {
   }
 
   /**
-     * Saves completed game to statistics
-     * @param {string} result - 'win', 'loss', or 'draw'
-     * @param {string} losingColor - Color that lost (only for win/loss)
-     */
+   * Saves completed game to statistics
+   * @param {string} result - 'win', 'loss', or 'draw'
+   * @param {string} losingColor - Color that lost (only for win/loss)
+   */
   saveGameToStatistics(result, losingColor = null) {
     if (!this.gameStartTime) {
       logger.warn('Game start time not set, skipping statistics save');
@@ -855,11 +866,11 @@ export class GameController {
     let opponent = 'Human';
     if (this.game.isAI) {
       const difficultyMap = {
-        'beginner': 'AI-Anfänger',
-        'easy': 'AI-Einfach',
-        'medium': 'AI-Mittel',
-        'hard': 'AI-Schwer',
-        'expert': 'AI-Experte'
+        beginner: 'AI-Anfänger',
+        easy: 'AI-Einfach',
+        medium: 'AI-Mittel',
+        hard: 'AI-Schwer',
+        expert: 'AI-Experte',
       };
       opponent = difficultyMap[this.game.difficulty] || 'AI';
     }
@@ -880,7 +891,7 @@ export class GameController {
       opponent: opponent,
       moveHistory: this.game.moveHistory || [],
       duration: Date.now() - this.gameStartTime,
-      finalPosition: JSON.stringify(this.game.board)
+      finalPosition: JSON.stringify(this.game.board),
     };
 
     this.statisticsManager.saveGame(gameData);
@@ -888,4 +899,3 @@ export class GameController {
     logger.info('Game saved to statistics:', playerResult, 'vs', opponent);
   }
 }
-

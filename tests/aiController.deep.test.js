@@ -3,7 +3,8 @@ import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
 
 // Mock UI module
 const mockUI = {
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateAnalysisUI: jest.fn(),
   renderEvalGraph: jest.fn(),
 };
@@ -14,8 +15,8 @@ jest.unstable_mockModule('../js/logger.js', () => ({
   logger: {
     info: jest.fn(),
     debug: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }));
 
 // Mock Worker global
@@ -33,7 +34,7 @@ global.Worker = MockWorker;
 // Mock Fetch
 global.fetch = jest.fn(() =>
   Promise.resolve({
-    json: () => Promise.resolve({ 'e2-e4': 'e7-e5' })
+    json: () => Promise.resolve({ 'e2-e4': 'e7-e5' }),
   })
 );
 
@@ -45,7 +46,9 @@ describe('AIController Deep Logic', () => {
 
   beforeEach(() => {
     game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       phase: PHASES.PLAY,
       turn: 'black',
       difficulty: 'medium',
@@ -57,7 +60,9 @@ describe('AIController Deep Logic', () => {
       drawOfferedBy: null,
       mode: 'pve',
       placeKing: jest.fn(),
-      placeShopPiece: jest.fn(() => { game.points -= 1; }), // Decrement to avoid infinite loop
+      placeShopPiece: jest.fn(() => {
+        game.points -= 1;
+      }), // Decrement to avoid infinite loop
       finishSetupPhase: jest.fn(),
       resign: jest.fn(),
       offerDraw: jest.fn(),
@@ -68,8 +73,9 @@ describe('AIController Deep Logic', () => {
       isInsufficientMaterial: jest.fn(() => false),
       getBoardHash: jest.fn(() => 'hash'),
       calculateMaterialAdvantage: jest.fn(() => 0),
-      renderBoard: jest.fn(), showModal: jest.fn(),
-      findKing: jest.fn(() => ({ r: 1, c: 4 })) // Add findKing mock
+      renderBoard: jest.fn(),
+      showModal: jest.fn(),
+      findKing: jest.fn(() => ({ r: 1, c: 4 })), // Add findKing mock
     };
 
     controller = new AIController(game);
@@ -145,9 +151,7 @@ describe('AIController Deep Logic', () => {
       expect(controller.aiWorkers.length).toBeGreaterThan(0);
       // Check that at least one worker received the getBestMove message
       const hasGetBestMove = controller.aiWorkers.some(w =>
-        w.postMessage.mock.calls.some(call =>
-          call[0] && call[0].type === 'getBestMove'
-        )
+        w.postMessage.mock.calls.some(call => call[0] && call[0].type === 'getBestMove')
       );
       expect(hasGetBestMove).toBe(true);
     });
@@ -157,7 +161,7 @@ describe('AIController Deep Logic', () => {
         depth: 3,
         maxDepth: 5,
         nodes: 1000,
-        bestMove: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } }
+        bestMove: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
       };
       controller.updateAIProgress(data);
 
@@ -176,9 +180,7 @@ describe('AIController Deep Logic', () => {
       // With multi-worker, check if any worker received analyze message
       if (controller.aiWorkers && controller.aiWorkers.length > 0) {
         const hasAnalyze = controller.aiWorkers.some(w =>
-          w.postMessage.mock.calls.some(call =>
-            call[0] && call[0].type === 'analyze'
-          )
+          w.postMessage.mock.calls.some(call => call[0] && call[0].type === 'analyze')
         );
         expect(hasAnalyze).toBe(true);
       }
@@ -187,9 +189,7 @@ describe('AIController Deep Logic', () => {
     test('updateAnalysisUI should update eval bar and top moves', () => {
       const analysis = {
         score: 50,
-        topMoves: [
-          { from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, score: 50 }
-        ]
+        topMoves: [{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, score: 50 }],
       };
       controller.updateAnalysisUI(analysis);
 
@@ -205,8 +205,12 @@ describe('AIController Deep Logic', () => {
       const move = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
       controller.highlightMove(move);
 
-      expect(document.querySelector('.cell[data-r="6"][data-c="4"]').classList.contains('analysis-from')).toBe(true);
-      expect(document.querySelector('.cell[data-r="4"][data-c="4"]').classList.contains('analysis-to')).toBe(true);
+      expect(
+        document.querySelector('.cell[data-r="6"][data-c="4"]').classList.contains('analysis-from')
+      ).toBe(true);
+      expect(
+        document.querySelector('.cell[data-r="4"][data-c="4"]').classList.contains('analysis-to')
+      ).toBe(true);
     });
   });
 
@@ -225,7 +229,8 @@ describe('AIController Deep Logic', () => {
     test('minimax should recurse and return score', () => {
       const move = { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } };
       game.board[6][4] = { type: 'p', color: 'white' };
-      game.getAllLegalMoves = jest.fn()
+      game.getAllLegalMoves = jest
+        .fn()
         .mockReturnValueOnce([{ from: { r: 1, c: 4 }, to: { r: 2, c: 4 } }]) // White moves
         .mockReturnValue([]); // Terminal
 
@@ -238,9 +243,7 @@ describe('AIController Deep Logic', () => {
       game.board[3][4] = { type: 'p', color: 'black' };
 
       // Mock getAllLegalMoves to return a capture
-      game.getAllLegalMoves = jest.fn(() => [
-        { from: { r: 3, c: 4 }, to: { r: 4, c: 4 } }
-      ]);
+      game.getAllLegalMoves = jest.fn(() => [{ from: { r: 3, c: 4 }, to: { r: 4, c: 4 } }]);
 
       const score = controller.quiescenceSearch(-Infinity, Infinity, true);
       expect(score).toBeDefined();

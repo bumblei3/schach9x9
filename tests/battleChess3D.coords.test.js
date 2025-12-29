@@ -97,7 +97,7 @@ describe('BattleChess3D Debug Tests', () => {
     document.body.appendChild(container);
 
     battleChess = new BattleChess3D(container);
-    // Manually init minimal parts to avoid full THREE init if possible, 
+    // Manually init minimal parts to avoid full THREE init if possible,
     // but init() is async and complex.
     // We can just mock the battleAnimator property directly if we don't call init.
     battleChess.battleAnimator = {

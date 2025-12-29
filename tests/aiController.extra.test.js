@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
 
-// Setup JSDOM body 
+// Setup JSDOM body
 document.body.innerHTML = `
     <div id="spinner-overlay" style="display: none;"></div>
     <div id="ai-depth"></div>
@@ -23,10 +23,12 @@ class MockWorker {
   postMessage = jest.fn();
   terminate = jest.fn();
 }
-global.Worker = jest.fn().mockImplementation((url) => new MockWorker(url));
+global.Worker = jest.fn().mockImplementation(url => new MockWorker(url));
 
 // Mock fetch
-global.fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ e2e4: ['e2e5'] }) }));
+global.fetch = jest.fn(() =>
+  Promise.resolve({ ok: true, json: () => Promise.resolve({ e2e4: ['e2e5'] }) })
+);
 
 const { AIController } = await import('../js/aiController.js');
 
@@ -35,7 +37,9 @@ describe('AIController Ultimate Precision V5', () => {
 
   beforeEach(() => {
     game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       phase: PHASES.PLAY,
       turn: 'black',
       difficulty: 'medium',
@@ -58,13 +62,14 @@ describe('AIController Ultimate Precision V5', () => {
       isInsufficientMaterial: jest.fn(() => false),
       getBoardHash: jest.fn(() => 'hash'),
       calculateMaterialAdvantage: jest.fn(() => 0),
-      renderBoard: jest.fn(), showModal: jest.fn(),
+      renderBoard: jest.fn(),
+      showModal: jest.fn(),
       continuousAnalysis: false,
       analysisMode: false,
       getAllLegalMoves: jest.fn(() => []),
       arrowRenderer: { clearArrows: jest.fn(), drawArrow: jest.fn() },
       halfMoveClock: 0,
-      findKing: jest.fn(() => ({ r: 1, c: 4 })) // Add findKing mock
+      findKing: jest.fn(() => ({ r: 1, c: 4 })), // Add findKing mock
     };
     controller = new AIController(game);
     jest.clearAllMocks();

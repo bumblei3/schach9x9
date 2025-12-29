@@ -13,10 +13,10 @@ export class StorageManager {
   }
 
   /**
-     * Save the game state
-     * @param {Game} game - The game instance
-     * @param {string} slotName - Name of the save slot (default: 'autosave')
-     */
+   * Save the game state
+   * @param {Game} game - The game instance
+   * @param {string} slotName - Name of the save slot (default: 'autosave')
+   */
   saveGame(game, slotName = 'autosave') {
     try {
       const gameState = {
@@ -38,7 +38,7 @@ export class StorageManager {
         blackTime: game.blackTime,
         clockEnabled: game.clockEnabled,
         // Meta
-        lastMove: game.lastMove
+        lastMove: game.lastMove,
       };
 
       const key = this.storageKey + slotName;
@@ -53,10 +53,10 @@ export class StorageManager {
   }
 
   /**
-     * Load a game state
-     * @param {string} slotName - Name of the save slot
-     * @returns {object|null} The deserialized game state or null
-     */
+   * Load a game state
+   * @param {string} slotName - Name of the save slot
+   * @returns {object|null} The deserialized game state or null
+   */
   loadGame(slotName = 'autosave') {
     const key = this.storageKey + slotName;
     const json = localStorage.getItem(key);
@@ -77,18 +77,18 @@ export class StorageManager {
   }
 
   /**
-     * Check if a save exists
-     */
+   * Check if a save exists
+   */
   hasSave(slotName = 'autosave') {
     return localStorage.getItem(this.storageKey + slotName) !== null;
   }
 
   /**
-     * Apply a saved state to a game instance
-     * Note: This modifies the game in-place. Alternatively, create a new Game.
-     * @param {Game} game - The game object to hydrate
-     * @param {object} state - The loaded state object
-     */
+   * Apply a saved state to a game instance
+   * Note: This modifies the game in-place. Alternatively, create a new Game.
+   * @param {Game} game - The game object to hydrate
+   * @param {object} state - The loaded state object
+   */
   loadStateIntoGame(game, state) {
     if (!state) return false;
 

@@ -4,7 +4,8 @@ import { PHASES, BOARD_SIZE } from '../js/config.js';
 
 // Mock UI and SoundManager modules
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   showPromotionModal: jest.fn(),
   showPromotionUI: jest.fn(),
   animateMove: jest.fn().mockResolvedValue(),
@@ -33,7 +34,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 // Mock document functions used in MoveController
 global.document = {
-  getElementById: jest.fn((id) => ({
+  getElementById: jest.fn(id => ({
     classList: { remove: jest.fn(), add: jest.fn() },
     style: {},
     textContent: '',

@@ -41,7 +41,7 @@
 }
 
 /* --- Theme Overrides --- */
-body[data-theme="blue"] {
+body[data-theme='blue'] {
   --bg-board-dark: #3b5998;
   --bg-board-light: #8b9dc3;
   /* Orange/Gold for Blue theme */
@@ -53,7 +53,7 @@ body[data-theme="blue"] {
   /* Very Dark Blue (almost black) */
 }
 
-body[data-theme="green"] {
+body[data-theme='green'] {
   --bg-board-dark: #769656;
   --bg-board-light: #eeeed2;
   /* Purple/Indigo for Green theme */
@@ -65,7 +65,7 @@ body[data-theme="green"] {
   /* Very Dark Green (almost black) */
 }
 
-body[data-theme="wood"] {
+body[data-theme='wood'] {
   --bg-board-dark: #b58863;
   --bg-board-light: #f0d9b5;
   /* Dark Green Felt for Wood theme */
@@ -77,7 +77,7 @@ body[data-theme="wood"] {
   /* Very Dark Brown (almost black) */
 }
 
-body[data-theme="dark"] {
+body[data-theme='dark'] {
   --bg-board-dark: #1a1a1a;
   --bg-board-light: #404040;
   /* Neon Pink for Dark theme */
@@ -90,7 +90,6 @@ body[data-theme="dark"] {
 }
 
 /* Default/classic theme uses the :root values */
-
 
 * {
   box-sizing: border-box;
@@ -302,7 +301,6 @@ body {
   text-transform: uppercase;
 }
 
-
 .cell {
   width: 100%;
   height: 100%;
@@ -368,13 +366,17 @@ body {
 
 .cell.selectable-corridor {
   /* Use box-shadow inset to tint the cell without removing the board background color */
-  box-shadow: inset 0 0 0 100px var(--corridor-bg), inset 0 0 0 1px var(--corridor-border) !important;
+  box-shadow:
+    inset 0 0 0 100px var(--corridor-bg),
+    inset 0 0 0 1px var(--corridor-border) !important;
   cursor: pointer;
 }
 
 .cell.selectable-corridor:hover {
   /* Darker tint on hover */
-  box-shadow: inset 0 0 0 100px var(--corridor-bg-hover), inset 0 0 0 1px var(--corridor-border-hover) !important;
+  box-shadow:
+    inset 0 0 0 100px var(--corridor-bg-hover),
+    inset 0 0 0 1px var(--corridor-border-hover) !important;
 }
 
 /* --- Action Bar --- */
@@ -488,7 +490,9 @@ body {
   pointer-events: none;
   opacity: 0;
   transform: scale(0.95);
-  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+  transition:
+    opacity 0.5s ease-in-out,
+    transform 0.5s ease-in-out;
 }
 
 #battle-chess-3d-container.active {
@@ -508,8 +512,6 @@ body {
   transition: opacity 0.3s ease;
 }
 
-
-
 /* --- Shop Panel --- */
 .shop-panel {
   width: 100%;
@@ -522,7 +524,10 @@ body {
   padding: 1.5rem;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
   z-index: 100;
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    padding 0.3s ease;
   max-height: 60vh;
   overflow-y: auto;
   opacity: 1;
@@ -701,7 +706,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 
 /* --- Overlays --- */
 .fullscreen-overlay {

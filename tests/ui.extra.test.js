@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { PHASES, BOARD_SIZE } from '../js/config.js';
 
-// Setup JSDOM body 
+// Setup JSDOM body
 document.body.innerHTML = `
     <div id="board"></div>
     <div id="status-display"></div>
@@ -26,13 +26,13 @@ document.body.innerHTML = `
 // Mock PIECE_SVGS
 global.window.PIECE_SVGS = {
   white: { p: 'wp', n: 'wn', b: 'wb', r: 'wr', q: 'wq', k: 'wk', a: 'wa', c: 'wc', e: 'we' },
-  black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', a: 'ba', c: 'bc', e: 'be' }
+  black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', a: 'ba', c: 'bc', e: 'be' },
 };
 global.window._svgCache = {};
 
 // Mock sounds
 jest.unstable_mockModule('../js/sounds.js', () => ({
-  soundManager: { playMove: jest.fn(), playCapture: jest.fn(), playGameOver: jest.fn() }
+  soundManager: { playMove: jest.fn(), playCapture: jest.fn(), playGameOver: jest.fn() },
 }));
 
 const UI = await import('../js/ui.js');
@@ -42,7 +42,9 @@ describe('UI Final Precision V3', () => {
 
   beforeEach(() => {
     game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       phase: PHASES.PLAY,
       turn: 'white',
       points: 15,
@@ -52,13 +54,15 @@ describe('UI Final Precision V3', () => {
       capturedPieces: { white: [], black: [] },
       moveHistory: [],
       positionHistory: [],
-      _previousBoardState: Array(9).fill(null).map(() => Array(9).fill(null)),
+      _previousBoardState: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       _forceFullRender: true,
       calculateMaterialAdvantage: jest.fn(() => 5),
       tutorController: { getSetupTemplates: () => [], getTutorHints: () => [] },
       arrowRenderer: { highlightMove: jest.fn(), clearArrows: jest.fn() },
       handleCellClick: jest.fn(),
-      getValidMoves: jest.fn(() => [])
+      getValidMoves: jest.fn(() => []),
     };
     game.board[0][0] = { type: 'k', color: 'white' };
     jest.clearAllMocks();
@@ -77,7 +81,7 @@ describe('UI Final Precision V3', () => {
         getData: jest.fn(() => '0,0'),
         setDragImage: jest.fn(),
         effectAllowed: 'move',
-        dropEffect: 'move'
+        dropEffect: 'move',
       };
       ev.preventDefault = jest.fn();
       Object.assign(ev, data);

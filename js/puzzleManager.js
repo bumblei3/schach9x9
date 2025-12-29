@@ -10,10 +10,16 @@ export class PuzzleManager {
         description: 'Weiß zieht und setzt in 1 Zug matt.',
         difficulty: 'Einfach',
         // (0,2) bk (index 2); (1,7) wr (index 16); (2,2) wk (index 20)
-        setupStr: '..'.repeat(2) + 'bk' + '..'.repeat(13) + 'wr' + '..'.repeat(3) + 'wk' + '..'.repeat(81 - 21) + 'w',
-        solution: [
-          { from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }
-        ]
+        setupStr:
+          '..'.repeat(2) +
+          'bk' +
+          '..'.repeat(13) +
+          'wr' +
+          '..'.repeat(3) +
+          'wk' +
+          '..'.repeat(81 - 21) +
+          'w',
+        solution: [{ from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }],
       },
       {
         id: 'mate-in-2-001',
@@ -21,11 +27,21 @@ export class PuzzleManager {
         description: 'Weiß am Zug. Matt in 2.',
         difficulty: 'Mittel',
         // (0,4) bk (index 4); (2,4) wk (index 22); (6,4) wr (index 58); (2,0) wr (index 18)
-        setupStr: '..'.repeat(4) + 'bk' + '..'.repeat(13) + 'wr' + '..'.repeat(3) + 'wk' + '..'.repeat(35) + 'wr' + '..'.repeat(81 - 59) + 'w',
+        setupStr:
+          '..'.repeat(4) +
+          'bk' +
+          '..'.repeat(13) +
+          'wr' +
+          '..'.repeat(3) +
+          'wk' +
+          '..'.repeat(35) +
+          'wr' +
+          '..'.repeat(81 - 59) +
+          'w',
         solution: [
           { from: { r: 6, c: 4 }, to: { r: 1, c: 4 } },
-          { from: { r: 2, c: 0 }, to: { r: 0, c: 0 } }
-        ]
+          { from: { r: 2, c: 0 }, to: { r: 0, c: 0 } },
+        ],
       },
       {
         id: 'mate-in-1-arch',
@@ -34,10 +50,8 @@ export class PuzzleManager {
         difficulty: 'Mittel',
         // (0,3) bk (index 3); (2,2) wa (index 20); (2,3) wk (index 21)
         setupStr: '..'.repeat(3) + 'bk' + '..'.repeat(16) + 'wawk' + '..'.repeat(81 - 22) + 'w',
-        solution: [
-          { from: { r: 2, c: 2 }, to: { r: 1, c: 4 } }
-        ]
-      }
+        solution: [{ from: { r: 2, c: 2 }, to: { r: 1, c: 4 } }],
+      },
     ];
 
     this.currentPuzzleIndex = 0;
@@ -63,7 +77,7 @@ export class PuzzleManager {
       active: true,
       currentMoveIndex: 0,
       puzzleId: puzzle.id,
-      solved: false
+      solved: false,
     };
 
     // Apply setup from string or function
@@ -113,8 +127,8 @@ export class PuzzleManager {
   }
 
   /**
-     * Dynamically generates a puzzle from a game state
-     */
+   * Dynamically generates a puzzle from a game state
+   */
   generateAndLoad(game, depth = 2) {
     const solution = PuzzleGenerator.findMateSequence(game.board, game.turn, depth);
     if (!solution) return null;
@@ -125,7 +139,7 @@ export class PuzzleManager {
       description: `Setze matt in ${depth} Zügen.`,
       difficulty: depth === 1 ? 'Einfach' : 'Mittel',
       setupStr: PuzzleGenerator.boardToString(game.board, game.turn),
-      solution: solution.filter((_, i) => i % 2 === 0) // Only our moves
+      solution: solution.filter((_, i) => i % 2 === 0), // Only our moves
     };
 
     // Add to list and load

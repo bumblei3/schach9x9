@@ -5,15 +5,17 @@ const mockThree = {
   Scene: jest.fn().mockImplementation(() => ({
     add: jest.fn(),
     remove: jest.fn(),
-    traverse: jest.fn((cb) => cb({ geometry: { dispose: jest.fn() }, material: { dispose: jest.fn() } })),
+    traverse: jest.fn(cb =>
+      cb({ geometry: { dispose: jest.fn() }, material: { dispose: jest.fn() } })
+    ),
     background: null,
-    children: []
+    children: [],
   })),
   PerspectiveCamera: jest.fn().mockImplementation(() => ({
     position: { set: jest.fn() },
     lookAt: jest.fn(),
     aspect: 1,
-    updateProjectionMatrix: jest.fn()
+    updateProjectionMatrix: jest.fn(),
   })),
   WebGLRenderer: jest.fn().mockImplementation(() => ({
     setSize: jest.fn(),
@@ -21,10 +23,12 @@ const mockThree = {
     render: jest.fn(),
     dispose: jest.fn(),
     domElement: document.createElement('canvas'),
-    shadowMap: { enabled: false, type: null }
+    shadowMap: { enabled: false, type: null },
   })),
   Group: jest.fn().mockImplementation(() => ({
-    add: jest.fn(function (obj) { this.children.push(obj); }),
+    add: jest.fn(function (obj) {
+      this.children.push(obj);
+    }),
     remove: jest.fn(function (obj) {
       const index = this.children.indexOf(obj);
       if (index > -1) this.children.splice(index, 1);
@@ -32,17 +36,17 @@ const mockThree = {
     position: { set: jest.fn() },
     rotation: { x: 0, y: 0, z: 0, set: jest.fn() },
     children: [],
-    userData: {}
+    userData: {},
   })),
   Raycaster: jest.fn().mockImplementation(() => ({
     setFromCamera: jest.fn(),
-    intersectObjects: jest.fn((objs) => {
+    intersectObjects: jest.fn(objs => {
       // Simulate intersection with a piece/square if objs contains something
       if (objs.length > 0) {
         return [{ object: { userData: { row: 4, col: 4, type: 'square' } } }];
       }
       return [];
-    })
+    }),
   })),
   Vector3: jest.fn().mockImplementation(() => ({ x: 0, y: 0, z: 0 })),
   BoxGeometry: jest.fn(),
@@ -53,7 +57,7 @@ const mockThree = {
   AmbientLight: jest.fn(),
   DirectionalLight: jest.fn().mockImplementation(() => ({
     position: { set: jest.fn() },
-    shadow: { camera: {}, mapSize: {} }
+    shadow: { camera: {}, mapSize: {} },
   })),
   Color: jest.fn(),
   Mesh: jest.fn().mockImplementation(() => ({
@@ -61,15 +65,15 @@ const mockThree = {
     rotation: { x: 0, y: 0, z: 0, set: jest.fn() },
     userData: {},
     material: { color: { setHex: jest.fn() } },
-    add: jest.fn()
+    add: jest.fn(),
   })),
   HemisphereLight: jest.fn().mockImplementation(() => ({
-    position: { set: jest.fn() }
+    position: { set: jest.fn() },
   })),
   LatheGeometry: jest.fn(),
   Vector2: jest.fn().mockImplementation((x, y) => ({ x, y })),
   DoubleSide: 2,
-  PCFSoftShadowMap: 1
+  PCFSoftShadowMap: 1,
 };
 
 jest.unstable_mockModule('three', () => mockThree);
@@ -77,22 +81,22 @@ jest.unstable_mockModule('three/examples/jsm/controls/OrbitControls.js', () => (
   OrbitControls: jest.fn().mockImplementation(() => ({
     update: jest.fn(),
     dispose: jest.fn(),
-    target: { set: jest.fn() }
-  }))
+    target: { set: jest.fn() },
+  })),
 }));
 
 jest.unstable_mockModule('../js/pieces3D.js', () => ({
   createPiece3D: jest.fn(() => ({
     position: { set: jest.fn() },
-    userData: {}
+    userData: {},
   })),
-  PIECE_COLORS: { white: 0xffffff, black: 0x000000 }
+  PIECE_COLORS: { white: 0xffffff, black: 0x000000 },
 }));
 
 jest.unstable_mockModule('../js/battleAnimations.js', () => ({
   BattleAnimator: jest.fn().mockImplementation(() => ({
-    playBattle: jest.fn(() => Promise.resolve())
-  }))
+    playBattle: jest.fn(() => Promise.resolve()),
+  })),
 }));
 
 const { BattleChess3D } = await import('../js/battleChess3D.js');
@@ -132,7 +136,9 @@ describe('BattleChess3D Class', () => {
   test('should updateFromGameState', async () => {
     await engine.init();
     const game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null))
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
     };
     game.board[0][0] = { type: 'r', color: 'white' };
 
@@ -143,7 +149,10 @@ describe('BattleChess3D Class', () => {
   test('should highlightMoves', async () => {
     await engine.init();
     engine.highlights = []; // Mock highlights array if not initialized
-    const moves = [{ r: 4, c: 4 }, { r: 5, c: 5 }];
+    const moves = [
+      { r: 4, c: 4 },
+      { r: 5, c: 5 },
+    ];
     engine.highlightMoves(moves);
     expect(engine.highlights.length).toBe(2);
   });
@@ -163,7 +172,11 @@ describe('BattleChess3D Class', () => {
 
   test('should setTheme', async () => {
     await engine.init();
-    engine.boardGroup = { children: [{ userData: { type: 'square', isLight: true }, material: { color: { setHex: jest.fn() } } }] };
+    engine.boardGroup = {
+      children: [
+        { userData: { type: 'square', isLight: true }, material: { color: { setHex: jest.fn() } } },
+      ],
+    };
     engine.setTheme('blue');
     expect(engine.currentTheme).toBe('blue');
   });

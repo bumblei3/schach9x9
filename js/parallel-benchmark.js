@@ -8,7 +8,9 @@ import { BOARD_SIZE } from './config.js';
 
 // Create a test position (midgame tactical)
 function createTestPosition() {
-  const board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+  const board = Array(BOARD_SIZE)
+    .fill(null)
+    .map(() => Array(BOARD_SIZE).fill(null));
 
   // White pieces
   board[7][4] = { type: 'k', color: 'white', hasMoved: false };
@@ -19,7 +21,7 @@ function createTestPosition() {
   board[7][0] = { type: 'r', color: 'white', hasMoved: false };
   board[7][8] = { type: 'r', color: 'white', hasMoved: false };
 
-  // Black pieces  
+  // Black pieces
   board[1][4] = { type: 'k', color: 'black', hasMoved: false };
   board[2][3] = { type: 'p', color: 'black', hasMoved: false };
   board[2][4] = { type: 'p', color: 'black', hasMoved: false };
@@ -36,7 +38,9 @@ async function runBenchmark() {
   console.log('============================================================');
   console.log(' Parallel Search Benchmark');
   console.log('============================================================\n');
-  console.log(`CPU Cores Available: ${typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 'N/A (Node.js)'}`);
+  console.log(
+    `CPU Cores Available: ${typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 'N/A (Node.js)'}`
+  );
   console.log('Note: This benchmark simulates parallel search benefits.\n');
 
   const board = createTestPosition();
@@ -55,11 +59,16 @@ async function runBenchmark() {
     console.log(`  Move: (${move.from.r},${move.from.c}) -> (${move.to.r},${move.to.c})`);
 
     // Estimated parallel speedup (based on typical Lazy SMP scaling)
-    const numWorkers = Math.min(4, typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 4);
+    const numWorkers = Math.min(
+      4,
+      typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 4
+    );
     const speedupFactor = Math.min(numWorkers * 0.7, numWorkers); // ~70% efficiency
     const estimatedParallel = Math.round(elapsed / speedupFactor);
 
-    console.log(`  Estimated ${numWorkers}-worker: ~${estimatedParallel}ms (${speedupFactor.toFixed(1)}x speedup)`);
+    console.log(
+      `  Estimated ${numWorkers}-worker: ~${estimatedParallel}ms (${speedupFactor.toFixed(1)}x speedup)`
+    );
   }
 
   console.log('\n============================================================');

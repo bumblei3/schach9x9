@@ -5,19 +5,19 @@ import { PHASES, BOARD_SIZE } from '../js/config.js';
 jest.unstable_mockModule('../js/chess-pieces.js', () => ({
   PIECE_SVGS: {
     white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
-    black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' }
-  }
+    black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
+  },
 }));
 
 jest.unstable_mockModule('../js/utils.js', () => ({
   formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
-  debounce: jest.fn(fn => fn)
+  debounce: jest.fn(fn => fn),
 }));
 
 jest.unstable_mockModule('../js/effects.js', () => ({
   particleSystem: {
-    spawn: jest.fn()
-  }
+    spawn: jest.fn(),
+  },
 }));
 
 // Import UI module
@@ -29,7 +29,9 @@ describe('UI Module', () => {
   beforeEach(() => {
     // Mock Game state
     game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       phase: PHASES.PLAY,
       turn: 'white',
       whiteTime: 300,
@@ -53,13 +55,13 @@ describe('UI Module', () => {
       replayMode: false,
       getValidMoves: jest.fn(() => []),
       handleCellClick: jest.fn(),
-      isSquareUnderAttack: jest.fn(() => false)
+      isSquareUnderAttack: jest.fn(() => false),
     };
 
     // Setup window globals
     window.PIECE_SVGS = {
       white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
-      black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' }
+      black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
     };
     window._svgCache = {};
 
@@ -173,14 +175,16 @@ describe('UI Module', () => {
 
     test('should show tutor suggestions', () => {
       game.tutorController = {
-        getTutorHints: jest.fn(() => [{
-          move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
-          analysis: {
-            qualityLabel: 'Good',
-            tacticalExplanations: ['Tactical'],
-            strategicExplanations: ['Strategic']
-          }
-        }])
+        getTutorHints: jest.fn(() => [
+          {
+            move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
+            analysis: {
+              qualityLabel: 'Good',
+              tacticalExplanations: ['Tactical'],
+              strategicExplanations: ['Strategic'],
+            },
+          },
+        ]),
       };
       UI.showTutorSuggestions(game);
       const overlay = document.getElementById('tutor-overlay');

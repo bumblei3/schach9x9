@@ -182,7 +182,7 @@ describe('AI Engine', () => {
 
       expect(bestMove).toEqual({
         from: { r: 1, c: 7 },
-        to: { r: 0, c: 7 }
+        to: { r: 0, c: 7 },
       });
     });
 

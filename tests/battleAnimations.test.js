@@ -5,18 +5,20 @@ const mockThree = {
   Scene: jest.fn().mockImplementation(() => ({
     add: jest.fn(),
     remove: jest.fn(),
-    children: []
+    children: [],
   })),
   PerspectiveCamera: jest.fn().mockImplementation(() => ({
     position: new mockThree.Vector3(),
     lookAt: jest.fn(),
     quaternion: {
       clone: jest.fn(() => ({ copy: jest.fn() })),
-      copy: jest.fn()
-    }
+      copy: jest.fn(),
+    },
   })),
   Vector3: jest.fn().mockImplementation(function (x = 0, y = 0, z = 0) {
-    this.x = x; this.y = y; this.z = z;
+    this.x = x;
+    this.y = y;
+    this.z = z;
     return this;
   }),
   Group: jest.fn().mockImplementation(() => ({
@@ -24,7 +26,7 @@ const mockThree = {
     remove: jest.fn(),
     position: new mockThree.Vector3(),
     rotation: new mockThree.Vector3(),
-    children: []
+    children: [],
   })),
   Mesh: jest.fn().mockImplementation(() => ({
     position: new mockThree.Vector3(),
@@ -34,17 +36,17 @@ const mockThree = {
       opacity: 1,
       transparent: true,
       color: { setHex: jest.fn(), set: jest.fn() },
-      dispose: jest.fn()
+      dispose: jest.fn(),
     },
-    geometry: { dispose: jest.fn() }
+    geometry: { dispose: jest.fn() },
   })),
   SphereGeometry: jest.fn(),
   RingGeometry: jest.fn(),
   CylinderGeometry: jest.fn(),
   TorusGeometry: jest.fn(),
-  MeshBasicMaterial: jest.fn().mockImplementation((p) => p),
+  MeshBasicMaterial: jest.fn().mockImplementation(p => p),
   AdditiveBlending: 1,
-  DoubleSide: 2
+  DoubleSide: 2,
 };
 
 mockThree.Vector3.prototype = {
@@ -60,7 +62,9 @@ mockThree.Vector3.prototype = {
   lerp: jest.fn(),
   lerpVectors: jest.fn(),
   length: jest.fn(() => 1),
-  normalize: jest.fn(function () { return this; })
+  normalize: jest.fn(function () {
+    return this;
+  }),
 };
 
 jest.unstable_mockModule('three', () => mockThree);

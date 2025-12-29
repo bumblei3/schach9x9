@@ -25,13 +25,13 @@ export class AIController {
     const corridor = this.game.blackCorridor;
     // Map piece names to their symbols
     const pieceSymbols = {
-      'QUEEN': 'q',
-      'CHANCELLOR': 'c',
-      'ARCHBISHOP': 'a',
-      'ROOK': 'r',
-      'BISHOP': 'b',
-      'KNIGHT': 'n',
-      'PAWN': 'p'
+      QUEEN: 'q',
+      CHANCELLOR: 'c',
+      ARCHBISHOP: 'a',
+      ROOK: 'r',
+      BISHOP: 'b',
+      KNIGHT: 'n',
+      PAWN: 'p',
     };
 
     // Simple greedy strategy: buy expensive stuff first
@@ -127,7 +127,7 @@ export class AIController {
           this.openingBook = book;
           this.openingBookLoaded = true;
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for workers (convert to serializable format)
@@ -246,7 +246,7 @@ export class AIController {
 
     if (bestMoveEl && data.bestMove) {
       const from =
-                String.fromCharCode(97 + data.bestMove.from.c) + (BOARD_SIZE - data.bestMove.from.r);
+        String.fromCharCode(97 + data.bestMove.from.c) + (BOARD_SIZE - data.bestMove.from.r);
       const to = String.fromCharCode(97 + data.bestMove.to.c) + (BOARD_SIZE - data.bestMove.to.r);
       bestMoveEl.textContent = `Bester Zug: ${from}-${to}`;
     }
@@ -650,7 +650,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', book });
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for worker
@@ -745,7 +745,9 @@ export class AIController {
     });
 
     // Highlight the from and to squares
-    const fromCell = document.querySelector(`.cell[data-r="${move.from.r}"][data-c="${move.from.c}"]`);
+    const fromCell = document.querySelector(
+      `.cell[data-r="${move.from.r}"][data-c="${move.from.c}"]`
+    );
     const toCell = document.querySelector(`.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`);
 
     if (fromCell) fromCell.classList.add('analysis-from');

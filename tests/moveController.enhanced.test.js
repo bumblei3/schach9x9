@@ -22,13 +22,13 @@ describe('MoveController - Enhanced Coverage Tests', () => {
     game.startClock = jest.fn();
 
     // Mock DOM elements
-    jest.spyOn(document, 'getElementById').mockImplementation((id) => ({
+    jest.spyOn(document, 'getElementById').mockImplementation(id => ({
       classList: {
         add: jest.fn(),
-        remove: jest.fn()
+        remove: jest.fn(),
       },
       textContent: '',
-      disabled: false
+      disabled: false,
     }));
 
     jest.clearAllMocks();
@@ -41,14 +41,14 @@ describe('MoveController - Enhanced Coverage Tests', () => {
         {
           from: { r: 6, c: 4 },
           to: { r: 4, c: 4 },
-          piece: { type: 'p', color: 'white' }
+          piece: { type: 'p', color: 'white' },
         },
         {
           from: { r: 4, c: 4 },
           to: { r: 0, c: 4 },
           piece: { type: 'p', color: 'white' },
-          promotion: 'q' // Promoted to queen
-        }
+          promotion: 'q', // Promoted to queen
+        },
       ];
 
       moveController.enterReplayMode();
@@ -77,8 +77,8 @@ describe('MoveController - Enhanced Coverage Tests', () => {
           from: { r: 7, c: 4 },
           to: { r: 7, c: 6 },
           piece: { type: 'k', color: 'white' },
-          castling: { rookFrom: { r: 7, c: 7 }, rookTo: { r: 7, c: 5 } }
-        }
+          castling: { rookFrom: { r: 7, c: 7 }, rookTo: { r: 7, c: 5 } },
+        },
       ];
 
       moveController.enterReplayMode();
@@ -100,8 +100,8 @@ describe('MoveController - Enhanced Coverage Tests', () => {
           from: { r: 3, c: 4 },
           to: { r: 2, c: 5 },
           piece: { type: 'p', color: 'white' },
-          enPassant: { r: 3, c: 5 }
-        }
+          enPassant: { r: 3, c: 5 },
+        },
       ];
 
       moveController.enterReplayMode();
@@ -117,7 +117,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
       game.moveHistory = [
         { from: { r: 6, c: 4 }, to: { r: 5, c: 4 }, piece: { type: 'p', color: 'white' } },
         { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: { type: 'p', color: 'black' } },
-        { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: { type: 'p', color: 'white' } }
+        { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: { type: 'p', color: 'white' } },
       ];
 
       moveController.enterReplayMode();
@@ -139,7 +139,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
     test('should handle replay boundary conditions', () => {
       game.moveHistory = [
-        { from: { r: 6, c: 4 }, to: { r: 5, c: 4 }, piece: { type: 'p', color: 'white' } }
+        { from: { r: 6, c: 4 }, to: { r: 5, c: 4 }, piece: { type: 'p', color: 'white' } },
       ];
 
       moveController.enterReplayMode();
@@ -226,7 +226,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
         { name: 'blitz3', initial: 180, increment: 0 },
         { name: 'blitz5', initial: 300, increment: 0 },
         { name: 'rapid10', initial: 600, increment: 5 },
-        { name: 'rapid15', initial: 900, increment: 10 }
+        { name: 'rapid15', initial: 900, increment: 10 },
       ];
 
       timeControls.forEach(tc => {
@@ -257,7 +257,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
     test('should handle missing fields with defaults', () => {
       const incompleteSave = {
         turn: 'white',
-        board: game.board
+        board: game.board,
         // Missing: moveHistory, capturedPieces, etc.
       };
 
@@ -277,7 +277,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
       const oldFormatSave = {
         turn: 'white',
         boardState: game.board, // Old key name
-        moves: [] // Old key name
+        moves: [], // Old key name
       };
 
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(oldFormatSave));
@@ -299,8 +299,8 @@ describe('MoveController - Enhanced Coverage Tests', () => {
         moveHistory: new Array(10000).fill({
           from: { r: 0, c: 0 },
           to: { r: 1, c: 1 },
-          piece: { type: 'p', color: 'white' }
-        })
+          piece: { type: 'p', color: 'white' },
+        }),
       };
 
       try {
@@ -332,7 +332,9 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
     test('should detect insufficient material', () => {
       // King vs King
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       game.board[0][4] = { type: 'k', color: 'black' };
       game.board[8][4] = { type: 'k', color: 'white' };
 
@@ -342,7 +344,9 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
     test('should not detect sufficient material as insufficient', () => {
       // King + Queen vs King
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       game.board[0][4] = { type: 'k', color: 'black' };
       game.board[8][4] = { type: 'k', color: 'white' };
       game.board[8][3] = { type: 'q', color: 'white' };

@@ -12,127 +12,75 @@ import { BOARD_SIZE, AI_PIECE_VALUES as PIECE_VALUES } from './config.js';
 const PST = {
   // Pawn: wants to advance, middle ones more
   p: [
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    50, 50, 50, 50, 50, 50, 50, 50, 50,
-    10, 10, 20, 30, 30, 30, 20, 10, 10,
-    5, 5, 10, 25, 25, 25, 10, 5, 5,
-    0, 0, 0, 20, 25, 20, 0, 0, 0,
-    5, -5, -10, 0, 10, 0, -10, -5, 5,
-    5, 10, 10, -20, -20, -20, 10, 10, 5,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 50, 50, 50, 50, 50, 50, 50, 50, 10, 10, 20, 30, 30, 30, 20, 10,
+    10, 5, 5, 10, 25, 25, 25, 10, 5, 5, 0, 0, 0, 20, 25, 20, 0, 0, 0, 5, -5, -10, 0, 10, 0, -10, -5,
+    5, 5, 10, 10, -20, -20, -20, 10, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   ],
   // Knight: dislikes edges
   n: [
-    -50, -40, -30, -30, -30, -30, -30, -40, -50,
-    -40, -20, 0, 0, 0, 0, 0, -20, -40,
-    -30, 0, 10, 15, 15, 15, 10, 0, -30,
-    -30, 5, 15, 20, 20, 20, 15, 5, -30,
-    -30, 0, 15, 20, 25, 20, 15, 0, -30,
-    -30, 5, 15, 20, 20, 20, 15, 5, -30,
-    -30, 0, 10, 15, 15, 15, 10, 0, -30,
-    -40, -20, 0, 5, 5, 5, 0, -20, -40,
-    -50, -40, -30, -30, -30, -30, -30, -40, -50
+    -50, -40, -30, -30, -30, -30, -30, -40, -50, -40, -20, 0, 0, 0, 0, 0, -20, -40, -30, 0, 10, 15,
+    15, 15, 10, 0, -30, -30, 5, 15, 20, 20, 20, 15, 5, -30, -30, 0, 15, 20, 25, 20, 15, 0, -30, -30,
+    5, 15, 20, 20, 20, 15, 5, -30, -30, 0, 10, 15, 15, 15, 10, 0, -30, -40, -20, 0, 5, 5, 5, 0, -20,
+    -40, -50, -40, -30, -30, -30, -30, -30, -40, -50,
   ],
   // Bishop: center control
   b: [
-    -20, -10, -10, -10, -10, -10, -10, -10, -20,
-    -10, 0, 0, 0, 0, 0, 0, 0, -10,
-    -10, 0, 5, 10, 10, 10, 5, 0, -10,
-    -10, 5, 5, 10, 10, 10, 5, 5, -10,
-    -10, 0, 10, 10, 15, 10, 10, 0, -10,
-    -10, 10, 10, 10, 10, 10, 10, 10, -10,
-    -10, 5, 0, 0, 0, 0, 0, 5, -10,
-    -10, 0, 0, 0, 0, 0, 0, 0, -10,
-    -20, -10, -10, -10, -10, -10, -10, -10, -20
+    -20, -10, -10, -10, -10, -10, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5, 10, 10,
+    10, 5, 0, -10, -10, 5, 5, 10, 10, 10, 5, 5, -10, -10, 0, 10, 10, 15, 10, 10, 0, -10, -10, 10,
+    10, 10, 10, 10, 10, 10, -10, -10, 5, 0, 0, 0, 0, 0, 5, -10, -10, 0, 0, 0, 0, 0, 0, 0, -10, -20,
+    -10, -10, -10, -10, -10, -10, -10, -20,
   ],
   // Rook: 7th/8th rank
   r: [
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    5, 10, 10, 10, 10, 10, 10, 10, 5,
-    -5, 0, 0, 0, 0, 0, 0, 0, -5,
-    -5, 0, 0, 0, 0, 0, 0, 0, -5,
-    -5, 0, 0, 0, 0, 0, 0, 0, -5,
-    -5, 0, 0, 0, 0, 0, 0, 0, -5,
-    -5, 0, 0, 0, 0, 0, 0, 0, -5,
-    0, 0, 0, 5, 5, 5, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 10, 10, 10, 10, 10, 10, 5, -5, 0, 0, 0, 0, 0, 0, 0, -5, -5, 0,
+    0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0,
+    0, 0, 0, -5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   ],
   // Queen: center
   q: [
-    -20, -10, -10, -5, -5, -5, -10, -10, -20,
-    -10, 0, 0, 0, 0, 0, 0, 0, -10,
-    -10, 0, 5, 5, 5, 5, 5, 0, -10,
-    -5, 0, 5, 5, 5, 5, 5, 0, -5,
-    0, 0, 5, 5, 5, 5, 5, 0, -5,
-    -5, 0, 5, 5, 5, 5, 5, 0, -5,
-    -10, 0, 5, 5, 5, 5, 5, 0, -10,
-    -10, 0, 0, 0, 0, 0, 0, 0, -10,
-    -20, -10, -10, -5, -5, -5, -10, -10, -20
+    -20, -10, -10, -5, -5, -5, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5, 5, 5, 5, 5,
+    0, -10, -5, 0, 5, 5, 5, 5, 5, 0, -5, 0, 0, 5, 5, 5, 5, 5, 0, -5, -5, 0, 5, 5, 5, 5, 5, 0, -5,
+    -10, 0, 5, 5, 5, 5, 5, 0, -10, -10, 0, 0, 0, 0, 0, 0, 0, -10, -20, -10, -10, -5, -5, -5, -10,
+    -10, -20,
   ],
   // King: safety
   k: [
-    -30, -40, -40, -50, -50, -50, -40, -40, -30,
-    -30, -40, -40, -50, -50, -50, -40, -40, -30,
-    -30, -40, -40, -50, -50, -50, -40, -40, -30,
-    -30, -40, -40, -50, -50, -50, -40, -40, -30,
-    -30, -40, -40, -50, -50, -50, -40, -40, -30,
-    -30, -40, -40, -50, -50, -50, -40, -40, -30,
-    -20, -30, -30, -40, -40, -40, -30, -30, -20,
-    20, 20, 0, 0, 0, 0, 0, 20, 20,
-    20, 30, 10, 0, 0, 0, 10, 30, 20
+    -30, -40, -40, -50, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -50, -40, -40, -30, -30,
+    -40, -40, -50, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -50, -40, -40, -30, -30, -40,
+    -40, -50, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -50, -40, -40, -30, -20, -30, -30,
+    -40, -40, -40, -30, -30, -20, 20, 20, 0, 0, 0, 0, 0, 20, 20, 20, 30, 10, 0, 0, 0, 10, 30, 20,
   ],
   // Archbishop (Bishop + Knight)
   a: [
-    -20, -15, -10, -10, -10, -10, -10, -15, -20,
-    -15, -5, 0, 0, 0, 0, 0, -5, -15,
-    -10, 0, 10, 15, 15, 15, 10, 0, -10,
-    -10, 5, 15, 20, 20, 20, 15, 5, -10,
-    -10, 0, 15, 20, 25, 20, 15, 0, -10,
-    -10, 5, 15, 20, 20, 20, 15, 5, -10,
-    -10, 0, 10, 15, 15, 15, 10, 0, -10,
-    -15, -5, 0, 5, 5, 5, 0, -5, -15,
-    -20, -15, -10, -10, -10, -10, -10, -15, -20
+    -20, -15, -10, -10, -10, -10, -10, -15, -20, -15, -5, 0, 0, 0, 0, 0, -5, -15, -10, 0, 10, 15,
+    15, 15, 10, 0, -10, -10, 5, 15, 20, 20, 20, 15, 5, -10, -10, 0, 15, 20, 25, 20, 15, 0, -10, -10,
+    5, 15, 20, 20, 20, 15, 5, -10, -10, 0, 10, 15, 15, 15, 10, 0, -10, -15, -5, 0, 5, 5, 5, 0, -5,
+    -15, -20, -15, -10, -10, -10, -10, -10, -15, -20,
   ],
   // Chancellor (Rook + Knight)
   c: [
-    -10, -5, 0, 5, 5, 5, 0, -5, -10,
-    -5, 5, 10, 10, 10, 10, 10, 5, -5,
-    0, 10, 15, 20, 20, 20, 15, 10, 0,
-    5, 10, 20, 25, 25, 25, 20, 10, 5,
-    5, 10, 20, 25, 30, 25, 20, 10, 5,
-    5, 10, 20, 25, 25, 25, 20, 10, 5,
-    0, 10, 15, 20, 20, 20, 15, 10, 0,
-    -5, 5, 10, 10, 10, 10, 10, 5, -5,
-    -10, -5, 0, 5, 5, 5, 0, -5, -10
+    -10, -5, 0, 5, 5, 5, 0, -5, -10, -5, 5, 10, 10, 10, 10, 10, 5, -5, 0, 10, 15, 20, 20, 20, 15,
+    10, 0, 5, 10, 20, 25, 25, 25, 20, 10, 5, 5, 10, 20, 25, 30, 25, 20, 10, 5, 5, 10, 20, 25, 25,
+    25, 20, 10, 5, 0, 10, 15, 20, 20, 20, 15, 10, 0, -5, 5, 10, 10, 10, 10, 10, 5, -5, -10, -5, 0,
+    5, 5, 5, 0, -5, -10,
   ],
   // Angel (Queen + Knight)
   e: [
-    -20, -15, -10, -10, -10, -10, -10, -15, -20,
-    -15, 0, 5, 10, 10, 10, 5, 0, -15,
-    -10, 5, 15, 20, 20, 20, 15, 5, -10,
-    -10, 10, 20, 30, 30, 30, 20, 10, -10,
-    -10, 10, 20, 30, 40, 30, 20, 10, -10,
-    -10, 10, 20, 30, 30, 30, 20, 10, -10,
-    -10, 5, 15, 20, 20, 20, 15, 5, -10,
-    -15, 0, 5, 10, 10, 10, 5, 0, -15,
-    -20, -15, -10, -10, -10, -10, -10, -15, -20
-  ]
+    -20, -15, -10, -10, -10, -10, -10, -15, -20, -15, 0, 5, 10, 10, 10, 5, 0, -15, -10, 5, 15, 20,
+    20, 20, 15, 5, -10, -10, 10, 20, 30, 30, 30, 20, 10, -10, -10, 10, 20, 30, 40, 30, 20, 10, -10,
+    -10, 10, 20, 30, 30, 30, 20, 10, -10, -10, 5, 15, 20, 20, 20, 15, 5, -10, -15, 0, 5, 10, 10, 10,
+    5, 0, -15, -20, -15, -10, -10, -10, -10, -10, -15, -20,
+  ],
 };
 
 // Endgame Piece-Square Tables (PST)
 const PST_EG = {
   k: [
-    -50, -40, -30, -20, -20, -20, -30, -40, -50,
-    -30, -20, -10, 0, 0, 0, -10, -20, -30,
-    -30, -10, 10, 20, 20, 20, 10, -10, -30,
-    -30, 0, 20, 30, 30, 30, 20, 0, -30,
-    -30, 0, 20, 30, 40, 30, 20, 0, -30,
-    -30, 0, 20, 30, 30, 30, 20, 0, -30,
-    -30, -10, 10, 20, 20, 20, 10, -10, -30,
-    -30, -20, -10, 0, 0, 0, -10, -20, -30,
-    -50, -40, -30, -20, -20, -20, -30, -40, -50
-  ]
+    -50, -40, -30, -20, -20, -20, -30, -40, -50, -30, -20, -10, 0, 0, 0, -10, -20, -30, -30, -10,
+    10, 20, 20, 20, 10, -10, -30, -30, 0, 20, 30, 30, 30, 20, 0, -30, -30, 0, 20, 30, 40, 30, 20, 0,
+    -30, -30, 0, 20, 30, 30, 30, 20, 0, -30, -30, -10, 10, 20, 20, 20, 10, -10, -30, -30, -20, -10,
+    0, 0, 0, -10, -20, -30, -50, -40, -30, -20, -20, -20, -30, -40, -50,
+  ],
 };
 
 // ========================================
@@ -256,7 +204,6 @@ function updateHistory(piece, move, depth) {
     historyTable[piece.type][move.from.r][move.from.c][move.to.r][move.to.c] = maxHistory;
   }
 }
-
 
 /**
  * Initialize Zobrist hashing table
@@ -500,7 +447,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
         // Evaluate all moves and pick one with lower score
         const scoredMoves = moves.map(move => ({
           move,
-          score: Math.random() - 0.5 // Random score to add variation
+          score: Math.random() - 0.5, // Random score to add variation
         }));
         // Sort by score ascending (worse moves first)
         scoredMoves.sort((a, b) => a.score - b.score);
@@ -558,7 +505,8 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
       }
 
       // Root Search Loop
-      while (true) { // eslint-disable-line no-constant-condition
+      while (true) {
+        // eslint-disable-line no-constant-condition
         let currentAlpha = alpha;
         let currentBestScore = -Infinity;
         let currentBestMove = moves[0];
@@ -569,13 +517,40 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
 
           if (i === 0) {
             // Full window search for first move (PV candidate)
-            score = minimax(board, move, currentSearchDepth - 1, false, currentAlpha, beta, color, rootHash);
+            score = minimax(
+              board,
+              move,
+              currentSearchDepth - 1,
+              false,
+              currentAlpha,
+              beta,
+              color,
+              rootHash
+            );
           } else {
             // Null window search for moves after PV candidate
-            score = minimax(board, move, currentSearchDepth - 1, false, currentAlpha, currentAlpha + 1, color, rootHash);
+            score = minimax(
+              board,
+              move,
+              currentSearchDepth - 1,
+              false,
+              currentAlpha,
+              currentAlpha + 1,
+              color,
+              rootHash
+            );
             if (score > currentAlpha && score < beta) {
               // Re-search with full window if it fails high
-              score = minimax(board, move, currentSearchDepth - 1, false, currentAlpha, beta, color, rootHash);
+              score = minimax(
+                board,
+                move,
+                currentSearchDepth - 1,
+                false,
+                currentAlpha,
+                beta,
+                color,
+                rootHash
+              );
             }
           }
 
@@ -675,7 +650,7 @@ const MAX_PLY = 64; // Max depth
 const undoStack = new Array(MAX_PLY).fill(null).map(() => ({
   capturedPiece: null,
   oldHasMoved: false,
-  move: null
+  move: null,
 }));
 
 /**
@@ -693,7 +668,7 @@ function makeMove(board, move) {
   const undoInfo = {
     capturedPiece,
     oldHasMoved: fromPiece ? fromPiece.hasMoved : false,
-    move
+    move,
   };
 
   board[move.to.r][move.to.c] = fromPiece;
@@ -807,7 +782,16 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
       const R = 2;
       // Search with reduced depth, passing null to skip move application
       // Passing null means we pass the turn to the other side (!isMaximizing)
-      const nullScore = minimax(board, null, depth - 1 - R, !isMaximizing, alpha, beta, aiColor, hash);
+      const nullScore = minimax(
+        board,
+        null,
+        depth - 1 - R,
+        !isMaximizing,
+        alpha,
+        beta,
+        aiColor,
+        hash
+      );
 
       if (isMaximizing) {
         if (nullScore >= beta) {
@@ -850,7 +834,16 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
           }
 
           // Search with zero window (Fail-soft)
-          moveScore = minimax(board, nextMove, depth - 1 - reduction, false, alpha, alpha + 1, aiColor, hash);
+          moveScore = minimax(
+            board,
+            nextMove,
+            depth - 1 - reduction,
+            false,
+            alpha,
+            alpha + 1,
+            aiColor,
+            hash
+          );
 
           // Re-search if reduced depth was too deep
           if (moveScore > alpha && reduction > 0) {
@@ -897,7 +890,16 @@ function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentH
           }
 
           // Zero-window search (Fail-soft)
-          moveScore = minimax(board, nextMove, depth - 1 - reduction, true, beta - 1, beta, aiColor, hash);
+          moveScore = minimax(
+            board,
+            nextMove,
+            depth - 1 - reduction,
+            true,
+            beta - 1,
+            beta,
+            aiColor,
+            hash
+          );
 
           if (moveScore < beta && reduction > 0) {
             moveScore = minimax(board, nextMove, depth - 1, true, beta - 1, beta, aiColor, hash);
@@ -1071,7 +1073,7 @@ export function evaluatePosition(board, forColor) {
 
       // Passed pawn bonus
       if (isPassedPawn(board, r, c, piece.color)) {
-        const progress = isWhite ? (BOARD_SIZE - 1 - r) : r;
+        const progress = isWhite ? BOARD_SIZE - 1 - r : r;
         const passedBonus = progress * progress * 5;
         mgScore += passedBonus * sideMult;
         egScore += passedBonus * 1.5 * sideMult;
@@ -1086,7 +1088,7 @@ export function evaluatePosition(board, forColor) {
   const mgWeight = phaseValue / maxPhase;
   const egWeight = 1 - mgWeight;
 
-  const totalScore = (mgScore * mgWeight) + (egScore * egWeight);
+  const totalScore = mgScore * mgWeight + egScore * egWeight;
   const perspectiveScore = forColor === 'white' ? totalScore : -totalScore;
 
   return Math.round(perspectiveScore);
@@ -1116,12 +1118,12 @@ function isPassedPawn(board, r, c, color) {
  * Get position bonus for piece placement using PSTs
  */
 function getPositionBonus(r, c, type, color, isEndgame = false) {
-  let table = (isEndgame && PST_EG[type]) ? PST_EG[type] : PST[type];
+  let table = isEndgame && PST_EG[type] ? PST_EG[type] : PST[type];
   if (!table) table = PST[type]; // Fallback to normal PST if no EG table
   if (!table) return 0;
 
   // Mirror row for black pieces
-  const perspectiveRow = color === 'white' ? r : (BOARD_SIZE - 1 - r);
+  const perspectiveRow = color === 'white' ? r : BOARD_SIZE - 1 - r;
   return table[perspectiveRow * BOARD_SIZE + c];
 }
 
@@ -1147,7 +1149,6 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
 
   return safety;
 }
-
 
 /**
  * Order moves for better alpha-beta pruning
@@ -1183,11 +1184,23 @@ function orderMoves(board, moves, ttBestMove, depth = 0) {
       if (killers) {
         // Optimized check for MAX_KILLER_MOVES = 2
         const k0 = killers[0];
-        if (k0 && move.from.r === k0.from.r && move.from.c === k0.from.c && move.to.r === k0.to.r && move.to.c === k0.to.c) {
+        if (
+          k0 &&
+          move.from.r === k0.from.r &&
+          move.from.c === k0.from.c &&
+          move.to.r === k0.to.r &&
+          move.to.c === k0.to.c
+        ) {
           score += 900;
         } else {
           const k1 = killers[1];
-          if (k1 && move.from.r === k1.from.r && move.from.c === k1.from.c && move.to.r === k1.to.r && move.to.c === k1.to.c) {
+          if (
+            k1 &&
+            move.from.r === k1.from.r &&
+            move.from.c === k1.from.c &&
+            move.to.r === k1.to.r &&
+            move.to.c === k1.to.c
+          ) {
             score += 800;
           }
         }
@@ -1195,7 +1208,8 @@ function orderMoves(board, moves, ttBestMove, depth = 0) {
 
       // 4. History heuristic
       if (historyTable[fromPiece.type]) {
-        const historyValue = historyTable[fromPiece.type][move.from.r][move.from.c][move.to.r][move.to.c];
+        const historyValue =
+          historyTable[fromPiece.type][move.from.r][move.from.c][move.to.r][move.to.c];
         if (historyValue > 0) {
           score += historyValue / 100;
         }
@@ -1284,16 +1298,37 @@ function findKing(board, color) {
  * Check if a square is attacked by a specific color
  */
 const KNIGHT_MOVES = [
-  [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-  [1, -2], [1, 2], [2, -1], [2, 1],
+  [-2, -1],
+  [-2, 1],
+  [-1, -2],
+  [-1, 2],
+  [1, -2],
+  [1, 2],
+  [2, -1],
+  [2, 1],
 ];
 
-const DIAGONAL_DIRS = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
-const ORTHOGONAL_DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+const DIAGONAL_DIRS = [
+  [-1, -1],
+  [-1, 1],
+  [1, -1],
+  [1, 1],
+];
+const ORTHOGONAL_DIRS = [
+  [-1, 0],
+  [1, 0],
+  [0, -1],
+  [0, 1],
+];
 const KING_DIRS = [
-  [-1, -1], [-1, 0], [-1, 1],
-  [0, -1], [0, 1],
-  [1, -1], [1, 0], [1, 1]
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
 ];
 
 const ATTACK_DIRECTIONS = [
@@ -1316,15 +1351,15 @@ const PIECE_SLIDING_DIRS = {
   q: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS],
   a: DIAGONAL_DIRS,
   c: ORTHOGONAL_DIRS,
-  e: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS]
+  e: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS],
 };
 
 const PIECE_STEPPING_DIRS = {
   n: KNIGHT_MOVES, // Knight
-  k: KING_DIRS,    // King
+  k: KING_DIRS, // King
   a: KNIGHT_MOVES, // Archbishop (N+B)
   c: KNIGHT_MOVES, // Chancellor (N+R)
-  e: KNIGHT_MOVES  // Angel (Q+N)
+  e: KNIGHT_MOVES, // Angel (Q+N)
 };
 
 /**
@@ -1389,7 +1424,8 @@ function isSquareAttacked(board, r, c, attackerColor) {
         while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
           const nextPiece = board[nr][nc];
           if (nextPiece) {
-            if (nextPiece.color === attackerColor && PIECE_ATTACKS_DIAGONALLY[nextPiece.type]) return true;
+            if (nextPiece.color === attackerColor && PIECE_ATTACKS_DIAGONALLY[nextPiece.type])
+              return true;
             break;
           }
           nr += dir[0];
@@ -1419,7 +1455,8 @@ function isSquareAttacked(board, r, c, attackerColor) {
         while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
           const nextPiece = board[nr][nc];
           if (nextPiece) {
-            if (nextPiece.color === attackerColor && PIECE_ATTACKS_ORTHOGONALLY[nextPiece.type]) return true;
+            if (nextPiece.color === attackerColor && PIECE_ATTACKS_ORTHOGONALLY[nextPiece.type])
+              return true;
             break;
           }
           nr += dir[0];
@@ -1466,7 +1503,8 @@ function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
     if (steppingDirs) {
       for (let i = 0; i < steppingDirs.length; i++) {
         const [dr, dc] = steppingDirs[i];
-        const nr = r + dr, nc = c + dc;
+        const nr = r + dr,
+          nc = c + dc;
         if (isInside(nr, nc)) {
           if (isEnemy(nr, nc)) {
             moves.push({ from: { r, c }, to: { r: nr, c: nc } });
@@ -1533,7 +1571,6 @@ function getAllCaptureMoves(board, color) {
   return moves;
 }
 
-
 /**
  * Count pseudo-legal moves for mobility bonus (optimized, no object creation)
  */
@@ -1548,7 +1585,8 @@ function countMobility(board, r, c, piece) {
   if (steppingDirs) {
     for (let i = 0; i < steppingDirs.length; i++) {
       const [dr, dc] = steppingDirs[i];
-      const nr = r + dr, nc = c + dc;
+      const nr = r + dr,
+        nc = c + dc;
       if (isInside(nr, nc) && (isEmpty(nr, nc) || isEnemy(nr, nc))) {
         count++;
       }

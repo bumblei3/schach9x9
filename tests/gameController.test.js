@@ -3,7 +3,8 @@ import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateStatus: jest.fn(),
   updateShopUI: jest.fn(),
   updateClockUI: jest.fn(),
@@ -26,7 +27,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
     playGameOver: jest.fn(),
     playSound: jest.fn(),
     playCheck: jest.fn(),
-  }
+  },
 }));
 
 jest.unstable_mockModule('../js/gameEngine.js', () => ({
@@ -35,7 +36,9 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
       this.initialPoints = initialPoints;
       this.mode = mode;
       this.isAI = isAI;
-      this.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      this.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       this.phase = PHASES.SETUP_WHITE_KING;
       this.turn = 'white';
       this.points = initialPoints;
@@ -54,7 +57,7 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
     }
   },
   PHASES,
-  BOARD_SIZE: 9
+  BOARD_SIZE: 9,
 }));
 
 // Import GameController
@@ -80,7 +83,7 @@ describe('GameController', () => {
           remove: jest.fn(),
           add: jest.fn(),
           contains: jest.fn(() => false),
-          toggle: jest.fn()
+          toggle: jest.fn(),
         },
         style: {},
         disabled: false,
@@ -89,35 +92,41 @@ describe('GameController', () => {
         scrollTop: 0,
         scrollHeight: 100,
         appendChild: jest.fn(),
-        dataset: {}
+        dataset: {},
       };
       let innerHTML = '';
       let textContent = '';
       Object.defineProperty(element, 'innerHTML', {
         get: () => innerHTML,
-        set: (val) => { innerHTML = val; },
-        configurable: true
+        set: val => {
+          innerHTML = val;
+        },
+        configurable: true,
       });
       Object.defineProperty(element, 'textContent', {
         get: () => textContent,
-        set: (val) => { textContent = val; },
-        configurable: true
+        set: val => {
+          textContent = val;
+        },
+        configurable: true,
       });
       return element;
     };
 
-    jest.spyOn(document, 'getElementById').mockImplementation((id) => createMockElement());
+    jest.spyOn(document, 'getElementById').mockImplementation(id => createMockElement());
     jest.spyOn(document, 'querySelector').mockImplementation(() => ({
-      classList: { add: jest.fn(), remove: jest.fn() }
+      classList: { add: jest.fn(), remove: jest.fn() },
     }));
-    jest.spyOn(document, 'querySelectorAll').mockImplementation(() => [
-      { classList: { remove: jest.fn() } },
-      { classList: { remove: jest.fn() } }
-    ]);
+    jest
+      .spyOn(document, 'querySelectorAll')
+      .mockImplementation(() => [
+        { classList: { remove: jest.fn() } },
+        { classList: { remove: jest.fn() } },
+      ]);
     jest.spyOn(document, 'createElement').mockImplementation(() => ({
       classList: { add: jest.fn() },
       dataset: {},
-      addEventListener: jest.fn()
+      addEventListener: jest.fn(),
     }));
 
     global.alert = jest.fn();
@@ -247,7 +256,7 @@ describe('GameController', () => {
   describe('Clock Management', () => {
     test('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
-      gameController.clockInterval = setInterval(() => { }, 100);
+      gameController.clockInterval = setInterval(() => {}, 100);
       gameController.tickClock();
       expect(gameController.clockInterval).toBeNull();
     });

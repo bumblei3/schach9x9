@@ -4,7 +4,8 @@ import { PHASES } from '../js/config.js';
 
 // Mock UI and SoundManager modules
 jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   showPromotionModal: jest.fn(),
   showPromotionUI: jest.fn(),
   animateMove: jest.fn().mockResolvedValue(),
@@ -33,7 +34,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 // Mock document functions used in MoveController
 global.document = {
-  getElementById: jest.fn((id) => ({
+  getElementById: jest.fn(id => ({
     classList: { remove: jest.fn(), add: jest.fn() },
     style: {},
     textContent: '',
@@ -411,7 +412,7 @@ describe('MoveController', () => {
     moveController.undoMove();
 
     // Should be back to initial state
-    expect(game.turn).toBe('white');  // Back to white's turn
+    expect(game.turn).toBe('white'); // Back to white's turn
     expect(game.moveHistory.length).toBe(0); // All moves undone
     // After all undos, the board should be cleared or back to original state
   });
@@ -522,7 +523,7 @@ describe('MoveController', () => {
         moveHistory: [],
         capturedPieces: { white: [], black: [] },
         isAI: false,
-        difficulty: 'medium'
+        difficulty: 'medium',
       };
 
       Storage.prototype.getItem.mockReturnValue(JSON.stringify(savedState));
@@ -530,12 +531,15 @@ describe('MoveController', () => {
       // Verify mock works in test scope
       console.log('Test Verify:', localStorage.getItem('schach9x9_save_autosave'));
       // Explicitly mock getElementById for this test to avoid leakage issues
-      document.getElementById = jest.fn((id) => {
+      document.getElementById = jest.fn(id => {
         if (id === 'ai-toggle') return { checked: false, addEventListener: jest.fn() };
         if (id === 'difficulty-select') return { value: 'medium', addEventListener: jest.fn() };
-        if (id === 'draw-offer-overlay') return { classList: { remove: jest.fn(), add: jest.fn() } };
-        if (id === 'move-history-panel') return { classList: { remove: jest.fn(), add: jest.fn() } };
-        if (id === 'captured-pieces-panel') return { classList: { remove: jest.fn(), add: jest.fn() } };
+        if (id === 'draw-offer-overlay')
+          return { classList: { remove: jest.fn(), add: jest.fn() } };
+        if (id === 'move-history-panel')
+          return { classList: { remove: jest.fn(), add: jest.fn() } };
+        if (id === 'captured-pieces-panel')
+          return { classList: { remove: jest.fn(), add: jest.fn() } };
         return {
           classList: { remove: jest.fn(), add: jest.fn() },
           style: {},
@@ -543,14 +547,14 @@ describe('MoveController', () => {
           value: '',
           checked: false,
           innerHTML: '',
-          addEventListener: jest.fn()
+          addEventListener: jest.fn(),
         };
       });
 
       // Mock UI updates that are called during load
       // UI.updateShopUI is already mocked globally
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       moveController.loadGame();
 
@@ -598,7 +602,7 @@ describe('MoveController', () => {
   describe('Replay Mode', () => {
     beforeEach(() => {
       // Mock replay-specific elements
-      document.getElementById = jest.fn((id) => {
+      document.getElementById = jest.fn(id => {
         if (id === 'replay-status' || id === 'replay-exit' || id === 'undo-btn') {
           return {
             classList: { remove: jest.fn(), add: jest.fn() },
@@ -677,7 +681,7 @@ describe('MoveController', () => {
   describe('Draw Detection', () => {
     beforeEach(() => {
       // Mock game-over overlay elements
-      document.getElementById = jest.fn((id) => {
+      document.getElementById = jest.fn(id => {
         if (id === 'game-over-overlay' || id === 'winner-text') {
           return {
             classList: { remove: jest.fn(), add: jest.fn() },
@@ -769,7 +773,7 @@ describe('MoveController', () => {
       game.moveHistory.push({
         from: { r: 6, c: 4 },
         to: { r: 5, c: 4 },
-        piece: { type: 'p', color: 'white', hasMoved: true }
+        piece: { type: 'p', color: 'white', hasMoved: true },
       });
 
       // Mock board state for the move
@@ -802,8 +806,8 @@ describe('MoveController', () => {
           type: 'castling',
           rookFrom: { r: 8, c: 8 },
           rookTo: { r: 8, c: 5 },
-          rookHadMoved: false
-        }
+          rookHadMoved: false,
+        },
       };
 
       // Setup board state AFTER castling
@@ -829,8 +833,8 @@ describe('MoveController', () => {
         specialMove: {
           type: 'enPassant',
           capturedPawn: { type: 'p', color: 'black', hasMoved: true },
-          capturedPawnPos: { r: 3, c: 4 }
-        }
+          capturedPawnPos: { r: 3, c: 4 },
+        },
       };
 
       // Setup board state AFTER en passant
@@ -854,8 +858,8 @@ describe('MoveController', () => {
         piece: { type: 'e', color: 'white', hasMoved: true }, // Promoted piece
         specialMove: {
           type: 'promotion',
-          promotedTo: 'e'
-        }
+          promotedTo: 'e',
+        },
       };
 
       // Setup board state AFTER promotion
@@ -1019,7 +1023,7 @@ describe('MoveController', () => {
       game.lastMove = {
         to: { r: 3, c: 3 },
         piece: { type: 'p', color: 'black' },
-        isDoublePawnPush: true // Correct property name
+        isDoublePawnPush: true, // Correct property name
       };
 
       const from = { r: 3, c: 4 };
@@ -1053,7 +1057,7 @@ describe('MoveController', () => {
         turn: 'black',
         moveHistory: [],
         capturedPieces: { white: [], black: [] },
-        phase: PHASES.PLAY
+        phase: PHASES.PLAY,
       });
       Storage.prototype.getItem.mockReturnValue(savedState);
 

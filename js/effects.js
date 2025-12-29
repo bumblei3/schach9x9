@@ -28,7 +28,7 @@ export class ParticleSystem {
       p.style.backgroundColor = color;
 
       if (type === 'CAPTURE') {
-        p.style.width = (Math.random() * 6 + 2) + 'px';
+        p.style.width = Math.random() * 6 + 2 + 'px';
         p.style.height = p.style.width;
         p.style.boxShadow = `0 0 6px ${color}`;
       } else {
@@ -40,7 +40,12 @@ export class ParticleSystem {
 
       this.particles.push({
         el: p,
-        x, y, vx, vy, life, maxLife: life
+        x,
+        y,
+        vx,
+        vy,
+        life,
+        maxLife: life,
       });
     }
 
@@ -57,7 +62,7 @@ export class ParticleSystem {
     }
 
     const now = Date.now();
-    // Use fixed time step or delta for smoother animation if needed, 
+    // Use fixed time step or delta for smoother animation if needed,
     // but simple per-frame update is fine for this.
 
     for (let i = this.particles.length - 1; i >= 0; i--) {

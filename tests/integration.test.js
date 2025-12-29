@@ -48,7 +48,7 @@ describe('Integration Tests', () => {
 
   beforeEach(() => {
     // Mock DOM elements
-    global.document.getElementById = jest.fn((id) => ({
+    global.document.getElementById = jest.fn(id => ({
       textContent: '',
       innerHTML: '',
       classList: { add: jest.fn(), remove: jest.fn() },
@@ -114,7 +114,7 @@ describe('Integration Tests', () => {
       expect(game.phase).toBe(PHASES.SETUP_BLACK_KING);
       expect(game.whiteCorridor).toBeDefined();
 
-      // Phase 2: Black King Placement  
+      // Phase 2: Black King Placement
       gameController.placeKing(1, 4, 'black');
       expect(game.phase).toBe(PHASES.SETUP_WHITE_PIECES);
       expect(game.blackCorridor).toBeDefined();
@@ -149,7 +149,7 @@ describe('Integration Tests', () => {
       game.moveController = moveController;
 
       // Classic mode should skip setup and go straight to PLAY
-      // Note: Game constructor sets phase to PLAY for classic, 
+      // Note: Game constructor sets phase to PLAY for classic,
       // but GameController constructor handles initialization logic
       expect(game.phase).toBe(PHASES.PLAY);
       expect(game.board[8][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
@@ -168,7 +168,7 @@ describe('Integration Tests', () => {
 
       // Make some moves
       const from = { r: 7, c: 4 }; // Pawn at 7,4
-      const to = { r: 6, c: 4 };   // Move to 6,4
+      const to = { r: 6, c: 4 }; // Move to 6,4
       await moveController.executeMove(from, to);
 
       // Save game
@@ -215,7 +215,7 @@ describe('Integration Tests', () => {
       game.moveController = moveController;
 
       const from = { r: 7, c: 4 }; // Pawn at 7,4
-      const to = { r: 6, c: 4 };   // Move to 6,4
+      const to = { r: 6, c: 4 }; // Move to 6,4
 
       // Execute move
       await moveController.executeMove(from, to);
@@ -246,7 +246,7 @@ describe('Integration Tests', () => {
       gameController.resign('white');
 
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      // Resignation doesn't set game.winner property directly in Game object usually, 
+      // Resignation doesn't set game.winner property directly in Game object usually,
       // but updates UI and logs. We check phase.
     });
 

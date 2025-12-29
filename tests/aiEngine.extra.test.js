@@ -3,7 +3,9 @@ import * as AIEngine from '../js/aiEngine.js';
 
 describe('AIEngine Extra Coverage', () => {
   test('getAllLegalMoves for special pieces (Knight jumps)', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     // Archbishop at center
     board[4][4] = { type: 'a', color: 'white' };
     // Place king so moves are legal
@@ -22,7 +24,9 @@ describe('AIEngine Extra Coverage', () => {
   });
 
   test('pawn double jump (hasMoved: false)', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[6][0] = { type: 'p', color: 'white', hasMoved: false };
     board[8][4] = { type: 'k', color: 'white' };
     const moves = AIEngine.getAllLegalMoves(board, 'white');
@@ -31,7 +35,9 @@ describe('AIEngine Extra Coverage', () => {
   });
 
   test('Angel (E) moves (Queen + Knight)', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[4][4] = { type: 'e', color: 'white' };
     board[8][4] = { type: 'k', color: 'white' };
     const moves = AIEngine.getAllLegalMoves(board, 'white');
@@ -45,7 +51,9 @@ describe('AIEngine Extra Coverage', () => {
   });
 
   test('evaluatePosition for various pieces', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[4][4] = { type: 'q', color: 'white' };
     board[0][0] = { type: 'r', color: 'black' };
     const score = AIEngine.evaluatePosition(board, 'white');

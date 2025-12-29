@@ -11,7 +11,7 @@ const mockScene = {
   fog: null,
   add: jest.fn(),
   remove: jest.fn(),
-  traverse: jest.fn((callback) => {
+  traverse: jest.fn(callback => {
     callback({ isMesh: true, geometry: { dispose: jest.fn() }, material: { dispose: jest.fn() } });
   }),
 };
@@ -136,7 +136,9 @@ describe('BattleChess3D - Basic Tests', () => {
     });
 
     test('should update board state from game', () => {
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       mockBoard[6][0] = { type: 'r', color: 'white' };
       mockBoard[6][8] = { type: 'r', color: 'white' };
       mockBoard[7][4] = { type: 'k', color: 'white' };

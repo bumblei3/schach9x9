@@ -1,4 +1,3 @@
-
 import { jest } from '@jest/globals';
 
 // Mock AudioContext
@@ -9,10 +8,18 @@ global.window.AudioContext = jest.fn().mockImplementation(() => ({
       value: 0,
       linearRampToValueAtTime: jest.fn(),
       setValueAtTime: jest.fn(),
-      exponentialRampToValueAtTime: jest.fn()
-    }
+      exponentialRampToValueAtTime: jest.fn(),
+    },
   }),
-  createOscillator: jest.fn().mockReturnValue({ connect: jest.fn(), start: jest.fn(), stop: jest.fn(), frequency: { setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn() }, type: 'sine' }),
+  createOscillator: jest
+    .fn()
+    .mockReturnValue({
+      connect: jest.fn(),
+      start: jest.fn(),
+      stop: jest.fn(),
+      frequency: { setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn() },
+      type: 'sine',
+    }),
   currentTime: 0,
   destination: {},
 }));
@@ -23,7 +30,8 @@ import { MoveController } from '../js/moveController.js';
 import * as UI from '../js/ui.js';
 
 jest.mock('../js/ui.js', () => ({
-  renderBoard: jest.fn(), showModal: jest.fn(),
+  renderBoard: jest.fn(),
+  showModal: jest.fn(),
   updateCapturedUI: jest.fn(),
   updateMoveHistoryUI: jest.fn(),
   updateStatus: jest.fn(),
@@ -43,7 +51,7 @@ jest.mock('../js/sounds.js', () => ({
     playCapture: jest.fn(),
     playCheck: jest.fn(),
     playGameOver: jest.fn(),
-  }
+  },
 }));
 
 describe('Angel Piece and Promotion', () => {
@@ -66,7 +74,9 @@ describe('Angel Piece and Promotion', () => {
     game.arrowRenderer = { clearArrows: jest.fn() }; // Mock arrow renderer
 
     // Setup board for testing
-    game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+    game.board = Array(BOARD_SIZE)
+      .fill(null)
+      .map(() => Array(BOARD_SIZE).fill(null));
   });
 
   test('Angel should move like a Queen', () => {
@@ -220,7 +230,9 @@ describe('Angel Piece and Promotion', () => {
   describe('Angel Check and Checkmate Scenarios', () => {
     test('Angel can deliver checkmate with King support', () => {
       // Setup: White Angel and King vs Black King in corner
-      game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+      game.board = Array(BOARD_SIZE)
+        .fill(null)
+        .map(() => Array(BOARD_SIZE).fill(null));
       game.board[0][0] = { type: 'k', color: 'black', hasMoved: true };
       game.board[1][2] = { type: 'e', color: 'white', hasMoved: true };
       game.board[2][1] = { type: 'k', color: 'white', hasMoved: true };
@@ -231,7 +243,9 @@ describe('Angel Piece and Promotion', () => {
 
     test('Angel cannot move if it would expose own King to check', () => {
       // Setup: White Angel blocking check from Black Queen
-      game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+      game.board = Array(BOARD_SIZE)
+        .fill(null)
+        .map(() => Array(BOARD_SIZE).fill(null));
       game.board[4][4] = { type: 'k', color: 'white', hasMoved: true };
       game.board[4][5] = { type: 'e', color: 'white', hasMoved: true };
       game.board[4][8] = { type: 'q', color: 'black', hasMoved: true };
@@ -246,7 +260,9 @@ describe('Angel Piece and Promotion', () => {
     });
 
     test('Angel can block check with Queen-like move', () => {
-      game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+      game.board = Array(BOARD_SIZE)
+        .fill(null)
+        .map(() => Array(BOARD_SIZE).fill(null));
       game.board[4][4] = { type: 'k', color: 'white', hasMoved: true };
       game.board[2][2] = { type: 'e', color: 'white', hasMoved: true };
       game.board[0][4] = { type: 'r', color: 'black', hasMoved: true };
@@ -260,7 +276,9 @@ describe('Angel Piece and Promotion', () => {
     });
 
     test('Angel can block check with Knight-like jump', () => {
-      game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+      game.board = Array(BOARD_SIZE)
+        .fill(null)
+        .map(() => Array(BOARD_SIZE).fill(null));
       // Setup: King at 0,0, Rook at 0,5 checking along rank 0
       game.board[0][0] = { type: 'k', color: 'white', hasMoved: true };
       game.board[0][5] = { type: 'r', color: 'black', hasMoved: true };
@@ -327,7 +345,9 @@ describe('Angel Piece and Promotion', () => {
     });
 
     test('Angel should have maximum moves in center of empty board', () => {
-      game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+      game.board = Array(BOARD_SIZE)
+        .fill(null)
+        .map(() => Array(BOARD_SIZE).fill(null));
       game.board[4][4] = { type: 'e', color: 'white', hasMoved: false };
       // Add kings to avoid game-over logic
       game.board[0][0] = { type: 'k', color: 'black', hasMoved: true };

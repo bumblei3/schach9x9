@@ -11,7 +11,7 @@ describe('Game Engine Edge Cases', () => {
   });
 
   describe('isCheckmate', () => {
-    test('should detect basic Fool\'s Mate (White)', () => {
+    test("should detect basic Fool's Mate (White)", () => {
       // Setup a position where White is checkmated
       // 9x9 board, soFool's mate is slightly different but same principle
       // Let's use a simpler one: King in corner, trapped by Rook and Queen
@@ -80,13 +80,19 @@ describe('Game Engine Edge Cases', () => {
       const moves = game.getValidMoves(4, 4, game.board[4][4]);
 
       // Check for some knight jumps
-      expect(moves).toEqual(expect.arrayContaining([
-        { r: 2, c: 3 }, { r: 6, c: 5 }
-      ]));
+      expect(moves).toEqual(
+        expect.arrayContaining([
+          { r: 2, c: 3 },
+          { r: 6, c: 5 },
+        ])
+      );
       // Check for some bishop slides
-      expect(moves).toEqual(expect.arrayContaining([
-        { r: 5, c: 5 }, { r: 3, c: 3 }
-      ]));
+      expect(moves).toEqual(
+        expect.arrayContaining([
+          { r: 5, c: 5 },
+          { r: 3, c: 3 },
+        ])
+      );
     });
 
     test('Chancellor should have jumping and sliding moves', () => {
@@ -94,13 +100,19 @@ describe('Game Engine Edge Cases', () => {
       const moves = game.getValidMoves(4, 4, game.board[4][4]);
 
       // Check for some knight jumps
-      expect(moves).toEqual(expect.arrayContaining([
-        { r: 2, c: 3 }, { r: 6, c: 5 }
-      ]));
+      expect(moves).toEqual(
+        expect.arrayContaining([
+          { r: 2, c: 3 },
+          { r: 6, c: 5 },
+        ])
+      );
       // Check for some rook slides
-      expect(moves).toEqual(expect.arrayContaining([
-        { r: 4, c: 5 }, { r: 5, c: 4 }
-      ]));
+      expect(moves).toEqual(
+        expect.arrayContaining([
+          { r: 4, c: 5 },
+          { r: 5, c: 4 },
+        ])
+      );
     });
   });
 });

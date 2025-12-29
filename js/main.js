@@ -15,7 +15,8 @@ import { BattleChess3D } from './battleChess3D.js';
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js')
+    navigator.serviceWorker
+      .register('./service-worker.js')
       .then(registration => {
         logger.info('ServiceWorker registration successful with scope: ', registration.scope);
       })
@@ -54,92 +55,240 @@ async function initGame(initialPoints, mode = 'setup') {
     // --- Delegate Game.prototype methods to controllers ---
 
     // GameController delegations
-    Game.prototype.placeKing = function (r, c, color) { return this.gameController.placeKing(r, c, color); };
-    Game.prototype.selectShopPiece = function (type) { return this.gameController.selectShopPiece(type); };
-    Game.prototype.placeShopPiece = function (r, c) { return this.gameController.placeShopPiece(r, c); };
-    Game.prototype.finishSetupPhase = function () { return this.gameController.finishSetupPhase(); };
-    Game.prototype.setTimeControl = function (mode) { return this.gameController.setTimeControl(mode); };
-    Game.prototype.updateClockVisibility = function () { return this.gameController.updateClockVisibility(); };
-    Game.prototype.startClock = function () { return this.gameController.startClock(); };
-    Game.prototype.stopClock = function () { return this.gameController.stopClock(); };
-    Game.prototype.tickClock = function () { return this.gameController.tickClock(); };
-    Game.prototype.updateClockDisplay = function () { return this.gameController.updateClockDisplay(); };
-    Game.prototype.updateClockUI = function () { return this.gameController.updateClockUI(); };
-    Game.prototype.showShop = function (show) { return this.gameController.showShop(show); };
-    Game.prototype.updateShopUI = function () { return this.gameController.updateShopUI(); };
-    Game.prototype.handleCellClick = function (r, c) { return this.gameController.handleCellClick(r, c); };
-    Game.prototype.resign = function (color) { return this.gameController.resign(color); };
-    Game.prototype.offerDraw = function (color) { return this.gameController.offerDraw(color); };
-    Game.prototype.acceptDraw = function () { return this.gameController.acceptDraw(); };
-    Game.prototype.declineDraw = function () { return this.gameController.declineDraw(); };
-    Game.prototype.showDrawOfferDialog = function () { return this.gameController.showDrawOfferDialog(); };
+    Game.prototype.placeKing = function (r, c, color) {
+      return this.gameController.placeKing(r, c, color);
+    };
+    Game.prototype.selectShopPiece = function (type) {
+      return this.gameController.selectShopPiece(type);
+    };
+    Game.prototype.placeShopPiece = function (r, c) {
+      return this.gameController.placeShopPiece(r, c);
+    };
+    Game.prototype.finishSetupPhase = function () {
+      return this.gameController.finishSetupPhase();
+    };
+    Game.prototype.setTimeControl = function (mode) {
+      return this.gameController.setTimeControl(mode);
+    };
+    Game.prototype.updateClockVisibility = function () {
+      return this.gameController.updateClockVisibility();
+    };
+    Game.prototype.startClock = function () {
+      return this.gameController.startClock();
+    };
+    Game.prototype.stopClock = function () {
+      return this.gameController.stopClock();
+    };
+    Game.prototype.tickClock = function () {
+      return this.gameController.tickClock();
+    };
+    Game.prototype.updateClockDisplay = function () {
+      return this.gameController.updateClockDisplay();
+    };
+    Game.prototype.updateClockUI = function () {
+      return this.gameController.updateClockUI();
+    };
+    Game.prototype.showShop = function (show) {
+      return this.gameController.showShop(show);
+    };
+    Game.prototype.updateShopUI = function () {
+      return this.gameController.updateShopUI();
+    };
+    Game.prototype.handleCellClick = function (r, c) {
+      return this.gameController.handleCellClick(r, c);
+    };
+    Game.prototype.resign = function (color) {
+      return this.gameController.resign(color);
+    };
+    Game.prototype.offerDraw = function (color) {
+      return this.gameController.offerDraw(color);
+    };
+    Game.prototype.acceptDraw = function () {
+      return this.gameController.acceptDraw();
+    };
+    Game.prototype.declineDraw = function () {
+      return this.gameController.declineDraw();
+    };
+    Game.prototype.showDrawOfferDialog = function () {
+      return this.gameController.showDrawOfferDialog();
+    };
 
     // MoveController delegations
-    Game.prototype.handlePlayClick = function (r, c) { return this.moveController.handlePlayClick(r, c); };
-    Game.prototype.executeMove = function (from, to) { return this.moveController.executeMove(from, to); };
-    Game.prototype.showPromotionUI = function (r, c, color, record) { return this.moveController.showPromotionUI(r, c, color, record); };
-    Game.prototype.animateMove = function (from, to, piece) { return this.moveController.animateMove(from, to, piece); };
-    Game.prototype.finishMove = function () { return this.moveController.finishMove(); };
-    Game.prototype.undoMove = function () { return this.moveController.undoMove(); };
-    Game.prototype.redoMove = function () { return this.moveController.redoMove(); };
-    Game.prototype.checkDraw = function () { return this.moveController.checkDraw(); };
-    Game.prototype.isInsufficientMaterial = function () { return this.moveController.isInsufficientMaterial(); };
-    Game.prototype.getBoardHash = function () { return this.moveController.getBoardHash(); };
-    Game.prototype.saveGame = function () { return this.gameController.saveGame(); };
-    Game.prototype.loadGame = function () { return this.gameController.loadGame(); };
+    Game.prototype.handlePlayClick = function (r, c) {
+      return this.moveController.handlePlayClick(r, c);
+    };
+    Game.prototype.executeMove = function (from, to) {
+      return this.moveController.executeMove(from, to);
+    };
+    Game.prototype.showPromotionUI = function (r, c, color, record) {
+      return this.moveController.showPromotionUI(r, c, color, record);
+    };
+    Game.prototype.animateMove = function (from, to, piece) {
+      return this.moveController.animateMove(from, to, piece);
+    };
+    Game.prototype.finishMove = function () {
+      return this.moveController.finishMove();
+    };
+    Game.prototype.undoMove = function () {
+      return this.moveController.undoMove();
+    };
+    Game.prototype.redoMove = function () {
+      return this.moveController.redoMove();
+    };
+    Game.prototype.checkDraw = function () {
+      return this.moveController.checkDraw();
+    };
+    Game.prototype.isInsufficientMaterial = function () {
+      return this.moveController.isInsufficientMaterial();
+    };
+    Game.prototype.getBoardHash = function () {
+      return this.moveController.getBoardHash();
+    };
+    Game.prototype.saveGame = function () {
+      return this.gameController.saveGame();
+    };
+    Game.prototype.loadGame = function () {
+      return this.gameController.loadGame();
+    };
     Game.prototype.autoSave = function (show) {
       if (this.moveController.autoSave) return this.moveController.autoSave(show);
     };
 
-    Game.prototype.updateMoveHistoryUI = function () { UI.updateMoveHistoryUI(this); };
-    Game.prototype.updateUndoRedoButtons = function () { return this.moveController.updateUndoRedoButtons(); };
-    Game.prototype.updateCapturedUI = function () { UI.updateCapturedUI(this); };
-    Game.prototype.animateCheck = function (color) { UI.animateCheck(this, color); };
-    Game.prototype.animateCheckmate = function (color) { UI.animateCheckmate(this, color); };
-    Game.prototype.calculateMaterialAdvantage = function () { return this.moveController.calculateMaterialAdvantage(); };
-    Game.prototype.getMaterialValue = function (piece) { return this.moveController.getMaterialValue(piece); };
-    Game.prototype.updateStatistics = function () { UI.updateStatistics(this); };
+    Game.prototype.updateMoveHistoryUI = function () {
+      UI.updateMoveHistoryUI(this);
+    };
+    Game.prototype.updateUndoRedoButtons = function () {
+      return this.moveController.updateUndoRedoButtons();
+    };
+    Game.prototype.updateCapturedUI = function () {
+      UI.updateCapturedUI(this);
+    };
+    Game.prototype.animateCheck = function (color) {
+      UI.animateCheck(this, color);
+    };
+    Game.prototype.animateCheckmate = function (color) {
+      UI.animateCheckmate(this, color);
+    };
+    Game.prototype.calculateMaterialAdvantage = function () {
+      return this.moveController.calculateMaterialAdvantage();
+    };
+    Game.prototype.getMaterialValue = function (piece) {
+      return this.moveController.getMaterialValue(piece);
+    };
+    Game.prototype.updateStatistics = function () {
+      UI.updateStatistics(this);
+    };
 
     // Replay methods
-    Game.prototype.enterReplayMode = function () { return this.moveController.enterReplayMode(); };
-    Game.prototype.exitReplayMode = function () { return this.moveController.exitReplayMode(); };
-    Game.prototype.replayFirst = function () { return this.moveController.replayFirst(); };
-    Game.prototype.replayPrevious = function () { return this.moveController.replayPrevious(); };
-    Game.prototype.replayNext = function () { return this.moveController.replayNext(); };
-    Game.prototype.replayLast = function () { return this.moveController.replayLast(); };
-    Game.prototype.updateReplayUI = function () { return this.moveController.updateReplayUI(); };
-    Game.prototype.reconstructBoardAtMove = function (idx) { return this.moveController.reconstructBoardAtMove(idx); };
-    Game.prototype.undoMoveForReplay = function (move) { return this.moveController.undoMoveForReplay(move); };
-    Game.prototype.setTheme = function (theme) { return this.moveController.setTheme(theme); };
-    Game.prototype.applyTheme = function (theme) { return this.moveController.applyTheme(theme); };
+    Game.prototype.enterReplayMode = function () {
+      return this.moveController.enterReplayMode();
+    };
+    Game.prototype.exitReplayMode = function () {
+      return this.moveController.exitReplayMode();
+    };
+    Game.prototype.replayFirst = function () {
+      return this.moveController.replayFirst();
+    };
+    Game.prototype.replayPrevious = function () {
+      return this.moveController.replayPrevious();
+    };
+    Game.prototype.replayNext = function () {
+      return this.moveController.replayNext();
+    };
+    Game.prototype.replayLast = function () {
+      return this.moveController.replayLast();
+    };
+    Game.prototype.updateReplayUI = function () {
+      return this.moveController.updateReplayUI();
+    };
+    Game.prototype.reconstructBoardAtMove = function (idx) {
+      return this.moveController.reconstructBoardAtMove(idx);
+    };
+    Game.prototype.undoMoveForReplay = function (move) {
+      return this.moveController.undoMoveForReplay(move);
+    };
+    Game.prototype.setTheme = function (theme) {
+      return this.moveController.setTheme(theme);
+    };
+    Game.prototype.applyTheme = function (theme) {
+      return this.moveController.applyTheme(theme);
+    };
 
     // AI delegations
-    Game.prototype.aiSetupKing = function () { return this.aiController.aiSetupKing(); };
-    Game.prototype.aiSetupPieces = function () { return this.aiController.aiSetupPieces(); };
-    Game.prototype.aiMove = function () { return this.aiController.aiMove(); };
-    Game.prototype.evaluateMove = function (move) { return this.aiController.evaluateMove(move); };
-    Game.prototype.getBestMoveMinimax = function (moves, depth) { return this.aiController.getBestMoveMinimax(moves, depth); };
-    Game.prototype.minimax = function (move, depth, isMax, alpha, beta) { return this.aiController.minimax(move, depth, isMax, alpha, beta); };
-    Game.prototype.quiescenceSearch = function (alpha, beta, isMax) { return this.aiController.quiescenceSearch(alpha, beta, isMax); };
-    Game.prototype.evaluatePosition = function (color) { return this.aiController.evaluatePosition(color); };
-    Game.prototype.updateAIProgress = function (data) { return this.aiController.updateAIProgress(data); };
-    Game.prototype.aiEvaluateDrawOffer = function () { return this.aiController.aiEvaluateDrawOffer(); };
-    Game.prototype.aiShouldOfferDraw = function () { return this.aiController.aiShouldOfferDraw(); };
-    Game.prototype.aiShouldResign = function () { return this.aiController.aiShouldResign(); };
+    Game.prototype.aiSetupKing = function () {
+      return this.aiController.aiSetupKing();
+    };
+    Game.prototype.aiSetupPieces = function () {
+      return this.aiController.aiSetupPieces();
+    };
+    Game.prototype.aiMove = function () {
+      return this.aiController.aiMove();
+    };
+    Game.prototype.evaluateMove = function (move) {
+      return this.aiController.evaluateMove(move);
+    };
+    Game.prototype.getBestMoveMinimax = function (moves, depth) {
+      return this.aiController.getBestMoveMinimax(moves, depth);
+    };
+    Game.prototype.minimax = function (move, depth, isMax, alpha, beta) {
+      return this.aiController.minimax(move, depth, isMax, alpha, beta);
+    };
+    Game.prototype.quiescenceSearch = function (alpha, beta, isMax) {
+      return this.aiController.quiescenceSearch(alpha, beta, isMax);
+    };
+    Game.prototype.evaluatePosition = function (color) {
+      return this.aiController.evaluatePosition(color);
+    };
+    Game.prototype.updateAIProgress = function (data) {
+      return this.aiController.updateAIProgress(data);
+    };
+    Game.prototype.aiEvaluateDrawOffer = function () {
+      return this.aiController.aiEvaluateDrawOffer();
+    };
+    Game.prototype.aiShouldOfferDraw = function () {
+      return this.aiController.aiShouldOfferDraw();
+    };
+    Game.prototype.aiShouldResign = function () {
+      return this.aiController.aiShouldResign();
+    };
 
     // Tutor delegations
-    Game.prototype.updateBestMoves = function () { return this.tutorController.updateBestMoves(); };
-    Game.prototype.isTutorMove = function (from, to) { return this.tutorController.isTutorMove(from, to); };
-    Game.prototype.getTutorHints = function () { return this.tutorController.getTutorHints(); };
-    Game.prototype.getMoveNotation = function (move) { return this.tutorController.getMoveNotation(move); };
-    Game.prototype.showTutorSuggestions = function () { return this.tutorController.showTutorSuggestions(); };
-    Game.prototype.getPieceName = function (type) { return this.tutorController.getPieceName(type); };
-    Game.prototype.getThreatenedPieces = function (pos, color) { return this.tutorController.getThreatenedPieces(pos, color); };
-    Game.prototype.detectTacticalPatterns = function (move) { return this.tutorController.detectTacticalPatterns(move); };
-    Game.prototype.getDefendedPieces = function (pos, color) { return this.tutorController.getDefendedPieces(pos, color); };
-    Game.prototype.analyzeStrategicValue = function (move) { return this.tutorController.analyzeStrategicValue(move); };
-    Game.prototype.getScoreDescription = function (score) { return this.tutorController.getScoreDescription(score); };
-    Game.prototype.analyzeMoveWithExplanation = function (move, score, best) { return this.tutorController.analyzeMoveWithExplanation(move, score, best); };
+    Game.prototype.updateBestMoves = function () {
+      return this.tutorController.updateBestMoves();
+    };
+    Game.prototype.isTutorMove = function (from, to) {
+      return this.tutorController.isTutorMove(from, to);
+    };
+    Game.prototype.getTutorHints = function () {
+      return this.tutorController.getTutorHints();
+    };
+    Game.prototype.getMoveNotation = function (move) {
+      return this.tutorController.getMoveNotation(move);
+    };
+    Game.prototype.showTutorSuggestions = function () {
+      return this.tutorController.showTutorSuggestions();
+    };
+    Game.prototype.getPieceName = function (type) {
+      return this.tutorController.getPieceName(type);
+    };
+    Game.prototype.getThreatenedPieces = function (pos, color) {
+      return this.tutorController.getThreatenedPieces(pos, color);
+    };
+    Game.prototype.detectTacticalPatterns = function (move) {
+      return this.tutorController.detectTacticalPatterns(move);
+    };
+    Game.prototype.getDefendedPieces = function (pos, color) {
+      return this.tutorController.getDefendedPieces(pos, color);
+    };
+    Game.prototype.analyzeStrategicValue = function (move) {
+      return this.tutorController.analyzeStrategicValue(move);
+    };
+    Game.prototype.getScoreDescription = function (score) {
+      return this.tutorController.getScoreDescription(score);
+    };
+    Game.prototype.analyzeMoveWithExplanation = function (move, score, best) {
+      return this.tutorController.analyzeMoveWithExplanation(move, score, best);
+    };
 
     // Initialize GameController logic
     game.gameController.initGame(initialPoints, mode);
@@ -151,7 +300,7 @@ async function initGame(initialPoints, mode = 'setup') {
       window.battleChess3D = battleChess3D;
 
       // Listen for 3D board clicks
-      container3D.addEventListener('board3dclick', (event) => {
+      container3D.addEventListener('board3dclick', event => {
         const { row, col } = event.detail;
         if (game && game.phase === PHASES.PLAY) {
           game.handleCellClick(row, col);
@@ -163,7 +312,6 @@ async function initGame(initialPoints, mode = 'setup') {
     if (storageManager.hasSave()) {
       checkSavedGame();
     }
-
   } catch (error) {
     console.error('Error initializing game:', error);
     alert('Fehler beim Starten des Spiels. Bitte Konsole prüfen.');
@@ -276,7 +424,7 @@ function setupGlobalListeners() {
 
   // Close menu when clicking outside content
   if (menuOverlay) {
-    menuOverlay.addEventListener('click', (e) => {
+    menuOverlay.addEventListener('click', e => {
       if (e.target === menuOverlay) toggleMenu(false);
     });
   }
@@ -441,14 +589,14 @@ function setupGlobalListeners() {
     // Tutor Mode Selector
     const tutorModeSelect = document.getElementById('tutor-mode-select');
     if (tutorModeSelect) {
-      tutorModeSelect.addEventListener('change', (e) => {
+      tutorModeSelect.addEventListener('change', e => {
         window.game.tutorMode = e.target.value;
         window.game.log(`Tutor-Modus auf "${e.target.value}" geändert.`);
       });
     }
 
     // Handle skin changes
-    skinSelector.addEventListener('change', (e) => {
+    skinSelector.addEventListener('change', e => {
       const newSkin = e.target.value;
 
       // Save to localStorage with consistent key
@@ -483,7 +631,6 @@ function setupGlobalListeners() {
       soundManager.playMove();
     });
   }
-
 
   // --- Menu Actions ---
   document.getElementById('puzzle-mode-btn').addEventListener('click', () => {
@@ -548,7 +695,6 @@ function setupGlobalListeners() {
     if (window.game) UI.showStatisticsOverlay(window.game);
   });
 
-
   document.getElementById('help-btn').addEventListener('click', () => {
     toggleMenu(false);
     document.getElementById('help-overlay').classList.remove('hidden');
@@ -573,7 +719,6 @@ function setupGlobalListeners() {
       }
     });
   }
-
 
   // Difficulty
   const difficultySelect = document.getElementById('difficulty-select');
@@ -683,40 +828,56 @@ function setupGlobalListeners() {
     if (e.ctrlKey || e.metaKey) {
       if (!window.game) return;
       switch (e.key.toLowerCase()) {
-      case 's': e.preventDefault(); window.game.saveGame(); break;
-      case 'l': e.preventDefault(); window.game.loadGame(); break;
-      case 'z':
-        e.preventDefault();
-        if (e.shiftKey) {
-          if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) window.game.redoMove();
-        } else {
-          if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove();
-        }
-        break;
-      case 'y':
-        e.preventDefault();
-        if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) window.game.redoMove();
-        break;
+        case 's':
+          e.preventDefault();
+          window.game.saveGame();
+          break;
+        case 'l':
+          e.preventDefault();
+          window.game.loadGame();
+          break;
+        case 'z':
+          e.preventDefault();
+          if (e.shiftKey) {
+            if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY)
+              window.game.redoMove();
+          } else {
+            if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY)
+              window.game.undoMove();
+          }
+          break;
+        case 'y':
+          e.preventDefault();
+          if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY)
+            window.game.redoMove();
+          break;
       }
     }
 
     if (window.game && !window.game.replayMode) {
       switch (e.key.toLowerCase()) {
-      case 'h': if (window.game.phase === PHASES.PLAY) window.game.showTutorSuggestions(); break;
-      case 'u': if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove(); break;
-      case '3': document.getElementById('toggle-3d-btn')?.click(); break; // Toggle 3D mode
-      case 'escape':
-      case 'esc':
-        if (window.game.selectedSquare) {
-          window.game.selectedSquare = null;
-          window.game.validMoves = null;
-          UI.renderBoard(window.game);
-        }
-        // Close overlays
-        document.querySelectorAll('.fullscreen-overlay, .modal-overlay').forEach(el => {
-          if (!el.id.includes('points-selection')) el.classList.add('hidden');
-        });
-        break;
+        case 'h':
+          if (window.game.phase === PHASES.PLAY) window.game.showTutorSuggestions();
+          break;
+        case 'u':
+          if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY)
+            window.game.undoMove();
+          break;
+        case '3':
+          document.getElementById('toggle-3d-btn')?.click();
+          break; // Toggle 3D mode
+        case 'escape':
+        case 'esc':
+          if (window.game.selectedSquare) {
+            window.game.selectedSquare = null;
+            window.game.validMoves = null;
+            UI.renderBoard(window.game);
+          }
+          // Close overlays
+          document.querySelectorAll('.fullscreen-overlay, .modal-overlay').forEach(el => {
+            if (!el.id.includes('points-selection')) el.classList.add('hidden');
+          });
+          break;
       }
     }
 

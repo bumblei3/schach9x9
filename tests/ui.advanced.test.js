@@ -4,13 +4,13 @@ import { PHASES, BOARD_SIZE } from '../js/config.js';
 // Mock dependencies
 jest.unstable_mockModule('../js/utils.js', () => ({
   debounce: jest.fn(fn => fn),
-  formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`)
+  formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
 }));
 
 jest.unstable_mockModule('../js/effects.js', () => ({
   particleSystem: {
-    spawn: jest.fn()
-  }
+    spawn: jest.fn(),
+  },
 }));
 
 // Import UI module
@@ -22,7 +22,9 @@ describe('UI Module - Advanced Features', () => {
   beforeEach(() => {
     // Mock Game state
     game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       phase: PHASES.PLAY,
       turn: 'white',
       capturedPieces: { white: [], black: [] },
@@ -31,24 +33,24 @@ describe('UI Module - Advanced Features', () => {
         totalMoves: 10,
         playerMoves: 5,
         playerBestMoves: 3,
-        captures: 2
+        captures: 2,
       },
       replayMode: false,
       replayPosition: -1,
       savedGameState: null,
       arrowRenderer: {
         clearArrows: jest.fn(),
-        highlightMove: jest.fn()
+        highlightMove: jest.fn(),
       },
       tutorController: {
         getTutorHints: jest.fn(() => []),
         getSetupTemplates: jest.fn(() => []),
-        applySetupTemplate: jest.fn()
+        applySetupTemplate: jest.fn(),
       },
       executeMove: jest.fn(),
       calculateMaterialAdvantage: jest.fn(() => 5),
       startClock: jest.fn(),
-      stopClock: jest.fn()
+      stopClock: jest.fn(),
     };
 
     document.body.innerHTML = `
@@ -114,13 +116,17 @@ describe('UI Module - Advanced Features', () => {
     test('exitReplayMode should restore state and update UI', () => {
       game.replayMode = true;
       game.savedGameState = {
-        board: Array(9).fill(null).map(() => Array(9).fill(null)),
+        board: Array(9)
+          .fill(null)
+          .map(() => Array(9).fill(null)),
         turn: 'white',
         selectedSquare: null,
         validMoves: null,
-        lastMoveHighlight: null
+        lastMoveHighlight: null,
       };
-      game._previousBoardState = Array(9).fill(null).map(() => Array(9).fill(null));
+      game._previousBoardState = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
 
       UI.exitReplayMode(game);
 
@@ -152,7 +158,7 @@ describe('UI Module - Advanced Features', () => {
     test('should show setup templates in setup phase', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.tutorController.getSetupTemplates.mockReturnValue([
-        { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] }
+        { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
       ]);
 
       UI.showTutorSuggestions(game);
@@ -166,7 +172,7 @@ describe('UI Module - Advanced Features', () => {
       window.confirm = jest.fn(() => true);
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.tutorController.getSetupTemplates.mockReturnValue([
-        { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] }
+        { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
       ]);
 
       UI.showTutorSuggestions(game);
@@ -189,9 +195,9 @@ describe('UI Module - Advanced Features', () => {
             qualityLabel: 'Bester Zug',
             tacticalExplanations: ['Gewinnt Zentrum'],
             strategicExplanations: ['Entwickelt Springer'],
-            warnings: ['Vorsicht vor f7']
-          }
-        }
+            warnings: ['Vorsicht vor f7'],
+          },
+        },
       ]);
     });
 

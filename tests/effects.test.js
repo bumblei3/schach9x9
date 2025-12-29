@@ -16,7 +16,7 @@ global.document = {
   getElementById: jest.fn().mockReturnValue({
     appendChild: jest.fn(),
   }),
-  createElement: jest.fn((tag) => createMockElement()),
+  createElement: jest.fn(tag => createMockElement()),
   body: {
     appendChild: jest.fn(),
     removeChild: jest.fn(),
@@ -25,7 +25,7 @@ global.document = {
 };
 
 // Mock requestAnimationFrame
-global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 16));
+global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 16));
 
 describe('ParticleSystem', () => {
   let ParticleSystem;
@@ -101,7 +101,7 @@ describe('ParticleSystem', () => {
 
     test('should append particles to container', () => {
       const mockContainer = {
-        appendChild: jest.fn()
+        appendChild: jest.fn(),
       };
       const newParticleSystem = new ParticleSystem();
       newParticleSystem.container = mockContainer;
@@ -121,7 +121,7 @@ describe('ParticleSystem', () => {
       expect(initialCount).toBeGreaterThan(0);
 
       // Simulate particle expiry by setting life to 0
-      newParticleSystem.particles.forEach(p => p.life = 0);
+      newParticleSystem.particles.forEach(p => (p.life = 0));
 
       // Particles with life <= 0 should be removed in next update
       expect(newParticleSystem.particles.some(p => p.life <= 0)).toBe(true);
@@ -203,7 +203,7 @@ describe('ParticleSystem', () => {
       newParticleSystem.spawn(100, 100, 'MOVE');
 
       // Set a reasonable life value
-      newParticleSystem.particles.forEach(p => p.life = 0.5);
+      newParticleSystem.particles.forEach(p => (p.life = 0.5));
 
       const beforeCallCount = requestAnimationFrame.mock.calls.length;
       newParticleSystem.update();

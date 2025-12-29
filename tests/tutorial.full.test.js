@@ -3,12 +3,12 @@ import { jest } from '@jest/globals';
 // Mock PIECE_SVGS
 global.window.PIECE_SVGS = {
   white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
-  black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' }
+  black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
 };
 
 // Mock dependencies
 jest.unstable_mockModule('../js/chess-pieces.js', () => ({
-  PIECE_SVGS: global.window.PIECE_SVGS
+  PIECE_SVGS: global.window.PIECE_SVGS,
 }));
 
 const { Tutorial } = await import('../js/tutorial.js');

@@ -9,8 +9,8 @@ import { deepCopy } from './utils.js';
 
 export class PuzzleGenerator {
   /**
-     * Converts a 9x9 board to a string representation (81 chars + turn)
-     */
+   * Converts a 9x9 board to a string representation (81 chars + turn)
+   */
   static boardToString(board, turn) {
     let str = '';
     for (let r = 0; r < BOARD_SIZE; r++) {
@@ -24,10 +24,12 @@ export class PuzzleGenerator {
   }
 
   /**
-     * Converts the string representation back to a 9x9 board
-     */
+   * Converts the string representation back to a 9x9 board
+   */
   static stringToBoard(str) {
-    const board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+    const board = Array(BOARD_SIZE)
+      .fill(null)
+      .map(() => Array(BOARD_SIZE).fill(null));
     for (let i = 0; i < 81; i++) {
       const r = Math.floor(i / BOARD_SIZE);
       const c = i % BOARD_SIZE;
@@ -36,7 +38,7 @@ export class PuzzleGenerator {
         board[r][c] = {
           color: pieceStr[0] === 'w' ? 'white' : 'black',
           type: pieceStr[1],
-          hasMoved: true // Assumption for puzzles
+          hasMoved: true, // Assumption for puzzles
         };
       }
     }
@@ -45,12 +47,12 @@ export class PuzzleGenerator {
   }
 
   /**
-     * Finds a forced mate in X moves
-     * @param {Array} board
-     * @param {string} turn
-     * @param {number} depth - Number of full moves (e.g., 2 for Mate in 2)
-     * @returns {Array|null} Array of moves for the solution or null
-     */
+   * Finds a forced mate in X moves
+   * @param {Array} board
+   * @param {string} turn
+   * @param {number} depth - Number of full moves (e.g., 2 for Mate in 2)
+   * @returns {Array|null} Array of moves for the solution or null
+   */
   static findMateSequence(board, turn, depth) {
     return this._searchMate(deepCopy(board), turn, depth * 2);
   }
@@ -67,8 +69,9 @@ export class PuzzleGenerator {
       board[move.from.r][move.from.c] = null;
 
       // Check if checkmate
-      const isMate = AIEngine.getAllLegalMoves(board, opponentColor).length === 0 &&
-                AIEngine.isInCheck(board, opponentColor);
+      const isMate =
+        AIEngine.getAllLegalMoves(board, opponentColor).length === 0 &&
+        AIEngine.isInCheck(board, opponentColor);
 
       if (isMate) {
         // If it's a mate and we are looking for ply 1 or 2, we found it
