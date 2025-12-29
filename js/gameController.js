@@ -1,4 +1,5 @@
 import { PHASES, BOARD_SIZE } from './gameEngine.js';
+import { storageManager } from './storage.js';
 import { SHOP_PIECES, PIECE_VALUES } from './config.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
@@ -7,6 +8,7 @@ import { logger } from './logger.js';
 import { Tutorial } from './tutorial.js';
 import { ArrowRenderer } from './arrows.js';
 import { StatisticsManager } from './statisticsManager.js';
+import { puzzleManager } from './puzzleManager.js';
 
 // Piece values for shop
 const PIECES = SHOP_PIECES;
@@ -258,63 +260,65 @@ export class GameController {
         }
     }
 
-finishSetupPhase() {
-    const handleTransition = () => {
-        if (this.game.phase === PHASES.SETUP_WHITE_PIECES) {
-            this.game.phase = PHASES.SETUP_BLACK_PIECES;
-            this.game.points = this.game.initialPoints;
-            this.game.selectedShopPiece = null;
-            this.updateShopUI();
-            this.game.log('Weiß fertig. Schwarz kauft ein.');
+    finishSetupPhase() {
+        const handleTransition = () => {
+            if (this.game.phase === PHASES.SETUP_WHITE_PIECES) {
+                this.game.phase = PHASES.SETUP_BLACK_PIECES;
+                this.game.points = this.game.initialPoints;
+                this.game.selectedShopPiece = null;
+                this.updateShopUI();
+                this.game.log('Weiß fertig. Schwarz kauft ein.');
+                this.autoSave();
 
-            if (this.game.isAI) {
-                setTimeout(() => {
-                    if (this.game.aiSetupPieces) this.game.aiSetupPieces();
-                }, 1000);
+                if (this.game.isAI) {
+                    setTimeout(() => {
+                        if (this.game.aiSetupPieces) this.game.aiSetupPieces();
+                    }, 1000);
+                }
+            } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
+                this.game.phase = PHASES.PLAY;
+                this.showShop(false);
+
+                // Track game start time for statistics
+                this.gameStartTime = Date.now();
+
+                document.querySelectorAll('.cell.selectable-corridor').forEach(cell => {
+                    cell.classList.remove('selectable-corridor');
+                });
+                logger.debug('Removed all corridor highlighting for PLAY phase');
+
+                // Ensure Action Bar is visible
+                const actionBar = document.querySelector('.action-bar');
+                if (actionBar) actionBar.classList.remove('hidden');
+
+                this.game.log('Spiel beginnt! Weiß ist am Zug.');
+                if (this.game.updateBestMoves) this.game.updateBestMoves();
+                this.startClock();
+                UI.updateStatistics(this.game);
+                soundManager.playGameStart();
+                this.autoSave();
             }
-        } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
-            this.game.phase = PHASES.PLAY;
-            this.showShop(false);
+            UI.updateStatus(this.game);
+            UI.renderBoard(this.game);
+        };
 
-            // Track game start time for statistics
-            this.gameStartTime = Date.now();
+        // Check for unspent points
+        if (this.game.points > 0) {
+            // Don't warn AI
+            if (this.game.phase === PHASES.SETUP_BLACK_PIECES && this.game.isAI) {
+                handleTransition();
+                return;
+            }
 
-            document.querySelectorAll('.cell.selectable-corridor').forEach(cell => {
-                cell.classList.remove('selectable-corridor');
-            });
-            logger.debug('Removed all corridor highlighting for PLAY phase');
-
-            // Ensure Action Bar is visible
-            const actionBar = document.querySelector('.action-bar');
-            if (actionBar) actionBar.classList.remove('hidden');
-
-            this.game.log('Spiel beginnt! Weiß ist am Zug.');
-            if (this.game.updateBestMoves) this.game.updateBestMoves();
-            this.startClock();
-            UI.updateStatistics(this.game);
-            soundManager.playGameStart();
-        }
-        UI.updateStatus(this.game);
-        UI.renderBoard(this.game);
-    };
-
-    // Check for unspent points
-    if (this.game.points > 0) {
-        // Don't warn AI
-        if (this.game.phase === PHASES.SETUP_BLACK_PIECES && this.game.isAI) {
-            handleTransition();
+            UI.showModal('Ungewutzte Punkte', `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`, [
+                { text: 'Abbrechen', class: 'btn-secondary' },
+                { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition }
+            ]);
             return;
         }
 
-        UI.showModal('Ungewutzte Punkte', `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`, [
-            { text: 'Abbrechen', class: 'btn-secondary' },
-            { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition }
-        ]);
-        return;
+        handleTransition();
     }
-
-    handleTransition();
-}
     setTimeControl(mode) {
         const controls = {
             blitz3: { base: 180, increment: 2 },
@@ -535,130 +539,148 @@ finishSetupPhase() {
     }
 
     saveGame() {
-        const gameState = {
-            board: this.game.board,
-            turn: this.game.turn,
-            phase: this.game.phase,
-            whiteCorridor: this.game.whiteCorridor,
-            blackCorridor: this.game.blackCorridor,
-            points: this.game.points,
-            history: this.game.history,
-            capturedPieces: this.game.capturedPieces,
-            whiteTime: this.game.whiteTime,
-            blackTime: this.game.blackTime,
-            isAI: this.game.isAI,
-            difficulty: this.game.difficulty,
-            clockEnabled: this.game.clockEnabled,
-            timeControl: this.game.timeControl,
-            moveNumber: this.game.moveNumber,
-            halfMoveClock: this.game.halfMoveClock,
-            initialPoints: this.game.initialPoints
-        };
-
-        try {
-            localStorage.setItem('schach9x9_save', JSON.stringify(gameState));
+        if (storageManager.saveGame(this.game)) {
             this.game.log('💾 Spiel erfolgreich gespeichert!');
             soundManager.playMove(); // Feedback sound
-        } catch (e) {
-            console.error('Save failed:', e);
-            this.game.log('❌ Fehler beim Speichern: ' + e.message);
+        } else {
+            this.game.log('❌ Fehler beim Speichern.');
         }
     }
 
     loadGame() {
-        const saved = localStorage.getItem('schach9x9_save');
-        if (!saved) {
-            this.game.log('⚠️ Kein gespeichertes Spiel gefunden.');
+        let state;
+        try {
+            state = storageManager.loadGame();
+            if (!state) {
+                this.game.log('⚠️ Kein gespeichertes Spiel gefunden.');
+                return;
+            }
+        } catch (e) {
+            this.game.log('❌ Fehler beim Laden: ' + e.message);
             return;
         }
 
-        try {
-            const state = JSON.parse(saved);
+        // Stop any running clock before loading
+        this.stopClock();
 
-            // Stop any running clock before loading
-            this.stopClock();
+        // Restore state
+        if (storageManager.loadStateIntoGame(this.game, state)) {
+            this.game.log('📂 Spielstand geladen.');
+        } else {
+            this.game.log('❌ Fehler beim Laden des Spielstands.');
+            return;
+        }
 
-            // Restore state
-            Object.assign(this.game, state);
+        // Re-initialize UI components
+        UI.renderBoard(this.game);
+        UI.updateStatus(this.game);
+        UI.updateShopUI(this.game);
+        UI.updateStatistics(this.game);
+        UI.updateClockUI(this.game);
+        UI.updateClockDisplay(this.game);
 
-            // Re-initialize UI components
-            UI.renderBoard(this.game);
-            UI.updateStatus(this.game);
-            UI.updateShopUI(this.game);
-            UI.updateStatistics(this.game);
-            UI.updateClockUI(this.game);
-            UI.updateClockDisplay(this.game);
+        // Restore captured pieces display
+        // We need to clear and re-add them
+        const whiteCaptured = document.getElementById('captured-white');
+        const blackCaptured = document.getElementById('captured-black');
+        if (whiteCaptured) whiteCaptured.innerHTML = '';
+        if (blackCaptured) blackCaptured.innerHTML = '';
 
-            // Restore captured pieces display
-            // We need to clear and re-add them
-            const whiteCaptured = document.getElementById('captured-white');
-            const blackCaptured = document.getElementById('captured-black');
-            if (whiteCaptured) whiteCaptured.innerHTML = '';
-            if (blackCaptured) blackCaptured.innerHTML = '';
+        // Re-populate captured pieces
+        if (this.game.capturedPieces) {
+            if (this.game.capturedPieces.white) {
+                this.game.capturedPieces.white.forEach(piece => {
+                    UI.addCapturedPiece(piece);
+                });
+            }
+            if (this.game.capturedPieces.black) {
+                this.game.capturedPieces.black.forEach(piece => {
+                    UI.addCapturedPiece(piece);
+                });
+            }
+        }
 
-            // Re-populate captured pieces
-            if (this.game.capturedPieces) {
-                if (this.game.capturedPieces.white) {
-                    this.game.capturedPieces.white.forEach(piece => {
-                        UI.addCapturedPiece(piece);
-                    });
-                }
-                if (this.game.capturedPieces.black) {
-                    this.game.capturedPieces.black.forEach(piece => {
-                        UI.addCapturedPiece(piece);
-                    });
-                }
+        // Restore move history panel
+        const moveHistoryPanel = document.getElementById('move-history-panel');
+        if (moveHistoryPanel) {
+            // Clear existing history
+            const historyList = document.getElementById('move-history');
+            if (historyList) historyList.innerHTML = '';
+
+            // Re-populate history
+            if (this.game.history) {
+                this.game.history.forEach((move, index) => {
+                    UI.addMoveToHistory(move, index + 1);
+                });
+                // Scroll to bottom
+                if (historyList) historyList.scrollTop = historyList.scrollHeight;
             }
 
-            // Restore move history panel
-            const moveHistoryPanel = document.getElementById('move-history-panel');
-            if (moveHistoryPanel) {
-                // Clear existing history
-                const historyList = document.getElementById('move-history');
-                if (historyList) historyList.innerHTML = '';
-
-                // Re-populate history
-                if (this.game.history) {
-                    this.game.history.forEach((move, index) => {
-                        UI.addMoveToHistory(move, index + 1);
-                    });
-                    // Scroll to bottom
-                    if (historyList) historyList.scrollTop = historyList.scrollHeight;
-                }
-
-                if (this.game.phase === PHASES.PLAY) {
-                    moveHistoryPanel.classList.remove('hidden');
-                }
+            if (this.game.phase === PHASES.PLAY) {
+                moveHistoryPanel.classList.remove('hidden');
             }
+        }
 
-            // Restart clock if needed
-            if (this.game.phase === PHASES.PLAY && this.game.clockEnabled) {
-                this.startClock();
+        // Restart clock if needed
+        if (this.game.phase === PHASES.PLAY && this.game.clockEnabled) {
+            this.startClock();
+        }
+
+        // Trigger AI actions if in setup phase
+        if (this.game.isAI) {
+            if (this.game.phase === PHASES.SETUP_BLACK_KING) {
+                // AI needs to place black king
+                setTimeout(() => {
+                    if (this.game.aiSetupKing) this.game.aiSetupKing();
+                }, 1000);
+            } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
+                // AI needs to place black pieces
+                setTimeout(() => {
+                    if (this.game.aiSetupPieces) this.game.aiSetupPieces();
+                }, 1000);
             }
+        }
 
-            // Trigger AI actions if in setup phase
-            if (this.game.isAI) {
-                if (this.game.phase === PHASES.SETUP_BLACK_KING) {
-                    // AI needs to place black king
-                    setTimeout(() => {
-                        if (this.game.aiSetupKing) this.game.aiSetupKing();
-                    }, 1000);
-                } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
-                    // AI needs to place black pieces
-                    setTimeout(() => {
-                        if (this.game.aiSetupPieces) this.game.aiSetupPieces();
-                    }, 1000);
-                }
-            }
+        this.game.log('📂 Spiel erfolgreich geladen!');
+        soundManager.playGameStart(); // Feedback sound
 
-            this.game.log('📂 Spiel erfolgreich geladen!');
-            soundManager.playGameStart(); // Feedback sound
+    }
 
-        } catch (e) {
-            console.error('Load failed:', e);
-            this.game.log('❌ Fehler beim Laden: ' + e.message);
+    autoSave() {
+        if (this.game.mode !== 'puzzle' && storageManager.saveGame(this.game)) {
+            // Silently success or debug log
+            logger.debug('Auto-saved game');
         }
     }
+
+    startPuzzleMode() {
+        const puzzle = puzzleManager.loadPuzzle(this.game);
+        if (puzzle) {
+            UI.showPuzzleOverlay(puzzle);
+            UI.renderBoard(this.game);
+            UI.updateStatus(this.game);
+            // Ensure UI controls are appropriate
+            this.showShop(false);
+        }
+    }
+
+    nextPuzzle() {
+        const puzzle = puzzleManager.nextPuzzle(this.game);
+        if (puzzle) {
+            UI.showPuzzleOverlay(puzzle);
+            UI.renderBoard(this.game);
+            UI.updateStatus(this.game);
+        } else {
+            UI.updatePuzzleStatus('success', 'Alle Puzzles gelöst!');
+        }
+    }
+
+    exitPuzzleMode() {
+        UI.hidePuzzleOverlay();
+        // Return to main menu or restart
+        location.reload();
+    }
+
 
     // ===== ANALYSIS MODE METHODS =====
 
@@ -856,7 +878,7 @@ finishSetupPhase() {
             result: playerResult,
             playerColor: playerColor,
             opponent: opponent,
-            moveHistory: this.game.history || [],
+            moveHistory: this.game.moveHistory || [],
             duration: Date.now() - this.gameStartTime,
             finalPosition: JSON.stringify(this.game.board)
         };

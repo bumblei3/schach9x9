@@ -135,7 +135,7 @@ describe('Controller Logic Deep Dive', () => {
             game.points = 10;
             gameController.saveGame();
 
-            expect(spySet).toHaveBeenCalledWith('schach9x9_save', expect.any(String));
+            expect(spySet).toHaveBeenCalledWith('schach9x9_save_autosave', expect.any(String));
             const savedData = JSON.parse(spySet.mock.calls[0][1]);
             expect(savedData.points).toBe(10);
 

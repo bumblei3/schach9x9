@@ -4,7 +4,13 @@ import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-    renderBoard: jest.fn(), showModal: jest.fn(),
+    renderBoard: jest.fn(),
+    showModal: jest.fn((title, message, buttons) => {
+        const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.class === 'btn-primary');
+        if (continueBtn && continueBtn.callback) {
+            continueBtn.callback();
+        }
+    }),
     updateStatus: jest.fn(),
     updateShopUI: jest.fn(),
     updateClockUI: jest.fn(),
@@ -32,7 +38,6 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
     },
 }));
 
-// Import controllers AFTER mocking
 const { GameController } = await import('../js/gameController.js');
 const { MoveController } = await import('../js/moveController.js');
 
@@ -169,7 +174,7 @@ describe('Integration Tests', () => {
             // Save game
             gameController.saveGame();
             expect(localStorage.setItem).toHaveBeenCalledWith(
-                'schach9x9_save',
+                'schach9x9_save_autosave',
                 expect.any(String)
             );
 

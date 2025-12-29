@@ -499,7 +499,7 @@ describe('MoveController', () => {
             moveController.saveGame();
 
             expect(global.localStorage.setItem).toHaveBeenCalledWith(
-                'schach9x9_save',
+                'schach9x9_save_autosave',
                 expect.any(String)
             );
         });
@@ -510,7 +510,7 @@ describe('MoveController', () => {
 
             moveController.loadGame();
 
-            expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('gespeichert'));
+            expect(game.log).toHaveBeenCalledWith(expect.stringContaining('gefunden'));
         });
 
         test('should successfully load a saved game', () => {
@@ -528,7 +528,7 @@ describe('MoveController', () => {
             Storage.prototype.getItem.mockReturnValue(JSON.stringify(savedState));
 
             // Verify mock works in test scope
-            console.log('Test Verify:', localStorage.getItem('schach9x9_save'));
+            console.log('Test Verify:', localStorage.getItem('schach9x9_save_autosave'));
             // Explicitly mock getElementById for this test to avoid leakage issues
             document.getElementById = jest.fn((id) => {
                 if (id === 'ai-toggle') return { checked: false, addEventListener: jest.fn() };

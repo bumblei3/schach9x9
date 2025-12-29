@@ -68,6 +68,8 @@ export class Game {
     this.analysisBasePosition = null; // Save point before entering analysis
     this.analysisVariations = []; // Track explored variations
     this.continuousAnalysis = false;
+    // Puzzle Mode State
+    this.puzzleState = null;
   }
 
   setupClassicBoard() {

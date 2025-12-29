@@ -242,11 +242,11 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
     describe('Save/Load Robustness Tests', () => {
         test('should handle corrupt save data gracefully', () => {
-            localStorage.setItem('schach9x9_save', 'invalid-json-{]}');
+            localStorage.setItem('schach9x9_save_autosave', 'invalid-json-{]}');
 
             expect(() => {
                 try {
-                    JSON.parse(localStorage.getItem('schach9x9_save'));
+                    JSON.parse(localStorage.getItem('schach9x9_save_autosave'));
                 } catch (e) {
                     // Should catch parse error
                     expect(e).toBeInstanceOf(SyntaxError);
@@ -261,9 +261,9 @@ describe('MoveController - Enhanced Coverage Tests', () => {
                 // Missing: moveHistory, capturedPieces, etc.
             };
 
-            localStorage.setItem('schach9x9_save', JSON.stringify(incompleteSave));
+            localStorage.setItem('schach9x9_save_autosave', JSON.stringify(incompleteSave));
 
-            const loaded = JSON.parse(localStorage.getItem('schach9x9_save'));
+            const loaded = JSON.parse(localStorage.getItem('schach9x9_save_autosave'));
 
             // Should provide defaults
             const moveHistory = loaded.moveHistory || [];
@@ -280,9 +280,9 @@ describe('MoveController - Enhanced Coverage Tests', () => {
                 moves: [] // Old key name
             };
 
-            localStorage.setItem('schach9x9_save', JSON.stringify(oldFormatSave));
+            localStorage.setItem('schach9x9_save_autosave', JSON.stringify(oldFormatSave));
 
-            const loaded = JSON.parse(localStorage.getItem('schach9x9_save'));
+            const loaded = JSON.parse(localStorage.getItem('schach9x9_save_autosave'));
 
             // Simulate migration
             const migratedBoard = loaded.board || loaded.boardState;
@@ -304,7 +304,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
             };
 
             try {
-                localStorage.setItem('schach9x9_save', JSON.stringify(largeSave));
+                localStorage.setItem('schach9x9_save_autosave', JSON.stringify(largeSave));
             } catch (e) {
                 // Should handle QuotaExceededError
                 expect(e.name).toBe('QuotaExceededError');

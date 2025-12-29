@@ -240,6 +240,7 @@
           <div class="menu-section">
             <h3>Spiel</h3>
             <button id="restart-btn" class="menu-item">🔄 Neues Spiel</button>
+            <button id="puzzle-mode-btn" class="menu-item">🧩 Puzzles</button>
             <button id="save-btn" class="menu-item">💾 Speichern</button>
             <button id="load-btn" class="menu-item">📂 Laden</button>
             <button id="resign-btn" class="menu-item danger">🏳️ Aufgeben</button>
@@ -333,20 +334,12 @@
 
     <!-- Statistics Overlay -->
     <div id="stats-overlay" class="fullscreen-overlay hidden">
-      <div class="info-content">
-        <div class="menu-header">
+      <div class="stats-content">
+        <div class="stats-header">
           <h2>Statistiken</h2>
           <button id="stats-close-btn" class="close-icon-btn">×</button>
         </div>
         <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Züge</div>
-            <div id="stat-moves" class="stat-value">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Schlägt</div>
-            <div id="stat-captures" class="stat-value">0</div>
-          </div>
           <div class="stat-card">
             <div class="stat-label">Genauigkeit</div>
             <div id="stat-accuracy" class="stat-value">--%</div>
@@ -363,96 +356,111 @@
       </div>
     </div>
 
-    <!-- Help Overlay -->
-    <div id="help-overlay" class="fullscreen-overlay hidden">
-      <div class="info-content">
-        <div class="menu-header">
-          <h2>Hilfe & Regeln</h2>
-          <button id="close-help-btn" class="close-icon-btn">×</button>
-        </div>
-        <div class="help-body" style="padding: 20px; overflow-y: auto; max-height: 70vh;">
-          <h3>Spielablauf</h3>
-          <p>Schach 9x9 ist eine Variante auf einem größeren Brett mit neuen Figuren.</p>
-          <h4>1. Setup-Phase</h4>
-          <ul>
-            <li><strong>König platzieren:</strong> Wähle einen 3x3 Bereich für deinen König.</li>
-            <li><strong>Truppen kaufen:</strong> Nutze deine Punkte, um Figuren zu kaufen.</li>
-            <li><strong>Aufstellung:</strong> Platziere deine gekauften Figuren in deinem Bereich.</li>
-          </ul>
-          <h4>2. Neue Figuren</h4>
-          <ul>
-            <li><strong>Kanzler (C):</strong> Zieht wie Turm + Springer.</li>
-            <li><strong>Erzbischof (A):</strong> Zieht wie Läufer + Springer.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Confirmation Overlay -->
-    <div id="confirmation-overlay" class="modal-overlay hidden">
-      <div class="modal-content">
-        <h2 id="confirmation-title">Bestätigung</h2>
-        <p id="confirmation-message">Bist du sicher?</p>
+    <!-- Puzzle Overlay -->
+    <div id="puzzle-overlay" class="modal-overlay hidden">
+      <div class="modal-content puzzle-content">
+        <h2 id="puzzle-title">Puzzle Titel</h2>
+        <div id="puzzle-description">Beschreibung...</div>
+        <div class="puzzle-status" id="puzzle-status">Weiß am Zug</div>
         <div class="modal-buttons">
-          <button id="confirm-yes-btn" class="btn-primary">Ja</button>
-          <button id="confirm-no-btn" class="btn-secondary">Nein</button>
+          <button id="puzzle-next-btn" class="btn-primary hidden">Nächstes Puzzle</button>
+          <button id="puzzle-exit-btn" class="btn-secondary">Beenden</button>
         </div>
       </div>
     </div>
+  </div>
+  </div>
 
-    <!-- Draw Offer Overlay -->
-    <div id="draw-offer-overlay" class="modal-overlay hidden">
-      <div class="modal-content">
-        <h2>Remis angeboten</h2>
-        <p>Dein Gegner bietet ein Unentschieden an.</p>
-        <div class="modal-buttons">
-          <button id="accept-draw-btn" class="btn-primary">Annehmen</button>
-          <button id="decline-draw-btn" class="btn-secondary">Ablehnen</button>
+  <!-- Help Overlay -->
+  <div id="help-overlay" class="fullscreen-overlay hidden">
+    <div class="info-content">
+      <div class="menu-header">
+        <h2>Hilfe & Regeln</h2>
+        <button id="close-help-btn" class="close-icon-btn">×</button>
+      </div>
+      <div class="help-body" style="padding: 20px; overflow-y: auto; max-height: 70vh;">
+        <h3>Spielablauf</h3>
+        <p>Schach 9x9 ist eine Variante auf einem größeren Brett mit neuen Figuren.</p>
+        <h4>1. Setup-Phase</h4>
+        <ul>
+          <li><strong>König platzieren:</strong> Wähle einen 3x3 Bereich für deinen König.</li>
+          <li><strong>Truppen kaufen:</strong> Nutze deine Punkte, um Figuren zu kaufen.</li>
+          <li><strong>Aufstellung:</strong> Platziere deine gekauften Figuren in deinem Bereich.</li>
+        </ul>
+        <h4>2. Neue Figuren</h4>
+        <ul>
+          <li><strong>Kanzler (C):</strong> Zieht wie Turm + Springer.</li>
+          <li><strong>Erzbischof (A):</strong> Zieht wie Läufer + Springer.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Overlay -->
+  <div id="confirmation-overlay" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 id="confirmation-title">Bestätigung</h2>
+      <p id="confirmation-message">Bist du sicher?</p>
+      <div class="modal-buttons">
+        <button id="confirm-yes-btn" class="btn-primary">Ja</button>
+        <button id="confirm-no-btn" class="btn-secondary">Nein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Draw Offer Overlay -->
+  <div id="draw-offer-overlay" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2>Remis angeboten</h2>
+      <p>Dein Gegner bietet ein Unentschieden an.</p>
+      <div class="modal-buttons">
+        <button id="accept-draw-btn" class="btn-primary">Annehmen</button>
+        <button id="decline-draw-btn" class="btn-secondary">Ablehnen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial Overlay -->
+  <div id="tutorial-overlay" class="fullscreen-overlay hidden">
+    <div class="tutorial-content">
+      <div class="menu-header">
+        <h2>Tutorial</h2>
+        <button id="tutorial-close" class="close-icon-btn">×</button>
+      </div>
+      <div id="tutorial-steps" class="tutorial-body">
+        <!-- Steps injected by JS -->
+      </div>
+      <div class="tutorial-footer">
+        <div class="step-indicator">
+          Schritt <span id="tutorial-current-step">1</span> von <span id="tutorial-total-steps">5</span>
+        </div>
+        <div class="tutorial-controls">
+          <button id="tutorial-prev" class="btn-secondary">Zurück</button>
+          <button id="tutorial-next" class="btn-primary">Weiter ▶</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Tutorial Overlay -->
-    <div id="tutorial-overlay" class="fullscreen-overlay hidden">
-      <div class="tutorial-content">
-        <div class="menu-header">
-          <h2>Tutorial</h2>
-          <button id="tutorial-close" class="close-icon-btn">×</button>
-        </div>
-        <div id="tutorial-steps" class="tutorial-body">
-          <!-- Steps injected by JS -->
-        </div>
-        <div class="tutorial-footer">
-          <div class="step-indicator">
-            Schritt <span id="tutorial-current-step">1</span> von <span id="tutorial-total-steps">5</span>
-          </div>
-          <div class="tutorial-controls">
-            <button id="tutorial-prev" class="btn-secondary">Zurück</button>
-            <button id="tutorial-next" class="btn-primary">Weiter ▶</button>
-          </div>
-        </div>
+  <div id="points-selection-overlay" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Neues Spiel</h2>
+      <p>Wähle einen Modus:</p>
+      <button id="classic-mode-btn" class="btn-primary full-width mb-2">♟️ Klassisch (9x9)</button>
+      <div class="divider"><span>ODER</span></div>
+      <p class="small-text">Setup-Modus (Punkte wählen):</p>
+      <div class="points-grid">
+        <button class="btn-secondary points-btn" data-points="12">12</button>
+        <button class="btn-secondary points-btn" data-points="15">15</button>
+        <button class="btn-secondary points-btn" data-points="18">18</button>
       </div>
     </div>
+  </div>
 
-    <div id="points-selection-overlay" class="modal-overlay">
-      <div class="modal-content">
-        <h2>Neues Spiel</h2>
-        <p>Wähle einen Modus:</p>
-        <button id="classic-mode-btn" class="btn-primary full-width mb-2">♟️ Klassisch (9x9)</button>
-        <div class="divider"><span>ODER</span></div>
-        <p class="small-text">Setup-Modus (Punkte wählen):</p>
-        <div class="points-grid">
-          <button class="btn-secondary points-btn" data-points="12">12</button>
-          <button class="btn-secondary points-btn" data-points="15">15</button>
-          <button class="btn-secondary points-btn" data-points="18">18</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hidden elements for compatibility if needed -->
-    <div id="controls-wrapper" class="hidden"></div>
-    <div id="quick-actions" class="hidden"></div>
-    <div id="info-tabs-container" class="hidden"></div>
+  <!-- Hidden elements for compatibility if needed -->
+  <div id="controls-wrapper" class="hidden"></div>
+  <div id="quick-actions" class="hidden"></div>
+  <div id="info-tabs-container" class="hidden"></div>
 
   </div>
 

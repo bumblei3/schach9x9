@@ -4,6 +4,7 @@ import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
 import { PIECE_SVGS } from './chess-pieces.js';
 import { logger } from './logger.js';
+import { puzzleManager } from './puzzleManager.js';
 import { evaluatePosition } from './aiEngine.js';
 
 // Piece values for shop (needed for some logic?)
@@ -206,6 +207,27 @@ export class MoveController {
         // Add move to history
         this.game.moveHistory.push(moveRecord);
         UI.updateMoveHistoryUI(this.game);
+
+        // Puzzle Logic Check
+        if (this.game.mode === 'puzzle') {
+            const result = puzzleManager.checkMove(this.game, moveRecord);
+            if (result === 'wrong') {
+                // Delay slightly to show the wrong move, then undo
+                setTimeout(() => {
+                    this.undoMove();
+                    UI.updatePuzzleStatus('error', 'Falscher Zug!');
+                    if (window.soundManager && window.soundManager.playError) soundManager.playError();
+                }, 500);
+            } else if (result === 'solved') {
+                UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
+                if (window.soundManager && window.soundManager.playSuccess) soundManager.playSuccess();
+            } else {
+                UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');
+            }
+            // For puzzles, we might not want to switch turns if it's "white to move and win" single player experience
+            // But usually we do switch to let the "opponent" (AI or script) reply if it's a multi-move puzzle.
+            // For now, let's assume standard turn switching but we might need "PuzzleManager.getReply(game)"
+        }
 
         // Check for insufficient material
         if (this.isInsufficientMaterial()) {
@@ -678,16 +700,14 @@ export class MoveController {
             drawOffered: this.game.drawOffered,
             drawOfferedBy: this.game.drawOfferedBy,
         };
-        localStorage.setItem('schach9x9_save', JSON.stringify(gameState));
+        localStorage.setItem('schach9x9_save_autosave', JSON.stringify(gameState));
         this.game.log('Spiel gespeichert! 💾');
-        alert('Spiel wurde gespeichert!');
     }
 
     loadGame() {
-        const savedData = localStorage.getItem('schach9x9_save');
+        const savedData = localStorage.getItem('schach9x9_save_autosave');
         if (!savedData) {
             this.game.log('Kein gespeichertes Spiel gefunden.');
-            alert('Kein gespeichertes Spiel gefunden.');
             return false;
         }
 

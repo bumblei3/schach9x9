@@ -16,8 +16,10 @@ const mockThree = {
         castShadow: false,
         receiveShadow: false,
         position: { set: jest.fn() },
-        rotation: { set: jest.fn() }
+        rotation: { set: jest.fn(), x: 0, y: 0, z: 0 }
     })),
+    Vector2: jest.fn().mockImplementation((x, y) => ({ x, y })),
+    LatheGeometry: jest.fn(),
     BoxGeometry: jest.fn(),
     CylinderGeometry: jest.fn(),
     SphereGeometry: jest.fn(),

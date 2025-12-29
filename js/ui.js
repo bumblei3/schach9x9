@@ -1698,3 +1698,40 @@ export function closeModal() {
   if (modal) modal.style.display = 'none';
 }
 
+
+// --- Puzzle UI Helpers ---
+
+export function showPuzzleOverlay(puzzle) {
+  const overlay = document.getElementById('puzzle-overlay');
+  if (!overlay) return;
+
+  document.getElementById('puzzle-title').textContent = puzzle.title;
+  document.getElementById('puzzle-description').textContent = puzzle.description;
+
+  const statusEl = document.getElementById('puzzle-status');
+  statusEl.textContent = 'Weiß am Zug';
+  statusEl.className = 'puzzle-status';
+
+  // Hide next button, show exit
+  document.getElementById('puzzle-next-btn').classList.add('hidden');
+  document.getElementById('puzzle-exit-btn').classList.remove('hidden');
+
+  overlay.classList.remove('hidden');
+}
+
+export function hidePuzzleOverlay() {
+  const overlay = document.getElementById('puzzle-overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+export function updatePuzzleStatus(status, message) {
+  const statusEl = document.getElementById('puzzle-status');
+  if (!statusEl) return;
+
+  statusEl.textContent = message;
+  statusEl.className = `puzzle-status ${status}`; // status: 'success', 'error', 'neutral'
+
+  if (status === 'success') {
+    document.getElementById('puzzle-next-btn').classList.remove('hidden');
+  }
+}

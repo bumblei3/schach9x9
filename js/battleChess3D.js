@@ -24,7 +24,7 @@ export class BattleChess3D {
         this.controls = null;
         this.board = null;
         this.pieces = {}; // map of "r,c" to 3D piece
-        this.highlightMarkers = [];
+        this.highlights = [];
         this.battleAnimator = null;
         this.animationFrameId = null;
         this.raycaster = new THREE.Raycaster();

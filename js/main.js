@@ -9,6 +9,7 @@ import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
 import { debounce } from './utils.js';
 import { BOARD_SIZE, PHASES } from './gameEngine.js';
+import { storageManager } from './storage.js';
 import { BattleChess3D } from './battleChess3D.js';
 
 // Register Service Worker for PWA
@@ -159,9 +160,8 @@ async function initGame(initialPoints, mode = 'setup') {
     }
 
     // Check for autosaved game
-    const savedGame = localStorage.getItem('schach9x9_save');
-    if (savedGame) {
-      checkSavedGame(savedGame);
+    if (storageManager.hasSave()) {
+      checkSavedGame();
     }
 
   } catch (error) {
@@ -179,9 +179,11 @@ function focusCell(r, c) {
   }
 }
 
-function checkSavedGame(savedGame) {
+function checkSavedGame() {
+  const saveData = storageManager.loadGame();
+  if (!saveData) return;
+
   try {
-    const saveData = JSON.parse(savedGame);
     if (saveData.timestamp) {
       const hoursAgo = Math.floor((Date.now() - saveData.timestamp) / (1000 * 60 * 60));
       const timeAgo =
@@ -200,7 +202,7 @@ function checkSavedGame(savedGame) {
             <p>Möchtest du das Spiel fortsetzen?</p>
             <div class="save-info">
               <p>⏰ Gespeichert: ${timeAgo}</p>
-              <p>♟️ Züge gespielt: <strong>${saveData.moveHistory?.length || 0}</strong></p>
+              <p>♟️ Züge gespielt: <strong>${(saveData.moveHistory && saveData.moveHistory.length) || 0}</strong></p>
               <p>🎯 Spieler: ${saveData.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug</p>
             </div>
             <div class="modal-buttons">
@@ -212,12 +214,12 @@ function checkSavedGame(savedGame) {
       document.body.appendChild(restoreDialog);
 
       document.getElementById('restore-yes').onclick = () => {
-        window.game.loadGame();
+        window.game.loadGame(); // Calls GameController.loadGame -> storageManager.loadGame
         restoreDialog.remove();
       };
 
       document.getElementById('restore-no').onclick = () => {
-        localStorage.removeItem('schach9x9_save');
+        localStorage.removeItem('schach9x9_save_autosave'); // Or storageManager.clearSave()?
         restoreDialog.remove();
       };
     }
@@ -475,6 +477,13 @@ function setupGlobalListeners() {
 
 
   // --- Menu Actions ---
+  document.getElementById('puzzle-mode-btn').addEventListener('click', () => {
+    if (window.game) {
+      window.game.gameController.startPuzzleMode();
+      toggleMenu(false);
+    }
+  });
+
   document.getElementById('restart-btn').addEventListener('click', () => location.reload());
 
   document.getElementById('save-btn').addEventListener('click', () => {
@@ -629,6 +638,15 @@ function setupGlobalListeners() {
 
   document.getElementById('restart-btn-overlay').addEventListener('click', () => {
     location.reload();
+  });
+
+  // Puzzle Overlay
+  document.getElementById('puzzle-next-btn').addEventListener('click', () => {
+    if (window.game) window.game.gameController.nextPuzzle();
+  });
+
+  document.getElementById('puzzle-exit-btn').addEventListener('click', () => {
+    if (window.game) window.game.gameController.exitPuzzleMode();
   });
 
   // --- Shop ---

@@ -61,8 +61,14 @@ const mockThree = {
         position: { set: jest.fn() },
         rotation: { x: 0, y: 0, z: 0, set: jest.fn() },
         userData: {},
-        material: { color: { setHex: jest.fn() } }
+        material: { color: { setHex: jest.fn() } },
+        add: jest.fn()
     })),
+    HemisphereLight: jest.fn().mockImplementation(() => ({
+        position: { set: jest.fn() }
+    })),
+    LatheGeometry: jest.fn(),
+    Vector2: jest.fn().mockImplementation((x, y) => ({ x, y })),
     DoubleSide: 2,
     PCFSoftShadowMap: 1
 };
