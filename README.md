@@ -33,7 +33,7 @@ Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **550 automatisierten Tests** wird eine hohe Stabilität gewährleistet.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **530 automatisierten Tests** (Jest) wird eine hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.
 
 | Modul                | Coverage (Lines) | Beschreibung                                         |
 | -------------------- | ---------------- | ---------------------------------------------------- |
@@ -48,18 +48,23 @@ Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **550 au
 ### Voraussetzungen
 
 - Node.js (v14+)
+- NPM
 
 ### Schritte
 
 1. **Repository klonen:** `git clone https://github.com/bumblei3/schach9x9.git`
 2. **Abhängigkeiten installieren:** `npm install`
-3. **Spiel starten:** `npm start` (Standard: `http://localhost:3000`)
+3. **Spiel starten:** `npm run dev` (Vite dev server)
+4. **Build für Produktion:** `npm run build`
 
-## �️ Entwicklung
+## 🛠️ Entwicklung & CI
 
-- **Tests:** `npm test`
-- **Coverage:** `npm run test:coverage`
-- **Linting & Format:** `npm run lint` / `npm run format`
+Das Projekt nutzt einen modernen Entwicklungs-Workflow:
+
+- **Tests ausführen:** `npm test`
+- **Linting (ESLint):** `npm run lint` (überprüft Code-Qualität)
+- **Formatting (Prettier):** `npm run format` (stellt konsistenten Stil sicher)
+- **CI-Check:** `npm run format:check` && `npm run lint` && `npm test`
 
 ## 📄 Lizenz
 
