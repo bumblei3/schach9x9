@@ -669,27 +669,27 @@ export function updateStatus(game) {
 
   let text = '';
   switch (game.phase) {
-    case PHASES.SETUP_WHITE_KING:
-      text = 'Weiß: Wähle einen Korridor für den König';
-      break;
-    case PHASES.SETUP_BLACK_KING:
-      text = 'Schwarz: Wähle einen Korridor för den König';
-      break;
-    case PHASES.SETUP_WHITE_PIECES:
-      text = 'Weiß: Kaufe Truppen';
-      break;
-    case PHASES.SETUP_BLACK_PIECES:
-      text = 'Schwarz: Kaufe Truppen';
-      break;
-    case PHASES.PLAY:
-      text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
-      break;
-    case PHASES.ANALYSIS:
-      text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
-      break;
-    case PHASES.GAME_OVER:
-      text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
-      break;
+  case PHASES.SETUP_WHITE_KING:
+    text = 'Weiß: Wähle einen Korridor für den König';
+    break;
+  case PHASES.SETUP_BLACK_KING:
+    text = 'Schwarz: Wähle einen Korridor för den König';
+    break;
+  case PHASES.SETUP_WHITE_PIECES:
+    text = 'Weiß: Kaufe Truppen';
+    break;
+  case PHASES.SETUP_BLACK_PIECES:
+    text = 'Schwarz: Kaufe Truppen';
+    break;
+  case PHASES.PLAY:
+    text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+    break;
+  case PHASES.ANALYSIS:
+    text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+    break;
+  case PHASES.GAME_OVER:
+    text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
+    break;
   }
   statusEl.textContent = text;
 }
@@ -1739,48 +1739,6 @@ export function updatePuzzleStatus(status, message) {
     document.getElementById('puzzle-next-btn').classList.remove('hidden');
   }
 }
-/**
- * Zeigt ein generisches Modal an.
- * @param {string} title - Modal Titel
- * @param {string} message - Modal Nachricht
- * @param {Array} actions - Liste von Buttons {text, class, callback}
- */
-export function showModal(title, message, actions = []) {
-  const modal = document.getElementById('generic-modal');
-  const titleEl = document.getElementById('modal-title');
-  const messageEl = document.getElementById('modal-message');
-  const actionsEl = document.getElementById('modal-actions');
-
-  if (!modal || !titleEl || !messageEl || !actionsEl) return;
-
-  titleEl.textContent = title;
-  messageEl.textContent = message;
-  actionsEl.innerHTML = '';
-
-  if (actions.length === 0) {
-    actions.push({ text: 'OK', class: 'btn-primary' });
-  }
-
-  actions.forEach(action => {
-    const btn = document.createElement('button');
-    btn.textContent = action.text;
-    btn.className = `btn ${action.class || 'btn-secondary'}`;
-    btn.style.padding = '8px 16px';
-    btn.style.borderRadius = '8px';
-    btn.style.cursor = 'pointer';
-    btn.style.border = 'none';
-    btn.style.fontWeight = '600';
-
-    btn.addEventListener('click', () => {
-      modal.style.display = 'none';
-      if (action.callback) action.callback();
-    });
-    actionsEl.appendChild(btn);
-  });
-
-  modal.style.display = 'flex';
-}
-
 /**
  * Zeigt eine kurze Toast-Nachricht an.
  * @param {string} message - Nachricht

@@ -558,7 +558,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
       }
 
       // Root Search Loop
-      while (true) {
+      while (true) { // eslint-disable-line no-constant-condition
         let currentAlpha = alpha;
         let currentBestScore = -Infinity;
         let currentBestMove = moves[0];
@@ -990,7 +990,7 @@ const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
 export function evaluatePosition(board, forColor) {
   let mgScore = 0;
   let egScore = 0;
-  let materialCount = 0;
+  const materialCount = 0;
 
   // Reset static arrays for pawn structure
   pawnColumnsWhite.fill(0);
@@ -1532,7 +1532,6 @@ function getAllCaptureMoves(board, color) {
 
   return moves;
 }
-
 
 
 /**

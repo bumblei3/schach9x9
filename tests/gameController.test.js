@@ -3,58 +3,58 @@ import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
-    renderBoard: jest.fn(), showModal: jest.fn(),
-    updateStatus: jest.fn(),
-    updateShopUI: jest.fn(),
-    updateClockUI: jest.fn(),
-    updateClockDisplay: jest.fn(),
-    initBoardUI: jest.fn(),
-    showShop: jest.fn(),
-    updateMoveHistoryUI: jest.fn(),
-    updateCapturedUI: jest.fn(),
-    updateStatistics: jest.fn(),
-    renderEvalGraph: jest.fn(),
-    animateCheckmate: jest.fn(),
-    animateCheck: jest.fn(),
+  renderBoard: jest.fn(), showModal: jest.fn(),
+  updateStatus: jest.fn(),
+  updateShopUI: jest.fn(),
+  updateClockUI: jest.fn(),
+  updateClockDisplay: jest.fn(),
+  initBoardUI: jest.fn(),
+  showShop: jest.fn(),
+  updateMoveHistoryUI: jest.fn(),
+  updateCapturedUI: jest.fn(),
+  updateStatistics: jest.fn(),
+  renderEvalGraph: jest.fn(),
+  animateCheckmate: jest.fn(),
+  animateCheck: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({
-    soundManager: {
-        init: jest.fn(),
-        playMove: jest.fn(),
-        playGameStart: jest.fn(),
-        playGameOver: jest.fn(),
-        playSound: jest.fn(),
-        playCheck: jest.fn(),
-    }
+  soundManager: {
+    init: jest.fn(),
+    playMove: jest.fn(),
+    playGameStart: jest.fn(),
+    playGameOver: jest.fn(),
+    playSound: jest.fn(),
+    playCheck: jest.fn(),
+  }
 }));
 
 jest.unstable_mockModule('../js/gameEngine.js', () => ({
-    Game: class {
-        constructor(initialPoints = 15, mode = 'classic', isAI = false) {
-            this.initialPoints = initialPoints;
-            this.mode = mode;
-            this.isAI = isAI;
-            this.board = Array(9).fill(null).map(() => Array(9).fill(null));
-            this.phase = PHASES.SETUP_WHITE_KING;
-            this.turn = 'white';
-            this.points = initialPoints;
-            this.whiteCorridor = { rowStart: 6, colStart: 3 };
-            this.blackCorridor = { rowStart: 0, colStart: 3 };
-            this.log = jest.fn();
-            this.whiteTime = 300;
-            this.blackTime = 300;
-            this.clockEnabled = false;
-            this.moveHistory = [];
-            this.redoStack = [];
-            this.positionHistory = [];
-            this.capturedPieces = { white: [], black: [] };
-            this.drawOffered = false;
-            this.drawOfferedBy = null;
-        }
-    },
-    PHASES,
-    BOARD_SIZE: 9
+  Game: class {
+    constructor(initialPoints = 15, mode = 'classic', isAI = false) {
+      this.initialPoints = initialPoints;
+      this.mode = mode;
+      this.isAI = isAI;
+      this.board = Array(9).fill(null).map(() => Array(9).fill(null));
+      this.phase = PHASES.SETUP_WHITE_KING;
+      this.turn = 'white';
+      this.points = initialPoints;
+      this.whiteCorridor = { rowStart: 6, colStart: 3 };
+      this.blackCorridor = { rowStart: 0, colStart: 3 };
+      this.log = jest.fn();
+      this.whiteTime = 300;
+      this.blackTime = 300;
+      this.clockEnabled = false;
+      this.moveHistory = [];
+      this.redoStack = [];
+      this.positionHistory = [];
+      this.capturedPieces = { white: [], black: [] };
+      this.drawOffered = false;
+      this.drawOfferedBy = null;
+    }
+  },
+  PHASES,
+  BOARD_SIZE: 9
 }));
 
 // Import GameController
@@ -64,218 +64,218 @@ const UI = await import('../js/ui.js');
 const { soundManager } = await import('../js/sounds.js');
 
 describe('GameController', () => {
-    let game;
-    let gameController;
+  let game;
+  let gameController;
 
-    beforeEach(() => {
-        game = new Game(15, 'setup', false);
-        game.log = jest.fn();
-        gameController = new GameController(game);
-        game.gameController = gameController;
+  beforeEach(() => {
+    game = new Game(15, 'setup', false);
+    game.log = jest.fn();
+    gameController = new GameController(game);
+    game.gameController = gameController;
 
-        // Mock DOM
-        const createMockElement = () => {
-            const element = {
-                classList: {
-                    remove: jest.fn(),
-                    add: jest.fn(),
-                    contains: jest.fn(() => false),
-                    toggle: jest.fn()
-                },
-                style: {},
-                disabled: false,
-                value: '',
-                checked: false,
-                scrollTop: 0,
-                scrollHeight: 100,
-                appendChild: jest.fn(),
-                dataset: {}
-            };
-            let innerHTML = '';
-            let textContent = '';
-            Object.defineProperty(element, 'innerHTML', {
-                get: () => innerHTML,
-                set: (val) => { innerHTML = val; },
-                configurable: true
-            });
-            Object.defineProperty(element, 'textContent', {
-                get: () => textContent,
-                set: (val) => { textContent = val; },
-                configurable: true
-            });
-            return element;
-        };
+    // Mock DOM
+    const createMockElement = () => {
+      const element = {
+        classList: {
+          remove: jest.fn(),
+          add: jest.fn(),
+          contains: jest.fn(() => false),
+          toggle: jest.fn()
+        },
+        style: {},
+        disabled: false,
+        value: '',
+        checked: false,
+        scrollTop: 0,
+        scrollHeight: 100,
+        appendChild: jest.fn(),
+        dataset: {}
+      };
+      let innerHTML = '';
+      let textContent = '';
+      Object.defineProperty(element, 'innerHTML', {
+        get: () => innerHTML,
+        set: (val) => { innerHTML = val; },
+        configurable: true
+      });
+      Object.defineProperty(element, 'textContent', {
+        get: () => textContent,
+        set: (val) => { textContent = val; },
+        configurable: true
+      });
+      return element;
+    };
 
-        jest.spyOn(document, 'getElementById').mockImplementation((id) => createMockElement());
-        jest.spyOn(document, 'querySelector').mockImplementation(() => ({
-            classList: { add: jest.fn(), remove: jest.fn() }
-        }));
-        jest.spyOn(document, 'querySelectorAll').mockImplementation(() => [
-            { classList: { remove: jest.fn() } },
-            { classList: { remove: jest.fn() } }
-        ]);
-        jest.spyOn(document, 'createElement').mockImplementation(() => ({
-            classList: { add: jest.fn() },
-            dataset: {},
-            addEventListener: jest.fn()
-        }));
+    jest.spyOn(document, 'getElementById').mockImplementation((id) => createMockElement());
+    jest.spyOn(document, 'querySelector').mockImplementation(() => ({
+      classList: { add: jest.fn(), remove: jest.fn() }
+    }));
+    jest.spyOn(document, 'querySelectorAll').mockImplementation(() => [
+      { classList: { remove: jest.fn() } },
+      { classList: { remove: jest.fn() } }
+    ]);
+    jest.spyOn(document, 'createElement').mockImplementation(() => ({
+      classList: { add: jest.fn() },
+      dataset: {},
+      addEventListener: jest.fn()
+    }));
 
-        global.alert = jest.fn();
-        global.confirm = jest.fn(() => true);
+    global.alert = jest.fn();
+    global.confirm = jest.fn(() => true);
 
-        Storage.prototype.getItem = jest.fn(() => null);
-        Storage.prototype.setItem = jest.fn();
-        Storage.prototype.removeItem = jest.fn();
-        Storage.prototype.clear = jest.fn();
+    Storage.prototype.getItem = jest.fn(() => null);
+    Storage.prototype.setItem = jest.fn();
+    Storage.prototype.removeItem = jest.fn();
+    Storage.prototype.clear = jest.fn();
 
-        jest.clearAllMocks();
+    jest.clearAllMocks();
+  });
+
+  describe('General Logic and Statistics', () => {
+    test('should save game statistics on game over', () => {
+      gameController.gameStartTime = Date.now();
+      game.isAI = true;
+      game.difficulty = 'medium';
+      gameController.saveGameToStatistics('win', 'black');
+      expect(gameController.gameStartTime).toBeNull();
     });
 
-    describe('General Logic and Statistics', () => {
-        test('should save game statistics on game over', () => {
-            gameController.gameStartTime = Date.now();
-            game.isAI = true;
-            game.difficulty = 'medium';
-            gameController.saveGameToStatistics('win', 'black');
-            expect(gameController.gameStartTime).toBeNull();
-        });
-
-        test('should skip statistics if gameStartTime not set', () => {
-            gameController.gameStartTime = null;
-            gameController.saveGameToStatistics('win', 'black');
-            expect(true).toBe(true);
-        });
-
-        test('should handle corridor placement calculation', () => {
-            game.phase = PHASES.SETUP_WHITE_KING;
-            gameController.placeKing(7, 4, 'white');
-            expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
-        });
+    test('should skip statistics if gameStartTime not set', () => {
+      gameController.gameStartTime = null;
+      gameController.saveGameToStatistics('win', 'black');
+      expect(true).toBe(true);
     });
 
-    describe('King Placement', () => {
-        test('should place white king in valid corridor', () => {
-            game.phase = PHASES.SETUP_WHITE_KING;
-            gameController.placeKing(7, 4, 'white');
-            expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
-            expect(game.phase).toBe(PHASES.SETUP_BLACK_KING);
-        });
+    test('should handle corridor placement calculation', () => {
+      game.phase = PHASES.SETUP_WHITE_KING;
+      gameController.placeKing(7, 4, 'white');
+      expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+    });
+  });
 
-        test('should reject king placement outside corridor', () => {
-            game.phase = PHASES.SETUP_WHITE_KING;
-            gameController.placeKing(2, 4, 'white');
-            expect(game.board[2][4]).toBeNull();
-            expect(game.log).toHaveBeenCalledWith('Ungültiger Bereich für König!');
-        });
+  describe('King Placement', () => {
+    test('should place white king in valid corridor', () => {
+      game.phase = PHASES.SETUP_WHITE_KING;
+      gameController.placeKing(7, 4, 'white');
+      expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+      expect(game.phase).toBe(PHASES.SETUP_BLACK_KING);
     });
 
-    describe('Shop and Piece Management', () => {
-        test('should select piece if player has enough points', () => {
-            game.points = 15;
-            gameController.selectShopPiece('n');
-            expect(game.selectedShopPiece).toBe('n');
-        });
+    test('should reject king placement outside corridor', () => {
+      game.phase = PHASES.SETUP_WHITE_KING;
+      gameController.placeKing(2, 4, 'white');
+      expect(game.board[2][4]).toBeNull();
+      expect(game.log).toHaveBeenCalledWith('Ungültiger Bereich für König!');
+    });
+  });
 
-        test('should refund points when removing piece from corridor', () => {
-            game.phase = PHASES.SETUP_WHITE_PIECES;
-            game.points = 10;
-            game.board[6][3] = { type: 'p', color: 'white' };
-            game.selectedShopPiece = null;
-            gameController.placeShopPiece(6, 3);
-            expect(game.points).toBe(11);
-            expect(game.board[6][3]).toBeNull();
-        });
-
-        test('should clear selectedShopPiece after placing a piece', () => {
-            game.phase = PHASES.SETUP_WHITE_PIECES;
-            game.points = 15;
-            game.selectedShopPiece = 'p';
-            gameController.placeShopPiece(6, 3);
-            expect(game.selectedShopPiece).toBeNull();
-            expect(game.points).toBe(14);
-        });
-
-        test('should reject piece selection without shop piece', () => {
-            game.phase = PHASES.SETUP_WHITE_PIECES;
-            game.selectedShopPiece = null;
-            gameController.placeShopPiece(6, 3);
-            expect(game.log).toHaveBeenCalledWith('Bitte zuerst eine Figur im Shop auswählen!');
-        });
+  describe('Shop and Piece Management', () => {
+    test('should select piece if player has enough points', () => {
+      game.points = 15;
+      gameController.selectShopPiece('n');
+      expect(game.selectedShopPiece).toBe('n');
     });
 
-    describe('Cell Click Handling', () => {
-        test('should handle clicks during setup phases', () => {
-            game.phase = PHASES.SETUP_WHITE_KING;
-            gameController.handleCellClick(7, 4);
-            expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
-        });
-
-        test('should block clicks during animation', () => {
-            game.isAnimating = true;
-            game.phase = PHASES.PLAY;
-            gameController.handleCellClick(4, 4);
-            expect(UI.renderBoard).not.toHaveBeenCalled();
-        });
-
-        test('should block clicks in replay mode', () => {
-            game.replayMode = true;
-            game.phase = PHASES.PLAY;
-            gameController.handleCellClick(4, 4);
-            expect(UI.renderBoard).not.toHaveBeenCalled();
-        });
+    test('should refund points when removing piece from corridor', () => {
+      game.phase = PHASES.SETUP_WHITE_PIECES;
+      game.points = 10;
+      game.board[6][3] = { type: 'p', color: 'white' };
+      game.selectedShopPiece = null;
+      gameController.placeShopPiece(6, 3);
+      expect(game.points).toBe(11);
+      expect(game.board[6][3]).toBeNull();
     });
 
-    describe('AI and Game State', () => {
-        test('should not allow player clicks during AI turn', () => {
-            game.isAI = true;
-            game.phase = PHASES.PLAY;
-            game.turn = 'black';
-            game.handlePlayClick = jest.fn();
-            gameController.handleCellClick(0, 0);
-            expect(game.handlePlayClick).not.toHaveBeenCalled();
-        });
-
-        test('should handle AI draw offer evaluation', () => {
-            game.phase = PHASES.PLAY;
-            game.isAI = true;
-            game.turn = 'white';
-            gameController.offerDraw('white');
-            expect(game.drawOffered).toBe(true);
-        });
+    test('should clear selectedShopPiece after placing a piece', () => {
+      game.phase = PHASES.SETUP_WHITE_PIECES;
+      game.points = 15;
+      game.selectedShopPiece = 'p';
+      gameController.placeShopPiece(6, 3);
+      expect(game.selectedShopPiece).toBeNull();
+      expect(game.points).toBe(14);
     });
 
-    describe('Clock Management', () => {
-        test('should stop clock when not in PLAY phase', () => {
-            game.phase = PHASES.SETUP_WHITE_PIECES;
-            gameController.clockInterval = setInterval(() => { }, 100);
-            gameController.tickClock();
-            expect(gameController.clockInterval).toBeNull();
-        });
+    test('should reject piece selection without shop piece', () => {
+      game.phase = PHASES.SETUP_WHITE_PIECES;
+      game.selectedShopPiece = null;
+      gameController.placeShopPiece(6, 3);
+      expect(game.log).toHaveBeenCalledWith('Bitte zuerst eine Figur im Shop auswählen!');
+    });
+  });
+
+  describe('Cell Click Handling', () => {
+    test('should handle clicks during setup phases', () => {
+      game.phase = PHASES.SETUP_WHITE_KING;
+      gameController.handleCellClick(7, 4);
+      expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
     });
 
-    describe('Analysis Mode', () => {
-        test('should enter analysis mode only during play', () => {
-            game.phase = PHASES.SETUP_WHITE_KING;
-            const result = gameController.enterAnalysisMode();
-            expect(result).toBe(false);
-        });
-
-        test('should restore position when exiting analysis', () => {
-            game.phase = PHASES.PLAY;
-            game.positionHistory = ['h1'];
-            game.board[0][0] = { type: 'k', color: 'black' };
-            gameController.enterAnalysisMode();
-            game.positionHistory = ['h2'];
-            gameController.exitAnalysisMode(true);
-            expect(game.positionHistory).toEqual(['h1']);
-        });
+    test('should block clicks during animation', () => {
+      game.isAnimating = true;
+      game.phase = PHASES.PLAY;
+      gameController.handleCellClick(4, 4);
+      expect(UI.renderBoard).not.toHaveBeenCalled();
     });
 
-    describe('Save and Load', () => {
-        test('should handle corrupt save data', () => {
-            Storage.prototype.getItem.mockReturnValueOnce('invalid');
-            gameController.loadGame();
-            expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Fehler'));
-        });
+    test('should block clicks in replay mode', () => {
+      game.replayMode = true;
+      game.phase = PHASES.PLAY;
+      gameController.handleCellClick(4, 4);
+      expect(UI.renderBoard).not.toHaveBeenCalled();
     });
+  });
+
+  describe('AI and Game State', () => {
+    test('should not allow player clicks during AI turn', () => {
+      game.isAI = true;
+      game.phase = PHASES.PLAY;
+      game.turn = 'black';
+      game.handlePlayClick = jest.fn();
+      gameController.handleCellClick(0, 0);
+      expect(game.handlePlayClick).not.toHaveBeenCalled();
+    });
+
+    test('should handle AI draw offer evaluation', () => {
+      game.phase = PHASES.PLAY;
+      game.isAI = true;
+      game.turn = 'white';
+      gameController.offerDraw('white');
+      expect(game.drawOffered).toBe(true);
+    });
+  });
+
+  describe('Clock Management', () => {
+    test('should stop clock when not in PLAY phase', () => {
+      game.phase = PHASES.SETUP_WHITE_PIECES;
+      gameController.clockInterval = setInterval(() => { }, 100);
+      gameController.tickClock();
+      expect(gameController.clockInterval).toBeNull();
+    });
+  });
+
+  describe('Analysis Mode', () => {
+    test('should enter analysis mode only during play', () => {
+      game.phase = PHASES.SETUP_WHITE_KING;
+      const result = gameController.enterAnalysisMode();
+      expect(result).toBe(false);
+    });
+
+    test('should restore position when exiting analysis', () => {
+      game.phase = PHASES.PLAY;
+      game.positionHistory = ['h1'];
+      game.board[0][0] = { type: 'k', color: 'black' };
+      gameController.enterAnalysisMode();
+      game.positionHistory = ['h2'];
+      gameController.exitAnalysisMode(true);
+      expect(game.positionHistory).toEqual(['h1']);
+    });
+  });
+
+  describe('Save and Load', () => {
+    test('should handle corrupt save data', () => {
+      Storage.prototype.getItem.mockReturnValueOnce('invalid');
+      gameController.loadGame();
+      expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Fehler'));
+    });
+  });
 });

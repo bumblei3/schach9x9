@@ -549,7 +549,6 @@ function setupGlobalListeners() {
   });
 
 
-
   document.getElementById('help-btn').addEventListener('click', () => {
     toggleMenu(false);
     document.getElementById('help-overlay').classList.remove('hidden');
@@ -684,40 +683,40 @@ function setupGlobalListeners() {
     if (e.ctrlKey || e.metaKey) {
       if (!window.game) return;
       switch (e.key.toLowerCase()) {
-        case 's': e.preventDefault(); window.game.saveGame(); break;
-        case 'l': e.preventDefault(); window.game.loadGame(); break;
-        case 'z':
-          e.preventDefault();
-          if (e.shiftKey) {
-            if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) window.game.redoMove();
-          } else {
-            if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove();
-          }
-          break;
-        case 'y':
-          e.preventDefault();
+      case 's': e.preventDefault(); window.game.saveGame(); break;
+      case 'l': e.preventDefault(); window.game.loadGame(); break;
+      case 'z':
+        e.preventDefault();
+        if (e.shiftKey) {
           if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) window.game.redoMove();
-          break;
+        } else {
+          if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove();
+        }
+        break;
+      case 'y':
+        e.preventDefault();
+        if (window.game.redoStack.length > 0 && window.game.phase === PHASES.PLAY) window.game.redoMove();
+        break;
       }
     }
 
     if (window.game && !window.game.replayMode) {
       switch (e.key.toLowerCase()) {
-        case 'h': if (window.game.phase === PHASES.PLAY) window.game.showTutorSuggestions(); break;
-        case 'u': if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove(); break;
-        case '3': document.getElementById('toggle-3d-btn')?.click(); break; // Toggle 3D mode
-        case 'escape':
-        case 'esc':
-          if (window.game.selectedSquare) {
-            window.game.selectedSquare = null;
-            window.game.validMoves = null;
-            UI.renderBoard(window.game);
-          }
-          // Close overlays
-          document.querySelectorAll('.fullscreen-overlay, .modal-overlay').forEach(el => {
-            if (!el.id.includes('points-selection')) el.classList.add('hidden');
-          });
-          break;
+      case 'h': if (window.game.phase === PHASES.PLAY) window.game.showTutorSuggestions(); break;
+      case 'u': if (window.game.moveHistory.length > 0 && window.game.phase === PHASES.PLAY) window.game.undoMove(); break;
+      case '3': document.getElementById('toggle-3d-btn')?.click(); break; // Toggle 3D mode
+      case 'escape':
+      case 'esc':
+        if (window.game.selectedSquare) {
+          window.game.selectedSquare = null;
+          window.game.validMoves = null;
+          UI.renderBoard(window.game);
+        }
+        // Close overlays
+        document.querySelectorAll('.fullscreen-overlay, .modal-overlay').forEach(el => {
+          if (!el.id.includes('points-selection')) el.classList.add('hidden');
+        });
+        break;
       }
     }
 
