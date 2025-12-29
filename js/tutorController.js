@@ -597,7 +597,7 @@ export class TutorController {
 
   getScoreDescription(score) {
     // Score is in centipawns (100 = 1 pawn advantage)
-    const pawns = score / 100;
+    const _pawns = score / 100;
 
     if (score >= 900) {
       return { label: '🏆 Gewinnstellung', color: '#10b981', emoji: '🏆' };

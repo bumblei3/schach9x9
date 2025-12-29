@@ -35,7 +35,7 @@ export function updateMoveHistoryUI(game) {
       const pieceChar = pieceSymbols[move.piece.type];
 
       const fromFile = String.fromCharCode(97 + move.from.c);
-      const fromRank = BOARD_SIZE - move.from.r;
+      // const fromRank = BOARD_SIZE - move.from.r; // Unused
       const toFile = String.fromCharCode(97 + move.to.c);
       const toRank = BOARD_SIZE - move.to.r;
 
@@ -444,15 +444,12 @@ export function renderBoard(game) {
     }
   }
 
-  // Rendere nur geänderte Zellen (oder alle beim ersten Mal)
-  /* eslint-disable indent */
   const cellsToRender = game._forceFullRender
     ? Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => ({
         r: Math.floor(i / BOARD_SIZE),
         c: i % BOARD_SIZE,
       }))
     : changedCells;
-  /* eslint-enable indent */
 
   game._forceFullRender = false;
 

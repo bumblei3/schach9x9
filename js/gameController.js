@@ -1,4 +1,4 @@
-import { PHASES, BOARD_SIZE } from './gameEngine.js';
+import { PHASES/*, BOARD_SIZE*/ } from './gameEngine.js';
 import { storageManager } from './storage.js';
 import { SHOP_PIECES, PIECE_VALUES } from './config.js';
 import * as UI from './ui.js';
@@ -52,7 +52,7 @@ export class GameController {
     soundManager.init();
 
     // Initialize Tutorial
-    const tutorial = new Tutorial();
+    const _tutorial = new Tutorial();
 
     // Initialize Arrow Renderer
     const boardContainer = document.querySelector('#board').parentElement;
@@ -428,7 +428,7 @@ export class GameController {
     }
 
     const resigningColor = color || this.game.turn;
-    const winningColor = resigningColor === 'white' ? 'black' : 'white';
+    const _winningColor = resigningColor === 'white' ? 'black' : 'white';
 
     this.game.phase = PHASES.GAME_OVER;
     UI.renderBoard(this.game);

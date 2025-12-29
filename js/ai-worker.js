@@ -54,7 +54,7 @@ self.onmessage = function (e) {
       }
 
       case 'analyze': {
-        const { board, color, depth, topMovesCount = 5 } = data;
+        const { board, color, _depth, topMovesCount = 5 } = data;
 
         // Get position evaluation
         const score = evaluatePosition(board, color);

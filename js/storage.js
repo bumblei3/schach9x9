@@ -4,7 +4,7 @@
  * @module storage
  */
 
-import { BOARD_SIZE, PHASES } from './config.js';
+// import { BOARD_SIZE, PHASES } from './config.js';
 
 export class StorageManager {
   constructor() {

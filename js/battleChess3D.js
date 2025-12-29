@@ -6,7 +6,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createPiece3D, PIECE_COLORS } from './pieces3D.js';
+import { createPiece3D/*, PIECE_COLORS*/ } from './pieces3D.js';
 import { BattleAnimator } from './battleAnimations.js';
 import { logger } from './logger.js';
 import { BOARD_SIZE } from './config.js';
@@ -345,7 +345,7 @@ export class BattleChess3D {
   /**
    * Animate a piece move
    */
-  async animateMove(fromRow, fromCol, toRow, toCol, captured = false) {
+  async animateMove(fromRow, fromCol, toRow, toCol, _captured = false) {
     const key = `${fromRow},${fromCol}`;
     const piece = this.pieces[key];
     if (!piece) return;
@@ -522,7 +522,7 @@ export class BattleChess3D {
 
     // Recreate all pieces with the new skin
     const piecesToRecreate = [];
-    Object.entries(this.pieces).forEach(([key, piece]) => {
+    Object.entries(this.pieces).forEach(([_key, piece]) => {
       const { type, color, row, col } = piece.userData;
       piecesToRecreate.push({ type, color, row, col });
     });

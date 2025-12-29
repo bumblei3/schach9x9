@@ -1,14 +1,14 @@
 import { PHASES, BOARD_SIZE, PIECE_VALUES } from './gameEngine.js';
-import { SHOP_PIECES } from './config.js';
+// import { SHOP_PIECES } from './config.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
-import { PIECE_SVGS } from './chess-pieces.js';
-import { logger } from './logger.js';
+// import { PIECE_SVGS } from './chess-pieces.js';
+// import { logger } from './logger.js';
 import { puzzleManager } from './puzzleManager.js';
 import { evaluatePosition } from './aiEngine.js';
 
 // Piece values for shop (needed for some logic?)
-const PIECES = SHOP_PIECES;
+// const PIECES = SHOP_PIECES;
 
 export class MoveController {
   constructor(game) {

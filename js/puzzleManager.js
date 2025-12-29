@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from './config.js';
+// import { BOARD_SIZE } from './config.js';
 import { PuzzleGenerator } from './puzzleGenerator.js';
 
 export class PuzzleManager {

@@ -110,7 +110,7 @@ export class BattleAnimator {
    * Select appropriate battle animation
    * Returns animation type based on piece types
    */
-  selectBattleAnimation(attackerType, defenderType) {
+  selectBattleAnimation(_attackerType, _defenderType) {
     // Random selection from pool for variety
     const animations = ['charge', 'strike', 'clash', 'overpower'];
     const randomIndex = Math.floor(Math.random() * animations.length);
@@ -145,7 +145,7 @@ export class BattleAnimator {
   /**
    * Charge animation - attacker rushes forward
    */
-  async animateCharge(attackerPos, defenderPos) {
+  async animateCharge(attackerPos, _defenderPos) {
     // Create temporary visual effect
     const particles = this.createDustParticles(attackerPos);
 

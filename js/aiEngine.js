@@ -119,10 +119,12 @@ function initHistoryTable() {
 initHistoryTable();
 
 // Clear killer moves and history (between moves)
+// eslint-disable-next-line no-unused-vars
 function clearKillerMoves() {
   killerMoves.clear();
 }
 
+// eslint-disable-next-line no-unused-vars
 function clearHistory() {
   initHistoryTable();
 }
@@ -647,7 +649,7 @@ function sendProgress(maxDepth) {
  * Apply a move to the board and return undo information
  */
 const MAX_PLY = 64; // Max depth
-const undoStack = new Array(MAX_PLY).fill(null).map(() => ({
+const _undoStack = new Array(MAX_PLY).fill(null).map(() => ({
   capturedPiece: null,
   oldHasMoved: false,
   move: null,
@@ -992,7 +994,7 @@ const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
 export function evaluatePosition(board, forColor) {
   let mgScore = 0;
   let egScore = 0;
-  const materialCount = 0;
+  const _materialCount = 0;
 
   // Reset static arrays for pawn structure
   pawnColumnsWhite.fill(0);
@@ -1331,7 +1333,7 @@ const KING_DIRS = [
   [1, 1],
 ];
 
-const ATTACK_DIRECTIONS = [
+const _ATTACK_DIRECTIONS = [
   { dr: -1, dc: -1, types: ['b', 'q', 'a', 'e'] }, // Diagonals
   { dr: -1, dc: 1, types: ['b', 'q', 'a', 'e'] },
   { dr: 1, dc: -1, types: ['b', 'q', 'a', 'e'] },

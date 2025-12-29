@@ -61,7 +61,7 @@ export class ParticleSystem {
       return;
     }
 
-    const now = Date.now();
+    // const now = Date.now();
     // Use fixed time step or delta for smoother animation if needed,
     // but simple per-frame update is fine for this.
 

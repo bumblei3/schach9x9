@@ -4,7 +4,7 @@
  * Measures AI performance on various positions
  */
 
-import { getBestMove, evaluatePosition, setProgressCallback } from './aiEngine.js';
+import { getBestMove, setProgressCallback } from './aiEngine.js';
 import { BOARD_SIZE } from './config.js';
 
 // Disable progress callback to avoid spam
