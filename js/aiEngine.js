@@ -120,6 +120,21 @@ const PST = {
   ]
 };
 
+// Endgame Piece-Square Tables (PST)
+const PST_EG = {
+  k: [
+    -50, -40, -30, -20, -20, -20, -30, -40, -50,
+    -30, -20, -10, 0, 0, 0, -10, -20, -30,
+    -30, -10, 10, 20, 20, 20, 10, -10, -30,
+    -30, 0, 20, 30, 30, 30, 20, 0, -30,
+    -30, 0, 20, 30, 40, 30, 20, 0, -30,
+    -30, 0, 20, 30, 30, 30, 20, 0, -30,
+    -30, -10, 10, 20, 20, 20, 10, -10, -30,
+    -30, -20, -10, 0, 0, 0, -10, -20, -30,
+    -50, -40, -30, -20, -20, -20, -30, -40, -50
+  ]
+};
+
 // ========================================
 // TRANSPOSITION TABLE & ZOBRIST HASHING
 // ========================================
@@ -973,64 +988,141 @@ const pawnColumnsWhite = new Int8Array(BOARD_SIZE);
 const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
 
 export function evaluatePosition(board, forColor) {
-  let score = 0;
-  // Reset static arrays
+  let mgScore = 0;
+  let egScore = 0;
+  let materialCount = 0;
+
+  // Reset static arrays for pawn structure
   pawnColumnsWhite.fill(0);
   pawnColumnsBlack.fill(0);
 
-  // Single pass board iteration
+  // Total material for phase calculation (excluding pawns and kings)
+  const PHASE_VALUES = { n: 1, b: 1, r: 2, q: 4, a: 3, c: 3, e: 4 };
+  let totalPhase = 0;
+
+  // First pass: collect pieces and basic material/pst/mobility
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       const piece = board[r][c];
       if (!piece) continue;
 
       const pieceValue = PIECE_VALUES[piece.type] || 0;
-      const positionBonus = getPositionBonus(r, c, piece.type, piece.color);
-      let totalValue = pieceValue + positionBonus;
+      const mgBonus = getPositionBonus(r, c, piece.type, piece.color, false);
+      const egBonus = getPositionBonus(r, c, piece.type, piece.color, true);
 
-      // King Safety
-      if (piece.type === 'k') {
-        totalValue += evaluateKingSafety(board, r, c, piece.color);
-      }
+      // Material and basic PST
+      const isWhite = piece.color === 'white';
+      const sideMult = isWhite ? 1 : -1;
 
-      // Mobility bonus
+      mgScore += (pieceValue + mgBonus) * sideMult;
+      egScore += (pieceValue + egBonus) * sideMult;
+
+      // Mobility (only for non-pawn/king)
       if (piece.type !== 'p' && piece.type !== 'k') {
         const mobility = countMobility(board, r, c, piece);
-        totalValue += mobility * 2;
+        const mobBonus = mobility * 2;
+        mgScore += mobBonus * sideMult;
+        egScore += mobBonus * sideMult;
+
+        // Phase contribution
+        totalPhase += PHASE_VALUES[piece.type] || 0;
       }
 
       // Record pawn for structure eval
       if (piece.type === 'p') {
-        if (piece.color === 'white') {
+        if (isWhite) {
           pawnColumnsWhite[c]++;
         } else {
           pawnColumnsBlack[c]++;
         }
       }
 
-      if (piece.color === forColor) {
-        score += totalValue;
-      } else {
-        score -= totalValue;
+      // King Safety (Midgame only)
+      if (piece.type === 'k') {
+        const safety = evaluateKingSafety(board, r, c, piece.color);
+        mgScore += safety * sideMult;
       }
     }
   }
 
-  // Apply pawn structure penalties efficiently
-  for (let c = 0; c < BOARD_SIZE; c++) {
-    // White
-    if (pawnColumnsWhite[c] > 1) {
-      const penalty = (pawnColumnsWhite[c] - 1) * 10;
-      if (forColor === 'white') score -= penalty; else score += penalty;
-    }
-    // Black
-    if (pawnColumnsBlack[c] > 1) {
-      const penalty = (pawnColumnsBlack[c] - 1) * 10;
-      if (forColor === 'black') score -= penalty; else score += penalty;
+  // Second pass: Pawn structure (Isolated, Passed, Doubled)
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const piece = board[r][c];
+      if (!piece || piece.type !== 'p') continue;
+
+      const isWhite = piece.color === 'white';
+      const sideMult = isWhite ? 1 : -1;
+
+      // Doubled pawn penalty
+      const cols = isWhite ? pawnColumnsWhite : pawnColumnsBlack;
+      if (cols[c] > 1) {
+        mgScore -= 10 * sideMult;
+        egScore -= 12 * sideMult;
+      }
+
+      // Isolated pawn penalty
+      const leftCol = c > 0 ? cols[c - 1] : 0;
+      const rightCol = c < BOARD_SIZE - 1 ? cols[c + 1] : 0;
+      if (leftCol === 0 && rightCol === 0) {
+        mgScore -= 15 * sideMult;
+        egScore -= 20 * sideMult;
+      }
+
+      // Passed pawn bonus
+      if (isPassedPawn(board, r, c, piece.color)) {
+        const progress = isWhite ? (BOARD_SIZE - 1 - r) : r;
+        const passedBonus = progress * progress * 5;
+        mgScore += passedBonus * sideMult;
+        egScore += passedBonus * 1.5 * sideMult;
+      }
     }
   }
 
-  return score;
+  // Calculate phase (0 = pure endgame, 24+ = midgame)
+  // Max phase is roughly around 32-40 in this 9x9 setup
+  const maxPhase = 32;
+  const phaseValue = Math.min(totalPhase, maxPhase);
+  const mgWeight = phaseValue / maxPhase;
+  const egWeight = 1 - mgWeight;
+
+  const totalScore = (mgScore * mgWeight) + (egScore * egWeight);
+  const perspectiveScore = forColor === 'white' ? totalScore : -totalScore;
+
+  return Math.round(perspectiveScore);
+}
+
+/**
+ * Check if a pawn is a passed pawn
+ */
+function isPassedPawn(board, r, c, color) {
+  const opponentColor = color === 'white' ? 'black' : 'white';
+  const startR = color === 'white' ? r - 1 : r + 1;
+  const endR = color === 'white' ? 0 : BOARD_SIZE - 1;
+  const step = color === 'white' ? -1 : 1;
+
+  for (let row = startR; row !== endR + step; row += step) {
+    for (let col = Math.max(0, c - 1); col <= Math.min(BOARD_SIZE - 1, c + 1); col++) {
+      const piece = board[row][col];
+      if (piece && piece.type === 'p' && piece.color === opponentColor) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/**
+ * Get position bonus for piece placement using PSTs
+ */
+function getPositionBonus(r, c, type, color, isEndgame = false) {
+  let table = (isEndgame && PST_EG[type]) ? PST_EG[type] : PST[type];
+  if (!table) table = PST[type]; // Fallback to normal PST if no EG table
+  if (!table) return 0;
+
+  // Mirror row for black pieces
+  const perspectiveRow = color === 'white' ? r : (BOARD_SIZE - 1 - r);
+  return table[perspectiveRow * BOARD_SIZE + c];
 }
 
 /**
@@ -1056,17 +1148,6 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
   return safety;
 }
 
-/**
- * Get position bonus for piece placement using PSTs
- */
-function getPositionBonus(r, c, type, color) {
-  const table = PST[type];
-  if (!table) return 0;
-
-  // Mirror row for black pieces (so they move 'down' the table correctly)
-  const perspectiveRow = color === 'white' ? r : (BOARD_SIZE - 1 - r);
-  return table[perspectiveRow * BOARD_SIZE + c];
-}
 
 /**
  * Order moves for better alpha-beta pruning

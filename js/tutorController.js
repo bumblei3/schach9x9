@@ -10,6 +10,8 @@ export class TutorController {
         this.debouncedGetTutorHints = debounce(() => {
             this.game.bestMoves = this.getTutorHints();
         }, 300);
+
+        this.evalHistory = [];
     }
 
     updateBestMoves() {
@@ -687,6 +689,76 @@ export class TutorController {
             strategicValue: strategic,
             scoreDiff: diff,
         };
+    }
+
+    /**
+     * Handles player move for "Guess the Move" and Blunder Warnings
+     */
+    handlePlayerMove(from, to) {
+        if (this.game.phase !== PHASES.PLAY) return;
+
+        // Get the move from legal moves
+        const moves = this.game.getAllLegalMoves(this.game.turn);
+        const move = moves.find(m => m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c);
+
+        if (!move) return;
+
+        // 1. Guess the Move Logic
+        if (this.game.tutorMode === 'guess_the_move') {
+            const bestMoves = this.game.bestMoves || [];
+            if (bestMoves.length > 0) {
+                const isBest = bestMoves.some(hint =>
+                    hint.move.from.r === from.r && hint.move.from.c === from.c &&
+                    hint.move.to.r === to.r && hint.move.to.c === to.c
+                );
+
+                if (isBest) {
+                    this.game.tutorPoints += 10;
+                    UI.showToast("Richtig geraten! +10 Tutor-Punkte", "success");
+                } else {
+                    UI.showToast("Nicht der beste Zug, aber das Spiel geht weiter.", "neutral");
+                }
+            }
+        }
+
+        // 2. Blunder Detection
+        // This needs to be checked AFTER the move is made to see the evaluation drop
+        // Actually, we should check it IN executeMove or right after.
+        // We'll call this from moveController.executeMove after evalScore is calculated.
+    }
+
+    checkBlunder(moveRecord) {
+        if (!moveRecord || this.game.mode === 'puzzle') return;
+
+        const currentEval = moveRecord.evalScore;
+        const prevEval = this.game.lastEval || 0;
+        const turn = moveRecord.piece.color;
+
+        // Advantage drop (from perspective of current player)
+        // If White moved, eval should increase. If it decreased significantly, it's a blunder.
+        // White: drop = prevEval - currentEval
+        // Black: drop = currentEval - prevEval
+        const drop = turn === 'white' ? (prevEval - currentEval) : (currentEval - prevEval);
+
+        if (drop >= 200) { // 2.0 evaluation drop is a blunder
+            const analysis = this.analyzeMoveWithExplanation(moveRecord, currentEval, turn === 'white' ? prevEval : -prevEval);
+            this.showBlunderWarning(analysis);
+        }
+
+        this.game.lastEval = currentEval;
+    }
+
+    showBlunderWarning(analysis) {
+        const warnings = analysis.warnings.join("\n");
+        const explanation = analysis.tacticalExplanations.join("\n") || "Kein konkretes taktisches Motiv erkannt, aber die Stellung verschlechtert sich deutlich.";
+
+        UI.showModal("⚠️ Schwerer Fehler (Blunder)",
+            `Dieser Zug verschlechtert deine Stellung um ${(analysis.scoreDiff / -100).toFixed(1)} Bauern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`,
+            [
+                { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+                { text: 'Ja, Zug rückgängig machen', class: 'btn-primary', callback: () => this.game.undoMove() }
+            ]
+        );
     }
     getSetupTemplates() {
         const points = this.game.initialPoints;

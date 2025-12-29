@@ -438,6 +438,15 @@ function setupGlobalListeners() {
       window.battleChess3D.currentSkin = savedSkin;
     }
 
+    // Tutor Mode Selector
+    const tutorModeSelect = document.getElementById('tutor-mode-select');
+    if (tutorModeSelect) {
+      tutorModeSelect.addEventListener('change', (e) => {
+        window.game.tutorMode = e.target.value;
+        window.game.log(`Tutor-Modus auf "${e.target.value}" geändert.`);
+      });
+    }
+
     // Handle skin changes
     skinSelector.addEventListener('change', (e) => {
       const newSkin = e.target.value;

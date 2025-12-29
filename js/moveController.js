@@ -41,8 +41,8 @@ export class MoveController {
                 const isHumanMove = this.game.isAI ? this.game.turn === 'white' : true;
                 if (isHumanMove) {
                     this.game.stats.playerMoves++;
-                    if (this.game.isTutorMove && this.game.isTutorMove(this.game.selectedSquare, move)) {
-                        this.game.stats.playerBestMoves++;
+                    if (this.game.tutorController && this.game.tutorController.handlePlayerMove) {
+                        this.game.tutorController.handlePlayerMove(this.game.selectedSquare, move);
                     }
                 }
                 this.executeMove(this.game.selectedSquare, move);
@@ -207,6 +207,11 @@ export class MoveController {
         // Add move to history
         this.game.moveHistory.push(moveRecord);
         UI.updateMoveHistoryUI(this.game);
+
+        // Blunder Detection
+        if (this.game.tutorController && this.game.tutorController.checkBlunder) {
+            this.game.tutorController.checkBlunder(moveRecord);
+        }
 
         // Puzzle Logic Check
         if (this.game.mode === 'puzzle') {

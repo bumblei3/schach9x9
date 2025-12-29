@@ -1,10 +1,5 @@
-/**
- * Puzzle Manager for Schach 9x9
- * Handles puzzle logic, loading, and validation
- * @module puzzleManager
- */
-
 import { BOARD_SIZE } from './config.js';
+import { PuzzleGenerator } from './puzzleGenerator.js';
 
 export class PuzzleManager {
     constructor() {
@@ -14,29 +9,16 @@ export class PuzzleManager {
                 title: 'Puzzle 1: Der Gnadenstoß',
                 description: 'Weiß zieht und setzt in 1 Zug matt.',
                 difficulty: 'Einfach',
-                setup: (game) => {
-                    // Clear board
-                    game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
-
-                    // Place pieces (White to move)
-                    // White King at h1 (7, 8) in 9x9? No, let's use explicit indices
-                    // 9x9 Board: 0..8
-
-                    // White Pieces
-                    game.board[8][4] = { type: 'k', color: 'white', hasMoved: true }; // King at e1
-                    game.board[1][4] = { type: 'q', color: 'white', hasMoved: true }; // Queen at e8
-
-                    // Black Pieces
-                    game.board[0][4] = { type: 'k', color: 'black', hasMoved: true }; // King at e9
-
-                    // Setup internal state
-                    game.turn = 'white';
-                    game.whiteKingPos = { r: 8, c: 4 };
-                    game.blackKingPos = { r: 0, c: 4 };
-                },
+                // White King at 2,2 (index 20); Black King at 0,2 (index 2); White Rook at 1,7 (index 16)
+                // Index 0-1: .. .. (2)
+                // Index 2: bk
+                // Index 3-15: (13 squares)
+                // Index 16: wr
+                // Index 17-19: (3 squares)
+                // Index 20: wk
+                setupStr: '....bk..........................wr......wk..................................................................................................................w',
                 solution: [
-                    { from: { r: 1, c: 4 }, to: { r: 0, c: 4 } } // Qe8xe9# (Hypothetical, usually king capture isn't mate but in this engine checkmate detection logic applies)
-                    // Wait, standard mate. Let's try a supported mate.
+                    { from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }
                 ]
             },
             {
@@ -44,21 +26,27 @@ export class PuzzleManager {
                 title: 'Puzzle 2: Taktischer Schlag',
                 description: 'Weiß am Zug. Matt in 2.',
                 difficulty: 'Mittel',
-                setup: (game) => {
-                    game.board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
-                    // White
-                    game.board[7][4] = { type: 'k', color: 'white' };
-                    game.board[2][4] = { type: 'r', color: 'white' };
-                    game.board[6][4] = { type: 'r', color: 'white' };
-
-                    // Black
-                    game.board[0][4] = { type: 'k', color: 'black' };
-
-                    game.turn = 'white';
-                },
+                // Black King at 0,4 (index 4); White King at 2,4 (index 22); Rook at 6,4 (index 58); Rook at 2,4? Wait, Rooks at 6,4 and 2,4 was the old description.
+                // Let's use: King at 0,4 (B), 2,4 (W). Rooks at 6,4 and 2,0.
+                // Index 4: bk
+                // Index 22: wk
+                // Index 58: wr
+                // Index 18: wr (2,0)
+                setupStr: '........bk....................wr......wk..........................................................wr........................................................w',
                 solution: [
-                    { from: { r: 6, c: 4 }, to: { r: 1, c: 4 } }, // Rook check
-                    { from: { r: 2, c: 4 }, to: { r: 0, c: 4 } }  // Rook mate
+                    { from: { r: 6, c: 4 }, to: { r: 1, c: 4 } },
+                    { from: { r: 2, c: 0 }, to: { r: 0, c: 0 } } // Adjust solution to match
+                ]
+            },
+            {
+                id: 'mate-in-1-arch',
+                title: 'Puzzle 3: Die Kraft des Erzbischofs',
+                description: 'Weiß zieht. Setze matt mit dem Erzbischof.',
+                difficulty: 'Mittel',
+                // White King at 2,3 (index 21); Archbishop at 2,2 (index 20); Black King at 0,3 (index 3)
+                setupStr: '......bk........................awkb........................................................................................................................w',
+                solution: [
+                    { from: { r: 2, c: 2 }, to: { r: 1, c: 4 } }
                 ]
             }
         ];
@@ -77,7 +65,7 @@ export class PuzzleManager {
         const puzzle = this.puzzles[index];
 
         // Reset game to a clean state
-        game.phase = 'play'; // standard play phase
+        game.phase = 'play';
         game.mode = 'puzzle';
         game.points = 0;
         game.capturedPieces = { white: [], black: [] };
@@ -89,8 +77,14 @@ export class PuzzleManager {
             solved: false
         };
 
-        // Apply setup
-        puzzle.setup(game);
+        // Apply setup from string or function
+        if (puzzle.setupStr) {
+            const { board, turn } = PuzzleGenerator.stringToBoard(puzzle.setupStr);
+            game.board = board;
+            game.turn = turn;
+        } else if (puzzle.setup) {
+            puzzle.setup(game);
+        }
 
         return puzzle;
     }
@@ -127,6 +121,27 @@ export class PuzzleManager {
             return this.loadPuzzle(game, nextIndex);
         }
         return null;
+    }
+
+    /**
+     * Dynamically generates a puzzle from a game state
+     */
+    generateAndLoad(game, depth = 2) {
+        const solution = PuzzleGenerator.findMateSequence(game.board, game.turn, depth);
+        if (!solution) return null;
+
+        const puzzle = {
+            id: 'gen-' + Date.now(),
+            title: 'Generiertes Puzzle',
+            description: `Setze matt in ${depth} Zügen.`,
+            difficulty: depth === 1 ? 'Einfach' : 'Mittel',
+            setupStr: PuzzleGenerator.boardToString(game.board, game.turn),
+            solution: solution.filter((_, i) => i % 2 === 0) // Only our moves
+        };
+
+        // Add to list and load
+        this.puzzles.push(puzzle);
+        return this.loadPuzzle(game, this.puzzles.length - 1);
     }
 }
 

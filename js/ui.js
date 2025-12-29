@@ -743,6 +743,10 @@ export function updateShopUI(game) {
   const pointsDisplay = document.getElementById('points-display');
   if (pointsDisplay) pointsDisplay.textContent = game.points;
 
+  // Update tutor points
+  const tutorPointsDisplay = document.getElementById('tutor-points-display');
+  if (tutorPointsDisplay) tutorPointsDisplay.textContent = game.tutorPoints || 0;
+
   // Disable buttons if too expensive
   document.querySelectorAll('.shop-item').forEach(btn => {
     const cost = parseInt(btn.dataset.cost);
@@ -1734,4 +1738,73 @@ export function updatePuzzleStatus(status, message) {
   if (status === 'success') {
     document.getElementById('puzzle-next-btn').classList.remove('hidden');
   }
+}
+/**
+ * Zeigt ein generisches Modal an.
+ * @param {string} title - Modal Titel
+ * @param {string} message - Modal Nachricht
+ * @param {Array} actions - Liste von Buttons {text, class, callback}
+ */
+export function showModal(title, message, actions = []) {
+  const modal = document.getElementById('generic-modal');
+  const titleEl = document.getElementById('modal-title');
+  const messageEl = document.getElementById('modal-message');
+  const actionsEl = document.getElementById('modal-actions');
+
+  if (!modal || !titleEl || !messageEl || !actionsEl) return;
+
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  actionsEl.innerHTML = '';
+
+  if (actions.length === 0) {
+    actions.push({ text: 'OK', class: 'btn-primary' });
+  }
+
+  actions.forEach(action => {
+    const btn = document.createElement('button');
+    btn.textContent = action.text;
+    btn.className = `btn ${action.class || 'btn-secondary'}`;
+    btn.style.padding = '8px 16px';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.style.border = 'none';
+    btn.style.fontWeight = '600';
+
+    btn.addEventListener('click', () => {
+      modal.style.display = 'none';
+      if (action.callback) action.callback();
+    });
+    actionsEl.appendChild(btn);
+  });
+
+  modal.style.display = 'flex';
+}
+
+/**
+ * Zeigt eine kurze Toast-Nachricht an.
+ * @param {string} message - Nachricht
+ * @param {string} type - 'success', 'error', 'neutral'
+ */
+export function showToast(message, type = 'neutral') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '💡';
+  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+  container.appendChild(toast);
+
+  // Fade out and remove
+  setTimeout(() => {
+    toast.classList.add('fade-out');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }

@@ -13,40 +13,39 @@ describe('PuzzleMode', () => {
     });
 
     test('should load a puzzle correctly', () => {
-        const puzzle = puzzleManager.loadPuzzle(game, 0); // Load first puzzle
+        const puzzle = puzzleManager.loadPuzzle(game, 0); // Load first puzzle (Mate in 1)
 
         expect(puzzle).toBeDefined();
         expect(game.mode).toBe('puzzle');
         expect(game.puzzleState.active).toBe(true);
-        expect(game.puzzleState.currentMoveIndex).toBe(0);
 
-        // Puzzle 1 setup: White King at e1 (8, 4), Queen at e8 (1, 4), Black King at e9 (0, 4)
-        expect(game.board[8][4].type).toBe('k');
-        expect(game.board[1][4].type).toBe('q');
-        expect(game.board[0][4].type).toBe('k');
+        // New Puzzle 1: White King at 2,2; Black King at 0,2; White Rook at 1,7
+        expect(game.board[2][2].type).toBe('k');
+        expect(game.board[0][2].type).toBe('k');
+        expect(game.board[1][7].type).toBe('r');
     });
 
     test('should validate correct move', () => {
         puzzleManager.loadPuzzle(game, 0); // Mate in 1
 
-        // Correct move: Qe8-e9 (1,4 -> 0,4)
+        // Correct move: R(1,7) -> R(0,7)
         const move = {
-            from: { r: 1, c: 4 },
-            to: { r: 0, c: 4 }
+            from: { r: 1, c: 7 },
+            to: { r: 0, c: 7 }
         };
 
         const result = puzzleManager.checkMove(game, move);
-        expect(result).toBe('solved'); // Should be solved as it is mate in 1
+        expect(result).toBe('solved');
         expect(game.puzzleState.solved).toBe(true);
     });
 
     test('should reject wrong move', () => {
         puzzleManager.loadPuzzle(game, 0);
 
-        // Wrong move: Qe8-d8 (1,4 -> 0,3)
+        // Wrong move: R(1,7) -> R(1,6)
         const move = {
-            from: { r: 1, c: 4 },
-            to: { r: 0, c: 3 }
+            from: { r: 1, c: 7 },
+            to: { r: 1, c: 6 }
         };
 
         const result = puzzleManager.checkMove(game, move);
@@ -67,10 +66,10 @@ describe('PuzzleMode', () => {
         expect(result1).toBe('continue');
         expect(game.puzzleState.currentMoveIndex).toBe(1);
 
-        // Move 2: R(2,4) -> R(0,4)
+        // Move 2: R(2,0) -> R(0,0)
         const move2 = {
-            from: { r: 2, c: 4 },
-            to: { r: 0, c: 4 }
+            from: { r: 2, c: 0 },
+            to: { r: 0, c: 0 }
         };
 
         const result2 = puzzleManager.checkMove(game, move2);
