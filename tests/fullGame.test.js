@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { setupJSDOM, createMockGame } from './test-utils.js';
+import { setupJSDOM } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
