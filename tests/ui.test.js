@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals';
 import { PHASES, BOARD_SIZE } from '../js/config.js';
+import { setupJSDOM, createMockGame } from './test-utils.js';
 
-// Mock dependencies
+// Mocks for ui.js dependencies are handled here
 jest.unstable_mockModule('../js/chess-pieces.js', () => ({
   PIECE_SVGS: {
     white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
@@ -27,81 +28,8 @@ describe('UI Module', () => {
   let game;
 
   beforeEach(() => {
-    // Mock Game state
-    game = {
-      board: Array(9)
-        .fill(null)
-        .map(() => Array(9).fill(null)),
-      phase: PHASES.PLAY,
-      turn: 'white',
-      whiteTime: 300,
-      blackTime: 300,
-      points: 15,
-      whiteCorridor: { rowStart: 6, colStart: 3 },
-      blackCorridor: { rowStart: 0, colStart: 3 },
-      lastMove: null,
-      lastMoveHighlight: null,
-      selectedSquare: null,
-      validMoves: null,
-      check: false,
-      checkmate: false,
-      winner: null,
-      moveHistory: [],
-      capturedPieces: { white: [], black: [] },
-      stats: { totalMoves: 0, playerMoves: 0, playerBestMoves: 0 },
-      clockEnabled: true,
-      isAI: false,
-      isAnimating: false,
-      replayMode: false,
-      getValidMoves: jest.fn(() => []),
-      handleCellClick: jest.fn(),
-      isSquareUnderAttack: jest.fn(() => false),
-    };
-
-    // Setup window globals
-    window.PIECE_SVGS = {
-      white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
-      black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
-    };
-    window._svgCache = {};
-
-    // Setup DOM with all required elements
-    document.body.innerHTML = `
-            <div id="board-wrapper">
-                <div id="board"></div>
-            </div>
-            <div id="status-display"></div>
-            <div id="move-history"></div>
-            <div id="captured-white">
-                <div class="material-advantage white-adv"></div>
-            </div>
-            <div id="captured-black">
-                <div class="material-advantage black-adv"></div>
-            </div>
-            <div id="clock-white"></div>
-            <div id="clock-black"></div>
-            <div id="shop-panel" class="hidden"></div>
-            <div id="points-display"></div>
-            <div id="finish-setup-btn"></div>
-            <div id="selected-piece-display"></div>
-            <div id="tutor-overlay" class="hidden">
-                 <div id="tutor-hints-body"></div>
-            </div>
-            <div id="promotion-overlay" class="hidden">
-                <div id="promotion-options"></div>
-            </div>
-            <div id="replay-status" class="hidden"></div>
-            <div id="replay-exit" class="hidden"></div>
-            <div id="tutor-recommendations-section" class="hidden"></div>
-            <div id="stats-overlay" class="hidden">
-                 <div id="stat-moves"></div>
-                 <div id="stat-captures"></div>
-                 <div id="stat-accuracy"></div>
-                 <div id="stat-best-moves"></div>
-                 <div id="stat-material"></div>
-            </div>
-        `;
-
+    setupJSDOM();
+    game = createMockGame();
     jest.clearAllMocks();
   });
 

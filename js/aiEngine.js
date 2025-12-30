@@ -343,6 +343,10 @@ export function setProgressCallback(callback) {
   onProgressCallback = callback;
 }
 
+export function getNodesEvaluated() {
+  return nodesEvaluated;
+}
+
 // ========================================
 // OPENING BOOK
 // ========================================

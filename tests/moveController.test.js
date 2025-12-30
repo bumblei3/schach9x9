@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
+import { setupJSDOM } from './test-utils.js';
 
 // Mock UI and SoundManager modules
 jest.unstable_mockModule('../js/ui.js', () => ({
@@ -32,21 +33,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
   },
 }));
 
-// Mock document functions used in MoveController
-global.document = {
-  getElementById: jest.fn(() => ({
-    classList: { remove: jest.fn(), add: jest.fn() },
-    style: {},
-    textContent: '',
-    value: '',
-    checked: false,
-    disabled: false,
-    appendChild: jest.fn(),
-    scrollTop: 0,
-    scrollHeight: 100,
-    innerHTML: '',
-  })),
-};
+// DOM setup is handled in setupJSDOM
 
 // Mock localStorage
 Storage.prototype.getItem = jest.fn(() => null);
@@ -67,6 +54,7 @@ describe('MoveController', () => {
   let moveController;
 
   beforeEach(() => {
+    setupJSDOM();
     game = new Game();
     game.board = createEmptyBoard();
     game.phase = PHASES.PLAY;
