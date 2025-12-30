@@ -1,5 +1,3 @@
-
-
 // Minimal mock for dependencies if needed
 global.BOARD_SIZE = 9;
 

@@ -1,5 +1,3 @@
-
-
 const { ArrowRenderer } = await import('../js/arrows.js');
 
 describe('ArrowRenderer', () => {

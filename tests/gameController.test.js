@@ -255,7 +255,7 @@ describe('GameController', () => {
   describe('Clock Management', () => {
     test('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
-      gameController.clockInterval = setInterval(() => { }, 100);
+      gameController.clockInterval = setInterval(() => {}, 100);
       gameController.tickClock();
       expect(gameController.clockInterval).toBeNull();
     });

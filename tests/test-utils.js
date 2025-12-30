@@ -4,7 +4,7 @@ import { jest } from '@jest/globals';
  * Sets up a standard JSDOM environment for Schach 9x9 tests.
  */
 export function setupJSDOM() {
-    document.body.innerHTML = `
+  document.body.innerHTML = `
     <div id="board-wrapper">
         <div id="board"></div>
     </div>
@@ -59,70 +59,76 @@ export function setupJSDOM() {
     </div>
   `;
 
-    global.window.PIECE_SVGS = {
-        white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
-        black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
-    };
-    global.window._svgCache = {};
+  global.window.PIECE_SVGS = {
+    white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
+    black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
+  };
+  global.window._svgCache = {};
 }
 
 /**
  * Creates a mock game object with common methods and properties.
  */
 export function createMockGame(overrides = {}) {
-    const PHASES = {
-        PLAY: 'play',
-        SETUP_WHITE_KING: 'setup_white_king',
-        SETUP_WHITE_PIECES: 'setup_white_pieces',
-        SETUP_BLACK_KING: 'setup_black_king',
-        SETUP_BLACK_PIECES: 'setup_black_pieces',
-        GAME_OVER: 'game_over'
-    };
+  const PHASES = {
+    PLAY: 'play',
+    SETUP_WHITE_KING: 'setup_white_king',
+    SETUP_WHITE_PIECES: 'setup_white_pieces',
+    SETUP_BLACK_KING: 'setup_black_king',
+    SETUP_BLACK_PIECES: 'setup_black_pieces',
+    GAME_OVER: 'game_over',
+  };
 
-    return {
-        board: Array(9).fill(null).map(() => Array(9).fill(null)),
-        phase: PHASES.PLAY,
-        turn: 'white',
-        whiteTime: 300,
-        blackTime: 300,
-        points: 15,
-        initialPoints: 15,
-        whiteCorridor: { rowStart: 6, colStart: 3 },
-        blackCorridor: { rowStart: 0, colStart: 3 },
-        moveHistory: [],
-        positionHistory: [],
-        capturedPieces: { white: [], black: [] },
-        stats: { totalMoves: 0, playerMoves: 0, playerBestMoves: 0, captures: 0 },
-        clockEnabled: true,
-        isAI: false,
-        isAnimating: false,
-        replayMode: false,
-        log: jest.fn(),
-        getValidMoves: jest.fn(() => []),
-        handleCellClick: jest.fn(),
-        isSquareUnderAttack: jest.fn(() => false),
-        calculateMaterialAdvantage: jest.fn(() => 0),
-        updateBestMoves: jest.fn(),
-        gameStartTime: Date.now(),
-        ...overrides
-    };
+  return {
+    board: Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null)),
+    phase: PHASES.PLAY,
+    turn: 'white',
+    whiteTime: 300,
+    blackTime: 300,
+    points: 15,
+    initialPoints: 15,
+    whiteCorridor: { rowStart: 6, colStart: 3 },
+    blackCorridor: { rowStart: 0, colStart: 3 },
+    moveHistory: [],
+    positionHistory: [],
+    capturedPieces: { white: [], black: [] },
+    stats: { totalMoves: 0, playerMoves: 0, playerBestMoves: 0, captures: 0 },
+    clockEnabled: true,
+    isAI: false,
+    isAnimating: false,
+    replayMode: false,
+    log: jest.fn(),
+    getValidMoves: jest.fn(() => []),
+    handleCellClick: jest.fn(),
+    isSquareUnderAttack: jest.fn(() => false),
+    calculateMaterialAdvantage: jest.fn(() => 0),
+    updateBestMoves: jest.fn(),
+    gameStartTime: Date.now(),
+    ...overrides,
+  };
 }
 
 /**
  * Mocks Three.js basics for testing 3D components without loading the full library.
  */
 export function mockThreeJS() {
-    const mockScene = { add: jest.fn(), remove: jest.fn(), traverse: jest.fn() };
-    const mockCamera = { position: { set: jest.fn() }, lookAt: jest.fn(), updateProjectionMatrix: jest.fn() };
-    const mockRenderer = {
-        setSize: jest.fn(),
-        setPixelRatio: jest.fn(),
-        render: jest.fn(),
-        dispose: jest.fn(),
-        domElement: document.createElement('canvas')
-    };
+  const mockScene = { add: jest.fn(), remove: jest.fn(), traverse: jest.fn() };
+  const mockCamera = {
+    position: { set: jest.fn() },
+    lookAt: jest.fn(),
+    updateProjectionMatrix: jest.fn(),
+  };
+  const mockRenderer = {
+    setSize: jest.fn(),
+    setPixelRatio: jest.fn(),
+    render: jest.fn(),
+    dispose: jest.fn(),
+    domElement: document.createElement('canvas'),
+  };
 
-    return { mockScene, mockCamera, mockRenderer };
+  return { mockScene, mockCamera, mockRenderer };
 }
 
 /**
@@ -131,42 +137,51 @@ export function mockThreeJS() {
  * @param {number} blackPieceCount - Number of non-king black pieces.
  */
 export function generateRandomBoard(whitePieceCount = 5, blackPieceCount = 5) {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
-    const BOARD_SIZE = 9;
+  const board = Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(null));
+  const BOARD_SIZE = 9;
 
-    const getRandomCoord = () => ({
-        r: Math.floor(Math.random() * BOARD_SIZE),
-        c: Math.floor(Math.random() * BOARD_SIZE)
-    });
+  const getRandomCoord = () => ({
+    r: Math.floor(Math.random() * BOARD_SIZE),
+    c: Math.floor(Math.random() * BOARD_SIZE),
+  });
 
-    const isOccupied = (r, c) => board[r][c] !== null;
+  const isOccupied = (r, c) => board[r][c] !== null;
 
-    // Place Kings
-    let wkr, wkc, bkr, bkc;
-    do { ({ r: wkr, c: wkc } = getRandomCoord()); } while (isOccupied(wkr, wkc));
-    board[wkr][wkc] = { type: 'k', color: 'white' };
+  // Place Kings
+  let wkr, wkc, bkr, bkc;
+  do {
+    ({ r: wkr, c: wkc } = getRandomCoord());
+  } while (isOccupied(wkr, wkc));
+  board[wkr][wkc] = { type: 'k', color: 'white' };
 
-    do { ({ r: bkr, c: bkc } = getRandomCoord()); } while (isOccupied(bkr, bkc));
-    board[bkr][bkc] = { type: 'k', color: 'black' };
+  do {
+    ({ r: bkr, c: bkc } = getRandomCoord());
+  } while (isOccupied(bkr, bkc));
+  board[bkr][bkc] = { type: 'k', color: 'black' };
 
-    const pieceTypes = ['p', 'n', 'b', 'r', 'q', 'a', 'c', 'e'];
+  const pieceTypes = ['p', 'n', 'b', 'r', 'q', 'a', 'c', 'e'];
 
-    const placeRandomPieces = (count, color) => {
-        for (let i = 0; i < count; i++) {
-            let r, c;
-            do { ({ r, c } = getRandomCoord()); } while (isOccupied(r, c));
+  const placeRandomPieces = (count, color) => {
+    for (let i = 0; i < count; i++) {
+      let r, c;
+      do {
+        ({ r, c } = getRandomCoord());
+      } while (isOccupied(r, c));
 
-            const type = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
-            // Avoid pawns on promotion ranks
-            if (type === 'p' && (r === 0 || r === 8)) {
-                i--; continue;
-            }
-            board[r][c] = { type, color, hasMoved: Math.random() > 0.5 };
-        }
-    };
+      const type = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
+      // Avoid pawns on promotion ranks
+      if (type === 'p' && (r === 0 || r === 8)) {
+        i--;
+        continue;
+      }
+      board[r][c] = { type, color, hasMoved: Math.random() > 0.5 };
+    }
+  };
 
-    placeRandomPieces(whitePieceCount, 'white');
-    placeRandomPieces(blackPieceCount, 'black');
+  placeRandomPieces(whitePieceCount, 'white');
+  placeRandomPieces(blackPieceCount, 'black');
 
-    return board;
+  return board;
 }

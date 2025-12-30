@@ -125,7 +125,6 @@ describe('BattleChess3D Debug Tests', () => {
     const callArgs = battleChess.battleAnimator.playBattle.mock.calls[0];
     const attackerPos = callArgs[2];
 
-
     // Should have x and z properties, NOT r and c
     expect(attackerPos).toHaveProperty('x');
     expect(attackerPos).toHaveProperty('z');
