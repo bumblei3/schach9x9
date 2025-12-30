@@ -102,8 +102,14 @@ export function createMockGame(overrides = {}) {
     log: jest.fn(),
     getValidMoves: jest.fn(() => []),
     handleCellClick: jest.fn(),
+    isInCheck: jest.fn(() => false),
     isSquareUnderAttack: jest.fn(() => false),
+    isInsufficientMaterial: jest.fn(() => false),
     calculateMaterialAdvantage: jest.fn(() => 0),
+    acceptDraw: jest.fn(),
+    declineDraw: jest.fn(),
+    offerDraw: jest.fn(),
+    undoMove: jest.fn(),
     updateBestMoves: jest.fn(),
     gameStartTime: Date.now(),
     ...overrides,
@@ -132,19 +138,41 @@ export function mockThreeJS() {
 }
 
 /**
+ * Creates a simple seeded pseudo-random number generator.
+ * @param {number} seed
+ * @returns {Array<Function>} A random function and a reset function
+ */
+export function createPRNG(seed = 12345) {
+  let currentSeed = seed;
+  const random = () => {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    return currentSeed / 233280;
+  };
+  const reset = () => {
+    currentSeed = seed;
+  };
+  return { random, reset };
+}
+
+/**
  * Generates a random board state for testing.
  * @param {number} whitePieceCount - Number of non-king white pieces.
  * @param {number} blackPieceCount - Number of non-king black pieces.
+ * @param {Function} randomFunc - Optional PRNG function.
  */
-export function generateRandomBoard(whitePieceCount = 5, blackPieceCount = 5) {
+export function generateRandomBoard(
+  whitePieceCount = 5,
+  blackPieceCount = 5,
+  randomFunc = Math.random
+) {
   const board = Array(9)
     .fill(null)
     .map(() => Array(9).fill(null));
   const BOARD_SIZE = 9;
 
   const getRandomCoord = () => ({
-    r: Math.floor(Math.random() * BOARD_SIZE),
-    c: Math.floor(Math.random() * BOARD_SIZE),
+    r: Math.floor(randomFunc() * BOARD_SIZE),
+    c: Math.floor(randomFunc() * BOARD_SIZE),
   });
 
   const isOccupied = (r, c) => board[r][c] !== null;
@@ -170,13 +198,13 @@ export function generateRandomBoard(whitePieceCount = 5, blackPieceCount = 5) {
         ({ r, c } = getRandomCoord());
       } while (isOccupied(r, c));
 
-      const type = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
+      const type = pieceTypes[Math.floor(randomFunc() * pieceTypes.length)];
       // Avoid pawns on promotion ranks
       if (type === 'p' && (r === 0 || r === 8)) {
         i--;
         continue;
       }
-      board[r][c] = { type, color, hasMoved: Math.random() > 0.5 };
+      board[r][c] = { type, color, hasMoved: randomFunc() > 0.5 };
     }
   };
 
