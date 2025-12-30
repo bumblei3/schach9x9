@@ -794,7 +794,7 @@ export function updateShopUI(game) {
   updateTutorRecommendations(game);
 }
 
-function updateTutorRecommendations(game) {
+export function updateTutorRecommendations(game) {
   const toggleBtn = document.getElementById('toggle-tutor-recommendations');
   const container = document.getElementById('tutor-recommendations-container');
 

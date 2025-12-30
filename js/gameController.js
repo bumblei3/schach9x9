@@ -22,6 +22,10 @@ export class GameController {
   }
 
   initGame(initialPoints, mode = 'setup') {
+    this.game.points = initialPoints;
+    this.game.initialPoints = initialPoints;
+    this.game.phase = mode === 'setup' ? PHASES.SETUP_WHITE_KING : PHASES.PLAY;
+
     // Initialize UI
     UI.initBoardUI(this.game);
     UI.updateStatus(this.game);
@@ -587,41 +591,12 @@ export class GameController {
     UI.updateClockDisplay(this.game);
 
     // Restore captured pieces display
-    // We need to clear and re-add them
-    const whiteCaptured = document.getElementById('captured-white');
-    const blackCaptured = document.getElementById('captured-black');
-    if (whiteCaptured) whiteCaptured.innerHTML = '';
-    if (blackCaptured) blackCaptured.innerHTML = '';
-
-    // Re-populate captured pieces
-    if (this.game.capturedPieces) {
-      if (this.game.capturedPieces.white) {
-        this.game.capturedPieces.white.forEach(piece => {
-          UI.addCapturedPiece(piece);
-        });
-      }
-      if (this.game.capturedPieces.black) {
-        this.game.capturedPieces.black.forEach(piece => {
-          UI.addCapturedPiece(piece);
-        });
-      }
-    }
+    UI.updateCapturedUI(this.game);
 
     // Restore move history panel
     const moveHistoryPanel = document.getElementById('move-history-panel');
     if (moveHistoryPanel) {
-      // Clear existing history
-      const historyList = document.getElementById('move-history');
-      if (historyList) historyList.innerHTML = '';
-
-      // Re-populate history
-      if (this.game.history) {
-        this.game.history.forEach((move, index) => {
-          UI.addMoveToHistory(move, index + 1);
-        });
-        // Scroll to bottom
-        if (historyList) historyList.scrollTop = historyList.scrollHeight;
-      }
+      UI.updateMoveHistoryUI(this.game);
 
       if (this.game.phase === PHASES.PLAY) {
         moveHistoryPanel.classList.remove('hidden');
@@ -682,6 +657,7 @@ export class GameController {
   }
 
   exitPuzzleMode() {
+    this.game.puzzleMode = false;
     UI.hidePuzzleOverlay();
     // Return to main menu or restart
     location.reload();
