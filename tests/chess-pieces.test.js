@@ -1,8 +1,6 @@
-import { jest } from '@jest/globals';
-
 // Import chess-pieces
 const chessPieces = await import('../js/chess-pieces.js');
-const { PIECE_SETS, PIECE_SVGS, setPieceSkin } = chessPieces;
+const { PIECE_SETS, setPieceSkin } = chessPieces;
 
 describe('Chess Pieces', () => {
   describe('PIECE_SETS', () => {

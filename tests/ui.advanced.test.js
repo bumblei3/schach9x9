@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { PHASES, BOARD_SIZE } from '../js/config.js';
+import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/utils.js', () => ({

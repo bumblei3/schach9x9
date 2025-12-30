@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import * as THREE from 'three';
+
 import { BattleChess3D } from '../js/battleChess3D.js';
 
 // Mock THREE
@@ -124,7 +124,7 @@ describe('BattleChess3D Debug Tests', () => {
     // Check what playBattle was called with
     const callArgs = battleChess.battleAnimator.playBattle.mock.calls[0];
     const attackerPos = callArgs[2];
-    const defenderPos = callArgs[3];
+
 
     // Should have x and z properties, NOT r and c
     expect(attackerPos).toHaveProperty('x');

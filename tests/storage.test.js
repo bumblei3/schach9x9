@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { StorageManager } from '../js/storage.js';
-import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
+import { PHASES } from '../js/gameEngine.js';
 
 // Mock localStorage
 const localStorageMock = (function () {

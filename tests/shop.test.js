@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import { Game, createEmptyBoard } from '../js/gameEngine.js';
-import { PHASES, PIECE_VALUES } from '../js/config.js';
+import { Game } from '../js/gameEngine.js';
+import { PHASES } from '../js/config.js';
 
 // Mock UI module
 jest.unstable_mockModule('../js/ui.js', () => ({
@@ -21,7 +21,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 // Mock DOM
 global.document = {
-  getElementById: jest.fn(id => ({
+  getElementById: jest.fn(() => ({
     classList: { remove: jest.fn(), add: jest.fn() },
     style: {},
     textContent: '',
@@ -39,7 +39,6 @@ global.document = {
 
 // Import after mocking
 const { GameController } = await import('../js/gameController.js');
-const UI = await import('../js/ui.js');
 
 describe('Shop System', () => {
   let game;
@@ -198,11 +197,6 @@ describe('Shop System', () => {
       game.phase = PHASES.SETUP_BLACK_PIECES;
       game.points = 15;
       game.isAI = true;
-
-      // Mock AI controller
-      const aiController = {
-        game: game,
-      };
 
       // Manually set the piece using the symbol (simulating fixed AI logic)
       game.selectedShopPiece = 'q'; // Should be symbol, not 'QUEEN'

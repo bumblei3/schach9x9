@@ -64,7 +64,6 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
 const { GameController } = await import('../js/gameController.js');
 const { Game } = await import('../js/gameEngine.js');
 const UI = await import('../js/ui.js');
-const { soundManager } = await import('../js/sounds.js');
 
 describe('GameController', () => {
   let game;
@@ -113,7 +112,7 @@ describe('GameController', () => {
       return element;
     };
 
-    jest.spyOn(document, 'getElementById').mockImplementation(id => createMockElement());
+    jest.spyOn(document, 'getElementById').mockImplementation(() => createMockElement());
     jest.spyOn(document, 'querySelector').mockImplementation(() => ({
       classList: { add: jest.fn(), remove: jest.fn() },
     }));
@@ -256,7 +255,7 @@ describe('GameController', () => {
   describe('Clock Management', () => {
     test('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
-      gameController.clockInterval = setInterval(() => {}, 100);
+      gameController.clockInterval = setInterval(() => { }, 100);
       gameController.tickClock();
       expect(gameController.clockInterval).toBeNull();
     });

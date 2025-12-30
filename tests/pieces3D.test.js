@@ -8,7 +8,7 @@ const mockThree = {
     position: { set: jest.fn() },
     rotation: { set: jest.fn() },
     userData: {},
-    traverse: jest.fn(callback => {
+    traverse: jest.fn(() => {
       // No-op for now, or could simulate children
     }),
   })),

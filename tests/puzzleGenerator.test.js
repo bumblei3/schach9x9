@@ -1,5 +1,5 @@
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
-import { createEmptyBoard, BOARD_SIZE } from '../js/gameEngine.js';
+import { createEmptyBoard } from '../js/gameEngine.js';
 
 describe('PuzzleGenerator', () => {
   test('boardToString and stringToBoard should be inverse', () => {

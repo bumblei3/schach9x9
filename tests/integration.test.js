@@ -48,7 +48,7 @@ describe('Integration Tests', () => {
 
   beforeEach(() => {
     // Mock DOM elements
-    global.document.getElementById = jest.fn(id => ({
+    global.document.getElementById = jest.fn(() => ({
       textContent: '',
       innerHTML: '',
       classList: { add: jest.fn(), remove: jest.fn() },

@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { PHASES, BOARD_SIZE } from '../js/config.js';
+import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/utils.js', () => ({
@@ -178,7 +178,6 @@ describe('Coverage Boost Tests', () => {
   describe('UI.renderEvalGraph', () => {
     test('should render SVG based on moveHistory scores', () => {
       const svg = document.getElementById('eval-graph');
-      const container = document.getElementById('eval-graph-container');
 
       game.moveHistory = [{ evalScore: 50 }, { evalScore: -100 }];
 

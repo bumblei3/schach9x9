@@ -1,7 +1,6 @@
-import { jest } from '@jest/globals';
 import { PuzzleManager } from '../js/puzzleManager.js';
 import { Game } from '../js/gameEngine.js';
-import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
+import { BOARD_SIZE } from '../js/gameEngine.js';
 
 describe('PuzzleMode', () => {
   let puzzleManager;

@@ -16,7 +16,7 @@ global.document = {
   getElementById: jest.fn().mockReturnValue({
     appendChild: jest.fn(),
   }),
-  createElement: jest.fn(tag => createMockElement()),
+  createElement: jest.fn(() => createMockElement()),
   body: {
     appendChild: jest.fn(),
     removeChild: jest.fn(),

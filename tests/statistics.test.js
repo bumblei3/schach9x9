@@ -109,7 +109,6 @@ describe('StatisticsManager', () => {
 
   test('importGames with merge should avoid duplicates', () => {
     stats.saveGame({ result: 'win', opponent: 'Alpha' });
-    const gameId = stats.data.games[0].id;
     const exported = stats.exportGames();
 
     // Add another game to current stats

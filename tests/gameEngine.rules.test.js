@@ -1,4 +1,4 @@
-import { jest, describe, test, expect, beforeAll, beforeEach } from '@jest/globals';
+import { describe, test, expect, beforeAll, beforeEach } from '@jest/globals';
 
 describe('Game Engine Rules', () => {
   let Game, PHASES, BOARD_SIZE, createEmptyBoard;
@@ -131,7 +131,7 @@ describe('Game Engine Rules', () => {
       // Black Rook at h8 (1, 7) protecting the Queen
       game.board[1][7] = { type: 'r', color: 'black', hasMoved: false };
 
-      const moves = game.getAllLegalMoves('white');
+      game.getAllLegalMoves('white');
       // console.log('Legal moves for white:', JSON.stringify(moves, null, 2));
 
       expect(game.isInCheck('white')).toBe(true);

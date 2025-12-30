@@ -5,44 +5,6 @@
 
 import { jest } from '@jest/globals';
 
-// We need to create mock modules before importing the module under test
-const mockScene = {
-  background: null,
-  fog: null,
-  add: jest.fn(),
-  remove: jest.fn(),
-  traverse: jest.fn(callback => {
-    callback({ isMesh: true, geometry: { dispose: jest.fn() }, material: { dispose: jest.fn() } });
-  }),
-};
-
-const mockCamera = {
-  aspect: 1,
-  updateProjectionMatrix: jest.fn(),
-  position: { set: jest.fn() },
-  lookAt: jest.fn(),
-};
-
-const mockRenderer = {
-  setSize: jest.fn(),
-  setPixelRatio: jest.fn(),
-  render: jest.fn(),
-  dispose: jest.fn(),
-  domElement: document.createElement('canvas'),
-  shadowMap: {
-    enabled: false,
-    type: null,
-  },
-};
-
-const mockGroup = jest.fn().mockImplementation(() => ({
-  position: { set: jest.fn(), x: 0, y: 0, z: 0 },
-  rotation: { x: 0, y: 0, z: 0 },
-  userData: {},
-  add: jest.fn(),
-  traverse: jest.fn(),
-}));
-
 // Simple test without mocking complex Three.js for now
 describe('BattleChess3D - Basic Tests', () => {
   let container;

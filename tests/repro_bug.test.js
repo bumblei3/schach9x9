@@ -1,6 +1,5 @@
 import { jest } from '@jest/globals';
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
-import { PHASES, BOARD_SIZE } from '../js/config.js';
 
 // Mock UI and SoundManager modules
 jest.unstable_mockModule('../js/ui.js', () => ({
@@ -34,7 +33,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 // Mock document functions used in MoveController
 global.document = {
-  getElementById: jest.fn(id => ({
+  getElementById: jest.fn(() => ({
     classList: { remove: jest.fn(), add: jest.fn() },
     style: {},
     textContent: '',
@@ -61,7 +60,6 @@ global.alert = jest.fn();
 
 // Import MoveController AFTER mocking
 const { MoveController } = await import('../js/moveController.js');
-const UI = await import('../js/ui.js');
 
 describe('Bug Reproduction: Rook transforming into King', () => {
   let game;

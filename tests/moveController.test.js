@@ -34,7 +34,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 // Mock document functions used in MoveController
 global.document = {
-  getElementById: jest.fn(id => ({
+  getElementById: jest.fn(() => ({
     classList: { remove: jest.fn(), add: jest.fn() },
     style: {},
     textContent: '',
@@ -554,7 +554,7 @@ describe('MoveController', () => {
       // Mock UI updates that are called during load
       // UI.updateShopUI is already mocked globally
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
 
       moveController.loadGame();
 

@@ -22,7 +22,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
     game.startClock = jest.fn();
 
     // Mock DOM elements
-    jest.spyOn(document, 'getElementById').mockImplementation(id => ({
+    jest.spyOn(document, 'getElementById').mockImplementation(() => ({
       classList: {
         add: jest.fn(),
         remove: jest.fn(),
@@ -153,7 +153,6 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
       // Go to first, then try to go before (should stay at 0 or -1)
       moveController.replayFirst();
-      const firstPosition = game.replayPosition;
       moveController.replayPrevious();
 
       // Position should not change or should be at minimum allowed

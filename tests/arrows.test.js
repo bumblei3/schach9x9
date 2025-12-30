@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 
 const { ArrowRenderer } = await import('../js/arrows.js');
 
