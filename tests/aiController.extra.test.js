@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
+import { PHASES } from '../js/gameEngine.js';
 
 // Setup JSDOM body
 document.body.innerHTML = `

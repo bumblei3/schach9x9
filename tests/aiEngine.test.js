@@ -12,10 +12,8 @@ import {
   testStoreTT,
   testProbeTT,
   clearTT,
-  setOpeningBook,
 } from '../js/aiEngine.js';
-import { createEmptyBoard, BOARD_SIZE } from '../js/gameEngine.js';
-import { AI_PIECE_VALUES } from '../js/config.js';
+import { createEmptyBoard } from '../js/gameEngine.js';
 
 describe('AI Engine', () => {
   let board;

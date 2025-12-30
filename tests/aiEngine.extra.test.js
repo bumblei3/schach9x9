@@ -1,4 +1,3 @@
-import { PHASES, BOARD_SIZE } from '../js/gameEngine.js';
 import * as AIEngine from '../js/aiEngine.js';
 
 describe('AIEngine Extra Coverage', () => {

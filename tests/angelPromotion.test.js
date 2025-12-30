@@ -25,7 +25,6 @@ global.window.webkitAudioContext = global.window.AudioContext;
 
 import { Game, BOARD_SIZE } from '../js/gameEngine.js';
 import { MoveController } from '../js/moveController.js';
-import * as UI from '../js/ui.js';
 
 jest.mock('../js/ui.js', () => ({
   renderBoard: jest.fn(),

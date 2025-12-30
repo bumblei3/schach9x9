@@ -1,5 +1,4 @@
-import { jest } from '@jest/globals';
-import { PIECE_VALUES } from '../js/config.js';
+
 
 // Minimal mock for dependencies if needed
 global.BOARD_SIZE = 9;
