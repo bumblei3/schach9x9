@@ -375,6 +375,23 @@ export class App {
       });
     }
 
+    // Game Over Overlay Buttons
+    const restartBtnOverlay = document.getElementById('restart-btn-overlay');
+    if (restartBtnOverlay) {
+      restartBtnOverlay.addEventListener('click', () => {
+        document.getElementById('game-over-overlay')?.classList.add('hidden');
+        // Reload to start fresh
+        window.location.reload();
+      });
+    }
+
+    const closeGameOverBtn = document.getElementById('close-game-over-btn');
+    if (closeGameOverBtn) {
+      closeGameOverBtn.addEventListener('click', () => {
+        document.getElementById('game-over-overlay')?.classList.add('hidden');
+      });
+    }
+
     // Toggle 3D
     const toggle3D = document.getElementById('toggle-3d-btn');
     if (toggle3D) {
