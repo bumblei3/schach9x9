@@ -354,6 +354,32 @@ body {
   box-sizing: border-box;
 }
 
+/* Drag and Drop Styles */
+.cell.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.cell.drag-target {
+  box-shadow: inset 0 0 0 3px rgba(16, 185, 129, 0.5);
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.cell.drag-over {
+  box-shadow: inset 0 0 0 4px var(--success);
+  background-color: rgba(16, 185, 129, 0.25) !important;
+  transform: scale(1.02);
+  transition: all 0.1s ease;
+}
+
+.cell.hover-move {
+  box-shadow: inset 0 0 8px rgba(99, 102, 241, 0.4);
+}
+
+.cell.hover-piece {
+  box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.6);
+}
+
 .piece {
   width: 90%;
   height: 90%;
