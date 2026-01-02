@@ -362,13 +362,32 @@ export class App {
 
           if (this.battleChess3D.enabled) {
             container3D.style.display = 'block';
-            boardWrapper.style.opacity = '0'; // Hide 2D board but keep it for events
-            if (!this.battleChess3D.scene) this.battleChess3D.init();
+            // Force reflow
+            void container3D.offsetWidth;
+            container3D.classList.add('active');
 
-            // Sync current state
-            this.battleChess3D.updateFromGameState(this.game);
+            toggle3D.classList.add('active-3d');
+            boardWrapper.style.opacity = '0'; // Hide 2D board
+
+            if (!this.battleChess3D.scene) {
+              this.battleChess3D.init().then(() => {
+                this.battleChess3D.updateFromGameState(this.game);
+              });
+            } else {
+              this.battleChess3D.updateFromGameState(this.game);
+              this.battleChess3D.onWindowResize(); // Force resize since container was hidden
+            }
           } else {
-            container3D.style.display = 'none';
+            container3D.classList.remove('active');
+            toggle3D.classList.remove('active-3d');
+
+            // Wait for transition before hiding
+            setTimeout(() => {
+              if (!this.battleChess3D.enabled) {
+                container3D.style.display = 'none';
+              }
+            }, 500);
+
             boardWrapper.style.opacity = '1';
           }
         }
