@@ -35,6 +35,14 @@ export class TutorController {
     return HintGenerator.showTutorSuggestions(this.game);
   }
 
+  showHint() {
+    // Force calculation if no hints available (e.g. initialization or race condition)
+    if (!this.game.bestMoves || this.game.bestMoves.length === 0) {
+      this.game.bestMoves = this.getTutorHints();
+    }
+    this.showTutorSuggestions();
+  }
+
   getPieceName(type) {
     return MoveAnalyzer.getPieceName(type);
   }
