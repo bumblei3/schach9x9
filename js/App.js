@@ -11,6 +11,7 @@ import { logger } from './logger.js';
 import * as UI from './ui.js';
 import { BattleChess3D } from './battleChess3D.js';
 import { KeyboardManager } from './input/KeyboardManager.js';
+import { generatePGN, copyPGNToClipboard, downloadPGN } from './utils/PGNGenerator.js';
 
 export class App {
   constructor() {
@@ -514,6 +515,29 @@ export class App {
       if (localStorage.getItem('chess_theme')) {
         themeSelect.value = localStorage.getItem('chess_theme');
       }
+    }
+
+    // PGN Export
+    const exportPgnBtn = document.getElementById('export-pgn-btn');
+    if (exportPgnBtn) {
+      exportPgnBtn.addEventListener('click', async () => {
+        if (!this.game || !this.game.moveHistory || this.game.moveHistory.length === 0) {
+          alert('Keine Züge zum Exportieren!');
+          return;
+        }
+        const pgn = generatePGN(this.game);
+        const copied = await copyPGNToClipboard(pgn);
+        if (copied) {
+          alert('PGN in die Zwischenablage kopiert!');
+        } else {
+          // Fallback: download
+          downloadPGN(pgn);
+        }
+        if (menuOverlay) {
+          menuOverlay.classList.add('hidden');
+          menuOverlay.style.display = 'none';
+        }
+      });
     }
   }
 }
