@@ -1,16 +1,16 @@
 :root {
   /* --- Palette: Deep Space Minimalist --- */
   --bg-app: #0f111a;
-  /* Refined Glassmorphism */
+  /* Refined Glassmorphism (Premium) */
   --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 24px 48px -12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  --bg-panel: rgba(20, 23, 33, 0.85);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --bg-panel: rgba(15, 23, 42, 0.85);
+  /* Slightly darker, bluer slate */
+
   /* Slightly darker/more opaque for contrast */
-  --bg-board-dark: #475569;
+  --bg-board-dark: #334155;
   /* Lighter slate for better contrast with black lines */
-  --bg-board-light: #e2e4e9;
+  --bg-board-light: #cbd5e1;
 
   --accent-primary: #6366f1;
   /* Indigo */

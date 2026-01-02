@@ -3,6 +3,7 @@
 ## 🎮 UX/UI Verbesserungen
 
 ### 1. **Drag & Drop für Figuren** ✅
+
 - [x] Figuren per Drag & Drop verschieben
 - [x] Visuelles Feedback während des Ziehens
 - Ungültige Züge visuell markieren (z.B. rotes X)
@@ -21,6 +22,7 @@
 - Escape-Taste zum Abwählen
 
 ### 4. **Mobile Optimierung** ✅
+
 - [x] Touch-Gesten für Züge
 - [x] Responsive Layout für kleinere Bildschirme
 
@@ -82,6 +84,7 @@
 ## 🎨 Design & Theming
 
 ### 13. **Mehr Themes** ✅
+
 - [x] Custom Color Schemes (Classic, Blue, Green)
 - [x] CSS Variables für einfaches Theming
 - Minimalistisches Theme
@@ -139,6 +142,7 @@
 - Export als JSON/PNG
 
 ### 21. **Offline-Funktionalität** ✅
+
 - [x] Service Worker für vollständiges Offline-Spiel
 - [x] Cache-Strategie für Assets
 - Lokale Datenbank für Historie
