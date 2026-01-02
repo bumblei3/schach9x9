@@ -144,10 +144,6 @@ describe('Coverage Boost Tests', () => {
     jest.clearAllMocks();
   });
 
-  beforeAll(() => {
-    delete window.location;
-    window.location = { reload: jest.fn() };
-  });
 
   describe('UI.updateTutorRecommendations', () => {
     test('should render templates in setup phase', () => {
@@ -436,8 +432,13 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
+      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => { });
+
       controller.exitPuzzleMode();
+      expect(reloadSpy).toHaveBeenCalled();
       expect(game.puzzleMode).toBe(false);
+
+      reloadSpy.mockRestore();
     });
 
     test('initGame should setup initial state', () => {

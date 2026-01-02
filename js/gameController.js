@@ -498,6 +498,10 @@ export class GameController {
     this.game.puzzleMode = false;
     UI.hidePuzzleOverlay();
     // Return to main menu or restart
+    this.reloadPage();
+  }
+
+  reloadPage() {
     location.reload();
   }
 
