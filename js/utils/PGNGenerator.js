@@ -45,7 +45,7 @@ function rowToRank(row) {
  * @param {Object} game - Game instance (for disambiguation)
  * @returns {string} Algebraic notation string (e.g., "Nf3", "exd5", "O-O")
  */
-export function moveToNotation(move, game = null) {
+export function moveToNotation(move, _game = null) {
   if (!move || !move.from || !move.to) {
     return '??';
   }
@@ -60,7 +60,7 @@ export function moveToNotation(move, game = null) {
   const pieceType = move.piece?.type || 'p';
   const pieceLetter = PIECE_NOTATION[pieceType] || '';
   const fromFile = colToFile(move.from.c);
-  const fromRank = rowToRank(move.from.r);
+  const _fromRank = rowToRank(move.from.r);
   const toFile = colToFile(move.to.c);
   const toRank = rowToRank(move.to.r);
 
@@ -123,7 +123,7 @@ export function generatePGN(game, options = {}) {
   headers.push(`[Result "${result}"]`);
 
   // Custom variant header
-  headers.push(`[Variant "9x9"]`);
+  headers.push('[Variant "9x9"]');
 
   // Move text
   const moves = game.moveHistory || [];
