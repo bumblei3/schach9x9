@@ -499,6 +499,7 @@ body {
   pointer-events: auto;
   opacity: 1;
   transform: scale(1);
+  z-index: 20;
 }
 
 #battle-chess-3d-container canvas {
