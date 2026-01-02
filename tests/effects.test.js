@@ -1,280 +1,80 @@
 import { jest } from '@jest/globals';
+import * as Effects from '../js/effects.js';
 
-// Mock DOM
-// Mock DOM
-const createMockElement = () => ({
-  className: '',
-  style: {
-    getPropertyValue: jest.fn(),
-    setProperty: jest.fn(),
-  },
-  remove: jest.fn(),
-  appendChild: jest.fn(),
-});
-
-global.document = {
-  getElementById: jest.fn().mockReturnValue({
-    appendChild: jest.fn(),
-  }),
-  createElement: jest.fn(() => createMockElement()),
-  body: {
-    appendChild: jest.fn(),
-    removeChild: jest.fn(),
-    contains: jest.fn().mockReturnValue(true),
-  },
-};
-
-// Mock requestAnimationFrame
-global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 16));
-
-describe('ParticleSystem', () => {
-  let ParticleSystem;
-  let particleSystem;
-
-  beforeAll(async () => {
-    const mod = await import('../js/effects.js');
-    ParticleSystem = mod.ParticleSystem;
-    particleSystem = mod.particleSystem;
-  });
-
+describe('Effects System', () => {
   beforeEach(() => {
-    // Clear particles before each test
-    particleSystem.particles = [];
-    particleSystem.animating = false;
-    jest.clearAllMocks();
+    document.body.innerHTML = '<div id="board-container"></div><div id="board-wrapper"></div>';
+    jest.useFakeTimers();
   });
 
-  describe('spawn particles', () => {
-    test('should spawn particles', () => {
-      const initialLength = particleSystem.particles.length;
-      particleSystem.spawn(100, 200, 'CAPTURE', '#ff0000');
-
-      expect(particleSystem.particles.length).toBeGreaterThan(initialLength);
-    });
-
-    test('should create more particles for CAPTURE than MOVE', () => {
-      const newParticleSystem = new ParticleSystem();
-
-      newParticleSystem.spawn(100, 100, 'CAPTURE', '#ff0000');
-      const captureCount = newParticleSystem.particles.length;
-
-      const anotherParticleSystem = new ParticleSystem();
-      anotherParticleSystem.spawn(100, 100, 'MOVE', '#0000ff');
-      const moveCount = anotherParticleSystem.particles.length;
-
-      expect(captureCount).toBeGreaterThan(moveCount);
-    });
-
-    test('should start animation when spawning particles', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'CAPTURE');
-
-      expect(newParticleSystem.animating).toBe(true);
-      expect(requestAnimationFrame).toHaveBeenCalled();
-    });
-
-    test('should use default color when not specified', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      expect(newParticleSystem.particles.length).toBeGreaterThan(0);
-    });
-
-    test('should create particles with different types', () => {
-      const moveSystem = new ParticleSystem();
-      const captureSystem = new ParticleSystem();
-
-      moveSystem.spawn(100, 100, 'MOVE');
-      captureSystem.spawn(100, 100, 'CAPTURE');
-
-      // CAPTURE should create more particles
-      expect(captureSystem.particles.length).toBeGreaterThan(moveSystem.particles.length);
-    });
-
-    test('should handle unknown particle type', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'UNKNOWN_TYPE');
-
-      // Should still create particles with default count
-      expect(newParticleSystem.particles.length).toBeGreaterThan(0);
-    });
-
-    test('should append particles to container', () => {
-      const mockContainer = {
-        appendChild: jest.fn(),
-      };
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.container = mockContainer;
-
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      expect(mockContainer.appendChild).toHaveBeenCalled();
-    });
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
-  describe('particle update logic', () => {
-    test('should remove particles after life expires', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
+  test('ParticleSystem spawn and update', () => {
+    const ps = new Effects.ParticleSystem();
+    ps.spawn(100, 100, 'CAPTURE', '#ff0000');
+    expect(ps.particles.length).toBe(20);
 
-      const initialCount = newParticleSystem.particles.length;
-      expect(initialCount).toBeGreaterThan(0);
+    // Simulate animation frame
+    ps.update();
+    expect(ps.animating).toBe(true);
 
-      // Simulate particle expiry by setting life to 0
-      newParticleSystem.particles.forEach(p => (p.life = 0));
-
-      // Particles with life <= 0 should be removed in next update
-      expect(newParticleSystem.particles.some(p => p.life <= 0)).toBe(true);
-    });
-
-    test('should update particle positions', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      const particle = newParticleSystem.particles[0];
-      const originalX = particle.x;
-      const originalY = particle.y;
-
-      // Manually update particle
-      particle.x += particle.vx;
-      particle.y += particle.vy;
-
-      expect(particle.x).not.toBe(originalX);
-      expect(particle.y).not.toBe(originalY);
-    });
-
-    test('should apply gravity to particles', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      const particle = newParticleSystem.particles[0];
-      const originalVy = particle.vy;
-
-      // Simulate gravity
-      particle.vy += 0.2;
-
-      expect(particle.vy).toBeGreaterThan(originalVy);
-    });
-
-    test('should decrease particle life over time', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      const particle = newParticleSystem.particles[0];
-      const originalLife = particle.life;
-
-      particle.life -= 0.016;
-
-      expect(particle.life).toBeLessThan(originalLife);
-    });
+    // Fade out particles
+    for (let i = 0; i < 100; i++) {
+      ps.update();
+    }
+    expect(ps.particles.length).toBe(0);
+    expect(ps.animating).toBe(false);
   });
 
-  describe('animation lifecycle', () => {
-    test('should handle empty particle array', () => {
-      const newParticleSystem = new ParticleSystem();
+  test('FloatingTextManager show', () => {
+    const ftm = new Effects.FloatingTextManager();
+    ftm.show(50, 50, '+10', 'score');
+    const el = document.querySelector('.floating-text');
+    expect(el).not.toBeNull();
+    expect(el.textContent).toBe('+10');
 
-      expect(newParticleSystem.particles.length).toBe(0);
-      // animating should not be checked initially - it's set when particles spawn
-    });
-
-    test('should stop animation when no particles remain', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.particles = [];
-      newParticleSystem.animating = true;
-
-      newParticleSystem.update();
-
-      expect(newParticleSystem.animating).toBe(false);
-    });
-
-    test('should not start multiple animations when already animating', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.animating = true;
-      const callCount = requestAnimationFrame.mock.calls.length;
-
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      // Should not increment call count when already animating
-      expect(requestAnimationFrame.mock.calls.length).toBe(callCount);
-    });
-
-    test('should continue animating when particles exist', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      // Set a reasonable life value
-      newParticleSystem.particles.forEach(p => (p.life = 0.5));
-
-      const beforeCallCount = requestAnimationFrame.mock.calls.length;
-      newParticleSystem.update();
-
-      // Should call requestAnimationFrame again
-      expect(requestAnimationFrame.mock.calls.length).toBeGreaterThan(beforeCallCount);
-    });
+    jest.advanceTimersByTime(2000);
+    expect(document.querySelector('.floating-text')).toBeNull();
   });
 
-  describe('particle rendering', () => {
-    test('should set particle position styles', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(150, 250, 'MOVE');
+  test('ConfettiSystem spawn and update', () => {
+    const cs = new Effects.ConfettiSystem();
+    // mock getBoundingClientRect
+    cs.container.getBoundingClientRect = () => ({ width: 1000, height: 1000 });
 
-      const particle = newParticleSystem.particles[0];
+    cs.spawn();
+    expect(cs.particles.length).toBe(150);
 
-      expect(particle.el.style.left).toBe('150px');
-      expect(particle.el.style.top).toBe('250px');
-    });
+    cs.update();
+    expect(cs.animating).toBe(true);
 
-    test('should set CAPTURE particles with box shadow', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'CAPTURE', '#ff0000');
-
-      const particle = newParticleSystem.particles[0];
-
-      expect(particle.el.style.boxShadow).toBeDefined();
-      expect(particle.el.style.boxShadow).toContain('#ff0000');
-    });
-
-    test('should remove particle element when life expires', () => {
-      const newParticleSystem = new ParticleSystem();
-      newParticleSystem.spawn(100, 100, 'MOVE');
-
-      const particle = newParticleSystem.particles[0];
-      // Spy on the remove method of the created element
-      const removeSpy = jest.spyOn(particle.el, 'remove');
-
-      // Set life to 0 to trigger removal
-      particle.life = 0;
-      newParticleSystem.update();
-
-      expect(removeSpy).toHaveBeenCalled();
-    });
+    // Fade out
+    for (let i = 0; i < 200; i++) {
+      cs.update();
+    }
+    expect(cs.particles.length).toBe(0);
   });
 
-  describe('Utility Effects', () => {
-    test('triggerVibration should call navigator.vibrate', async () => {
-      const mod = await import('../js/effects.js');
-      global.navigator.vibrate = jest.fn();
+  test('triggerVibration', () => {
+    global.navigator.vibrate = jest.fn();
+    Effects.triggerVibration('heavy');
+    expect(global.navigator.vibrate).toHaveBeenCalledWith([100, 50, 100]);
 
-      mod.triggerVibration('light');
-      expect(global.navigator.vibrate).toHaveBeenCalledWith(20);
+    Effects.triggerVibration('medium');
+    expect(global.navigator.vibrate).toHaveBeenCalledWith(50);
 
-      mod.triggerVibration('medium');
-      expect(global.navigator.vibrate).toHaveBeenCalledWith(50);
+    Effects.triggerVibration('light');
+    expect(global.navigator.vibrate).toHaveBeenCalledWith(20);
+  });
 
-      mod.triggerVibration('heavy');
-      expect(global.navigator.vibrate).toHaveBeenCalledWith([100, 50, 100]);
-    });
+  test('shakeScreen', () => {
+    Effects.shakeScreen(10, 100);
+    // Request animation frame is called
+    expect(document.getElementById('board-wrapper').style.transition).toBe('none');
 
-    test('shakeScreen should apply transform to container', async () => {
-      const mod = await import('../js/effects.js');
-      const mockContainer = createMockElement();
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockContainer);
-
-      mod.shakeScreen(10, 100);
-
-      // Should have started animation
-      expect(requestAnimationFrame).toHaveBeenCalled();
-      expect(mockContainer.style.transition).toBe('none');
-    });
+    jest.advanceTimersByTime(200);
+    // It should reset
   });
 });

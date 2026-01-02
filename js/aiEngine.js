@@ -7,6 +7,7 @@ import { logger } from './logger.js';
 import {
   getBestMove,
   analyzePosition,
+  extractPV,
   setProgressCallback,
   getNodesEvaluated,
   resetNodesEvaluated,
@@ -38,6 +39,7 @@ export {
   logger,
   getBestMove,
   analyzePosition,
+  extractPV,
   evaluatePosition,
   setOpeningBook,
   queryOpeningBook,

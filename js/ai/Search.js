@@ -124,7 +124,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
         searchBeta = bestScore + WINDOW_SIZE;
       }
 
-      for (;;) {
+      for (; ;) {
         let alpha = searchAlpha;
         const beta = searchBeta;
         currentBestScoreForDepth = -Infinity;
@@ -175,6 +175,11 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
       bestMove = currentBestMoveForDepth || bestMove;
       bestScore = currentBestScoreForDepth;
       bestMoveSoFar = bestMove;
+
+      // Store best move in TT for PV extraction
+      const rootHash = computeZobristHash(board, color);
+      storeTT(rootHash, d, bestScore, TT_EXACT, bestMove);
+
       sendProgress(maxDepth);
 
       // Re-order moves: put best move first

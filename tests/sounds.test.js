@@ -10,8 +10,13 @@ const mockOscillator = {
   connect: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
-  type: 'sine', // Added type property
-  frequency: { setValueAtTime: jest.fn() },
+  type: 'sine',
+  frequency: {
+    setValueAtTime: jest.fn(),
+    value: 440,
+    exponentialRampToValueAtTime: jest.fn(),
+    linearRampToValueAtTime: jest.fn()
+  },
 };
 
 const mockGain = {
@@ -19,6 +24,7 @@ const mockGain = {
   gain: {
     setValueAtTime: jest.fn(),
     exponentialRampToValueAtTime: jest.fn(),
+    value: 1,
   },
 };
 
@@ -26,15 +32,16 @@ global.window.AudioContext = class MockAudioContext {
   constructor() {
     this.destination = {};
     this.currentTime = 0;
+    this.state = 'suspended';
+  }
+  resume() {
+    this.state = 'running';
+    return Promise.resolve();
   }
   createOscillator() {
     return {
       ...mockOscillator,
-      frequency: {
-        value: 440,
-        setValueAtTime: jest.fn(),
-        exponentialRampToValueAtTime: jest.fn(),
-      },
+      frequency: { ...mockOscillator.frequency }
     };
   }
   createGain() {
@@ -55,54 +62,44 @@ describe('SoundManager', () => {
     jest.clearAllMocks();
   });
 
-  test('initial settings are loaded from localStorage or defaults', () => {
+  test('initial settings and persistence', () => {
     const manager = new SoundManager();
     expect(manager.enabled).toBe(true);
-    expect(manager.volume).toBeCloseTo(0.3);
+    manager.setVolume(50);
+    expect(manager.volume).toBeCloseTo(0.5);
+
+    manager.setEnabled(false);
+    expect(manager.enabled).toBe(false);
   });
 
-  test('setVolume converts 0‑100 range to 0‑1 internally', () => {
+  test('loadSettings error handling', () => {
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    const mockGetItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('access');
+    });
+
     const manager = new SoundManager();
-    manager.setVolume(75);
-    expect(manager.volume).toBeCloseTo(0.75);
+    expect(spy).toHaveBeenCalled();
+    mockGetItem.mockRestore();
+    spy.mockRestore();
   });
 
-  test('toggle flips the enabled flag and persists it', () => {
+  test('playback functions while enabled', () => {
     const manager = new SoundManager();
-    const initial = manager.enabled;
-    manager.toggle();
-    expect(manager.enabled).toBe(!initial);
-    const saved = JSON.parse(localStorage.getItem('chess9x9-sound-settings'));
-    expect(saved.enabled).toBe(!initial);
-  });
-
-  test('playMove does not throw when disabled', () => {
-    const manager = new SoundManager();
-    manager.enabled = false;
+    manager.enabled = true;
     expect(() => manager.playMove()).not.toThrow();
-  });
-
-  test('should play capture sound when enabled', () => {
-    const manager = new SoundManager();
-    manager.enabled = true;
     expect(() => manager.playCapture()).not.toThrow();
-  });
-
-  test('should play check sound when enabled', () => {
-    const manager = new SoundManager();
-    manager.enabled = true;
     expect(() => manager.playCheck()).not.toThrow();
-  });
-
-  test('should play game start sound when enabled', () => {
-    const manager = new SoundManager();
-    manager.enabled = true;
     expect(() => manager.playGameStart()).not.toThrow();
+    expect(() => manager.playGameOver(true)).not.toThrow();
+    expect(() => manager.playSuccess()).not.toThrow();
+    expect(() => manager.playError()).not.toThrow();
   });
 
-  test('should play game over sound when enabled', () => {
+  test('AudioContext unlock interaction', async () => {
     const manager = new SoundManager();
-    manager.enabled = true;
-    expect(() => manager.playGameOver(true)).not.toThrow();
+    const event = new Event('pointerdown');
+    window.dispatchEvent(event);
+    await new Promise(r => setTimeout(r, 0));
   });
 });

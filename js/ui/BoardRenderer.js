@@ -19,7 +19,7 @@ export function getPieceSymbol(piece) {
     const wrapper = document.createElement('div');
     wrapper.className = 'piece-svg';
     wrapper.innerHTML = window.PIECE_SVGS[piece.color][piece.type];
-    window._svgCache[key] = wrapper.innerHTML;
+    window._svgCache[key] = wrapper.outerHTML;
   }
   return window._svgCache[key];
 }

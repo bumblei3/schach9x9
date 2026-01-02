@@ -7,6 +7,7 @@ jest.unstable_mockModule('../js/ai/Search.js', () => ({
   getNodesEvaluated: jest.fn(() => 500),
   resetNodesEvaluated: jest.fn(),
   setProgressCallback: jest.fn(),
+  extractPV: jest.fn(() => []),
 }));
 
 jest.unstable_mockModule('../js/ai/Evaluation.js', () => ({
