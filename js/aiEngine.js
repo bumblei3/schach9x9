@@ -9,6 +9,7 @@ import {
   analyzePosition,
   setProgressCallback,
   getNodesEvaluated,
+  resetNodesEvaluated,
 } from './ai/Search.js';
 import { evaluatePosition, PST, PST_EG } from './ai/Evaluation.js';
 import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.js';
@@ -42,6 +43,7 @@ export {
   queryOpeningBook,
   setProgressCallback,
   getNodesEvaluated,
+  resetNodesEvaluated,
   getAllLegalMoves,
   makeMove,
   undoMove,

@@ -4,7 +4,7 @@
 
 import { jest } from '@jest/globals';
 import { ShopManager } from '../js/shop/ShopManager.js';
-import { BOARD_SIZE, PHASES, PIECE_VALUES } from '../js/config.js';
+import { BOARD_SIZE, PHASES } from '../js/config.js';
 
 describe('ShopManager', () => {
   let mockGame;

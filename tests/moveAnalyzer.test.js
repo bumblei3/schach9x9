@@ -19,6 +19,10 @@ function createTestGame() {
     bestMoves: [],
     getAllLegalMoves: () => [],
     stats: { accuracies: [] },
+    getValidMoves: () => [],
+    isInCheck: () => false,
+    isSquareAttacked: () => false,
+    isSquareUnderAttack: () => false,
   };
 
   // Setup basic position
@@ -170,14 +174,44 @@ describe('MoveAnalyzer', () => {
   });
 
   describe('analyzeMoveWithExplanation', () => {
-    test('should return move analysis object with required properties', () => {
+    test('should identify "Entscheidender Gewinnzug" for high scores', () => {
       const game = createTestGame();
       game.board[6][0] = { type: 'n', color: 'white' };
-      const _move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
+      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      // Skip TacticsDetector-dependent tests
-      // Just verify the function structure
-      expect(typeof MoveAnalyzer.analyzeMoveWithExplanation).toBe('function');
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 400, 400);
+      expect(analysis.qualityLabel).toContain('Entscheidender Gewinnzug');
+      expect(analysis.category).toBe('excellent');
+    });
+
+    test('should identify "Brillanter Zug" for best moves', () => {
+      const game = createTestGame();
+      game.board[6][0] = { type: 'n', color: 'white' };
+      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
+
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 150, 150);
+      expect(analysis.qualityLabel).toContain('Brillanter Zug');
+    });
+
+    test('should identify "Ungenauigkeit" for questionable moves', () => {
+      const game = createTestGame();
+      game.board[6][0] = { type: 'n', color: 'white' };
+      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
+
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -100, 150); // diff = -250 (-2.5 pawns)
+      expect(analysis.qualityLabel).toContain('Ungenauigkeit');
+      expect(analysis.category).toBe('questionable');
+    });
+
+    test('should identify "Grober Fehler" for mistakes', () => {
+      const game = createTestGame();
+      game.board[6][0] = { type: 'n', color: 'white' };
+      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
+
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -300, 150); // diff = -450 (-4.5 pawns)
+      expect(analysis.qualityLabel).toContain('Grober Fehler');
+      expect(analysis.category).toBe('mistake');
+      expect(analysis.warnings.length).toBeGreaterThan(0);
     });
   });
 });

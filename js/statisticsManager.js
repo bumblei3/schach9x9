@@ -55,6 +55,7 @@ export class StatisticsManager {
         draws: 0,
         winRate: 0,
       },
+      tutorPoints: 0,
     };
   }
 
@@ -111,6 +112,24 @@ export class StatisticsManager {
 
     this.saveData();
     logger.info(`Game saved: ${game.result} vs ${game.opponent} (${game.moves} moves)`);
+  }
+
+  /**
+   * Saves tutor points to storage
+   * @param {number} points
+   */
+  saveTutorPoints(points) {
+    this.data.tutorPoints = points;
+    this.saveData();
+    logger.debug(`Tutor points saved: ${points}`);
+  }
+
+  /**
+   * Gets current tutor points
+   * @returns {number}
+   */
+  getTutorPoints() {
+    return this.data.tutorPoints || 0;
   }
 
   /**

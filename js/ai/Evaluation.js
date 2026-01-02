@@ -263,7 +263,13 @@ export function evaluatePosition(board, forColor, config) {
       // Passed pawn bonus
       if (isPassedPawn(board, r, c, piece.color)) {
         const progress = isWhite ? BOARD_SIZE - 1 - r : r;
-        const passedBonus = progress * progress * 5 * pawnStructureWeight;
+        let passedBonus = progress * progress * 5 * pawnStructureWeight;
+
+        // Bonus for supported passed pawns
+        if (isPawnSupported(board, r, c, piece.color)) {
+          passedBonus *= 1.3;
+        }
+
         mgScore += passedBonus * sideMult;
         egScore += passedBonus * 1.5 * sideMult;
       }
@@ -304,13 +310,14 @@ function getPositionBonus(r, c, type, color, isEndgame = false) {
 }
 
 /**
- * Evaluate king safety based on surrounding pawns
+ * Evaluate king safety based on surrounding pawns and enemy threats
  */
 function evaluateKingSafety(board, kingR, kingC, kingColor) {
   let safety = 0;
   const pawnRow = kingColor === 'white' ? 1 : -1;
+  const opponentColor = kingColor === 'white' ? 'black' : 'white';
 
-  // Check for pawn shield in front of king
+  // 1. Pawn shield
   for (let dc = -1; dc <= 1; dc++) {
     const checkR = kingR + pawnRow;
     const checkC = kingC + dc;
@@ -318,12 +325,44 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
     if (checkR >= 0 && checkR < BOARD_SIZE && checkC >= 0 && checkC < BOARD_SIZE) {
       const piece = board[checkR][checkC];
       if (piece && piece.type === 'p' && piece.color === kingColor) {
-        safety += 15; // Bonus for pawn shield
+        safety += 15;
       }
     }
   }
 
+  // 2. King Zone Attacks (Enemy pieces near king)
+  let enemyAttacks = 0;
+  for (let r = Math.max(0, kingR - 2); r <= Math.min(BOARD_SIZE - 1, kingR + 2); r++) {
+    for (let c = Math.max(0, kingC - 2); c <= Math.min(BOARD_SIZE - 1, kingC + 2); c++) {
+      const piece = board[r][c];
+      if (piece && piece.color === opponentColor) {
+        // Count pieces that can reach the king's vicinity
+        enemyAttacks++;
+      }
+    }
+  }
+  safety -= enemyAttacks * 5;
+
   return safety;
+}
+
+/**
+ * Check if a pawn is supported by another pawn
+ */
+function isPawnSupported(board, r, c, color) {
+  const supportRow = color === 'white' ? r + 1 : r - 1;
+  if (supportRow < 0 || supportRow >= BOARD_SIZE) return false;
+
+  for (let dc = -1; dc <= 1; dc += 2) {
+    const checkC = c + dc;
+    if (checkC >= 0 && checkC < BOARD_SIZE) {
+      const piece = board[supportRow][checkC];
+      if (piece && piece.type === 'p' && piece.color === color) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /**

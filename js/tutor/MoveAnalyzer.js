@@ -22,25 +22,25 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
   if (diffP >= -0.5) {
     if (score >= 300) {
       category = 'excellent';
-      qualityLabel = '⭐⭐⭐ Gewinnzug! Diese Stellung ist entscheidend.';
+      qualityLabel = '⭐⭐⭐ Entscheidender Gewinnzug! Du kontrollierst die Partie.';
     } else if (diffP >= -0.1) {
       category = 'excellent';
-      qualityLabel = '⭐⭐⭐ Bester Zug';
+      qualityLabel = '⭐⭐⭐ Brillanter Zug! Exakt die Empfehlung der KI.';
     } else {
       category = 'good';
       qualityLabel = `⭐⭐ Guter Zug (minimal schwächer: ${Math.abs(diffP)} Bauern)`;
     }
   } else if (diffP >= -1.5) {
     category = 'normal';
-    qualityLabel = `⭐ Solider Zug (${Math.abs(diffP)} Bauern schwächer als bester Zug)`;
+    qualityLabel = `⭐ Solider Zug (${Math.abs(diffP)} Bauern schwächer)`;
   } else if (diffP >= -3.0) {
     category = 'questionable';
-    qualityLabel = `⚠️ Fragwürdig (${Math.abs(diffP)} Bauern schlechter)`;
-    warnings.push('Es gibt deutlich bessere Züge! Überlege nochmal.');
+    qualityLabel = `⚠️ Ungenauigkeit (${Math.abs(diffP)} Bauern schlechter)`;
+    warnings.push('Es gibt strategisch wertvollere Alternativen. Beachte die Figurenentwicklung!');
   } else {
     category = 'mistake';
-    qualityLabel = `❌ Fehler (${Math.abs(diffP)} Bauern Nachteil)`;
-    warnings.push('⚠️ Dieser Zug verschenkt Material oder Position!');
+    qualityLabel = `❌ Grober Fehler (${Math.abs(diffP)} Bauern Verlust)`;
+    warnings.push('⚠️ Dieser Zug gefährdet deine Position massiv!');
   }
 
   // Detect tactical patterns

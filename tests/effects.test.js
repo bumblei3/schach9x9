@@ -249,4 +249,32 @@ describe('ParticleSystem', () => {
       expect(removeSpy).toHaveBeenCalled();
     });
   });
+
+  describe('Utility Effects', () => {
+    test('triggerVibration should call navigator.vibrate', async () => {
+      const mod = await import('../js/effects.js');
+      global.navigator.vibrate = jest.fn();
+
+      mod.triggerVibration('light');
+      expect(global.navigator.vibrate).toHaveBeenCalledWith(20);
+
+      mod.triggerVibration('medium');
+      expect(global.navigator.vibrate).toHaveBeenCalledWith(50);
+
+      mod.triggerVibration('heavy');
+      expect(global.navigator.vibrate).toHaveBeenCalledWith([100, 50, 100]);
+    });
+
+    test('shakeScreen should apply transform to container', async () => {
+      const mod = await import('../js/effects.js');
+      const mockContainer = createMockElement();
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockContainer);
+
+      mod.shakeScreen(10, 100);
+
+      // Should have started animation
+      expect(requestAnimationFrame).toHaveBeenCalled();
+      expect(mockContainer.style.transition).toBe('none');
+    });
+  });
 });

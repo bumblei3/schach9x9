@@ -108,42 +108,72 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
 
   try {
     // ITERATIVE DEEPENING
+    const WINDOW_SIZE = 50;
+
     for (let d = 1; d <= maxDepth; d++) {
       currentDepth = d;
-      let currentBestMove = null;
-      let currentBestScore = -Infinity;
-      let alpha = -Infinity;
-      const beta = Infinity;
+      let currentBestMoveForDepth = null;
+      let currentBestScoreForDepth = -Infinity;
 
-      // PVS at Root
-      for (let i = 0; i < orderedMoves.length; i++) {
-        const move = orderedMoves[i];
-        const undoInfo = makeMove(board, move);
-        const opponentColor = color === 'white' ? 'black' : 'white';
-        const nextHash = computeZobristHash(board, opponentColor);
+      let searchAlpha = -Infinity;
+      let searchBeta = Infinity;
 
-        let score;
-        if (i === 0) {
-          score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHash);
-        } else {
-          score = -minimax(board, d - 1, -(alpha + 1), -alpha, opponentColor, color, nextHash);
-          if (score > alpha && score < beta) {
-            score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHash);
-          }
-        }
-
-        undoMove(board, undoInfo);
-
-        if (score > currentBestScore) {
-          currentBestScore = score;
-          currentBestMove = move;
-        }
-        alpha = Math.max(alpha, currentBestScore);
-        if (alpha >= beta) break;
+      // ASPIRATION WINDOW
+      if (d > 1) {
+        searchAlpha = bestScore - WINDOW_SIZE;
+        searchBeta = bestScore + WINDOW_SIZE;
       }
 
-      bestMove = currentBestMove || bestMove;
-      bestScore = currentBestScore;
+      for (;;) {
+        let alpha = searchAlpha;
+        const beta = searchBeta;
+        currentBestScoreForDepth = -Infinity;
+
+        // PVS at Root
+        for (let i = 0; i < orderedMoves.length; i++) {
+          const move = orderedMoves[i];
+          const undoInfo = makeMove(board, move);
+          const opponentColor = color === 'white' ? 'black' : 'white';
+
+          // Incremental Hash Update
+          // XOR out from pos, XOR in to pos
+          // We need zobristTable - let's just use computeZobristHash for root for simplicity,
+          // or import it. It's already available via computeZobristHash.
+          // For root, it's only once per move, so computeZobristHash is OK.
+          // BUT for minimax it's CRITICAL to be fast.
+          const nextHashVal = computeZobristHash(board, opponentColor);
+
+          let score;
+          if (i === 0) {
+            score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal);
+          } else {
+            score = -minimax(board, d - 1, -(alpha + 1), -alpha, opponentColor, color, nextHashVal);
+            if (score > alpha && score < beta) {
+              score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal);
+            }
+          }
+
+          undoMove(board, undoInfo);
+
+          if (score > currentBestScoreForDepth) {
+            currentBestScoreForDepth = score;
+            currentBestMoveForDepth = move;
+          }
+          alpha = Math.max(alpha, currentBestScoreForDepth);
+          if (alpha >= beta) break;
+        }
+
+        // If search returned a value outside the window, widen it and search again
+        if (currentBestScoreForDepth <= searchAlpha || currentBestScoreForDepth >= searchBeta) {
+          searchAlpha = -Infinity;
+          searchBeta = Infinity;
+          continue;
+        }
+        break;
+      }
+
+      bestMove = currentBestMoveForDepth || bestMove;
+      bestScore = currentBestScoreForDepth;
       bestMoveSoFar = bestMove;
       sendProgress(maxDepth);
 
@@ -186,6 +216,27 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
     return quiescenceSearch(board, alpha, beta, turnColor, aiColor);
   }
 
+  const opponentColor = turnColor === 'white' ? 'black' : 'white';
+
+  // NULL MOVE PRUNING
+  // Don't use NMP if in check or near endgame (phaseValue < 5)
+  // totalPhase is not available here, but we can check if depth is enough
+  if (depth >= 3 && !isInCheck(board, turnColor)) {
+    const R = 2; // Reduction depth
+    const nextHash = computeZobristHash(board, opponentColor); // Null move doesn't change board but changes turn
+    // Simplified null move: we just search with reduced depth and reversed window
+    const score = -minimax(
+      board,
+      depth - 1 - R,
+      -beta,
+      -beta + 1,
+      opponentColor,
+      aiColor,
+      nextHash
+    );
+    if (score >= beta) return beta;
+  }
+
   const moves = getAllLegalMoves(board, turnColor);
   if (moves.length === 0) {
     if (isInCheck(board, turnColor)) {
@@ -199,8 +250,6 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
   let bestMove = null;
   let flag = TT_ALPHA;
 
-  const opponentColor = turnColor === 'white' ? 'black' : 'white';
-
   for (let i = 0; i < orderedMoves.length; i++) {
     const move = orderedMoves[i];
     const undoInfo = makeMove(board, move);
@@ -210,8 +259,31 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
     if (i === 0) {
       score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash);
     } else {
+      // LATE MOVE REDUCTION (LMR)
+      let reduction = 0;
+      const isCapture = board[move.to.r][move.to.c] !== null;
+
+      if (depth >= 3 && i >= 4 && !isCapture && !isInCheck(board, turnColor)) {
+        reduction = 1;
+        if (i >= 10) reduction = 2;
+      }
+
       // PVS Null Window Search
-      score = -minimax(board, depth - 1, -(alpha + 1), -alpha, opponentColor, aiColor, nextHash);
+      score = -minimax(
+        board,
+        depth - 1 - reduction,
+        -(alpha + 1),
+        -alpha,
+        opponentColor,
+        aiColor,
+        nextHash
+      );
+
+      // Re-search if reduced move was better than alpha
+      if (reduction > 0 && score > alpha) {
+        score = -minimax(board, depth - 1, -(alpha + 1), -alpha, opponentColor, aiColor, nextHash);
+      }
+
       if (score > alpha && score < beta) {
         score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash);
       }

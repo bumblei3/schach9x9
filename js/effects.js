@@ -112,6 +112,53 @@ export class FloatingTextManager {
   }
 }
 
+/**
+ * Triggers haptic feedback (vibration)
+ * @param {string} type - 'light', 'medium', 'heavy'
+ */
+export function triggerVibration(type = 'light') {
+  if (!navigator.vibrate) return;
+
+  switch (type) {
+    case 'heavy':
+      navigator.vibrate([100, 50, 100]);
+      break;
+    case 'medium':
+      navigator.vibrate(50);
+      break;
+    default:
+      navigator.vibrate(20);
+      break;
+  }
+}
+
+/**
+ * Visual screen shake effect
+ * @param {number} intensity - Magnitude of shake
+ * @param {number} duration - Duration in ms
+ */
+export function shakeScreen(intensity = 5, duration = 300) {
+  const container = document.getElementById('board-wrapper') || document.body;
+  const originalTransition = container.style.transition;
+  const start = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - start;
+    if (elapsed < duration) {
+      const x = (Math.random() - 0.5) * intensity;
+      const y = (Math.random() - 0.5) * intensity;
+      container.style.transform = `translate(${x}px, ${y}px)`;
+      requestAnimationFrame(animate);
+    } else {
+      container.style.transform = '';
+      container.style.transition = originalTransition;
+    }
+  }
+
+  container.style.transition = 'none';
+  animate();
+}
+
 export const particleSystem = new ParticleSystem();
 export const floatingTextManager = new FloatingTextManager();
 

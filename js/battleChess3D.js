@@ -7,9 +7,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createPiece3D /*, PIECE_COLORS*/ } from './pieces3D.js';
-import { BattleAnimator } from './battleAnimations.js';
-import { logger } from './logger.js';
+import { triggerVibration, shakeScreen } from './effects.js';
 import { BOARD_SIZE } from './config.js';
+import { logger } from './logger.js';
+import { BattleAnimator } from './battleAnimations.js';
 
 /**
  * Main 3D Battle Chess Engine
@@ -475,6 +476,15 @@ export class BattleChess3D {
 
     try {
       await this.battleAnimator.playBattle(attacker, defender, startPos, endPos);
+
+      // Visual feedback for heavy captures
+      if (['q', 'a', 'c', 'e'].includes(attacker.type)) {
+        triggerVibration('heavy');
+        shakeScreen(8, 400);
+      } else {
+        triggerVibration('medium');
+        shakeScreen(3, 200);
+      }
     } catch (error) {
       logger.error('Battle animation failed:', error);
     }
