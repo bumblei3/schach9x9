@@ -10,6 +10,7 @@ import { TutorController } from './tutorController.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
 import { BattleChess3D } from './battleChess3D.js';
+import { KeyboardManager } from './input/KeyboardManager.js';
 
 export class App {
   constructor() {
@@ -33,6 +34,9 @@ export class App {
     this.game.gameController.game = this.game;
     this.game.moveController.game = this.game;
     this.game.tutorController = new TutorController(this.game);
+
+    // Input handlers
+    this.keyboardManager = new KeyboardManager(this);
 
     // Apply delegates (monkey-patching Game prototype for legacy support)
     this.applyDelegates();
@@ -349,7 +353,7 @@ export class App {
             if (!this.battleChess3D.scene) this.battleChess3D.init();
 
             // Sync current state
-            this.battleChess3D.syncBoard(this.game.board);
+            this.battleChess3D.updateFromGameState(this.game);
           } else {
             container3D.style.display = 'none';
             boardWrapper.style.opacity = '1';
