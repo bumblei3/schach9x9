@@ -30,10 +30,16 @@ export class App {
     this.game.aiController = new AIController(this.game);
 
     // Make controllers accessible to each other (circular dependencies)
-    this.game.aiController.game = this.game;
-    this.game.gameController.game = this.game;
-    this.game.moveController.game = this.game;
-    this.game.tutorController = new TutorController(this.game);
+    this.aiController = this.game.aiController;
+    this.gameController = this.game.gameController;
+    this.moveController = this.game.moveController;
+
+    this.aiController.game = this.game;
+    this.gameController.game = this.game;
+    this.moveController.game = this.game;
+
+    this.tutorController = new TutorController(this.game);
+    this.game.tutorController = this.tutorController;
 
     // Input handlers
     this.keyboardManager = new KeyboardManager(this);
