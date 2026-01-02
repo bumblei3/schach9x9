@@ -352,6 +352,19 @@ export class App {
       });
     }
 
+    // Shop Item Selection
+    document.querySelectorAll('.shop-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pieceType = btn.dataset.piece;
+        if (this.game && this.game.selectShopPiece) {
+          this.game.selectShopPiece(pieceType);
+          // Highlight selected button
+          document.querySelectorAll('.shop-item').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        }
+      });
+    });
+
     // Toggle 3D
     const toggle3D = document.getElementById('toggle-3d-btn');
     if (toggle3D) {
