@@ -264,7 +264,13 @@ export function showBlunderWarning(game, analysis) {
       {
         text: 'Ja, Zug rückgängig machen',
         class: 'btn-primary',
-        callback: () => game.undoMove(),
+        callback: () => {
+          if (game.moveController && game.moveController.undoMove) {
+            game.moveController.undoMove();
+          } else if (game.undoMove) {
+            game.undoMove();
+          }
+        },
       },
     ]
   );

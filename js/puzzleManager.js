@@ -68,7 +68,7 @@ export class PuzzleManager {
     const puzzle = this.puzzles[index];
 
     // Reset game to a clean state
-    game.phase = 'play';
+    game.phase = 'PLAY';
     game.mode = 'puzzle';
     game.points = 0;
     game.capturedPieces = { white: [], black: [] };

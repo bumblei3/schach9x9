@@ -475,6 +475,7 @@ export class GameController {
   startPuzzleMode() {
     const puzzle = puzzleManager.loadPuzzle(this.game);
     if (puzzle) {
+      this.game.currentPuzzle = puzzle;
       UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
       UI.updateStatus(this.game);
