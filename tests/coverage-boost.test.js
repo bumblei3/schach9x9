@@ -434,7 +434,7 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => { });
+      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => {});
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();

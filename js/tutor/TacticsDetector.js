@@ -78,7 +78,8 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'discovered',
         severity: 'high',
         explanation: `🌟 Abzugsangriff auf ${target.name}!`,
-        question: 'Kannst du durch das Wegziehen einer Figur einen Angriff auf eine andere freilegen?',
+        question:
+          'Kannst du durch das Wegziehen einer Figur einen Angriff auf eine andere freilegen?',
       });
     }
 
