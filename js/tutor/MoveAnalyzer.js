@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from '../gameEngine.js';
+import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
 
@@ -6,41 +6,73 @@ import * as TacticsDetector from './TacticsDetector.js';
  * Analyzes a move and provides a detailed explanation
  */
 export function analyzeMoveWithExplanation(game, move, score, bestScore) {
-  const diff = score - bestScore;
-  let moveQuality = 'good';
-  let qualityLabel = 'Guter Zug';
+  const tacticalExplanations = [];
+  const strategicExplanations = [];
+  const warnings = [];
+  let category = 'normal';
 
-  if (diff < -300) {
-    moveQuality = 'blunder';
-    qualityLabel = 'Blunder (Grober Patzer)';
-  } else if (diff < -100) {
-    moveQuality = 'mistake';
-    qualityLabel = 'Fehler';
-  } else if (diff > -10) {
-    moveQuality = 'best';
-    qualityLabel = 'Bester Zug';
+  // Calculate difference from best move (relative quality)
+  const diff = score - bestScore;
+  const diffPawns = (diff / 100).toFixed(1);
+
+  // Categorize based on relative score
+  let qualityLabel = '';
+  const diffP = parseFloat(diffPawns);
+  if (diffP >= -0.5) {
+    if (score >= 300) {
+      category = 'excellent';
+      qualityLabel = '⭐⭐⭐ Gewinnzug! Diese Stellung ist entscheidend.';
+    } else if (diffP >= -0.1) {
+      category = 'excellent';
+      qualityLabel = '⭐⭐⭐ Bester Zug';
+    } else {
+      category = 'good';
+      qualityLabel = `⭐⭐ Guter Zug (minimal schwächer: ${Math.abs(diffP)} Bauern)`;
+    }
+  } else if (diffP >= -1.5) {
+    category = 'normal';
+    qualityLabel = `⭐ Solider Zug (${Math.abs(diffP)} Bauern schwächer als bester Zug)`;
+  } else if (diffP >= -3.0) {
+    category = 'questionable';
+    qualityLabel = `⚠️ Fragwürdig (${Math.abs(diffP)} Bauern schlechter)`;
+    warnings.push('Es gibt deutlich bessere Züge! Überlege nochmal.');
+  } else {
+    category = 'mistake';
+    qualityLabel = `❌ Fehler (${Math.abs(diffP)} Bauern Nachteil)`;
+    warnings.push('⚠️ Dieser Zug verschenkt Material oder Position!');
   }
 
-  const tacticalPatterns = TacticsDetector.detectTacticalPatterns(game, this, move);
-  const strategicPatterns = analyzeStrategicValue(game, move);
+  // Detect tactical patterns
+  const patterns = TacticsDetector.detectTacticalPatterns(game, this, move);
+  patterns.forEach(pattern => {
+    tacticalExplanations.push(pattern.explanation);
+  });
+
+  // Analyze strategic value
+  const strategic = analyzeStrategicValue(game, move);
+  strategic.forEach(s => {
+    strategicExplanations.push(s.explanation);
+  });
+
+  // Check for threats to own pieces after this move
   const threats = TacticsDetector.detectThreatsAfterMove(game, this, move);
-
-  const explanations = [
-    ...tacticalPatterns.map(p => p.explanation),
-    ...strategicPatterns.map(p => p.explanation),
-    ...threats.map(t => t.warning),
-  ];
-
-  if (explanations.length === 0) {
-    explanations.push('Solider Entwicklungszug.');
+  if (threats.length > 0) {
+    threats.forEach(threat => {
+      warnings.push(threat.warning);
+    });
   }
 
   return {
     move,
     score,
-    quality: moveQuality,
-    label: qualityLabel,
-    explanations,
+    category,
+    qualityLabel,
+    tacticalExplanations,
+    strategicExplanations,
+    warnings,
+    tacticalPatterns: patterns,
+    strategicValue: strategic,
+    scoreDiff: diff,
     notation: getMoveNotation(game, move),
   };
 }
@@ -155,14 +187,34 @@ export function getPieceName(type) {
  * Handles player moves for Guess the Move and warnings
  */
 export function handlePlayerMove(game, tutorController, from, to) {
-  if (!game.isAI || game.turn !== 'white') return;
+  if (game.phase !== PHASES.PLAY) return;
 
-  // If in "Guess the Move" mode
-  if (game.guessMoveMode) {
-    const isBest = game.bestMoves && game.bestMoves.some(m => m.r === to.r && m.c === to.c);
-    if (isBest) {
-      UI.showToast('Korrekt! Das war der beste Zug. (+10 Punkte)');
-      game.points.white += 10;
+  // Get the move from legal moves
+  const moves = game.getAllLegalMoves(game.turn);
+  const move = moves.find(
+    m => m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
+  );
+
+  if (!move) return;
+
+  // 1. Guess the Move Logic
+  if (game.tutorMode === 'guess_the_move') {
+    const bestMoves = game.bestMoves || [];
+    if (bestMoves.length > 0) {
+      const isBest = bestMoves.some(
+        hint =>
+          hint.move.from.r === from.r &&
+          hint.move.from.c === from.c &&
+          hint.move.to.r === to.r &&
+          hint.move.to.c === to.c
+      );
+
+      if (isBest) {
+        game.tutorPoints += 10;
+        UI.showToast('Richtig geraten! +10 Tutor-Punkte', 'success');
+      } else {
+        UI.showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
+      }
     }
   }
 }
@@ -171,52 +223,49 @@ export function handlePlayerMove(game, tutorController, from, to) {
  * Checks for blunders
  */
 export function checkBlunder(game, tutorController, moveRecord) {
-  if (!game.isAI || moveRecord.piece.color !== 'white') return;
+  if (!moveRecord || game.mode === 'puzzle') return;
 
-  // We need current and previous evaluation
-  if (game.moveHistory.length < 2) return;
-  const prevMove = game.moveHistory[game.moveHistory.length - 2];
   const currentEval = moveRecord.evalScore;
-  const prevEval = prevMove.evalScore;
+  const prevEval = game.lastEval || 0;
+  const turn = moveRecord.piece.color;
 
-  // If evaluation dropped significantly (> 200 cents)
-  if (currentEval < prevEval - 200) {
+  // Advantage drop (from perspective of current player)
+  const drop = turn === 'white' ? prevEval - currentEval : currentEval - prevEval;
+
+  if (drop >= 200) {
+    // 2.0 evaluation drop is a blunder
     const analysis = analyzeMoveWithExplanation.call(
       tutorController,
       game,
       { from: moveRecord.from, to: moveRecord.to },
       currentEval,
-      prevEval
+      turn === 'white' ? prevEval : -prevEval
     );
-    showBlunderWarning(analysis);
+    tutorController.showBlunderWarning(analysis);
   }
+
+  game.lastEval = currentEval;
 }
 
 /**
  * Shows a blunder warning
  */
-export function showBlunderWarning(analysis) {
-  UI.showModal({
-    title: '⚠️ Blunder Warnung',
-    content: `
-      <div class="blunder-analysis">
-        <p>Dein letzter Zug <strong>${analysis.notation}</strong> war ein grober Fehler.</p>
-        <ul>
-          ${analysis.explanations.map(e => `<li>${e}</li>`).join('')}
-        </ul>
-        <p>Die Bewertung fiel von ${analysis.score} auf einen deutlich schlechteren Wert.</p>
-      </div>
-    `,
-    buttons: [
-      { text: 'Zug zurücknehmen', action: 'undo', primary: true },
-      { text: 'Fortfahren', action: 'close' },
-    ],
-    callback: action => {
-      if (action === 'undo') {
-        if (window.gameInstance && window.gameInstance.moveController) {
-          window.gameInstance.moveController.undoMove();
-        }
-      }
-    },
-  });
+export function showBlunderWarning(game, analysis) {
+  const warnings = analysis.warnings.join('\n');
+  const explanation =
+    analysis.tacticalExplanations.join('\n') ||
+    'Kein konkretes taktisches Motiv erkannt, aber die Stellung verschlechtert sich deutlich.';
+
+  UI.showModal(
+    '⚠️ Schwerer Fehler (Blunder)',
+    `Dieser Zug verschlechtert deine Stellung um ${(analysis.scoreDiff / -100).toFixed(1)} Bauern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`,
+    [
+      { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+      {
+        text: 'Ja, Zug rückgängig machen',
+        class: 'btn-primary',
+        callback: () => game.undoMove(),
+      },
+    ]
+  );
 }
