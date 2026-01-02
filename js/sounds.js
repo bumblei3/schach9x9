@@ -190,6 +190,49 @@ class SoundManager {
       osc.stop(this.audioContext.currentTime + 0.5);
     }
   }
+
+  playSuccess() {
+    if (!this.enabled) return;
+    this.init();
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+
+    // High-pitched, positive bell-like sound
+    osc.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5
+    osc.frequency.exponentialRampToValueAtTime(1320, this.audioContext.currentTime + 0.2); // E6
+
+    gain.gain.setValueAtTime(this.volume * 0.6, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+
+    osc.start(this.audioContext.currentTime);
+    osc.stop(this.audioContext.currentTime + 0.2);
+  }
+
+  playError() {
+    if (!this.enabled) return;
+    this.init();
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+
+    // Low-pitched, slightly discordant "buzzer" sound
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, this.audioContext.currentTime);
+    osc.frequency.linearRampToValueAtTime(100, this.audioContext.currentTime + 0.3);
+
+    gain.gain.setValueAtTime(this.volume * 0.4, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+
+    osc.start(this.audioContext.currentTime);
+    osc.stop(this.audioContext.currentTime + 0.3);
+  }
 }
 
 // Global instance
