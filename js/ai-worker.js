@@ -10,13 +10,7 @@ import {
   evaluatePosition,
   setOpeningBook,
   setProgressCallback,
-  getAllLegalMoves,
 } from './aiEngine.js';
-
-// Helper to get moves from board (wrapper for consistency)
-function getAllLegalMovesFromBoard(board, color) {
-  return getAllLegalMoves(board, color);
-}
 
 // Main message handler
 self.onmessage = function (e) {

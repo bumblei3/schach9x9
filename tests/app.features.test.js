@@ -24,7 +24,6 @@ describe('App Feature Tests', () => {
   describe('Volume Slider', () => {
     it('should update volume value display on input', () => {
       const slider = document.getElementById('volume-slider');
-      const display = document.getElementById('volume-value');
 
       slider.value = 75;
       slider.dispatchEvent(new Event('input'));

@@ -145,7 +145,7 @@ describe('Comprehensive Game Flow Integration Tests', () => {
 
       // In a real game, move validator would mark this as castling
       // We'll simulate a move that the validator thinks is castling
-      const moveResult = await mc.executeMove(from, to, { type: 'castling', isKingside: true });
+      await mc.executeMove(from, to, { type: 'castling', isKingside: true });
 
       expect(game.board[8][6]).toMatchObject({ type: 'k', color: 'white' });
       expect(game.board[8][5]).toMatchObject({ type: 'r', color: 'white' });
@@ -175,10 +175,7 @@ describe('Comprehensive Game Flow Integration Tests', () => {
 
   describe('Puzzle Mode Lifecycle', () => {
     test('should transition to puzzle mode and solve a simple puzzle', async () => {
-      const { puzzleManager } = await import('../js/puzzleManager.js');
-
-      // Store current game state
-      const initialPhase = game.phase;
+      await import('../js/puzzleManager.js');
 
       // Start puzzle mode
       gc.startPuzzleMode();
