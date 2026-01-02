@@ -3,74 +3,74 @@
    =========================================== */
 
 :root {
-    /* --- Palette: Deep Space Minimalist --- */
-    --bg-app: #0f111a;
+  /* --- Palette: Deep Space Minimalist --- */
+  --bg-app: #0f111a;
 
-    /* Refined Glassmorphism (Premium) */
-    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-    --bg-panel: rgba(15, 23, 42, 0.85);
+  /* Refined Glassmorphism (Premium) */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --bg-panel: rgba(15, 23, 42, 0.85);
 
-    /* Board Colors */
-    --bg-board-dark: #334155;
-    --bg-board-light: #cbd5e1;
+  /* Board Colors */
+  --bg-board-dark: #334155;
+  --bg-board-light: #cbd5e1;
 
-    /* Accent Colors */
-    --accent-primary: #6366f1;
-    --accent-hover: #4f46e5;
-    --accent-glow: rgba(99, 102, 241, 0.3);
+  /* Accent Colors */
+  --accent-primary: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-glow: rgba(99, 102, 241, 0.3);
 
-    /* Text Colors */
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+  /* Text Colors */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
 
-    /* Semantic Colors */
-    --success: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
+  /* Semantic Colors */
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
 
-    /* Dimensions & Spacing */
-    --cell-size: min(8vw, 64px);
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
+  /* Dimensions & Spacing */
+  --cell-size: min(8vw, 64px);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 
-    /* Typography */
-    --font-main: 'Outfit', sans-serif;
+  /* Typography */
+  --font-main: 'Outfit', sans-serif;
 
-    /* Corridor/Zone Colors (Default) */
-    --corridor-bg: rgba(16, 185, 129, 0.15);
-    --corridor-border: rgba(16, 185, 129, 0.4);
-    --corridor-bg-hover: rgba(16, 185, 129, 0.25);
-    --corridor-border-hover: rgba(16, 185, 129, 0.6);
+  /* Corridor/Zone Colors (Default) */
+  --corridor-bg: rgba(16, 185, 129, 0.15);
+  --corridor-border: rgba(16, 185, 129, 0.4);
+  --corridor-bg-hover: rgba(16, 185, 129, 0.25);
+  --corridor-border-hover: rgba(16, 185, 129, 0.6);
 
-    /* Grid Line Colors */
-    --grid-line-color: #0f172a;
+  /* Grid Line Colors */
+  --grid-line-color: #0f172a;
 }
 
 /* --- Reset --- */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* --- Body --- */
 body {
-    font-family: var(--font-main);
-    background-color: var(--bg-app);
-    background-image:
-        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 25%);
-    color: var(--text-main);
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+  font-family: var(--font-main);
+  background-color: var(--bg-app);
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 25%);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* --- Hidden Utility --- */
 .hidden {
-    display: none !important;
+  display: none !important;
 }

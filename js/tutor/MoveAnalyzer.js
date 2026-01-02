@@ -107,7 +107,11 @@ export function analyzeStrategicValue(game, move) {
 
   // 2. Development (Minor Pieces)
   const homeRow = piece.color === 'white' ? 8 : 0;
-  if ((piece.type === 'n' || piece.type === 'b' || piece.type === 'a' || piece.type === 'c') && from.r === homeRow && to.r !== homeRow) {
+  if (
+    (piece.type === 'n' || piece.type === 'b' || piece.type === 'a' || piece.type === 'c') &&
+    from.r === homeRow &&
+    to.r !== homeRow
+  ) {
     patterns.push({
       type: 'development',
       explanation: '🚀 Entwickelt eine Figur',

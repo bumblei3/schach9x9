@@ -282,7 +282,6 @@ export function evaluatePosition(board, forColor, config) {
   return Math.round(perspectiveScore);
 }
 
-
 /**
  * Get position bonus for piece placement using PSTs
  */

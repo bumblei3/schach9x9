@@ -244,7 +244,7 @@ export class DebugConsole {
       timestamp,
       level,
       message,
-      context: this.extractContext(message)
+      context: this.extractContext(message),
     };
 
     this.logs.push(log);
@@ -282,14 +282,17 @@ export class DebugConsole {
       filtered = filtered.filter(log => log.message.toLowerCase().includes(query));
     }
 
-    container.innerHTML = filtered.slice(-100).map(log => {
-      const time = this.formatTime(log.timestamp);
-      return `<div class="debug-log-entry debug-log-${log.level}">
+    container.innerHTML = filtered
+      .slice(-100)
+      .map(log => {
+        const time = this.formatTime(log.timestamp);
+        return `<div class="debug-log-entry debug-log-${log.level}">
         <span class="log-time">${time}</span>
         <span class="log-level">${this.getLevelIcon(log.level)}</span>
         <span class="log-msg">${this.escapeHtml(log.message)}</span>
       </div>`;
-    }).join('');
+      })
+      .join('');
 
     container.scrollTop = container.scrollHeight;
 
@@ -370,7 +373,8 @@ export class DebugConsole {
     set('state-moves', this.game.moveHistory?.length || 0);
 
     // Calculate material
-    let matWhite = 0, matBlack = 0;
+    let matWhite = 0,
+      matBlack = 0;
     const values = { p: 1, n: 3, b: 3, r: 5, q: 9, a: 7, c: 8, e: 10, k: 0 };
     if (this.game.board) {
       for (let r = 0; r < 9; r++) {
@@ -414,8 +418,15 @@ export class DebugConsole {
   boardToString() {
     if (!this.game?.board) return 'Kein Board';
     const symbols = {
-      p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚',
-      a: 'A', c: 'C', e: 'E'
+      p: '♟',
+      r: '♜',
+      n: '♞',
+      b: '♝',
+      q: '♛',
+      k: '♚',
+      a: 'A',
+      c: 'C',
+      e: 'E',
     };
     let result = '   a b c d e f g h i\n';
     for (let r = 0; r < 9; r++) {

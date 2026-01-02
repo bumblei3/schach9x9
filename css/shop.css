@@ -4,246 +4,249 @@
 
 /* --- Shop Panel --- */
 .shop-panel {
-    width: 100%;
-    background: var(--bg-panel);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: var(--glass-border);
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-    max-height: 60vh;
-    overflow-y: auto;
-    opacity: 1;
+  width: 100%;
+  background: var(--bg-panel);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: var(--glass-border);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    padding 0.3s ease;
+  max-height: 60vh;
+  overflow-y: auto;
+  opacity: 1;
 }
 
 .shop-panel.hidden {
-    max-height: 0;
-    padding: 0;
-    opacity: 0;
-    border: none;
-    overflow: hidden;
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  border: none;
+  overflow: hidden;
 }
 
 .shop-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .shop-header h2 {
-    font-size: 1.1rem;
+  font-size: 1.1rem;
 }
 
 .shop-points {
-    font-weight: 700;
-    color: var(--accent-primary);
+  font-weight: 700;
+  color: var(--accent-primary);
 }
 
 .shop-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .shop-item {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 0.75rem 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .shop-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .shop-item.selected {
-    border-color: var(--accent-primary);
-    background: rgba(99, 102, 241, 0.15);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
 }
 
 .shop-icon {
-    font-size: 1.5rem;
-    margin-bottom: 4px;
+  font-size: 1.5rem;
+  margin-bottom: 4px;
 }
 
 .shop-cost {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .shop-status {
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-    height: 1.2em;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  height: 1.2em;
 }
 
 /* --- Tutor Recommendations --- */
 .tutor-recommendations-section {
-    margin: 1rem 0;
+  margin: 1rem 0;
 }
 
 #toggle-tutor-recommendations {
-    margin-bottom: 0.75rem;
-    background: rgba(99, 102, 241, 0.15);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    transition: all 0.2s;
+  margin-bottom: 0.75rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  transition: all 0.2s;
 }
 
 #toggle-tutor-recommendations:hover {
-    background: rgba(99, 102, 241, 0.25);
-    border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
 }
 
 .tutor-recommendations-container {
-    display: flex;
-    overflow-x: auto;
-    gap: 1rem;
-    padding: 0.5rem;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-primary) transparent;
-    margin-bottom: 1rem;
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 0.5rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-primary) transparent;
+  margin-bottom: 1rem;
 }
 
 .tutor-recommendations-container::-webkit-scrollbar {
-    height: 6px;
+  height: 6px;
 }
 
 .tutor-recommendations-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
 }
 
 .tutor-recommendations-container::-webkit-scrollbar-thumb {
-    background-color: var(--accent-primary);
-    border-radius: 3px;
+  background-color: var(--accent-primary);
+  border-radius: 3px;
 }
 
 .setup-template-card {
-    background: rgba(34, 197, 94, 0.05);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    border-radius: 16px;
-    padding: 1rem;
-    margin-bottom: 0;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(4px);
-    min-width: 240px;
-    flex-shrink: 0;
-    scroll-snap-align: start;
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 0;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
+  min-width: 240px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
 }
 
 .setup-template-card:hover {
-    background: rgba(34, 197, 94, 0.15);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
-    border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
 }
 
 .template-name {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-    color: var(--text-main);
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-main);
 }
 
 .template-description {
-    font-size: 0.85rem;
-    color: #cbd5e1;
-    margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
 }
 
 .template-pieces {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
 }
 
 .template-piece-icon {
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* --- Puzzle Panel --- */
 .puzzle-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .puzzle-panel.hidden {
-    display: none;
+  display: none;
 }
 
 .puzzle-content {
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    animation: slideUp 0.3s ease-out;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideUp 0.3s ease-out;
 }
 
 .puzzle-content h2 {
-    font-size: 1.25rem;
-    color: var(--accent-primary);
-    margin: 0;
+  font-size: 1.25rem;
+  color: var(--accent-primary);
+  margin: 0;
 }
 
 .puzzle-content p {
-    color: var(--text-muted);
-    margin: 0;
+  color: var(--text-muted);
+  margin: 0;
 }
 
 .puzzle-status {
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    text-align: center;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  text-align: center;
 }
 
 .puzzle-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
 }
