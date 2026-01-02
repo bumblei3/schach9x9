@@ -379,5 +379,122 @@ export class App {
     // If not triggered by buttons, we might show the overlay
     const overlay = document.getElementById('points-selection-overlay');
     if (overlay) overlay.style.display = 'flex';
+
+    this.initMenuHandlers();
+  }
+
+  initMenuHandlers() {
+    const menuBtn = document.getElementById('menu-btn');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuCloseBtn = document.getElementById('menu-close-btn');
+
+    if (menuBtn && menuOverlay) {
+      menuBtn.addEventListener('click', () => {
+        menuOverlay.classList.remove('hidden');
+        menuOverlay.style.display = 'flex';
+      });
+    }
+
+    if (menuCloseBtn && menuOverlay) {
+      menuCloseBtn.addEventListener('click', () => {
+        menuOverlay.classList.add('hidden');
+        menuOverlay.style.display = 'none';
+      });
+    }
+
+    // Wiring up menu items
+    const restartBtn = document.getElementById('restart-btn');
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        if (confirm('Spiel wirklich neu starten?')) {
+          location.reload();
+        }
+      });
+    }
+
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          this.gameController.saveGame();
+          // Optional: Show toast or close menu
+          if (menuOverlay) {
+            menuOverlay.classList.add('hidden');
+            menuOverlay.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Add other menu handlers here (Load, Resign, etc.)
+    const resignBtn = document.getElementById('resign-btn');
+    if (resignBtn) {
+      resignBtn.addEventListener('click', () => {
+        if (this.gameController && confirm('Wirklich aufgeben?')) {
+          this.gameController.resign(this.game.turn);
+          if (menuOverlay) {
+            menuOverlay.classList.add('hidden');
+            menuOverlay.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    const loadBtn = document.getElementById('load-btn');
+    if (loadBtn) {
+      loadBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          this.gameController.loadGame();
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+        }
+      });
+    }
+
+    const drawBtn = document.getElementById('draw-offer-btn');
+    if (drawBtn) {
+      drawBtn.addEventListener('click', () => {
+        if (this.gameController && confirm('Remis anbieten?')) {
+          this.gameController.offerDraw(this.game.turn);
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+        }
+      });
+    }
+
+    const puzzleBtn = document.getElementById('puzzle-mode-btn');
+    if (puzzleBtn) {
+      puzzleBtn.addEventListener('click', () => {
+        alert('Puzzle Modus noch nicht implementiert!');
+      });
+    }
+
+    const helpBtn = document.getElementById('help-btn');
+    const helpOverlay = document.getElementById('help-overlay');
+    const closeHelpBtn = document.getElementById('close-help-btn');
+    if (helpBtn && helpOverlay) {
+      helpBtn.addEventListener('click', () => {
+        helpOverlay.classList.remove('hidden');
+        helpOverlay.style.display = 'flex';
+        if (menuOverlay) menuOverlay.classList.add('hidden');
+      });
+      if (closeHelpBtn) {
+        closeHelpBtn.addEventListener('click', () => {
+          helpOverlay.classList.add('hidden');
+          helpOverlay.style.display = 'none';
+        });
+      }
+    }
+
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect) {
+      themeSelect.addEventListener('change', (e) => {
+        if (this.game) {
+          this.game.setTheme(e.target.value);
+        }
+      });
+      // Set initial value
+      if (localStorage.getItem('chess_theme')) {
+        themeSelect.value = localStorage.getItem('chess_theme');
+      }
+    }
   }
 }
