@@ -20,8 +20,9 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Optimierte KI**: Leistungsstarker Gegner mit Alpha-Beta-Suche, Transposition Table und effizientem Move-Ordering.
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
-- **Progressive Web App (PWA)**: Installierbar auf Desktop und Mobile, unterstützt Offline-Spiel.
+- **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker. Mit Touch-Support für Drag & Drop auf Tablets und Smartphones.
 - **Detaillierte Statistiken**: Umfassendes Tracking von Gewinnraten, Zügen und Spielhistorie.
+- **Anpassbare Designs**: Wähle zwischen Classic, Deep Blue und Forest Green Themes.
 
 ## 🧠 Technische Highlights
 

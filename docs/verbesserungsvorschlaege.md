@@ -2,10 +2,9 @@
 
 ## 🎮 UX/UI Verbesserungen
 
-### 1. **Drag & Drop für Figuren**
-
-- Figuren per Drag & Drop verschieben (zusätzlich zu Klick)
-- Visuelles Feedback während des Ziehens
+### 1. **Drag & Drop für Figuren** ✅
+- [x] Figuren per Drag & Drop verschieben
+- [x] Visuelles Feedback während des Ziehens
 - Ungültige Züge visuell markieren (z.B. rotes X)
 
 ### 2. **Bessere visuelle Feedback-Mechanismen**
@@ -21,11 +20,9 @@
 - Tastenkürzel für häufige Aktionen (U=Undo, H=Hint, S=Save)
 - Escape-Taste zum Abwählen
 
-### 4. **Mobile Optimierung**
-
-- Touch-Gesten für Züge
-- Responsive Layout für kleinere Bildschirme
-- Swipe-Gesten für Replay-Navigation
+### 4. **Mobile Optimierung** ✅
+- [x] Touch-Gesten für Züge
+- [x] Responsive Layout für kleinere Bildschirme
 
 ### 5. **Bessere Tutor-Integration**
 
@@ -84,11 +81,9 @@
 
 ## 🎨 Design & Theming
 
-### 13. **Mehr Themes**
-
-- High-Contrast Mode für Barrierefreiheit
-- Custom Color Schemes (Benutzer kann Farben wählen)
-- 3D-Ansicht (optional)
+### 13. **Mehr Themes** ✅
+- [x] Custom Color Schemes (Classic, Blue, Green)
+- [x] CSS Variables für einfaches Theming
 - Minimalistisches Theme
 
 ### 14. **Figuren-Darstellung**
@@ -143,24 +138,23 @@
 - Cloud-Sync (optional)
 - Export als JSON/PNG
 
-### 21. **Offline-Funktionalität**
-
-- Service Worker für vollständiges Offline-Spiel
-- Cache-Strategie für Assets
+### 21. **Offline-Funktionalität** ✅
+- [x] Service Worker für vollständiges Offline-Spiel
+- [x] Cache-Strategie für Assets
 - Lokale Datenbank für Historie
 
 ## 🎯 Quick Wins (Schnell umsetzbar)
 
-1. **Tastenkürzel hinzufügen** (U=Undo, H=Hint, etc.)
+1. **Tastenkürzel hinzufügen** ✅ (U=Undo, H=Hint, etc.)
 2. **Bessere Fehlermeldungen** (benutzerfreundlicher)
-3. **Auto-Save** alle 5 Züge
-4. **PGN Export** für Zughistorie
-5. **Mehr Themes** (einfach CSS-Variablen)
-6. **Bessere Animationen** (CSS Transitions)
-7. **Tooltips** für alle Buttons
-8. **Konfetti-Animation** bei Sieg
-9. **Sound-Volume-Slider**
-10. **Fullscreen-Modus**
+3. **Auto-Save** ✅
+4. **PGN Export** ✅
+5. **Mehr Themes** ✅
+6. **Bessere Animationen** ✅
+7. **Tooltips** ✅
+8. **Konfetti-Animation** ✅
+9. **Sound-Volume-Slider** ✅
+10. **Fullscreen-Modus** ✅
 
 ## 📈 Priorisierung
 
