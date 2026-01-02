@@ -7,7 +7,7 @@ import * as UI from '../ui.js';
  * @param {Object} moveController - The move controller instance
  */
 export function undoMove(game, moveController) {
-  if (game.moveHistory.length === 0 || game.phase !== PHASES.PLAY) {
+  if (game.moveHistory.length === 0 || (game.phase !== PHASES.PLAY && game.phase !== PHASES.ANALYSIS)) {
     return;
   }
 
@@ -91,6 +91,12 @@ export function undoMove(game, moveController) {
   }
 
   if (game.updateBestMoves) game.updateBestMoves();
+
+  // Trigger analysis update if in analysis mode
+  if (game.analysisMode && game.continuousAnalysis && game.gameController) {
+    game.gameController.requestPositionAnalysis();
+  }
+
   moveController.updateUndoRedoButtons();
 }
 

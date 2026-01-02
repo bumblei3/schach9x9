@@ -350,6 +350,11 @@ export function finishMove(game, moveController) {
   } else {
     setTimeout(() => {
       if (game.updateBestMoves) game.updateBestMoves();
+
+      // Trigger analysis update if in analysis mode
+      if (game.analysisMode && game.continuousAnalysis && game.gameController) {
+        game.gameController.requestPositionAnalysis();
+      }
     }, 10);
   }
 }

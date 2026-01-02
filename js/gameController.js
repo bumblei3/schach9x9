@@ -107,7 +107,7 @@ export class GameController {
       this.game.phase === PHASES.SETUP_BLACK_PIECES
     ) {
       this.placeShopPiece(r, c);
-    } else if (this.game.phase === PHASES.PLAY) {
+    } else if (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS) {
       if (this.game.handlePlayClick) {
         this.game.handlePlayClick(r, c);
       }

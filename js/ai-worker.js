@@ -6,6 +6,7 @@
 import { logger } from './logger.js';
 import {
   getBestMove,
+  analyzePosition,
   evaluatePosition,
   setOpeningBook,
   setProgressCallback,
@@ -54,49 +55,19 @@ self.onmessage = function (e) {
       }
 
       case 'analyze': {
-        const { board, color, _depth, topMovesCount = 5 } = data;
+        const { board, color, depth = 3, topMovesCount = 5 } = data;
 
-        // Get position evaluation
-        const score = evaluatePosition(board, color);
-
-        // Get all legal moves and evaluate each
-        const allMoves = getAllLegalMovesFromBoard(board, color);
-
-        // Evaluate each move
-        const movesWithScores = allMoves.map(move => {
-          const fromPiece = board[move.from.r][move.from.c];
-          const targetPiece = board[move.to.r][move.to.c];
-
-          // Simulate move
-          board[move.to.r][move.to.c] = fromPiece;
-          board[move.from.r][move.from.c] = null;
-
-          // Evaluate resulting position
-          const moveScore = evaluatePosition(board, color);
-
-          // Undo move
-          board[move.from.r][move.from.c] = fromPiece;
-          board[move.to.r][move.to.c] = targetPiece;
-
-          return {
-            from: move.from,
-            to: move.to,
-            score: moveScore,
-          };
+        // Setup progress callback
+        setProgressCallback(progress => {
+          self.postMessage({ type: 'progress', data: progress });
         });
 
-        // Sort moves by score (descending for current player)
-        movesWithScores.sort((a, b) => b.score - a.score);
-
-        // Get top N moves
-        const topMoves = movesWithScores.slice(0, topMovesCount);
+        // Use the new deep analysis function
+        const analysis = analyzePosition(board, color, depth, topMovesCount);
 
         self.postMessage({
           type: 'analysis',
-          data: {
-            score,
-            topMoves,
-          },
+          data: analysis,
         });
         break;
       }

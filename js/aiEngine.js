@@ -4,7 +4,12 @@
  */
 
 import { logger } from './logger.js';
-import { getBestMove, setProgressCallback, getNodesEvaluated } from './ai/Search.js';
+import {
+  getBestMove,
+  analyzePosition,
+  setProgressCallback,
+  getNodesEvaluated,
+} from './ai/Search.js';
 import { evaluatePosition, PST, PST_EG } from './ai/Evaluation.js';
 import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.js';
 import {
@@ -31,6 +36,7 @@ import {
 export {
   logger,
   getBestMove,
+  analyzePosition,
   evaluatePosition,
   setOpeningBook,
   queryOpeningBook,

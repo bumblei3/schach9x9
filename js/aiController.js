@@ -127,7 +127,7 @@ export class AIController {
           this.openingBook = book;
           this.openingBookLoaded = true;
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for workers (convert to serializable format)
@@ -650,7 +650,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker
@@ -666,8 +666,13 @@ export class AIController {
         // Update analysis UI with results
         this.updateAnalysisUI(data);
       } else if (type === 'progress') {
-        // Optionally show progress in analysis panel
-        // Could update a progress indicator
+        // Handle engine statistics or partial analysis
+        if (data.type === 'partial_analysis') {
+          this.updateAnalysisUI(data.data);
+          this.updateAnalysisStats(data);
+        } else {
+          this.updateAnalysisStats(data);
+        }
       }
     };
 
@@ -680,6 +685,16 @@ export class AIController {
         topMovesCount: 5, // Get top 5 moves
       },
     });
+  }
+
+  updateAnalysisStats(data) {
+    const engineInfo = document.getElementById('analysis-engine-info');
+    if (engineInfo) {
+      const depth = data.depth || 0;
+      const maxDepth = data.maxDepth || 0;
+      const nodes = data.nodes ? data.nodes.toLocaleString('de-DE') : 0;
+      engineInfo.textContent = `Tiefe: ${depth}/${maxDepth} | Knoten: ${nodes}`;
+    }
   }
 
   updateAnalysisUI(analysis) {
@@ -735,6 +750,11 @@ export class AIController {
 
         topMovesContent.appendChild(item);
       });
+
+      // Automatically highlight best move if continuous analysis is on
+      if (this.game.continuousAnalysis) {
+        this.highlightMove(analysis.topMoves[0], true); // true = silent/non-persistent if needed
+      }
     }
   }
 

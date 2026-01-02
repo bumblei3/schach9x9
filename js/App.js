@@ -442,6 +442,53 @@ export class App {
     if (overlay) overlay.style.display = 'flex';
 
     this.initMenuHandlers();
+    this.initAnalysisHandlers();
+  }
+
+  initAnalysisHandlers() {
+    const analysisModeBtn = document.getElementById('analysis-mode-btn');
+    const closeAnalysisBtn = document.getElementById('close-analysis-btn');
+    const continuousBtn = document.getElementById('continuous-analysis-btn');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    if (analysisModeBtn) {
+      analysisModeBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          if (!this.game.analysisMode) {
+            this.gameController.enterAnalysisMode();
+          } else {
+            this.gameController.exitAnalysisMode();
+          }
+
+          // Close menu
+          if (menuOverlay) {
+            menuOverlay.classList.add('hidden');
+            menuOverlay.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    if (closeAnalysisBtn) {
+      closeAnalysisBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          this.gameController.exitAnalysisMode();
+        }
+      });
+    }
+
+    if (continuousBtn) {
+      continuousBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          this.gameController.toggleContinuousAnalysis();
+          // Visual feedback
+          continuousBtn.classList.toggle('active', this.game.continuousAnalysis);
+          continuousBtn.textContent = this.game.continuousAnalysis
+            ? '⏸️ Pausieren'
+            : '🔄 Kontinuierlich';
+        }
+      });
+    }
   }
 
   initMenuHandlers() {
