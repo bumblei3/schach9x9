@@ -71,6 +71,15 @@ export class KeyboardManager {
       return;
     }
 
+    // Fullscreen: 'f'
+    if (key === 'f') {
+      event.preventDefault();
+      if (this.app.toggleFullscreen) {
+        this.app.toggleFullscreen();
+      }
+      return;
+    }
+
     // Escape: Cancel selection / Close modals
     if (key === 'escape') {
       event.preventDefault();

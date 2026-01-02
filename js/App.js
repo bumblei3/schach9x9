@@ -567,5 +567,57 @@ export class App {
         volumeValue.textContent = val + '%';
       });
     }
+
+    // Fullscreen
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('click', () => {
+        this.toggleFullscreen();
+      });
+
+      // Update icon when fullscreen state changes
+      document.addEventListener('fullscreenchange', () => {
+        this.updateFullscreenIcon();
+      });
+    }
+  }
+
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(e => {
+        console.warn('Fullscreen request failed:', e);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  updateFullscreenIcon() {
+    const btn = document.getElementById('fullscreen-btn');
+    if (!btn) return;
+
+    const isFullscreen = !!document.fullscreenElement;
+    const svg = btn.querySelector('svg');
+    if (svg) {
+      if (isFullscreen) {
+        // Exit fullscreen icon (corners pointing inward)
+        svg.innerHTML = `
+          <path d="M4 14h3a2 2 0 0 1 2 2v3"></path>
+          <path d="M20 10v-3a2 2 0 0 0-2-2h-3"></path>
+          <path d="M4 10V7a2 2 0 0 1 2-2h3"></path>
+          <path d="M14 20h3a2 2 0 0 0 2-2v-3"></path>
+        `;
+      } else {
+        // Enter fullscreen icon (corners pointing outward)
+        svg.innerHTML = `
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+        `;
+      }
+    }
+
+    btn.classList.toggle('active-fullscreen', isFullscreen);
   }
 }
