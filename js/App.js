@@ -70,7 +70,7 @@ export class App {
       // via window.battleChess3D checks.
 
       // Listen for 3D board clicks
-      window.addEventListener('board3dclick', (e) => {
+      window.addEventListener('board3dclick', e => {
         if (this.game && this.gameController) {
           this.gameController.handleCellClick(e.detail.row, e.detail.col);
         }
@@ -486,7 +486,7 @@ export class App {
 
     const themeSelect = document.getElementById('theme-select');
     if (themeSelect) {
-      themeSelect.addEventListener('change', (e) => {
+      themeSelect.addEventListener('change', e => {
         if (this.game) {
           this.game.setTheme(e.target.value);
         }
