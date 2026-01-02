@@ -352,6 +352,15 @@ export class App {
       });
     }
 
+    // Puzzle Mode
+    const puzzleStartBtn = document.getElementById('puzzle-start-btn');
+    if (puzzleStartBtn) {
+      puzzleStartBtn.addEventListener('click', () => {
+        document.getElementById('points-selection-overlay').style.display = 'none';
+        this.init(0, 'puzzle');
+      });
+    }
+
     // Shop Item Selection
     document.querySelectorAll('.shop-item').forEach(btn => {
       btn.addEventListener('click', () => {
