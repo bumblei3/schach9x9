@@ -365,6 +365,16 @@ export class App {
       });
     });
 
+    // Finish Setup Button
+    const finishSetupBtn = document.getElementById('finish-setup-btn');
+    if (finishSetupBtn) {
+      finishSetupBtn.addEventListener('click', () => {
+        if (this.game && this.game.finishSetupPhase) {
+          this.game.finishSetupPhase();
+        }
+      });
+    }
+
     // Toggle 3D
     const toggle3D = document.getElementById('toggle-3d-btn');
     if (toggle3D) {
