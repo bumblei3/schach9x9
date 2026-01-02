@@ -328,6 +328,19 @@ export function finishMove(game, moveController) {
 
   UI.updateStatus(game);
   UI.renderEvalGraph(game);
+
+  // Auto-save every 5 moves
+  if (game.moveHistory.length > 0 && game.moveHistory.length % 5 === 0) {
+    try {
+      if (game.gameController && game.gameController.saveGame) {
+        game.gameController.saveGame(true); // silent save
+        UI.showToast('Spiel automatisch gespeichert', 'success');
+      }
+    } catch (e) {
+      console.warn('Auto-save failed:', e);
+    }
+  }
+
   game.log(`${game.turn === 'white' ? 'Weiß' : 'Schwarz'} ist am Zug.`);
 
   if (game.isAI && game.turn === 'black' && game.phase === PHASES.PLAY) {
