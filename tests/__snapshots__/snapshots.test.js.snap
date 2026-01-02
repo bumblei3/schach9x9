@@ -40,70 +40,20 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
 
   
     <!-- Spinner Overlay (unchanged) -->
-    <div id="spinner-overlay" style="
-        display: none;
-        position: fixed;
-        z-index: 9998;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.3);
-        align-items: center;
-        justify-content: center;
-      ">
-      <div class="ai-thinking-panel" style="
-          background: #222;
-          padding: 30px 40px;
-          border-radius: 16px;
-          box-shadow: 0 0 16px #000;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-width: 300px;
-        ">
-        <div class="spinner" style="
-            width: 48px;
-            height: 48px;
-            border: 6px solid #eee;
-            border-top: 6px solid #2196f3;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          "></div>
-        <div style="margin-top: 16px; font-size: 1.2em">KI denkt nach...</div>
-        <div class="ai-status" style="margin-top: 20px; text-align: center; width: 100%">
-          <div id="ai-depth" style="font-size: 0.95em; color: #ddd; margin-bottom: 8px">
-            Calculating...
-          </div>
-          <div id="ai-nodes" style="font-size: 0.9em; color: #aaa; margin-bottom: 8px">
-            0 Positionen
-          </div>
-          <div id="ai-best-move" style="font-size: 0.85em; color: #888; margin-bottom: 12px"></div>
+    <div id="spinner-overlay">
+      <div class="ai-thinking-panel">
+        <div class="spinner"></div>
+        <div style="margin-top: 16px; font-size: 1.2em; font-weight: 600">KI denkt nach...</div>
+        <div class="ai-status">
+          <div id="ai-depth">Calculating...</div>
+          <div id="ai-nodes">0 Positionen</div>
+          <div id="ai-best-move"></div>
         </div>
-        <div class="progress-bar" style="
-            width: 100%;
-            height: 6px;
-            background: #444;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 8px;
-          ">
-          <div id="progress-fill" style="
-              height: 100%;
-              width: 0%;
-              background: linear-gradient(90deg, #2196f3, #21cbf3);
-              transition: width 0.3s ease;
-            "></div>
+        <div class="progress-bar-container">
+          <div id="progress-fill"></div>
         </div>
       </div>
     </div>
-    <style>
-      @keyframes spin {
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
 
     <!-- Error Overlay (unchanged) -->
     <div id="error-overlay" style="
