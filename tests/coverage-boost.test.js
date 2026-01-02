@@ -144,7 +144,6 @@ describe('Coverage Boost Tests', () => {
     jest.clearAllMocks();
   });
 
-
   describe('UI.updateTutorRecommendations', () => {
     test('should render templates in setup phase', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
@@ -432,7 +431,7 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => { });
+      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => {});
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();
