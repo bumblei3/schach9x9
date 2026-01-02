@@ -7,7 +7,10 @@ import * as UI from '../ui.js';
  * @param {Object} moveController - The move controller instance
  */
 export function undoMove(game, moveController) {
-  if (game.moveHistory.length === 0 || (game.phase !== PHASES.PLAY && game.phase !== PHASES.ANALYSIS)) {
+  if (
+    game.moveHistory.length === 0 ||
+    (game.phase !== PHASES.PLAY && game.phase !== PHASES.ANALYSIS)
+  ) {
     return;
   }
 

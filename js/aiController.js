@@ -127,7 +127,7 @@ export class AIController {
           this.openingBook = book;
           this.openingBookLoaded = true;
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for workers (convert to serializable format)
@@ -650,7 +650,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for worker

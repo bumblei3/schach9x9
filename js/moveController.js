@@ -93,7 +93,10 @@ export class MoveController {
    * Redoes the last undone move
    */
   async redoMove() {
-    if (this.redoStack.length === 0 || (this.game.phase !== PHASES.PLAY && this.game.phase !== PHASES.ANALYSIS)) {
+    if (
+      this.redoStack.length === 0 ||
+      (this.game.phase !== PHASES.PLAY && this.game.phase !== PHASES.ANALYSIS)
+    ) {
       return;
     }
     const move = this.redoStack.pop();
@@ -128,13 +131,17 @@ export class MoveController {
     const redoBtn = document.getElementById('redo-btn');
 
     if (undoBtn) {
-      const canUndo = this.game.moveHistory.length > 0 && (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
+      const canUndo =
+        this.game.moveHistory.length > 0 &&
+        (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
       undoBtn.disabled = !canUndo;
       undoBtn.textContent = `⏮ Rückgängig${this.game.moveHistory.length > 0 ? ` (${this.game.moveHistory.length})` : ''}`;
     }
 
     if (redoBtn) {
-      const canRedo = this.redoStack.length > 0 && (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
+      const canRedo =
+        this.redoStack.length > 0 &&
+        (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
       redoBtn.disabled = !canRedo;
       redoBtn.textContent = `⏭ Wiederholen${this.redoStack.length > 0 ? ` (${this.redoStack.length})` : ''}`;
     }
