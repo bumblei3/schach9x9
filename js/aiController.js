@@ -183,7 +183,7 @@ export class AIController {
 
       // Load opening book if available
       if (this.openingBookLoaded) {
-        worker.postMessage({ type: 'loadBook', book: this.openingBook });
+        worker.postMessage({ type: 'loadBook', data: { book: this.openingBook } });
       }
 
       worker.onmessage = e => {
@@ -648,7 +648,7 @@ export class AIController {
       fetch('opening-book.json')
         .then(r => r.json())
         .then(book => {
-          this.aiWorker.postMessage({ type: 'loadBook', book });
+          this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
         .catch(() => {});
     }

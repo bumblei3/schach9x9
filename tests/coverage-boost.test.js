@@ -141,8 +141,12 @@ describe('Coverage Boost Tests', () => {
     };
 
     global.confirm = jest.fn(() => true);
-
     jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    delete window.location;
+    window.location = { reload: jest.fn() };
   });
 
   describe('UI.updateTutorRecommendations', () => {

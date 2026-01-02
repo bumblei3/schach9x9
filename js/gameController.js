@@ -9,6 +9,7 @@ import { Tutorial } from './tutorial.js';
 import { ArrowRenderer } from './arrows.js';
 import { StatisticsManager } from './statisticsManager.js';
 import { puzzleManager } from './puzzleManager.js';
+import { TimeManager } from './TimeManager.js';
 
 // Piece values for shop
 const PIECES = SHOP_PIECES;
@@ -16,8 +17,8 @@ const PIECES = SHOP_PIECES;
 export class GameController {
   constructor(game) {
     this.game = game;
-    this.clockInterval = null;
     this.statisticsManager = new StatisticsManager();
+    this.timeManager = new TimeManager(game, this);
     this.gameStartTime = null;
   }
 
@@ -64,35 +65,16 @@ export class GameController {
       this.game.arrowRenderer = new ArrowRenderer(boardContainer);
     }
 
-    // Start clock update loop
-    if (this.game.clockInterval) clearInterval(this.game.clockInterval);
-    this.game.clockInterval = setInterval(() => {
-      if (this.game.phase === PHASES.PLAY && !this.game.replayMode && this.game.clockEnabled) {
-        const now = Date.now();
-        const delta = (now - this.game.lastMoveTime) / 1000;
-        this.game.lastMoveTime = now;
+    // Start clock update loop delegated to TimeManager is handled via startClock call below if needed.
+    // Actually the logic was inline in initGame previously, but now we use TimeManager.startClock()
+    // strictly when game starts or via updates.
 
-        if (this.game.turn === 'white') {
-          this.game.whiteTime = Math.max(0, this.game.whiteTime - delta);
-          if (this.game.whiteTime <= 0) {
-            this.game.phase = PHASES.GAME_OVER;
-            this.game.log('Zeit abgelaufen! Schwarz gewinnt.');
-            UI.updateStatus(this.game);
-            soundManager.playGameOver(false);
-          }
-        } else {
-          this.game.blackTime = Math.max(0, this.game.blackTime - delta);
-          if (this.game.blackTime <= 0) {
-            this.game.phase = PHASES.GAME_OVER;
-            this.game.log('Zeit abgelaufen! Weiß gewinnt.');
-            UI.updateStatus(this.game);
-            soundManager.playGameOver(false);
-          }
-        }
-        UI.updateClockDisplay(this.game);
-        UI.updateClockUI(this.game);
-      }
-    }, 100);
+    // The previous code had a setInterval for clock UI updates and checking timeout.
+    // TimeManager.startClock() does setInterval.
+    // But we need to make sure we don't start it if not playing.
+
+    // In 'Classic' mode branch above (lines 36+), we called this.startClock().
+    // We should ensure TimeManager handles the interval.
 
     logger.info('Game initialized with', initialPoints, 'points in mode:', mode);
   }
@@ -327,95 +309,31 @@ export class GameController {
     handleTransition();
   }
   setTimeControl(mode) {
-    const controls = {
-      blitz3: { base: 180, increment: 2 },
-      blitz5: { base: 300, increment: 3 },
-      rapid10: { base: 600, increment: 0 },
-      rapid15: { base: 900, increment: 10 },
-      classical30: { base: 1800, increment: 0 },
-    };
-    this.game.timeControl = controls[mode] || controls['blitz5'];
-    this.game.whiteTime = this.game.timeControl.base;
-    this.game.blackTime = this.game.timeControl.base;
-    this.updateClockDisplay();
+    this.timeManager.setTimeControl(mode);
   }
 
   updateClockVisibility() {
-    const clockEl = document.getElementById('chess-clock');
-    if (clockEl) {
-      if (this.game.clockEnabled) {
-        clockEl.classList.remove('hidden');
-      } else {
-        clockEl.classList.add('hidden');
-      }
-    }
+    this.timeManager.updateClockVisibility();
   }
 
   startClock() {
-    if (!this.game.clockEnabled || this.game.phase !== PHASES.PLAY) return;
-
-    this.stopClock();
-    this.game.lastMoveTime = Date.now();
-    this.clockInterval = setInterval(() => this.tickClock(), 100);
-    this.updateClockUI();
+    this.timeManager.startClock();
   }
 
   stopClock() {
-    if (this.clockInterval) {
-      clearInterval(this.clockInterval);
-      this.clockInterval = null;
-    }
+    this.timeManager.stopClock();
   }
 
   tickClock() {
-    if (this.game.phase !== PHASES.PLAY) {
-      this.stopClock();
-      return;
-    }
-
-    const now = Date.now();
-    const elapsed = (now - this.game.lastMoveTime) / 1000;
-    this.game.lastMoveTime = now;
-
-    if (this.game.turn === 'white') {
-      this.game.whiteTime = Math.max(0, this.game.whiteTime - elapsed);
-    } else {
-      this.game.blackTime = Math.max(0, this.game.blackTime - elapsed);
-    }
-
-    this.updateClockDisplay();
-
-    if (this.game.whiteTime <= 0) {
-      this.stopClock();
-      this.game.phase = PHASES.GAME_OVER;
-      this.game.log('Weiß hat keine Zeit mehr! Schwarz gewinnt durch Zeitüberschreitung.');
-      const overlay = document.getElementById('game-over-overlay');
-      const winnerText = document.getElementById('winner-text');
-      winnerText.textContent = 'Schwarz gewinnt durch Zeitüberschreitung!';
-      overlay.classList.remove('hidden');
-
-      // Save to statistics
-      this.saveGameToStatistics('loss', 'white');
-    } else if (this.game.blackTime <= 0) {
-      this.stopClock();
-      this.game.phase = PHASES.GAME_OVER;
-      this.game.log('Schwarz hat keine Zeit mehr! Weiß gewinnt durch Zeitüberschreitung.');
-      const overlay = document.getElementById('game-over-overlay');
-      const winnerText = document.getElementById('winner-text');
-      winnerText.textContent = 'Weiß gewinnt durch Zeitüberschreitung!';
-      overlay.classList.remove('hidden');
-
-      // Save to statistics
-      this.saveGameToStatistics('win', 'black');
-    }
+    this.timeManager.tickClock();
   }
 
   updateClockDisplay() {
-    UI.updateClockDisplay(this.game);
+    this.timeManager.updateClockDisplay();
   }
 
   updateClockUI() {
-    UI.updateClockUI(this.game);
+    this.timeManager.updateClockUI();
   }
 
   showShop(show) {
