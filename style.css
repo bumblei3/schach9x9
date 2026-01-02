@@ -250,7 +250,8 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
-  /* Added for 3D container positioning */
+  /* Added padding to accommodate absolute positioned labels (Left/Bottom) */
+  padding: 0 0 30px 30px;
 }
 
 #board-wrapper {
@@ -1638,14 +1639,17 @@ body {
 .cell.analysis-to {
   background-color: rgba(79, 156, 249, 0.4) !important;
 }
+
 /* --- Micro-Interactions & Animations --- */
 @keyframes spring-pop {
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(0.92);
   }
+
   100% {
     transform: scale(1);
   }
@@ -1656,6 +1660,7 @@ body {
     opacity: 0;
     transform: translateY(20px) scale(0.96);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -1667,7 +1672,8 @@ body {
 .btn-secondary:active,
 .shop-item:active {
   animation: spring-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform: translateY(0); /* Override default generic transform */
+  transform: translateY(0);
+  /* Override default generic transform */
 }
 
 /* Apply new opening animation to modals */
