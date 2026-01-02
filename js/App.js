@@ -524,7 +524,14 @@ export class App {
     const puzzleBtn = document.getElementById('puzzle-mode-btn');
     if (puzzleBtn) {
       puzzleBtn.addEventListener('click', () => {
-        alert('Puzzle Modus noch nicht implementiert!');
+        if (this.gameController && this.gameController.startPuzzleMode) {
+          this.gameController.startPuzzleMode();
+          // Close menu
+          if (menuOverlay) {
+            menuOverlay.classList.add('hidden');
+            menuOverlay.style.display = 'none';
+          }
+        }
       });
     }
 
