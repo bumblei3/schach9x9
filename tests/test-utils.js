@@ -1,63 +1,18 @@
 import { jest } from '@jest/globals';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Sets up a standard JSDOM environment for Schach 9x9 tests.
  */
 export function setupJSDOM() {
-  document.body.innerHTML = `
-    <div id="board-wrapper">
-        <div id="board"></div>
-    </div>
-    <div id="status-display"></div>
-    <div id="move-history"></div>
-    <div id="captured-white">
-        <div class="material-advantage white-adv"></div>
-    </div>
-    <div id="captured-black">
-        <div class="material-advantage black-adv"></div>
-    </div>
-    <div id="clock-white"></div>
-    <div id="clock-black"></div>
-    <div id="shop-panel" class="hidden"></div>
-    <div id="points-display"></div>
-    <div id="finish-setup-btn"></div>
-    <div id="selected-piece-display"></div>
-    <div id="tutor-overlay" class="hidden">
-         <div id="tutor-hints-body"></div>
-    </div>
-    <div id="promotion-overlay" class="hidden">
-        <div id="promotion-options"></div>
-    </div>
-    <div id="replay-status" class="hidden"></div>
-    <div id="replay-exit" class="hidden"></div>
-    <div id="tutor-recommendations-section" class="hidden"></div>
-    <div id="stats-overlay" class="hidden">
-         <div id="stat-moves"></div>
-         <div id="stat-captures"></div>
-         <div id="stat-accuracy"></div>
-         <div id="stat-best-moves"></div>
-         <div id="stat-material"></div>
-    </div>
-    <div id="generic-modal" style="display:none">
-        <div id="modal-title"></div>
-        <div id="modal-message"></div>
-        <div id="modal-actions"></div>
-    </div>
-    <div id="game-over-overlay" class="hidden">
-        <div id="winner-text"></div>
-    </div>
-    <div id="draw-offer-overlay" class="hidden">
-        <div id="draw-offer-message"></div>
-    </div>
-    <div id="chess-clock" class="hidden"></div>
-    <div id="puzzle-overlay" class="hidden">
-        <div id="puzzle-title"></div>
-        <div id="puzzle-description"></div>
-        <div id="puzzle-status"></div>
-        <button id="puzzle-next-btn"></button>
-        <button id="puzzle-exit-btn"></button>
-    </div>
-  `;
+  const htmlPath = path.resolve(__dirname, '../index.html');
+  const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+  document.body.innerHTML = htmlContent;
 
   global.window.PIECE_SVGS = {
     white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },

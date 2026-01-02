@@ -1,10 +1,13 @@
 :root {
   /* --- Palette: Deep Space Minimalist --- */
   --bg-app: #0f111a;
-  --bg-panel: rgba(26, 29, 41, 0.75);
-  /* Semi-transparent for glassmorphism */
+  /* Refined Glassmorphism */
   --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 24px 48px -12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --bg-panel: rgba(20, 23, 33, 0.85);
+  /* Slightly darker/more opaque for contrast */
   --bg-board-dark: #475569;
   /* Lighter slate for better contrast with black lines */
   --bg-board-light: #e2e4e9;
@@ -772,7 +775,7 @@ body {
   box-shadow: var(--glass-shadow);
   max-height: 80vh;
   overflow-y: auto;
-  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .menu-header {
@@ -1634,4 +1637,45 @@ body {
 
 .cell.analysis-to {
   background-color: rgba(79, 156, 249, 0.4) !important;
+}
+/* --- Micro-Interactions & Animations --- */
+@keyframes spring-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.action-icon-btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.shop-item:active {
+  animation: spring-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: translateY(0); /* Override default generic transform */
+}
+
+/* Apply new opening animation to modals */
+.modal-content,
+.menu-content,
+.info-content,
+.stats-content,
+.puzzle-content,
+.tutorial-content {
+  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }

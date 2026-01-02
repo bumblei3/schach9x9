@@ -239,15 +239,69 @@ export class BattleChess3D {
    * Add coordinate labels to the board
    */
   addCoordinateLabels() {
-    // TODO: Add text sprites for coordinates
-    // For now, just add small markers at corners
-    const markerGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-    const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-    // Mark origin
-    const origin = new THREE.Mesh(markerGeometry, markerMaterial);
-    origin.position.set(-4 * this.squareSize, 0.1, -4 * this.squareSize);
-    this.boardGroup.add(origin);
+    // Add File labels (a-i)
+    files.forEach((file, index) => {
+      const sprite = this.createTextSprite(file);
+      const pos = this.boardToWorld(0, index);
+      // Place at bottom (z=5) and top (z=-5)
+      sprite.position.set(pos.x, 0.05, 4.5 * this.squareSize); // Bottom side
+      this.boardGroup.add(sprite);
+
+      const spriteTop = this.createTextSprite(file);
+      spriteTop.position.set(pos.x, 0.05, -4.5 * this.squareSize); // Top side
+      this.boardGroup.add(spriteTop);
+    });
+
+    // Add Rank labels (1-9)
+    ranks.forEach((rank, index) => {
+      const sprite = this.createTextSprite(rank);
+      const pos = this.boardToWorld(index, 0);
+      // Place at left (x=-5) and right (x=5)
+      sprite.position.set(-4.5 * this.squareSize, 0.05, pos.z); // Left side
+      this.boardGroup.add(sprite);
+
+      const spriteRight = this.createTextSprite(rank);
+      spriteRight.position.set(4.5 * this.squareSize, 0.05, pos.z); // Right side
+      this.boardGroup.add(spriteRight);
+    });
+  }
+
+  /**
+   * Create a text sprite using Canvas
+   */
+  createTextSprite(text) {
+    const canvas = document.createElement('canvas');
+    const size = 128;
+    canvas.width = size;
+    canvas.height = size;
+
+    const context = canvas.getContext('2d');
+    context.fillStyle = 'rgba(0,0,0,0)'; // Transparent background
+    context.fillRect(0, 0, size, size);
+
+    context.font = 'bold 80px "Outfit", Arial, sans-serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+
+    // Add text shadow/outline for readability on any background
+    context.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+    context.lineWidth = 4;
+    context.strokeText(text.toUpperCase(), size / 2, size / 2);
+
+    context.fillStyle = '#ffffff';
+    context.fillText(text.toUpperCase(), size / 2, size / 2);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture });
+    const sprite = new THREE.Sprite(material);
+
+    // Scale sprite to fit board square size roughly
+    sprite.scale.set(0.6, 0.6, 1);
+
+    return sprite;
   }
 
   /**

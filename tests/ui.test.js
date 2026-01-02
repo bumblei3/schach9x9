@@ -126,7 +126,9 @@ describe('UI Module', () => {
       UI.showStatisticsOverlay(game);
       const overlay = document.getElementById('stats-overlay');
       expect(overlay.classList.contains('hidden')).toBe(false);
-      expect(document.getElementById('stat-moves').textContent).toBe('0');
+      expect(document.getElementById('stat-moves')).toBeNull(); // Old ID removed
+      expect(document.getElementById('stat-accuracy')).not.toBeNull();
+      expect(document.getElementById('stat-elo')).not.toBeNull();
     });
   });
 
