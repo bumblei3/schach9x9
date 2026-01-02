@@ -1,5 +1,12 @@
 {
-  "source": ["gameEngine.js", "ui.js"],
+  "source": [
+    "js/App.js",
+    "js/RulesEngine.js",
+    "js/TimeManager.js",
+    "js/gameEngine.js",
+    "js/ui.js",
+    "js/gameController.js"
+  ],
   "opts": {
     "destination": "docs",
     "recurse": true

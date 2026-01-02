@@ -1,24 +1,26 @@
 import { PHASES /*, BOARD_SIZE*/ } from './gameEngine.js';
 import { storageManager } from './storage.js';
-import { SHOP_PIECES, PIECE_VALUES } from './config.js';
+// import { SHOP_PIECES, PIECE_VALUES } from './config.js'; // Unused
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
-import { PIECE_SVGS } from './chess-pieces.js';
+// import { PIECE_SVGS } from './chess-pieces.js'; // Unused
 import { logger } from './logger.js';
 import { Tutorial } from './tutorial.js';
 import { ArrowRenderer } from './arrows.js';
 import { StatisticsManager } from './statisticsManager.js';
 import { puzzleManager } from './puzzleManager.js';
 import { TimeManager } from './TimeManager.js';
+import { ShopManager } from './shop/ShopManager.js';
 
 // Piece values for shop
-const PIECES = SHOP_PIECES;
+// const PIECES = SHOP_PIECES; // Unused
 
 export class GameController {
   constructor(game) {
     this.game = game;
     this.statisticsManager = new StatisticsManager();
     this.timeManager = new TimeManager(game, this);
+    this.shopManager = new ShopManager(game);
     this.gameStartTime = null;
   }
 
@@ -156,93 +158,11 @@ export class GameController {
   }
 
   selectShopPiece(pieceType) {
-    if (!pieceType) return;
-    const cost = PIECE_VALUES[pieceType];
-    if (cost > this.game.points) {
-      this.game.log('Nicht genug Punkte!');
-      return;
-    }
-
-    this.game.selectedShopPiece = pieceType;
-
-    // Update UI
-    document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('selected'));
-    const btn = document.querySelector(`.shop-btn[data-piece="${pieceType}"]`);
-    if (btn) btn.classList.add('selected');
-
-    const displayEl = document.getElementById('selected-piece-display');
-    // Find the piece info from SHOP_PIECES by matching the symbol
-    const pieceInfo = Object.values(PIECES).find(p => p.symbol === pieceType);
-    const svg = PIECE_SVGS['white'][pieceType];
-    displayEl.innerHTML = `Ausgewählt: <div style="display:inline-block;width:30px;height:30px;vertical-align:middle;">${svg}</div> ${pieceInfo ? pieceInfo.name : pieceType} (${cost})`;
+    this.shopManager.selectShopPiece(pieceType);
   }
 
   placeShopPiece(r, c) {
-    if (!this.game.selectedShopPiece) {
-      const piece = this.game.board[r][c];
-      const isWhiteTurn = this.game.phase === PHASES.SETUP_WHITE_PIECES;
-      const color = isWhiteTurn ? 'white' : 'black';
-
-      if (piece && piece.color === color && piece.type !== 'k') {
-        const cost = PIECES[Object.keys(PIECES).find(k => PIECES[k].symbol === piece.type)].points;
-        this.game.points += cost;
-        this.game.board[r][c] = null;
-        this.updateShopUI();
-        this.game.log('Figur entfernt, Punkte erstattet.');
-
-        // Update 3D board if active
-        if (window.battleChess3D && window.battleChess3D.enabled) {
-          window.battleChess3D.removePiece(r, c);
-        }
-      } else {
-        this.game.log('Bitte zuerst eine Figur im Shop auswählen!');
-      }
-      return;
-    }
-
-    const isWhiteTurn = this.game.phase === PHASES.SETUP_WHITE_PIECES;
-    const color = isWhiteTurn ? 'white' : 'black';
-    const corridor = isWhiteTurn ? this.game.whiteCorridor : this.game.blackCorridor;
-
-    if (
-      r < corridor.rowStart ||
-      r >= corridor.rowStart + 3 ||
-      c < corridor.colStart ||
-      c >= corridor.colStart + 3
-    ) {
-      this.game.log('Muss im eigenen Korridor platziert werden!');
-      return;
-    }
-
-    if (this.game.board[r][c]) {
-      this.game.log('Feld besetzt!');
-      return;
-    }
-
-    const cost = PIECE_VALUES[this.game.selectedShopPiece];
-    if (this.game.points >= cost) {
-      const pieceType = this.game.selectedShopPiece; // Store before clearing
-
-      this.game.board[r][c] = {
-        type: pieceType,
-        color: color,
-        hasMoved: false,
-      };
-      this.game.points -= cost;
-
-      // Clear selection after placing the piece
-      this.game.selectedShopPiece = null;
-
-      // Deselect all shop buttons
-      document.querySelectorAll('.shop-item').forEach(btn => btn.classList.remove('selected'));
-
-      this.updateShopUI();
-
-      // Update 3D board if active
-      if (window.battleChess3D && window.battleChess3D.enabled) {
-        window.battleChess3D.addPiece(pieceType, color, r, c);
-      }
-    }
+    this.shopManager.placeShopPiece(r, c);
   }
 
   finishSetupPhase() {

@@ -38,6 +38,13 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Skin-System**: Unterstützung für verschiedene Ästhetiken (Classic, Infernale, Neon).
 - **Animationen**: Weiche Übergänge für Züge und Capture-Events durch integrierten `BattleAnimator`.
 
+### Architektur (`js/App.js`)
+
+- **Modulare Struktur**: Klare Trennung von Verantwortlichkeiten.
+  - **App**: Lifecycle-Management und Initialisierung.
+  - **RulesEngine**: Kapselt alle Regellogiken und Zugvalidierungen.
+  - **TimeManager**: Verwaltet die Spieluhr sicher und präzise.
+
 ## 🧪 Qualitätssicherung & Testing
 
 Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **530 automatisierten Tests** (Jest) wird eine hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.

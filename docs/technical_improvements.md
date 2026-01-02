@@ -1,6 +1,6 @@
 # Technical Improvements for Schach9x9
 
-- **Modularize code**: Split `main.js` into separate modules (e.g., `gameEngine.js`, `ui.js`, `utils.js`) and use ES modules (`import`/`export`).
+- **Modularize code**: Split `main.js` into separate modules (App, rules, time) and use ES modules. (Partially Complete: `App.js`, `RulesEngine.js`, `TimeManager.js` created)
 - **Linting & Formatting**: Add ESLint and Prettier configurations; run them on every commit.
 - **Unit Tests**: Set up Jest and write tests for piece movement, capture logic, and special pieces (e.g., Chancellor).
 - **Performance Profiling**: Measure FPS / render time, minimise DOM updates, and debounce UI events.
