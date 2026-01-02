@@ -96,7 +96,7 @@ export class TutorController {
   }
 
   showBlunderWarning(analysis) {
-    return MoveAnalyzer.showBlunderWarning(analysis);
+    return MoveAnalyzer.showBlunderWarning(this.game, analysis);
   }
 
   getSetupTemplates() {
