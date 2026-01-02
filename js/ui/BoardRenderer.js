@@ -148,7 +148,7 @@ export function initBoardUI(game) {
       });
 
       // --- TOUCH SUPPORT (Mobile) ---
-      let touchStartX, touchStartY;
+      let _touchStartX, _touchStartY;
       let draggedElement = null;
 
       cell.addEventListener(
@@ -163,8 +163,8 @@ export function initBoardUI(game) {
           }
 
           e.preventDefault(); // Prevent scrolling
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
+          _touchStartX = touch.clientX;
+          _touchStartY = touch.clientY;
 
           cell.classList.add('dragging');
 

@@ -3,7 +3,7 @@
  * Features: Log filtering, search, export, AI debug, board state
  */
 
-import { logger, LOG_LEVELS } from './logger.js';
+import { logger } from './logger.js';
 
 export class DebugConsole {
   constructor(game) {
@@ -237,7 +237,7 @@ export class DebugConsole {
     if (tabName === 'ai') this.updateAITab();
   }
 
-  addLog(level, message, context = '') {
+  addLog(level, message, _context = '') {
     const timestamp = new Date();
     const log = {
       id: Date.now(),

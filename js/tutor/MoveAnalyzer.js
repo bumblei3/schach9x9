@@ -1,7 +1,7 @@
 import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
-import { evaluatePosition } from '../ai/Evaluation.js';
+import { evaluatePosition as _evaluatePosition } from '../ai/Evaluation.js';
 
 /**
  * Analyzes a move and provides a detailed explanation

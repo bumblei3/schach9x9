@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { initBoardUI, getPieceSymbol } from '../js/ui/BoardRenderer.js';
+import { initBoardUI, getPieceSymbol as _getPieceSymbol } from '../js/ui/BoardRenderer.js';
 import { PHASES } from '../js/config.js';
 
 // Mock PIECE_SVGS globally
@@ -10,11 +10,11 @@ window.PIECE_SVGS = {
 
 describe('BoardRenderer Touch Interactions', () => {
   let gameMock;
-  let boardElement;
+  let _boardElement;
 
   beforeEach(() => {
     document.body.innerHTML = '<div id="board"></div>';
-    boardElement = document.getElementById('board');
+    _boardElement = document.getElementById('board');
 
     gameMock = {
       board: Array(9)
@@ -97,7 +97,7 @@ describe('BoardRenderer Touch Interactions', () => {
     cell.appendChild(wrapper);
 
     const touch = createTouch(cell, 0, 100, 100);
-    const event = dispatchTouchEvent('touchstart', cell, [touch]);
+    const _event = dispatchTouchEvent('touchstart', cell, [touch]);
 
     expect(cell.classList.contains('dragging')).toBe(true);
     // Check if clone exists in body
