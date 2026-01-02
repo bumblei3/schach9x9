@@ -147,6 +147,103 @@ export function initBoardUI(game) {
         }
       });
 
+      // --- TOUCH SUPPORT (Mobile) ---
+      let touchStartX, touchStartY;
+      let draggedElement = null;
+
+      cell.addEventListener(
+        'touchstart',
+        e => {
+          if (game.phase !== PHASES.PLAY || game.replayMode || game.isAnimating) return;
+          const touch = e.touches[0];
+          const piece = game.board[r][c];
+
+          if (!piece || (game.isAI && game.turn === 'black') || piece.color !== game.turn) {
+            return;
+          }
+
+          e.preventDefault(); // Prevent scrolling
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+
+          cell.classList.add('dragging');
+
+          // Create visual drag element
+          draggedElement = cell.querySelector('.piece-svg').cloneNode(true);
+          draggedElement.style.position = 'fixed';
+          draggedElement.style.zIndex = '1000';
+          draggedElement.style.width = cell.offsetWidth + 'px';
+          draggedElement.style.height = cell.offsetHeight + 'px';
+          draggedElement.style.pointerEvents = 'none';
+          draggedElement.style.opacity = '0.8';
+          draggedElement.style.left = touch.clientX - cell.offsetWidth / 2 + 'px';
+          draggedElement.style.top = touch.clientY - cell.offsetHeight / 2 + 'px';
+          document.body.appendChild(draggedElement);
+
+          // Highlight valid moves
+          const validMoves = game.getValidMoves(r, c, piece);
+          validMoves.forEach(move => {
+            const target = document.querySelector(`.cell[data-r="${move.r}"][data-c="${move.c}"]`);
+            if (target) target.classList.add('drag-target');
+          });
+        },
+        { passive: false }
+      );
+
+      cell.addEventListener(
+        'touchmove',
+        e => {
+          if (!draggedElement) return;
+          e.preventDefault();
+          const touch = e.touches[0];
+
+          draggedElement.style.left = touch.clientX - cell.offsetWidth / 2 + 'px';
+          draggedElement.style.top = touch.clientY - cell.offsetHeight / 2 + 'px';
+
+          // Visual feedback for drop target
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetCell = target ? target.closest('.cell') : null;
+
+          document
+            .querySelectorAll('.cell.drag-over')
+            .forEach(c => c.classList.remove('drag-over'));
+          if (targetCell && targetCell.classList.contains('drag-target')) {
+            targetCell.classList.add('drag-over');
+          }
+        },
+        { passive: false }
+      );
+
+      cell.addEventListener('touchend', e => {
+        if (!draggedElement) return;
+
+        // Clean up visual elements
+        document.body.removeChild(draggedElement);
+        draggedElement = null;
+        cell.classList.remove('dragging');
+        document
+          .querySelectorAll('.cell.drag-target')
+          .forEach(c => c.classList.remove('drag-target'));
+        document.querySelectorAll('.cell.drag-over').forEach(c => c.classList.remove('drag-over'));
+
+        // Handle drop
+        const touch = e.changedTouches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        const targetCell = target ? target.closest('.cell') : null;
+
+        if (targetCell) {
+          const targetR = parseInt(targetCell.dataset.r);
+          const targetC = parseInt(targetCell.dataset.c);
+
+          const validMoves = game.getValidMoves(r, c, game.board[r][c]);
+          if (validMoves.some(m => m.r === targetR && m.c === targetC)) {
+            game.selectedSquare = { r, c };
+            game.validMoves = validMoves;
+            game.handleCellClick(targetR, targetC);
+          }
+        }
+      });
+
       cell.addEventListener(
         'mouseenter',
         debounce(() => {

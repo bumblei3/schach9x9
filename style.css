@@ -59,13 +59,14 @@ body[data-theme='blue'] {
 body[data-theme='green'] {
   --bg-board-dark: #769656;
   --bg-board-light: #eeeed2;
-  /* Purple/Indigo for Green theme */
-  --corridor-bg: rgba(99, 102, 241, 0.15);
-  --corridor-border: rgba(99, 102, 241, 0.4);
-  --corridor-bg-hover: rgba(99, 102, 241, 0.25);
-  --corridor-border-hover: rgba(99, 102, 241, 0.6);
-  --grid-line-color: #022c22;
-  /* Very Dark Green (almost black) */
+  --corridor-bg: rgba(255, 255, 0, 0.15);
+  --corridor-border: rgba(255, 255, 0, 0.4);
+}
+
+body[data-theme='classic'] {
+  /* Default variables are already set in :root, but we can enforce them here if needed */
+  --bg-board-dark: #475569;
+  --bg-board-light: #e2e4e9;
 }
 
 body[data-theme='wood'] {
