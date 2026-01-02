@@ -35,6 +35,9 @@ export class GameController {
 
     if (mode === 'setup') {
       UI.updateShopUI(this.game);
+    } else if (mode === 'puzzle') {
+      // Puzzle mode: start puzzle directly
+      this.startPuzzleMode();
     } else {
       // In classic mode, we start directly in PLAY phase
       this.game.gameStartTime = Date.now();
