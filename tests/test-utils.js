@@ -19,6 +19,20 @@ export function setupJSDOM() {
     black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
   };
   global.window._svgCache = {};
+
+  // Mock HTMLCanvasElement.prototype.getContext to prevent 3D test failures
+  HTMLCanvasElement.prototype.getContext = () => ({
+    fillStyle: '',
+    fillRect: jest.fn(),
+    font: '',
+    textAlign: '',
+    textBaseline: '',
+    strokeStyle: '',
+    lineWidth: 0,
+    strokeText: jest.fn(),
+    fillText: jest.fn(),
+    measureText: jest.fn(() => ({ width: 0 })),
+  });
 }
 
 /**

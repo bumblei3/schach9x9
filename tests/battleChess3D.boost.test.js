@@ -48,6 +48,12 @@ const mockThree = {
       return [];
     }),
   })),
+  CanvasTexture: jest.fn(),
+  SpriteMaterial: jest.fn(),
+  Sprite: jest.fn().mockImplementation(() => ({
+    position: { set: jest.fn() },
+    scale: { set: jest.fn() },
+  })),
   Vector3: jest.fn().mockImplementation(() => ({ x: 0, y: 0, z: 0 })),
   BoxGeometry: jest.fn(),
   SphereGeometry: jest.fn(),
@@ -99,6 +105,8 @@ jest.unstable_mockModule('../js/battleAnimations.js', () => ({
   })),
 }));
 
+import { setupJSDOM } from './test-utils.js';
+
 const { BattleChess3D } = await import('../js/battleChess3D.js');
 
 describe('BattleChess3D Class', () => {
@@ -106,6 +114,7 @@ describe('BattleChess3D Class', () => {
   let engine;
 
   beforeEach(() => {
+    setupJSDOM();
     container = document.createElement('div');
     // Mock clientWidth/Height for init
     Object.defineProperty(container, 'clientWidth', { value: 800, configurable: true });
