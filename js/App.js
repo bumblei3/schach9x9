@@ -12,6 +12,7 @@ import * as UI from './ui.js';
 import { BattleChess3D } from './battleChess3D.js';
 import { KeyboardManager } from './input/KeyboardManager.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from './utils/PGNGenerator.js';
+import { soundManager } from './sounds.js';
 
 export class App {
   constructor() {
@@ -537,6 +538,33 @@ export class App {
           menuOverlay.classList.add('hidden');
           menuOverlay.style.display = 'none';
         }
+      });
+    }
+
+    // Sound Controls
+    const soundToggle = document.getElementById('sound-toggle');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeValue = document.getElementById('volume-value');
+
+    if (soundToggle) {
+      // Initialize from saved state
+      soundToggle.checked = soundManager.enabled;
+      soundToggle.addEventListener('change', () => {
+        soundManager.setEnabled(soundToggle.checked);
+        if (volumeSlider) volumeSlider.disabled = !soundToggle.checked;
+      });
+    }
+
+    if (volumeSlider && volumeValue) {
+      // Initialize from saved state
+      volumeSlider.value = Math.round(soundManager.volume * 100);
+      volumeValue.textContent = volumeSlider.value + '%';
+      volumeSlider.disabled = !soundManager.enabled;
+
+      volumeSlider.addEventListener('input', () => {
+        const val = parseInt(volumeSlider.value);
+        soundManager.setVolume(val);
+        volumeValue.textContent = val + '%';
       });
     }
   }

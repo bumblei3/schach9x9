@@ -386,7 +386,18 @@
               </div>
               <div class="setting-row">
                 <label>Sound</label>
-                <input type="checkbox" id="sound-toggle" checked />
+                <div class="volume-control">
+                  <input type="checkbox" id="sound-toggle" checked />
+                  <input
+                    type="range"
+                    id="volume-slider"
+                    min="0"
+                    max="100"
+                    value="30"
+                    class="volume-slider"
+                  />
+                  <span id="volume-value">30%</span>
+                </div>
               </div>
 
               <div class="setting-row">
