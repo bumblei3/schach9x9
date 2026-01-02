@@ -68,6 +68,13 @@ export class App {
       // Hook into Game methods for 3D updates if not handled by event listeners
       // Note: 3D updates are currently handled in GameController/MoveController directly
       // via window.battleChess3D checks.
+
+      // Listen for 3D board clicks
+      window.addEventListener('board3dclick', (e) => {
+        if (this.game && this.gameController) {
+          this.gameController.handleCellClick(e.detail.row, e.detail.col);
+        }
+      });
     }
   }
 
