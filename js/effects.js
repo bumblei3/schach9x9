@@ -114,3 +114,99 @@ export class FloatingTextManager {
 
 export const particleSystem = new ParticleSystem();
 export const floatingTextManager = new FloatingTextManager();
+
+export class ConfettiSystem {
+  constructor() {
+    this.container = document.getElementById('board-container') || document.body;
+    this.particles = [];
+    this.animating = false;
+    this.colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
+  }
+
+  spawn() {
+    const count = 150;
+    const rect = this.container.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti';
+
+      // Random starting position (explosion center)
+      const x = centerX;
+      const y = centerY;
+
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 15 + 10;
+      const vx = Math.cos(angle) * velocity;
+      const vy = Math.sin(angle) * velocity;
+
+      const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+
+      p.style.position = 'absolute';
+      p.style.width = '8px';
+      p.style.height = '8px';
+      p.style.backgroundColor = color;
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      p.style.zIndex = '1000';
+      p.style.pointerEvents = 'none';
+
+      this.container.appendChild(p);
+
+      this.particles.push({
+        el: p,
+        x,
+        y,
+        vx,
+        vy,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+        gravity: 0.5,
+        drag: 0.96,
+        life: 1.0,
+        decay: Math.random() * 0.01 + 0.005,
+      });
+    }
+
+    if (!this.animating) {
+      this.animating = true;
+      requestAnimationFrame(() => this.update());
+    }
+  }
+
+  update() {
+    if (this.particles.length === 0) {
+      this.animating = false;
+      return;
+    }
+
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+
+      p.life -= p.decay;
+
+      if (p.life <= 0) {
+        p.el.remove();
+        this.particles.splice(i, 1);
+        continue;
+      }
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravity;
+      p.vx *= p.drag;
+      p.vy *= p.drag;
+      p.rotation += p.rotationSpeed;
+
+      p.el.style.transform = `translate(${p.x - parseFloat(p.el.style.left)}px, ${p.y - parseFloat(p.el.style.top)}px) rotate(${p.rotation}deg)`;
+      p.el.style.opacity = p.life;
+    }
+
+    requestAnimationFrame(() => this.update());
+  }
+}
+
+export const confettiSystem = new ConfettiSystem();

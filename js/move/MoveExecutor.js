@@ -4,6 +4,7 @@ import { soundManager } from '../sounds.js';
 import { puzzleManager } from '../puzzleManager.js';
 import { evaluatePosition } from '../aiEngine.js';
 import * as MoveValidator from './MoveValidator.js';
+import { confettiSystem } from '../effects.js';
 
 /**
  * Executes a move on the board
@@ -229,6 +230,7 @@ export function finishMove(game, moveController) {
 
     const isPlayerWin = (game.isAI && game.turn === 'black') || !game.isAI;
     soundManager.playGameOver(isPlayerWin);
+    if (isPlayerWin) confettiSystem.spawn();
 
     UI.renderBoard(game);
     UI.updateStatus(game);
@@ -299,6 +301,7 @@ export function finishMove(game, moveController) {
 
     const isPlayerWin = (game.isAI && opponentColor === 'black') || !game.isAI;
     soundManager.playGameOver(isPlayerWin);
+    if (isPlayerWin) confettiSystem.spawn();
 
     if (game.gameController) {
       game.gameController.saveGameToStatistics('win', opponentColor);
