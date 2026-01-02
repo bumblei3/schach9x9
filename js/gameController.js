@@ -479,6 +479,12 @@ export class GameController {
       UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
       UI.updateStatus(this.game);
+
+      // Update 3D board if active
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.updateFromGameState(this.game);
+      }
+
       // Ensure UI controls are appropriate
       this.showShop(false);
     }
@@ -490,6 +496,10 @@ export class GameController {
       UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
       UI.updateStatus(this.game);
+
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.updateFromGameState(this.game);
+      }
     } else {
       UI.updatePuzzleStatus('success', 'Alle Puzzles gelöst!');
     }

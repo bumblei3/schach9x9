@@ -443,6 +443,28 @@ export class App {
 
     this.initMenuHandlers();
     this.initAnalysisHandlers();
+    this.initPuzzleHandlers();
+  }
+
+  initPuzzleHandlers() {
+    const exitBtn = document.getElementById('puzzle-exit-btn');
+    const nextBtn = document.getElementById('puzzle-next-btn');
+
+    if (exitBtn) {
+      exitBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          this.gameController.exitPuzzleMode();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (this.gameController) {
+          this.gameController.nextPuzzle();
+        }
+      });
+    }
   }
 
   initAnalysisHandlers() {

@@ -73,6 +73,7 @@ export class PuzzleManager {
     game.points = 0;
     game.capturedPieces = { white: [], black: [] };
     game.moveHistory = [];
+    game._forceFullRender = true;
     game.puzzleState = {
       active: true,
       currentMoveIndex: 0,
