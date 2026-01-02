@@ -161,6 +161,9 @@ const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
 
 /**
  * Evaluate board position with advanced heuristics
+ * @param {Array<Array<Object>>} board - The game board
+ * @param {string} forColor - Perspective color ('white' or 'black')
+ * @returns {number} Score in centipawns
  */
 export function evaluatePosition(board, forColor) {
   let mgScore = 0;

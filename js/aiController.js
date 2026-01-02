@@ -110,28 +110,10 @@ export class AIController {
     if (spinner) spinner.style.display = 'flex';
     console.time('KI-Zug');
 
-    // MULTI-CORE PARALLEL SEARCH (Lazy SMP)
-    // Detect available CPU cores (cap at 4 for reasonable overhead)
-    const numWorkers = Math.min(navigator.hardwareConcurrency || 2, 4);
-    logger.debug(`[AI] Using ${numWorkers} parallel workers for search`);
-
-    // Initialize workers array if needed
-    if (!this.aiWorkers) {
-      this.aiWorkers = [];
-      this.openingBookLoaded = false;
-
-      // Load opening book once
-      fetch('opening-book.json')
-        .then(r => r.json())
-        .then(book => {
-          this.openingBook = book;
-          this.openingBookLoaded = true;
-        })
-        .catch(() => {});
+    // Initialize persistent worker pool if not exists
+    if (!this.aiWorkers || this.aiWorkers.length === 0) {
+      this.initWorkerPool();
     }
-
-    // Prepare board state for workers (convert to serializable format)
-    const boardCopy = JSON.parse(JSON.stringify(this.game.board));
 
     // Difficulty to depth mapping
     const depthMap = {
@@ -142,7 +124,6 @@ export class AIController {
       expert: 5,
     };
 
-    // In classic mode (AI vs AI), use lower depth for faster, watchable gameplay
     let depth;
     if (this.game.mode === 'classic') {
       depth = 3;
@@ -152,20 +133,19 @@ export class AIController {
       logger.debug(`[AI] Difficulty ${this.game.difficulty}: using depth ${depth}`);
     }
 
-    // Results collection
+    // Prepare board state for workers
+    const boardCopy = JSON.parse(JSON.stringify(this.game.board));
+
+    // Track results
     const workerResults = [];
     let completedWorkers = 0;
+    const numWorkers = this.aiWorkers.length;
 
     const processResults = () => {
       console.timeEnd('KI-Zug');
       if (spinner) spinner.style.display = 'none';
 
-      // Terminate all workers
-      this.aiWorkers.forEach(w => w.terminate());
-      this.aiWorkers = [];
-
-      // Find best result (could be based on score, depth, etc.)
-      // For now, just take the first valid result
+      // Find best result
       const bestResult = workerResults.find(r => r && r.from && r.to);
 
       if (bestResult) {
@@ -176,41 +156,25 @@ export class AIController {
       }
     };
 
-    // Create and start workers
-    for (let i = 0; i < numWorkers; i++) {
-      const worker = new Worker('js/ai-worker.js', { type: 'module' });
-      this.aiWorkers.push(worker);
-
-      // Load opening book if available
-      if (this.openingBookLoaded) {
-        worker.postMessage({ type: 'loadBook', data: { book: this.openingBook } });
-      }
-
+    // Dispatch tasks to persistent workers
+    this.aiWorkers.forEach((worker, i) => {
+      // Reset worker listeners for this move
       worker.onmessage = e => {
         const { type, data } = e.data;
 
         if (type === 'progress') {
-          // Update progress UI (only from first worker to avoid flicker)
-          if (i === 0) {
-            this.updateAIProgress(data);
-          }
+          if (i === 0) this.updateAIProgress(data);
         } else if (type === 'bestMove') {
           workerResults[i] = data;
           completedWorkers++;
-
-          // Use first result (fastest worker wins)
-          if (completedWorkers === 1) {
-            processResults();
-          }
+          if (completedWorkers === 1) processResults();
         }
       };
 
       worker.onerror = err => {
         logger.error(`[AI] Worker ${i} error:`, err);
         completedWorkers++;
-        if (completedWorkers === numWorkers) {
-          processResults();
-        }
+        if (completedWorkers === numWorkers) processResults();
       };
 
       // Send search request
@@ -224,6 +188,41 @@ export class AIController {
           moveNumber: Math.floor(this.game.moveHistory.length / 2),
         },
       });
+    });
+  }
+
+  initWorkerPool() {
+    const numWorkers = Math.min(navigator.hardwareConcurrency || 2, 4);
+    logger.debug(`[AI] Initializing pool with ${numWorkers} workers`);
+
+    this.aiWorkers = [];
+
+    // Load opening book once
+    fetch('opening-book.json')
+      .then(r => r.json())
+      .then(book => {
+        this.openingBook = book;
+        this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
+      })
+      .catch(() => { });
+
+    for (let i = 0; i < numWorkers; i++) {
+      const worker = new Worker('js/ai-worker.js', { type: 'module' });
+      this.aiWorkers.push(worker);
+      if (this.openingBook) {
+        worker.postMessage({ type: 'loadBook', data: { book: this.openingBook } });
+      }
+    }
+  }
+
+  terminate() {
+    if (this.aiWorkers) {
+      this.aiWorkers.forEach(w => w.terminate());
+      this.aiWorkers = [];
+    }
+    if (this.aiWorker) {
+      this.aiWorker.terminate();
+      this.aiWorker = null;
     }
   }
 
@@ -650,7 +649,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker

@@ -4,6 +4,7 @@
  */
 
 import { logger } from './logger.js';
+import { safeJSONParse } from './utils.js';
 
 const STORAGE_KEY = 'chess9x9-game-history';
 
@@ -32,9 +33,13 @@ export class StatisticsManager {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
-        logger.info(`Loaded ${parsed.games?.length || 0} games from storage`);
-        return parsed;
+        if (stored) {
+          const parsed = safeJSONParse(stored, null);
+          if (parsed) {
+            logger.info(`Loaded ${parsed.games?.length || 0} games from storage`);
+            return parsed;
+          }
+        }
       }
     } catch (err) {
       logger.error('Error loading game history:', err);
@@ -180,7 +185,8 @@ export class StatisticsManager {
    */
   importGames(jsonData, merge = true) {
     try {
-      const importData = JSON.parse(jsonData);
+      const importData = safeJSONParse(jsonData, null);
+      if (!importData) throw new Error('Invalid JSON format');
 
       if (!importData.data || !importData.data.games) {
         throw new Error('Invalid import format');

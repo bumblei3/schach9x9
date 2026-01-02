@@ -20,3 +20,19 @@ export function debounce(fn, delay = 150) {
     timer = setTimeout(() => fn(...args), delay);
   };
 }
+
+/**
+ * Safely parses JSON with a fallback value.
+ * Logs errors instead of throwing.
+ * @param {string} jsonString
+ * @param {any} fallback
+ * @returns {any}
+ */
+export function safeJSONParse(jsonString, fallback = null) {
+  try {
+    return JSON.parse(jsonString);
+  } catch (e) {
+    console.error('JSON Parse Error:', e);
+    return fallback;
+  }
+}
