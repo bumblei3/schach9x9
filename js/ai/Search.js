@@ -30,6 +30,9 @@ let progressCallback = null;
 export function setProgressCallback(cb) {
   progressCallback = cb;
 }
+// Active personality config
+let activeConfig = null;
+
 let currentDepth = 0;
 let bestMoveSoFar = null;
 let lastProgressUpdate = 0;
@@ -70,9 +73,11 @@ function sendProgress(maxDepth) {
  * @param {string} color - 'white' or 'black'
  * @param {number} depth - Search depth
  * @param {string} difficulty - Difficulty level
+ * @param {Object} [config] - Personality configuration
  * @returns {Move|null} Best move found
  */
-export function getBestMove(board, color, depth, difficulty) {
+export function getBestMove(board, color, depth, difficulty, moveNumber, config = null) {
+  activeConfig = config;
   nodesEvaluated = 0;
   currentDepth = 0;
   bestMoveSoFar = null;
@@ -241,7 +246,7 @@ function quiescenceSearch(board, alpha, beta, turnColor, aiColor) {
   nodesEvaluated++;
 
   // Evaluation from perspective of turnColor
-  const score = evaluatePosition(board, turnColor);
+  const score = evaluatePosition(board, turnColor, activeConfig);
 
   if (score >= beta) return beta;
   if (alpha < score) alpha = score;

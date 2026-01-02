@@ -1,0 +1,45 @@
+/* ===========================================
+   THEMES.CSS - Theme Overrides
+   =========================================== */
+
+body[data-theme='blue'] {
+    --bg-board-dark: #3b5998;
+    --bg-board-light: #8b9dc3;
+    --corridor-bg: rgba(245, 158, 11, 0.15);
+    --corridor-border: rgba(245, 158, 11, 0.4);
+    --corridor-bg-hover: rgba(245, 158, 11, 0.25);
+    --corridor-border-hover: rgba(245, 158, 11, 0.6);
+    --grid-line-color: #0f172a;
+}
+
+body[data-theme='green'] {
+    --bg-board-dark: #769656;
+    --bg-board-light: #eeeed2;
+    --corridor-bg: rgba(255, 255, 0, 0.15);
+    --corridor-border: rgba(255, 255, 0, 0.4);
+}
+
+body[data-theme='classic'] {
+    --bg-board-dark: #475569;
+    --bg-board-light: #e2e4e9;
+}
+
+body[data-theme='wood'] {
+    --bg-board-dark: #b58863;
+    --bg-board-light: #f0d9b5;
+    --corridor-bg: rgba(22, 101, 52, 0.2);
+    --corridor-border: rgba(22, 101, 52, 0.5);
+    --corridor-bg-hover: rgba(22, 101, 52, 0.3);
+    --corridor-border-hover: rgba(22, 101, 52, 0.7);
+    --grid-line-color: #271202;
+}
+
+body[data-theme='dark'] {
+    --bg-board-dark: #1a1a1a;
+    --bg-board-light: #404040;
+    --corridor-bg: rgba(236, 72, 153, 0.15);
+    --corridor-border: rgba(236, 72, 153, 0.4);
+    --corridor-bg-hover: rgba(236, 72, 153, 0.25);
+    --corridor-border-hover: rgba(236, 72, 153, 0.6);
+    --grid-line-color: #f472b6;
+}

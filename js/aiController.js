@@ -6,6 +6,41 @@ import * as UI from './ui.js';
 // Piece values for shop
 const PIECES = SHOP_PIECES;
 
+export const AI_PERSONALITIES = {
+  balanced: {
+    name: 'Balanced',
+    mobilityWeight: 1.0,
+    safetyWeight: 1.0,
+    pawnStructureWeight: 1.0,
+    centerControlWeight: 1.0,
+    attackWeight: 1.0
+  },
+  aggressive: {
+    name: 'Aggressive',
+    mobilityWeight: 1.2,
+    safetyWeight: 0.8,
+    pawnStructureWeight: 0.9,
+    centerControlWeight: 1.2,
+    attackWeight: 1.5
+  },
+  defensive: {
+    name: 'Defensive',
+    mobilityWeight: 0.8,
+    safetyWeight: 1.5,
+    pawnStructureWeight: 1.2,
+    centerControlWeight: 1.0,
+    attackWeight: 0.7
+  },
+  positional: {
+    name: 'Positional',
+    mobilityWeight: 1.0,
+    safetyWeight: 1.1,
+    pawnStructureWeight: 1.5,
+    centerControlWeight: 1.4,
+    attackWeight: 0.9
+  }
+};
+
 export class AIController {
   constructor(game) {
     this.game = game;
@@ -186,6 +221,7 @@ export class AIController {
           depth: depth,
           difficulty: this.game.difficulty,
           moveNumber: Math.floor(this.game.moveHistory.length / 2),
+          config: AI_PERSONALITIES[this.game.aiPersonality || 'balanced']
         },
       });
     });
@@ -204,7 +240,7 @@ export class AIController {
         this.openingBook = book;
         this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
       })
-      .catch(() => {});
+      .catch(() => { });
 
     for (let i = 0; i < numWorkers; i++) {
       const worker = new Worker('js/ai-worker.js', { type: 'module' });
@@ -649,7 +685,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker

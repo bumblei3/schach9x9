@@ -1,0 +1,172 @@
+/* ===========================================
+   LAYOUT.CSS - Header, Game Area, Player Info
+   =========================================== */
+
+/* --- App Container --- */
+#app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    position: relative;
+}
+
+/* --- Header --- */
+.minimal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    height: 60px;
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.25rem;
+    background: linear-gradient(135deg, #fff, #94a3b8);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.status-pill,
+.stat-pill {
+    font-size: 0.85rem;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-pill {
+    background: var(--accent-glow);
+    border-color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Game Area --- */
+.game-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* --- Player Info --- */
+.player-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: var(--bg-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    height: 56px;
+}
+
+.player-avatar {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+}
+
+.player-details {
+    flex: 1;
+    overflow: hidden;
+}
+
+.player-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.captured-pieces {
+    height: 16px;
+    display: flex;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.captured-piece-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.clock-display {
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    color: var(--text-muted);
+}
+
+.clock-display.active {
+    color: var(--text-main);
+    background: var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-glow);
+    animation: pulse-glow 2s infinite;
+}
+
+/* --- Action Bar --- */
+.action-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.action-icon-btn {
+    background: var(--bg-panel);
+    border: none;
+    color: var(--text-muted);
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    transform: scale(1.05);
+}
+
+.close-icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.close-icon-btn:hover {
+    color: var(--text-main);
+}

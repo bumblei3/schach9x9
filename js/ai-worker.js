@@ -29,14 +29,14 @@ self.onmessage = function (e) {
       }
 
       case 'getBestMove': {
-        const { board, color, depth, difficulty, moveNumber } = data;
+        const { board, color, depth, difficulty, moveNumber, config } = data;
 
         // Setup progress callback
         setProgressCallback(progress => {
           self.postMessage({ type: 'progress', data: progress });
         });
 
-        const bestMove = getBestMove(board, color, depth, difficulty, moveNumber);
+        const bestMove = getBestMove(board, color, depth, difficulty, moveNumber, config);
         self.postMessage({ type: 'bestMove', data: bestMove });
         break;
       }

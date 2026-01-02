@@ -165,7 +165,15 @@ const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
  * @param {string} forColor - Perspective color ('white' or 'black')
  * @returns {number} Score in centipawns
  */
-export function evaluatePosition(board, forColor) {
+export function evaluatePosition(board, forColor, config) {
+  /* Personality Config */
+  const {
+    mobilityWeight = 1.0,
+    safetyWeight = 1.0,
+    pawnStructureWeight = 1.0,
+    centerControlWeight = 1.0,
+  } = config || {};
+
   let mgScore = 0;
   let egScore = 0;
 
@@ -187,9 +195,15 @@ export function evaluatePosition(board, forColor) {
       const mgBonus = getPositionBonus(r, c, piece.type, piece.color, false);
       const egBonus = getPositionBonus(r, c, piece.type, piece.color, true);
 
-      // Material and basic PST
       const isWhite = piece.color === 'white';
       const sideMult = isWhite ? 1 : -1;
+
+      // Center Control Bonus
+      if (r >= 3 && r <= 5 && c >= 3 && c <= 5) {
+        const centerBonus = 10 * centerControlWeight;
+        mgScore += centerBonus * sideMult;
+        egScore += centerBonus * sideMult;
+      }
 
       mgScore += (pieceValue + mgBonus) * sideMult;
       egScore += (pieceValue + egBonus) * sideMult;
@@ -197,7 +211,7 @@ export function evaluatePosition(board, forColor) {
       // Mobility (only for non-pawn/king)
       if (piece.type !== 'p' && piece.type !== 'k') {
         const mobility = countMobility(board, r, c, piece);
-        const mobBonus = mobility * 2;
+        const mobBonus = mobility * 2 * mobilityWeight;
         mgScore += mobBonus * sideMult;
         egScore += mobBonus * sideMult;
 
@@ -217,7 +231,7 @@ export function evaluatePosition(board, forColor) {
       // King Safety (Midgame only)
       if (piece.type === 'k') {
         const safety = evaluateKingSafety(board, r, c, piece.color);
-        mgScore += safety * sideMult;
+        mgScore += safety * safetyWeight * sideMult;
       }
     }
   }
@@ -234,30 +248,29 @@ export function evaluatePosition(board, forColor) {
       // Doubled pawn penalty
       const cols = isWhite ? pawnColumnsWhite : pawnColumnsBlack;
       if (cols[c] > 1) {
-        mgScore -= 10 * sideMult;
-        egScore -= 12 * sideMult;
+        mgScore -= 10 * pawnStructureWeight * sideMult;
+        egScore -= 12 * pawnStructureWeight * sideMult;
       }
 
       // Isolated pawn penalty
       const leftCol = c > 0 ? cols[c - 1] : 0;
       const rightCol = c < BOARD_SIZE - 1 ? cols[c + 1] : 0;
       if (leftCol === 0 && rightCol === 0) {
-        mgScore -= 15 * sideMult;
-        egScore -= 20 * sideMult;
+        mgScore -= 15 * pawnStructureWeight * sideMult;
+        egScore -= 20 * pawnStructureWeight * sideMult;
       }
 
       // Passed pawn bonus
       if (isPassedPawn(board, r, c, piece.color)) {
         const progress = isWhite ? BOARD_SIZE - 1 - r : r;
-        const passedBonus = progress * progress * 5;
+        const passedBonus = progress * progress * 5 * pawnStructureWeight;
         mgScore += passedBonus * sideMult;
         egScore += passedBonus * 1.5 * sideMult;
       }
     }
   }
 
-  // Calculate phase (0 = pure endgame, 24+ = midgame)
-  // Max phase is roughly around 32-40 in this 9x9 setup
+  // Calculate phase (0 = pure endgame, 32+ = midgame)
   const maxPhase = 32;
   const phaseValue = Math.min(totalPhase, maxPhase);
   const mgWeight = phaseValue / maxPhase;
@@ -268,6 +281,7 @@ export function evaluatePosition(board, forColor) {
 
   return Math.round(perspectiveScore);
 }
+
 
 /**
  * Get position bonus for piece placement using PSTs

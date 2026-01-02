@@ -1,6 +1,7 @@
 import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
+import { evaluatePosition } from '../ai/Evaluation.js';
 
 /**
  * Analyzes a move and provides a detailed explanation
@@ -91,26 +92,50 @@ export function analyzeStrategicValue(game, move) {
 
   if (!piece) return patterns;
 
+  // Utilize the Evaluation logic to detect concepts
+  // We need to simulate the board state
+  // Simplification: We look at static features of the move
+
   // 1. Center Control
+  // Center is 3,3 to 5,5
   if (to.r >= 3 && to.r <= 5 && to.c >= 3 && to.c <= 5) {
     patterns.push({
       type: 'center_control',
-      explanation: '🏰 Kontrolliert das Zentrum',
+      explanation: '🏰 Besetzt das Zentrum',
     });
   }
 
-  // 2. Development
+  // 2. Development (Minor Pieces)
   const homeRow = piece.color === 'white' ? 8 : 0;
-  if (from.r === homeRow && to.r !== homeRow) {
+  if ((piece.type === 'n' || piece.type === 'b' || piece.type === 'a' || piece.type === 'c') && from.r === homeRow && to.r !== homeRow) {
     patterns.push({
       type: 'development',
       explanation: '🚀 Entwickelt eine Figur',
     });
   }
 
-  // 3. Mobility
-  // This is a bit simplified as we don't have the board state after move here easily
-  // without re-simulating. But detectTacticalPatterns already does simulation.
+  // 3. King Safety (Simple Heuristic for Tutor)
+  // If King moves and creates a castling-like structure or moves to safety
+  if (piece.type === 'k') {
+    // Castling detection (usually specific move type, but here by coordinates)
+    if (Math.abs(from.c - to.c) > 1) {
+      patterns.push({
+        type: 'safety',
+        explanation: '🛡️ Bringt den König in Sicherheit (Rochade)',
+      });
+    }
+  }
+
+  // 4. Pawn Structure
+  if (piece.type === 'p') {
+    // Check for passed pawn creation (simplified)
+    if (piece.color === 'white' && to.r < 4) {
+      patterns.push({
+        type: 'space',
+        explanation: 'Territoriumsgewinn',
+      });
+    }
+  }
 
   return patterns;
 }
