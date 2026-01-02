@@ -542,7 +542,7 @@ describe('MoveController', () => {
       // Mock UI updates that are called during load
       // UI.updateShopUI is already mocked globally
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
 
       moveController.loadGame();
 
