@@ -1,9 +1,16 @@
-const CACHE_NAME = 'schach9x9-v1';
+const CACHE_NAME = 'schach9x9-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
-  './coordinates.css',
+  './css/base.css',
+  './css/themes.css',
+  './css/layout.css',
+  './css/board.css',
+  './css/components.css',
+  './css/shop.css',
+  './css/animations.css',
+  './css/debug.css',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

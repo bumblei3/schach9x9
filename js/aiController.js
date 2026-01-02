@@ -120,6 +120,11 @@ export class AIController {
   }
 
   aiMove() {
+    // Don't move in puzzle mode - player solves alone
+    if (this.game.mode === 'puzzle') {
+      return;
+    }
+
     // Check if AI should resign
     if (this.aiShouldResign()) {
       this.game.resign('black');
