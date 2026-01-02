@@ -33,6 +33,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'fork',
         severity: 'high',
         explanation: `🍴 Gabelangriff! Bedroht: ${pieces}`,
+        question: 'Siehst du eine Möglichkeit, zwei wertvolle Figuren gleichzeitig zu bedrohen?',
       });
     }
 
@@ -43,6 +44,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'capture',
         severity: 'medium',
         explanation: `⚔️ Schlägt ${pieceName}`,
+        question: 'Gibt es eine gegnerische Figur, die du vorteilhaft schlagen kannst?',
       });
     }
 
@@ -52,6 +54,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'check',
         severity: 'high',
         explanation: '♔ Schach! Bedroht gegnerischen König',
+        question: 'Wie kannst du den gegnerischen König unter Druck setzen?',
       });
     }
 
@@ -63,6 +66,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'pin',
         severity: 'high',
         explanation: `📌 Fesselung! ${pinnedPiece.pinnedName} kann nicht ziehen`,
+        question: 'Kannst du eine gegnerische Figur an den König fesseln?',
       });
     }
 
@@ -74,6 +78,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'discovered',
         severity: 'high',
         explanation: `🌟 Abzugsangriff auf ${target.name}!`,
+        question: 'Kannst du durch das Wegziehen einer Figur einen Angriff auf eine andere freilegen?',
       });
     }
 
@@ -85,6 +90,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         type: 'defense',
         severity: 'medium',
         explanation: `🛡️ Verteidigt bedrohten ${defended.name}`,
+        question: 'Wie kannst du eine deiner bedrohten Figuren am besten schützen?',
       });
     }
   } finally {

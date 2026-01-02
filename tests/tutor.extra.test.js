@@ -38,6 +38,7 @@ describe('TutorController Extra Coverage', () => {
       tutorMode: 'standard',
       tutorPoints: 0,
       lastEval: 0,
+      stats: { accuracies: [] },
       bestMoves: [],
       getAllLegalMoves: jest.fn(() => []),
       getValidMoves: jest.fn(() => []),

@@ -19,6 +19,9 @@ jest.unstable_mockModule('../js/effects.js', () => ({
   particleSystem: {
     spawn: jest.fn(),
   },
+  floatingTextManager: {
+    show: jest.fn(),
+  },
 }));
 
 const UI = await import('../js/ui.js');

@@ -225,14 +225,28 @@ export function updateStatistics(game) {
     (game.capturedPieces?.white?.length || 0) + (game.capturedPieces?.black?.length || 0);
   const capturesEl = document.getElementById('stat-captures');
   if (capturesEl) capturesEl.textContent = game.stats.captures;
+
+  // Accuracy display based on recorded accuracies
   const accuracyEl = document.getElementById('stat-accuracy');
-  if (accuracyEl)
-    accuracyEl.textContent =
-      game.stats.playerMoves > 0
-        ? Math.round((game.stats.playerBestMoves / game.stats.playerMoves) * 100) + '%'
-        : '--%';
+  if (accuracyEl) {
+    if (game.stats.accuracies && game.stats.accuracies.length > 0) {
+      const avgAcc =
+        game.stats.accuracies.reduce((a, b) => a + b, 0) / game.stats.accuracies.length;
+      accuracyEl.textContent = Math.round(avgAcc) + '%';
+    } else {
+      accuracyEl.textContent = '--%';
+    }
+  }
+
+  // Elo estimation display
+  const eloEl = document.getElementById('stat-elo');
+  if (eloEl && game.getEstimatedElo) {
+    eloEl.textContent = game.getEstimatedElo();
+  }
+
   const bestMovesEl = document.getElementById('stat-best-moves');
   if (bestMovesEl) bestMovesEl.textContent = game.stats.playerBestMoves;
+
   if (game.calculateMaterialAdvantage) {
     const adv = game.calculateMaterialAdvantage();
     const materialEl = document.getElementById('stat-material');

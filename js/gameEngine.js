@@ -50,7 +50,13 @@ export class Game {
     this.validMoves = null;
     this.lastMoveHighlight = null;
     this.lastMove = null;
-    this.stats = { totalMoves: 0, playerMoves: 0, playerBestMoves: 0, captures: 0 };
+    this.stats = {
+      totalMoves: 0,
+      playerMoves: 0,
+      playerBestMoves: 0,
+      captures: 0,
+      accuracies: [],
+    };
     this.clockEnabled = false;
     this.timeControl = { ...DEFAULT_TIME_CONTROL };
     this.whiteTime = DEFAULT_TIME_CONTROL.base;
@@ -144,6 +150,24 @@ export class Game {
 
   isStalemate(color) {
     return this.rulesEngine.isStalemate(color);
+  }
+
+  /**
+   * Calculates estimated Elo based on move accuracy
+   * @returns {number} Estimated Elo
+   */
+  getEstimatedElo() {
+    if (this.stats.accuracies.length === 0) return 600;
+
+    // Filter out opening moves (usually 100% accuracy but don't say much about skill)
+    const midgameAccuracies = this.stats.accuracies.slice(5);
+    const evaluationList = midgameAccuracies.length > 0 ? midgameAccuracies : this.stats.accuracies;
+
+    const avgAccuracy = evaluationList.reduce((a, b) => a + b, 0) / evaluationList.length;
+
+    // Linear mapping with caps: 50% -> 800, 100% -> 2400
+    const elo = 800 + (avgAccuracy - 50) * 32;
+    return Math.max(400, Math.min(2800, Math.round(elo)));
   }
 }
 

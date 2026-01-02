@@ -1,567 +1,301 @@
 import { logger } from '../logger.js';
 import { queryOpeningBook } from './OpeningBook.js';
 import {
-  getAllLegalMoves,
-  makeMove,
-  undoMove,
-  getAllCaptureMoves,
-  isInCheck,
+    getAllLegalMoves,
+    makeMove,
+    undoMove,
+    getAllCaptureMoves,
+    isInCheck,
 } from './MoveGenerator.js';
 import { evaluatePosition } from './Evaluation.js';
 import {
-  computeZobristHash,
-  storeTT,
-  probeTT,
-  TT_EXACT,
-  TT_ALPHA,
-  TT_BETA,
-  getZobristTable,
-  getTTStats,
+    computeZobristHash,
+    storeTT,
+    probeTT,
+    TT_EXACT,
+    TT_ALPHA,
+    TT_BETA,
 } from './TranspositionTable.js';
-import { orderMoves, addKillerMove, updateHistory, clearKillerMoves } from './MoveOrdering.js';
-
-// Get Zobrist table for incremental hashing
-const zobristTable = getZobristTable();
+import { orderMoves, addKillerMove, updateHistory } from './MoveOrdering.js';
 
 // Progress tracking
-let nodesEvaluated = 0;
+export let nodesEvaluated = 0;
+export function getNodesEvaluated() { return nodesEvaluated; }
+export function resetNodesEvaluated() { nodesEvaluated = 0; }
+let progressCallback = null;
+export function setProgressCallback(cb) { progressCallback = cb; }
 let currentDepth = 0;
 let bestMoveSoFar = null;
 let lastProgressUpdate = 0;
-let onProgressCallback = null;
-
-export function setProgressCallback(callback) {
-  onProgressCallback = callback;
-}
-
-export function getNodesEvaluated() {
-  return nodesEvaluated;
-}
 
 /**
- * Send progress update to main thread
+ * Send progress update to UI
  */
 function sendProgress(maxDepth) {
-  if (!onProgressCallback) return;
+    const now = Date.now();
+    if (now - lastProgressUpdate > 100) {
+        const progressData = {
+            type: 'progress',
+            depth: currentDepth,
+            maxDepth: maxDepth,
+            nodes: nodesEvaluated,
+            bestMove: bestMoveSoFar
+        };
 
-  const now = Date.now();
-  // Throttle updates to every 100ms
-  if (now - lastProgressUpdate < 100) return;
-
-  lastProgressUpdate = now;
-  onProgressCallback({
-    depth: currentDepth,
-    maxDepth: maxDepth,
-    nodes: nodesEvaluated,
-    bestMove: bestMoveSoFar,
-  });
+        if (progressCallback) {
+            progressCallback(progressData);
+        } else if (typeof self !== 'undefined' && self.postMessage) {
+            self.postMessage(progressData);
+        }
+        lastProgressUpdate = now;
+    }
 }
 
 /**
- * Get best move using minimax algorithm with iterative deepening
+ * Main AI function to find the best move
  */
-export function getBestMove(board, color, depth, difficulty, moveNumber = 0) {
-  try {
-    // Check opening book first (only for first 10 moves)
-    const bookMove = queryOpeningBook(board, moveNumber);
-    if (bookMove) {
-      return bookMove;
-    }
-    // Reset progress tracking
+export function getBestMove(board, color, depth, difficulty) {
     nodesEvaluated = 0;
     currentDepth = 0;
     bestMoveSoFar = null;
     lastProgressUpdate = Date.now();
 
-    clearKillerMoves();
+    // 1. Opening Book
+    const bookMove = queryOpeningBook(board);
+    if (bookMove) {
+        logger.info(`[AI Worker] Opening book move found: ${bookMove.from.r},${bookMove.from.c} -> ${bookMove.to.r},${bookMove.to.c}`);
+        return bookMove;
+    }
 
     const moves = getAllLegalMoves(board, color);
+    if (moves.length === 0) return null;
+    if (moves.length === 1) return moves[0];
 
-    if (moves.length === 0) {
-      return null;
-    }
+    // Difficulty-based depth limit
+    let maxDepth = depth;
+    if (difficulty === 'beginner') maxDepth = Math.min(depth, 1);
+    else if (difficulty === 'easy') maxDepth = Math.min(depth, 2);
 
-    // Difficulty-based behavior
-    if (difficulty === 'beginner') {
-      const randomChance = Math.random();
-      if (randomChance < 0.85) {
-        return moves[Math.floor(Math.random() * moves.length)];
-      } else if (randomChance < 0.95) {
-        const scoredMoves = moves.map(move => {
-          const undo = makeMove(board, move);
-          const score = evaluatePosition(board, color);
-          undoMove(board, undo);
-          return { move, score };
-        });
-        scoredMoves.sort((a, b) => a.score - b.score);
-        const worstMoves = scoredMoves.slice(0, Math.max(1, Math.floor(moves.length * 0.3)));
-        return worstMoves[Math.floor(Math.random() * worstMoves.length)].move;
-      }
-      depth = 1;
-    } else if (difficulty === 'easy') {
-      const captures = moves.filter(
-        m => board[m.to.r][m.to.c] && board[m.to.r][m.to.c].color !== color
-      );
-      if (captures.length > 0 && Math.random() > 0.3) {
-        return captures[Math.floor(Math.random() * captures.length)];
-      }
-      depth = 2;
-    }
-
-    // For medium and above: Use iterative deepening
     let bestMove = moves[0];
-    bestMoveSoFar = bestMove;
+    let bestScore = -Infinity;
 
-    const useIterativeDeepening = difficulty === 'hard' || difficulty === 'expert';
-    const startDepth = useIterativeDeepening ? 1 : depth;
-    let previousIterationScore = 0;
+    const orderedMoves = orderMoves(board, moves, null, 0);
 
-    for (let currentSearchDepth = startDepth; currentSearchDepth <= depth; currentSearchDepth++) {
-      currentDepth = currentSearchDepth;
+    try {
+        // ITERATIVE DEEPENING
+        for (let d = 1; d <= maxDepth; d++) {
+            currentDepth = d;
+            let currentBestMove = null;
+            let currentBestScore = -Infinity;
+            let alpha = -Infinity;
+            const beta = Infinity;
 
-      let bestScore = -Infinity;
-      let iterationBestMove = moves[0];
+            // PVS at Root
+            for (let i = 0; i < orderedMoves.length; i++) {
+                const move = orderedMoves[i];
+                const undoInfo = makeMove(board, move);
+                const opponentColor = color === 'white' ? 'black' : 'white';
+                const nextHash = computeZobristHash(board, opponentColor);
 
-      sendProgress(depth);
+                let score;
+                if (i === 0) {
+                    score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHash);
+                } else {
+                    score = -minimax(board, d - 1, -(alpha + 1), -alpha, opponentColor, color, nextHash);
+                    if (score > alpha && score < beta) {
+                        score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHash);
+                    }
+                }
 
-      const ttBestMove = currentSearchDepth > startDepth ? bestMove : null;
-      const orderedMoves = orderMoves(board, moves, ttBestMove, currentSearchDepth);
+                undoMove(board, undoInfo);
 
-      const rootHash = computeZobristHash(board, color);
-
-      let alpha = -Infinity;
-      let beta = Infinity;
-
-      let windowSize = 40;
-      if (currentSearchDepth > startDepth && Math.abs(previousIterationScore) < 5000) {
-        alpha = previousIterationScore - windowSize;
-        beta = previousIterationScore + windowSize;
-      }
-
-      // Root Search Loop
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        let currentAlpha = alpha;
-        let currentBestScore = -Infinity;
-        let currentBestMove = moves[0];
-
-        for (let i = 0; i < orderedMoves.length; i++) {
-          const move = orderedMoves[i];
-          let score;
-
-          if (i === 0) {
-            score = minimax(
-              board,
-              move,
-              currentSearchDepth - 1,
-              false,
-              currentAlpha,
-              beta,
-              color,
-              rootHash
-            );
-          } else {
-            score = minimax(
-              board,
-              move,
-              currentSearchDepth - 1,
-              false,
-              currentAlpha,
-              currentAlpha + 1,
-              color,
-              rootHash
-            );
-            if (score > currentAlpha && score < beta) {
-              score = minimax(
-                board,
-                move,
-                currentSearchDepth - 1,
-                false,
-                currentAlpha,
-                beta,
-                color,
-                rootHash
-              );
+                if (score > currentBestScore) {
+                    currentBestScore = score;
+                    currentBestMove = move;
+                }
+                alpha = Math.max(alpha, currentBestScore);
+                if (alpha >= beta) break;
             }
-          }
 
-          if (score > currentBestScore) {
-            currentBestScore = score;
-            currentBestMove = move;
-          }
-          if (score > currentAlpha) {
-            currentAlpha = score;
-          }
-          if (score >= beta) break;
+            bestMove = currentBestMove || bestMove;
+            bestScore = currentBestScore;
+            bestMoveSoFar = bestMove;
+            sendProgress(maxDepth);
+
+            // Re-order moves: put best move first
+            if (bestMove) {
+                const index = orderedMoves.indexOf(bestMove);
+                if (index > 0) {
+                    orderedMoves.splice(index, 1);
+                    orderedMoves.unshift(bestMove);
+                }
+            }
+
+            // If we found a mate, no need to search deeper
+            if (Math.abs(bestScore) > 9000) break;
         }
 
-        if (currentBestScore <= alpha) {
-          alpha -= windowSize;
-          windowSize *= 2;
-          continue;
-        }
-        if (currentBestScore >= beta) {
-          beta += windowSize;
-          windowSize *= 2;
-          continue;
-        }
+        // Cleanup
+        if (bestMove && bestMove._score !== undefined) delete bestMove._score;
+        return bestMove;
 
-        bestScore = currentBestScore;
-        iterationBestMove = currentBestMove;
-        break;
-      }
-
-      previousIterationScore = bestScore;
-      bestMove = iterationBestMove;
-      bestMoveSoFar = bestMove;
-      sendProgress(depth);
+    } catch (error) {
+        logger.error('[AI Worker] Error in getBestMove:', error);
+        return moves[0];
     }
-
-    // Log TT statistics
-    const stats = getTTStats();
-    const ttTotal = stats.hits + stats.misses;
-    const hitRate = ttTotal > 0 ? ((stats.hits / ttTotal) * 100).toFixed(1) : 0;
-    logger.info(
-      `[AI Worker] TT Hit Rate: ${hitRate}% (${stats.hits}/${ttTotal}), Nodes: ${nodesEvaluated}`
-    );
-
-    if (bestMove && bestMove._score !== undefined) {
-      delete bestMove._score;
-    }
-
-    return bestMove;
-  } catch (error) {
-    logger.error('[AI Worker] Error in getBestMove:', error);
-    const moves = getAllLegalMoves(board, color);
-    if (moves.length > 0) {
-      const move = moves[Math.floor(Math.random() * moves.length)];
-      if (move._score !== undefined) delete move._score;
-      return move;
-    }
-    return null;
-  }
 }
 
 /**
- * Check if the side has major pieces
+ * Minimax with Alpha-Beta, PVS, and TT
+ * This version uses a NegaMax style for cleaner code
  */
-function hasMajorPieces(board, color) {
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      const piece = board[r][c];
-      if (piece && piece.color === color) {
-        if (piece.type !== 'p' && piece.type !== 'k') {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
+function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
+    nodesEvaluated++;
 
-/**
- * Minimax algorithm with alpha-beta pruning and transposition table
- */
-function minimax(board, move, depth, isMaximizing, alpha, beta, aiColor, parentHash) {
-  nodesEvaluated++;
+    if (nodesEvaluated % 1000 === 0) sendProgress(currentDepth);
 
-  if (nodesEvaluated % 100 === 0) {
-    const now = Date.now();
-    if (now - lastProgressUpdate >= 100) {
-      sendProgress(currentDepth);
-    }
-  }
+    // TT Probe
+    const ttEntry = probeTT(hash, depth, alpha, beta);
+    if (ttEntry && ttEntry.score !== undefined) return ttEntry.score;
 
-  const fromPiece = move ? board[move.from.r][move.from.c] : null;
-  const capturedPiece = move ? board[move.to.r][move.to.c] : null;
-
-  // INCREMENTAL HASH UPDATE
-  let hash = parentHash;
-
-  // 1. Toggle side to move
-  hash ^= zobristTable.sideToMove;
-
-  if (move) {
-    if (fromPiece) {
-      hash ^= zobristTable[fromPiece.color][fromPiece.type][move.from.r][move.from.c];
-    }
-    if (fromPiece) {
-      hash ^= zobristTable[fromPiece.color][fromPiece.type][move.to.r][move.to.c];
-    }
-    if (capturedPiece) {
-      hash ^= zobristTable[capturedPiece.color][capturedPiece.type][move.to.r][move.to.c];
-    }
-  }
-
-  // Probe transposition table
-  const ttEntry = probeTT(hash, depth, alpha, beta);
-  if (ttEntry && ttEntry.score !== undefined) {
-    return ttEntry.score;
-  }
-
-  // Apply move
-  const undoInfo = makeMove(board, move);
-
-  let score;
-  let bestMove = null;
-  let flag = TT_ALPHA; // Default: upper bound
-
-  if (depth === 0) {
-    // Use quiescence search at leaf nodes
-    score = quiescenceSearch(board, alpha, beta, isMaximizing, aiColor);
-    flag = TT_EXACT;
-  } else {
-    // NULL MOVE PRUNING
-    const color = isMaximizing ? aiColor : aiColor === 'white' ? 'black' : 'white';
-
-    if (depth >= 3 && move !== null && !isInCheck(board, color) && hasMajorPieces(board, color)) {
-      const R = 2;
-      const nullScore = minimax(
-        board,
-        null,
-        depth - 1 - R,
-        !isMaximizing,
-        alpha,
-        beta,
-        aiColor,
-        hash
-      );
-
-      if (isMaximizing) {
-        if (nullScore >= beta) {
-          undoMove(board, undoInfo);
-          return beta; // Cutoff
-        }
-      } else {
-        if (nullScore <= alpha) {
-          undoMove(board, undoInfo);
-          return alpha; // Cutoff
-        }
-      }
+    if (depth <= 0) {
+        return quiescenceSearch(board, alpha, beta, turnColor, aiColor);
     }
 
-    const moves = getAllLegalMoves(board, color);
-
+    const moves = getAllLegalMoves(board, turnColor);
     if (moves.length === 0) {
-      score = isMaximizing ? -10000 : 10000;
-      flag = TT_EXACT;
-    } else if (isMaximizing) {
-      score = -Infinity;
-      const ttBestMove = ttEntry ? ttEntry.bestMove : null;
-      const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
-
-      for (let i = 0; i < orderedMoves.length; i++) {
-        const nextMove = orderedMoves[i];
-        let moveScore;
-        const isCapture = board[nextMove.to.r][nextMove.to.c] !== null;
-
-        if (i === 0) {
-          moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
-        } else {
-          // PVS / LMR search
-          let reduction = 0;
-          if (depth >= 3 && i >= 4 && !isCapture && !isInCheck(board, color)) {
-            reduction = 1;
-            if (i >= 12) reduction = 2;
-          }
-
-          moveScore = minimax(
-            board,
-            nextMove,
-            depth - 1 - reduction,
-            false,
-            alpha,
-            alpha + 1,
-            aiColor,
-            hash
-          );
-
-          if (moveScore > alpha && reduction > 0) {
-            moveScore = minimax(board, nextMove, depth - 1, false, alpha, alpha + 1, aiColor, hash);
-          }
-          if (moveScore > alpha && moveScore < beta) {
-            moveScore = minimax(board, nextMove, depth - 1, false, alpha, beta, aiColor, hash);
-          }
+        if (isInCheck(board, turnColor)) {
+            return -10000 - depth; // Mate (favor closer mates)
         }
-
-        if (moveScore > score) {
-          score = moveScore;
-          bestMove = nextMove;
-        }
-        alpha = Math.max(alpha, score);
-        if (beta <= alpha) {
-          if (!capturedPiece) addKillerMove(depth, nextMove);
-          updateHistory(fromPiece, nextMove, depth);
-          flag = TT_BETA;
-          break;
-        }
-      }
-      if (flag !== TT_BETA) flag = TT_EXACT;
-    } else {
-      score = Infinity;
-      const ttBestMove = ttEntry ? ttEntry.bestMove : null;
-      const orderedMoves = orderMoves(board, moves, ttBestMove, depth);
-
-      for (let i = 0; i < orderedMoves.length; i++) {
-        const nextMove = orderedMoves[i];
-        let moveScore;
-        const isCapture = board[nextMove.to.r][nextMove.to.c] !== null;
-
-        if (i === 0) {
-          moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
-        } else {
-          // PVS / LMR search
-          let reduction = 0;
-          if (depth >= 3 && i >= 4 && !isCapture && !isInCheck(board, color)) {
-            reduction = 1;
-            if (i >= 12) reduction = 2;
-          }
-
-          moveScore = minimax(
-            board,
-            nextMove,
-            depth - 1 - reduction,
-            true,
-            beta - 1,
-            beta,
-            aiColor,
-            hash
-          );
-
-          if (moveScore < beta && reduction > 0) {
-            moveScore = minimax(board, nextMove, depth - 1, true, beta - 1, beta, aiColor, hash);
-          }
-          if (moveScore < beta && moveScore > alpha) {
-            moveScore = minimax(board, nextMove, depth - 1, true, alpha, beta, aiColor, hash);
-          }
-        }
-
-        if (moveScore < score) {
-          score = moveScore;
-          bestMove = nextMove;
-        }
-        beta = Math.min(beta, score);
-        if (beta <= alpha) {
-          if (!capturedPiece) addKillerMove(depth, nextMove);
-          updateHistory(fromPiece, nextMove, depth);
-          flag = TT_BETA;
-          break;
-        }
-      }
-      if (flag !== TT_BETA) flag = TT_EXACT;
+        return 0; // Stalemate
     }
-  }
 
-  // Undo move
-  undoMove(board, undoInfo);
+    const orderedMoves = orderMoves(board, moves, ttEntry ? ttEntry.bestMove : null, depth);
+    let bestScore = -Infinity;
+    let bestMove = null;
+    let flag = TT_ALPHA;
 
-  // Store in transposition table
-  storeTT(hash, depth, score, flag, bestMove);
+    const opponentColor = turnColor === 'white' ? 'black' : 'white';
 
-  return score;
+    for (let i = 0; i < orderedMoves.length; i++) {
+        const move = orderedMoves[i];
+        const undoInfo = makeMove(board, move);
+        const nextHash = computeZobristHash(board, opponentColor);
+
+        let score;
+        if (i === 0) {
+            score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash);
+        } else {
+            // PVS Null Window Search
+            score = -minimax(board, depth - 1, -(alpha + 1), -alpha, opponentColor, aiColor, nextHash);
+            if (score > alpha && score < beta) {
+                score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash);
+            }
+        }
+
+        undoMove(board, undoInfo);
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+        }
+
+        alpha = Math.max(alpha, bestScore);
+        if (alpha >= beta) {
+            flag = TT_BETA;
+            if (board[move.to.r][move.to.c] === null) addKillerMove(depth, move);
+            updateHistory(board[move.from.r][move.from.c], move, depth);
+            break;
+        }
+    }
+
+    if (flag !== TT_BETA) flag = TT_EXACT;
+    storeTT(hash, depth, bestScore, flag, bestMove);
+
+    return bestScore;
 }
 
 /**
- * Quiescence search to avoid horizon effect
+ * Quiescence Search
  */
-function quiescenceSearch(board, alpha, beta, isMaximizing, aiColor) {
-  nodesEvaluated++;
-  const standPat = evaluatePosition(board, aiColor);
+function quiescenceSearch(board, alpha, beta, turnColor, aiColor) {
+    nodesEvaluated++;
 
-  if (isMaximizing) {
-    if (standPat >= beta) return beta;
-    if (alpha < standPat) alpha = standPat;
-  } else {
-    if (standPat <= alpha) return alpha;
-    if (beta > standPat) beta = standPat;
-  }
+    // Evaluation from perspective of turnColor
+    const score = evaluatePosition(board, turnColor);
 
-  // Find all capture moves
-  const color = isMaximizing ? aiColor : aiColor === 'white' ? 'black' : 'white';
-  const captureMoves = getAllCaptureMoves(board, color);
+    if (score >= beta) return beta;
+    if (alpha < score) alpha = score;
 
-  if (isMaximizing) {
-    for (const move of captureMoves) {
-      const undoInfo = makeMove(board, move);
+    const captures = getAllCaptureMoves(board, turnColor);
+    const orderedCaptures = orderMoves(board, captures, null, 0);
 
-      const score = quiescenceSearch(board, alpha, beta, false, aiColor);
+    for (const move of orderedCaptures) {
+        const undoInfo = makeMove(board, move);
+        const opponentColor = turnColor === 'white' ? 'black' : 'white';
+        const captureScore = -quiescenceSearch(board, -beta, -alpha, opponentColor, aiColor);
+        undoMove(board, undoInfo);
 
-      undoMove(board, undoInfo);
-
-      if (score >= beta) return beta;
-      if (score > alpha) alpha = score;
+        if (captureScore >= beta) return beta;
+        if (captureScore > alpha) alpha = captureScore;
     }
+
     return alpha;
-  } else {
-    for (const move of captureMoves) {
-      const undoInfo = makeMove(board, move);
-
-      const score = quiescenceSearch(board, alpha, beta, true, aiColor);
-
-      undoMove(board, undoInfo);
-
-      if (score <= alpha) return alpha;
-      if (score < beta) beta = score;
-    }
-    return beta;
-  }
 }
+
 /**
- * Analyze position and get top moves with their evaluations
+ * Analyze position for UI
  */
-export function analyzePosition(board, color, depth, topMovesCount = 5) {
-  try {
-    // Reset progress tracking
-    nodesEvaluated = 0;
-    lastProgressUpdate = Date.now();
+export function analyzePosition(board, color, depth) {
+    try {
+        nodesEvaluated = 0;
+        const moves = getAllLegalMoves(board, color);
+        if (moves.length === 0) return { score: 0, topMoves: [] };
 
-    const moves = getAllLegalMoves(board, color);
-    if (moves.length === 0) {
-      return {
-        score: isInCheck(board, color) ? -10000 : 0,
-        topMoves: [],
-      };
-    }
+        const results = moves.map(move => {
+            const undoInfo = makeMove(board, move);
+            const opponentColor = color === 'white' ? 'black' : 'white';
+            const nextHash = computeZobristHash(board, opponentColor);
 
-    const rootHash = computeZobristHash(board, color);
-    let bestAnalysis = null;
-
-    // Iterative deepening for analysis
-    for (let d = 1; d <= depth; d++) {
-      currentDepth = d;
-      sendProgress(depth);
-
-      // Evaluate each move at current depth d
-      const results = moves.map(move => {
-        // For each move, we do a full search
-        // We use PVS logic if we already have a best move from previous depth
-        const score = minimax(board, move, d - 1, false, -Infinity, Infinity, color, rootHash);
-        return { from: move.from, to: move.to, score };
-      });
-
-      // Sort descending for current player (larger score = better)
-      results.sort((a, b) => b.score - a.score);
-
-      bestAnalysis = {
-        score: results.length > 0 ? results[0].score : evaluatePosition(board, color),
-        topMoves: results.slice(0, topMovesCount),
-      };
-
-      // Send partial result back to worker (which sends it to main thread)
-      if (onProgressCallback && d < depth) {
-        onProgressCallback({
-          type: 'partial_analysis',
-          data: bestAnalysis,
-          depth: d,
-          maxDepth: depth,
-          nodes: nodesEvaluated,
+            // Search from opponent's perspective and negate
+            const score = -minimax(board, depth - 1, -Infinity, Infinity, opponentColor, color, nextHash);
+            undoMove(board, undoInfo);
+            return { move, score };
         });
-      }
+
+        results.sort((a, b) => b.score - a.score);
+        return {
+            score: results[0].score,
+            topMoves: results.slice(0, 5)
+        };
+    } catch (e) {
+        logger.error('[Search] Error analyzing position:', e);
+        return { score: 0, topMoves: [] };
+    }
+}
+
+/**
+ * Extract PV (Principal Variation)
+ */
+export function extractPV(board, color, depth) {
+    const pv = [];
+    const undoStack = [];
+    let currentColor = color;
+
+    for (let i = 0; i < depth && i < 10; i++) {
+        const hash = computeZobristHash(board, currentColor);
+        const entry = probeTT(hash, 0, -Infinity, Infinity);
+        if (!entry || !entry.bestMove) break;
+
+        const move = entry.bestMove;
+        pv.push(move);
+        undoStack.push(makeMove(board, move));
+        currentColor = currentColor === 'white' ? 'black' : 'white';
     }
 
-    return bestAnalysis;
-  } catch (error) {
-    logger.error('[AI Worker] Error in analyzePosition:', error);
-    return null;
-  }
+    while (undoStack.length > 0) {
+        undoMove(board, undoStack.pop());
+    }
+    return pv;
 }
+

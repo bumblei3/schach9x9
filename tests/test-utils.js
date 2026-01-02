@@ -94,7 +94,7 @@ export function createMockGame(overrides = {}) {
     moveHistory: [],
     positionHistory: [],
     capturedPieces: { white: [], black: [] },
-    stats: { totalMoves: 0, playerMoves: 0, playerBestMoves: 0, captures: 0 },
+    stats: { totalMoves: 0, playerMoves: 0, playerBestMoves: 0, captures: 0, accuracies: [] },
     clockEnabled: true,
     isAI: false,
     isAnimating: false,

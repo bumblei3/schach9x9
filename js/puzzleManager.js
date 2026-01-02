@@ -48,9 +48,44 @@ export class PuzzleManager {
         title: 'Puzzle 3: Die Kraft des Erzbischofs',
         description: 'Weiß zieht. Setze matt mit dem Erzbischof.',
         difficulty: 'Mittel',
-        // (0,3) bk (index 3); (2,2) wa (index 20); (2,3) wk (index 21)
         setupStr: '..'.repeat(3) + 'bk' + '..'.repeat(16) + 'wawk' + '..'.repeat(81 - 22) + 'w',
         solution: [{ from: { r: 2, c: 2 }, to: { r: 1, c: 4 } }],
+      },
+      {
+        id: 'mate-in-1-queen-001',
+        title: 'Puzzle 4: Damenmatt',
+        description: 'Setze matt mit der Dame.',
+        difficulty: 'Einfach',
+        setupStr:
+          'bk' +
+          '..'.repeat(8) +
+          'wq' +
+          '..'.repeat(9) +
+          'wk' +
+          '..'.repeat(81 - 20) +
+          'w',
+        solution: [{ from: { r: 1, c: 0 }, to: { r: 0, c: 0 } }],
+      },
+      {
+        id: 'double-rook-mate',
+        title: 'Puzzle 5: Die Treppenmatt',
+        description: 'Klassisches Treppenmatt mit zwei Türmen.',
+        difficulty: 'Mittel',
+        setupStr:
+          '..'.repeat(4) +
+          'bk' +
+          '..'.repeat(13) +
+          'wr' +
+          '..'.repeat(8) +
+          'wr' +
+          '..'.repeat(9) +
+          'wk' +
+          '..'.repeat(81 - 38) +
+          'w',
+        solution: [
+          { from: { r: 2, c: 0 }, to: { r: 1, c: 0 } },
+          { from: { r: 3, c: 1 }, to: { r: 0, c: 1 } },
+        ],
       },
     ];
 

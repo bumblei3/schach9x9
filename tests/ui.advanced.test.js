@@ -11,6 +11,9 @@ jest.unstable_mockModule('../js/effects.js', () => ({
   particleSystem: {
     spawn: jest.fn(),
   },
+  floatingTextManager: {
+    show: jest.fn(),
+  },
 }));
 
 // Import UI module
@@ -34,6 +37,7 @@ describe('UI Module - Advanced Features', () => {
         playerMoves: 5,
         playerBestMoves: 3,
         captures: 2,
+        accuracies: [60, 60, 60],
       },
       replayMode: false,
       replayPosition: -1,
@@ -96,6 +100,7 @@ describe('UI Module - Advanced Features', () => {
 
     test('should handle zero player moves for accuracy', () => {
       game.stats.playerMoves = 0;
+      game.stats.accuracies = [];
       UI.updateStatistics(game);
       expect(document.getElementById('stat-accuracy').textContent).toBe('--%');
     });

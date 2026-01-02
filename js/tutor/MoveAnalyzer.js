@@ -44,8 +44,10 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
 
   // Detect tactical patterns
   const patterns = TacticsDetector.detectTacticalPatterns(game, this, move);
+  const questions = [];
   patterns.forEach(pattern => {
     tacticalExplanations.push(pattern.explanation);
+    if (pattern.question) questions.push(pattern.question);
   });
 
   // Analyze strategic value
@@ -72,6 +74,7 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
     warnings,
     tacticalPatterns: patterns,
     strategicValue: strategic,
+    questions,
     scoreDiff: diff,
     notation: getMoveNotation(game, move),
   };
@@ -231,6 +234,13 @@ export function checkBlunder(game, tutorController, moveRecord) {
 
   // Advantage drop (from perspective of current player)
   const drop = turn === 'white' ? prevEval - currentEval : currentEval - prevEval;
+
+  // Track accuracy for Elo estimation
+  // Using a sigmoid-like curve or simple mapping:
+  // 0 drop = 100%, 100 drop = 90%, 200 drop = 70%, 500 drop = 20%
+  const clampedDrop = Math.max(0, drop);
+  const accuracy = 100 * Math.pow(0.5, clampedDrop / 200);
+  game.stats.accuracies.push(accuracy);
 
   if (drop >= 200) {
     // 2.0 evaluation drop is a blunder

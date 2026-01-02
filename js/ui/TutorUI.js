@@ -284,14 +284,47 @@ export function showTutorSuggestions(game) {
     suggEl.appendChild(actionsEl);
 
     if (
+      (analysis.questions && analysis.questions.length > 0) ||
       analysis.tacticalExplanations.length > 0 ||
       analysis.strategicExplanations.length > 0 ||
       analysis.warnings.length > 0
     ) {
       const detailsEl = document.createElement('div');
-      detailsEl.className = 'suggestion-details';
+      detailsEl.className = 'suggestion-details hidden'; // Hide by default
       detailsEl.style.cssText =
         'margin-top: 0.75rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px; font-size: 0.85rem;';
+
+      const questionEl = document.createElement('div');
+      if (analysis.questions && analysis.questions.length > 0) {
+        questionEl.innerHTML = `
+          <div style="color: #fbbf24; font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🧐</span> 
+            <span>${analysis.questions[0]}</span>
+          </div>
+          <button class="show-details-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+            Erklärung anzeigen
+          </button>
+        `;
+      } else {
+        questionEl.innerHTML = `
+          <button class="show-details-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+            Warum ist das ein guter Zug?
+          </button>
+        `;
+      }
+      questionEl.style.cssText = 'margin-top: 0.75rem; padding: 0 0.75rem;';
+
+      const showBtn = questionEl.querySelector('.show-details-btn');
+      showBtn.onclick = e => {
+        e.stopPropagation();
+        detailsEl.classList.toggle('hidden');
+        showBtn.textContent = detailsEl.classList.contains('hidden')
+          ? analysis.questions?.length > 0
+            ? 'Erklärung anzeigen'
+            : 'Warum ist das ein guter Zug?'
+          : 'Erklärung ausblenden';
+      };
+
       if (analysis.tacticalExplanations.length > 0) {
         const tactDiv = document.createElement('div');
         tactDiv.style.marginBottom = '0.5rem';
@@ -326,6 +359,7 @@ export function showTutorSuggestions(game) {
         });
         detailsEl.appendChild(warnDiv);
       }
+      suggEl.appendChild(questionEl);
       suggEl.appendChild(detailsEl);
     }
 

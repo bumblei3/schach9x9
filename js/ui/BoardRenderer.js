@@ -4,7 +4,7 @@
  */
 import { BOARD_SIZE, PHASES } from '../config.js';
 import { debounce } from '../utils.js';
-import { particleSystem } from '../effects.js';
+import { particleSystem, floatingTextManager } from '../effects.js';
 
 /**
  * Gibt das SVG-Symbol für eine Figur zurück.
@@ -384,11 +384,24 @@ export async function animateMove(game, from, to, piece) {
     setTimeout(() => {
       if (document.body.contains(clone)) document.body.removeChild(clone);
       if (pieceElement) pieceElement.style.opacity = originalOpacity;
+
+      const centerX = toRect.left + toRect.width / 2;
+      const centerY = toRect.top + toRect.height / 2;
+
       if (isCapture) {
-        const centerX = toRect.left + toRect.width / 2;
-        const centerY = toRect.top + toRect.height / 2;
         const color = targetPiece.color === 'white' ? '#e2e8f0' : '#1e293b';
         particleSystem.spawn(centerX, centerY, 'CAPTURE', color);
+
+        // Show floating score
+        const values = { p: 1, n: 3, b: 3, r: 5, q: 9, e: 12, a: 7, c: 8, k: 0 };
+        const scoreVal = values[targetPiece.type] || 0;
+        if (scoreVal > 0) {
+          floatingTextManager.show(centerX, centerY, `+${scoreVal}`, 'score');
+        }
+      } else {
+        // Subtle particles for normal moves
+        const color = piece.color === 'white' ? '#f8fafc' : '#334155';
+        particleSystem.spawn(centerX, centerY, 'MOVE', color);
       }
       game.isAnimating = false;
       resolve();

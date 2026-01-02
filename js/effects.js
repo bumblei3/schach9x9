@@ -87,4 +87,30 @@ export class ParticleSystem {
   }
 }
 
+export class FloatingTextManager {
+  constructor() {
+    this.container = document.getElementById('board-container') || document.body;
+  }
+
+  show(x, y, text, type = 'score') {
+    const el = document.createElement('div');
+    el.className = `floating-text ${type}`;
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+
+    this.container.appendChild(el);
+
+    // Animation via CSS transitions/animations
+    setTimeout(() => {
+      el.classList.add('animate');
+    }, 10);
+
+    setTimeout(() => {
+      el.remove();
+    }, 1500);
+  }
+}
+
 export const particleSystem = new ParticleSystem();
+export const floatingTextManager = new FloatingTextManager();

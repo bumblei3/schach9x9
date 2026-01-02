@@ -127,7 +127,7 @@ export class AIController {
           this.openingBook = book;
           this.openingBookLoaded = true;
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for workers (convert to serializable format)
@@ -650,7 +650,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker
@@ -731,19 +731,25 @@ export class AIController {
         item.className = 'top-move-item';
         if (index === 0) item.classList.add('best');
 
-        // Convert move to algebraic notation
-        const fromFile = String.fromCharCode(97 + move.from.c);
-        const fromRank = BOARD_SIZE - move.from.r;
-        const toFile = String.fromCharCode(97 + move.to.c);
-        const toRank = BOARD_SIZE - move.to.r;
-        const notation = `${fromFile}${fromRank}-${toFile}${toRank}`;
-
+        // Main move notation
+        const notation = this.getAlgebraicNotation(move);
         const scoreInPawns = (move.score / 100).toFixed(2);
 
+        // Render PV sequence
+        let pvHtml = '';
+        if (move.pv && move.pv.length > 1) {
+          // Skip the first move as it's the main move shown
+          const pvMoves = move.pv.slice(1).map(m => this.getAlgebraicNotation(m));
+          pvHtml = `<div class="top-move-pv">${pvMoves.join(' ')}</div>`;
+        }
+
         item.innerHTML = `
-                    <span class="top-move-notation">${notation}</span>
-                    <span class="top-move-score">${scoreInPawns > 0 ? '+' : ''}${scoreInPawns}</span>
-                `;
+            <div class="top-move-main">
+                <span class="top-move-notation">${notation}</span>
+                <span class="top-move-score">${scoreInPawns > 0 ? '+' : ''}${scoreInPawns}</span>
+            </div>
+            ${pvHtml}
+        `;
 
         // Click to preview/highlight the move
         item.onclick = () => this.highlightMove(move);
@@ -784,5 +790,14 @@ export class AIController {
         'rgba(79, 156, 249, 0.7)'
       );
     }
+  }
+
+  getAlgebraicNotation(move) {
+    if (!move || !move.from || !move.to) return '??';
+    const fromFile = String.fromCharCode(97 + move.from.c);
+    const fromRank = BOARD_SIZE - move.from.r;
+    const toFile = String.fromCharCode(97 + move.to.c);
+    const toRank = BOARD_SIZE - move.to.r;
+    return `${fromFile}${fromRank}-${toFile}${toRank}`;
   }
 }

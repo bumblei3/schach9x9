@@ -1229,7 +1229,34 @@ body {
   z-index: 9999;
 }
 
-/* Enhanced Highlighting */
+/* Floating Text */
+.floating-text {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  font-weight: bold;
+  font-size: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: all 1.5s cubic-bezier(0.1, 0.7, 0.1, 1);
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+.floating-text.score {
+  color: #fbbf24;
+  /* Amber */
+}
+
+.floating-text.message {
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.floating-text.animate {
+  transform: translate(-50%, -100px);
+  opacity: 0;
+}
+
 .cell.last-move {
   background-color: rgba(255, 255, 0, 0.3) !important;
   box-shadow: inset 0 0 10px rgba(255, 255, 0, 0.4);
@@ -1533,13 +1560,20 @@ body {
 
 .top-move-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  gap: 4px;
+}
+
+.top-move-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .top-move-item:hover {
@@ -1561,6 +1595,17 @@ body {
 .top-move-score {
   font-size: 0.9rem;
   color: #94a3b8;
+}
+
+.top-move-pv {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 4px;
 }
 
 /* Controls */
