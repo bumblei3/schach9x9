@@ -5,6 +5,7 @@
 Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer Tiefe und modernen Features.
 
 ## 🚀 Live Demo
+
 Das Spiel ist live unter folgender Adresse verfügbar:
 **[https://bumblei3.github.io/schach9x9/](https://bumblei3.github.io/schach9x9/)**
 

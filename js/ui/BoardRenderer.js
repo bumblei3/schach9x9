@@ -1,0 +1,397 @@
+/**
+ * Modul für das Rendern des Schachbretts.
+ * @module BoardRenderer
+ */
+import { BOARD_SIZE, PHASES } from '../config.js';
+import { debounce } from '../utils.js';
+import { particleSystem } from '../effects.js';
+
+/**
+ * Gibt das SVG-Symbol für eine Figur zurück.
+ * @param {object} piece - Die Figur
+ * @returns {string} HTML-String des SVGs
+ */
+export function getPieceSymbol(piece) {
+  if (!piece) return '';
+  if (!window._svgCache) window._svgCache = {};
+  const key = piece.color + piece.type;
+  if (!window._svgCache[key]) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'piece-svg';
+    wrapper.innerHTML = window.PIECE_SVGS[piece.color][piece.type];
+    window._svgCache[key] = wrapper.innerHTML;
+  }
+  return window._svgCache[key];
+}
+
+/**
+ * Gibt das Text-Symbol (Unicode) für eine Figur zurück.
+ * @param {object} piece - Die Figur
+ * @returns {string} Text-Symbol
+ */
+export function getPieceText(piece) {
+  if (!piece) return '';
+  const symbols = {
+    white: {
+      p: '♙',
+      n: '♘',
+      b: '♗',
+      r: '♖',
+      q: '♕',
+      k: '♔',
+      a: 'A',
+      c: 'C',
+      e: 'E',
+    },
+    black: {
+      p: '♟',
+      n: '♞',
+      b: '♝',
+      r: '♜',
+      q: '♛',
+      k: '♚',
+      a: 'A',
+      c: 'C',
+      e: 'E',
+    },
+  };
+  return symbols[piece.color][piece.type];
+}
+
+/**
+ * Initialisiert das Schachbrett im DOM und fügt Event-Listener hinzu.
+ * @param {object} game - Die Game-Instanz
+ */
+export function initBoardUI(game) {
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const cell = document.createElement('div');
+      cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+      if (c === 2 || c === 5) cell.classList.add('border-right');
+      if (r === 2 || r === 5) cell.classList.add('border-bottom');
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      cell.addEventListener('click', () => game.handleCellClick(r, c));
+
+      // Drag & Drop
+      cell.draggable = true;
+      cell.addEventListener('dragstart', e => {
+        if (game.phase !== PHASES.PLAY || game.replayMode || game.isAnimating) {
+          e.preventDefault();
+          return false;
+        }
+        const piece = game.board[r][c];
+        if (!piece || (game.isAI && game.turn === 'black') || piece.color !== game.turn) {
+          e.preventDefault();
+          return false;
+        }
+        e.dataTransfer.setData('text/plain', `${r},${c}`);
+        e.dataTransfer.effectAllowed = 'move';
+        cell.classList.add('dragging');
+        const dragImage = cell.cloneNode(true);
+        dragImage.style.opacity = '0.8';
+        dragImage.style.transform = 'rotate(5deg)';
+        document.body.appendChild(dragImage);
+        dragImage.style.position = 'absolute';
+        dragImage.style.top = '-1000px';
+        e.dataTransfer.setDragImage(dragImage, cell.offsetWidth / 2, cell.offsetHeight / 2);
+        setTimeout(() => document.body.removeChild(dragImage), 0);
+        const validMoves = game.getValidMoves(r, c, piece);
+        validMoves.forEach(move => {
+          const targetCell = document.querySelector(
+            `.cell[data-r="${move.r}"][data-c="${move.c}"]`
+          );
+          if (targetCell) targetCell.classList.add('drag-target');
+        });
+      });
+
+      cell.addEventListener('dragend', () => {
+        cell.classList.remove('dragging');
+        document
+          .querySelectorAll('.cell.drag-target')
+          .forEach(c => c.classList.remove('drag-target'));
+        document.querySelectorAll('.cell.drag-over').forEach(c => c.classList.remove('drag-over'));
+      });
+
+      cell.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const data = e.dataTransfer.getData('text/plain');
+        if (!data) return;
+        const [fromR, fromC] = data.split(',').map(Number);
+        const piece = game.board[fromR][fromC];
+        if (!piece) return;
+        const validMoves = game.getValidMoves(fromR, fromC, piece);
+        if (validMoves.some(move => move.r === r && move.c === c)) {
+          cell.classList.add('drag-over');
+        }
+      });
+
+      cell.addEventListener('dragleave', () => cell.classList.remove('drag-over'));
+
+      cell.addEventListener('drop', e => {
+        e.preventDefault();
+        cell.classList.remove('drag-over');
+        const data = e.dataTransfer.getData('text/plain');
+        if (!data) return;
+        const [fromR, fromC] = data.split(',').map(Number);
+        const piece = game.board[fromR][fromC];
+        if (!piece || piece.color !== game.turn) return;
+        const validMoves = game.getValidMoves(fromR, fromC, piece);
+        if (validMoves.some(move => move.r === r && move.c === c)) {
+          game.selectedSquare = { r: fromR, c: fromC };
+          game.validMoves = validMoves;
+          game.handleCellClick(r, c);
+        }
+      });
+
+      cell.addEventListener(
+        'mouseenter',
+        debounce(() => {
+          if (game.phase === PHASES.PLAY && !game.replayMode) {
+            const piece = game.board[r][c];
+            if (piece) {
+              game.getValidMoves(r, c, piece).forEach(move => {
+                const targetCell = document.querySelector(
+                  `.cell[data-r="${move.r}"][data-c="${move.c}"]`
+                );
+                if (targetCell) targetCell.classList.add('hover-move');
+              });
+              cell.classList.add('hover-piece');
+            }
+          }
+        }, 50)
+      );
+
+      cell.addEventListener('mouseleave', () => {
+        document
+          .querySelectorAll('.cell.hover-move')
+          .forEach(c => c.classList.remove('hover-move'));
+        document
+          .querySelectorAll('.cell.hover-piece')
+          .forEach(c => c.classList.remove('hover-piece'));
+      });
+
+      boardEl.appendChild(cell);
+    }
+  }
+
+  // Koordinaten-Labels
+  const boardWrapper = document.getElementById('board-wrapper');
+  if (boardWrapper) {
+    boardWrapper.querySelectorAll('.col-labels, .row-labels').forEach(el => el.remove());
+    const colLabels = document.createElement('div');
+    colLabels.className = 'col-labels';
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const label = document.createElement('span');
+      label.textContent = String.fromCharCode(97 + c);
+      label.className = 'coord-label';
+      colLabels.appendChild(label);
+    }
+    const rowLabels = document.createElement('div');
+    rowLabels.className = 'row-labels';
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      const label = document.createElement('span');
+      label.textContent = (BOARD_SIZE - r).toString();
+      label.className = 'coord-label';
+      rowLabels.appendChild(label);
+    }
+    boardWrapper.appendChild(colLabels);
+    boardWrapper.appendChild(rowLabels);
+  }
+}
+
+/**
+ * Rendert das Schachbrett und die Figuren im DOM.
+ * @param {object} game - Die Game-Instanz
+ */
+export function renderBoard(game) {
+  if (!game._previousBoardState) {
+    game._previousBoardState = Array(BOARD_SIZE)
+      .fill(null)
+      .map(() => Array(BOARD_SIZE).fill(null));
+    game._forceFullRender = true;
+  }
+
+  document
+    .querySelectorAll('.cell.selectable-corridor')
+    .forEach(cell => cell.classList.remove('selectable-corridor'));
+
+  const cellsToRender = [];
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const currentPiece = game.board[r][c];
+      const prev = game._previousBoardState[r][c];
+      const changed =
+        (!currentPiece && prev) ||
+        (currentPiece && !prev) ||
+        (currentPiece &&
+          prev &&
+          (currentPiece.type !== prev.type || currentPiece.color !== prev.color));
+      if (game._forceFullRender || changed) {
+        cellsToRender.push({ r, c });
+        game._previousBoardState[r][c] = currentPiece
+          ? { type: currentPiece.type, color: currentPiece.color }
+          : null;
+      }
+    }
+  }
+
+  game._forceFullRender = false;
+
+  for (const { r, c } of cellsToRender) {
+    const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    if (!cell) continue;
+    const piece = game.board[r][c];
+    const symbol = getPieceSymbol(piece);
+    if (cell.innerHTML !== symbol) cell.innerHTML = symbol;
+    cell.classList.remove(
+      'highlight',
+      'corridor',
+      'valid-move',
+      'last-move',
+      'tutor-move',
+      'threatened',
+      'selectable-corridor'
+    );
+  }
+
+  // Rendere Highlights (immer für alle Zellen relevanten Zustände prüfen)
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+      if (!cell) continue;
+
+      // Korridore
+      const isHumanSetup =
+        game.phase === PHASES.SETUP_WHITE_KING ||
+        (game.phase === PHASES.SETUP_BLACK_KING && !game.isAI);
+      if (isHumanSetup) {
+        const rowStart = game.phase === PHASES.SETUP_WHITE_KING ? 6 : 0;
+        if (
+          r >= rowStart &&
+          r < rowStart + 3 &&
+          ((c >= 0 && c <= 2) || (c >= 3 && c <= 5) || (c >= 6 && c <= 8))
+        ) {
+          cell.classList.add('selectable-corridor');
+        }
+      }
+      if (
+        game.whiteCorridor &&
+        (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)
+      ) {
+        if (
+          r >= game.whiteCorridor.rowStart &&
+          r < game.whiteCorridor.rowStart + 3 &&
+          c >= game.whiteCorridor.colStart &&
+          c < game.whiteCorridor.colStart + 3
+        ) {
+          cell.classList.add('selectable-corridor');
+        }
+      }
+      if (game.blackCorridor && game.phase === PHASES.SETUP_BLACK_PIECES) {
+        if (
+          r >= game.blackCorridor.rowStart &&
+          r < game.blackCorridor.rowStart + 3 &&
+          c >= game.blackCorridor.colStart &&
+          c < game.blackCorridor.colStart + 3
+        ) {
+          cell.classList.add('selectable-corridor');
+        }
+      }
+
+      // Andere Highlights
+      cell.classList.remove('highlight', 'valid-move', 'tutor-move', 'last-move', 'threatened');
+      if (game.selectedSquare && game.selectedSquare.r === r && game.selectedSquare.c === c)
+        cell.classList.add('highlight');
+      if (game.validMoves) {
+        const move = game.validMoves.find(m => m.r === r && m.c === c);
+        if (move) {
+          cell.classList.add('valid-move');
+          if (game.isTutorMove && game.isTutorMove(game.selectedSquare, { r, c }))
+            cell.classList.add('tutor-move');
+        }
+      }
+      if (
+        game.lastMoveHighlight &&
+        ((game.lastMoveHighlight.from.r === r && game.lastMoveHighlight.from.c === c) ||
+          (game.lastMoveHighlight.to.r === r && game.lastMoveHighlight.to.c === c))
+      ) {
+        cell.classList.add('last-move');
+      }
+      const p = game.board[r][c];
+      if (game.phase === PHASES.PLAY && p) {
+        const opponent = p.color === 'white' ? 'black' : 'white';
+        if (game.isSquareUnderAttack && game.isSquareUnderAttack(r, c, opponent))
+          cell.classList.add('threatened');
+      }
+    }
+  }
+}
+
+/**
+ * Animiert einen Zug.
+ * @param {object} game - Die Game-Instanz
+ * @param {object} from - Startposition {r, c}
+ * @param {object} to - Zielposition {r, c}
+ * @param {object} piece - Die bewegte Figur
+ */
+export async function animateMove(game, from, to, piece) {
+  game.isAnimating = true;
+  return new Promise(resolve => {
+    const fromCell = document.querySelector(`.cell[data-r="${from.r}"][data-c="${from.c}"]`);
+    const toCell = document.querySelector(`.cell[data-r="${to.r}"][data-c="${to.c}"]`);
+    if (!fromCell || !toCell) {
+      game.isAnimating = false;
+      resolve();
+      return;
+    }
+    let pieceElement = fromCell.querySelector('.piece-svg');
+    if (!pieceElement) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'piece-svg';
+      wrapper.innerHTML = getPieceSymbol(piece);
+      pieceElement = wrapper;
+      fromCell.appendChild(wrapper);
+    }
+    const clone = pieceElement.cloneNode(true);
+    clone.className = 'animating-piece';
+    clone.style.position = 'fixed';
+    clone.style.zIndex = '10000';
+    clone.style.pointerEvents = 'none';
+    clone.style.transition = 'none';
+    const fromRect = fromCell.getBoundingClientRect();
+    clone.style.left = fromRect.left + 'px';
+    clone.style.top = fromRect.top + 'px';
+    clone.style.width = fromRect.width + 'px';
+    clone.style.height = fromRect.height + 'px';
+    clone.style.display = 'flex';
+    clone.style.justifyContent = 'center';
+    clone.style.alignItems = 'center';
+    document.body.appendChild(clone);
+    const originalOpacity = pieceElement.style.opacity;
+    pieceElement.style.opacity = '0';
+    clone.offsetHeight;
+    clone.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    const toRect = toCell.getBoundingClientRect();
+    const deltaX = toRect.left - fromRect.left;
+    const deltaY = toRect.top - fromRect.top;
+    clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    const targetPiece = game.board[to.r][to.c];
+    const isCapture = targetPiece && targetPiece.color !== piece.color;
+    setTimeout(() => {
+      if (document.body.contains(clone)) document.body.removeChild(clone);
+      if (pieceElement) pieceElement.style.opacity = originalOpacity;
+      if (isCapture) {
+        const centerX = toRect.left + toRect.width / 2;
+        const centerY = toRect.top + toRect.height / 2;
+        const color = targetPiece.color === 'white' ? '#e2e8f0' : '#1e293b';
+        particleSystem.spawn(centerX, centerY, 'CAPTURE', color);
+      }
+      game.isAnimating = false;
+      resolve();
+    }, 250);
+  });
+}
