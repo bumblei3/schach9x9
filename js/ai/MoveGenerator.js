@@ -253,6 +253,7 @@ export function isInCheck(board, color, knownKingPos) {
  */
 export function findKing(board, color) {
   for (let r = 0; r < BOARD_SIZE; r++) {
+    if (!board[r]) continue;
     for (let c = 0; c < BOARD_SIZE; c++) {
       const piece = board[r][c];
       if (piece && piece.color === color && piece.type === 'k') {
