@@ -553,7 +553,7 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
     <div id="draw-offer-overlay" class="modal-overlay hidden">
       <div class="modal-content">
         <h2>Remis angeboten</h2>
-        <p>Dein Gegner bietet ein Unentschieden an.</p>
+        <p id="draw-offer-message">Dein Gegner bietet ein Unentschieden an.</p>
         <div class="modal-buttons">
           <button id="accept-draw-btn" class="btn-primary">Annehmen</button>
           <button id="decline-draw-btn" class="btn-secondary">Ablehnen</button>
