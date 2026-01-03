@@ -35,7 +35,7 @@ describe('ArrowRenderer', () => {
     const defs = renderer.svgLayer.querySelector('defs');
     expect(defs).toBeDefined();
     const markers = defs.querySelectorAll('marker');
-    expect(markers.length).toBe(3); // gold, silver, bronze
+    expect(markers.length).toBe(6); // gold, silver, bronze, red, green, orange
     expect(markers[0].id).toBe('arrowhead-gold');
   });
 
@@ -60,7 +60,13 @@ describe('ArrowRenderer', () => {
 
   test('highlightMove should clear previous and draw new arrow', () => {
     renderer.highlightMove(0, 0, 1, 1, 'silver');
-    expect(renderer.lastArrow).toEqual({ fromR: 0, fromC: 0, toR: 1, toC: 1, quality: 'silver' });
+    expect(renderer.lastArrows[0]).toEqual({
+      fromR: 0,
+      fromC: 0,
+      toR: 1,
+      toC: 1,
+      colorKey: 'silver',
+    });
 
     renderer.highlightMove(2, 2, 3, 3, 'gold');
     const arrows = renderer.svgLayer.querySelectorAll('.tutor-arrow');
@@ -68,14 +74,25 @@ describe('ArrowRenderer', () => {
     expect(arrows[0].getAttribute('stroke')).toBe('#FFD700');
   });
 
-  test('redraw should refresh the current arrow', () => {
+  test('highlightMoves should draw multiple arrows', () => {
+    const moves = [
+      { fromR: 0, fromC: 0, toR: 1, toC: 1, colorKey: 'red' },
+      { fromR: 2, fromC: 2, toR: 3, toC: 3, colorKey: 'green' },
+    ];
+    renderer.highlightMoves(moves);
+    const arrows = renderer.svgLayer.querySelectorAll('.tutor-arrow');
+    expect(arrows.length).toBe(2);
+    expect(renderer.lastArrows).toBe(moves);
+  });
+
+  test('redraw should refresh the current arrows', () => {
     renderer.highlightMove(0, 0, 1, 1, 'bronze');
     const initialPath = renderer.svgLayer.querySelector('.tutor-arrow');
 
     renderer.redraw();
     const newPath = renderer.svgLayer.querySelector('.tutor-arrow');
     expect(newPath).not.toBe(initialPath);
-    expect(newPath.getAttribute('stroke')).toBe('#CD7F32');
+    expect(newPath.getAttribute('stroke').toLowerCase()).toBe('#cd7f32');
   });
 
   test('destroy should remove the SVG layer', () => {

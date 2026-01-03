@@ -13,6 +13,7 @@ import { BattleChess3D } from './battleChess3D.js';
 import { KeyboardManager } from './input/KeyboardManager.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from './utils/PGNGenerator.js';
 import { soundManager } from './sounds.js';
+import { AnalysisManager } from './AnalysisManager.js';
 
 export class App {
   constructor() {
@@ -42,6 +43,9 @@ export class App {
 
     this.tutorController = new TutorController(this.game);
     this.game.tutorController = this.tutorController;
+
+    this.analysisManager = new AnalysisManager(this.game);
+    this.game.analysisManager = this.analysisManager;
 
     // Input handlers
     this.keyboardManager = new KeyboardManager(this);
@@ -331,6 +335,17 @@ export class App {
     Game.prototype.analyzeMoveWithExplanation = function (move, score, best) {
       return this.tutorController.analyzeMoveWithExplanation(move, score, best);
     };
+
+    // AnalysisManager delegations
+    Game.prototype.toggleThreats = function () {
+      return this.analysisManager.toggleThreats();
+    };
+    Game.prototype.toggleOpportunities = function () {
+      return this.analysisManager.toggleOpportunities();
+    };
+    Game.prototype.toggleBestMove = function () {
+      return this.analysisManager.toggleBestMove();
+    };
   }
 
   initDOM() {
@@ -373,6 +388,37 @@ export class App {
         }
       });
     });
+
+    // Analysis Toggle Buttons
+    const bestMoveBtn = document.getElementById('best-move-btn');
+    if (bestMoveBtn) {
+      bestMoveBtn.addEventListener('click', () => {
+        if (this.game.analysisManager) {
+          const active = this.game.analysisManager.toggleBestMove();
+          bestMoveBtn.classList.toggle('active', active);
+        }
+      });
+    }
+
+    const threatsBtn = document.getElementById('threats-btn');
+    if (threatsBtn) {
+      threatsBtn.addEventListener('click', () => {
+        if (this.game.analysisManager) {
+          const active = this.game.analysisManager.toggleThreats();
+          threatsBtn.classList.toggle('active', active);
+        }
+      });
+    }
+
+    const opportunitiesBtn = document.getElementById('opportunities-btn');
+    if (opportunitiesBtn) {
+      opportunitiesBtn.addEventListener('click', () => {
+        if (this.game.analysisManager) {
+          const active = this.game.analysisManager.toggleOpportunities();
+          opportunitiesBtn.classList.toggle('active', active);
+        }
+      });
+    }
 
     // Finish Setup Button
     const finishSetupBtn = document.getElementById('finish-setup-btn');

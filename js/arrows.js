@@ -50,6 +50,9 @@ export class ArrowRenderer {
       gold: '#FFD700',
       silver: '#C0C0C0',
       bronze: '#CD7F32',
+      red: '#ef4444',
+      green: '#22c55e',
+      orange: '#f59e0b',
     };
 
     Object.entries(colors).forEach(([name, color]) => {
@@ -72,7 +75,7 @@ export class ArrowRenderer {
     this.svgLayer.appendChild(defs);
   }
 
-  drawArrow(fromR, fromC, toR, toC, quality = 'gold') {
+  drawArrow(fromR, fromC, toR, toC, colorKey = 'gold') {
     // Calculate center positions of cells
     const fromX = fromC * this.cellSize + this.cellSize / 2;
     const fromY = fromR * this.cellSize + this.cellSize / 2;
@@ -96,18 +99,22 @@ export class ArrowRenderer {
       gold: '#FFD700',
       silver: '#C0C0C0',
       bronze: '#CD7F32',
+      red: '#ef4444',
+      green: '#22c55e',
+      orange: '#f59e0b',
     };
 
-    path.setAttribute('stroke', colors[quality] || colors.gold);
+    const color = colors[colorKey] || colors.gold;
+    path.setAttribute('stroke', color);
     path.setAttribute('stroke-width', '5');
     path.setAttribute('stroke-linecap', 'round');
     path.setAttribute('fill', 'none');
-    path.setAttribute('marker-end', `url(#arrowhead-${quality})`);
+    path.setAttribute('marker-end', `url(#arrowhead-${colorKey})`);
     path.setAttribute('opacity', '0.9');
     path.classList.add('tutor-arrow');
 
     // Add glow effect
-    path.style.filter = `drop-shadow(0 0 4px ${colors[quality]})`;
+    path.style.filter = `drop-shadow(0 0 4px ${color})`;
 
     this.svgLayer.appendChild(path);
   }
@@ -117,22 +124,24 @@ export class ArrowRenderer {
     arrows.forEach(arrow => arrow.remove());
   }
 
-  highlightMove(fromR, fromC, toR, toC, quality = 'gold') {
-    this.lastArrow = { fromR, fromC, toR, toC, quality };
+  highlightMove(fromR, fromC, toR, toC, colorKey = 'gold') {
+    this.lastArrows = [{ fromR, fromC, toR, toC, colorKey }];
     this.clearArrows();
-    this.drawArrow(fromR, fromC, toR, toC, quality);
+    this.drawArrow(fromR, fromC, toR, toC, colorKey);
+  }
+
+  highlightMoves(moves) {
+    this.lastArrows = moves;
+    this.clearArrows();
+    moves.forEach(m => this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey));
   }
 
   redraw() {
     this.updateCellSize();
-    if (this.lastArrow) {
-      this.clearArrows(); // Clear existing to avoid duplicates
-      this.drawArrow(
-        this.lastArrow.fromR,
-        this.lastArrow.fromC,
-        this.lastArrow.toR,
-        this.lastArrow.toC,
-        this.lastArrow.quality
+    if (this.lastArrows) {
+      this.clearArrows();
+      this.lastArrows.forEach(m =>
+        this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey || m.quality)
       );
     }
   }

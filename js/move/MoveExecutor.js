@@ -358,6 +358,10 @@ export function finishMove(game, moveController) {
       if (game.analysisMode && game.continuousAnalysis && game.gameController) {
         game.gameController.requestPositionAnalysis();
       }
+
+      if (game.analysisManager) {
+        game.analysisManager.updateArrows();
+      }
     }, 10);
   }
 }

@@ -62,6 +62,42 @@ export class KeyboardManager {
       return;
     }
 
+    // Threats: 't'
+    if (key === 't') {
+      event.preventDefault();
+      if (this.app.game.analysisManager) {
+        const active = this.app.game.analysisManager.toggleThreats();
+        UI.showToast(active ? 'Drohungen AN' : 'Drohungen AUS', 'info');
+        const btn = document.getElementById('threats-btn');
+        if (btn) btn.classList.toggle('active', active);
+      }
+      return;
+    }
+
+    // Opportunities: 'o'
+    if (key === 'o') {
+      event.preventDefault();
+      if (this.app.game.analysisManager) {
+        const active = this.app.game.analysisManager.toggleOpportunities();
+        UI.showToast(active ? 'Chancen AN' : 'Chancen AUS', 'info');
+        const btn = document.getElementById('opportunities-btn');
+        if (btn) btn.classList.toggle('active', active);
+      }
+      return;
+    }
+
+    // Best Move: 'b'
+    if (key === 'b') {
+      event.preventDefault();
+      if (this.app.game.analysisManager) {
+        const active = this.app.game.analysisManager.toggleBestMove();
+        UI.showToast(active ? 'Bester Zug AN' : 'Bester Zug AUS', 'info');
+        const btn = document.getElementById('best-move-btn');
+        if (btn) btn.classList.toggle('active', active);
+      }
+      return;
+    }
+
     // Save: 's'
     if (key === 's') {
       event.preventDefault();

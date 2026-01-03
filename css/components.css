@@ -444,3 +444,12 @@
   padding: 0.5rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
+.action-icon-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.action-icon-btn.active svg {
+  filter: drop-shadow(0 0 2px currentColor);
+}
