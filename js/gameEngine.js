@@ -11,11 +11,12 @@ import {
   PIECE_VALUES,
   DEFAULT_TIME_CONTROL,
   DEFAULT_DIFFICULTY,
+  AI_DELAY_MS,
 } from './config.js';
 import { RulesEngine } from './RulesEngine.js';
 import { makeMove } from './ai/MoveGenerator.js';
 
-export { BOARD_SIZE, PHASES, PIECE_VALUES };
+export { BOARD_SIZE, PHASES, PIECE_VALUES, AI_DELAY_MS };
 
 /**
  * Hauptklasse für die Spiellogik und den Spielzustand von Schach9x9

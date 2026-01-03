@@ -148,7 +148,6 @@ export class AIController {
 
     const spinner = document.getElementById('spinner-overlay');
     if (spinner) spinner.style.display = 'flex';
-    console.time('KI-Zug');
 
     // Initialize persistent worker pool if not exists
     if (!this.aiWorkers || this.aiWorkers.length === 0) {
@@ -182,7 +181,6 @@ export class AIController {
     const numWorkers = this.aiWorkers.length;
 
     const processResults = () => {
-      console.timeEnd('KI-Zug');
       if (spinner) spinner.style.display = 'none';
 
       // Find best result

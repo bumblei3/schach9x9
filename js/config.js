@@ -98,3 +98,9 @@ export const AI_DIFFICULTIES = {
 };
 
 export const DEFAULT_DIFFICULTY = AI_DIFFICULTIES.MEDIUM;
+
+/**
+ * Timing constants for game flow
+ */
+export const AI_DELAY_MS = 1000; // Delay before AI makes a move
+export const AUTO_SAVE_INTERVAL = 5; // Auto-save every N moves

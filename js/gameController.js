@@ -1,4 +1,4 @@
-import { PHASES } from './gameEngine.js';
+import { PHASES, AI_DELAY_MS } from './gameEngine.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
@@ -111,9 +111,7 @@ export class GameController {
       }
     }
 
-    console.time('Rendering');
     UI.renderBoard(this.game);
-    console.timeEnd('Rendering');
   }
 
   placeKing(r, c, color) {
@@ -142,7 +140,7 @@ export class GameController {
       if (this.game.isAI) {
         setTimeout(() => {
           if (this.game.aiSetupKing) this.game.aiSetupKing();
-        }, 1000);
+        }, AI_DELAY_MS);
       }
     } else {
       this.game.blackCorridor = { rowStart: validRowStart, colStart: colStart };
@@ -176,7 +174,7 @@ export class GameController {
         if (this.game.isAI) {
           setTimeout(() => {
             if (this.game.aiSetupPieces) this.game.aiSetupPieces();
-          }, 1000);
+          }, AI_DELAY_MS);
         }
       } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
         this.game.phase = PHASES.PLAY;
@@ -316,7 +314,7 @@ export class GameController {
         // Player offered draw to AI
         setTimeout(() => {
           if (this.game.aiEvaluateDrawOffer) this.game.aiEvaluateDrawOffer();
-        }, 1000);
+        }, AI_DELAY_MS);
       }
     } else {
       // Show draw offer dialog to human opponent
@@ -450,12 +448,12 @@ export class GameController {
         // AI needs to place black king
         setTimeout(() => {
           if (this.game.aiSetupKing) this.game.aiSetupKing();
-        }, 1000);
+        }, AI_DELAY_MS);
       } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
         // AI needs to place black pieces
         setTimeout(() => {
           if (this.game.aiSetupPieces) this.game.aiSetupPieces();
-        }, 1000);
+        }, AI_DELAY_MS);
       }
     }
 

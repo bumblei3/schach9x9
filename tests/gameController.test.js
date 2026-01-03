@@ -58,6 +58,7 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
   },
   PHASES,
   BOARD_SIZE: 9,
+  AI_DELAY_MS: 1000,
 }));
 
 // Import GameController
