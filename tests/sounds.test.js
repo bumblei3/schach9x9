@@ -73,7 +73,7 @@ describe('SoundManager', () => {
   });
 
   test('loadSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const mockGetItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('access');
     });
@@ -85,7 +85,7 @@ describe('SoundManager', () => {
   });
 
   test('saveSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const mockSetItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota');
     });
@@ -147,18 +147,24 @@ describe('SoundManager', () => {
 
   test('loadSettings parses saved settings correctly', () => {
     // Pre-set some settings in localStorage
-    localStorage.setItem('chess9x9-sound-settings', JSON.stringify({
-      enabled: false,
-      volume: 0.8
-    }));
+    localStorage.setItem(
+      'chess9x9-sound-settings',
+      JSON.stringify({
+        enabled: false,
+        volume: 0.8,
+      })
+    );
 
     const manager = new SoundManager();
     // Note: constructor removes settings first, so this tests the code path
     // We need to manually call loadSettings after setting the storage
-    localStorage.setItem('chess9x9-sound-settings', JSON.stringify({
-      enabled: false,
-      volume: 0.8
-    }));
+    localStorage.setItem(
+      'chess9x9-sound-settings',
+      JSON.stringify({
+        enabled: false,
+        volume: 0.8,
+      })
+    );
     manager.loadSettings();
 
     expect(manager.enabled).toBe(false);
@@ -191,4 +197,3 @@ describe('SoundManager', () => {
     expect(ctx1).toBe(ctx2);
   });
 });
-
