@@ -15,7 +15,7 @@ const mockOscillator = {
     setValueAtTime: jest.fn(),
     value: 440,
     exponentialRampToValueAtTime: jest.fn(),
-    linearRampToValueAtTime: jest.fn()
+    linearRampToValueAtTime: jest.fn(),
   },
 };
 
@@ -41,7 +41,7 @@ global.window.AudioContext = class MockAudioContext {
   createOscillator() {
     return {
       ...mockOscillator,
-      frequency: { ...mockOscillator.frequency }
+      frequency: { ...mockOscillator.frequency },
     };
   }
   createGain() {
@@ -73,7 +73,7 @@ describe('SoundManager', () => {
   });
 
   test('loadSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const mockGetItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('access');
     });

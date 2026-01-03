@@ -124,7 +124,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
         searchBeta = bestScore + WINDOW_SIZE;
       }
 
-      for (; ;) {
+      for (;;) {
         let alpha = searchAlpha;
         const beta = searchBeta;
         currentBestScoreForDepth = -Infinity;
