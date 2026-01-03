@@ -38,6 +38,9 @@ export class DOMHandler {
   }
 
   initDOM() {
+    if (this.domInitialized) return;
+    this.domInitialized = true;
+
     // Points selection
     document.querySelectorAll('.points-btn').forEach(btn => {
       btn.addEventListener('click', e => {

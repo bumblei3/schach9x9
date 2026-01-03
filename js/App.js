@@ -20,7 +20,7 @@ export class App {
   constructor() {
     this.game = null;
     this.battleChess3D = null;
-    this.domHandler = null;
+    this.domHandler = new DOMHandler(this);
   }
 
   async init(initialPoints, mode = 'setup') {
@@ -57,8 +57,7 @@ export class App {
     // Input handlers
     this.keyboardManager = new KeyboardManager(this);
 
-    // Initialize DOM Handler
-    this.domHandler = new DOMHandler(this);
+    // Initialize DOM Handler (Menu handlers, etc.)
     this.domHandler.init();
 
     // Apply delegates (monkey-patching Game prototype for legacy support)
@@ -74,6 +73,10 @@ export class App {
     this.registerServiceWorker();
 
     logger.info('App initialization complete');
+  }
+
+  initDOM() {
+    this.domHandler.initDOM();
   }
 
   init3D() {
