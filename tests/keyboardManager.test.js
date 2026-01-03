@@ -192,6 +192,42 @@ describe('KeyboardManager', () => {
     // Should not crash
   });
 
+  // Analysis Tools Tests
+  it('should toggle threats on "t" key', async () => {
+    app.game.analysisManager = { toggleThreats: jest.fn(() => true) };
+    const event = new KeyboardEvent('keydown', { key: 't' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(event);
+    expect(app.game.analysisManager.toggleThreats).toHaveBeenCalled();
+  });
+
+  it('should toggle opportunities on "o" key', async () => {
+    app.game.analysisManager = { toggleOpportunities: jest.fn(() => true) };
+    const event = new KeyboardEvent('keydown', { key: 'o' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(event);
+    expect(app.game.analysisManager.toggleOpportunities).toHaveBeenCalled();
+  });
+
+  it('should toggle best move on "b" key', async () => {
+    app.game.analysisManager = { toggleBestMove: jest.fn(() => true) };
+    const event = new KeyboardEvent('keydown', { key: 'b' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(event);
+    expect(app.game.analysisManager.toggleBestMove).toHaveBeenCalled();
+  });
+
+  it('should handle analysis keys safely if analysisManager is missing', async () => {
+    delete app.game.analysisManager;
+    const keys = ['t', 'o', 'b'];
+    for (const key of keys) {
+      const event = new KeyboardEvent('keydown', { key });
+      Object.defineProperty(event, 'target', { value: document.body });
+      await keyboardManager.handleKeyDown(event);
+      // Should not crash
+    }
+  });
+
   it('should handle Escape key when no square is selected', async () => {
     app.game.selectedSquare = null;
     const { closeModal, OverlayManager } = await import('../js/ui.js');
