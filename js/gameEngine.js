@@ -13,6 +13,7 @@ import {
   DEFAULT_DIFFICULTY,
 } from './config.js';
 import { RulesEngine } from './RulesEngine.js';
+import { makeMove } from './ai/MoveGenerator.js';
 
 export { BOARD_SIZE, PHASES, PIECE_VALUES };
 
@@ -168,6 +169,43 @@ export class Game {
     // Linear mapping with caps: 50% -> 800, 100% -> 2400
     const elo = 800 + (avgAccuracy - 50) * 32;
     return Math.max(400, Math.min(2800, Math.round(elo)));
+  }
+
+  /**
+   * Generates a string hash for the current board state
+   * Format matches OpeningBook's hash
+   */
+  getBoardHash() {
+    let hash = '';
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const piece = this.board[r][c];
+        hash += piece ? `${piece.color[0]}${piece.type}` : '..';
+      }
+    }
+    hash += this.turn[0];
+    return hash;
+  }
+
+  /**
+   * Execute a move on the board
+   * @param {object} from - {r, c}
+   * @param {object} to - {r, c}
+   */
+  executeMove(from, to) {
+    const move = { from, to };
+    const undoInfo = makeMove(this.board, move);
+
+    // Update game state
+    this.moveHistory.push(undoInfo); // Usually we store undoInfo or move. Let's match what AI does or simple move?
+    // AIController usually pushes JUST the move object {from, to, ...} to game.moveHistory
+    // But Game.moveHistory usually keeps enough to undo.
+    // The simplified Game here in gameEngine might be different from main App logic if not unified.
+    // But BookGenerator uses THIS class.
+
+    this.turn = this.turn === 'white' ? 'black' : 'white';
+
+    return undoInfo;
   }
 }
 

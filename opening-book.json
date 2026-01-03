@@ -11,7 +11,7 @@
             "r": 3,
             "c": 4
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         },
         {
@@ -23,7 +23,7 @@
             "r": 1,
             "c": 0
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         },
         {
@@ -35,7 +35,7 @@
             "r": 4,
             "c": 3
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         },
         {
@@ -47,7 +47,7 @@
             "r": 1,
             "c": 3
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         }
       ],
@@ -64,7 +64,7 @@
             "r": 1,
             "c": 2
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -76,7 +76,7 @@
             "r": 4,
             "c": 4
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -88,7 +88,7 @@
             "r": 6,
             "c": 1
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -100,7 +100,7 @@
             "r": 3,
             "c": 3
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -112,7 +112,7 @@
             "r": 3,
             "c": 0
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         }
       ],
@@ -129,7 +129,7 @@
             "r": 1,
             "c": 5
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         },
         {
@@ -141,7 +141,7 @@
             "r": 4,
             "c": 2
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         },
         {
@@ -153,7 +153,7 @@
             "r": 1,
             "c": 6
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         },
         {
@@ -165,7 +165,7 @@
             "r": 0,
             "c": 4
           },
-          "weight": 100,
+          "weight": 25,
           "games": 1
         }
       ],
@@ -182,7 +182,7 @@
             "r": 3,
             "c": 6
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -194,7 +194,7 @@
             "r": 3,
             "c": 4
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -206,7 +206,7 @@
             "r": 2,
             "c": 5
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -218,7 +218,7 @@
             "r": 1,
             "c": 3
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -230,7 +230,7 @@
             "r": 1,
             "c": 5
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         }
       ],
@@ -247,7 +247,7 @@
             "r": 6,
             "c": 1
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -259,7 +259,7 @@
             "r": 1,
             "c": 5
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -271,7 +271,7 @@
             "r": 2,
             "c": 5
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -283,7 +283,7 @@
             "r": 0,
             "c": 7
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -295,7 +295,7 @@
             "r": 4,
             "c": 3
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         }
       ],
@@ -312,7 +312,7 @@
             "r": 8,
             "c": 1
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -324,7 +324,7 @@
             "r": 8,
             "c": 8
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -336,7 +336,7 @@
             "r": 8,
             "c": 2
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -348,7 +348,7 @@
             "r": 8,
             "c": 2
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -360,7 +360,7 @@
             "r": 8,
             "c": 2
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         }
       ],
@@ -377,7 +377,7 @@
             "r": 5,
             "c": 8
           },
-          "weight": 100,
+          "weight": 33,
           "games": 1
         },
         {
@@ -389,7 +389,7 @@
             "r": 7,
             "c": 8
           },
-          "weight": 100,
+          "weight": 33,
           "games": 1
         },
         {
@@ -401,7 +401,7 @@
             "r": 1,
             "c": 4
           },
-          "weight": 100,
+          "weight": 33,
           "games": 1
         }
       ],
@@ -418,7 +418,7 @@
             "r": 4,
             "c": 1
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -430,7 +430,7 @@
             "r": 3,
             "c": 1
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -442,7 +442,7 @@
             "r": 2,
             "c": 0
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -454,7 +454,7 @@
             "r": 6,
             "c": 4
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         },
         {
@@ -466,7 +466,7 @@
             "r": 5,
             "c": 1
           },
-          "weight": 100,
+          "weight": 20,
           "games": 1
         }
       ],
@@ -483,7 +483,7 @@
             "r": 1,
             "c": 5
           },
-          "weight": 100,
+          "weight": 33,
           "games": 2
         },
         {
@@ -495,7 +495,7 @@
             "r": 2,
             "c": 3
           },
-          "weight": 100,
+          "weight": 17,
           "games": 1
         },
         {
@@ -507,7 +507,7 @@
             "r": 2,
             "c": 3
           },
-          "weight": 100,
+          "weight": 17,
           "games": 1
         },
         {
@@ -519,7 +519,7 @@
             "r": 2,
             "c": 3
           },
-          "weight": 100,
+          "weight": 17,
           "games": 1
         },
         {
@@ -531,11 +531,547 @@
             "r": 0,
             "c": 4
           },
-          "weight": 100,
+          "weight": 17,
           "games": 1
         }
       ],
       "seenCount": 9
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbpbpbpbp..........................................................................................wpwpwpwpwpwpwpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 4
+          },
+          "to": {
+            "r": 5,
+            "c": 4
+          },
+          "weight": 50,
+          "games": 6
+        },
+        {
+          "from": {
+            "r": 7,
+            "c": 2
+          },
+          "to": {
+            "r": 5,
+            "c": 2
+          },
+          "weight": 17,
+          "games": 2
+        },
+        {
+          "from": {
+            "r": 7,
+            "c": 6
+          },
+          "to": {
+            "r": 5,
+            "c": 6
+          },
+          "weight": 17,
+          "games": 2
+        },
+        {
+          "from": {
+            "r": 7,
+            "c": 3
+          },
+          "to": {
+            "r": 5,
+            "c": 3
+          },
+          "weight": 8,
+          "games": 1
+        },
+        {
+          "from": {
+            "r": 7,
+            "c": 5
+          },
+          "to": {
+            "r": 5,
+            "c": 5
+          },
+          "weight": 8,
+          "games": 1
+        }
+      ],
+      "seenCount": 12
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbpbpbpbp..............................................................wp..........................wpwpwpwp..wpwpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 4
+          },
+          "to": {
+            "r": 3,
+            "c": 4
+          },
+          "weight": 100,
+          "games": 6
+        }
+      ],
+      "seenCount": 6
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbp..bpbpbpbp..........................bp..................................wp..........................wpwpwpwp..wpwpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 3
+          },
+          "to": {
+            "r": 5,
+            "c": 3
+          },
+          "weight": 75,
+          "games": 3
+        },
+        {
+          "from": {
+            "r": 7,
+            "c": 5
+          },
+          "to": {
+            "r": 5,
+            "c": 5
+          },
+          "weight": 25,
+          "games": 1
+        }
+      ],
+      "seenCount": 4
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbp..bpbpbpbp..........................bp................................wpwp..........................wpwpwp....wpwpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 3
+          },
+          "to": {
+            "r": 3,
+            "c": 3
+          },
+          "weight": 100,
+          "games": 3
+        }
+      ],
+      "seenCount": 3
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbp....bpbpbpbp........................bpbp................................wpwp..........................wpwpwp....wpwpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 8,
+            "c": 1
+          },
+          "to": {
+            "r": 6,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 3
+        }
+      ],
+      "seenCount": 3
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbpbpbpbp............................................................wp............................wpwpwp..wpwpwpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 3
+          },
+          "to": {
+            "r": 3,
+            "c": 3
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbp..bpbpbpbpbp........................bp..................................wp............................wpwpwp..wpwpwpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 2
+          },
+          "to": {
+            "r": 5,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbp..bpbpbpbpbp........................bp................................wpwp............................wpwp....wpwpwpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 2
+          },
+          "to": {
+            "r": 3,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbp....bpbpbpbpbp......................bpbp................................wpwp............................wpwp....wpwpwpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 8,
+            "c": 1
+          },
+          "to": {
+            "r": 6,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbpbpbpbp................................................................wp........................wpwpwpwpwp..wpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 5
+          },
+          "to": {
+            "r": 3,
+            "c": 5
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbp..bpbpbp............................bp..................................wp........................wpwpwpwpwp..wpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 4
+          },
+          "to": {
+            "r": 5,
+            "c": 4
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbp..bpbpbp............................bp................................wpwp........................wpwpwpwp....wpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 4
+          },
+          "to": {
+            "r": 3,
+            "c": 4
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbp....bpbpbpbp........................bpbp................................wpwp............wn............wpwpwp....wpwpwpwpwr..wbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 0,
+            "c": 1
+          },
+          "to": {
+            "r": 2,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbpbpbpbp..........................................................wp..............................wpwp..wpwpwpwpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 2
+          },
+          "to": {
+            "r": 3,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbp..bpbpbpbpbpbp......................bp..................................wp..............................wpwp..wpwpwpwpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 8,
+            "c": 1
+          },
+          "to": {
+            "r": 6,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbp..bpbpbpbpbpbp......................bp..................................wp................wn............wpwp..wpwpwpwpwpwpwr..wbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 0,
+            "c": 1
+          },
+          "to": {
+            "r": 2,
+            "c": 2
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "br..bbbqbkbqbbbnbrbpbp..bpbpbpbpbpbp....bn................bp..................................wp................wn............wpwp..wpwpwpwpwpwpwr..wbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 3
+          },
+          "to": {
+            "r": 5,
+            "c": 3
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "br..bbbqbkbqbbbnbrbpbp..bpbpbpbpbpbp....bn................bp..................................wpwp..............wn............wpwp....wpwpwpwpwpwr..wbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 3
+          },
+          "to": {
+            "r": 3,
+            "c": 3
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "br..bbbqbkbqbbbnbrbpbp....bpbpbpbpbp....bn................bpbp................................wpwp..............wn............wpwp....wpwpwpwpwpwr..wbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 4
+          },
+          "to": {
+            "r": 5,
+            "c": 4
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "br..bbbqbkbqbbbnbrbpbp....bpbpbpbpbp....bn................bpbp................................wpwpwp............wn............wpwp......wpwpwpwpwr..wbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 4
+          },
+          "to": {
+            "r": 3,
+            "c": 4
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbpbpbpbp..................................................................wp......................wpwpwpwpwpwp..wpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 6
+          },
+          "to": {
+            "r": 3,
+            "c": 6
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbp..bpbp..............................bp..................................wp......................wpwpwpwpwpwp..wpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 8,
+            "c": 7
+          },
+          "to": {
+            "r": 6,
+            "c": 6
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbpbpbp..bpbp..............................bp..................................wp................wn....wpwpwpwpwpwp..wpwpwrwnwbwqwkwqwb..wrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 0,
+            "c": 7
+          },
+          "to": {
+            "r": 2,
+            "c": 6
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbb..brbpbpbpbpbpbp..bpbp............bn................bp..................................wp................wn....wpwpwpwpwpwp..wpwpwrwnwbwqwkwqwb..wrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 5
+          },
+          "to": {
+            "r": 5,
+            "c": 5
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbb..brbpbpbpbpbpbp..bpbp............bn................bp................................wpwp................wn....wpwpwpwpwp....wpwpwrwnwbwqwkwqwb..wrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 5
+          },
+          "to": {
+            "r": 3,
+            "c": 5
+          },
+          "weight": 100,
+          "games": 2
+        }
+      ],
+      "seenCount": 2
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbp..bpbpbpbp..........................bp..................................wpwp........................wpwpwpwp....wpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 5
+          },
+          "to": {
+            "r": 3,
+            "c": 5
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbp....bpbpbp..........................bpbp................................wpwp........................wpwpwpwp....wpwpwpwrwnwbwqwkwqwbwnwrw": {
+      "moves": [
+        {
+          "from": {
+            "r": 7,
+            "c": 3
+          },
+          "to": {
+            "r": 5,
+            "c": 3
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
+    },
+    "brbnbbbqbkbqbbbnbrbpbpbpbp....bpbpbp..........................bpbp..............................wpwpwp........................wpwpwp......wpwpwpwrwnwbwqwkwqwbwnwrb": {
+      "moves": [
+        {
+          "from": {
+            "r": 1,
+            "c": 3
+          },
+          "to": {
+            "r": 3,
+            "c": 3
+          },
+          "weight": 100,
+          "games": 1
+        }
+      ],
+      "seenCount": 1
     }
   },
   "metadata": {

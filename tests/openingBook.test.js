@@ -1,4 +1,4 @@
-import { setOpeningBook, queryOpeningBook } from '../js/ai/OpeningBook.js';
+import { setOpeningBook, queryOpeningBook, OpeningBook } from '../js/ai/OpeningBook.js';
 import { logger } from '../js/logger.js';
 import { jest } from '@jest/globals';
 
@@ -114,5 +114,60 @@ describe('OpeningBook', () => {
     expect(move2).toEqual({ from: { r: 2, c: 2 }, to: { r: 3, c: 3 } });
 
     jest.restoreAllMocks();
+  });
+
+  describe('OpeningBook Class', () => {
+    it('should add moves correctly', () => {
+      const book = new OpeningBook();
+      const board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+      const move = { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } };
+
+      book.addMove(board, 'white', move);
+
+      const hash = book.getBoardHash(board, 'white');
+      expect(book.data.positions[hash]).toBeDefined();
+      expect(book.data.positions[hash].moves.length).toBe(1);
+      expect(book.data.positions[hash].moves[0].games).toBe(1);
+
+      // Add same move
+      book.addMove(board, 'white', move);
+      expect(book.data.positions[hash].moves[0].games).toBe(2);
+    });
+
+    it('should merge books correctly with complex weights', () => {
+      const book1 = new OpeningBook();
+      const book2 = new OpeningBook();
+      const board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+      const move1 = { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } };
+      const move2 = { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } };
+
+      // Book 1: Move 1 seen 2 times
+      book1.addMove(board, 'white', move1);
+      book1.addMove(board, 'white', move1);
+
+      // Book 2: Move 1 seen 3 times, Move 2 seen 5 times
+      book2.addMove(board, 'white', move1);
+      book2.addMove(board, 'white', move1); // x2
+      book2.addMove(board, 'white', move1); // x3
+      for (let i = 0; i < 5; i++) book2.addMove(board, 'white', move2);
+
+      // Merge
+      book1.merge(book2);
+
+      const hash = book1.getBoardHash(board, 'white');
+      const moves = book1.data.positions[hash].moves;
+
+      expect(moves.length).toBe(2);
+
+      const m1 = moves.find(m => m.from.r === 1);
+      const m2 = moves.find(m => m.from.r === 3);
+
+      expect(m1.games).toBe(5); // 2 + 3
+      expect(m2.games).toBe(5); // 0 + 5
+    });
   });
 });

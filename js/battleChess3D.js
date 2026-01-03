@@ -135,9 +135,13 @@ export class BattleChess3D {
         this.inputHandler.enable();
         this.sceneManager.animate();
       }
+      document.body.classList.add('mode-3d');
+      // Force resize after enabling to ensure canvas fits
+      setTimeout(() => this.onWindowResize(), 50);
       logger.info('3D mode enabled');
     } else {
       this.inputHandler.disable();
+      document.body.classList.remove('mode-3d');
       logger.info('3D mode disabled');
     }
   }

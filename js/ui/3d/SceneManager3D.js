@@ -46,7 +46,7 @@ export class SceneManager3D {
 
       // Scene
       this.scene = new THREE.Scene();
-      this.scene.background = new THREE.Color(0x1a1d29); // Match app background
+      // this.scene.background = new THREE.Color(0x1a1d29); // Remove solid background for transparency
 
       // Camera
       const aspect = width / height;
@@ -55,11 +55,12 @@ export class SceneManager3D {
       this.camera.lookAt(0, 0, 0);
 
       // Renderer
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // Enable alpha
       this.renderer.setSize(width, height);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      this.renderer.setClearColor(0x000000, 0); // Transparent clear color
 
       // Clear container
       while (this.container.firstChild) {
