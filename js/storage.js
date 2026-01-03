@@ -4,6 +4,7 @@
  * @module storage
  */
 
+import { logger } from './logger.js';
 // import { BOARD_SIZE, PHASES } from './config.js';
 
 export class StorageManager {
@@ -44,10 +45,10 @@ export class StorageManager {
       const key = this.storageKey + slotName;
       const json = JSON.stringify(gameState);
       localStorage.setItem(key, json);
-      console.log(`[Storage] Game saved to ${key} (${json.length} bytes)`);
+      logger.info(`[Storage] Game saved to ${key} (${json.length} bytes)`);
       return true;
     } catch (error) {
-      console.error('[Storage] Failed to save game:', error);
+      logger.error('[Storage] Failed to save game:', error);
       return false;
     }
   }
@@ -62,16 +63,16 @@ export class StorageManager {
     const json = localStorage.getItem(key);
 
     if (!json) {
-      console.warn(`[Storage] No save found for ${key}`);
+      logger.warn(`[Storage] No save found for ${key}`);
       return null;
     }
 
     try {
       const state = JSON.parse(json);
-      console.log(`[Storage] Game loaded from ${key}`);
+      logger.info(`[Storage] Game loaded from ${key}`);
       return state;
     } catch (error) {
-      console.error('[Storage] Failed to parse save game:', error);
+      logger.error('[Storage] Failed to parse save game:', error);
       throw new Error('CORRUPT_SAVE');
     }
   }
