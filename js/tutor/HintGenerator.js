@@ -151,6 +151,7 @@ export function getSetupTemplates(game) {
       description: 'Ausgewogen mit Springer und Läufer.',
       pieces: ['n', 'n', 'b', 'p', 'p', 'p'], // 3+3+3+1+1+1 = 12
       cost: 12,
+      isRecommended: true,
     },
     {
       id: 'swarm_12',
@@ -186,6 +187,7 @@ export function getSetupTemplates(game) {
         'Ausgewogene Strategie: Erzbischof (Läufer+Springer-Hybrid) bietet Vielseitigkeit. Anpassbar  an jede Situation.',
       pieces: ['a', 'r', 'b'], // 7+5+3 = 15
       cost: 15,
+      isRecommended: true,
     },
     {
       id: 'swarm_15',
@@ -219,6 +221,7 @@ export function getSetupTemplates(game) {
       description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
       pieces: ['c', 'q', 'p'], // 8+9+1 = 18
       cost: 18,
+      isRecommended: true,
     },
     {
       id: 'swarm_18',

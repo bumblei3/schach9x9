@@ -37,34 +37,26 @@ export function updateTutorRecommendations(game) {
     toggleBtn.dataset.initialized = 'true';
   }
 
-  if (container.children.length === 0) {
+  if (container.children.length === 0 || container.dataset.points !== String(game.initialPoints)) {
     const templates = game.tutorController.getSetupTemplates();
     container.innerHTML = '';
+    container.dataset.points = game.initialPoints;
 
     templates.forEach(template => {
       const card = document.createElement('div');
       card.className = 'setup-template-card';
+      if (template.isRecommended) card.classList.add('recommended');
+
+      const color = game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
+      const svgs = window.PIECE_SVGS || {};
 
       const piecesPreview = template.pieces
         .map(pieceType => {
-          const color = game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
-          if (
-            window.PIECE_SVGS &&
-            window.PIECE_SVGS[color] &&
-            window.PIECE_SVGS[color][pieceType]
-          ) {
-            return `<span class="template-piece-icon">${window.PIECE_SVGS[color][pieceType]}</span>`;
+          if (svgs[color] && svgs[color][pieceType]) {
+            return `<span class="template-piece-icon">${svgs[color][pieceType]}</span>`;
           } else {
             const symbols = {
-              p: '♟',
-              n: '♞',
-              b: '♝',
-              r: '♜',
-              q: '♛',
-              k: '♚',
-              a: '🏰',
-              c: '⚖️',
-              e: '👼',
+              p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚', a: '🏰', c: '⚖️', e: '👼',
             };
             return `<span class="template-piece-icon">${symbols[pieceType] || pieceType}</span>`;
           }
@@ -72,6 +64,7 @@ export function updateTutorRecommendations(game) {
         .join('');
 
       card.innerHTML = `
+        ${template.isRecommended ? '<div class="recommended-badge">Empfohlen</div>' : ''}
         <div class="template-name">${template.name}</div>
         <div class="template-description">${template.description}</div>
         <div class="template-pieces">
@@ -104,10 +97,6 @@ export function showTutorSuggestions(game) {
   const suggestionsEl = document.getElementById('tutor-suggestions');
 
   if (!tutorPanel || !suggestionsEl) {
-    if (!game.tutorController || !game.tutorController.getTutorHints) {
-      alert('Tutor nicht verfügbar!');
-      return;
-    }
     const hints = game.tutorController.getTutorHints();
     if (hints.length === 0) {
       alert('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
