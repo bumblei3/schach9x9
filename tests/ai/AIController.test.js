@@ -41,8 +41,8 @@ jest.unstable_mockModule('../../js/puzzleManager.js', () => ({
   puzzleManager: { active: false, checkMove: jest.fn() },
 }));
 
-const UI = await import('../../js/ui.js');
-const { soundManager } = await import('../../js/sounds.js');
+const _UI = await import('../../js/ui.js');
+const { soundManager: _soundManager } = await import('../../js/sounds.js');
 const MoveExecutor = await import('../../js/move/MoveExecutor.js');
 const { getBestMove } = await import('../../js/ai/Search.js');
 
@@ -54,7 +54,7 @@ describe('AI Integration: Self-Play', () => {
     jest.clearAllMocks();
 
     // Mock DOM
-    document.getElementById = jest.fn(id => {
+    document.getElementById = jest.fn(_id => {
       return {
         appendChild: jest.fn(),
         removeChild: jest.fn(),

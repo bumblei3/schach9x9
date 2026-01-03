@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 // Helper to create empty board
 function createEmptyBoard() {
   return Array(9)

@@ -1,9 +1,7 @@
-import { PHASES /*, BOARD_SIZE*/ } from './gameEngine.js';
+import { PHASES } from './gameEngine.js';
 import { storageManager } from './storage.js';
-// import { SHOP_PIECES, PIECE_VALUES } from './config.js'; // Unused
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
-// import { PIECE_SVGS } from './chess-pieces.js'; // Unused
 import { logger } from './logger.js';
 import { Tutorial } from './tutorial.js';
 import { ArrowRenderer } from './arrows.js';
@@ -11,9 +9,6 @@ import { StatisticsManager } from './statisticsManager.js';
 import { puzzleManager } from './puzzleManager.js';
 import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
-
-// Piece values for shop
-// const PIECES = SHOP_PIECES; // Unused
 
 export class GameController {
   constructor(game) {
@@ -219,7 +214,7 @@ export class GameController {
       }
 
       UI.showModal(
-        'Ungewutzte Punkte',
+        'Ungenutzte Punkte',
         `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
         [
           { text: 'Abbrechen', class: 'btn-secondary' },
