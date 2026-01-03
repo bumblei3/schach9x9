@@ -104,19 +104,88 @@ export function showTutorSuggestions(game) {
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');
 
+  const inSetup =
+    game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_PIECES;
+
   if (!tutorPanel || !suggestionsEl) {
-    const hints = game.tutorController.getTutorHints();
-    if (hints.length === 0) {
-      alert('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
+    if (
+      !game.tutorController ||
+      (inSetup ? !game.tutorController.getSetupTemplates : !game.tutorController.getTutorHints)
+    ) {
+      alert('Tutor nicht verfügbar!');
       return;
     }
 
-    let overlay = document.getElementById('tutor-overlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'tutor-overlay';
-      overlay.className = 'modal-overlay';
-      overlay.innerHTML = `
+    if (inSetup) {
+      const templates = game.tutorController.getSetupTemplates();
+      let overlay = document.getElementById('tutor-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'tutor-overlay';
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+            <div class="modal-content" style="max-width: 600px; text-align: left;">
+              <div class="menu-header">
+                <h2>🏗️ Aufstellungs-Vorlagen</h2>
+                <button id="close-tutor-btn" class="close-icon-btn">×</button>
+              </div>
+              <div id="tutor-hints-body" class="templates-overlay-grid" style="max-height: 60vh; overflow-y: auto; padding: 1rem;"></div>
+            </div>
+          `;
+        document.body.appendChild(overlay);
+        document
+          .getElementById('close-tutor-btn')
+          .addEventListener('click', () => overlay.classList.add('hidden'));
+      }
+
+      const body = document.getElementById('tutor-hints-body');
+      body.innerHTML = '';
+      body.className = 'templates-overlay-grid';
+
+      const color = game.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
+      const svgs = window.PIECE_SVGS || {};
+
+      templates.forEach(template => {
+        const div = document.createElement('div');
+        div.className = 'setup-template-card' + (template.isRecommended ? ' recommended' : '');
+
+        const piecesPreview = template.pieces
+          .map(p => {
+            if (svgs[color] && svgs[color][p])
+              return `<span class="template-piece-icon">${svgs[color][p]}</span>`;
+            return p;
+          })
+          .join('');
+
+        div.innerHTML = `
+            ${template.isRecommended ? '<div class="recommended-badge">KI-Tipp</div>' : ''}
+            <div class="template-name">${template.name}</div>
+            <div class="template-description" style="font-size: 0.85rem; color: #cbd5e1;">${template.description}</div>
+            <div style="margin-top: 10px; display: flex; gap: 4px;">${piecesPreview}</div>
+          `;
+        div.addEventListener('click', () => {
+          if (confirm(`Aufstellung "${template.name}" anwenden?`)) {
+            game.tutorController.applySetupTemplate(template.id);
+            overlay.classList.add('hidden');
+            if (updateShopUI) updateShopUI(game);
+          }
+        });
+        body.appendChild(div);
+      });
+      overlay.classList.remove('hidden');
+    } else {
+      const hints = game.tutorController.getTutorHints();
+      if (hints.length === 0) {
+        alert('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
+        return;
+      }
+
+      let overlay = document.getElementById('tutor-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'tutor-overlay';
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
         <div class="modal-content" style="max-width: 500px; text-align: left;">
           <div class="menu-header">
             <h2>💡 KI-Tipps</h2>
@@ -125,33 +194,33 @@ export function showTutorSuggestions(game) {
           <div id="tutor-hints-body" style="max-height: 60vh; overflow-y: auto;"></div>
         </div>
       `;
-      document.body.appendChild(overlay);
-      document
-        .getElementById('close-tutor-btn')
-        .addEventListener('click', () => overlay.classList.add('hidden'));
-    }
+        document.body.appendChild(overlay);
+        document
+          .getElementById('close-tutor-btn')
+          .addEventListener('click', () => overlay.classList.add('hidden'));
+      }
 
-    const body = document.getElementById('tutor-hints-body');
-    body.innerHTML = '';
-    hints.forEach((hint, index) => {
-      const div = document.createElement('div');
-      div.className = 'tutor-hint-item';
-      const getQualityColor = cat => {
-        const colors = {
-          brilliant: '#a855f7', // Purple
-          best: '#22c55e', // Green
-          excellent: '#10b981', // Emerald
-          good: '#3b82f6', // Blue
-          inaccuracy: '#f59e0b', // Amber
-          mistake: '#ef4444', // Red
-          blunder: '#b91c1c', // Dark Red
+      const body = document.getElementById('tutor-hints-body');
+      body.innerHTML = '';
+      hints.forEach((hint, index) => {
+        const div = document.createElement('div');
+        div.className = 'tutor-hint-item';
+        const getQualityColor = cat => {
+          const colors = {
+            brilliant: '#a855f7', // Purple
+            best: '#22c55e', // Green
+            excellent: '#10b981', // Emerald
+            good: '#3b82f6', // Blue
+            inaccuracy: '#f59e0b', // Amber
+            mistake: '#ef4444', // Red
+            blunder: '#b91c1c', // Dark Red
+          };
+          return colors[cat] || '#94a3b8';
         };
-        return colors[cat] || '#94a3b8';
-      };
 
-      const badgeColor = getQualityColor(hint.analysis.category);
+        const badgeColor = getQualityColor(hint.analysis.category);
 
-      div.innerHTML = `
+        div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <strong style="font-size: 1.1em;">${index + 1}. ${hint.notation}</strong>
           <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; background: ${badgeColor}22; color: ${badgeColor}; border: 1px solid ${badgeColor}44; font-weight: 600;">
@@ -164,13 +233,14 @@ export function showTutorSuggestions(game) {
           ${hint.analysis.strategicExplanations.map(e => `<div>${e}</div>`).join('')}
         </div>
       `;
-      div.addEventListener('click', () => {
-        overlay.classList.add('hidden');
-        game.executeMove(hint.move.from, hint.move.to);
+        div.addEventListener('click', () => {
+          overlay.classList.add('hidden');
+          game.executeMove(hint.move.from, hint.move.to);
+        });
+        body.appendChild(div);
       });
-      body.appendChild(div);
-    });
-    overlay.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+    }
     return;
   }
 
