@@ -104,6 +104,30 @@ export function detectTacticalPatterns(game, analyzer, move) {
 }
 
 /**
+ * Checks if a move has tactical significance (e.g., capture, fork, pin)
+ * @param {Object} game - The game instance
+ * @param {Object} move - The move to check
+ * @returns {boolean} True if tactical
+ */
+export function isTactical(game, move) {
+  // Simplest check: is it a capture?
+  if (game.board[move.to.r][move.to.c]) return true;
+
+  // Is it a promotion?
+  const piece = game.board[move.from.r][move.from.c];
+  if (piece && piece.type === 'p') {
+    const promotionRow = piece.color === 'white' ? 0 : BOARD_SIZE - 1;
+    if (move.to.r === promotionRow) return true;
+  }
+
+  // Check for other tactical patterns (simplified to avoid deep recursion)
+  // We check if the move creates a fork or pin
+  const analyzer = { getPieceName: t => t };
+  const patterns = detectTacticalPatterns(game, analyzer, move);
+  return patterns.length > 0;
+}
+
+/**
  * Detect if a piece at the given position is pinning an opponent piece
  * Returns array of pinned pieces
  */

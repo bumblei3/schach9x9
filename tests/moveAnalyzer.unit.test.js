@@ -14,7 +14,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       50,
       'white'
     );
-    expect(result.category).toBe('excellent');
+    expect(result.category).toBe('best');
   });
 
   test('categorizeMove blunder', () => {
@@ -25,20 +25,19 @@ describe('MoveAnalyzer Unit Tests', () => {
       50,
       'white'
     );
-    // Based on logic: diffP is -300 (250-50 = -300? No, score is -250, bestScore is 50. diff = -300. diffP = -3.0)
-    // >= -3.0 is 'questionable'
-    expect(result.category).toBe('questionable');
+    // diff = -300. diffP = -3.0. category is 'mistake'
+    expect(result.category).toBe('mistake');
   });
 
   test('categorizeMove mistake', () => {
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       { board, getValidMoves: () => [], isInCheck: () => false },
       { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
-      -400,
+      -150,
       50,
       'white'
     );
-    // diff = -450. diffP = -4.5. < -3.0 is 'mistake'
+    // diff = -200. diffP = -2.0. >= -3.0 is 'mistake'
     expect(result.category).toBe('mistake');
   });
 

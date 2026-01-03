@@ -147,6 +147,11 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
   const evalScore = evaluatePosition(game.board, 'white');
   moveRecord.evalScore = evalScore;
 
+  // Update evaluation bar if available
+  if (game.evaluationBar) {
+    game.evaluationBar.update(evalScore);
+  }
+
   // Add move to history
   game.moveHistory.push(moveRecord);
   UI.updateMoveHistoryUI(game);

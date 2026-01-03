@@ -174,44 +174,53 @@ describe('MoveAnalyzer', () => {
   });
 
   describe('analyzeMoveWithExplanation', () => {
-    test('should identify "Entscheidender Gewinnzug" for high scores', () => {
+    test('should identify "Bester Zug" for engine top moves', () => {
       const game = createTestGame();
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
       const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 400, 400);
-      expect(analysis.qualityLabel).toContain('Entscheidender Gewinnzug');
+      expect(analysis.qualityLabel).toContain('Bester Zug');
+      expect(analysis.category).toBe('best');
+    });
+
+    test('should identify "Exzellenter Zug" for nearly perfect moves', () => {
+      const game = createTestGame();
+      game.board[6][0] = { type: 'n', color: 'white' };
+      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
+
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 130, 150); // diff = -0.2
       expect(analysis.category).toBe('excellent');
     });
 
-    test('should identify "Brillanter Zug" for best moves', () => {
+    test('should identify "Ungenauigkeit" for inaccuracies', () => {
       const game = createTestGame();
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 150, 150);
-      expect(analysis.qualityLabel).toContain('Brillanter Zug');
-    });
-
-    test('should identify "Ungenauigkeit" for questionable moves', () => {
-      const game = createTestGame();
-      game.board[6][0] = { type: 'n', color: 'white' };
-      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
-
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -100, 150); // diff = -250 (-2.5 pawns)
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 50, 150); // diff = -1.0
       expect(analysis.qualityLabel).toContain('Ungenauigkeit');
-      expect(analysis.category).toBe('questionable');
+      expect(analysis.category).toBe('inaccuracy');
     });
 
-    test('should identify "Grober Fehler" for mistakes', () => {
+    test('should identify "Fehler" for mistakes', () => {
       const game = createTestGame();
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -300, 150); // diff = -450 (-4.5 pawns)
-      expect(analysis.qualityLabel).toContain('Grober Fehler');
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -100, 150); // diff = -2.5
+      expect(analysis.qualityLabel).toContain('Fehler');
       expect(analysis.category).toBe('mistake');
-      expect(analysis.warnings.length).toBeGreaterThan(0);
+    });
+
+    test('should identify "Grober Fehler" for blunders', () => {
+      const game = createTestGame();
+      game.board[6][0] = { type: 'n', color: 'white' };
+      const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
+
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -300, 150); // diff = -4.5
+      expect(analysis.qualityLabel).toContain('Grober Fehler');
+      expect(analysis.category).toBe('blunder');
     });
   });
 });

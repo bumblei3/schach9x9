@@ -25,6 +25,13 @@ export function getPieceSymbol(piece) {
 }
 
 /**
+ * Clears the piece SVG cache.
+ */
+export function clearPieceCache() {
+  window._svgCache = {};
+}
+
+/**
  * Gibt das Text-Symbol (Unicode) für eine Figur zurück.
  * @param {object} piece - Die Figur
  * @returns {string} Text-Symbol
@@ -504,4 +511,36 @@ export async function animateMove(game, from, to, piece) {
       resolve();
     }, 250);
   });
+}
+
+/**
+ * Visualizes move quality on the board
+ * @param {Object} game - The game instance
+ * @param {Object} move - {from, to}
+ * @param {string} category - 'brilliant', 'best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder'
+ */
+export function showMoveQuality(game, move, category) {
+  // Clear existing quality highlights
+  document
+    .querySelectorAll(
+      '.cell.quality-best, .cell.quality-brilliant, .cell.quality-excellent, .cell.quality-good, .cell.quality-inaccuracy, .cell.quality-mistake, .cell.quality-blunder'
+    )
+    .forEach(cell =>
+      cell.classList.remove(
+        'quality-best',
+        'quality-brilliant',
+        'quality-excellent',
+        'quality-good',
+        'quality-inaccuracy',
+        'quality-mistake',
+        'quality-blunder'
+      )
+    );
+
+  if (!category || category === 'normal') return;
+
+  const toCell = document.querySelector(`.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`);
+  if (toCell) {
+    toCell.classList.add(`quality-${category}`);
+  }
 }

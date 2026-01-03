@@ -19,27 +19,33 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
   // Categorize based on relative score
   let qualityLabel = '';
   const diffP = parseFloat(diffPawns);
-  if (diffP >= -0.5) {
-    if (score >= 300) {
-      category = 'excellent';
-      qualityLabel = '⭐⭐⭐ Entscheidender Gewinnzug! Du kontrollierst die Partie.';
-    } else if (diffP >= -0.1) {
-      category = 'excellent';
-      qualityLabel = '⭐⭐⭐ Brillanter Zug! Exakt die Empfehlung der KI.';
+
+  if (diffP >= 0) {
+    // If it's as good or better than engine's top move
+    if (diffP > 0.5 && TacticsDetector.isTactical(game, move)) {
+      category = 'brilliant';
+      qualityLabel = '!! Brillanter Zug! Du hast eine taktische Tiefe gefunden, die die KI beeindruckt.';
     } else {
-      category = 'good';
-      qualityLabel = `⭐⭐ Guter Zug (minimal schwächer: ${Math.abs(diffP)} Bauern)`;
+      category = 'best';
+      qualityLabel = '⭐ Bester Zug! Exakt die Empfehlung der KI.';
     }
+  } else if (diffP >= -0.3) {
+    category = 'excellent';
+    qualityLabel = '✨ Exzellenter Zug! Beinahe perfekt.';
+  } else if (diffP >= -0.8) {
+    category = 'good';
+    qualityLabel = '✅ Guter Zug.';
   } else if (diffP >= -1.5) {
-    category = 'normal';
-    qualityLabel = `⭐ Solider Zug (${Math.abs(diffP)} Bauern schwächer)`;
+    category = 'inaccuracy';
+    qualityLabel = `!? Ungenauigkeit (${Math.abs(diffP)} Bauern schwächer)`;
+    warnings.push('Es gibt strategisch wertvollere Alternativen.');
   } else if (diffP >= -3.0) {
-    category = 'questionable';
-    qualityLabel = `⚠️ Ungenauigkeit (${Math.abs(diffP)} Bauern schlechter)`;
-    warnings.push('Es gibt strategisch wertvollere Alternativen. Beachte die Figurenentwicklung!');
-  } else {
     category = 'mistake';
-    qualityLabel = `❌ Grober Fehler (${Math.abs(diffP)} Bauern Verlust)`;
+    qualityLabel = `? Fehler (${Math.abs(diffP)} Bauern schlechter)`;
+    warnings.push('Dieser Zug verschlechtert deine Stellung spürbar.');
+  } else {
+    category = 'blunder';
+    qualityLabel = `?? Grober Fehler (${Math.abs(diffP)} Bauern Verlust)`;
     warnings.push('⚠️ Dieser Zug gefährdet deine Position massiv!');
   }
 
@@ -281,6 +287,20 @@ export function checkBlunder(game, tutorController, moveRecord) {
       turn === 'white' ? prevEval : -prevEval
     );
     tutorController.showBlunderWarning(analysis);
+  }
+
+  // Show quality highlight on the board
+  if (UI.showMoveQuality) {
+    // We assume the best move score is either the engine's best or the previous eval if no engine ran
+    const bestScore = game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
+    const analysis = analyzeMoveWithExplanation.call(
+      tutorController,
+      game,
+      { from: moveRecord.from, to: moveRecord.to },
+      currentEval,
+      bestScore
+    );
+    UI.showMoveQuality(game, { from: moveRecord.from, to: moveRecord.to }, analysis.category);
   }
 
   game.lastEval = currentEval;

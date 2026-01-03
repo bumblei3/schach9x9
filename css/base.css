@@ -3,49 +3,57 @@
    =========================================== */
 
 :root {
-  /* --- Palette: Deep Space Minimalist --- */
-  --bg-app: #0f111a;
+  /* --- Palette: Deep Space Minimalist (Premium) --- */
+  --bg-app: #06080f;
 
-  /* Refined Glassmorphism (Premium) */
-  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  --bg-panel: rgba(15, 23, 42, 0.85);
+  /* Glassmorphism Tokens */
+  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass-border-bright: 1px solid rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  --glass-reflection: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  --bg-panel: var(--glass-bg);
 
   /* Board Colors */
-  --bg-board-dark: #334155;
-  --bg-board-light: #cbd5e1;
+  --bg-board-dark: #1e293b;
+  --bg-board-light: #94a3b8;
+  --cell-accent: rgba(99, 102, 241, 0.1);
 
-  /* Accent Colors */
-  --accent-primary: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-glow: rgba(99, 102, 241, 0.3);
+  /* Accent Colors (More Vibrant) */
+  --accent-primary: #818cf8;
+  --accent-secondary: #c084fc;
+  --accent-hover: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.4);
+  --accent-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
 
   /* Text Colors */
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-main: #f1f5f9;
+  --text-muted: #64748b;
+  --text-dim: #475569;
 
   /* Semantic Colors */
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
+  --success: #34d399;
+  --danger: #fb7185;
+  --warning: #fbbf24;
 
   /* Dimensions & Spacing */
   --cell-size: min(8vw, 64px);
+  --radius-xl: 24px;
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
 
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
   /* Typography */
   --font-main: 'Outfit', sans-serif;
 
-  /* Corridor/Zone Colors (Default) */
-  --corridor-bg: rgba(16, 185, 129, 0.15);
-  --corridor-border: rgba(16, 185, 129, 0.4);
-  --corridor-bg-hover: rgba(16, 185, 129, 0.25);
-  --corridor-border-hover: rgba(16, 185, 129, 0.6);
-
   /* Grid Line Colors */
-  --grid-line-color: #0f172a;
+  --grid-line-color: rgba(0, 0, 0, 0.2);
 }
 
 /* --- Reset --- */
@@ -61,13 +69,27 @@ body {
   font-family: var(--font-main);
   background-color: var(--bg-app);
   background-image:
-    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 25%);
+    radial-gradient(circle at 15% 50%, rgba(129, 140, 248, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(192, 132, 252, 0.1) 0%, transparent 40%);
   color: var(--text-main);
   height: 100vh;
+  margin: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml;utf8,<svg opacity="0.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* --- Hidden Utility --- */

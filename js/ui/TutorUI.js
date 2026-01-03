@@ -139,21 +139,29 @@ export function showTutorSuggestions(game) {
     hints.forEach((hint, index) => {
       const div = document.createElement('div');
       div.className = 'tutor-hint-item';
-      div.style.cssText =
-        'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ' +
-        (hint.analysis.scoreDiff > -0.5 ? '#10b981' : '#f59e0b') +
-        '; cursor: pointer; transition: background 0.2s;';
-      div.onmouseover = () => {
-        div.style.background = 'rgba(255,255,255,0.1)';
+      const getQualityColor = (cat) => {
+        const colors = {
+          'brilliant': '#a855f7', // Purple
+          'best': '#22c55e',      // Green
+          'excellent': '#10b981', // Emerald
+          'good': '#3b82f6',      // Blue
+          'inaccuracy': '#f59e0b', // Amber
+          'mistake': '#ef4444',    // Red
+          'blunder': '#b91c1c'     // Dark Red
+        };
+        return colors[cat] || '#94a3b8';
       };
-      div.onmouseout = () => {
-        div.style.background = 'rgba(255,255,255,0.05)';
-      };
+
+      const badgeColor = getQualityColor(hint.analysis.category);
+
       div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <strong style="font-size: 1.1em;">${index + 1}. ${hint.notation}</strong>
-          <span style="font-size: 0.9em; color: ${hint.analysis.scoreDiff > -0.5 ? '#10b981' : '#f59e0b'}">${hint.analysis.qualityLabel}</span>
+          <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; background: ${badgeColor}22; color: ${badgeColor}; border: 1px solid ${badgeColor}44; font-weight: 600;">
+            ${hint.analysis.category.toUpperCase()}
+          </span>
         </div>
+        <div style="font-size: 0.9em; color: ${badgeColor}; margin-bottom: 4px;">${hint.analysis.qualityLabel}</div>
         <div style="font-size: 0.9em; color: #ccc;">
           ${hint.analysis.tacticalExplanations.map(e => `<div>${e}</div>`).join('')}
           ${hint.analysis.strategicExplanations.map(e => `<div>${e}</div>`).join('')}

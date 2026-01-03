@@ -110,6 +110,7 @@ describe('UI Module', () => {
           {
             move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
             analysis: {
+              category: 'excellent',
               qualityLabel: 'Good',
               tacticalExplanations: ['Tactical'],
               strategicExplanations: ['Strategic'],

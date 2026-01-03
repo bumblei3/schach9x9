@@ -132,29 +132,44 @@
 .action-bar {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 0.75rem;
-  padding: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-xl);
+  border: var(--glass-border);
+  margin-top: 1.5rem;
+  box-shadow: var(--glass-shadow);
+  transition: var(--transition-normal);
 }
 
 .action-icon-btn {
-  background: var(--bg-panel);
-  border: none;
-  color: var(--text-muted);
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: var(--transition-fast);
 }
 
 .action-icon-btn:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--text-main);
-  transform: scale(1.05);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+  color: var(--accent-primary);
+}
+
+.action-icon-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .close-icon-btn {

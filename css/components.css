@@ -149,39 +149,111 @@
   padding: 0 0.5rem;
 }
 
+/* --- Custom Select --- */
 .menu-select {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  appearance: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--glass-border);
   color: var(--text-main);
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 10px 32px 10px 16px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
 }
 
-/* --- Volume Control --- */
-.volume-control {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.menu-select:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-primary);
 }
 
+.menu-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* --- Toggle Switch --- */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: var(--transition-normal);
+  border-radius: 24px;
+  border: var(--glass-border);
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: var(--transition-normal);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked+.toggle-slider {
+  background: var(--accent-gradient);
+}
+
+input:focus+.toggle-slider {
+  box-shadow: 0 0 1px var(--accent-primary);
+}
+
+input:checked+.toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* --- Modern Sliders --- */
 .volume-slider {
-  width: 80px;
+  width: 100px;
   height: 6px;
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   outline: none;
+  transition: var(--transition-fast);
 }
 
 .volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  background: var(--accent-primary);
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #fff;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.1s;
+  border: 4px solid var(--accent-primary);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: var(--transition-bounce);
 }
 
 .volume-slider::-webkit-slider-thumb:hover {
@@ -379,25 +451,38 @@
 
 /* --- Skin Selector --- */
 .skin-selector {
-  background: var(--bg-panel);
+  appearance: none;
+  background-color: var(--bg-panel);
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-main);
-  padding: 8px 12px;
+  padding: 8px 30px 8px 12px;
   border-radius: 12px;
   cursor: pointer;
   font-size: 0.85rem;
+  font-family: var(--font-main);
+  font-weight: 500;
   transition: all 0.2s;
 }
 
 .skin-selector:hover {
   border-color: var(--accent-primary);
-  background: rgba(99, 102, 241, 0.1);
+  background-color: rgba(99, 102, 241, 0.1);
 }
 
 .skin-selector:focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.skin-selector option {
+  background-color: #0f172a;
+  color: white;
+  padding: 10px;
 }
 
 /* --- Tabs --- */
@@ -439,11 +524,12 @@
   font-size: 0.9rem;
 }
 
-.history-list > div,
-.log-list > div {
+.history-list>div,
+.log-list>div {
   padding: 0.5rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
+
 .action-icon-btn.active {
   background: rgba(255, 255, 255, 0.15);
   border-color: var(--accent-primary);

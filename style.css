@@ -24,6 +24,9 @@
 /* Animations: Keyframes & Transitions */
 @import './css/animations.css';
 
+/* Analysis: Eval Bar, Move Quality */
+@import './css/analysis.css';
+
 /* Debug: Enhanced Debug Console */
 @import './css/debug.css';
 

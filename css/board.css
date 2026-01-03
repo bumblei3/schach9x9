@@ -64,6 +64,19 @@
   text-transform: uppercase;
 }
 
+/* --- 3x3 Grid Overlay (Thick Borders) --- */
+/* Vertical dividers after Col 3 and Col 6 */
+.cell:nth-child(9n+3),
+.cell:nth-child(9n+6) {
+  border-right: 3px solid rgba(0, 0, 0, 0.5);
+}
+
+/* Horizontal dividers after Row 3 (cells 19-27) and Row 6 (cells 46-54) */
+.cell:nth-child(n+19):nth-child(-n+27),
+.cell:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 3px solid rgba(0, 0, 0, 0.5);
+}
+
 /* --- Cells --- */
 .cell {
   width: 100%;

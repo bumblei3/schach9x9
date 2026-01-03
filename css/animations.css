@@ -130,12 +130,36 @@
   transform: translateY(0);
 }
 
-/* --- Modal Opening Animations --- */
-.modal-content,
-.menu-content,
-.info-content,
-.stats-content,
-.puzzle-content,
-.tutorial-content {
-  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+/* --- Slide In Left --- */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* --- Entrance Animations --- */
+.game-area {
+  animation: fadeIn var(--transition-slow);
+}
+
+#board-container {
+  animation: slide-up-fade 0.8s var(--transition-bounce);
+}
+
+.player-info.opponent {
+  animation: slideInLeft 0.6s var(--transition-bounce) 0.1s both;
+}
+
+.player-info.self {
+  animation: slideInLeft 0.6s var(--transition-bounce) 0.2s both;
+}
+
+.action-bar {
+  animation: slide-up-fade 0.6s var(--transition-bounce) 0.3s both;
 }

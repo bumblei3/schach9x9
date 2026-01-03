@@ -167,7 +167,7 @@ describe('TutorController Extra Coverage', () => {
       const analysis = tutor.analyzeMoveWithExplanation(moveRecord, currentEval, bestEval);
 
       expect(analysis.category).toBe('excellent');
-      expect(analysis.qualityLabel).toContain('Brillanter Zug!');
+      expect(analysis.qualityLabel).toContain('Exzellenter Zug!');
     });
   });
 });

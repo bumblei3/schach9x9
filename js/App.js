@@ -14,6 +14,9 @@ import { KeyboardManager } from './input/KeyboardManager.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from './utils/PGNGenerator.js';
 import { soundManager } from './sounds.js';
 import { AnalysisManager } from './AnalysisManager.js';
+import { EvaluationBar } from './ui/EvaluationBar.js';
+import { UIEffects } from './ui/ui_effects.js';
+import { setPieceSkin } from './chess-pieces.js';
 
 export class App {
   constructor() {
@@ -46,6 +49,11 @@ export class App {
 
     this.analysisManager = new AnalysisManager(this.game);
     this.game.analysisManager = this.analysisManager;
+
+    this.evaluationBar = new EvaluationBar('board-container');
+    this.uiEffects = new UIEffects();
+    this.uiEffects.startFloatingPieces();
+    this.game.evaluationBar = this.evaluationBar;
 
     // Input handlers
     this.keyboardManager = new KeyboardManager(this);
@@ -685,7 +693,10 @@ export class App {
       });
       // Set initial value
       if (localStorage.getItem('chess_theme')) {
-        themeSelect.value = localStorage.getItem('chess_theme');
+        const savedTheme = localStorage.getItem('chess_theme');
+        themeSelect.value = savedTheme;
+        // Apply theme color to body immediately
+        document.body.setAttribute('data-theme', savedTheme);
       }
     }
 
@@ -710,6 +721,27 @@ export class App {
           menuOverlay.style.display = 'none';
         }
       });
+    }
+
+    // Skin Selection
+    const skinSelector = document.getElementById('skin-selector');
+    if (skinSelector) {
+      skinSelector.addEventListener('change', e => {
+        const newSkin = e.target.value;
+        setPieceSkin(newSkin);
+        if (UI.clearPieceCache) UI.clearPieceCache();
+        if (this.game) {
+          this.game._forceFullRender = true;
+          UI.renderBoard(this.game);
+        }
+        localStorage.setItem('chess_skin', newSkin);
+      });
+      // Set initial value
+      if (localStorage.getItem('chess_skin')) {
+        const savedSkin = localStorage.getItem('chess_skin');
+        skinSelector.value = savedSkin;
+        setPieceSkin(savedSkin);
+      }
     }
 
     // Sound Controls

@@ -245,7 +245,7 @@ export class AIController {
         this.openingBook = book;
         this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
       })
-      .catch(() => {});
+      .catch(() => { });
 
     for (let i = 0; i < numWorkers; i++) {
       const worker = new Worker('js/ai-worker.js', { type: 'module' });
@@ -690,7 +690,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker
@@ -752,6 +752,11 @@ export class AIController {
       const percentage = 50 + (normalizedScore / 1000) * 50;
 
       evalBar.style.width = `${percentage}%`;
+
+      // Update vertical evaluation bar if available
+      if (this.game.evaluationBar) {
+        this.game.evaluationBar.update(analysis.score);
+      }
 
       // Update numeric display
       const scoreInPawns = (analysis.score / 100).toFixed(2);
