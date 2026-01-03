@@ -9,13 +9,17 @@ import { StatisticsManager } from './statisticsManager.js';
 import { puzzleManager } from './puzzleManager.js';
 import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
+import { AnalysisController } from './AnalysisController.js';
 
 export class GameController {
   constructor(game) {
     this.game = game;
     this.statisticsManager = new StatisticsManager();
     this.timeManager = new TimeManager(game, this);
-    this.shopManager = new ShopManager(game);
+    this.shopManager = new ShopManager(game, this);
+    this.analysisController = new AnalysisController(this);
+    this.moveExecutor = null; // Circular dependency resolved later
+    this.game.gameController = this;
     this.gameStartTime = null;
   }
 
@@ -515,127 +519,19 @@ export class GameController {
   // ===== ANALYSIS MODE METHODS =====
 
   enterAnalysisMode() {
-    // Can only analyze during play phase
-    if (this.game.phase !== PHASES.PLAY) {
-      this.game.log('⚠️ Analyse-Modus nur während des Spiels verfügbar.');
-      return false;
-    }
-
-    // Save current game state
-    this.game.analysisBasePosition = {
-      board: JSON.parse(JSON.stringify(this.game.board)),
-      turn: this.game.turn,
-      moveHistory: [...this.game.moveHistory],
-      redoStack: [...this.game.redoStack],
-      lastMove: this.game.lastMove ? { ...this.game.lastMove } : null,
-      lastMoveHighlight: this.game.lastMoveHighlight ? { ...this.game.lastMoveHighlight } : null,
-      selectedSquare: this.game.selectedSquare,
-      validMoves: this.game.validMoves,
-      halfMoveClock: this.game.halfMoveClock,
-      positionHistory: [...this.game.positionHistory],
-    };
-
-    // Enter analysis mode
-    this.game.analysisMode = true;
-    this.game.phase = PHASES.ANALYSIS;
-
-    // Stop clock
-    this.stopClock();
-
-    // Clear selection
-    this.game.selectedSquare = null;
-    this.game.validMoves = null;
-
-    // Show analysis panel
-    const analysisPanel = document.getElementById('analysis-panel');
-    if (analysisPanel) {
-      analysisPanel.classList.remove('hidden');
-    }
-
-    UI.updateStatus(this.game);
-    UI.renderBoard(this.game);
-    UI.renderEvalGraph(this.game);
-
-    this.game.log('🔍 Analyse-Modus aktiviert. Züge lösen keine KI-Reaktion aus.');
-
-    // Start continuous analysis if enabled
-    if (this.game.continuousAnalysis && this.game.aiController) {
-      this.requestPositionAnalysis();
-    }
-
-    return true;
+    return this.analysisController.enterAnalysisMode();
   }
 
   exitAnalysisMode(restore = true) {
-    if (!this.game.analysisMode) {
-      return false;
-    }
-
-    if (restore && this.game.analysisBasePosition) {
-      // Restore saved position
-      this.game.board = JSON.parse(JSON.stringify(this.game.analysisBasePosition.board));
-      this.game.turn = this.game.analysisBasePosition.turn;
-      this.game.moveHistory = [...this.game.analysisBasePosition.moveHistory];
-      this.game.redoStack = [...this.game.analysisBasePosition.redoStack];
-      this.game.lastMove = this.game.analysisBasePosition.lastMove
-        ? { ...this.game.analysisBasePosition.lastMove }
-        : null;
-      this.game.lastMoveHighlight = this.game.analysisBasePosition.lastMoveHighlight
-        ? { ...this.game.analysisBasePosition.lastMoveHighlight }
-        : null;
-      this.game.selectedSquare = this.game.analysisBasePosition.selectedSquare;
-      this.game.validMoves = this.game.analysisBasePosition.validMoves;
-      this.game.halfMoveClock = this.game.analysisBasePosition.halfMoveClock;
-      this.game.positionHistory = [...this.game.analysisBasePosition.positionHistory];
-    }
-
-    // Exit analysis mode
-    this.game.analysisMode = false;
-    this.game.phase = PHASES.PLAY;
-    this.game.analysisBasePosition = null;
-    this.game.analysisVariations = [];
-
-    // Hide analysis panel
-    const analysisPanel = document.getElementById('analysis-panel');
-    if (analysisPanel) {
-      analysisPanel.classList.add('hidden');
-    }
-
-    // Restart clock if enabled
-    if (this.game.clockEnabled) {
-      this.startClock();
-    }
-
-    UI.updateStatus(this.game);
-    UI.renderBoard(this.game);
-    UI.renderEvalGraph(this.game);
-
-    const message = restore
-      ? '🔍 Analyse-Modus beendet. Position wiederhergestellt.'
-      : '🔍 Analyse-Modus beendet. Aktuelle Position behalten.';
-    this.game.log(message);
-
-    return true;
+    return this.analysisController.exitAnalysisMode(restore);
   }
 
   requestPositionAnalysis() {
-    // Request analysis from AI controller
-    if (!this.game.aiController || !this.game.aiController.analyzePosition) {
-      return;
-    }
-
-    this.game.aiController.analyzePosition();
+    this.analysisController.requestPositionAnalysis();
   }
 
   toggleContinuousAnalysis() {
-    this.game.continuousAnalysis = !this.game.continuousAnalysis;
-
-    if (this.game.continuousAnalysis && this.game.analysisMode) {
-      this.requestPositionAnalysis();
-      this.game.log('🔄 Kontinuierliche Analyse aktiviert.');
-    } else {
-      this.game.log('⏸️ Kontinuierliche Analyse deaktiviert.');
-    }
+    this.analysisController.toggleContinuousAnalysis();
   }
 
   /**
@@ -643,34 +539,11 @@ export class GameController {
    * @param {number} moveIndex - Index of the move in moveHistory
    */
   jumpToMove(moveIndex) {
-    if (!this.game.moveController || !this.game.moveController.reconstructBoardAtMove) {
-      return;
-    }
-
-    this.game.moveController.reconstructBoardAtMove(moveIndex);
-    this.game.replayPosition = moveIndex;
-
-    UI.renderBoard(this.game);
-    UI.updateStatus(this.game);
-
-    if (this.game.continuousAnalysis) {
-      this.requestPositionAnalysis();
-    }
+    this.analysisController.jumpToMove(moveIndex);
   }
 
-  /**
-   * Jumps to the initial game position (for analysis).
-   */
   jumpToStart() {
-    if (!this.game.moveController || !this.game.moveController.reconstructBoardAtMove) {
-      return;
-    }
-
-    this.game.moveController.reconstructBoardAtMove(0);
-    this.game.replayPosition = -1;
-
-    UI.renderBoard(this.game);
-    UI.updateStatus(this.game);
+    this.analysisController.jumpToStart();
   }
 
   /**

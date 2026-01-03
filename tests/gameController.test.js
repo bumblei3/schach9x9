@@ -30,6 +30,18 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
   },
 }));
 
+jest.unstable_mockModule('../js/AnalysisController.js', () => ({
+  AnalysisController: class {
+    constructor(gameController) {}
+    enterAnalysisMode = jest.fn(() => true);
+    exitAnalysisMode = jest.fn(() => true);
+    requestPositionAnalysis = jest.fn();
+    toggleContinuousAnalysis = jest.fn();
+    jumpToMove = jest.fn();
+    jumpToStart = jest.fn();
+  },
+}));
+
 jest.unstable_mockModule('../js/gameEngine.js', () => ({
   Game: class {
     constructor(initialPoints = 15, mode = 'classic', isAI = false) {
@@ -263,20 +275,14 @@ describe('GameController', () => {
   });
 
   describe('Analysis Mode', () => {
-    test('should enter analysis mode only during play', () => {
-      game.phase = PHASES.SETUP_WHITE_KING;
-      const result = gameController.enterAnalysisMode();
-      expect(result).toBe(false);
+    test('should delegate enterAnalysisMode to AnalysisController', () => {
+      gameController.enterAnalysisMode();
+      expect(gameController.analysisController.enterAnalysisMode).toHaveBeenCalled();
     });
 
-    test('should restore position when exiting analysis', () => {
-      game.phase = PHASES.PLAY;
-      game.positionHistory = ['h1'];
-      game.board[0][0] = { type: 'k', color: 'black' };
-      gameController.enterAnalysisMode();
-      game.positionHistory = ['h2'];
+    test('should delegate exitAnalysisMode to AnalysisController', () => {
       gameController.exitAnalysisMode(true);
-      expect(game.positionHistory).toEqual(['h1']);
+      expect(gameController.analysisController.exitAnalysisMode).toHaveBeenCalledWith(true);
     });
   });
 
