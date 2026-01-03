@@ -301,6 +301,7 @@ export function enterReplayMode(game) {
   if (game.stopClock) game.stopClock();
   document.getElementById('replay-status').classList.remove('hidden');
   document.getElementById('replay-exit').classList.remove('hidden');
+  document.getElementById('replay-control').classList.remove('hidden');
   const undo = document.getElementById('undo-btn');
   if (undo) undo.disabled = true;
   updateReplayUI(game);
@@ -320,6 +321,7 @@ export function exitReplayMode(game) {
   game.savedGameState = null;
   document.getElementById('replay-status').classList.add('hidden');
   document.getElementById('replay-exit').classList.add('hidden');
+  document.getElementById('replay-control').classList.add('hidden');
   const undo = document.getElementById('undo-btn');
   if (undo) undo.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
   renderBoard(game);
