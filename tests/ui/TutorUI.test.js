@@ -159,26 +159,15 @@ describe('TutorUI Component', () => {
       expect(container.textContent).toContain('♞');
     });
 
-    test('should apply template on click after confirmation', () => {
+    test('should apply template directly on click', () => {
       game.phase = 'setup_white';
       TutorUI.updateTutorRecommendations(game);
 
       const card = document.querySelector('.setup-template-card');
       card.click();
 
-      expect(window.confirm).toHaveBeenCalled();
+      // confirm() dialog was removed - templates apply directly
       expect(game.tutorController.applySetupTemplate).toHaveBeenCalledWith('template1');
-    });
-
-    test('should not apply template if confirmation is cancelled', () => {
-      window.confirm = jest.fn(() => false);
-      game.phase = 'setup_white';
-      TutorUI.updateTutorRecommendations(game);
-
-      const card = document.querySelector('.setup-template-card');
-      card.click();
-
-      expect(game.tutorController.applySetupTemplate).not.toHaveBeenCalled();
     });
   });
 
@@ -289,7 +278,7 @@ describe('TutorUI Component', () => {
       TutorUI.showTutorSuggestions(game);
 
       const tryBtn = document.querySelector('.try-move-btn');
-      tryBtn.onclick({ stopPropagation: () => {} });
+      tryBtn.onclick({ stopPropagation: () => { } });
 
       expect(game.executeMove).toHaveBeenCalled();
       const panel = document.getElementById('tutor-panel');
