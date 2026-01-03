@@ -24,7 +24,8 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
     // If it's as good or better than engine's top move
     if (diffP > 0.5 && TacticsDetector.isTactical(game, move)) {
       category = 'brilliant';
-      qualityLabel = '!! Brillanter Zug! Du hast eine taktische Tiefe gefunden, die die KI beeindruckt.';
+      qualityLabel =
+        '!! Brillanter Zug! Du hast eine taktische Tiefe gefunden, die die KI beeindruckt.';
     } else {
       category = 'best';
       qualityLabel = '⭐ Bester Zug! Exakt die Empfehlung der KI.';
@@ -292,7 +293,8 @@ export function checkBlunder(game, tutorController, moveRecord) {
   // Show quality highlight on the board
   if (UI.showMoveQuality) {
     // We assume the best move score is either the engine's best or the previous eval if no engine ran
-    const bestScore = game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
+    const bestScore =
+      game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
     const analysis = analyzeMoveWithExplanation.call(
       tutorController,
       game,

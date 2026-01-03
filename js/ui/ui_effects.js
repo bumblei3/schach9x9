@@ -4,48 +4,51 @@
  */
 
 export class UIEffects {
-    constructor() {
-        this.container = document.body;
-        this.pieces = ['♟', '♞', '♝', '♜', '♛', '♚', '🏰', '⚖️', '👼'];
+  constructor() {
+    this.container = document.body;
+    this.pieces = ['♟', '♞', '♝', '♜', '♛', '♚', '🏰', '⚖️', '👼'];
+  }
+
+  /**
+   * Start the floating pieces effect in the background
+   */
+  startFloatingPieces() {
+    // Only run on main menu or if desirable
+    if (
+      document.getElementById('points-selection-overlay') &&
+      !document.getElementById('points-selection-overlay').classList.contains('hidden')
+    ) {
+      this.createFloatingPieces(15);
     }
+  }
 
-    /**
-     * Start the floating pieces effect in the background
-     */
-    startFloatingPieces() {
-        // Only run on main menu or if desirable
-        if (document.getElementById('points-selection-overlay') && !document.getElementById('points-selection-overlay').classList.contains('hidden')) {
-            this.createFloatingPieces(15);
-        }
+  /**
+   * Create floating chess pieces
+   * @param {number} count
+   */
+  createFloatingPieces(count) {
+    for (let i = 0; i < count; i++) {
+      this.spawnPiece();
     }
+  }
 
-    /**
-     * Create floating chess pieces
-     * @param {number} count 
-     */
-    createFloatingPieces(count) {
-        for (let i = 0; i < count; i++) {
-            this.spawnPiece();
-        }
-    }
+  spawnPiece() {
+    const piece = document.createElement('div');
+    piece.className = 'floating-bg-piece';
+    piece.textContent = this.pieces[Math.floor(Math.random() * this.pieces.length)];
 
-    spawnPiece() {
-        const piece = document.createElement('div');
-        piece.className = 'floating-bg-piece';
-        piece.textContent = this.pieces[Math.floor(Math.random() * this.pieces.length)];
+    const size = 20 + Math.random() * 60;
+    const left = Math.random() * 100;
+    const duration = 15 + Math.random() * 30;
+    const delay = Math.random() * -30;
 
-        const size = 20 + Math.random() * 60;
-        const left = Math.random() * 100;
-        const duration = 15 + Math.random() * 30;
-        const delay = Math.random() * -30;
+    piece.style.left = `${left}%`;
+    piece.style.fontSize = `${size}px`;
+    piece.style.opacity = (Math.random() * 0.1).toString();
+    piece.style.animation = `floatPiece ${duration}s linear ${delay}s infinite`;
 
-        piece.style.left = `${left}%`;
-        piece.style.fontSize = `${size}px`;
-        piece.style.opacity = (Math.random() * 0.1).toString();
-        piece.style.animation = `floatPiece ${duration}s linear ${delay}s infinite`;
-
-        this.container.appendChild(piece);
-    }
+    this.container.appendChild(piece);
+  }
 }
 
 // Add CSS for the floating pieces if not in a CSS file

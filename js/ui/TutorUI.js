@@ -139,15 +139,15 @@ export function showTutorSuggestions(game) {
     hints.forEach((hint, index) => {
       const div = document.createElement('div');
       div.className = 'tutor-hint-item';
-      const getQualityColor = (cat) => {
+      const getQualityColor = cat => {
         const colors = {
-          'brilliant': '#a855f7', // Purple
-          'best': '#22c55e',      // Green
-          'excellent': '#10b981', // Emerald
-          'good': '#3b82f6',      // Blue
-          'inaccuracy': '#f59e0b', // Amber
-          'mistake': '#ef4444',    // Red
-          'blunder': '#b91c1c'     // Dark Red
+          brilliant: '#a855f7', // Purple
+          best: '#22c55e', // Green
+          excellent: '#10b981', // Emerald
+          good: '#3b82f6', // Blue
+          inaccuracy: '#f59e0b', // Amber
+          mistake: '#ef4444', // Red
+          blunder: '#b91c1c', // Dark Red
         };
         return colors[cat] || '#94a3b8';
       };

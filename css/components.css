@@ -208,7 +208,7 @@
 
 .toggle-slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 18px;
   width: 18px;
   left: 2px;
@@ -219,15 +219,15 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-input:checked+.toggle-slider {
+input:checked + .toggle-slider {
   background: var(--accent-gradient);
 }
 
-input:focus+.toggle-slider {
+input:focus + .toggle-slider {
   box-shadow: 0 0 1px var(--accent-primary);
 }
 
-input:checked+.toggle-slider:before {
+input:checked + .toggle-slider:before {
   transform: translateX(20px);
 }
 
@@ -524,8 +524,8 @@ input:checked+.toggle-slider:before {
   font-size: 0.9rem;
 }
 
-.history-list>div,
-.log-list>div {
+.history-list > div,
+.log-list > div {
   padding: 0.5rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }

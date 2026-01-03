@@ -245,7 +245,7 @@ export class AIController {
         this.openingBook = book;
         this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
       })
-      .catch(() => { });
+      .catch(() => {});
 
     for (let i = 0; i < numWorkers; i++) {
       const worker = new Worker('js/ai-worker.js', { type: 'module' });
@@ -690,7 +690,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for worker

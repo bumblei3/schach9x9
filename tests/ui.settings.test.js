@@ -3,39 +3,39 @@ import { setupJSDOM, createMockGame } from './test-utils.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/chess-pieces.js', () => ({
-    setPieceSkin: jest.fn(),
-    PIECE_SVGS: {
-        white: { p: 'wp' },
-        black: { p: 'bp' },
-    },
+  setPieceSkin: jest.fn(),
+  PIECE_SVGS: {
+    white: { p: 'wp' },
+    black: { p: 'bp' },
+  },
 }));
 
 const AppMock = {
-    game: null,
-    moveController: {
-        setTheme: jest.fn(),
-    }
+  game: null,
+  moveController: {
+    setTheme: jest.fn(),
+  },
 };
 
 describe('UI Settings Tests', () => {
-    let UI;
-    let chessPieces;
-    let game;
+  let UI;
+  let chessPieces;
+  let game;
 
-    beforeEach(async () => {
-        setupJSDOM();
-        jest.clearAllMocks();
+  beforeEach(async () => {
+    setupJSDOM();
+    jest.clearAllMocks();
 
-        // Import modules after mocks
-        UI = await import('../js/ui.js');
-        const chessPiecesModule = await import('../js/chess-pieces.js');
-        chessPieces = chessPiecesModule;
+    // Import modules after mocks
+    UI = await import('../js/ui.js');
+    const chessPiecesModule = await import('../js/chess-pieces.js');
+    chessPieces = chessPiecesModule;
 
-        game = createMockGame();
-        AppMock.game = game;
+    game = createMockGame();
+    AppMock.game = game;
 
-        // Setup DOM for skin selector
-        document.body.innerHTML = `
+    // Setup DOM for skin selector
+    document.body.innerHTML = `
       <div class="action-bar">
         <select id="skin-selector" class="skin-selector">
           <option value="classic">Klassisch</option>
@@ -49,55 +49,55 @@ describe('UI Settings Tests', () => {
         </select>
       </div>
     `;
+  });
+
+  test('Skin selector should update skin and force render', () => {
+    const skinSelector = document.getElementById('skin-selector');
+
+    // Simulate App.js event listener logic manually since we can't easily mock the entire App class structure here
+    // but we can verify the core logic steps
+
+    skinSelector.addEventListener('change', e => {
+      const newSkin = e.target.value;
+      chessPieces.setPieceSkin(newSkin);
+      UI.clearPieceCache();
+      game._forceFullRender = true;
+      UI.renderBoard(game);
+      localStorage.setItem('chess_skin', newSkin);
     });
 
-    test('Skin selector should update skin and force render', () => {
-        const skinSelector = document.getElementById('skin-selector');
-
-        // Simulate App.js event listener logic manually since we can't easily mock the entire App class structure here
-        // but we can verify the core logic steps
-
-        skinSelector.addEventListener('change', (e) => {
-            const newSkin = e.target.value;
-            chessPieces.setPieceSkin(newSkin);
-            UI.clearPieceCache();
-            game._forceFullRender = true;
-            UI.renderBoard(game);
-            localStorage.setItem('chess_skin', newSkin);
-        });
-
-        // Spy on the setter
-        let renderFlagSet = false;
-        let _forceFullRender = game._forceFullRender;
-        Object.defineProperty(game, '_forceFullRender', {
-            get: () => _forceFullRender,
-            set: (v) => {
-                _forceFullRender = v;
-                if (v) renderFlagSet = true;
-            },
-            configurable: true
-        });
-
-        // trigger change
-        skinSelector.value = 'modern';
-        skinSelector.dispatchEvent(new Event('change'));
-
-        expect(chessPieces.setPieceSkin).toHaveBeenCalledWith('modern');
-        expect(renderFlagSet).toBe(true);
-        expect(localStorage.getItem('chess_skin')).toBe('modern');
+    // Spy on the setter
+    let renderFlagSet = false;
+    let _forceFullRender = game._forceFullRender;
+    Object.defineProperty(game, '_forceFullRender', {
+      get: () => _forceFullRender,
+      set: v => {
+        _forceFullRender = v;
+        if (v) renderFlagSet = true;
+      },
+      configurable: true,
     });
 
-    test('Theme selector should call game.setTheme', () => {
-        const themeSelect = document.getElementById('theme-select');
+    // trigger change
+    skinSelector.value = 'modern';
+    skinSelector.dispatchEvent(new Event('change'));
 
-        // Mock the listener logic from App.js
-        themeSelect.addEventListener('change', (e) => {
-            AppMock.moveController.setTheme(e.target.value);
-        });
+    expect(chessPieces.setPieceSkin).toHaveBeenCalledWith('modern');
+    expect(renderFlagSet).toBe(true);
+    expect(localStorage.getItem('chess_skin')).toBe('modern');
+  });
 
-        themeSelect.value = 'dark';
-        themeSelect.dispatchEvent(new Event('change'));
+  test('Theme selector should call game.setTheme', () => {
+    const themeSelect = document.getElementById('theme-select');
 
-        expect(AppMock.moveController.setTheme).toHaveBeenCalledWith('dark');
+    // Mock the listener logic from App.js
+    themeSelect.addEventListener('change', e => {
+      AppMock.moveController.setTheme(e.target.value);
     });
+
+    themeSelect.value = 'dark';
+    themeSelect.dispatchEvent(new Event('change'));
+
+    expect(AppMock.moveController.setTheme).toHaveBeenCalledWith('dark');
+  });
 });
