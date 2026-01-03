@@ -32,9 +32,11 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Transposition Table**: Depth-preferred Replacement-Strategie zur Minimierung redundanter Berechnungen.
 - **Move Ordering**: Optimiert durch Killer Moves, MVV-LVA (Most Valuable Victim - Least Valuable Attacker) und TT-Hits.
 - **Evaluation**: Nuancierte Stellungsbewertung inklusive Figurenwerten, Positionsboni und Königssicherheit.
+- **Opening Book**: Erweitertes Eröffnungsbuch mit PGN-Unterstützung und intelligenter Zugauswahl (Merge-Strategien, Gewichtung).
 
 ### 3D Rendering (`js/battleChess3D.js`)
 
+- **Transparent Overlay**: Nahtlose Integration der 3D-Ansicht über das neue "Deep Space" UI.
 - **Procedural Models**: Alle Schachfiguren werden prozedural generiert (`js/pieces3D.js`).
 - **Skin-System**: Unterstützung für verschiedene Ästhetiken (Classic, Infernale, Neon).
 - **Animationen**: Weiche Übergänge für Züge und Capture-Events durch integrierten `BattleAnimator`.
@@ -44,6 +46,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Modulare Struktur**: Klare Trennung von Verantwortlichkeiten.
   - **App**: Lifecycle-Management und Initialisierung.
   - **RulesEngine**: Kapselt alle Regellogiken und Zugvalidierungen.
+  - **OpeningBook**: Robuste Klasse für Eröffnungsdatenverwaltung (`js/utils/PGNParser.js` für Importe).
   - **TimeManager**: Verwaltet die Spieluhr sicher und präzise.
 
 ## 🧪 Qualitätssicherung & Testing
