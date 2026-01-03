@@ -269,4 +269,79 @@ describe('BattleChess3D Class', () => {
     expect(engine.battleAnimator.playBattle).toHaveBeenCalled();
     expect(engine.animating).toBe(false);
   });
+
+  // Additional coverage tests for setters
+  test('should set camera', async () => {
+    await engine.init();
+    const mockCamera = { position: { set: jest.fn() } };
+    engine.camera = mockCamera;
+    expect(engine.sceneManager.camera).toBe(mockCamera);
+  });
+
+  test('should set renderer', async () => {
+    await engine.init();
+    const mockRenderer = { setSize: jest.fn() };
+    engine.renderer = mockRenderer;
+    expect(engine.sceneManager.renderer).toBe(mockRenderer);
+  });
+
+  test('should set controls', async () => {
+    await engine.init();
+    const mockControls = { update: jest.fn() };
+    engine.controls = mockControls;
+    expect(engine.sceneManager.controls).toBe(mockControls);
+  });
+
+  test('should set battleAnimator', async () => {
+    await engine.init();
+    const mockAnimator = { playBattle: jest.fn() };
+    engine.battleAnimator = mockAnimator;
+    expect(engine.pieceManager.battleAnimator).toBe(mockAnimator);
+  });
+
+  test('should set pieces', async () => {
+    await engine.init();
+    const mockPieces = { '0,0': {} };
+    engine.pieces = mockPieces;
+    expect(engine.pieceManager.pieces).toBe(mockPieces);
+  });
+
+  test('should set currentSkin', async () => {
+    await engine.init();
+    engine.currentSkin = 'neon';
+    expect(engine.pieceManager.currentSkin).toBe('neon');
+  });
+
+  test('should set currentTheme', async () => {
+    await engine.init();
+    engine.currentTheme = 'blue';
+    expect(engine.sceneManager.currentTheme).toBe('blue');
+  });
+
+  test('should toggle with existing scene (re-enable)', async () => {
+    await engine.init();
+    engine.toggle(false);
+    expect(engine.enabled).toBe(false);
+
+    // Re-enable with existing scene
+    engine.toggle(true);
+    expect(engine.enabled).toBe(true);
+    expect(document.body.classList.contains('mode-3d')).toBe(true);
+  });
+
+  test('should clear highlights', async () => {
+    await engine.init();
+    engine.pieceManager.highlights = [{ mock: true }];
+    engine.clearHighlights();
+    expect(engine.pieceManager.highlights.length).toBe(0);
+  });
+
+  test('should add and remove pieces', async () => {
+    await engine.init();
+    engine.addPiece('p', 'white', 3, 3);
+    expect(Object.keys(engine.pieces).length).toBe(1);
+
+    engine.removePiece(3, 3);
+    expect(Object.keys(engine.pieces).length).toBe(0);
+  });
 });
