@@ -52,27 +52,17 @@ describe('PuzzleMode', () => {
     expect(game.puzzleState.solved).toBe(false);
   });
 
-  test('should handle multi-step puzzles', () => {
-    puzzleManager.loadPuzzle(game, 1); // Mate in 2
+  test('should handle puzzle 2 (back-rank mate)', () => {
+    puzzleManager.loadPuzzle(game, 1); // Mate in 1 (back-rank)
 
-    // Move 1: R(6,4) -> R(1,4)
-    const move1 = {
-      from: { r: 6, c: 4 },
-      to: { r: 1, c: 4 },
-    };
-
-    const result1 = puzzleManager.checkMove(game, move1);
-    expect(result1).toBe('continue');
-    expect(game.puzzleState.currentMoveIndex).toBe(1);
-
-    // Move 2: R(2,0) -> R(0,0)
-    const move2 = {
-      from: { r: 2, c: 0 },
+    // Correct move: R(7,0) -> R(0,0) for back-rank mate
+    const move = {
+      from: { r: 7, c: 0 },
       to: { r: 0, c: 0 },
     };
 
-    const result2 = puzzleManager.checkMove(game, move2);
-    expect(result2).toBe('solved');
+    const result = puzzleManager.checkMove(game, move);
+    expect(result).toBe('solved');
     expect(game.puzzleState.solved).toBe(true);
   });
 
@@ -85,7 +75,7 @@ describe('PuzzleMode', () => {
   test('should navigate to next puzzle', () => {
     puzzleManager.loadPuzzle(game, 0);
     const next = puzzleManager.nextPuzzle(game);
-    expect(next.id).toBe('mate-in-2-001');
+    expect(next.id).toBe('mate-in-1-rook');
     expect(puzzleManager.currentPuzzleIndex).toBe(1);
   });
 

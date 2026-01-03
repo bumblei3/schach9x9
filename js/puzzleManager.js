@@ -22,26 +22,30 @@ export class PuzzleManager {
         solution: [{ from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }],
       },
       {
-        id: 'mate-in-2-001',
-        title: 'Puzzle 2: Taktischer Schlag',
-        description: 'Weiß am Zug. Matt in 2.',
-        difficulty: 'Mittel',
-        // (0,4) bk (index 4); (2,4) wk (index 22); (6,4) wr (index 58); (2,0) wr (index 18)
+        id: 'mate-in-1-rook',
+        title: 'Puzzle 2: Turm-Mattangriff',
+        description: 'Weiß zieht und setzt in 1 Zug matt.',
+        difficulty: 'Einfach',
+        // Black king at (0,4), blocked by pawns at (1,3), (1,4), (1,5)
+        // White king at (7,4), White rook at (7,0)
+        // Rook to (0,0) is back-rank mate
+        // Board:
+        // Row 0: .. .. .. .. bk .. .. .. ..   <- Black king
+        // Row 1: .. .. .. bp bp bp .. .. ..   <- Blocking pawns
+        // Row 7: wr .. .. .. wk .. .. .. ..   <- White rook and king
+        // Index: bk=4, bp=12,13,14, wr=63, wk=67
         setupStr:
           '..'.repeat(4) +
           'bk' +
-          '..'.repeat(13) +
+          '..'.repeat(7) +
+          'bpbpbp' +
+          '..'.repeat(48) +
           'wr' +
           '..'.repeat(3) +
           'wk' +
-          '..'.repeat(35) +
-          'wr' +
-          '..'.repeat(81 - 59) +
+          '..'.repeat(13) +
           'w',
-        solution: [
-          { from: { r: 6, c: 4 }, to: { r: 1, c: 4 } },
-          { from: { r: 2, c: 0 }, to: { r: 0, c: 0 } },
-        ],
+        solution: [{ from: { r: 7, c: 0 }, to: { r: 0, c: 0 } }],
       },
       {
         id: 'mate-in-1-arch',
