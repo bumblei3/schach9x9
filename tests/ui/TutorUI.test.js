@@ -207,7 +207,9 @@ describe('TutorUI Component', () => {
       document.body.innerHTML = '';
       game.tutorController.getTutorHints = jest.fn(() => []);
       TutorUI.showTutorSuggestions(game);
-      expect(window.alert).toHaveBeenCalledWith('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
+      expect(window.alert).toHaveBeenCalledWith(
+        'Keine Tipps verfügbar! Spiele erst ein paar Züge.'
+      );
     });
 
     test('should close overlay when close button clicked', () => {
@@ -287,7 +289,7 @@ describe('TutorUI Component', () => {
       TutorUI.showTutorSuggestions(game);
 
       const tryBtn = document.querySelector('.try-move-btn');
-      tryBtn.onclick({ stopPropagation: () => { } });
+      tryBtn.onclick({ stopPropagation: () => {} });
 
       expect(game.executeMove).toHaveBeenCalled();
       const panel = document.getElementById('tutor-panel');

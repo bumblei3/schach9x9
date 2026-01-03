@@ -190,10 +190,7 @@ describe('PGNParser', () => {
       game.board[7][1] = { type: 'n', color: 'white' }; // Nb1
       game.board[7][6] = { type: 'n', color: 'white' }; // Ng1
       const move = { from: { r: 7, c: 1 }, to: { r: 5, c: 2 } };
-      const allMoves = [
-        move,
-        { from: { r: 7, c: 6 }, to: { r: 5, c: 2 } }
-      ];
+      const allMoves = [move, { from: { r: 7, c: 6 }, to: { r: 5, c: 2 } }];
       const notation = parser.generateNotationForCheck(move, game, allMoves);
       expect(notation).toBe('Nbc4');
     });
@@ -203,10 +200,7 @@ describe('PGNParser', () => {
       game.board[3][3] = { type: 'r', color: 'white' };
       game.board[5][3] = { type: 'r', color: 'white' };
       const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 3 } };
-      const allMoves = [
-        move,
-        { from: { r: 5, c: 3 }, to: { r: 4, c: 3 } }
-      ];
+      const allMoves = [move, { from: { r: 5, c: 3 }, to: { r: 4, c: 3 } }];
       const notation = parser.generateNotationForCheck(move, game, allMoves);
       expect(notation).toBe('R6d5');
     });
@@ -220,7 +214,7 @@ describe('PGNParser', () => {
       const allMoves = [
         move,
         { from: { r: 3, c: 5 }, to: { r: 4, c: 4 } },
-        { from: { r: 5, c: 3 }, to: { r: 4, c: 4 } }
+        { from: { r: 5, c: 3 }, to: { r: 4, c: 4 } },
       ];
       const notation = parser.generateNotationForCheck(move, game, allMoves);
       expect(notation).toBe('Qd6e5');

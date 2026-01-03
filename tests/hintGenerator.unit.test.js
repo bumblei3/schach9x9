@@ -16,7 +16,7 @@ const {
   applySetupTemplate,
   isTutorMove,
   showTutorSuggestions,
-  updateBestMoves
+  updateBestMoves,
 } = await import('../js/tutor/HintGenerator.js');
 
 describe('HintGenerator - Unit Tests', () => {
@@ -27,7 +27,9 @@ describe('HintGenerator - Unit Tests', () => {
     jest.clearAllMocks();
 
     game = new Game(15, 'classic');
-    game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+    game.board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     game.bestMoves = [];
 
     mockTutorController = {
@@ -183,7 +185,7 @@ describe('HintGenerator - Unit Tests', () => {
 
     const template = {
       id: 'fallback',
-      pieces: ['q', 'n', 'e'] // Queen, Knight, Angel (others)
+      pieces: ['q', 'n', 'e'], // Queen, Knight, Angel (others)
     };
     mockTutorController.getSetupTemplates.mockReturnValue([template]);
 
@@ -208,7 +210,7 @@ describe('HintGenerator - Unit Tests', () => {
 
     const template = {
       id: 'blocked',
-      pieces: ['r', 'b']
+      pieces: ['r', 'b'],
     };
     mockTutorController.getSetupTemplates.mockReturnValue([template]);
 
@@ -232,7 +234,7 @@ describe('HintGenerator - Unit Tests', () => {
 
     const template = {
       id: 'super_fallback',
-      pieces: ['b', 'q', 'n']
+      pieces: ['b', 'q', 'n'],
     };
     mockTutorController.getSetupTemplates.mockReturnValue([template]);
 
