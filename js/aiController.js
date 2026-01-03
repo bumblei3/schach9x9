@@ -694,7 +694,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker
@@ -775,24 +775,24 @@ export class AIController {
     if (topMovesContent && analysis.topMoves && analysis.topMoves.length > 0) {
       topMovesContent.innerHTML = '';
 
-      analysis.topMoves.forEach((move, index) => {
-        const item = document.createElement('div');
-        item.className = 'top-move-item';
-        if (index === 0) item.classList.add('best');
+      analysis.topMoves.forEach((item, index) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'top-move-item';
+        if (index === 0) itemEl.classList.add('best');
 
         // Main move notation
-        const notation = this.getAlgebraicNotation(move);
-        const scoreInPawns = (move.score / 100).toFixed(2);
+        const notation = this.getAlgebraicNotation(item.move);
+        const scoreInPawns = (item.score / 100).toFixed(2);
 
         // Render PV sequence
         let pvHtml = '';
-        if (move.pv && move.pv.length > 1) {
+        if (item.pv && item.pv.length > 1) {
           // Skip the first move as it's the main move shown
-          const pvMoves = move.pv.slice(1).map(m => this.getAlgebraicNotation(m));
+          const pvMoves = item.pv.slice(1).map(m => this.getAlgebraicNotation(m));
           pvHtml = `<div class="top-move-pv">${pvMoves.join(' ')}</div>`;
         }
 
-        item.innerHTML = `
+        itemEl.innerHTML = `
             <div class="top-move-main">
                 <span class="top-move-notation">${notation}</span>
                 <span class="top-move-score">${scoreInPawns > 0 ? '+' : ''}${scoreInPawns}</span>
@@ -801,19 +801,21 @@ export class AIController {
         `;
 
         // Click to preview/highlight the move
-        item.onclick = () => this.highlightMove(move);
+        itemEl.onclick = () => this.highlightMove(item.move);
 
-        topMovesContent.appendChild(item);
+        topMovesContent.appendChild(itemEl);
       });
 
       // Automatically highlight best move if continuous analysis is on
-      if (this.game.continuousAnalysis) {
-        this.highlightMove(analysis.topMoves[0], true); // true = silent/non-persistent if needed
+      if (this.game.continuousAnalysis && analysis.topMoves[0]) {
+        this.highlightMove(analysis.topMoves[0].move, true); // true = silent/non-persistent if needed
       }
     }
   }
 
   highlightMove(move) {
+    if (!move || !move.from || !move.to) return;
+
     // Clear previous highlights
     document.querySelectorAll('.cell').forEach(cell => {
       cell.classList.remove('analysis-from', 'analysis-to');
