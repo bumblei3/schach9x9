@@ -13,7 +13,9 @@ export function updateTutorRecommendations(game) {
   const toggleBtn = document.getElementById('toggle-tutor-recommendations');
   const container = document.getElementById('tutor-recommendations-container');
 
-  if (!toggleBtn || !container) return;
+  if (!toggleBtn || !container) {
+    return;
+  }
 
   const inSetupPhase =
     game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_PIECES;
@@ -82,14 +84,9 @@ export function updateTutorRecommendations(game) {
       `;
 
       card.addEventListener('click', () => {
-        if (
-          confirm(
-            `Möchtest du die Aufstellung "${template.name}" anwenden?\n\nDeine aktuelle Aufstellung wird überschrieben und deine Punkte werden zurückgesetzt.`
-          )
-        ) {
-          game.tutorController.applySetupTemplate(template.id);
-          updateShopUI(game);
-        }
+        // Apply template directly on click
+        game.tutorController.applySetupTemplate(template.id);
+        updateShopUI(game);
       });
       container.appendChild(card);
     });
