@@ -156,8 +156,8 @@ export function getSetupTemplates(game) {
     {
       id: 'swarm_12',
       name: '🐝 Der Schwarm',
-      description: 'Viele leichte Figuren.',
-      pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p'], // 3+3+1+1+1+1+1+1 = 12
+      description: 'Viele leichte Figuren für maximale Feldpräsenz.',
+      pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p'], // 3+3+6*1 = 12
       cost: 12,
     },
   ];
@@ -226,8 +226,8 @@ export function getSetupTemplates(game) {
     {
       id: 'swarm_18',
       name: '🐝 Der Schwarm',
-      description: 'Erzbischof mit vielen leichten Figuren.',
-      pieces: ['a', 'n', 'n', 'b', 'p', 'p'], // 7+3+3+3+1+1 = 18
+      description: 'Maximale Anzahl an Figuren (8 Stk) für totale Dominanz.',
+      pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p'], // 3+3+3+5+1+1+1+1 = 18
       cost: 18,
     },
   ];
