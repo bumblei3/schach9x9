@@ -124,6 +124,48 @@ export function showTutorSuggestions(game) {
 }
 
 /**
+ * Piece value mapping for cost calculation
+ */
+const PIECE_VALUES = { q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1, e: 12, k: 0 };
+
+/**
+ * Calculates the total cost of a pieces array
+ * @param {string[]} pieces - Array of piece symbols
+ * @returns {number} Total cost
+ */
+function calculatePieceCost(pieces) {
+  return pieces.reduce((sum, p) => sum + (PIECE_VALUES[p] || 0), 0);
+}
+
+/**
+ * Creates a template with automatic cost calculation and validation
+ * @param {object} template - Template definition without cost
+ * @param {number} expectedCost - Expected cost for validation
+ * @returns {object} Template with calculated cost
+ */
+function createTemplate({ id, name, description, pieces, isRecommended }, expectedCost) {
+  const calculatedCost = calculatePieceCost(pieces);
+
+  // Development warning if costs don't match
+  if (calculatedCost !== expectedCost) {
+    console.warn(
+      `[HintGenerator] Template "${id}" cost mismatch! ` +
+        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+        `(Pieces: ${pieces.join(', ')})`
+    );
+  }
+
+  return {
+    id,
+    name,
+    description,
+    pieces,
+    cost: calculatedCost, // Use calculated cost (auto-corrects errors)
+    ...(isRecommended && { isRecommended }),
+  };
+}
+
+/**
  * Returns available setup templates
  */
 export function getSetupTemplates(game) {
@@ -131,105 +173,129 @@ export function getSetupTemplates(game) {
 
   // Templates for 12 points
   const templates12 = [
-    {
-      id: 'fortress_12',
-      name: '🏰 Die Festung',
-      description: 'Defensiv mit Turm und Läufern.',
-      pieces: ['r', 'b', 'b', 'p'], // 5+3+3+1 = 12
-      cost: 12,
-    },
-    {
-      id: 'rush_12',
-      name: '⚡ Der Ansturm',
-      description: 'Aggressiv mit Dame und Bauern.',
-      pieces: ['q', 'p', 'p', 'p'], // 9+1+1+1 = 12
-      cost: 12,
-    },
-    {
-      id: 'flexible_12',
-      name: '🔄 Flexibel',
-      description: 'Ausgewogen mit Springer und Läufer.',
-      pieces: ['n', 'n', 'b', 'p', 'p', 'p'], // 3+3+3+1+1+1 = 12
-      cost: 12,
-      isRecommended: true,
-    },
-    {
-      id: 'swarm_12',
-      name: '🐝 Der Schwarm',
-      description: 'Viele leichte Figuren für maximale Feldpräsenz.',
-      pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p'], // 3+3+6*1 = 12
-      cost: 12,
-    },
+    createTemplate(
+      {
+        id: 'fortress_12',
+        name: '🏰 Die Festung',
+        description: 'Defensiv mit Turm und Läufern.',
+        pieces: ['r', 'b', 'b', 'p'],
+      },
+      12
+    ),
+    createTemplate(
+      {
+        id: 'rush_12',
+        name: '⚡ Der Ansturm',
+        description: 'Aggressiv mit Dame und Bauern.',
+        pieces: ['q', 'p', 'p', 'p'],
+      },
+      12
+    ),
+    createTemplate(
+      {
+        id: 'flexible_12',
+        name: '🔄 Flexibel',
+        description: 'Ausgewogen mit Springer und Läufer.',
+        pieces: ['n', 'n', 'b', 'p', 'p', 'p'],
+        isRecommended: true,
+      },
+      12
+    ),
+    createTemplate(
+      {
+        id: 'swarm_12',
+        name: '🐝 Der Schwarm',
+        description: 'Viele leichte Figuren für maximale Feldpräsenz.',
+        pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p'],
+      },
+      12
+    ),
   ];
 
   // Templates for 15 points
   const templates15 = [
-    {
-      id: 'fortress_15',
-      name: '🏰 Die Festung',
-      description:
-        'Defensive Strategie: 2 Türme kontrollieren wichtige Linien, Läufer unterstützt. Ideal gegen aggressive Gegner.',
-      pieces: ['r', 'r', 'b', 'p', 'p'], // 5+5+3+1+1 = 15
-      cost: 15,
-    },
-    {
-      id: 'rush_15',
-      name: '⚡ Der Ansturm',
-      description:
-        'Offensive Strategie: Dame + 2 Springer für frühen Angriffsdruck. Für erfahrene Spieler, die schnell zuschlagen wollen.',
-      pieces: ['q', 'n', 'n'], // 9+3+3 = 15
-      cost: 15,
-    },
-    {
-      id: 'flexible_15',
-      name: '🔄 Flexibel',
-      description:
-        'Ausgewogene Strategie: Erzbischof (Läufer+Springer-Hybrid) bietet Vielseitigkeit. Anpassbar  an jede Situation.',
-      pieces: ['a', 'r', 'b'], // 7+5+3 = 15
-      cost: 15,
-      isRecommended: true,
-    },
-    {
-      id: 'swarm_15',
-      name: '🐝 Der Schwarm',
-      description:
-        'Zahlenüberlegenheit: Viele leichte Figuren für Feldkontrolle und Flexibilität. Schwer für Gegner zu verteidigen.',
-      pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'], // 3+3+3+3+1+1+1 = 15
-      cost: 15,
-    },
+    createTemplate(
+      {
+        id: 'fortress_15',
+        name: '🏰 Die Festung',
+        description:
+          'Defensive Strategie: 2 Türme kontrollieren wichtige Linien, Läufer unterstützt. Ideal gegen aggressive Gegner.',
+        pieces: ['r', 'r', 'b', 'p', 'p'],
+      },
+      15
+    ),
+    createTemplate(
+      {
+        id: 'rush_15',
+        name: '⚡ Der Ansturm',
+        description:
+          'Offensive Strategie: Dame + 2 Springer für frühen Angriffsdruck. Für erfahrene Spieler, die schnell zuschlagen wollen.',
+        pieces: ['q', 'n', 'n'],
+      },
+      15
+    ),
+    createTemplate(
+      {
+        id: 'flexible_15',
+        name: '🔄 Flexibel',
+        description:
+          'Ausgewogene Strategie: Erzbischof (Läufer+Springer-Hybrid) bietet Vielseitigkeit. Anpassbar an jede Situation.',
+        pieces: ['a', 'r', 'b'],
+        isRecommended: true,
+      },
+      15
+    ),
+    createTemplate(
+      {
+        id: 'swarm_15',
+        name: '🐝 Der Schwarm',
+        description:
+          'Zahlenüberlegenheit: Viele leichte Figuren für Feldkontrolle und Flexibilität. Schwer für Gegner zu verteidigen.',
+        pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'],
+      },
+      15
+    ),
   ];
 
   // Templates for 18 points
   const templates18 = [
-    {
-      id: 'fortress_18',
-      name: '🏰 Die Festung',
-      description: 'Maximale Defensive mit 2 Türmen und Erzbischof.',
-      pieces: ['r', 'r', 'a', 'p'], // 5+5+7+1 = 18
-      cost: 18,
-    },
-    {
-      id: 'rush_18',
-      name: '⚡ Der Ansturm',
-      description: 'Doppelte Damen für maximalen Druck.',
-      pieces: ['q', 'q'], // 9+9 = 18
-      cost: 18,
-    },
-    {
-      id: 'flexible_18',
-      name: '🔄 Flexibel',
-      description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
-      pieces: ['c', 'q', 'p'], // 8+9+1 = 18
-      cost: 18,
-      isRecommended: true,
-    },
-    {
-      id: 'swarm_18',
-      name: '🐝 Der Schwarm',
-      description: 'Maximale Anzahl an Figuren (8 Stk) für totale Dominanz.',
-      pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p'], // 3+3+3+5+1+1+1+1 = 18
-      cost: 18,
-    },
+    createTemplate(
+      {
+        id: 'fortress_18',
+        name: '🏰 Die Festung',
+        description: 'Maximale Defensive mit 2 Türmen und Erzbischof.',
+        pieces: ['r', 'r', 'a', 'p'],
+      },
+      18
+    ),
+    createTemplate(
+      {
+        id: 'rush_18',
+        name: '⚡ Der Ansturm',
+        description: 'Doppelte Damen für maximalen Druck.',
+        pieces: ['q', 'q'],
+      },
+      18
+    ),
+    createTemplate(
+      {
+        id: 'flexible_18',
+        name: '🔄 Flexibel',
+        description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
+        pieces: ['c', 'q', 'p'],
+        isRecommended: true,
+      },
+      18
+    ),
+    createTemplate(
+      {
+        id: 'swarm_18',
+        name: '🐝 Der Schwarm',
+        description: 'Maximale Anzahl an Figuren (8 Stk) für totale Dominanz.',
+        pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p'],
+      },
+      18
+    ),
   ];
 
   // Return templates matching the current game's point budget

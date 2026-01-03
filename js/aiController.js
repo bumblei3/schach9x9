@@ -694,7 +694,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for worker

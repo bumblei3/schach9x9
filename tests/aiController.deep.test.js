@@ -189,7 +189,7 @@ describe('AIController Deep Logic', () => {
     test('updateAnalysisUI should update eval bar and top moves', () => {
       const analysis = {
         score: 50,
-        topMoves: [{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, score: 50 }],
+        topMoves: [{ move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } }, score: 50 }],
       };
       controller.updateAnalysisUI(analysis);
 
