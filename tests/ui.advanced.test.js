@@ -73,6 +73,7 @@ describe('UI Module - Advanced Features', () => {
             
             <div id="replay-status" class="hidden"></div>
             <div id="replay-exit" class="hidden"></div>
+            <div id="replay-control" class="hidden"></div>
             <div id="replay-move-num"></div>
             <button id="replay-first"></button>
             <button id="replay-prev"></button>
