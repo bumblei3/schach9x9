@@ -73,12 +73,12 @@ describe('SoundManager', () => {
   });
 
   test('loadSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => { });
     const mockGetItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('access');
     });
 
-    const manager = new SoundManager();
+    new SoundManager();
     expect(spy).toHaveBeenCalled();
     mockGetItem.mockRestore();
     spy.mockRestore();
@@ -97,7 +97,7 @@ describe('SoundManager', () => {
   });
 
   test('AudioContext unlock interaction', async () => {
-    const manager = new SoundManager();
+    new SoundManager();
     const event = new Event('pointerdown');
     window.dispatchEvent(event);
     await new Promise(r => setTimeout(r, 0));

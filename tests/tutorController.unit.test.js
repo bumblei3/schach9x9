@@ -1,10 +1,5 @@
 import { jest } from '@jest/globals';
 
-// Mock utils for debounce
-jest.unstable_mockModule('../js/utils.js', () => ({
-  debounce: jest.fn(fn => fn),
-}));
-
 // Mock the sub-modules
 jest.unstable_mockModule('../js/tutor/TacticsDetector.js', () => ({
   getThreatenedPieces: jest.fn(),
@@ -55,7 +50,7 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
 const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
 const MoveAnalyzer = await import('../js/tutor/MoveAnalyzer.js');
 const HintGenerator = await import('../js/tutor/HintGenerator.js');
-const { debounce } = await import('../js/utils.js');
+await import('../js/utils.js');
 const { TutorController } = await import('../js/tutorController.js');
 const { Game } = await import('../js/gameEngine.js');
 
