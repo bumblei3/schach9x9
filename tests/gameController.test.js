@@ -32,7 +32,7 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 jest.unstable_mockModule('../js/AnalysisController.js', () => ({
   AnalysisController: class {
-    constructor(gameController) {}
+    constructor(_gameController) { }
     enterAnalysisMode = jest.fn(() => true);
     exitAnalysisMode = jest.fn(() => true);
     requestPositionAnalysis = jest.fn();
@@ -268,7 +268,7 @@ describe('GameController', () => {
   describe('Clock Management', () => {
     it('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_KING;
-      gameController.timeManager.clockInterval = setInterval(() => {}, 100);
+      gameController.timeManager.clockInterval = setInterval(() => { }, 100);
       gameController.tickClock(); // Delegates to timeManager
       expect(gameController.timeManager.clockInterval).toBeNull();
     });
