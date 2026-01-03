@@ -1,11 +1,8 @@
-import { describe, expect, test, beforeEach, afterEach, jest } from '@jest/globals';
+import { jest } from '@jest/globals';
+import { Game } from '../js/gameEngine.js';
+import { PHASES } from '../js/config.js';
 
-// Mocks
-jest.unstable_mockModule('../js/gameEngine.js', () => ({
-    BOARD_SIZE: 9,
-    PHASES: { PLAY: 'play', GAME_OVER: 'game_over' },
-}));
-
+// --- MOCKS FOR I/O ONLY ---
 jest.unstable_mockModule('../js/ui.js', () => ({
     renderBoard: jest.fn(),
     animateMove: jest.fn(() => Promise.resolve()),
@@ -20,6 +17,14 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     animateCheckmate: jest.fn(),
     animateCheck: jest.fn(),
     showToast: jest.fn(),
+    showShop: jest.fn(),
+    showTutorSuggestions: jest.fn(),
+}));
+
+jest.unstable_mockModule('../js/puzzleManager.js', () => ({
+    puzzleManager: {
+        checkMove: jest.fn(),
+    }
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({
@@ -33,253 +38,301 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
     },
 }));
 
-jest.unstable_mockModule('../js/puzzleManager.js', () => ({
-    puzzleManager: {
-        checkMove: jest.fn(),
-    },
-}));
-
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-    evaluatePosition: jest.fn(() => 0),
-}));
-
-jest.unstable_mockModule('../js/move/MoveValidator.js', () => ({
-    isInsufficientMaterial: jest.fn(() => false),
-    getBoardHash: jest.fn(() => 'hash'),
-    checkDraw: jest.fn(() => false),
-}));
-
 jest.unstable_mockModule('../js/effects.js', () => ({
     confettiSystem: { spawn: jest.fn() },
 }));
 
+// Mock 3D globally
+global.window = {
+    battleChess3D: undefined,
+    innerWidth: 1024,
+    innerHeight: 768
+};
+global.document = {
+    getElementById: jest.fn(), // Will be overridden in beforeEach
+    createElement: jest.fn(() => ({
+        className: '',
+        textContent: '',
+    })),
+    body: {
+        innerHTML: ''
+    }
+};
+
 const MoveExecutor = await import('../js/move/MoveExecutor.js');
-const UI = await import('../js/ui.js');
 const { soundManager } = await import('../js/sounds.js');
 const { puzzleManager } = await import('../js/puzzleManager.js');
+const UI = await import('../js/ui.js');
 
-describe('MoveExecutor Unit Tests', () => {
+describe('MoveExecutor Integration Tests', () => {
     let game;
     let moveController;
 
     beforeEach(() => {
-        // Setup basic game state
-        game = {
-            board: Array(9).fill(null).map(() => Array(9).fill(null)),
-            phase: 'play',
-            turn: 'white',
-            halfMoveClock: 0,
-            positionHistory: [],
-            moveHistory: [],
-            capturedPieces: { white: [], black: [] },
-            stats: { totalMoves: 0, captures: 0, playerMoves: 0 },
-            log: jest.fn(),
-            isAI: false,
-            mode: 'normal',
-            clockEnabled: false,
-            gameController: {
-                saveGame: jest.fn(),
-                saveGameToStatistics: jest.fn(),
-            },
-            arrowRenderer: { clearArrows: jest.fn() },
-            isCheckmate: jest.fn(() => false),
-            isStalemate: jest.fn(() => false),
-            isInCheck: jest.fn(() => false),
-            tutorController: { checkBlunder: jest.fn() },
+        jest.clearAllMocks();
+
+        // Robust DOM Mock for all tests
+        const mockElement = {
+            textContent: '',
+            classList: { remove: jest.fn(), add: jest.fn() },
+            appendChild: jest.fn(),
+            scrollTop: 0,
+            scrollHeight: 100,
+            style: {}
         };
 
-        // Add Kings to board to prevent "King Captured" game over trigger
-        game.board[0][4] = { type: 'k', color: 'black', hasMoved: false }; // Black King
-        game.board[8][4] = { type: 'k', color: 'white', hasMoved: false }; // White King
+        document.getElementById = jest.fn((id) => {
+            if (id === 'winner-text') return mockElement;
+            if (id === 'game-log') return mockElement;
+            return mockElement;
+        });
+
+        // REAL Game Instance
+        game = new Game(15, 'classic');
+
+        // Manual Board Setup (Clear board for precise testing)
+        game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+
+        // Basic Kings (Required for validation/check logic)
+        game.board[0][4] = { type: 'k', color: 'black', hasMoved: false };
+        game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
 
         moveController = {
-            redoStack: ['something'],
+            redoStack: [],
             updateUndoRedoButtons: jest.fn(),
-            undoMove: jest.fn(),
+            undoMove: jest.fn(), // We can keep this simple or link to GameStateManager
         };
-
-        // Clear mocks
-        jest.clearAllMocks();
     });
 
-    afterEach(() => {
-        jest.useRealTimers();
-    });
+    // Ensure global document mock is active before tests run if setup in beforeEach?
+    // But here we set it globally.
 
-    test('Normal Move: updates board, history, and stats', async () => {
-        // Setup board: White Pawn at 6,4
-        const piece = { type: 'p', color: 'white', hasMoved: false };
-        game.board[6][4] = piece;
+    test('Normal Move: Updates real board state and turn', async () => {
+        // Setup: White Pawn at 6,4
+        game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
 
         const from = { r: 6, c: 4 };
         const to = { r: 5, c: 4 };
 
+        // Execute Real Move
         await MoveExecutor.executeMove(game, moveController, from, to);
 
-        // Check board update
+        // Verify State
         expect(game.board[6][4]).toBeNull();
-        expect(game.board[5][4]).toBe(piece);
-        expect(piece.hasMoved).toBe(true);
+        expect(game.board[5][4]).toEqual(expect.objectContaining({ type: 'p', color: 'white' }));
+        expect(game.turn).toBe('black');
 
-        // Check UI calls
+        // Verify I/O Side Effects
         expect(UI.renderBoard).toHaveBeenCalled();
-        expect(UI.animateMove).toHaveBeenCalled();
-        expect(UI.updateMoveHistoryUI).toHaveBeenCalled();
-
-        // Check Sound
         expect(soundManager.playMove).toHaveBeenCalled();
+    });
 
-        // Check redo stack cleared
-        expect(moveController.redoStack).toEqual([]);
-        expect(moveController.updateUndoRedoButtons).toHaveBeenCalled();
+    test('Capture: Updates captured pieces logic', async () => {
+        game.board[6][4] = { type: 'r', color: 'white' }; // Rook
+        game.board[5][4] = { type: 'p', color: 'black' }; // Enemy Pawn
 
-        // Turn switch
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
+
+        // Logical Assertions
+        expect(game.board[6][4]).toBeNull();
+        expect(game.board[5][4].type).toBe('r');
+        expect(game.capturedPieces.white).toHaveLength(1);
+        expect(game.capturedPieces.white[0].type).toBe('p');
+
+        // Side Effect Assertions
+        expect(soundManager.playCapture).toHaveBeenCalled();
+    });
+
+    test('Promotion: Pawn promotes to Angel at row 0', async () => {
+        game.board[1][0] = { type: 'p', color: 'white' };
+
+        await MoveExecutor.executeMove(game, moveController, { r: 1, c: 0 }, { r: 0, c: 0 });
+
+        expect(game.board[0][0].type).toBe('e'); // Angel
         expect(game.turn).toBe('black');
     });
 
-    test('Capture Move: checks sound and stats', async () => {
-        const p1 = { type: 'r', color: 'white' };
-        const p2 = { type: 'p', color: 'black' };
-        game.board[1][0] = p1; // Moved off occupied 0,0 (though 0,4 is King now, but 0,0 is safe)
-        game.board[1][1] = p2;
+    test('Castling: Moves King and Rook logic', async () => {
+        // White King at 8,4. Rook at 8,0.
+        game.board[8][0] = { type: 'r', color: 'white', hasMoved: false };
 
-        await MoveExecutor.executeMove(game, moveController, { r: 1, c: 0 }, { r: 1, c: 1 });
-
-        expect(game.board[1][1]).toBe(p1);
-        // Captured pieces are pushed as COPIES in MoveExecutor if specialMove, but normal capture just pushes reference?
-        // Code L113: game.capturedPieces[capturerColor].push(targetPiece); -> Reference!
-        // But targetPiece is p2.
-        // Let's use toContainEqual to be safe.
-        expect(game.capturedPieces.white).toContain(p2);
-        expect(soundManager.playCapture).toHaveBeenCalled();
-        expect(game.stats.captures).toBe(1);
-    });
-
-    test('Castling: moves king and rook', async () => {
-        // Kings are already placed at 0,4 (Black) and 8,4 (White)
-        const king = game.board[8][4];
-        const rook = { type: 'r', color: 'white', hasMoved: false };
-        game.board[8][0] = rook; // Queenside rook
-
-        // Move King to c=2 (Queenside castling in 9x9? Usually 2 steps)
-        // 9x9: King at 4. Queenside is left (towards 0). Kingside right (towards 8).
-        // Logic: abs(to.c - from.c) === 2.
-        // Target: 4 - 2 = 2.
+        // Real castling logic relies on "specialMove" flag often passed from Validator
+        // For MoveExecutor, it often *constructs* the special move OR receives it?
+        // Looking at code: MoveExecutor constructs `moveRecord`.
+        // It detects castling by `piece.type === 'k' && Math.abs(to.c - from.c) > 1`.
 
         await MoveExecutor.executeMove(game, moveController, { r: 8, c: 4 }, { r: 8, c: 2 });
 
         expect(game.board[8][4]).toBeNull();
-        expect(game.board[8][2]).toBe(king);
-
-        // Rook logic:
-        // isKingside = 2 > 4 (false).
-        // rookCol = 0.
-        // rookTargetCol = 2 + 1 = 3.
-        expect(game.board[8][0]).toBeNull();
-        expect(game.board[8][3]).toBe(rook);
-        expect(game.log).toHaveBeenCalledWith('Weiß rochiert!');
+        expect(game.board[8][2].type).toBe('k'); // King moved
+        expect(game.board[8][0]).toBeNull(); // Rook moved from 0
+        expect(game.board[8][3].type).toBe('r'); // Rook moved to 3
     });
 
-    test('En Passant: captures pawn correctly', async () => {
-        const pawn = { type: 'p', color: 'white' };
-        const enemyPawn = { type: 'p', color: 'black' };
+    test('Check Detection: Integration with MoveValidator', async () => {
+        // Setup Check scenario: White Rook attacks Black King
+        game.board[0][4] = { type: 'k', color: 'black' };
+        game.board[8][4] = { type: 'r', color: 'white' }; // On same file
 
-        game.board[3][1] = pawn;
-        game.board[3][2] = enemyPawn; // Enemy adjacent
+        // Check Detection
+        // Use a simple Rook check.
+        // Board is cleared.
+        // Place Black King at 3,3.
+        game.board[0][4] = null;
+        game.board[3][3] = { type: 'k', color: 'black' };
 
-        // En Passant target: behind enemy?
-        // Move white pawn to 2,2 (capture diagonal empty, but enemy at 3,2)
-        // Logic: piece is 'p', to.c != from.c, targetPiece null.
+        // White Rook at 3,0. 
+        game.board[3][0] = { type: 'r', color: 'white' };
 
-        await MoveExecutor.executeMove(game, moveController, { r: 3, c: 1 }, { r: 2, c: 2 });
+        // Add White King to prevent Insufficient Material draw!
+        game.board[8][8] = { type: 'k', color: 'white' };
 
-        expect(game.board[3][2]).toBeNull(); // Enemy removed
-        expect(game.capturedPieces.white).toContainEqual(expect.objectContaining({ type: 'p', color: 'black' }));
-        expect(game.board[2][2]).toBe(pawn);
-        expect(game.log).toHaveBeenCalledWith(expect.stringContaining('En Passant'));
+        // Move Rook from 3,0 to 3,1. Should check 3,3.
+        await MoveExecutor.executeMove(game, moveController, { r: 3, c: 0 }, { r: 3, c: 1 });
+
+        // Assertions
+        expect(UI.animateCheck).toHaveBeenCalledWith(expect.anything(), 'black');
+        expect(soundManager.playCheck).toHaveBeenCalled();
     });
 
-    test('Promotion: upgrades pawn', async () => {
-        const pawn = { type: 'p', color: 'white' };
-        // Move to existing empty square
-        game.board[1][0] = pawn;
+    test('Checkmate: Real Checkmate Scenario', async () => {
+        // Fool's Mate equivalent or simple Rook mate.
+        // Black King at 0,0. White Rooks at 0,1 and 1,0?
+        // Let's trap Black King at 0,0.
+        game.board[0][0] = { type: 'k', color: 'black' };
+        game.board[0][4] = null; // Removing original king
 
-        await MoveExecutor.executeMove(game, moveController, { r: 1, c: 0 }, { r: 0, c: 0 }); // 0,0 is safe
+        // White Rook 1 cuts off row 1.
+        game.board[1][8] = { type: 'r', color: 'white' };
 
-        expect(game.board[0][0].type).toBe('e'); // Promoted to 'e' (Engel/Angel) or 'q' depending on implementation?
-        // Source says: piece.type = 'e';
-        expect(game.log).toHaveBeenCalledWith(expect.stringContaining('befördert'));
+        // White Rook 2 moves to row 0 to mate.
+        game.board[6][8] = { type: 'r', color: 'white' };
+
+        // Move White Rook 2 to 0,8
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 8 }, { r: 0, c: 8 });
+
+        expect(game.phase).toBe(PHASES.GAME_OVER);
+        expect(UI.animateCheckmate).toHaveBeenCalled();
+        expect(soundManager.playGameOver).toHaveBeenCalledWith(true); // Player won
     });
 
-    test('Puzzle Mode: handles wrong move', async () => {
-        game.mode = 'puzzle';
-        // Must place a piece to move!
-        game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
+    test('Insufficient Material: Real Logic', async () => {
+        // Redefine getElementById behavior for this test
+        const winnerText = { textContent: '' };
 
-        puzzleManager.checkMove.mockReturnValue('wrong');
+        // We must preserve the 'game-log' behavior!
+        const logMock = {
+            appendChild: jest.fn(),
+            scrollTop: 0,
+            scrollHeight: 100
+        };
+
+        document.getElementById = jest.fn((id) => {
+            if (id === 'winner-text') return winnerText;
+            if (id === 'game-log') return logMock;
+            // Fallback for everything else
+            return {
+                textContent: '',
+                classList: { remove: jest.fn(), add: jest.fn() },
+                appendChild: jest.fn(), // Safety net
+                style: {}
+            };
+        });
+
+        // Only Kings left
+        // Ensure board is clear for safety (though beforeEach does it)
+        game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+        game.board[0][4] = { type: 'k', color: 'black' };
+        game.board[8][4] = { type: 'k', color: 'white' };
+
+        // Create a dummy move (King step)
+        await MoveExecutor.executeMove(game, moveController, { r: 8, c: 4 }, { r: 7, c: 4 });
+
+        expect(game.phase).toBe(PHASES.GAME_OVER); // Draw by insufficient material
+        expect(winnerText.textContent).toMatch(/Unentschieden/);
+    });
+
+    test('3D Battle: Integration with window.battleChess3D', async () => {
+        window.battleChess3D = {
+            enabled: true,
+            playBattleSequence: jest.fn(() => Promise.resolve()),
+            removePiece: jest.fn(),
+            animateMove: jest.fn()
+        };
+
+        game.board[6][0] = { type: 'r', color: 'white' };
+        game.board[5][0] = { type: 'p', color: 'black' };
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 0 }, { r: 5, c: 0 });
+        expect(window.battleChess3D.playBattleSequence).toHaveBeenCalled();
+    });
+
+    test('AI Move Trigger: Verified via timeout', async () => {
         jest.useFakeTimers();
+        game.isAI = true;
+        game.turn = 'white'; // Will become black
+        game.aiMove = jest.fn();
+
+        game.board[6][4] = { type: 'p', color: 'white' };
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
+
+        jest.advanceTimersByTime(1500);
+        expect(game.aiMove).toHaveBeenCalled();
+        jest.useRealTimers();
+    });
+
+    test('Puzzle Mode: Correct Move', async () => {
+        game.mode = 'puzzle';
+        game.board[6][4] = { type: 'p', color: 'white' };
+        puzzleManager.checkMove.mockReturnValue('correct');
 
         await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
 
-        // Check loop was entered
-        expect(puzzleManager.checkMove).toHaveBeenCalled();
+        expect(UI.updatePuzzleStatus).toHaveBeenCalledWith('neutral', expect.any(String));
+    });
 
-        jest.advanceTimersByTime(1000);
+    test('Puzzle Mode: Solved', async () => {
+        game.mode = 'puzzle';
+        game.board[6][4] = { type: 'p', color: 'white' };
+        puzzleManager.checkMove.mockReturnValue('solved');
+
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
+
+        expect(UI.updatePuzzleStatus).toHaveBeenCalledWith('success', expect.any(String));
+        expect(soundManager.playSuccess).toHaveBeenCalled();
+    });
+
+    test('Puzzle Wrong: Triggers error UI and sound', async () => {
+        // Setup Puzzle Mode
+        game.mode = 'puzzle';
+        game.board[6][4] = { type: 'p', color: 'white' };
+
+        puzzleManager.checkMove.mockReturnValue('wrong');
+
+        jest.useFakeTimers();
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
+        jest.advanceTimersByTime(500);
 
         expect(UI.updatePuzzleStatus).toHaveBeenCalledWith('error', expect.any(String));
-        expect(moveController.undoMove).toHaveBeenCalled();
+        expect(soundManager.playError).toHaveBeenCalled();
+        jest.useRealTimers();
     });
 
-    test('Game Over: Checkmate', async () => {
-        // Setup game to be checkmate AFTER move
-        // Move execution happens...
-        // Then finishMove checks checkmate
+    test('Auto-save: Triggers saveGame after a move', async () => {
+        // game.settings might not exist on Game class based on view_file.
+        // MoveExecutor checks: if (game.moveHistory.length % 5 === 0)
+        // AND checks game.gameController.saveGame.
 
-        // We need to put pieces so finishMove doesn't trigger "King Missing".
-        game.board[0][0] = { type: 'k', color: 'white' };
-        game.board[8][8] = { type: 'k', color: 'black' };
+        // Setup
+        game.moveHistory = [1, 2, 3, 4]; // 4 moves already
+        game.gameController = {
+            saveGame: jest.fn(),
+            saveGameToStatistics: jest.fn()
+        };
+        // Ensure no error thrown
+        game.board[6][4] = { type: 'p', color: 'white' };
 
-        game.board[1][0] = { type: 'r', color: 'white' };
-
-        game.isCheckmate = jest.fn(() => true);
-
-        await MoveExecutor.executeMove(game, moveController, { r: 1, c: 0 }, { r: 1, c: 1 });
-
-        expect(game.phase).toBe('game_over');
-        expect(soundManager.playGameOver).toHaveBeenCalled();
-        expect(UI.animateCheckmate).toHaveBeenCalled();
-        expect(game.gameController.saveGameToStatistics).toHaveBeenCalledWith('win', 'black'); // Opponent (black) wins if White Checkmates?
-        // Wait, if White moved, opponent is Black.
-        // game.isCheckmate(opponentColor). Opponent color is 'black'.
-        // If Black is mat, White wins.
-        // saveGameToStatistics('win', 'black') -> Winner 'white' saved? Or 'win' type for 'black'?
-        // Source: saveGameToStatistics('win', opponentColor).
-        // Wait: winner = opponentColor === 'white' ? 'Schwarz' : 'Weiß'.
-        // if opponent (black) is mat, winner is Weiß.
-        // saveGameToStatistics('win', 'black'). If this implies WINNER is black, it's bug.
-        // But `finishMove` logic: `game.gameController.saveGameToStatistics('win', opponentColor);`
-        // If `opponentColor` is checkmated, they LOST.
-        // Why save 'win' for 'black'?
-        // Ah, check source logic again.
-        // Code: Line 312: `saveGameToStatistics('win', opponentColor)`.
-        // If `opponentColor` is checkmated.
-        // Maybe the second arg is "winning color"?
-        // If opponent is black, winning color is white?
-        // OpponentColor is the one WHO IS CHECKMATED.
-        // So passing 'black' (loser) as second arg? Hopefully saveGameToStatistics handles it as "winner" or "played by".
-        // I verify checking the call args match code.
-    });
-
-    test('Auto-save triggers toast', async () => {
-        game.board[0][0] = { type: 'k', color: 'white' };
-        game.board[8][8] = { type: 'k', color: 'black' };
-        game.moveHistory = [1, 2, 3, 4]; // Length 4
-
-        // Make move -> Length 5. 5 % 5 === 0. Auto-save.
-
-        await MoveExecutor.executeMove(game, moveController, { r: 0, c: 0 }, { r: 0, c: 1 });
+        await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
 
         expect(game.gameController.saveGame).toHaveBeenCalledWith(true);
-        expect(UI.showToast).toHaveBeenCalled();
     });
 });

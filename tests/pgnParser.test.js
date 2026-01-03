@@ -78,6 +78,17 @@ describe('PGNParser', () => {
       expect(games[0].headers.White).toBe('Player1');
       expect(games[0].headers.Black).toBe('Player2');
     });
+
+    it('should ignore malformed header tags', () => {
+      const pgn = `
+[Event "Valid"]
+[Malformed Header]
+1. e4 *
+      `;
+      const games = parser.parse(pgn);
+      expect(games[0].headers.Event).toBe('Valid');
+      expect(games[0].headers['Malformed']).toBeUndefined();
+    });
   });
 
   describe('replayGame()', () => {
@@ -144,6 +155,84 @@ describe('PGNParser', () => {
       const fakeMove = { from: { r: 4, c: 4 }, to: { r: 3, c: 3 } };
       const notation = parser.generateNotationForCheck(fakeMove, game, []);
       expect(notation).toBe('');
+    });
+
+    it('should generate castling notation', () => {
+      const game = new Game(15, 'classic');
+      // King at 8,4
+      const castleShort = { from: { r: 8, c: 4 }, to: { r: 8, c: 6 } };
+      game.board[8][4] = { type: 'k', color: 'white' };
+      const notationShort = parser.generateNotationForCheck(castleShort, game, []);
+      expect(notationShort).toBe('O-O');
+
+      const castleLong = { from: { r: 8, c: 4 }, to: { r: 8, c: 2 } };
+      const notationLong = parser.generateNotationForCheck(castleLong, game, []);
+      expect(notationLong).toBe('O-O-O');
+
+      game.board[5][5] = { type: 'k', color: 'white' };
+      game.board[4][5] = null;
+      const kingMove = { from: { r: 5, c: 5 }, to: { r: 4, c: 5 } };
+      const notationKing = parser.generateNotationForCheck(kingMove, game, []);
+      expect(notationKing).toBe('Kf5'); // r4 is rank 5, c5 is f
+    });
+
+    it('should generate pawn capture notation', () => {
+      const game = new Game(15, 'classic');
+      game.board[4][4] = { type: 'p', color: 'white' };
+      game.board[3][5] = { type: 'p', color: 'black' };
+      const move = { from: { r: 4, c: 4 }, to: { r: 3, c: 5 } };
+      const notation = parser.generateNotationForCheck(move, game, []);
+      expect(notation).toBe('exf6');
+    });
+
+    it('should handle piece disambiguation (column)', () => {
+      const game = new Game(15, 'classic');
+      game.board[7][1] = { type: 'n', color: 'white' }; // Nb1
+      game.board[7][6] = { type: 'n', color: 'white' }; // Ng1
+      const move = { from: { r: 7, c: 1 }, to: { r: 5, c: 2 } };
+      const allMoves = [
+        move,
+        { from: { r: 7, c: 6 }, to: { r: 5, c: 2 } }
+      ];
+      const notation = parser.generateNotationForCheck(move, game, allMoves);
+      expect(notation).toBe('Nbc4');
+    });
+
+    it('should handle piece disambiguation (row)', () => {
+      const game = new Game(15, 'classic');
+      game.board[3][3] = { type: 'r', color: 'white' };
+      game.board[5][3] = { type: 'r', color: 'white' };
+      const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 3 } };
+      const allMoves = [
+        move,
+        { from: { r: 5, c: 3 }, to: { r: 4, c: 3 } }
+      ];
+      const notation = parser.generateNotationForCheck(move, game, allMoves);
+      expect(notation).toBe('R6d5');
+    });
+
+    it('should handle piece disambiguation (both)', () => {
+      const game = new Game(15, 'classic');
+      game.board[3][3] = { type: 'q', color: 'white' };
+      game.board[3][5] = { type: 'q', color: 'white' };
+      game.board[5][3] = { type: 'q', color: 'white' };
+      const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } };
+      const allMoves = [
+        move,
+        { from: { r: 3, c: 5 }, to: { r: 4, c: 4 } },
+        { from: { r: 5, c: 3 }, to: { r: 4, c: 4 } }
+      ];
+      const notation = parser.generateNotationForCheck(move, game, allMoves);
+      expect(notation).toBe('Qd6e5');
+    });
+
+    it('should generate piece capture notation', () => {
+      const game = new Game(15, 'classic');
+      game.board[3][3] = { type: 'r', color: 'white' };
+      game.board[3][5] = { type: 'p', color: 'black' };
+      const move = { from: { r: 3, c: 3 }, to: { r: 3, c: 5 } };
+      const notation = parser.generateNotationForCheck(move, game, []);
+      expect(notation).toBe('Rxf6');
     });
   });
 });
