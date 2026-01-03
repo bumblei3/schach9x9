@@ -73,7 +73,7 @@ describe('SoundManager', () => {
   });
 
   test('loadSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const mockGetItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('access');
     });
