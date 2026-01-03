@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schach9x9-v2';
+const CACHE_NAME = 'schach9x9-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -25,17 +25,31 @@ const ASSETS_TO_CACHE = [
   './js/effects.js',
   './js/arrows.js',
   './js/tutorial.js',
-  './js/rulesEngine.js', // Case sensitive check needed? File is RulesEngine.js
   './js/RulesEngine.js',
   './js/TimeManager.js',
   './js/ai-worker.js',
   './js/aiController.js',
   './js/gameController.js',
-  './js/gameEngine.js', // Legacy
-  './js/aiEngine.js', // Legacy
-  './js/moveController.js', // Legacy
+  './js/gameEngine.js',
+  './js/aiEngine.js',
+  './js/moveController.js',
   './js/tutorController.js',
   './js/statisticsManager.js',
+  './js/battleChess3D.js',
+  './js/pieces3D.js',
+  './js/battleAnimations.js',
+  './js/puzzleManager.js',
+  './js/puzzleGenerator.js',
+  './js/debug.js',
+  './js/chess-pieces.js',
+  './js/assets/pieces/index.js',
+  './js/assets/pieces/classic.js',
+  './js/assets/pieces/modern.js',
+  './js/assets/pieces/pixel.js',
+  './js/assets/pieces/infernale.js',
+  './js/assets/pieces/wood.js',
+  './js/assets/pieces/neon.js',
+  './js/assets/pieces/minimalist.js',
   './js/ai/Evaluation.js',
   './js/ai/MoveGenerator.js',
   './js/ai/MoveOrdering.js',

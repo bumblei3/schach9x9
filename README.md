@@ -50,13 +50,32 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **530 automatisierten Tests** (Jest) wird eine hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.
 
-| Modul                | Coverage (Lines) | Beschreibung                                         |
-| -------------------- | ---------------- | ---------------------------------------------------- |
-| **AI Engine**        | ~89%             | Validierung von Suchalgorithmen und Bewertung.       |
-| **3D Engine**        | ~96%             | Tests für Rendering-Initialisierung und Animationen. |
-| **Piece Generation** | ~98%             | Verifizierung der prozeduralen Modellierung.         |
-| **Core Logic**       | ~95%             | Spielregeln, Move-Validation und Game-State.         |
-| **UI**               | ~61%             | Interaktionstests für Menüs, Shop und Overlays.      |
+| Modul             | Coverage (Lines) | Beschreibung                                         |
+| ----------------- | ---------------- | ---------------------------------------------------- |
+| **Global**        | **> 90%**        | Gesamtheitliche Codeabdeckung.                       |
+| **AI Engine**     | > 90%            | Validierung von Suchalgorithmen und Bewertung.       |
+| **3D Engine**     | > 95%            | Tests für Rendering-Initialisierung und Animationen. |
+| **Logic & Rules** | > 95%            | Spielregeln, Move-Validation und Game-State.         |
+| **UI Components** | > 85%            | Interaktionstests für Menüs, Shop und Overlays.      |
+
+## 📁 Projektstruktur
+
+```
+schach9x9/
+├── css/                # Styling (Modularisiert nach Komponenten)
+├── js/
+│   ├── ai/             # KI-Logik (Suche, Bewertung, Opening Book)
+│   ├── assets/         # Statische Assets (Figuren SVGs)
+│   │   └── pieces/     # Modularisierte Schachfiguren-Sets
+│   ├── move/           # Zugvalidierung und Ausführung
+│   ├── tutor/          # Tutor-System und Analyse
+│   ├── ui/             # UI-Komponenten und Renderer
+│   │   └── 3d/         # 3D-Engine Module (Scene, Piece, Input)
+│   ├── App.js          # Hauptanwendungsklasse
+│   └── battleChess3D.js # 3D-Fassade
+├── tests/              # Test-Suite (Unit & Integration)
+└── index.html          # Einstiegspunkt
+```
 
 ## 🚀 Installation & Start
 
