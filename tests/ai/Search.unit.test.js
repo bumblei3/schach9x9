@@ -137,8 +137,9 @@ describe('AI Search Logic', () => {
     const move = getBestMove(board, 'white', 3, 'expert', 1);
 
     expect(move).toBeDefined();
+    // Knight moves to row 2 for a fork (either 2,1 or 2,3 both give check + attack Rook)
     expect(move.to.r).toBe(2);
-    expect(move.to.c).toBe(1);
+    expect([1, 3]).toContain(move.to.c); // Accept either fork square
     // This fork wins a Rook eventually.
   });
 
