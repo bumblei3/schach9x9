@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
 import { TooltipManager } from '../../js/ui/TooltipManager.js';
 
 describe('TooltipManager', () => {
@@ -14,6 +13,7 @@ describe('TooltipManager', () => {
   });
 
   test('should create tooltip element on init', () => {
+    expect(tooltipManager).toBeDefined(); // Use variable
     const el = document.querySelector('.global-tooltip');
     expect(el).not.toBeNull();
     expect(el.classList.contains('hidden')).toBe(true);

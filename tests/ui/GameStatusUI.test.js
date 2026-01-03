@@ -21,7 +21,8 @@ jest.unstable_mockModule('../../js/ui/BoardRenderer.js', () => ({
 }));
 
 const GameStatusUI = await import('../../js/ui/GameStatusUI.js');
-const { renderBoard } = await import('../../js/ui/BoardRenderer.js');
+// renderBoard import removed as it was unused
+
 
 describe('GameStatusUI Component', () => {
   let game;
@@ -205,7 +206,7 @@ describe('GameStatusUI Component', () => {
 
     // Manually trigger the event on the SVG listener to avoid JSDOM bubbling issues
     // We simulate what the event listener receives
-    const handler = svg.getAttribute('data-hasListener') ? null : null; // can't access closure
+
 
     // But we can dispatch the event on the point and hope JSDOM bubbles it.
     // If bubbling fails, we can try to find the listener.
