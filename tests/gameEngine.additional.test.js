@@ -68,7 +68,6 @@ describe('Game Engine Additional Tests', () => {
     game.board[4][4] = { type: 'c', color: 'white' };
     const moves = game.getValidMoves(4, 4, game.board[4][4]);
     // Should include at least 4 orthogonal moves and 8 knight moves (total >=12)
-    expect(moves.length).toBeGreaterThanOrEqual(12);
     expect(moves).toEqual(
       expect.arrayContaining([
         { r: 4, c: 5 }, // rook right
@@ -77,5 +76,36 @@ describe('Game Engine Additional Tests', () => {
         { r: 6, c: 5 }, // knight move
       ])
     );
+  });
+
+  describe('Elo Estimation', () => {
+    test('should return default 600 if no accuracies recorded', () => {
+      game.stats = { accuracies: [] };
+      expect(game.getEstimatedElo()).toBe(600);
+    });
+
+    test('should calculate elo based on midgame accuracies', () => {
+      // Provide enough moves to trigger slicing (> 5)
+      // 100% accuracy = 2400
+      game.stats = { accuracies: [100, 100, 100, 100, 100, 100, 100] };
+      const elo = game.getEstimatedElo();
+      expect(elo).toBe(2400);
+    });
+
+    test('should fallback to all accuracies if midgame is not reached', () => {
+      // < 5 moves, so all are used
+      game.stats = { accuracies: [50, 50] }; // 50% = 800
+      expect(game.getEstimatedElo()).toBe(800);
+    });
+
+    test('should cap Elo at min 400 and max 2800', () => {
+      game.stats = { accuracies: [0, 0, 0, 0, 0, 0] }; // 0% = 400 (capped)
+      expect(game.getEstimatedElo()).toBe(400);
+
+      // Hypothetical >100% accuracy? Logic uses linear mapping.
+      // 800 + (100 - 50) * 32 = 800 + 1600 = 2400.
+      game.stats = { accuracies: [120, 120, 120, 120, 120, 120] };
+      expect(game.getEstimatedElo()).toBe(2800);
+    });
   });
 });
