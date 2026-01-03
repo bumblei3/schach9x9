@@ -56,7 +56,15 @@ export function updateTutorRecommendations(game) {
             return `<span class="template-piece-icon">${svgs[color][pieceType]}</span>`;
           } else {
             const symbols = {
-              p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚', a: '🏰', c: '⚖️', e: '👼',
+              p: '♟',
+              n: '♞',
+              b: '♝',
+              r: '♜',
+              q: '♛',
+              k: '♚',
+              a: '🏰',
+              c: '⚖️',
+              e: '👼',
             };
             return `<span class="template-piece-icon">${symbols[pieceType] || pieceType}</span>`;
           }
