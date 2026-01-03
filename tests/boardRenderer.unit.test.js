@@ -128,7 +128,7 @@ describe('BoardRenderer Full Coverage', () => {
     };
     Object.defineProperty(dragStartEvent, 'dataTransfer', { value: dt });
 
-    const originalCloneNode = cell.cloneNode;
+    // Mock cloneNode
     cell.cloneNode = jest.fn(() => document.createElement('div'));
 
     cell.dispatchEvent(dragStartEvent);
