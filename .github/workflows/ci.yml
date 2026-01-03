@@ -30,9 +30,3 @@ jobs:
 
       - name: Run tests with coverage
         run: npm test -- --coverage
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          slug: bumblei3/schach9x9
-          fail_ci_if_error: false
