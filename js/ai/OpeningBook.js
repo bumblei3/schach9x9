@@ -123,16 +123,22 @@ export class OpeningBook {
 
   /**
    * Generate board hash
+   * Detects board size from the array rather than using constant
    */
   getBoardHash(board, turn) {
+    // Detect actual board size from the array
+    const size = board ? board.length : 0;
+    if (size === 0) return turn ? turn[0] : '';
+
     let hash = '';
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let r = 0; r < size; r++) {
+      if (!board[r]) continue;
+      for (let c = 0; c < board[r].length; c++) {
         const piece = board[r][c];
         hash += piece ? `${piece.color[0]}${piece.type}` : '..';
       }
     }
-    hash += turn[0];
+    hash += turn ? turn[0] : '';
     return hash;
   }
 }
