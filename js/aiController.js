@@ -122,8 +122,12 @@ export class AIController {
   aiMove() {
     // Don't move in puzzle mode - player solves alone
     if (this.game.mode === 'puzzle') {
+      logger.debug('[AI] Skipping aiMove - puzzle mode');
       return;
     }
+
+    logger.info('[AI] Starting aiMove...');
+    this._aiMoveStartTime = Date.now();
 
     // Check if AI should resign
     if (this.aiShouldResign()) {
@@ -181,17 +185,49 @@ export class AIController {
     const numWorkers = this.aiWorkers.length;
 
     const processResults = () => {
+      const elapsed = Date.now() - this._aiMoveStartTime;
+      logger.info(`[AI] Processing results after ${elapsed}ms`);
+
       if (spinner) spinner.style.display = 'none';
 
       // Find best result
       const bestResult = workerResults.find(r => r && r.from && r.to);
+      logger.debug('[AI] Worker results:', workerResults.map(r => r ? `${r.from?.r},${r.from?.c}->${r.to?.r},${r.to?.c}` : 'null'));
 
       if (bestResult) {
+        logger.info(`[AI] Executing move: ${bestResult.from.r},${bestResult.from.c} -> ${bestResult.to.r},${bestResult.to.c}`);
         this.game.executeMove(bestResult.from, bestResult.to);
         if (this.game.renderBoard) this.game.renderBoard();
       } else {
+        logger.warn('[AI] No valid move found in worker results!');
         this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
       }
+    };
+
+    // Add timeout to prevent game from freezing if workers hang
+    let hasProcessed = false;
+    const timeoutId = setTimeout(() => {
+      if (!hasProcessed) {
+        hasProcessed = true;
+        logger.error('[AI] Worker timeout after 30 seconds! Making fallback move.');
+        if (spinner) spinner.style.display = 'none';
+
+        // Make a random legal move as fallback
+        const allMoves = this.game.getAllLegalMoves('black');
+        if (allMoves.length > 0) {
+          const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+          this.game.executeMove(randomMove.from, randomMove.to);
+        } else {
+          this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
+        }
+      }
+    }, 30000); // 30 second timeout
+
+    const processResultsWithTimeout = () => {
+      if (hasProcessed) return;
+      hasProcessed = true;
+      clearTimeout(timeoutId);
+      processResults();
     };
 
     // Dispatch tasks to persistent workers
@@ -205,15 +241,17 @@ export class AIController {
         } else if (type === 'bestMove') {
           workerResults[i] = data;
           completedWorkers++;
-          if (completedWorkers === 1) processResults();
+          if (completedWorkers === 1) processResultsWithTimeout();
         }
       };
 
       worker.onerror = err => {
         logger.error(`[AI] Worker ${i} error:`, err);
         completedWorkers++;
-        if (completedWorkers === numWorkers) processResults();
+        if (completedWorkers === numWorkers) processResultsWithTimeout();
       };
+
+      logger.debug(`[AI] Dispatching search to worker ${i}`);
 
       // Send search request
       worker.postMessage({
@@ -696,7 +734,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker

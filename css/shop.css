@@ -19,16 +19,28 @@
     opacity 0.3s ease,
     padding 0.3s ease;
   max-height: 60vh;
+  min-height: 0;
+  /* Edge fix: explicit min-height */
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* iOS/Safari smooth scrolling */
+  touch-action: pan-y;
+  /* Edge/touch: allow vertical scrolling */
+  overscroll-behavior: contain;
+  /* Prevent scroll chaining */
   opacity: 1;
 }
 
 .shop-panel.hidden {
   max-height: 0;
+  min-height: 0;
   padding: 0;
   opacity: 0;
   border: none;
   overflow: hidden;
+  visibility: hidden;
+  /* Edge fix: hide properly */
 }
 
 .shop-header {

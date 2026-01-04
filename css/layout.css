@@ -12,6 +12,9 @@
   padding: 0 1rem;
   position: relative;
   justify-content: space-between;
+  overflow-y: auto;
+  /* Edge fix: allow container scrolling */
+  overflow-x: hidden;
 }
 
 /* --- Header --- */

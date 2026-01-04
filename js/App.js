@@ -64,6 +64,17 @@ export class App {
     // Input handlers
     this.keyboardManager = new KeyboardManager(this);
 
+    // Expose global recovery function for console access
+    window.recoverGame = () => {
+      if (this.keyboardManager && this.keyboardManager.performEmergencyRecovery) {
+        this.keyboardManager.performEmergencyRecovery();
+        console.log('✅ Game recovery performed. If game is still frozen, try refreshing the page.');
+      } else {
+        console.error('❌ Recovery function not available');
+      }
+    };
+    console.log('💡 TIP: If game freezes, type recoverGame() in console or press Ctrl+Shift+F12');
+
     // Initialize DOM Handler (Menu handlers, etc.)
     this.domHandler.init();
 

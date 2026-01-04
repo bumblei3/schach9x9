@@ -30,14 +30,23 @@ self.onmessage = function (e) {
 
       case 'getBestMove': {
         const { board, color, depth, difficulty, moveNumber, config } = data;
+        const startTime = Date.now();
+        logger.debug(`[AI Worker] getBestMove started - color:${color} depth:${depth} difficulty:${difficulty} moveNumber:${moveNumber}`);
 
         // Setup progress callback
         setProgressCallback(progress => {
           self.postMessage({ type: 'progress', data: progress });
         });
 
-        const bestMove = getBestMove(board, color, depth, difficulty, moveNumber, config);
-        self.postMessage({ type: 'bestMove', data: bestMove });
+        try {
+          const bestMove = getBestMove(board, color, depth, difficulty, moveNumber, config);
+          const elapsed = Date.now() - startTime;
+          logger.debug(`[AI Worker] getBestMove completed in ${elapsed}ms - move:`, bestMove ? `${bestMove.from?.r},${bestMove.from?.c}->${bestMove.to?.r},${bestMove.to?.c}` : 'null');
+          self.postMessage({ type: 'bestMove', data: bestMove });
+        } catch (error) {
+          logger.error('[AI Worker] getBestMove failed:', error);
+          self.postMessage({ type: 'bestMove', data: null });
+        }
         break;
       }
 

@@ -116,6 +116,14 @@ export class KeyboardManager {
       return;
     }
 
+    // Emergency Recovery: Ctrl+Shift+F12
+    if (ctrl && shift && key === 'f12') {
+      event.preventDefault();
+      this.performEmergencyRecovery();
+      UI.showToast('🔧 Emergency Recovery - Game unstuck!', 'warning');
+      return;
+    }
+
     // Escape: Cancel selection / Close modals
     if (key === 'escape') {
       event.preventDefault();
@@ -136,5 +144,47 @@ export class KeyboardManager {
       }
       return;
     }
+  }
+
+  /**
+   * Emergency recovery function to unstick frozen games.
+   * Resets game state flags and UI to allow interaction again.
+   * Can be called from console via: window.recoverGame()
+   */
+  performEmergencyRecovery() {
+    const game = this.app.game;
+    if (!game) return;
+
+    console.warn('[RECOVERY] Performing emergency game recovery...');
+
+    // Reset turn to player
+    const previousTurn = game.turn;
+    game.turn = 'white';
+
+    // Clear animation lock
+    game.isAnimating = false;
+
+    // Hide spinner
+    const spinner = document.getElementById('spinner-overlay');
+    if (spinner) spinner.style.display = 'none';
+
+    // Clear any stuck selections
+    game.selectedSquare = null;
+    game.validMoves = null;
+
+    // Force re-render
+    if (game._forceFullRender !== undefined) {
+      game._forceFullRender = true;
+    }
+
+    // Log recovery info
+    console.warn(`[RECOVERY] Previous turn: ${previousTurn}, isAnimating was reset, spinner hidden`);
+    console.warn('[RECOVERY] Game should now be responsive');
+
+    // Render board
+    import('../ui.js').then(UI => {
+      UI.renderBoard(game);
+      UI.updateStatus(game);
+    });
   }
 }

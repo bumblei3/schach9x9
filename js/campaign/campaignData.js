@@ -31,7 +31,7 @@ export const CAMPAIGN_LEVELS = [
     difficulty: 'medium',
     playerColor: 'white',
     // More complex setup
-    fen: 'rnbqkbnr/pppppppp/9/9/9/9/PPPPPPPP/RNBQKBNR w KQkq - 0 1', // Standard start for now, placeholder
+    fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKBNR w KQkq - 0 1', // 9x9 start position
     winCondition: {
       type: 'checkmate',
     },
@@ -47,7 +47,7 @@ export const CAMPAIGN_LEVELS = [
     description: 'Stürze den König in seiner Festung. Er ist schwer bewacht.',
     difficulty: 'hard',
     playerColor: 'white',
-    fen: '8/8/8/3ppp3/3pkp3/3ppp3/8/8/RNBQKBNR w KQkq - 0 1',
+    fen: '9/9/9/3ppp3/3pkp3/3ppp3/9/9/RNBQKBNR w KQkq - 0 1',
     winCondition: {
       type: 'checkmate',
     },
@@ -81,7 +81,7 @@ export const CAMPAIGN_LEVELS = [
       'Der dunkle Herrscher stellt sich dir entgegen. Verbessere deine Truppen und siegre!',
     difficulty: 'expert',
     playerColor: 'white',
-    fen: 'rnbqkbnr/pppppppp/9/9/9/9/PPPPPPPP/RNBQKBNR w KQkq - 0 1', // Start from scratch but expert AI
+    fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKBNR w KQkq - 0 1', // 9x9 start position with expert AI
     winCondition: {
       type: 'checkmate',
     },
