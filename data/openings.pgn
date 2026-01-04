@@ -1,27 +1,350 @@
-[Event "Schach 9x9 Book"]
-[Site "Local"]
-[Date "2026.01.03"]
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
 [Variant "9x9"]
+[Result "*"]
 
-1. e4 e6 2. d4 d6 3. Nc3 Nc7 *
+{Italian-style openings - Center control with e4}
+1. e4 e6 2. d4 d6 3. Nc3 Nc7 4. Bf4 Bf6 5. Qf3 Qf7 *
 
-[Event "Schach 9x9 Book"]
-[Site "Local"]
-[Date "2026.01.03"]
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
 [Variant "9x9"]
+[Result "*"]
 
-1. e4 e6 2. f4 f6 3. d4 d6 *
+{Sicilian-style - Asymmetric c-pawn response}
+1. e4 c6 2. Nc3 d6 3. d4 Nc7 4. Bf4 e6 *
 
-[Event "Schach 9x9 Book"]
-[Site "Local"]
-[Date "2026.01.03"]
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
 [Variant "9x9"]
+[Result "*"]
 
-1. c4 c6 2. Nc3 Nc7 3. d4 d6 4. e4 e6 *
+{Queen's Gambit style - d4 opening}
+1. d4 d6 2. c4 c6 3. Nc3 Nc7 4. e4 e6 5. Bf4 Bf6 *
 
-[Event "Schach 9x9 Book"]
-[Site "Local"]
-[Date "2026.01.03"]
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
 [Variant "9x9"]
+[Result "*"]
 
-1. g4 g6 2. Ng3 Ng7 3. f4 f6 *
+{English Opening style}
+1. c4 c6 2. Nc3 Nc7 3. d4 d6 4. e4 e6 5. g4 g6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{King's Indian style}
+1. d4 g6 2. c4 Bg7 3. Nc3 d6 4. e4 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Fianchetto opening}
+1. g4 g6 2. Bg3 Bg7 3. Nc3 Nc7 4. d4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Aggressive f-pawn push}
+1. f4 f6 2. e4 e6 3. d4 d6 4. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Symmetric center}
+1. e4 e6 2. f4 f6 3. d4 d6 4. c4 c6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Knight development first}
+1. Nc3 Nc7 2. e4 e6 3. d4 d6 4. Bf4 Bf6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Double fianchetto}
+1. g4 g6 2. Bg3 Bg7 3. c4 c6 4. Bc3 Bc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Central pawn storm}
+1. e4 e6 2. d4 d6 3. f4 f6 4. c4 c6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Wings attack}
+1. h4 h6 2. a4 a6 3. g4 g6 4. b4 b6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Bishop pair development}
+1. e4 e6 2. Bf4 Bf6 3. Bc4 Bc6 4. d4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{e4 with quick Qf3}
+1. e4 e6 2. Qf3 Qf7 3. d4 d6 4. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{d4 Bf4 system}
+1. d4 d6 2. Bf4 Bf6 3. e4 e6 4. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Hypermodern - control from distance}
+1. Nc3 d6 2. g4 Nc7 3. Bg3 e6 4. d4 Bf6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Aggressive kingside}
+1. e4 e6 2. g4 f6 3. h4 g6 4. f4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Solid center with bishops}
+1. e4 e6 2. d4 d6 3. Bd4 Bd6 4. Bg4 Bg6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{c4 d4 center}
+1. c4 e6 2. d4 d6 3. Nc3 c6 4. e4 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Quick development}
+1. e4 e6 2. Nc3 Nc7 3. Ng3 Ng7 4. d4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{f4 Dutch style}
+1. f4 d6 2. Nf3 f6 3. e4 e6 4. d4 Nf7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Long diagonal control}
+1. g4 b6 2. Bg3 Bb7 3. d4 e6 4. c4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{e4 d4 c4 - broad center}
+1. e4 e6 2. d4 d6 3. c4 c6 4. Nc3 Nc7 5. Bf4 Bf6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Early Queen sortie}
+1. e4 e6 2. Qd3 Qd7 3. Nc3 Nc7 4. d4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{h-pawn attack}
+1. h4 e6 2. e4 h6 3. d4 d6 4. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{a-pawn queenside expansion}
+1. a4 a6 2. d4 d6 3. c4 c6 4. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Bishop to g3 system}
+1. d4 d6 2. g4 g6 3. Bg3 Bg7 4. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Central knight outpost}
+1. e4 e6 2. Ne3 Ne7 3. d4 d6 4. c4 c6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Four pawns attack}
+1. e4 e6 2. d4 d6 3. f4 f6 4. c4 c6 5. Nc3 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Quiet d4 system}
+1. d4 d6 2. Nd3 Nd7 3. e4 e6 4. c4 c6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{e4 Ne3 Bf4}
+1. e4 e6 2. Ne3 Nc7 3. Bf4 Bf6 4. d4 d6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Slow buildup with g4}
+1. g4 d6 2. Bg3 e6 3. d4 Nc7 4. Nc3 g6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Mirror game}
+1. e4 e6 2. d4 d6 3. c4 c6 4. f4 f6 5. g4 g6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Pirc-style for Black}
+1. e4 d6 2. d4 Nc7 3. Nc3 e6 4. Bf4 g6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Black plays c6 early}
+1. e4 c6 2. d4 d6 3. Nc3 e6 4. Bf4 Nc7 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Caro-Kann style}
+1. e4 c6 2. d4 d6 3. e5 f6 4. Nc3 e6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{French style}
+1. e4 e6 2. d4 d6 3. Nc3 Nc7 4. e5 f6 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{Scandinavian style}
+1. e4 d6 2. d4 e5 3. Nc3 Nc7 4. Bf4 exd4 *
+
+[Event "Schach 9x9 Opening Book"]
+[Site "Generated"]
+[Date "2026.01.04"]
+[Variant "9x9"]
+[Result "*"]
+
+{London System style}
+1. d4 d6 2. Bf4 Nc7 3. e4 e6 4. Nc3 Bf6 *
