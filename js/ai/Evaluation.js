@@ -219,6 +219,20 @@ export const PST_EG = {
   ],
 };
 
+// Endgame PST for 8x8 (Standard Chess)
+export const PST_EG_8 = {
+  k: [
+    -50, -40, -30, -20, -20, -30, -40, -50,
+    -30, -20, -10, 0, 0, -10, -20, -30,
+    -30, -10, 20, 30, 30, 20, -10, -30,
+    -30, -10, 30, 40, 40, 30, -10, -30,
+    -30, -10, 30, 40, 40, 30, -10, -30,
+    -30, -10, 20, 30, 30, 20, -10, -30,
+    -30, -30, 0, 0, 0, 0, -30, -30,
+    -50, -30, -30, -30, -30, -30, -30, -50,
+  ],
+};
+
 // Reuse arrays to avoid allocation
 // Reuse arrays to avoid allocation (assuming max size 9)
 const pawnColumnsWhite = new Int8Array(9);
@@ -364,8 +378,12 @@ export function evaluatePosition(board, forColor, config) {
  */
 function getPositionBonus(r, c, type, color, size, isEndgame = false) {
   // Select correct PST based on board size
-  // For 9x9, check endgame tables. For 8x8, we currently only have main PSTs.
-  const PST_SET = size === 8 ? PST_8 : (isEndgame && PST_EG[type] ? PST_EG : PST);
+  let PST_SET;
+  if (size === 8) {
+    PST_SET = isEndgame && PST_EG_8[type] ? PST_EG_8 : PST_8;
+  } else {
+    PST_SET = isEndgame && PST_EG[type] ? PST_EG : PST;
+  }
   const table = PST_SET[type];
 
   if (!table) return 0; // Fallback if type not found
