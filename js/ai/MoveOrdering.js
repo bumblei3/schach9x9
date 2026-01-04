@@ -1,4 +1,4 @@
-import { BOARD_SIZE, AI_PIECE_VALUES } from '../config.js';
+import { BOARD_SIZE } from '../config.js';
 import { see } from './MoveGenerator.js';
 
 // Killer Moves: Moves that caused beta cutoffs at each depth

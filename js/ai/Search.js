@@ -137,7 +137,7 @@ export function getBestMove(
 
   try {
     // ITERATIVE DEEPENING
-    const WINDOW_SIZE = 50;
+    // ITERATIVE DEEPENING
     const initialRootHash = computeZobristHash(board, color);
 
     for (let d = 1; d <= maxDepth; d++) {
@@ -147,12 +147,12 @@ export function getBestMove(
 
       let searchAlpha = -Infinity;
       let searchBeta = Infinity;
+      let aspWindow = 50;
 
       // ASPIRATION WINDOW
       if (d > 1) {
-        let window = 50;
-        searchAlpha = bestScore - window;
-        searchBeta = bestScore + window;
+        searchAlpha = bestScore - aspWindow;
+        searchBeta = bestScore + aspWindow;
       }
 
       for (; ;) {
@@ -207,15 +207,17 @@ export function getBestMove(
         }
 
         // Aspiration Window Refinement
-        if (currentBestScoreForDepth <= searchAlpha) {
-          searchAlpha -= window;
-          window += 50; // Gradually widen
-          continue;
-        }
-        if (currentBestScoreForDepth >= searchBeta) {
-          searchBeta += window;
-          window += 50; // Gradually widen
-          continue;
+        if (d > 1) {
+          if (currentBestScoreForDepth <= searchAlpha) {
+            searchAlpha -= aspWindow;
+            aspWindow += 50; // Gradually widen
+            continue;
+          }
+          if (currentBestScoreForDepth >= searchBeta) {
+            searchBeta += aspWindow;
+            aspWindow += 50; // Gradually widen
+            continue;
+          }
         }
         break;
       }
