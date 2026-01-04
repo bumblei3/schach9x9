@@ -132,6 +132,17 @@ export class DOMHandler {
       });
     }
 
+    // AI Personality Selector
+    const personalitySelect = document.getElementById('ai-personality-select');
+    if (personalitySelect) {
+      personalitySelect.addEventListener('change', e => {
+        if (this.game) {
+          this.game.aiPersonality = e.target.value;
+          // Also persist if needed? For now just runtime.
+        }
+      });
+    }
+
     // Finish Setup Button
     const finishSetupBtn = document.getElementById('finish-setup-btn');
     if (finishSetupBtn) {

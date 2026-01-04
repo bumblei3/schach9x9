@@ -105,6 +105,9 @@ export class Game {
     this.mentorLevel = savedMentorLevel || 'STANDARD';
     // Backward compatibility: kiMentorEnabled is true if level is not OFF
     this.kiMentorEnabled = this.mentorLevel !== 'OFF';
+
+    // AI Personality
+    this.aiPersonality = 'balanced';
   }
 
   /**
