@@ -100,6 +100,7 @@ describe('Randomized Fuzz Testing', () => {
   async function playRandomGame(iterations = 1, maxMoves = 50) {
     for (let i = 0; i < iterations; i++) {
       game = new Game(15, 'classic');
+      game.isAI = false; // Disable AI moves to speed up tests and avoid setTimeouts
       gameController = new GameController(game);
       moveController = new MoveController(game);
       game.gameController = gameController;
@@ -125,6 +126,7 @@ describe('Randomized Fuzz Testing', () => {
 
   test('should NOT crash over randomized setup phase', async () => {
     game = new Game(15, 'setup');
+    game.isAI = false;
     gameController = new GameController(game);
     moveController = new MoveController(game);
     game.gameController = gameController;

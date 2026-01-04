@@ -278,7 +278,7 @@ export function evaluatePosition(board, forColor, config) {
 
         // Rook on open/semi-open file
         if (piece.type === 'r') {
-          const fileBonus = evaluateRookFile(c, isWhite, size);
+          const fileBonus = evaluateRookFile(c, isWhite);
           mgScore += fileBonus * sideMult;
           egScore += (fileBonus / 2) * sideMult;
         }
@@ -397,7 +397,7 @@ function getPositionBonus(r, c, type, color, size, isEndgame = false) {
  */
 function evaluateKingSafety(board, kingR, kingC, kingColor) {
   let safety = 0;
-  const pawnRow = kingColor === 'white' ? 1 : -1;
+  const pawnRow = kingColor === 'white' ? -1 : 1;
   const opponentColor = kingColor === 'white' ? 'black' : 'white';
 
   const size = board.length;
@@ -445,7 +445,7 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
 /**
  * Evaluate rook bonus for open/semi-open files
  */
-function evaluateRookFile(col, isWhite, size) {
+function evaluateRookFile(col, isWhite) {
   const friendlyPawns = isWhite ? pawnColumnsWhite[col] : pawnColumnsBlack[col];
   const enemyPawns = isWhite ? pawnColumnsBlack[col] : pawnColumnsWhite[col];
 

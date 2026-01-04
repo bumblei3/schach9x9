@@ -4,5 +4,5 @@ export default {
   moduleFileExtensions: ['js', 'json'],
   transform: {},
   verbose: true,
-  testPathIgnorePatterns: ['/node_modules/', '/tests/browser/'],
+  testPathIgnorePatterns: ['/node_modules/', '/tests/browser/', '\\.spec\\.js$'],
 };

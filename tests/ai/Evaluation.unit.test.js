@@ -110,8 +110,6 @@ describe('AI Evaluation Logic', () => {
     boardClosed[8][0] = { type: 'r', color: 'white' };
     boardClosed[7][0] = { type: 'p', color: 'white' }; // Blocked by own pawn
 
-    evaluatePosition(boardOpen, 'white');
-    evaluatePosition(boardClosed, 'white');
 
     // Rook on open file should be worth more (excluding the material of the pawn in closed case)
     // scoreOpen (~500+25pst+20open) vs scoreClosed (~500+25pst + 100pawn)
@@ -123,5 +121,129 @@ describe('AI Evaluation Logic', () => {
     const finalScoreClosed = evaluatePosition(boardClosed, 'white');
 
     expect(finalScoreOpen).toBeGreaterThan(finalScoreClosed);
+  });
+
+  test('Pawn Structure: Doubled and Isolated Pawns', () => {
+    // Doubled Pawns
+    const boardDoubled = createEmptyBoard();
+    boardDoubled[7][4] = { type: 'p', color: 'white' };
+    boardDoubled[6][4] = { type: 'p', color: 'white' }; // Doubled on file 4
+
+    const boardNormal = createEmptyBoard();
+    boardNormal[7][4] = { type: 'p', color: 'white' };
+    boardNormal[7][5] = { type: 'p', color: 'white' }; // Not doubled
+
+    const scoreDoubled = evaluatePosition(boardDoubled, 'white');
+    const scoreNormal = evaluatePosition(boardNormal, 'white');
+    expect(scoreDoubled).toBeLessThan(scoreNormal);
+
+    // Isolated Pawns
+    const boardIsolated = createEmptyBoard();
+    boardIsolated[7][4] = { type: 'p', color: 'white' };
+    // No pawns on file 3 or 5
+
+    const boardSupported = createEmptyBoard();
+    boardSupported[7][4] = { type: 'p', color: 'white' };
+    boardSupported[7][3] = { type: 'p', color: 'white' };
+
+    const scoreIsolated = evaluatePosition(boardIsolated, 'white');
+    const scoreSupported = evaluatePosition(boardSupported, 'white');
+    // Note: supported has an extra pawn, so it's naturally higher. 
+    // Let's add the same pawn elsewhere in isolated case
+    boardIsolated[7][0] = { type: 'p', color: 'white' };
+
+    const finalScoreIsolated = evaluatePosition(boardIsolated, 'white');
+    const finalScoreSupported = evaluatePosition(boardSupported, 'white');
+    expect(finalScoreSupported).toBeGreaterThan(finalScoreIsolated);
+  });
+
+  test('King Safety: Open Files and Zone Attacks', () => {
+    // Open file near king
+    const boardSafe = createEmptyBoard();
+    boardSafe[8][4] = { type: 'k', color: 'white' };
+    boardSafe[7][4] = { type: 'p', color: 'white' }; // Shield
+    // Add material to trigger midgame phase
+    boardSafe[0][0] = { type: 'q', color: 'white' };
+    boardSafe[0][8] = { type: 'q', color: 'black' };
+
+    const boardExposed = createEmptyBoard();
+    boardExposed[8][4] = { type: 'k', color: 'white' };
+    // No pawn on file 4
+    boardExposed[7][0] = { type: 'p', color: 'white' }; // Far away pawn
+    boardExposed[0][0] = { type: 'q', color: 'white' };
+    boardExposed[0][8] = { type: 'q', color: 'black' };
+
+    const scoreSafe = evaluatePosition(boardSafe, 'white');
+    const scoreExposed = evaluatePosition(boardExposed, 'white');
+    expect(scoreSafe).toBeGreaterThan(scoreExposed + 10);
+
+    // King Zone Attacks
+    const boardAttacked = createEmptyBoard();
+    boardAttacked[8][4] = { type: 'k', color: 'white' };
+    boardAttacked[6][4] = { type: 'n', color: 'black' }; // Knight near king
+
+    const boardCalm = createEmptyBoard();
+    boardCalm[8][4] = { type: 'k', color: 'white' };
+    boardCalm[0][0] = { type: 'n', color: 'black' }; // Knight far away
+
+    const scoreAttacked = evaluatePosition(boardAttacked, 'white');
+    const scoreCalm = evaluatePosition(boardCalm, 'white');
+    expect(scoreAttacked).toBeLessThan(scoreCalm);
+  });
+
+  test('Advanced Pawn Logic: Supported and Blocked Passed Pawns', () => {
+    // Supported Pawn
+    const boardSupported = createEmptyBoard();
+    boardSupported[7][4] = { type: 'p', color: 'white' };
+    boardSupported[8][3] = { type: 'p', color: 'white' }; // Supports 7,4
+
+    const boardUnsupported = createEmptyBoard();
+    boardUnsupported[7][4] = { type: 'p', color: 'white' };
+    boardUnsupported[8][0] = { type: 'p', color: 'white' }; // Far away
+
+    const scoreSupported = evaluatePosition(boardSupported, 'white');
+    const scoreUnsupported = evaluatePosition(boardUnsupported, 'white');
+    // Supported pawn bonus should make it higher
+    expect(scoreSupported).toBeGreaterThan(scoreUnsupported);
+
+    // Blocked Passed Pawn
+    const boardBlocked = createEmptyBoard();
+    boardBlocked[4][4] = { type: 'p', color: 'white' };
+    boardBlocked[3][4] = { type: 'n', color: 'black' }; // Blocked by knight
+
+    const boardFree = createEmptyBoard();
+    boardFree[4][4] = { type: 'p', color: 'white' };
+    boardFree[0][0] = { type: 'n', color: 'black' }; // Far away
+
+    const scoreBlocked = evaluatePosition(boardBlocked, 'white');
+    const scoreFree = evaluatePosition(boardFree, 'white');
+    expect(scoreFree).toBeGreaterThan(scoreBlocked);
+  });
+
+  test('Black Piece Heuristics', () => {
+    // Black Bishop Pair
+    const boardPair = createEmptyBoard();
+    boardPair[0][2] = { type: 'b', color: 'black' };
+    boardPair[0][5] = { type: 'b', color: 'black' };
+
+    const boardSingle = createEmptyBoard();
+    boardSingle[0][2] = { type: 'b', color: 'black' };
+    boardSingle[0][5] = { type: 'n', color: 'black' };
+
+    const scorePair = evaluatePosition(boardPair, 'black');
+    const scoreSingle = evaluatePosition(boardSingle, 'black');
+    expect(scorePair).toBeGreaterThan(scoreSingle + 10);
+  });
+
+  test('8x8 Mode Evaluation', () => {
+    // 8x8 board
+    const board8 = Array(8)
+      .fill(null)
+      .map(() => Array(8).fill(null));
+    board8[7][4] = { type: 'k', color: 'white' };
+    board8[0][4] = { type: 'k', color: 'black' };
+
+    const score = evaluatePosition(board8, 'white');
+    expect(typeof score).toBe('number');
   });
 });
