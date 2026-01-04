@@ -92,8 +92,61 @@ export function computeZobristHash(board, colorToMove) {
   return hash;
 }
 
+/**
+ * Incrementally update Zobrist hash for a move
+ */
+export function updateZobristHash(hash, from, to, piece, capturedPiece = null, undoInfo = null) {
+  let newHash = hash;
+
+  // 1. Remove piece from 'from' square
+  // If it was a promotion, the piece.type reflects the NEW type.
+  // We need to use the OLD type for the 'from' square.
+  const oldType = undoInfo && undoInfo.promoted ? undoInfo.oldType : piece.type;
+  newHash ^= zobristTable[piece.color][oldType][from.r][from.c];
+
+  // 2. Remove captured piece if any
+  if (capturedPiece) {
+    newHash ^= zobristTable[capturedPiece.color][capturedPiece.type][to.r][to.c];
+  }
+
+  // 3. Handle Special Moves
+  if (undoInfo) {
+    if (undoInfo.enPassantCaptured) {
+      const { enPassantRow, enPassantCol, enPassantCaptured } = undoInfo;
+      // Remove captured pawn (it's not on the 'to' square)
+      newHash ^=
+        zobristTable[enPassantCaptured.color][enPassantCaptured.type][enPassantRow][enPassantCol];
+    } else if (undoInfo.castling) {
+      const { rook, rookFrom, rookTo } = undoInfo.castling;
+      // Move rook: XOR from old position, XOR to new position
+      newHash ^= zobristTable[piece.color][rook.type][rookFrom.r][rookFrom.c];
+      newHash ^= zobristTable[piece.color][rook.type][rookTo.r][rookTo.c];
+    } else if (undoInfo.promoted) {
+      // Place promoted piece on 'to' square
+      newHash ^= zobristTable[piece.color][piece.type][to.r][to.c];
+      // Flip side to move and return
+      newHash ^= zobristTable.sideToMove;
+      return newHash;
+    }
+  }
+
+  // 4. Place piece on 'to' square (if not already handled in promotion)
+  if (!undoInfo || !undoInfo.promoted) {
+    newHash ^= zobristTable[piece.color][piece.type][to.r][to.c];
+  }
+
+  // 5. Flip side to move
+  newHash ^= zobristTable.sideToMove;
+
+  return newHash;
+}
+
 export function getZobristTable() {
   return zobristTable;
+}
+
+export function getXORSideToMove() {
+  return zobristTable.sideToMove;
 }
 
 /**

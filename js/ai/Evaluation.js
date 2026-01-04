@@ -432,7 +432,8 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
   for (let dc = -1; dc <= 1; dc++) {
     const checkC = kingC + dc;
     if (checkC >= 0 && checkC < size) {
-      const friendlyPawn = kingColor === 'white' ? pawnColumnsWhite[checkC] : pawnColumnsBlack[checkC];
+      const friendlyPawn =
+        kingColor === 'white' ? pawnColumnsWhite[checkC] : pawnColumnsBlack[checkC];
       if (friendlyPawn === 0) {
         safety -= 15; // Penalty for open file near king
       }

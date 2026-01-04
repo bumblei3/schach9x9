@@ -110,10 +110,9 @@ describe('AI Evaluation Logic', () => {
     boardClosed[8][0] = { type: 'r', color: 'white' };
     boardClosed[7][0] = { type: 'p', color: 'white' }; // Blocked by own pawn
 
-
     // Rook on open file should be worth more (excluding the material of the pawn in closed case)
     // scoreOpen (~500+25pst+20open) vs scoreClosed (~500+25pst + 100pawn)
-    // Wait, scoreClosed has an extra pawn! 
+    // Wait, scoreClosed has an extra pawn!
     // Let's add the same pawn to a DIFFERENT file in boardOpen.
     boardOpen[7][1] = { type: 'p', color: 'white' };
 
@@ -148,7 +147,7 @@ describe('AI Evaluation Logic', () => {
 
     evaluatePosition(boardIsolated, 'white');
     evaluatePosition(boardSupported, 'white');
-    // Note: supported has an extra pawn, so it's naturally higher. 
+    // Note: supported has an extra pawn, so it's naturally higher.
     // Let's add the same pawn elsewhere in isolated case
     boardIsolated[7][0] = { type: 'p', color: 'white' };
 

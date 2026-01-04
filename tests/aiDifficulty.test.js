@@ -23,6 +23,8 @@ jest.unstable_mockModule('../js/ai/Evaluation.js', () => ({
 
 jest.unstable_mockModule('../js/ai/TranspositionTable.js', () => ({
   computeZobristHash: jest.fn(() => 0),
+  updateZobristHash: jest.fn(() => 0),
+  getXORSideToMove: jest.fn(() => 0),
   storeTT: jest.fn(),
   probeTT: jest.fn(),
   TT_EXACT: 1,

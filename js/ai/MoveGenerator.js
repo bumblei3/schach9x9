@@ -105,6 +105,13 @@ export function makeMove(board, move) {
     };
   }
 
+  // Handle Promotion
+  if (move.promotion) {
+    undoInfo.oldType = fromPiece.type;
+    fromPiece.type = move.promotion;
+    undoInfo.promoted = true;
+  }
+
   board[move.to.r][move.to.c] = fromPiece;
   board[move.from.r][move.from.c] = null;
 
@@ -130,6 +137,11 @@ export function undoMove(board, undoInfo) {
 
   board[move.from.r][move.from.c] = piece;
   board[move.to.r][move.to.c] = capturedPiece;
+
+  // Undo Promotion
+  if (undoInfo.promoted) {
+    piece.type = undoInfo.oldType;
+  }
 
   // Restore En Passant pawn
   if (enPassantCaptured) {
@@ -204,9 +216,13 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, la
 
   if (piece.type === 'p') {
     const forward = piece.color === 'white' ? -1 : 1;
+    const promotionRow = piece.color === 'white' ? 0 : size - 1;
+
     // Move 1
     if (!onlyCaptures && isInside(r + forward, c) && isEmpty(r + forward, c)) {
-      moves.push({ from: { r, c }, to: { r: r + forward, c } });
+      const move = { from: { r, c }, to: { r: r + forward, c } };
+      if (r + forward === promotionRow) move.promotion = 'e';
+      moves.push(move);
       // Move 2 (if not moved)
       if (piece.hasMoved === false && isInside(r + forward * 2, c) && isEmpty(r + forward * 2, c)) {
         moves.push({ from: { r, c }, to: { r: r + forward * 2, c } });
@@ -216,7 +232,9 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, la
     for (const dc of [-1, 1]) {
       if (isInside(r + forward, c + dc)) {
         if (isEnemy(r + forward, c + dc)) {
-          moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
+          const move = { from: { r, c }, to: { r: r + forward, c: c + dc } };
+          if (r + forward === promotionRow) move.promotion = 'e';
+          moves.push(move);
         } else if (
           lastMove &&
           lastMove.piece.type === 'p' &&

@@ -10,6 +10,8 @@ import {
 import { evaluatePosition } from './Evaluation.js';
 import {
   computeZobristHash,
+  updateZobristHash,
+  getXORSideToMove,
   storeTT,
   probeTT,
   TT_EXACT,
@@ -47,9 +49,9 @@ let searchEndTime = Infinity;
 /**
  * Send progress update to UI
  */
-function sendProgress(maxDepth) {
+function sendProgress(maxDepth, force = false) {
   const now = Date.now();
-  if (now - lastProgressUpdate > 100) {
+  if (force || now - lastProgressUpdate > 100) {
     const progressData = {
       type: 'progress',
       depth: currentDepth,
@@ -60,8 +62,14 @@ function sendProgress(maxDepth) {
 
     if (progressCallback) {
       progressCallback(progressData);
-    } else if (typeof self !== 'undefined' && self.postMessage) {
-      self.postMessage(progressData);
+    } else if (typeof self !== 'undefined' && typeof self.postMessage === 'function') {
+      try {
+        // In Web Workers, postMessage takes 1 argument. 
+        // In JSDOM/Window, it may require 2.
+        self.postMessage(progressData);
+      } catch (e) {
+        // Silently fail if postMessage fails (e.g. in test environments)
+      }
     }
     lastProgressUpdate = now;
   }
@@ -129,6 +137,7 @@ export function getBestMove(
   try {
     // ITERATIVE DEEPENING
     const WINDOW_SIZE = 50;
+    const initialRootHash = computeZobristHash(board, color);
 
     for (let d = 1; d <= maxDepth; d++) {
       currentDepth = d;
@@ -144,7 +153,7 @@ export function getBestMove(
         searchBeta = bestScore + WINDOW_SIZE;
       }
 
-      for (;;) {
+      for (; ;) {
         let alpha = searchAlpha;
         const beta = searchBeta;
         currentBestScoreForDepth = -Infinity;
@@ -152,11 +161,19 @@ export function getBestMove(
         // PVS at Root
         for (let i = 0; i < orderedMoves.length; i++) {
           const move = orderedMoves[i];
+          const piece = board[move.from.r][move.from.c];
           const undoInfo = makeMove(board, move);
           const opponentColor = color === 'white' ? 'black' : 'white';
 
           // Incremental Hash Update
-          const nextHashVal = computeZobristHash(board, opponentColor);
+          const nextHashVal = updateZobristHash(
+            initialRootHash,
+            move.from,
+            move.to,
+            piece,
+            board[move.to.r][move.to.c],
+            undoInfo
+          );
 
           let score;
           if (i === 0) {
@@ -194,10 +211,9 @@ export function getBestMove(
       bestMoveSoFar = bestMove;
 
       // Store best move in TT for PV extraction
-      const rootHash = computeZobristHash(board, color);
-      storeTT(rootHash, d, bestScore, TT_EXACT, bestMove);
+      storeTT(initialRootHash, d, bestScore, TT_EXACT, bestMove);
 
-      sendProgress(maxDepth);
+      sendProgress(maxDepth, d === maxDepth);
 
       // Re-order moves: put best move first
       if (bestMove) {
@@ -288,19 +304,44 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
   const ttEntry = probeTT(hash, depth, alpha, beta);
   if (ttEntry && ttEntry.score !== undefined) return ttEntry.score;
 
+  const inCheck = isInCheck(board, turnColor);
+
+  // CHECK EXTENSIONS: Extend search if in check
+  if (inCheck && depth < currentDepth + 2) {
+    depth++;
+  }
+
+  if (depth <= 0 && !inCheck) {
+    return quiescenceSearch(board, alpha, beta, turnColor, aiColor);
+  }
+
+  const moves = getAllLegalMoves(board, turnColor);
+  if (moves.length === 0) {
+    if (inCheck) {
+      return -10000 - depth; // Mate (favor closer mates)
+    }
+    return 0; // Stalemate
+  }
+
   if (depth <= 0) {
     return quiescenceSearch(board, alpha, beta, turnColor, aiColor);
   }
 
   const opponentColor = turnColor === 'white' ? 'black' : 'white';
 
+  // STATIC NULL MOVE PRUNING (Reverse Futility Pruning)
+  if (depth <= 3 && !inCheck && Math.abs(beta) < 9000) {
+    const staticEval = evaluatePosition(board, turnColor, activeConfig);
+    const margin = 120 * depth;
+    if (staticEval - margin >= beta) return beta;
+  }
+
   // NULL MOVE PRUNING
-  // Don't use NMP if in check or near endgame (phaseValue < 5)
-  // totalPhase is not available here, but we can check if depth is enough
-  if (depth >= 3 && !isInCheck(board, turnColor)) {
-    const R = 2; // Reduction depth
-    const nextHash = computeZobristHash(board, opponentColor); // Null move doesn't change board but changes turn
-    // Simplified null move: we just search with reduced depth and reversed window
+  if (depth >= 3 && !inCheck && Math.abs(beta) < 9000) {
+    const R = 2 + Math.floor(depth / 6); // Dynamic reduction
+    // Flip side to move for null move
+    const nextHash = hash ^ getXORSideToMove();
+
     const score = -minimax(
       board,
       depth - 1 - R,
@@ -313,14 +354,6 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
     if (score >= beta) return beta;
   }
 
-  const moves = getAllLegalMoves(board, turnColor);
-  if (moves.length === 0) {
-    if (isInCheck(board, turnColor)) {
-      return -10000 - depth; // Mate (favor closer mates)
-    }
-    return 0; // Stalemate
-  }
-
   const orderedMoves = orderMoves(board, moves, ttEntry ? ttEntry.bestMove : null, depth);
   let bestScore = -Infinity;
   let bestMove = null;
@@ -328,8 +361,10 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
 
   for (let i = 0; i < orderedMoves.length; i++) {
     const move = orderedMoves[i];
+    const piece = board[move.from.r][move.from.c];
+    const capturedPiece = board[move.to.r][move.to.c];
     const undoInfo = makeMove(board, move);
-    const nextHash = computeZobristHash(board, opponentColor);
+    const nextHash = updateZobristHash(hash, move.from, move.to, piece, capturedPiece, undoInfo);
 
     let score;
     if (i === 0) {
@@ -339,9 +374,10 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
       let reduction = 0;
       const isCapture = board[move.to.r][move.to.c] !== null;
 
-      if (depth >= 3 && i >= 4 && !isCapture && !isInCheck(board, turnColor)) {
-        reduction = 1;
-        if (i >= 10) reduction = 2;
+      // LATE MOVE REDUCTION
+      if (depth >= 3 && i >= 3 && !isCapture && !inCheck && Math.abs(alpha) < 9000) {
+        reduction = Math.floor(1 + (Math.log(depth) * Math.log(i)) / 2.0);
+        reduction = Math.min(depth - 1, reduction); // Don't reduce to 0
       }
 
       // PVS Null Window Search

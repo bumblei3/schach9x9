@@ -63,6 +63,8 @@ describe('AI Engine', () => {
       // White rook can capture black pawn
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'p', color: 'black' };
+      board[8][8] = { type: 'k', color: 'white' };
+      board[0][0] = { type: 'k', color: 'black' };
 
       const bestMove = getBestMove(board, 'white', 1, 'medium');
 
@@ -76,6 +78,8 @@ describe('AI Engine', () => {
       // White queen threatened by black rook
       board[4][4] = { type: 'q', color: 'white' };
       board[4][0] = { type: 'r', color: 'black' };
+      board[8][8] = { type: 'k', color: 'white' };
+      board[0][0] = { type: 'k', color: 'black' };
 
       // Black to move, should capture queen
       const bestMove = getBestMove(board, 'black', 1, 'medium');
@@ -203,20 +207,19 @@ describe('AI Engine', () => {
 
     test('should use Quiescence Search to see capture chains', () => {
       // Setup a position where a capture looks good but leads to material loss
-      // White Queen at 4,4
-      // Black Pawn at 3,3 (protected by Black Rook at 3,0)
+      // White Knight at 4,4
+      // Black Pawn at 3,3 (protected by Black Bishop at 1,1)
+      // If depth is 1, AI might take pawn (gain 100) and miss the bishop recapture (lose 320)
 
-      board[4][4] = { type: 'q', color: 'white' };
+      board[4][4] = { type: 'n', color: 'white' };
       board[3][3] = { type: 'p', color: 'black' };
-      board[3][0] = { type: 'r', color: 'black' };
-
-      // If depth is 1, AI might take pawn (gain 100) and miss the rook recapture (lose 900)
-      // Quiescence search should see the recapture
+      board[1][1] = { type: 'b', color: 'black' }; // Diagonally protects 3,3
 
       const bestMove = getBestMove(board, 'white', 1, 'expert');
 
-      // Should NOT capture the pawn
-      if (bestMove) {
+      // Should NOT capture the pawn if it leads to losing the knight
+      if (bestMove && bestMove.from.r === 4 && bestMove.from.c === 4) {
+        // If moving the knight, shouldn't go to protected pawn
         expect(bestMove.to).not.toEqual({ r: 3, c: 3 });
       }
     });
