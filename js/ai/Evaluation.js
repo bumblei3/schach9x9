@@ -231,6 +231,9 @@ export function evaluatePosition(board, forColor, config) {
   const PHASE_VALUES = { n: 1, b: 1, r: 2, q: 4, a: 3, c: 3, e: 4 };
   let totalPhase = 0;
 
+  let whiteBishops = 0;
+  let blackBishops = 0;
+
   // First pass: collect pieces and basic material/pst/mobility
   const size = board.length;
   for (let r = 0; r < size; r++) {
@@ -266,6 +269,19 @@ export function evaluatePosition(board, forColor, config) {
 
         // Phase contribution
         totalPhase += PHASE_VALUES[piece.type] || 0;
+
+        // Count bishops for pair bonus
+        if (piece.type === 'b') {
+          if (isWhite) whiteBishops++;
+          else blackBishops++;
+        }
+
+        // Rook on open/semi-open file
+        if (piece.type === 'r') {
+          const fileBonus = evaluateRookFile(c, isWhite, size);
+          mgScore += fileBonus * sideMult;
+          egScore += (fileBonus / 2) * sideMult;
+        }
       }
 
       // Record pawn for structure eval
@@ -283,6 +299,16 @@ export function evaluatePosition(board, forColor, config) {
         mgScore += safety * safetyWeight * sideMult;
       }
     }
+  }
+
+  // Bishop Pair Bonus
+  if (whiteBishops >= 2) {
+    mgScore += 25 * mobilityWeight;
+    egScore += 40 * mobilityWeight;
+  }
+  if (blackBishops >= 2) {
+    mgScore -= 25 * mobilityWeight;
+    egScore -= 40 * mobilityWeight;
   }
 
   // Second pass: Pawn structure (Isolated, Passed, Doubled)
@@ -317,6 +343,11 @@ export function evaluatePosition(board, forColor, config) {
         // Bonus for supported passed pawns
         if (isPawnSupported(board, r, c, piece.color)) {
           passedBonus *= 1.3;
+        }
+
+        // Penalty for blocked passed pawns
+        if (isPawnBlocked(board, r, c, piece.color)) {
+          passedBonus *= 0.5;
         }
 
         mgScore += passedBonus * sideMult;
@@ -397,7 +428,32 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
   }
   safety -= enemyAttacks * 5;
 
+  // 3. Open files near king
+  for (let dc = -1; dc <= 1; dc++) {
+    const checkC = kingC + dc;
+    if (checkC >= 0 && checkC < size) {
+      const friendlyPawn = kingColor === 'white' ? pawnColumnsWhite[checkC] : pawnColumnsBlack[checkC];
+      if (friendlyPawn === 0) {
+        safety -= 15; // Penalty for open file near king
+      }
+    }
+  }
+
   return safety;
+}
+
+/**
+ * Evaluate rook bonus for open/semi-open files
+ */
+function evaluateRookFile(col, isWhite, size) {
+  const friendlyPawns = isWhite ? pawnColumnsWhite[col] : pawnColumnsBlack[col];
+  const enemyPawns = isWhite ? pawnColumnsBlack[col] : pawnColumnsWhite[col];
+
+  if (friendlyPawns === 0) {
+    if (enemyPawns === 0) return 20; // Open file
+    return 10; // Semi-open file
+  }
+  return 0;
 }
 
 /**
@@ -439,4 +495,14 @@ function isPassedPawn(board, r, c, color) {
     }
   }
   return true;
+}
+
+/**
+ * Check if a pawn is blocked by any piece
+ */
+function isPawnBlocked(board, r, c, color) {
+  const nextR = color === 'white' ? r - 1 : r + 1;
+  const size = board.length;
+  if (nextR < 0 || nextR >= size) return false;
+  return board[nextR][c] !== null;
 }

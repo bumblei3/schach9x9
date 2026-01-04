@@ -84,4 +84,44 @@ describe('AI Evaluation Logic', () => {
 
     expect(scoreShield).toBeGreaterThan(scoreAlone);
   });
+
+  test('Bishop Pair Bonus', () => {
+    const boardPair = createEmptyBoard();
+    boardPair[8][2] = { type: 'b', color: 'white' };
+    boardPair[8][5] = { type: 'b', color: 'white' };
+
+    const boardSingle = createEmptyBoard();
+    boardSingle[8][2] = { type: 'b', color: 'white' };
+    boardSingle[8][5] = { type: 'n', color: 'white' }; // Swap one bishop for knight
+
+    const scorePair = evaluatePosition(boardPair, 'white');
+    const scoreSingle = evaluatePosition(boardSingle, 'white');
+
+    // Material difference is small (330 vs 320), but pair bonus (25) should make it clear
+    expect(scorePair).toBeGreaterThan(scoreSingle + 10);
+  });
+
+  test('Rook on Open File', () => {
+    const boardOpen = createEmptyBoard();
+    boardOpen[8][0] = { type: 'r', color: 'white' };
+    // File 0 is open (no pawns)
+
+    const boardClosed = createEmptyBoard();
+    boardClosed[8][0] = { type: 'r', color: 'white' };
+    boardClosed[7][0] = { type: 'p', color: 'white' }; // Blocked by own pawn
+
+    const scoreOpen = evaluatePosition(boardOpen, 'white');
+    const scoreClosed = evaluatePosition(boardClosed, 'white');
+
+    // Rook on open file should be worth more (excluding the material of the pawn in closed case)
+    // scoreOpen (~500+25pst+20open) vs scoreClosed (~500+25pst + 100pawn)
+    // Wait, scoreClosed has an extra pawn! 
+    // Let's add the same pawn to a DIFFERENT file in boardOpen.
+    boardOpen[7][1] = { type: 'p', color: 'white' };
+
+    const finalScoreOpen = evaluatePosition(boardOpen, 'white');
+    const finalScoreClosed = evaluatePosition(boardClosed, 'white');
+
+    expect(finalScoreOpen).toBeGreaterThan(finalScoreClosed);
+  });
 });
