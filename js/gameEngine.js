@@ -12,6 +12,9 @@ import {
   DEFAULT_TIME_CONTROL,
   DEFAULT_DIFFICULTY,
   AI_DELAY_MS,
+  setBoardVariant,
+  BOARD_VARIANTS,
+  getCurrentBoardSize,
 } from './config.js';
 import { RulesEngine } from './RulesEngine.js';
 import { makeMove } from './ai/MoveGenerator.js';
@@ -24,13 +27,27 @@ export { BOARD_SIZE, PHASES, PIECE_VALUES, AI_DELAY_MS };
 export class Game {
   constructor(initialPoints = 15, mode = 'setup') {
     this.mode = mode;
-    this.board = Array(BOARD_SIZE)
+
+    // Set board variant based on mode
+    if (mode === 'standard8x8') {
+      setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
+    } else {
+      setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
+    }
+
+    // Store board size as instance property
+    this.boardSize = getCurrentBoardSize();
+
+    this.board = Array(this.boardSize)
       .fill(null)
-      .map(() => Array(BOARD_SIZE).fill(null));
+      .map(() => Array(this.boardSize).fill(null));
 
     if (this.mode === 'classic') {
       this.phase = PHASES.PLAY;
       this.setupClassicBoard();
+    } else if (this.mode === 'standard8x8') {
+      this.phase = PHASES.PLAY;
+      this.setupStandard8x8Board();
     } else {
       this.phase = PHASES.SETUP_WHITE_KING;
     }
@@ -90,18 +107,40 @@ export class Game {
     this.kiMentorEnabled = this.mentorLevel !== 'OFF';
   }
 
+  /**
+   * Setup for 9x9 "Classic" mode (with extra queen columns)
+   */
   setupClassicBoard() {
+    const size = this.boardSize;
     // Setup Pawns
-    for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let c = 0; c < size; c++) {
       this.board[1][c] = { type: 'p', color: 'black', hasMoved: false };
-      this.board[BOARD_SIZE - 2][c] = { type: 'p', color: 'white', hasMoved: false };
+      this.board[size - 2][c] = { type: 'p', color: 'white', hasMoved: false };
     }
 
-    // Setup Pieces: R N B Q K Q B N R
+    // Setup Pieces: R N B Q K Q B N R (9 pieces for 9x9)
     const pieces = ['r', 'n', 'b', 'q', 'k', 'q', 'b', 'n', 'r'];
-    for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let c = 0; c < size; c++) {
       this.board[0][c] = { type: pieces[c], color: 'black', hasMoved: false };
-      this.board[BOARD_SIZE - 1][c] = { type: pieces[c], color: 'white', hasMoved: false };
+      this.board[size - 1][c] = { type: pieces[c], color: 'white', hasMoved: false };
+    }
+  }
+
+  /**
+   * Setup for standard 8x8 chess
+   */
+  setupStandard8x8Board() {
+    // Setup Pawns (row 1 for black, row 6 for white)
+    for (let c = 0; c < 8; c++) {
+      this.board[1][c] = { type: 'p', color: 'black', hasMoved: false };
+      this.board[6][c] = { type: 'p', color: 'white', hasMoved: false };
+    }
+
+    // Setup Pieces: R N B Q K B N R (standard chess)
+    const pieces = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
+    for (let c = 0; c < 8; c++) {
+      this.board[0][c] = { type: pieces[c], color: 'black', hasMoved: false };
+      this.board[7][c] = { type: pieces[c], color: 'white', hasMoved: false };
     }
   }
 

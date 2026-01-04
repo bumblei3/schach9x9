@@ -6,6 +6,11 @@ import { BOARD_SIZE, PHASES } from '../config.js';
 import { debounce } from '../utils.js';
 import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
 
+// Get effective board size (from game instance or fallback to BOARD_SIZE)
+function getBoardSize(game) {
+  return game && game.boardSize ? game.boardSize : BOARD_SIZE;
+}
+
 /**
  * Gibt das SVG-Symbol für eine Figur zurück.
  * @param {object} piece - Die Figur
@@ -72,12 +77,26 @@ export function getPieceText(piece) {
 export function initBoardUI(game) {
   const boardEl = document.getElementById('board');
   boardEl.innerHTML = '';
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+
+  const size = getBoardSize(game);
+
+  // Add CSS class for board size
+  boardEl.classList.remove('board-8x8', 'board-9x9');
+  boardEl.classList.add(size === 8 ? 'board-8x8' : 'board-9x9');
+
+  // Set CSS grid template
+  boardEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  boardEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const cell = document.createElement('div');
       cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
-      if (c === 2 || c === 5) cell.classList.add('border-right');
-      if (r === 2 || r === 5) cell.classList.add('border-bottom');
+      // Only show corridor borders for 9x9 mode
+      if (size === 9) {
+        if (c === 2 || c === 5) cell.classList.add('border-right');
+        if (r === 2 || r === 5) cell.classList.add('border-bottom');
+      }
       cell.dataset.r = r;
       cell.dataset.c = c;
       cell.addEventListener('click', () => game.handleCellClick(r, c));
@@ -288,7 +307,7 @@ export function initBoardUI(game) {
     boardWrapper.querySelectorAll('.col-labels, .row-labels').forEach(el => el.remove());
     const colLabels = document.createElement('div');
     colLabels.className = 'col-labels';
-    for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let c = 0; c < size; c++) {
       const label = document.createElement('span');
       label.textContent = String.fromCharCode(97 + c);
       label.className = 'coord-label';
@@ -296,9 +315,9 @@ export function initBoardUI(game) {
     }
     const rowLabels = document.createElement('div');
     rowLabels.className = 'row-labels';
-    for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let r = 0; r < size; r++) {
       const label = document.createElement('span');
-      label.textContent = (BOARD_SIZE - r).toString();
+      label.textContent = (size - r).toString();
       label.className = 'coord-label';
       rowLabels.appendChild(label);
     }
@@ -312,10 +331,12 @@ export function initBoardUI(game) {
  * @param {object} game - Die Game-Instanz
  */
 export function renderBoard(game) {
+  const size = getBoardSize(game);
+
   if (!game._previousBoardState) {
-    game._previousBoardState = Array(BOARD_SIZE)
+    game._previousBoardState = Array(size)
       .fill(null)
-      .map(() => Array(BOARD_SIZE).fill(null));
+      .map(() => Array(size).fill(null));
     game._forceFullRender = true;
   }
 
@@ -324,10 +345,10 @@ export function renderBoard(game) {
     .forEach(cell => cell.classList.remove('selectable-corridor'));
 
   const cellsToRender = [];
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const currentPiece = game.board[r][c];
-      const prev = game._previousBoardState[r][c];
+      const prev = game._previousBoardState[r] ? game._previousBoardState[r][c] : null;
       const changed =
         (!currentPiece && prev) ||
         (currentPiece && !prev) ||
@@ -336,6 +357,7 @@ export function renderBoard(game) {
           (currentPiece.type !== prev.type || currentPiece.color !== prev.color));
       if (game._forceFullRender || changed) {
         cellsToRender.push({ r, c });
+        if (!game._previousBoardState[r]) game._previousBoardState[r] = [];
         game._previousBoardState[r][c] = currentPiece
           ? { type: currentPiece.type, color: currentPiece.color }
           : null;
@@ -363,8 +385,8 @@ export function renderBoard(game) {
   }
 
   // Rendere Highlights (immer für alle Zellen relevanten Zustände prüfen)
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
       if (!cell) continue;
 

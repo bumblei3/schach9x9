@@ -4,10 +4,59 @@
  */
 
 /**
- * Größe des Schachbretts (9x9 Felder)
+ * Board Variants
+ * @enum {string}
+ */
+export const BOARD_VARIANTS = {
+  SCHACH9X9: '9x9',
+  STANDARD_8X8: '8x8',
+};
+
+/**
+ * Board size for each variant
+ */
+const BOARD_SIZES = {
+  [BOARD_VARIANTS.SCHACH9X9]: 9,
+  [BOARD_VARIANTS.STANDARD_8X8]: 8,
+};
+
+/**
+ * Current active board variant (default: 9x9)
+ */
+let currentBoardVariant = BOARD_VARIANTS.SCHACH9X9;
+
+/**
+ * Größe des Schachbretts (dynamisch basierend auf Variante)
  * @type {number}
  */
-export const BOARD_SIZE = 9;
+export let BOARD_SIZE = 9;
+
+/**
+ * Set the active board variant and update BOARD_SIZE
+ * @param {string} variant - BOARD_VARIANTS value
+ */
+export function setBoardVariant(variant) {
+  if (BOARD_SIZES[variant]) {
+    currentBoardVariant = variant;
+    BOARD_SIZE = BOARD_SIZES[variant];
+  }
+}
+
+/**
+ * Get current board size
+ * @returns {number}
+ */
+export function getCurrentBoardSize() {
+  return BOARD_SIZE;
+}
+
+/**
+ * Get current board variant
+ * @returns {string}
+ */
+export function getCurrentBoardVariant() {
+  return currentBoardVariant;
+}
 
 /**
  * Spielphasen
@@ -28,8 +77,9 @@ export const PHASES = {
  * @enum {string}
  */
 export const GAME_MODES = {
-  SETUP: 'setup', // Original mode with points and shop
-  CLASSIC: 'classic', // Fixed setup
+  SETUP: 'setup', // Original mode with points and shop (9x9)
+  CLASSIC: 'classic', // Fixed 9x9 setup
+  STANDARD_8X8: 'standard8x8', // Standard 8x8 chess
 };
 
 /**

@@ -51,7 +51,16 @@ export class DOMHandler {
       });
     });
 
-    // Classic Mode
+    // Standard 8x8 Mode
+    const standard8x8Btn = document.getElementById('standard-8x8-btn');
+    if (standard8x8Btn) {
+      standard8x8Btn.addEventListener('click', () => {
+        document.getElementById('points-selection-overlay').style.display = 'none';
+        this.app.init(0, 'standard8x8');
+      });
+    }
+
+    // Classic Mode (9x9)
     const classicBtn = document.getElementById('classic-mode-btn');
     if (classicBtn) {
       classicBtn.addEventListener('click', () => {
