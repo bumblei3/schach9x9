@@ -531,3 +531,109 @@ export function countMobility(board, r, c, piece) {
 
   return count;
 }
+
+// Piece values for SEE (same scale as AI_PIECE_VALUES)
+const SEE_PIECE_VALUES = {
+  p: 100,
+  n: 320,
+  b: 330,
+  r: 500,
+  q: 900,
+  k: 20000,
+  a: 650,
+  c: 850,
+  e: 1220,
+};
+
+/**
+ * Static Exchange Evaluation (SEE)
+ * Evaluates whether a capture sequence on a square wins or loses material.
+ * @param {Array} board - The board
+ * @param {Object} from - Attacker position {r, c}
+ * @param {Object} to - Target position {r, c}
+ * @returns {number} Material gain (positive = good capture, negative = bad)
+ */
+export function see(board, from, to) {
+  const size = board.length;
+  const attacker = board[from.r][from.c];
+  const target = board[to.r][to.c];
+
+  if (!attacker || !target) return 0;
+
+  // Simple case: Just return MVV-LVA approximation for performance
+  // Full SEE is expensive; this is a good approximation
+  const victimValue = SEE_PIECE_VALUES[target.type] || 0;
+  const attackerValue = SEE_PIECE_VALUES[attacker.type] || 0;
+
+  // If victim is worth more than attacker, likely good capture
+  if (victimValue >= attackerValue) return victimValue - attackerValue;
+
+  // Check if the square is defended
+  const defenderColor = target.color;
+
+  // Find the least valuable defender
+  let minDefenderValue = Infinity;
+
+  // Check pawn defenders
+  const pawnDir = defenderColor === 'white' ? -1 : 1;
+  for (const dc of [-1, 1]) {
+    const dr = to.r + pawnDir;
+    const dc2 = to.c + dc;
+    if (dr >= 0 && dr < size && dc2 >= 0 && dc2 < size) {
+      const p = board[dr][dc2];
+      if (p && p.type === 'p' && p.color === defenderColor) {
+        minDefenderValue = Math.min(minDefenderValue, SEE_PIECE_VALUES.p);
+      }
+    }
+  }
+
+  // Check knight defenders
+  for (const [dr, dc] of KNIGHT_MOVES) {
+    const nr = to.r + dr;
+    const nc = to.c + dc;
+    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+      const p = board[nr][nc];
+      if (p && p.color === defenderColor && (nr !== from.r || nc !== from.c)) {
+        if (p.type === 'n' || p.type === 'a' || p.type === 'c' || p.type === 'e') {
+          const val = SEE_PIECE_VALUES[p.type];
+          minDefenderValue = Math.min(minDefenderValue, val);
+        }
+      }
+    }
+  }
+
+  // Check sliding defenders (simplified - just look for presence)
+  for (const [dr, dc] of [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS]) {
+    let nr = to.r + dr;
+    let nc = to.c + dc;
+    while (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+      const p = board[nr][nc];
+      if (p) {
+        if (p.color === defenderColor && (nr !== from.r || nc !== from.c)) {
+          const isDiag = Math.abs(dr) === Math.abs(dc);
+          const canAttack = isDiag
+            ? PIECE_ATTACKS_DIAGONALLY[p.type]
+            : PIECE_ATTACKS_ORTHOGONALLY[p.type];
+          if (canAttack) {
+            minDefenderValue = Math.min(minDefenderValue, SEE_PIECE_VALUES[p.type]);
+          }
+        }
+        break;
+      }
+      nr += dr;
+      nc += dc;
+    }
+  }
+
+  // If no defenders, capture is good
+  if (minDefenderValue === Infinity) return victimValue;
+
+  // If we would lose the attacker and gain victim, calculate net
+  // Simplified: if defender < attacker, we probably lose the exchange
+  if (minDefenderValue <= attackerValue) {
+    return victimValue - attackerValue;
+  }
+
+  return victimValue;
+}
+

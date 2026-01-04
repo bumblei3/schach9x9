@@ -1,4 +1,5 @@
 import { BOARD_SIZE, AI_PIECE_VALUES } from '../config.js';
+import { see } from './MoveGenerator.js';
 
 // Killer Moves: Moves that caused beta cutoffs at each depth
 // Format: killerMoves[depth] = [move1, move2]
@@ -99,12 +100,17 @@ export function orderMoves(board, moves, ttBestMove, depth = 0) {
       score += 10000;
     }
 
-    // 2. MVV-LVA: Most Valuable Victim - Least Valuable Attacker
+    // 2. SEE-based capture scoring (replaces MVV-LVA)
     const targetPiece = board[move.to.r][move.to.c];
     if (targetPiece) {
-      const victimValue = AI_PIECE_VALUES[targetPiece.type] || 0;
-      const attackerValue = AI_PIECE_VALUES[fromPiece.type] || 0;
-      score += victimValue * 10 - attackerValue / 10;
+      const seeScore = see(board, move.from, move.to);
+      // Good captures (winning material) get high scores
+      // Bad captures (losing material) still tried after good captures but before quiet moves
+      if (seeScore >= 0) {
+        score += 5000 + seeScore; // Good captures: 5000+
+      } else {
+        score += 1000 + seeScore; // Bad captures: 1000 + negative = less priority
+      }
     } else {
       // 3. Killer moves (non-capture moves that caused beta cutoffs)
       const killers = killerMoves.get(depth);

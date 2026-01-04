@@ -234,6 +234,15 @@ export function evaluatePosition(board, forColor, config) {
   let whiteBishops = 0;
   let blackBishops = 0;
 
+  // Track rook positions for connected rook bonus
+  const whiteRooks = [];
+  const blackRooks = [];
+
+  // Tempo bonus: Small advantage for having the move
+  const TEMPO_BONUS = 10;
+  mgScore += TEMPO_BONUS; // Side to move (forColor) gets tempo
+  egScore += TEMPO_BONUS / 2;
+
   // First pass: collect pieces and basic material/pst/mobility
   const size = board.length;
   for (let r = 0; r < size; r++) {
@@ -276,11 +285,51 @@ export function evaluatePosition(board, forColor, config) {
           else blackBishops++;
         }
 
-        // Rook on open/semi-open file
+        // Rook on open/semi-open file + track positions
         if (piece.type === 'r') {
           const fileBonus = evaluateRookFile(c, isWhite);
           mgScore += fileBonus * sideMult;
           egScore += (fileBonus / 2) * sideMult;
+          // Track rook position for connected rook bonus
+          if (isWhite) whiteRooks.push({ r, c });
+          else blackRooks.push({ r, c });
+        }
+
+        // KNIGHT/BISHOP OUTPOST BONUS
+        if (piece.type === 'n' || piece.type === 'b') {
+          // Check if on central squares (forward half, middle columns)
+          const centerStart = Math.floor(size / 3);
+          const centerEnd = size - centerStart - 1;
+          const forwardHalf = isWhite ? r <= Math.floor(size / 2) : r >= Math.floor(size / 2);
+
+          if (forwardHalf && c >= centerStart && c <= centerEnd) {
+            // Check if protected by own pawn
+            const protectRow = isWhite ? r + 1 : r - 1;
+            let isSupported = false;
+            for (const dc of [-1, 1]) {
+              const pc = c + dc;
+              if (pc >= 0 && pc < size && protectRow >= 0 && protectRow < size) {
+                const p = board[protectRow][pc];
+                if (p && p.type === 'p' && p.color === piece.color) {
+                  isSupported = true;
+                  break;
+                }
+              }
+            }
+
+            if (isSupported) {
+              // Check if attackable by enemy pawns
+              const enemyPawnCols = isWhite ? pawnColumnsBlack : pawnColumnsWhite;
+              const canBeAttacked = (c > 0 && enemyPawnCols[c - 1] > 0) || (c < size - 1 && enemyPawnCols[c + 1] > 0);
+
+              if (!canBeAttacked) {
+                // Strong outpost
+                const outpostBonus = piece.type === 'n' ? 25 : 15;
+                mgScore += outpostBonus * sideMult;
+                egScore += (outpostBonus / 2) * sideMult;
+              }
+            }
+          }
         }
       }
 
@@ -309,6 +358,42 @@ export function evaluatePosition(board, forColor, config) {
   if (blackBishops >= 2) {
     mgScore -= 25 * mobilityWeight;
     egScore -= 40 * mobilityWeight;
+  }
+
+  // CONNECTED ROOKS BONUS
+  // Check if two rooks are on the same file or rank with no pieces between
+  function areRooksConnected(rooks, board) {
+    if (rooks.length < 2) return false;
+    const r1 = rooks[0], r2 = rooks[1];
+    // Same file
+    if (r1.c === r2.c) {
+      const minR = Math.min(r1.r, r2.r);
+      const maxR = Math.max(r1.r, r2.r);
+      for (let row = minR + 1; row < maxR; row++) {
+        if (board[row][r1.c]) return false;
+      }
+      return true;
+    }
+    // Same rank
+    if (r1.r === r2.r) {
+      const minC = Math.min(r1.c, r2.c);
+      const maxC = Math.max(r1.c, r2.c);
+      for (let col = minC + 1; col < maxC; col++) {
+        if (board[r1.r][col]) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  const CONNECTED_ROOK_BONUS = 20;
+  if (areRooksConnected(whiteRooks, board)) {
+    mgScore += CONNECTED_ROOK_BONUS;
+    egScore += CONNECTED_ROOK_BONUS * 1.5;
+  }
+  if (areRooksConnected(blackRooks, board)) {
+    mgScore -= CONNECTED_ROOK_BONUS;
+    egScore -= CONNECTED_ROOK_BONUS * 1.5;
   }
 
   // Second pass: Pawn structure (Isolated, Passed, Doubled)

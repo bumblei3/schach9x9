@@ -23,8 +23,9 @@ describe('AI Engine', () => {
   });
 
   describe('evaluatePosition', () => {
-    test('should return 0 for empty board', () => {
-      expect(evaluatePosition(board, 'white')).toBe(0);
+    test('should return tempo bonus for empty board', () => {
+      // With tempo bonus, the side to move gets a small advantage
+      expect(evaluatePosition(board, 'white')).toBe(5); // Tempo bonus
     });
 
     test('should value material correctly', () => {

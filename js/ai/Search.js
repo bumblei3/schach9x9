@@ -164,7 +164,7 @@ export function getBestMove(
         for (let i = 0; i < orderedMoves.length; i++) {
           // Time Management Check: Check every few moves to ensure responsiveness
           if ((i % 5 === 0) && timeLimit > 0) {
-            if (Date.now() - startTime >= timeLimit) {
+            if (Date.now() >= searchEndTime) {
               throw new Error('TimeOut');
             }
           }
@@ -343,9 +343,11 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
 
   const opponentColor = turnColor === 'white' ? 'black' : 'white';
 
+  // Calculate static eval once for pruning decisions
+  const staticEval = evaluatePosition(board, turnColor, activeConfig);
+
   // STATIC NULL MOVE PRUNING (Reverse Futility Pruning)
   if (depth <= 3 && !inCheck && Math.abs(beta) < 9000) {
-    const staticEval = evaluatePosition(board, turnColor, activeConfig);
     const margin = 120 * depth;
     if (staticEval - margin >= beta) return beta;
   }
@@ -373,10 +375,28 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
   let bestMove = null;
   let flag = TT_ALPHA;
 
+  // Futility Pruning margins (indexed by depth)
+  const FUTILITY_MARGIN = [0, 100, 200, 350];
+
   for (let i = 0; i < orderedMoves.length; i++) {
     const move = orderedMoves[i];
     const piece = board[move.from.r][move.from.c];
     const capturedPiece = board[move.to.r][move.to.c];
+
+    // FUTILITY PRUNING: Skip quiet moves that can't improve alpha
+    if (
+      depth <= 3 &&
+      i > 0 && // Don't prune first move
+      !inCheck &&
+      !capturedPiece && // Not a capture
+      !move.promotion && // Not a promotion
+      Math.abs(alpha) < 9000 // Not mate score
+    ) {
+      if (staticEval + FUTILITY_MARGIN[depth] <= alpha) {
+        continue; // Prune this move
+      }
+    }
+
     const undoInfo = makeMove(board, move);
     const nextHash = updateZobristHash(hash, move.from, move.to, piece, capturedPiece, undoInfo);
 
@@ -386,7 +406,7 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
     } else {
       // LATE MOVE REDUCTION (LMR)
       let reduction = 0;
-      const isCapture = board[move.to.r][move.to.c] !== null;
+      const isCapture = capturedPiece !== null;
 
       // LATE MOVE REDUCTION
       if (depth >= 3 && i >= 3 && !isCapture && !inCheck && Math.abs(alpha) < 9000) {
