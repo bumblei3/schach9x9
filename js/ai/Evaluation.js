@@ -438,6 +438,25 @@ export function evaluatePosition(board, forColor, config) {
         mgScore += passedBonus * sideMult;
         egScore += passedBonus * 1.5 * sideMult;
       }
+
+      // Backward Pawn Penalty
+      if (isBackwardPawn(board, r, c, piece.color, pawnColumnsWhite, pawnColumnsBlack)) {
+        mgScore -= 10 * pawnStructureWeight * sideMult;
+        egScore -= 10 * pawnStructureWeight * sideMult;
+      }
+
+      // Phalanx Bonus (Connected on same rank)
+      // Check right neighbor to avoid double counting
+      if (c < size - 1) {
+        const rightPiece = board[r][c + 1];
+        if (rightPiece && rightPiece.type === 'p' && rightPiece.color === piece.color) {
+          // Bonus depends on rank (advanced phalanx is stronger)
+          const rankBonus = isWhite ? r : size - 1 - r;
+          const phalanxBonus = (5 + rankBonus) * pawnStructureWeight;
+          mgScore += phalanxBonus * sideMult;
+          egScore += phalanxBonus * sideMult;
+        }
+      }
     }
   }
 
@@ -451,6 +470,70 @@ export function evaluatePosition(board, forColor, config) {
   const perspectiveScore = forColor === 'white' ? totalScore : -totalScore;
 
   return Math.round(perspectiveScore);
+}
+
+
+/**
+ * Check if a pawn is backward
+ * A backward pawn cannot safely advance and has fewer friendly pawns controlling its stop square.
+ */
+function isBackwardPawn(board, r, c, color, whitePawnCols, blackPawnCols) {
+  const size = board.length;
+  const isWhite = color === 'white';
+
+  // 1. Check if blocked or controlled by enemy pawn
+  // Enemy attacks on stop square
+  const enemyCols = isWhite ? blackPawnCols : whitePawnCols;
+  const enemyAttacks = (enemyCols[c - 1] > 0 ? 1 : 0) + (enemyCols[c + 1] > 0 ? 1 : 0);
+
+  if (enemyAttacks === 0) return false; // Can advance freely (at least regarding pawns)
+
+  // 2. Check for friendly support
+  // A pawn is backward if no friendly pawn is behind it or on equal rank on adjacent files
+  // (i.e., neighbors are all ahead)
+  // This is simplified as we only have column counts here, not row positions.
+  // Ideally we need exact board check.
+
+  // Adjusted Logic:
+  // Check adjacent files for friendly pawns that can support the stop square (r+1, c)
+  // Support comes from (r, c-1) or (r, c+1) moving to (r+1, c)? No, pawns capture diagonally.
+  // Support comes from (r, c-1) or (r, c+1) guarding (r+1, c).
+  // This means friendly pawns at (r, c-1) or (r, c+1) directly.
+  // Or friendly pawns at (r-1, c-1) etc.
+
+  // Implementation using board check is more accurate than column counts
+  let supported = false;
+
+  // Check left support
+  if (c > 0) {
+    // Friendly pawn on adjacent file that is BEHIND or EQUAL to this pawn?
+    // If neighbor is AHEAD (r+1), it cannot guard (r+1).
+    // Wait, White pawns at r guard r+1.
+    // So neighbor at r (c-1) guards r+1, c.
+    // Neighbor at r-1 (c-1) can move to r and guard.
+    // Generally: Is there a helper that prevents it from being backward?
+
+    // Backward definition: "Has no friendly pawn on an adjacent file which is further back or on the same rank".
+    // We check board for neighbors.
+    for (let row = isWhite ? 0 : size - 1; isWhite ? row <= r : row >= r; isWhite ? row++ : row--) {
+      const p = board[row][c - 1];
+      if (p && p.type === 'p' && p.color === color) {
+        supported = true;
+        break;
+      }
+    }
+  }
+  if (!supported && c < size - 1) {
+    for (let row = isWhite ? 0 : size - 1; isWhite ? row <= r : row >= r; isWhite ? row++ : row--) {
+      const p = board[row][c + 1];
+      if (p && p.type === 'p' && p.color === color) {
+        supported = true;
+        break;
+      }
+    }
+  }
+
+  return !supported;
 }
 
 /**

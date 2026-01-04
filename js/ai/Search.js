@@ -111,6 +111,9 @@ export function getBestMove(
   bestMoveSoFar = null;
   lastProgressUpdate = Date.now();
   searchEndTime = timeLimit > 0 ? Date.now() + timeLimit : Infinity;
+  const hardLimit = timeLimit;
+  const softLimit = timeLimit > 0 ? timeLimit * 0.6 : 0; // Target 60% of allocated time
+  const startTime = Date.now();
 
   // 1. Opening Book
   const bookMove = queryOpeningBook(board);
@@ -132,11 +135,12 @@ export function getBestMove(
 
   let bestMove = moves[0];
   let bestScore = -Infinity;
+  let bestMoveStability = 0; // How many depths bas bestMove remained same
+  let previousBestMove = null;
 
   const orderedMoves = orderMoves(board, moves, null, 0);
 
   try {
-    // ITERATIVE DEEPENING
     // ITERATIVE DEEPENING
     const initialRootHash = computeZobristHash(board, color);
 
@@ -242,6 +246,36 @@ export function getBestMove(
 
       // If we found a mate, no need to search deeper
       if (Math.abs(bestScore) > 9000) break;
+
+      // SMART TIME MANAGEMENT
+      const elapsed = Date.now() - startTime;
+
+      if (
+        previousBestMove &&
+        bestMove &&
+        previousBestMove.from.r === bestMove.from.r &&
+        previousBestMove.from.c === bestMove.from.c &&
+        previousBestMove.to.r === bestMove.to.r &&
+        previousBestMove.to.c === bestMove.to.c
+      ) {
+        bestMoveStability++;
+      } else {
+        bestMoveStability = 0;
+      }
+      previousBestMove = bestMove;
+
+      if (timeLimit > 0) {
+        // Hard Limit check
+        if (elapsed >= hardLimit) break;
+
+        // Soft Limit check
+        if (elapsed >= softLimit) {
+          // If stable (move unchanged for >= 1 iteration) or very close to hard limit, stop
+          if (bestMoveStability >= 1 || elapsed > hardLimit * 0.9) {
+            break;
+          }
+        }
+      }
     }
 
     // Adjust difficulty for beginner at the end of search

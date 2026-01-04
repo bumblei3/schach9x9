@@ -190,6 +190,42 @@ describe('AI Evaluation Logic', () => {
     expect(scoreAttacked).toBeLessThan(scoreCalm);
   });
 
+  test('Pawn Structure: Backward Pawn Penalty', () => {
+    // Normal pawn vs Backward pawn
+    const boardNormal = createEmptyBoard();
+    boardNormal[4][4] = { type: 'p', color: 'white' }; // Safe
+
+    const boardBackward = createEmptyBoard();
+    boardBackward[4][4] = { type: 'p', color: 'white' };
+
+    // White moves UP (decreasing r). Stop square is 3,4.
+    // Black moves DOWN (increasing r).
+    // Enemy pawn at 2,5 attacks 3,4. (2 + 1 = 3, 5 - 1 = 4).
+    boardBackward[2][5] = { type: 'p', color: 'black' };
+
+    const scoreNormal = evaluatePosition(boardNormal, 'white');
+    const scoreBackward = evaluatePosition(boardBackward, 'white');
+
+    // Backward pawn should have lower score
+    expect(scoreBackward).toBeLessThan(scoreNormal);
+  });
+
+  test('Pawn Structure: Phalanx Bonus', () => {
+    // Connected pawns on same rank vs Isolated
+    const boardPhalanx = createEmptyBoard();
+    boardPhalanx[4][4] = { type: 'p', color: 'white' };
+    boardPhalanx[4][5] = { type: 'p', color: 'white' };
+
+    const boardIsolated = createEmptyBoard();
+    boardIsolated[4][4] = { type: 'p', color: 'white' };
+    boardIsolated[4][6] = { type: 'p', color: 'white' }; // Gap of 1
+
+    const scorePhalanx = evaluatePosition(boardPhalanx, 'white');
+    const scoreIso = evaluatePosition(boardIsolated, 'white');
+
+    expect(scorePhalanx).toBeGreaterThan(scoreIso);
+  });
+
   test('Advanced Pawn Logic: Supported and Blocked Passed Pawns', () => {
     // Supported Pawn
     const boardSupported = createEmptyBoard();
