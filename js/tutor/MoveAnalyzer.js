@@ -2,6 +2,65 @@ import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
 import { evaluatePosition as _evaluatePosition } from '../ai/Evaluation.js';
+import { MENTOR_SETTINGS } from '../config.js';
+
+/**
+ * Analyzes a move BEFORE it is executed to provide proactive warnings
+ * @param {Object} game
+ * @param {Object} move {from: {r,c}, to: {r,c}}
+ */
+export function analyzePlayerMovePreExecution(game, move) {
+  if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return null;
+
+  const from = move.from;
+  const to = move.to;
+  const piece = game.board[from.r][from.c];
+  if (!piece) return null;
+
+  // 1. Get current evaluation (perspective: white is positive)
+  const currentEval = _evaluatePosition(game.board, 'white');
+
+  // 🎯 Add tactical penalty for hanging pieces
+  // We call it BEFORE our manual simulation because detectThreatsAfterMove does its own simulation
+  const threats = TacticsDetector.detectThreatsAfterMove(game, { getPieceName: t => t }, move);
+  let penalty = 0;
+  threats.forEach(t => {
+    const val = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000, a: 650, c: 850, e: 1220 };
+    penalty += val[t.piece.type] || 0;
+  });
+
+  // 2. Simulate move for static evaluation
+  const originalTarget = game.board[to.r][to.c];
+  game.board[to.r][to.c] = piece;
+  game.board[from.r][from.c] = null;
+
+  // 3. Evaluate resulting position
+  let newEval = _evaluatePosition(game.board, 'white');
+
+  const turn = piece.color;
+  if (turn === 'white') newEval -= penalty;
+  else newEval += penalty;
+
+  // Restore board
+  game.board[from.r][from.c] = piece;
+  game.board[to.r][to.c] = originalTarget;
+
+  // 4. Calculate drop from perspective of moving player
+  const drop = turn === 'white' ? currentEval - newEval : newEval - currentEval;
+  const threshold = MENTOR_SETTINGS.BLUNDER_THRESHOLD || 200;
+
+  if (drop >= threshold) {
+    // Generate full analysis for the warning
+    return analyzeMoveWithExplanation(
+      game,
+      move,
+      newEval,
+      turn === 'white' ? currentEval : -currentEval
+    );
+  }
+
+  return null;
+}
 
 /**
  * Analyzes a move and provides a detailed explanation
@@ -51,7 +110,8 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
   }
 
   // Detect tactical patterns
-  const patterns = TacticsDetector.detectTacticalPatterns(game, this, move);
+  const analyzer = { getPieceName };
+  const patterns = TacticsDetector.detectTacticalPatterns(game, analyzer, move);
   const questions = [];
   patterns.forEach(pattern => {
     tacticalExplanations.push(pattern.explanation);
@@ -65,7 +125,7 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
   });
 
   // Check for threats to own pieces after this move
-  const threats = TacticsDetector.detectThreatsAfterMove(game, this, move);
+  const threats = TacticsDetector.detectThreatsAfterMove(game, analyzer, move);
   if (threats.length > 0) {
     threats.forEach(threat => {
       warnings.push(threat.warning);
@@ -369,28 +429,42 @@ export function checkBlunder(game, tutorController, moveRecord) {
 /**
  * Shows a blunder warning
  */
-export function showBlunderWarning(game, analysis) {
+/**
+ * Shows a blunder warning (can be post-move or pre-move)
+ */
+export function showBlunderWarning(game, analysis, proceedCallback = null) {
   const warnings = analysis.warnings.join('\n');
   const explanation =
     analysis.tacticalExplanations.join('\n') ||
     'Kein konkretes taktisches Motiv erkannt, aber die Stellung verschlechtert sich deutlich.';
 
-  UI.showModal(
-    '⚠️ Schwerer Fehler (Blunder)',
-    `Dieser Zug verschlechtert deine Stellung um ${(analysis.scoreDiff / -100).toFixed(1)} Bauern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`,
-    [
-      { text: 'Nein, weiterspielen', class: 'btn-secondary' },
-      {
-        text: 'Ja, Zug rückgängig machen',
-        class: 'btn-primary',
-        callback: () => {
-          if (game.moveController && game.moveController.undoMove) {
-            game.moveController.undoMove();
-          } else if (game.undoMove) {
-            game.undoMove();
-          }
+  const isPreMove = !!proceedCallback;
+  const title = isPreMove ? '⚠️ Warnung: Grober Fehler?' : '⚠️ Schwerer Fehler (Blunder)';
+  const diff = (analysis.scoreDiff / -100).toFixed(1);
+
+  const message = isPreMove
+    ? `Dieser Zug würde deine Stellung um ${diff} Bauern verschlechtern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du diesen Zug wirklich ausführen?`
+    : `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`;
+
+  const buttons = isPreMove
+    ? [
+        { text: 'Abbrechen', class: 'btn-secondary' },
+        { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
+      ]
+    : [
+        { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+        {
+          text: 'Ja, Zug rückgängig machen',
+          class: 'btn-primary',
+          callback: () => {
+            if (game.moveController && game.moveController.undoMove) {
+              game.moveController.undoMove();
+            } else if (game.undoMove) {
+              game.undoMove();
+            }
+          },
         },
-      },
-    ]
-  );
+      ];
+
+  UI.showModal(title, message, buttons);
 }

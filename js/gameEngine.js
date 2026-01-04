@@ -82,6 +82,10 @@ export class Game {
     this.puzzleState = null;
 
     this.rulesEngine = new RulesEngine(this);
+
+    // KI-Mentor (Coach)
+    const savedMentor = localStorage.getItem('ki_mentor_enabled');
+    this.kiMentorEnabled = savedMentor === null ? true : savedMentor === 'true';
   }
 
   setupClassicBoard() {

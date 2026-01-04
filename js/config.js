@@ -104,3 +104,14 @@ export const DEFAULT_DIFFICULTY = AI_DIFFICULTIES.MEDIUM;
  */
 export const AI_DELAY_MS = 1000; // Delay before AI makes a move
 export const AUTO_SAVE_INTERVAL = 5; // Auto-save every N moves
+
+/**
+ * KI-Mentor Settings
+ */
+export const MENTOR_SETTINGS = {
+  BLUNDER_THRESHOLD: 200, // Drop in centipawns to trigger a warning
+  MISTAKE_THRESHOLD: 100, // Drop in centipawns for minor warnings
+  FAST_DEPTH: 6, // Depth for quick pre-move analysis
+};
+
+export const DEFAULT_MENTOR_ENABLED = true;

@@ -118,4 +118,8 @@ export class TutorController {
   placePiece(r, c, type, isWhite) {
     return HintGenerator.placePiece(this.game, r, c, type, isWhite);
   }
+
+  analyzePlayerMovePreExecution(move) {
+    return MoveAnalyzer.analyzePlayerMovePreExecution(this.game, move);
+  }
 }

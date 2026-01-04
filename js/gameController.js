@@ -66,20 +66,22 @@ export class GameController {
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
             </li>
-            ${level.goals[2]
-        ? `
+            ${
+              level.goals[2]
+                ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
             </li>`
-        : ''
-      }
-            ${level.goals[3]
-        ? `
+                : ''
+            }
+            ${
+              level.goals[3]
+                ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
             </li>`
-        : ''
-      }
+                : ''
+            }
           </ul>
         </div>
       </div>
@@ -87,7 +89,7 @@ export class GameController {
 
     // Show intro modal
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
     ]);
   }
 

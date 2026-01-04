@@ -208,7 +208,7 @@ export class AnalysisUI {
   }
 
   finishAnalysis() {
-    UI.hideModal(); // Hide progress
+    UI.closeModal(); // Hide progress
 
     const whiteStats = PostGameAnalyzer.analyzeGame(this.game.moveHistory, 'white');
     const blackStats = PostGameAnalyzer.analyzeGame(this.game.moveHistory, 'black');

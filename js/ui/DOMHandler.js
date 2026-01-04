@@ -486,6 +486,26 @@ export class DOMHandler {
         this.updateFullscreenIcon();
       });
     }
+
+    // KI Mentor Toggle
+    const mentorToggle = document.getElementById('ki-mentor-toggle');
+    if (mentorToggle) {
+      // Initialize from localStorage or default
+      const savedMentor = localStorage.getItem('ki_mentor_enabled');
+      const isEnabled = savedMentor === null ? true : savedMentor === 'true';
+      mentorToggle.checked = isEnabled;
+      if (this.game) this.game.kiMentorEnabled = isEnabled;
+
+      mentorToggle.addEventListener('change', () => {
+        const active = mentorToggle.checked;
+        if (this.game) this.game.kiMentorEnabled = active;
+        localStorage.setItem('ki_mentor_enabled', active);
+        UI.showToast(
+          active ? 'KI-Mentor aktiviert' : 'KI-Mentor deaktiviert',
+          active ? 'success' : 'neutral'
+        );
+      });
+    }
   }
 
   toggleFullscreen() {

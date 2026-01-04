@@ -4,7 +4,7 @@ import { setupJSDOM, createMockGame } from '../test-utils.js';
 // Mock UI
 jest.unstable_mockModule('../../js/ui.js', () => ({
   showModal: jest.fn(),
-  hideModal: jest.fn(),
+  closeModal: jest.fn(),
   showToast: jest.fn(),
   updateMoveHistoryUI: jest.fn(),
   renderEvalGraph: jest.fn(),
