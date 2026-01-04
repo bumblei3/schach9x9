@@ -54,8 +54,8 @@ describe('PuzzleManager', () => {
 
     test('should return false for invalid index', () => {
       expect(manager.loadPuzzle(game, -1)).toBe(false);
-      // Index 999 is now valid and triggers infinite generation
-      const puzzle = manager.loadPuzzle(game, 999);
+      // Index 1000 is now valid and triggers infinite generation (even indices are 'easy')
+      const puzzle = manager.loadPuzzle(game, 1000);
       expect(puzzle).not.toBe(false);
       expect(puzzle.id).toMatch(/^proc-/);
     });

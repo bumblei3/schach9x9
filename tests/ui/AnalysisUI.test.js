@@ -68,10 +68,10 @@ describe('AnalysisUI', () => {
     };
 
     game = createMockGame();
+    game.aiController = {
+      aiWorkers: [mockWorker],
+    };
     game.gameController = {
-      aiController: {
-        aiWorkers: [mockWorker],
-      },
       moveController: {
         reconstructBoardAtMove: jest.fn(),
       },

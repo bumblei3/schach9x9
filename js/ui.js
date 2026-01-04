@@ -38,7 +38,7 @@ export function animateCheckmate(game, color) {
 
       // Winner is the opposite color
       // Trigger confetti
-      import('../effects.js').then(({ confettiSystem }) => {
+      import('./effects.js').then(({ confettiSystem }) => {
         confettiSystem.spawn();
       });
     }

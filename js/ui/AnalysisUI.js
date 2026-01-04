@@ -48,7 +48,7 @@ export class AnalysisUI {
     this.showProgressModal();
 
     // Use AI worker from controller
-    const aiController = this.game.gameController.aiController;
+    const aiController = this.game.aiController;
     if (!aiController) {
       logger.error('AI Controller not found for analysis');
       this.isAnalyzing = false;

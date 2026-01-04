@@ -13,7 +13,7 @@ export class ProceduralGenerator {
    */
   static generatePuzzle(difficulty = 'easy') {
     const depth = difficulty === 'easy' ? 1 : 2;
-    const maxAttempts = 200;
+    const maxAttempts = 500;
 
     for (let i = 0; i < maxAttempts; i++) {
       const board = this.createRandomPosition(difficulty);
