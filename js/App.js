@@ -90,6 +90,19 @@ export class App {
     // Initialize Service Worker
     this.registerServiceWorker();
 
+    // UI Adjustments for Game Modes
+    const toggle3DBtn = document.getElementById('toggle-3d-btn');
+    const shopPanel = document.getElementById('shop-panel');
+
+    if (mode === 'standard8x8') {
+      // Hide 3D button (Battle Chess only supports 9x9 currently)
+      if (toggle3DBtn) toggle3DBtn.style.display = 'none';
+      // Ensure Shop is hidden
+      if (shopPanel) shopPanel.classList.add('hidden');
+    } else {
+      if (toggle3DBtn) toggle3DBtn.style.display = 'flex';
+    }
+
     logger.info('App initialization complete');
   }
 
