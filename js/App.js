@@ -95,8 +95,7 @@ export class App {
     const shopPanel = document.getElementById('shop-panel');
 
     if (mode === 'standard8x8') {
-      // Hide 3D button (Battle Chess only supports 9x9 currently)
-      if (toggle3DBtn) toggle3DBtn.style.display = 'none';
+      // 3D mode now supported for 8x8 too by dynamic sizing
       // Ensure Shop is hidden
       if (shopPanel) shopPanel.classList.add('hidden');
     } else {

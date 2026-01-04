@@ -170,28 +170,30 @@ export class SceneManager3D {
   }
 
   addCoordinateLabels() {
-    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
-    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'].slice(0, BOARD_SIZE);
+    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].slice(0, BOARD_SIZE);
+
+    const offset = (BOARD_SIZE * this.squareSize) / 2;
 
     files.forEach((file, index) => {
       const sprite = this.createTextSprite(file);
       const pos = this.boardToWorld(0, index);
-      sprite.position.set(pos.x, 0.05, 4.5 * this.squareSize);
+      sprite.position.set(pos.x, 0.05, offset);
       this.boardGroup.add(sprite);
 
       const spriteTop = this.createTextSprite(file);
-      spriteTop.position.set(pos.x, 0.05, -4.5 * this.squareSize);
+      spriteTop.position.set(pos.x, 0.05, -offset);
       this.boardGroup.add(spriteTop);
     });
 
     ranks.forEach((rank, index) => {
       const sprite = this.createTextSprite(rank);
       const pos = this.boardToWorld(index, 0);
-      sprite.position.set(-4.5 * this.squareSize, 0.05, pos.z);
+      sprite.position.set(-offset, 0.05, pos.z);
       this.boardGroup.add(sprite);
 
       const spriteRight = this.createTextSprite(rank);
-      spriteRight.position.set(4.5 * this.squareSize, 0.05, pos.z);
+      spriteRight.position.set(offset, 0.05, pos.z);
       this.boardGroup.add(spriteRight);
     });
   }
@@ -225,8 +227,9 @@ export class SceneManager3D {
   }
 
   boardToWorld(row, col) {
-    const x = (col - 4) * this.squareSize;
-    const z = (row - 4) * this.squareSize;
+    const offset = (BOARD_SIZE - 1) / 2;
+    const x = (col - offset) * this.squareSize;
+    const z = (row - offset) * this.squareSize;
     return { x, z };
   }
 
