@@ -2,7 +2,6 @@
  * AI Search Edge Cases and Coverage Tests
  * These tests target specific uncovered branches in Search.js and TranspositionTable.js
  */
-import { jest } from '@jest/globals';
 import { Game } from '../../js/gameEngine.js';
 import * as Search from '../../js/ai/Search.js';
 import {

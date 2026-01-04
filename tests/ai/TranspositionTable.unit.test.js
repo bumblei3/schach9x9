@@ -1,12 +1,7 @@
-import { jest } from '@jest/globals';
 import {
     computeZobristHash,
     updateZobristHash,
-    storeTT,
-    probeTT,
     clearTT,
-    getZobristTable,
-    TT_EXACT,
     getXORSideToMove,
 } from '../../js/ai/TranspositionTable.js';
 import { BOARD_SIZE } from '../../js/config.js';
