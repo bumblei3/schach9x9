@@ -1,4 +1,4 @@
-import { logger } from '../logger.js';
+import { debounce } from '../utils.js';
 import * as UI from '../ui.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from '../utils/PGNGenerator.js';
 import { soundManager } from '../sounds.js';
@@ -447,9 +447,18 @@ export class DOMHandler {
       volumeValue.textContent = volumeSlider.value + '%';
       volumeSlider.disabled = !soundManager.enabled;
 
+      volumeSlider.addEventListener(
+        'input',
+        debounce(() => {
+          const val = parseInt(volumeSlider.value);
+          soundManager.setVolume(val);
+          volumeValue.textContent = val + '%';
+        }, 50)
+      );
+
+      // Immediate visual update (optional, but good UX)
       volumeSlider.addEventListener('input', () => {
         const val = parseInt(volumeSlider.value);
-        soundManager.setVolume(val);
         volumeValue.textContent = val + '%';
       });
     }
