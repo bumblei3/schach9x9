@@ -395,11 +395,12 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
               </div>
 
               <div class="setting-row">
-                <label>KI-Mentor (Warnungen)</label>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="ki-mentor-toggle" checked="">
-                  <span class="toggle-slider"></span>
-                </label>
+                <label>KI-Mentor (Warnstufe)</label>
+                <select id="ki-mentor-level-select" class="menu-select">
+                  <option value="OFF">Aus</option>
+                  <option value="STANDARD" selected="">Standard (Nur Patzer)</option>
+                  <option value="STRICT">Streng (Auch Fehler)</option>
+                </select>
               </div>
 
               <div class="setting-row" id="tutor-points-row">

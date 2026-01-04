@@ -8,7 +8,7 @@ describe('MoveAnalyzer Unit Tests', () => {
 
   test('categorizeMove great move', () => {
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
-      { board, getValidMoves: () => [], isInCheck: () => false },
+      { board, getValidMoves: () => [], isInCheck: () => false, isSquareUnderAttack: () => false },
       { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
       250,
       50,
@@ -19,7 +19,7 @@ describe('MoveAnalyzer Unit Tests', () => {
 
   test('categorizeMove blunder', () => {
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
-      { board, getValidMoves: () => [], isInCheck: () => false },
+      { board, getValidMoves: () => [], isInCheck: () => false, isSquareUnderAttack: () => false },
       { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
       -250,
       50,
@@ -31,7 +31,7 @@ describe('MoveAnalyzer Unit Tests', () => {
 
   test('categorizeMove mistake', () => {
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
-      { board, getValidMoves: () => [], isInCheck: () => false },
+      { board, getValidMoves: () => [], isInCheck: () => false, isSquareUnderAttack: () => false },
       { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
       -150,
       50,
@@ -50,7 +50,12 @@ describe('MoveAnalyzer Unit Tests', () => {
     testBoard[7][4] = { type: 'p', color: 'white' };
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
-      { board: testBoard, getValidMoves: () => [], isInCheck: () => false },
+      {
+        board: testBoard,
+        getValidMoves: () => [],
+        isInCheck: () => false,
+        isSquareUnderAttack: () => false,
+      },
       { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, captured: { type: 'p', color: 'black' } },
       100,
       0,

@@ -487,23 +487,30 @@ export class DOMHandler {
       });
     }
 
-    // KI Mentor Toggle
-    const mentorToggle = document.getElementById('ki-mentor-toggle');
-    if (mentorToggle) {
+    // KI Mentor Level Select
+    const mentorSelect = document.getElementById('ki-mentor-level-select');
+    if (mentorSelect) {
       // Initialize from localStorage or default
-      const savedMentor = localStorage.getItem('ki_mentor_enabled');
-      const isEnabled = savedMentor === null ? true : savedMentor === 'true';
-      mentorToggle.checked = isEnabled;
-      if (this.game) this.game.kiMentorEnabled = isEnabled;
+      const savedLevel = localStorage.getItem('ki_mentor_level') || 'STANDARD';
+      mentorSelect.value = savedLevel;
+      if (this.game) {
+        this.game.mentorLevel = savedLevel;
+        this.game.kiMentorEnabled = savedLevel !== 'OFF';
+      }
 
-      mentorToggle.addEventListener('change', () => {
-        const active = mentorToggle.checked;
-        if (this.game) this.game.kiMentorEnabled = active;
-        localStorage.setItem('ki_mentor_enabled', active);
-        UI.showToast(
-          active ? 'KI-Mentor aktiviert' : 'KI-Mentor deaktiviert',
-          active ? 'success' : 'neutral'
-        );
+      mentorSelect.addEventListener('change', () => {
+        const level = mentorSelect.value;
+        if (this.game) {
+          this.game.mentorLevel = level;
+          this.game.kiMentorEnabled = level !== 'OFF';
+        }
+        localStorage.setItem('ki_mentor_level', level);
+
+        let msg = 'KI-Mentor deaktiviert';
+        if (level === 'STANDARD') msg = 'KI-Mentor: Standard (Patzer)';
+        else if (level === 'STRICT') msg = 'KI-Mentor: Streng (Fehler & Patzer)';
+
+        UI.showToast(msg, level !== 'OFF' ? 'success' : 'neutral');
       });
     }
   }

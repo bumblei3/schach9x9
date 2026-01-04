@@ -2,7 +2,7 @@ import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
 import { evaluatePosition as _evaluatePosition } from '../ai/Evaluation.js';
-import { MENTOR_SETTINGS } from '../config.js';
+import { MENTOR_LEVELS } from '../config.js';
 
 /**
  * Analyzes a move BEFORE it is executed to provide proactive warnings
@@ -47,7 +47,9 @@ export function analyzePlayerMovePreExecution(game, move) {
 
   // 4. Calculate drop from perspective of moving player
   const drop = turn === 'white' ? currentEval - newEval : newEval - currentEval;
-  const threshold = MENTOR_SETTINGS.BLUNDER_THRESHOLD || 200;
+
+  const currentLevel = MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD;
+  const threshold = currentLevel.threshold;
 
   if (drop >= threshold) {
     // Generate full analysis for the warning

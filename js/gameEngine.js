@@ -84,8 +84,10 @@ export class Game {
     this.rulesEngine = new RulesEngine(this);
 
     // KI-Mentor (Coach)
-    const savedMentor = localStorage.getItem('ki_mentor_enabled');
-    this.kiMentorEnabled = savedMentor === null ? true : savedMentor === 'true';
+    const savedMentorLevel = localStorage.getItem('ki_mentor_level');
+    this.mentorLevel = savedMentorLevel || 'STANDARD';
+    // Backward compatibility: kiMentorEnabled is true if level is not OFF
+    this.kiMentorEnabled = this.mentorLevel !== 'OFF';
   }
 
   setupClassicBoard() {

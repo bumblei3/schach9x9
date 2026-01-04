@@ -42,7 +42,8 @@ describe('TutorController Extra Coverage', () => {
       bestMoves: [],
       getAllLegalMoves: jest.fn(() => []),
       getValidMoves: jest.fn(() => []),
-      isSquareAttacked: jest.fn(() => false),
+      isSquareUnderAttack: jest.fn(() => false),
+      isSquareAttacked: jest.fn(() => false), // Legacy support if needed
       isInCheck: jest.fn(() => false),
       isCheckmate: jest.fn(() => false),
       isStalemate: jest.fn(() => false),

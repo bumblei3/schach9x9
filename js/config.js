@@ -108,10 +108,14 @@ export const AUTO_SAVE_INTERVAL = 5; // Auto-save every N moves
 /**
  * KI-Mentor Settings
  */
+export const MENTOR_LEVELS = {
+  STRICT: { id: 'STRICT', threshold: 50, name: 'Streng (Fehler & Patzer)' },
+  STANDARD: { id: 'STANDARD', threshold: 200, name: 'Standard (Nur Patzer)' },
+  OFF: { id: 'OFF', threshold: Infinity, name: 'Aus' },
+};
+
 export const MENTOR_SETTINGS = {
-  BLUNDER_THRESHOLD: 200, // Drop in centipawns to trigger a warning
-  MISTAKE_THRESHOLD: 100, // Drop in centipawns for minor warnings
   FAST_DEPTH: 6, // Depth for quick pre-move analysis
 };
 
-export const DEFAULT_MENTOR_ENABLED = true;
+export const DEFAULT_MENTOR_LEVEL = 'STANDARD';

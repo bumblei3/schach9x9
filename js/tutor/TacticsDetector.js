@@ -475,7 +475,7 @@ export function detectThreatsAfterMove(game, analyzer, move) {
       for (let c = 0; c < BOARD_SIZE; c++) {
         const ownPiece = game.board[r][c];
         if (!ownPiece || ownPiece.color !== piece.color) continue;
-        if (ownPiece.type === 'p') continue; // Don't warn about pawns
+        // Pawns are now included for STRICT mode detection
 
         // Is this piece under attack?
         const isUnderAttack = game.isSquareUnderAttack(r, c, opponentColor);
