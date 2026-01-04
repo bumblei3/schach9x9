@@ -211,23 +211,30 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
         .sort((a, b) => b._score - a._score);
 
       if (validMoves.length > 0) {
-        // Pick from top 30% or top 3, whichever is larger
-        // This ensures we don't pick absolutely terrible moves (like hanging a queen) unless only few moves exist
-        const count = Math.max(3, Math.ceil(validMoves.length * 0.3));
+        // Pick from top 50% or top 5, whichever is larger
+        // This makes the AI less precise
+        const count = Math.max(5, Math.ceil(validMoves.length * 0.5));
         // Ensure we don't exceed length
         const safeCount = Math.min(count, validMoves.length);
 
         const candidates = validMoves.slice(0, safeCount);
-        const randomMove = candidates[Math.floor(Math.random() * candidates.length)];
+        let selectedMove = candidates[Math.floor(Math.random() * candidates.length)];
+
+        // 25% chance to blunder (pick any legal move)
+        if (Math.random() < 0.25) {
+          selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+          logger.info('[AI] Beginner: Blunder roll passed. Picking random move.');
+        }
+
         logger.info(
-          `[AI] Beginner: Picked move with score ${randomMove._score} (Best was ${validMoves[0]._score})`
+          `[AI] Beginner: Picked move with score ${selectedMove._score} (Best was ${validMoves[0]._score})`
         );
 
         // Clean up scores
         orderedMoves.forEach(m => {
           if (m._score !== undefined) delete m._score;
         });
-        return randomMove;
+        return selectedMove;
       }
     }
 

@@ -99,9 +99,9 @@ describe('AI Difficulty', () => {
 
     // Verify we found at least 2 different moves (proving randomness)
     expect(selectedIds.size).toBeGreaterThan(1);
-    // Verify move 4 (the worst one, 0 score) was never picked
-    // Top 30% of 4 moves is ceil(1.2) = 2. But we force at least top 3 moves.
-    expect(selectedIds.has(4)).toBe(false);
+    // With increased randomness/blunder chance, even the worst move might be picked occasionally.
+    // So we just verify variety.
+    expect(selectedIds.size).toBeGreaterThan(1);
   });
 
   test('Expert Difficulty should always pick the absolute best move', () => {
