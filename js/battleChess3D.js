@@ -106,7 +106,7 @@ export class BattleChess3D {
         this.enabled = true;
 
         // Restore saved settings
-        const savedSkin = localStorage.getItem('chessSkin') || 'classic';
+        const savedSkin = localStorage.getItem('chess_skin') || 'classic';
         const savedTheme = localStorage.getItem('chess_theme') || 'classic';
 
         this.pieceManager.setSkin(savedSkin);

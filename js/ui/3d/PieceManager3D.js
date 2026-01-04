@@ -17,7 +17,7 @@ export class PieceManager3D {
     this.highlights = [];
     this.battleAnimator = null;
     this.animating = false;
-    this.currentSkin = localStorage.getItem('chessSkin') || 'classic';
+    this.currentSkin = localStorage.getItem('chess_skin') || 'classic';
   }
 
   init() {
@@ -174,7 +174,7 @@ export class PieceManager3D {
     if (!this.sceneManager.scene) return;
 
     this.currentSkin = skinName;
-    localStorage.setItem('chessSkin', skinName);
+    localStorage.setItem('chess_skin', skinName);
 
     const piecesToRecreate = [];
     Object.entries(this.pieces).forEach(([_key, piece]) => {

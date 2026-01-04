@@ -448,6 +448,13 @@ export class DOMHandler {
           this.game._forceFullRender = true;
           UI.renderBoard(this.game);
         }
+
+        // Update 3D Skin
+        if (this.app.battleChess3D && this.app.battleChess3D.pieceManager) {
+          this.app.battleChess3D.pieceManager.setSkin(newSkin);
+          this.app.battleChess3D.pieceManager.updateFromGameState(this.game);
+        }
+
         localStorage.setItem('chess_skin', newSkin);
       });
       // Set initial value
