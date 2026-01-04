@@ -156,6 +156,7 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
   // Add move to history
   game.moveHistory.push(moveRecord);
   UI.updateMoveHistoryUI(game);
+  UI.updateStatus(game);
 
   // Blunder Detection
   if (game.tutorController && game.tutorController.checkBlunder) {
@@ -361,8 +362,11 @@ export function finishMove(game, moveController) {
     setTimeout(() => {
       if (game.updateBestMoves) game.updateBestMoves();
 
-      // Trigger analysis update if in analysis mode
-      if (game.analysisMode && game.continuousAnalysis && game.gameController) {
+      // Trigger analysis update if in analysis mode OR live engine analysis is active
+      if (
+        game.gameController &&
+        (game.analysisMode || (game.aiController && game.aiController.analysisActive))
+      ) {
         game.gameController.requestPositionAnalysis();
       }
 

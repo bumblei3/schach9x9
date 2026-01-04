@@ -4,6 +4,7 @@ import { generatePGN, copyPGNToClipboard, downloadPGN } from '../utils/PGNGenera
 import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
+import { AnalysisUI } from './AnalysisUI.js';
 
 /**
  * Handles all DOM access and event listeners for the main application.
@@ -15,6 +16,10 @@ export class DOMHandler {
    */
   constructor(app) {
     this.app = app;
+    this.analysisUI = new AnalysisUI(app.game);
+    if (app.game && app.game.aiController) {
+      app.game.aiController.setAnalysisUI(this.analysisUI);
+    }
   }
 
   /**
@@ -129,6 +134,28 @@ export class DOMHandler {
           const active = this.game.analysisManager.toggleOpportunities();
           opportunitiesBtn.classList.toggle('active', active);
         }
+      });
+    }
+
+    const analysisBtn = document.getElementById('toggle-analysis-btn');
+    if (analysisBtn) {
+      analysisBtn.addEventListener('click', () => {
+        if (this.game.aiController) {
+          const active = this.game.aiController.toggleAnalysisMode();
+          analysisBtn.classList.toggle('active', active);
+          this.analysisUI.togglePanel();
+        }
+      });
+    }
+
+    const closeAnalysisBtn = document.getElementById('close-analysis-btn');
+    if (closeAnalysisBtn) {
+      closeAnalysisBtn.addEventListener('click', () => {
+        if (this.game.aiController && this.game.aiController.analysisActive) {
+          this.game.aiController.toggleAnalysisMode();
+          if (analysisBtn) analysisBtn.classList.remove('active');
+        }
+        this.analysisUI.panel.classList.add('hidden');
       });
     }
 

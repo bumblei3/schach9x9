@@ -582,5 +582,29 @@ export function showMoveQuality(game, move, category) {
   const toCell = document.querySelector(`.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`);
   if (toCell) {
     toCell.classList.add(`quality-${category}`);
+
+    // Show floating text
+    const rect = toCell.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top;
+
+    const labels = {
+      brilliant: 'Brilliant!!',
+      best: 'Bester Zug ⭐',
+      excellent: 'Exzellent ✨',
+      good: 'Gut ✅',
+      inaccuracy: 'Ungenau ?!',
+      mistake: 'Fehler ?',
+      blunder: 'Patzer ??',
+    };
+
+    if (labels[category]) {
+      floatingTextManager.show(x, y, labels[category], category);
+    }
+
+    // Special effects for blunders
+    if (category === 'blunder') {
+      shakeScreen(8, 400);
+    }
   }
 }

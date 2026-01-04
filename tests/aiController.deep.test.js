@@ -186,15 +186,17 @@ describe('AIController Deep Logic', () => {
       }
     });
 
-    test('updateAnalysisUI should update eval bar and top moves', () => {
+    test('updateAnalysisUI should delegate to analysisUI', () => {
       const analysis = {
         score: 50,
         topMoves: [{ move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } }, score: 50 }],
       };
+      controller.analysisUI = {
+        update: jest.fn(),
+      };
       controller.updateAnalysisUI(analysis);
 
-      expect(document.getElementById('eval-score').textContent).toBe('0.50');
-      expect(document.getElementById('top-moves-content').innerHTML).toContain('e3-e5');
+      expect(controller.analysisUI.update).toHaveBeenCalledWith(analysis);
     });
 
     test('highlightMove should add CSS classes to cells', () => {

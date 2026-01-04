@@ -86,7 +86,16 @@ function sendProgress(maxDepth) {
  * @param {number} [timeLimit] - Time limit in ms (default 0 = infinite)
  * @returns {Move|null} Best move found
  */
-export function getBestMove(board, color, depth, difficulty, moveNumber, config = null, lastMove = null, timeLimit = 0) {
+export function getBestMove(
+  board,
+  color,
+  depth,
+  difficulty,
+  moveNumber,
+  config = null,
+  lastMove = null,
+  timeLimit = 0
+) {
   activeConfig = config;
   nodesEvaluated = 0;
   currentDepth = 0;
@@ -135,7 +144,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
         searchBeta = bestScore + WINDOW_SIZE;
       }
 
-      for (; ;) {
+      for (;;) {
         let alpha = searchAlpha;
         const beta = searchBeta;
         currentBestScoreForDepth = -Infinity;

@@ -13,6 +13,63 @@
   padding: 0 0 30px 30px;
 }
 
+/* --- Evaluation Bar --- */
+.evaluation-bar {
+  position: absolute;
+  left: -32px;
+  top: 0;
+  width: 12px;
+  height: calc(100% - 30px);
+  background: #222;
+  /* Black for opponent */
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 15;
+  transition: opacity 0.3s ease;
+}
+
+.evaluation-bar.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#eval-fill {
+  width: 100%;
+  height: 50%;
+  /* Initial 0.0 */
+  background: #eee;
+  /* White for player */
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#eval-text {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 2;
+}
+
+#eval-marker {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  top: 50%;
+  z-index: 1;
+}
+
 #battle-chess-3d-container {
   position: absolute;
   top: 0;
@@ -224,4 +281,89 @@ body.mode-3d #board-wrapper {
 .cell.checkmate {
   background: rgba(239, 68, 68, 0.8) !important;
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+}
+
+/* --- Move Quality Indicators --- */
+.cell.quality-brilliant::before {
+  content: '!!';
+  background-color: #31c48d;
+}
+
+.cell.quality-best::before {
+  content: '★';
+  background-color: #9f5fef;
+}
+
+.cell.quality-excellent::before {
+  content: '□';
+  background-color: #93c5fd;
+}
+
+.cell.quality-good::before {
+  content: '✔';
+  background-color: #d1d5db;
+}
+
+.cell.quality-inaccuracy::before {
+  content: '?!';
+  background-color: #facc15;
+}
+
+.cell.quality-mistake::before {
+  content: '?';
+  background-color: #f97316;
+}
+
+.cell.quality-blunder::before {
+  content: '??';
+  background-color: #f87171;
+}
+
+[class*='quality-']::before {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Opening Name Styling */
+#opening-name-container {
+  height: 30px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #ccc;
+  transition: all 0.3s ease;
+}
+
+#opening-name {
+  font-weight: bold;
+  color: var(--accent, #4f9cf9);
+  margin-left: 8px;
 }

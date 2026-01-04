@@ -200,9 +200,11 @@ describe('AI Search Logic', () => {
 
     const pv = extractPV(board, 'white', 2);
     expect(pv.length).toBeGreaterThan(0);
-    expect(pv[0]).toEqual(expect.objectContaining({
-      from: move.from,
-      to: move.to
-    }));
+    expect(pv[0]).toEqual(
+      expect.objectContaining({
+        from: move.from,
+        to: move.to,
+      })
+    );
   });
 });

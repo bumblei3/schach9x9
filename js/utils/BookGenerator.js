@@ -38,8 +38,13 @@ async function generateBook() {
     try {
       bookData = JSON.parse(fs.readFileSync(outputFile, 'utf8'));
       if (bookData.metadata && bookData.metadata.mode && bookData.metadata.mode !== mode) {
-        console.warn(`Warning: Existing book has mode ${bookData.metadata.mode}, but we are generating for ${mode}. overwriting.`);
-        bookData = { positions: {}, metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode } };
+        console.warn(
+          `Warning: Existing book has mode ${bookData.metadata.mode}, but we are generating for ${mode}. overwriting.`
+        );
+        bookData = {
+          positions: {},
+          metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode },
+        };
       }
       console.log(`Loaded existing book with ${Object.keys(bookData.positions).length} positions.`);
     } catch (e) {

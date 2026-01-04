@@ -34,6 +34,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         severity: 'high',
         explanation: `🍴 Gabelangriff! Bedroht: ${pieces}`,
         question: 'Siehst du eine Möglichkeit, zwei wertvolle Figuren gleichzeitig zu bedrohen?',
+        targets: valuableThreatened.map(t => t.pos),
       });
     }
 
@@ -45,16 +46,32 @@ export function detectTacticalPatterns(game, analyzer, move) {
         severity: 'medium',
         explanation: `⚔️ Schlägt ${pieceName}`,
         question: 'Gibt es eine gegnerische Figur, die du vorteilhaft schlagen kannst?',
+        targets: [{ r: to.r, c: to.c }],
       });
     }
 
     // 3. CHECK - Threatening opponent's king
     if (game.isInCheck(opponentColor)) {
+      // Find king pos
+      let kingPos = null;
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        // Optimization: search only if needed
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const p = game.board[r][c];
+          if (p && p.type === 'k' && p.color === opponentColor) {
+            kingPos = { r, c };
+            break;
+          }
+        }
+        if (kingPos) break;
+      }
+
       patterns.push({
         type: 'check',
         severity: 'high',
         explanation: '♔ Schach! Bedroht gegnerischen König',
         question: 'Wie kannst du den gegnerischen König unter Druck setzen?',
+        targets: kingPos ? [kingPos] : [],
       });
     }
 
@@ -62,11 +79,15 @@ export function detectTacticalPatterns(game, analyzer, move) {
     const pinned = detectPins(game, analyzer, to, piece.color);
     if (pinned.length > 0) {
       const pinnedPiece = pinned[0];
+      const targets = [pinnedPiece.pinnedPos];
+      if (pinnedPiece.behindPos) targets.push(pinnedPiece.behindPos);
+
       patterns.push({
         type: 'pin',
         severity: 'high',
         explanation: `📌 Fesselung! ${pinnedPiece.pinnedName} kann nicht ziehen`,
         question: 'Kannst du eine gegnerische Figur an den König fesseln?',
+        targets: targets,
       });
     }
 
@@ -80,6 +101,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         explanation: `🌟 Abzugsangriff auf ${target.name}!`,
         question:
           'Kannst du durch das Wegziehen einer Figur einen Angriff auf eine andere freilegen?',
+        targets: target.targetPos ? [target.targetPos] : [],
       });
     }
 
@@ -92,6 +114,7 @@ export function detectTacticalPatterns(game, analyzer, move) {
         severity: 'medium',
         explanation: `🛡️ Verteidigt bedrohten ${defended.name}`,
         question: 'Wie kannst du eine deiner bedrohten Figuren am besten schützen?',
+        targets: [defended.pos],
       });
     }
     // 7. SKEWER - Valuable piece forced to move, exposing something behind
@@ -108,7 +131,21 @@ export function detectTacticalPatterns(game, analyzer, move) {
       });
     }
 
-    // 8. REMOVING THE GUARD - Capturing a defender
+    // 8. BATTERY - Aligning pieces
+    const battery = detectBattery(game, analyzer, to, piece.color);
+    if (battery.length > 0) {
+      const b = battery[0];
+      patterns.push({
+        type: 'battery',
+        severity: 'medium',
+        explanation: `🔋 Batterie gebildet! ${b.frontName} und ${b.behindName} vereinen ihre Kraft.`,
+        question:
+          'Kannst du diese geballte Kraft nutzen, um in die gegnerische Stellung einzudringen?',
+        targets: [b.behindPos], // Point to the supporting piece
+      });
+    }
+
+    // 9. REMOVING THE GUARD - Capturing a defender
     if (capturedPiece) {
       const removingGuard = detectRemovingGuard(game, analyzer, to, capturedPiece);
       if (removingGuard.length > 0) {
@@ -360,6 +397,7 @@ export function detectPins(game, analyzer, pos, attackerColor) {
             pinnedName: analyzer.getPieceName(targetPiece.type),
             behindPiece: behindPiece,
             behindName: analyzer.getPieceName(behindPiece.type),
+            behindPos: { r, c },
           });
         }
         break; // Stop at first piece
@@ -418,6 +456,7 @@ export function detectDiscoveredAttacks(game, analyzer, from, to, attackerColor)
               attackingPiece: piece,
               target: targetPiece,
               name: analyzer.getPieceName(targetPiece.type),
+              targetPos: { r: checkR, c: checkC },
             });
           }
           break;
@@ -594,4 +633,61 @@ export function getDefendedPieces(game, analyzer, pos, defenderColor) {
   });
 
   return defended;
+}
+
+/**
+ * Detect Battery: Aligning two sliding pieces
+ */
+export function detectBattery(game, analyzer, pos, color) {
+  const batteries = [];
+  const piece = game.board[pos.r][pos.c];
+  if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) return batteries;
+
+  // Check all 8 directions for a friendly sliding piece
+  // Orthogonal: R, Q, C
+  // Diagonal: B, Q, A
+
+  const ort = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
+  ];
+  const diag = [
+    [1, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, -1],
+  ];
+
+  const checkDirs = (dirs, types) => {
+    dirs.forEach(d => {
+      let r = pos.r + d[0];
+      let c = pos.c + d[1];
+      while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+        const p = game.board[r][c];
+        if (p) {
+          if (p.color === color && types.includes(p.type)) {
+            batteries.push({
+              frontPos: pos,
+              frontName: analyzer.getPieceName(piece.type),
+              behindPos: { r, c },
+              behindName: analyzer.getPieceName(p.type),
+            });
+          }
+          break;
+        }
+        r += d[0];
+        c += d[1];
+      }
+    });
+  };
+
+  const isOrthogonal = ['r', 'q', 'c'].includes(piece.type);
+  const isDiagonal = ['b', 'q', 'a'].includes(piece.type);
+
+  if (isOrthogonal) checkDirs(ort, ['r', 'q', 'c']);
+  if (isDiagonal) checkDirs(diag, ['b', 'q', 'a']);
+
+  return batteries;
 }

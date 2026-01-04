@@ -101,7 +101,7 @@ export function makeMove(board, move) {
       rook,
       rookFrom: { r: move.from.r, c: rookCol },
       rookTo: { r: move.from.r, c: rookDestCol },
-      rookOldHasMoved: rook.hasMoved
+      rookOldHasMoved: rook.hasMoved,
     };
   }
 
@@ -217,9 +217,13 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, la
       if (isInside(r + forward, c + dc)) {
         if (isEnemy(r + forward, c + dc)) {
           moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
-        } else if (lastMove && lastMove.piece.type === 'p' &&
+        } else if (
+          lastMove &&
+          lastMove.piece.type === 'p' &&
           Math.abs(lastMove.from.r - lastMove.to.r) === 2 &&
-          lastMove.to.r === r && lastMove.to.c === c + dc) {
+          lastMove.to.r === r &&
+          lastMove.to.c === c + dc
+        ) {
           // En Passant logic: Opponent pawn moved 2 squares, landed next to us
           moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
         }
@@ -275,7 +279,10 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, la
       if (kr && kr.type === 'r' && !kr.hasMoved) {
         let pathClear = true;
         for (let k = c + 1; k < size - 1; k++) {
-          if (board[r][k]) { pathClear = false; break; }
+          if (board[r][k]) {
+            pathClear = false;
+            break;
+          }
         }
         if (pathClear) {
           moves.push({ from: { r, c }, to: { r, c: c + 2 } });
@@ -288,7 +295,10 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, la
       if (qr && qr.type === 'r' && !qr.hasMoved) {
         let pathClear = true;
         for (let k = 1; k < c; k++) {
-          if (board[r][k]) { pathClear = false; break; }
+          if (board[r][k]) {
+            pathClear = false;
+            break;
+          }
         }
         if (pathClear) {
           moves.push({ from: { r, c }, to: { r, c: c - 2 } });

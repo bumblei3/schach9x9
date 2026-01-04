@@ -110,7 +110,6 @@ export class PieceManager3D {
       this.sceneManager.scene.add(marker);
       this.highlights.push(marker);
     });
-
   }
 
   addPiece(type, color, row, col) {

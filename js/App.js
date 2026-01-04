@@ -68,7 +68,9 @@ export class App {
     window.recoverGame = () => {
       if (this.keyboardManager && this.keyboardManager.performEmergencyRecovery) {
         this.keyboardManager.performEmergencyRecovery();
-        console.log('✅ Game recovery performed. If game is still frozen, try refreshing the page.');
+        console.log(
+          '✅ Game recovery performed. If game is still frozen, try refreshing the page.'
+        );
       } else {
         console.error('❌ Recovery function not available');
       }

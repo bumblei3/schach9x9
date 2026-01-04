@@ -45,6 +45,20 @@ export class AIController {
   constructor(game) {
     this.game = game;
     this.aiWorker = null;
+    this.analysisActive = false;
+    this.analysisUI = null;
+  }
+
+  setAnalysisUI(analysisUI) {
+    this.analysisUI = analysisUI;
+  }
+
+  toggleAnalysisMode() {
+    this.analysisActive = !this.analysisActive;
+    if (this.analysisActive) {
+      this.analyzePosition();
+    }
+    return this.analysisActive;
   }
 
   aiSetupKing() {
@@ -158,7 +172,9 @@ export class AIController {
       this.initWorkerPool();
     } else if (this.currentBookMode !== this.game.mode) {
       // Reload workers if mode changed (different opening book)
-      logger.info(`[AI] Mode changed from ${this.currentBookMode} to ${this.game.mode}. Reloading workers.`);
+      logger.info(
+        `[AI] Mode changed from ${this.currentBookMode} to ${this.game.mode}. Reloading workers.`
+      );
       this.terminate();
       this.initWorkerPool();
     }
@@ -198,10 +214,15 @@ export class AIController {
 
       // Find best result
       const bestResult = workerResults.find(r => r && r.from && r.to);
-      logger.debug('[AI] Worker results:', workerResults.map(r => r ? `${r.from?.r},${r.from?.c}->${r.to?.r},${r.to?.c}` : 'null'));
+      logger.debug(
+        '[AI] Worker results:',
+        workerResults.map(r => (r ? `${r.from?.r},${r.from?.c}->${r.to?.r},${r.to?.c}` : 'null'))
+      );
 
       if (bestResult) {
-        logger.info(`[AI] Executing move: ${bestResult.from.r},${bestResult.from.c} -> ${bestResult.to.r},${bestResult.to.c}`);
+        logger.info(
+          `[AI] Executing move: ${bestResult.from.r},${bestResult.from.c} -> ${bestResult.to.r},${bestResult.to.c}`
+        );
         this.game.executeMove(bestResult.from, bestResult.to);
         if (this.game.renderBoard) this.game.renderBoard();
 
@@ -209,11 +230,13 @@ export class AIController {
         if (bestResult.pv && bestResult.pv.length > 0) {
           const bestMoveEl = document.getElementById('ai-best-move');
           if (bestMoveEl) {
-            const pvText = bestResult.pv.map(m => {
-              const from = String.fromCharCode(97 + m.from.c) + (BOARD_SIZE - m.from.r);
-              const to = String.fromCharCode(97 + m.to.c) + (BOARD_SIZE - m.to.r);
-              return `${from}${to}`;
-            }).join(' ');
+            const pvText = bestResult.pv
+              .map(m => {
+                const from = String.fromCharCode(97 + m.from.c) + (BOARD_SIZE - m.from.r);
+                const to = String.fromCharCode(97 + m.to.c) + (BOARD_SIZE - m.to.r);
+                return `${from}${to}`;
+              })
+              .join(' ');
             bestMoveEl.textContent = `KI Plan: ${pvText}`;
           }
         }
@@ -261,6 +284,10 @@ export class AIController {
           workerResults[i] = data;
           completedWorkers++;
           if (completedWorkers === 1) processResultsWithTimeout();
+        } else if (type === 'analysis') {
+          if (this.analysisUI) {
+            this.analysisUI.update(data);
+          }
         }
       };
 
@@ -311,7 +338,8 @@ export class AIController {
     this.aiWorkers = [];
     this.currentBookMode = this.game.mode;
 
-    const bookFile = this.game.mode === 'standard8x8' ? 'opening-book-8x8.json' : 'opening-book.json';
+    const bookFile =
+      this.game.mode === 'standard8x8' ? 'opening-book-8x8.json' : 'opening-book.json';
 
     // Load opening book once
     fetch(bookFile)
@@ -758,56 +786,37 @@ export class AIController {
   // ===== ANALYSIS MODE METHODS =====
 
   analyzePosition() {
-    // Don't analyze if not in analysis mode
-    if (!this.game.analysisMode) {
+    // Check if either dedicated analysis mode OR live engine overlay is active
+    if (!this.game.analysisMode && !this.analysisActive) {
       return;
     }
 
-    // Use Web Worker for analysis to prevent UI freezing
-    if (!this.aiWorker) {
-      this.aiWorker = new Worker('js/ai-worker.js', { type: 'module' });
-
-      // Load opening book if available
-      fetch('opening-book.json')
-        .then(r => r.json())
-        .then(book => {
-          this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
-        })
-        .catch(() => { });
+    if (!this.aiWorkers || this.aiWorkers.length === 0) {
+      this.initWorkerPool();
     }
 
-    // Prepare board state for worker
+    // Use worker 0 for analysis to avoid conflict with game search
+    const worker = this.aiWorkers[0];
     const boardCopy = JSON.parse(JSON.stringify(this.game.board));
 
-    // Analysis depth (can be higher than normal play since no time pressure)
-    const analysisDepth = 3; // Medium depth for responsive analysis
+    // Deep analysis depth
+    const analysisDepth = this.game.analysisMode ? 12 : 8;
 
-    this.aiWorker.onmessage = e => {
-      const { type, data } = e.data;
-
-      if (type === 'analysis') {
-        // Update analysis UI with results
-        this.updateAnalysisUI(data);
-      } else if (type === 'progress') {
-        // Handle engine statistics or partial analysis
-        if (data.type === 'partial_analysis') {
-          this.updateAnalysisUI(data.data);
-          this.updateAnalysisStats(data);
-        } else {
-          this.updateAnalysisStats(data);
-        }
-      }
-    };
-
-    this.aiWorker.postMessage({
+    worker.postMessage({
       type: 'analyze',
       data: {
         board: boardCopy,
         color: this.game.turn,
         depth: analysisDepth,
-        topMovesCount: 5, // Get top 5 moves
+        topMovesCount: 3,
       },
     });
+  }
+
+  updateAnalysisUI(data) {
+    if (this.analysisUI) {
+      this.analysisUI.update(data);
+    }
   }
 
   updateAnalysisStats(data) {
@@ -817,78 +826,6 @@ export class AIController {
       const maxDepth = data.maxDepth || 0;
       const nodes = data.nodes ? data.nodes.toLocaleString('de-DE') : 0;
       engineInfo.textContent = `Tiefe: ${depth}/${maxDepth} | Knoten: ${nodes}`;
-    }
-  }
-
-  updateAnalysisUI(analysis) {
-    if (!analysis) return;
-
-    // Update evaluation bar
-    const evalBar = document.getElementById('eval-bar');
-    const evalScore = document.getElementById('eval-score');
-
-    if (evalBar && evalScore) {
-      // Convert score to percentage (centipawns to %)
-      // Score ranges roughly from -1000 to +1000
-      // 0 = 50% (even), +1000 = 100% (white winning), -1000 = 0% (black winning)
-      const normalizedScore = Math.max(-1000, Math.min(1000, analysis.score));
-      const percentage = 50 + (normalizedScore / 1000) * 50;
-
-      evalBar.style.width = `${percentage}%`;
-
-      // Update vertical evaluation bar if available
-      if (this.game.evaluationBar) {
-        this.game.evaluationBar.update(analysis.score);
-      }
-
-      // Update numeric display
-      const scoreInPawns = (analysis.score / 100).toFixed(2);
-      evalScore.textContent = scoreInPawns;
-      evalScore.className = 'eval-score';
-      if (analysis.score > 0) evalScore.classList.add('positive');
-      if (analysis.score < 0) evalScore.classList.add('negative');
-    }
-
-    // Update top moves list
-    const topMovesContent = document.getElementById('top-moves-content');
-    if (topMovesContent && analysis.topMoves && analysis.topMoves.length > 0) {
-      topMovesContent.innerHTML = '';
-
-      analysis.topMoves.forEach((item, index) => {
-        const itemEl = document.createElement('div');
-        itemEl.className = 'top-move-item';
-        if (index === 0) itemEl.classList.add('best');
-
-        // Main move notation
-        const notation = this.getAlgebraicNotation(item.move);
-        const scoreInPawns = (item.score / 100).toFixed(2);
-
-        // Render PV sequence
-        let pvHtml = '';
-        if (item.pv && item.pv.length > 1) {
-          // Skip the first move as it's the main move shown
-          const pvMoves = item.pv.slice(1).map(m => this.getAlgebraicNotation(m));
-          pvHtml = `<div class="top-move-pv">${pvMoves.join(' ')}</div>`;
-        }
-
-        itemEl.innerHTML = `
-            <div class="top-move-main">
-                <span class="top-move-notation">${notation}</span>
-                <span class="top-move-score">${scoreInPawns > 0 ? '+' : ''}${scoreInPawns}</span>
-            </div>
-            ${pvHtml}
-        `;
-
-        // Click to preview/highlight the move
-        itemEl.onclick = () => this.highlightMove(item.move);
-
-        topMovesContent.appendChild(itemEl);
-      });
-
-      // Automatically highlight best move if continuous analysis is on
-      if (this.game.continuousAnalysis && analysis.topMoves[0]) {
-        this.highlightMove(analysis.topMoves[0].move, true); // true = silent/non-persistent if needed
-      }
     }
   }
 

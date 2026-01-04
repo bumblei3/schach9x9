@@ -4,6 +4,7 @@
  */
 import { BOARD_SIZE, PHASES, PIECE_VALUES } from '../config.js';
 import { renderBoard } from './BoardRenderer.js';
+import { getOpeningName } from '../ai/OpeningDatabase.js';
 
 /**
  * Aktualisiert die Zughistorie im UI.
@@ -145,6 +146,36 @@ export function updateStatus(game) {
       break;
   }
   statusEl.textContent = text;
+  updateOpeningUI(game);
+}
+
+/**
+ * Aktualisiert die Anzeige des Eröffnungsnamens.
+ */
+export function updateOpeningUI(game) {
+  const container = document.getElementById('opening-name-container');
+  const nameEl = document.getElementById('opening-name');
+  if (!container || !nameEl) return;
+
+  if (game.phase !== PHASES.PLAY) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  const hash = game.getBoardHash();
+  const openingName = getOpeningName(hash);
+
+  if (openingName) {
+    nameEl.textContent = openingName;
+    container.classList.remove('hidden');
+  } else {
+    // Keep visible if already found an opening, but maybe don't hide for every minor move?
+    // For now, let's keep it if we have one, or hide if we move out of book.
+    // Usually openings are only for the first few moves.
+    if (game.moveHistory.length > 15) {
+      container.classList.add('hidden');
+    }
+  }
 }
 
 /**

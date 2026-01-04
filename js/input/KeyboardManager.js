@@ -178,7 +178,9 @@ export class KeyboardManager {
     }
 
     // Log recovery info
-    console.warn(`[RECOVERY] Previous turn: ${previousTurn}, isAnimating was reset, spinner hidden`);
+    console.warn(
+      `[RECOVERY] Previous turn: ${previousTurn}, isAnimating was reset, spinner hidden`
+    );
     console.warn('[RECOVERY] Game should now be responsive');
 
     // Render board
