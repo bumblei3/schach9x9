@@ -190,7 +190,7 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {
-      game.gameController.saveGameToStatistics('draw', null);
+      game.gameController.handleGameEnd('draw', null);
     }
     return;
   }
@@ -241,8 +241,8 @@ export function finishMove(game, moveController) {
     UI.updateStatus(game);
 
     if (game.gameController) {
-      const losingColor = !whiteKingExists ? 'white' : 'black';
-      game.gameController.saveGameToStatistics('win', losingColor);
+      const winner = !whiteKingExists ? 'black' : 'white';
+      game.gameController.handleGameEnd('win', winner);
     }
     return;
   }
@@ -309,7 +309,7 @@ export function finishMove(game, moveController) {
     if (isPlayerWin) confettiSystem.spawn();
 
     if (game.gameController) {
-      game.gameController.saveGameToStatistics('win', opponentColor);
+      game.gameController.handleGameEnd('win', opponentColor);
     }
     return;
   } else if (game.isStalemate(opponentColor)) {
@@ -323,7 +323,7 @@ export function finishMove(game, moveController) {
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {
-      game.gameController.saveGameToStatistics('draw', null);
+      game.gameController.handleGameEnd('draw', null);
     }
     return;
   } else if (MoveValidator.checkDraw(game, moveController)) {

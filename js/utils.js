@@ -36,3 +36,35 @@ export function safeJSONParse(jsonString, fallback = null) {
     return fallback;
   }
 }
+
+/**
+ * Parses a 9x9 FEN string into board and game state
+ * @param {string} fen 
+ * @returns {Object} { board, turn, castling, enPassant, halfMove, fullMove }
+ */
+export function parseFEN(fen) {
+  const parts = fen.split(' ');
+  const position = parts[0];
+  const turn = parts[1] === 'w' ? 'white' : 'black';
+
+  const board = Array(9).fill(null).map(() => Array(9).fill(null));
+
+  const rows = position.split('/');
+  for (let r = 0; r < 9; r++) {
+    const rowStr = rows[r];
+    let c = 0;
+    for (let i = 0; i < rowStr.length; i++) {
+      const char = rowStr[i];
+      if (!isNaN(char)) {
+        c += parseInt(char);
+      } else {
+        const color = char === char.toUpperCase() ? 'white' : 'black';
+        const type = char.toLowerCase();
+        board[r][c] = { type, color, hasMoved: true }; // Default hasMoved to true for FEN mostly
+        c++;
+      }
+    }
+  }
+
+  return { board, turn };
+}

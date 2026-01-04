@@ -3,6 +3,7 @@ import * as UI from '../ui.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from '../utils/PGNGenerator.js';
 import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
+import { CampaignUI } from './CampaignUI.js';
 
 /**
  * Handles all DOM access and event listeners for the main application.
@@ -65,6 +66,16 @@ export class DOMHandler {
       puzzleStartBtn.addEventListener('click', () => {
         document.getElementById('points-selection-overlay').style.display = 'none';
         this.app.init(0, 'puzzle');
+      });
+    }
+
+    // Campaign Mode
+    const campaignStartBtn = document.getElementById('campaign-start-btn');
+    if (campaignStartBtn) {
+      this.campaignUI = new CampaignUI(this.app);
+      campaignStartBtn.addEventListener('click', () => {
+        document.getElementById('points-selection-overlay').style.display = 'none';
+        this.campaignUI.show();
       });
     }
 

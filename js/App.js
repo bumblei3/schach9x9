@@ -23,6 +23,13 @@ export class App {
     this.domHandler = new DOMHandler(this);
   }
 
+  async startCampaignLevel(levelId) {
+    if (!this.game) {
+      await this.init(0, 'campaign');
+    }
+    this.gameController.startCampaignLevel(levelId);
+  }
+
   async init(initialPoints, mode = 'setup') {
     logger.info('App initializing with', initialPoints, 'points in mode:', mode);
 

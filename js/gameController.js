@@ -10,6 +10,8 @@ import { puzzleManager } from './puzzleManager.js';
 import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
+import { campaignManager } from './campaign/CampaignManager.js';
+import { parseFEN } from './utils.js';
 
 export class GameController {
   constructor(game) {
@@ -21,6 +23,39 @@ export class GameController {
     this.moveExecutor = null; // Circular dependency resolved later
     this.game.gameController = this;
     this.gameStartTime = null;
+  }
+
+  startCampaignLevel(levelId) {
+    const level = campaignManager.getLevel(levelId);
+    if (!level) {
+      console.error('Level not found:', levelId);
+      return;
+    }
+
+    // Reset Game
+    this.initGame(0, 'campaign');
+
+    // Load FEN
+    const { board, turn } = parseFEN(level.fen);
+    this.game.board = board;
+    this.game.turn = turn; // Usually white
+    this.game.campaignMode = true;
+    this.game.currentLevelId = levelId;
+    this.game.points = 0; // Or specific points for level?
+
+    // Specific Level Settings
+    this.game.playerColor = level.playerColor;
+
+    // UI Updates
+    UI.updateStatus(this.game);
+    UI.renderBoard(this.game);
+
+    logger.info(`Started Campaign Level: ${level.title}`);
+
+    // Show intro modal
+    UI.showModal(level.title, level.description, [
+      { text: 'Start', callback: () => { } }
+    ]);
   }
 
   initGame(initialPoints, mode = 'setup') {
@@ -601,5 +636,50 @@ export class GameController {
     this.statisticsManager.saveGame(gameData);
     this.gameStartTime = null;
     logger.info('Game saved to statistics:', playerResult, 'vs', opponent);
+  }
+
+  handleGameEnd(result, winnerColor) {
+    // Save stats
+    // Logic for losingColor derived from result/winnerColor
+    let _losingColor = null;
+    if (result === 'win') {
+      _losingColor = winnerColor === 'white' ? 'black' : 'white';
+    } else if (result === 'loss') {
+      _losingColor = winnerColor; // Logic in saveGameToStatistics expects "losingColor" if result is 'win'?? 
+      // Wait, saveGameToStatistics(result, losingColor)
+      // If result is 'win', 2nd arg is losingColor.
+      // If result is 'loss', 2nd arg is resigningColor (the loser).
+      // So 2nd arg is ALWAYS the loser?
+      // existing calls: saveGameToStatistics('win', losingColor)
+      // saveGameToStatistics('loss', resigningColor)
+      // So yes, 2nd arg is the loser.
+      _losingColor = winnerColor; // If result is loss (resignation), winnerColor passed here is actually the loser? 
+      // Let's standardize: handleGameEnd(result, winningColor)
+      // If result is 'draw', winningColor is null.
+    }
+
+    // Adapt args for legacy saveGameToStatistics
+    const saveResult = result;
+    let saveColorArg = null;
+
+    if (result === 'win') {
+      saveColorArg = winnerColor === 'white' ? 'black' : 'white'; // Loser
+    } else if (result === 'loss') { // Resignation
+      saveColorArg = winnerColor; // The one who resigned (the loser)
+      // Wait, if I resign, result is 'loss', and I pass my color.
+    }
+
+    this.saveGameToStatistics(saveResult, saveColorArg);
+
+    if (this.game.campaignMode && result === 'win' && winnerColor === this.game.playerColor) {
+      if (this.game.currentLevelId) {
+        campaignManager.completeLevel(this.game.currentLevelId, 3); // Todo: calculate stars
+        setTimeout(() => {
+          UI.showModal('Sieg!', 'Level abgeschlossen.', [
+            { text: 'Weiter', callback: () => { window.location.reload(); } } // Temp: reload to menu
+          ]);
+        }, 1500);
+      }
+    }
   }
 }
