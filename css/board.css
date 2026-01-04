@@ -97,8 +97,12 @@ body.mode-3d #board-wrapper {
   position: relative;
   width: 100%;
   height: 100%;
-  max-width: calc(var(--cell-size) * 9);
-  max-height: calc(var(--cell-size) * 9);
+}
+
+/* 8x8 Mode Sizing */
+#board.board-8x8 {
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
 }
 
 #board {
@@ -120,7 +124,7 @@ body.mode-3d #board-wrapper {
   left: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  /* grid-template-columns set dynamically by JS */
   text-align: center;
   pointer-events: none;
 }
@@ -131,7 +135,7 @@ body.mode-3d #board-wrapper {
   top: 0;
   height: 100%;
   display: grid;
-  grid-template-rows: repeat(9, 1fr);
+  /* grid-template-rows set dynamically by JS */
   align-items: center;
   text-align: right;
   pointer-events: none;

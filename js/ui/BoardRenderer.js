@@ -307,6 +307,7 @@ export function initBoardUI(game) {
     boardWrapper.querySelectorAll('.col-labels, .row-labels').forEach(el => el.remove());
     const colLabels = document.createElement('div');
     colLabels.className = 'col-labels';
+    colLabels.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     for (let c = 0; c < size; c++) {
       const label = document.createElement('span');
       label.textContent = String.fromCharCode(97 + c);
@@ -315,6 +316,7 @@ export function initBoardUI(game) {
     }
     const rowLabels = document.createElement('div');
     rowLabels.className = 'row-labels';
+    rowLabels.style.gridTemplateRows = `repeat(${size}, 1fr)`;
     for (let r = 0; r < size; r++) {
       const label = document.createElement('span');
       label.textContent = (size - r).toString();

@@ -18,10 +18,13 @@ Das Spiel ist live unter folgender Adresse verfügbar:
   - **Engel**: Eine mächtige Premium-Figur für fortgeschrittene Strategien.
 - **Setup-Phase**: Platziere deinen König strategisch und stelle deine Armee mit einem Punktesystem (15 Punkte) zusammen.
 - **Optimierte KI**: Leistungsstarker Gegner mit Alpha-Beta-Suche, Transposition Table und effizientem Move-Ordering.
+- **Engine Analyse Modus**: Echtzeit-Evaluation mit vertikaler Bar, Top-Züge inkl. PV-Varianten und Engine-Statistiken (Tiefe, Knoten).
+- **Zug-Qualitäts-Indikatoren**: Sofortiges Feedback auf Züge (Brilliant, Best, Blunder) mit visuellen Badges und Effekten.
+- **Eröffnungs-Erkennung**: Dynamische Anzeige von Eröffnungsnamen (z.B. Sizilianisch, Kanzler-Gambit) während der Partie.
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
-- **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker. Mit Touch-Support für Drag & Drop auf Tablets und Smartphones.
-- **Detaillierte Statistiken**: Umfassendes Tracking von Gewinnraten, Zügen und Spielhistorie.
+- **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker. Mit Touch-Support für Drag & Drop.
+- **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
 - **Anpassbare Designs**: Wähle zwischen Classic, Deep Blue und Forest Green Themes.
 
 ## 🧠 Technische Highlights
@@ -51,7 +54,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **530 automatisierten Tests** (Jest) wird eine hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.100 automatisierten Tests** (Jest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.
 
 | Modul             | Coverage (Lines) | Beschreibung                                         |
 | ----------------- | ---------------- | ---------------------------------------------------- |
@@ -77,6 +80,7 @@ schach9x9/
 │   ├── App.js          # Hauptanwendungsklasse
 │   └── battleChess3D.js # 3D-Fassade
 ├── tests/              # Test-Suite (Unit & Integration)
+├── opening-book-trainer-real.cjs # Self-Play Trainer für Eröffnungen
 └── index.html          # Einstiegspunkt
 ```
 

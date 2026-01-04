@@ -503,6 +503,7 @@ async function trainOpeningBook(numGames, depth) {
 
   const builder = new OpeningBookBuilder();
   const results = { white: 0, black: 0, draw: 0 };
+  const startTime = Date.now();
 
   for (let i = 0; i < numGames; i++) {
     const game = new SimpleGame();
@@ -523,12 +524,17 @@ async function trainOpeningBook(numGames, depth) {
       builder.recordGame(game, game.winner);
     }
 
-    // Progress indicator
-    if ((i + 1) % 10 === 0) {
-      const progress = Math.floor(((i + 1) / numGames) * 40);
-      const bar = '='.repeat(progress) + ' '.repeat(40 - progress);
-      process.stdout.write(`\r   [${bar}] ${i + 1}/${numGames} games`);
-    }
+    // Progress bar with ETA
+    const elapsed = (Date.now() - startTime) / 1000;
+    const avgTimePerGame = elapsed / (i + 1);
+    const remaining = avgTimePerGame * (numGames - i - 1);
+    const eta = remaining > 60 ? `${(remaining / 60).toFixed(1)}m` : `${remaining.toFixed(0)}s`;
+
+    const progress = Math.floor(((i + 1) / numGames) * 40);
+    const bar = '█'.repeat(progress) + '░'.repeat(40 - progress);
+    const pct = Math.floor(((i + 1) / numGames) * 100);
+
+    process.stdout.write(`\r   [${bar}] ${pct}% (${i + 1}/${numGames}) ETA: ${eta}  `);
   }
 
   console.log('\n');
