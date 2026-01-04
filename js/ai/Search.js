@@ -457,6 +457,7 @@ function quiescenceSearch(board, alpha, beta, turnColor, aiColor) {
 export function analyzePosition(board, color, depth) {
   try {
     nodesEvaluated = 0;
+    searchEndTime = Infinity; // Ensure no stale timeout affects analysis
     const moves = getAllLegalMoves(board, color);
     if (moves.length === 0) return { score: 0, topMoves: [] };
 
