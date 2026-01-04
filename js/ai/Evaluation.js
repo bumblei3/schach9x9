@@ -238,6 +238,12 @@ export function evaluatePosition(board, forColor, config) {
   const whiteRooks = [];
   const blackRooks = [];
 
+  // Track material and king positions for endgame mop-up
+  let whiteMaterial = 0;
+  let blackMaterial = 0;
+  let whiteKingPos = null;
+  let blackKingPos = null;
+
   // Tempo bonus: Small advantage for having the move
   const TEMPO_BONUS = 10;
   mgScore += TEMPO_BONUS; // Side to move (forColor) gets tempo
@@ -342,10 +348,18 @@ export function evaluatePosition(board, forColor, config) {
         }
       }
 
-      // King Safety (Midgame only)
+      // Tracking Material & King Position
       if (piece.type === 'k') {
+        if (isWhite) whiteKingPos = { r, c };
+        else blackKingPos = { r, c };
+
+        // King Safety (Midgame only)
         const safety = evaluateKingSafety(board, r, c, piece.color);
         mgScore += safety * safetyWeight * sideMult;
+      } else {
+        // Track material (excluding King)
+        if (isWhite) whiteMaterial += pieceValue;
+        else blackMaterial += pieceValue;
       }
     }
   }
@@ -466,6 +480,20 @@ export function evaluatePosition(board, forColor, config) {
   const mgWeight = phaseValue / maxPhase;
   const egWeight = 1 - mgWeight;
 
+  // ENDGAME MOP-UP EVALUATION
+  if (egWeight > 0.4 && whiteKingPos && blackKingPos) {
+    // If White is winning
+    if (whiteMaterial > blackMaterial + 200) {
+      const mopUp = evaluateMopUp(whiteKingPos, blackKingPos);
+      egScore += mopUp;
+    }
+    // If Black is winning
+    else if (blackMaterial > whiteMaterial + 200) {
+      const mopUp = evaluateMopUp(blackKingPos, whiteKingPos);
+      egScore -= mopUp;
+    }
+  }
+
   const totalScore = mgScore * mgWeight + egScore * egWeight;
   const perspectiveScore = forColor === 'white' ? totalScore : -totalScore;
 
@@ -534,6 +562,28 @@ function isBackwardPawn(board, r, c, color, whitePawnCols, blackPawnCols) {
   }
 
   return !supported;
+}
+
+/**
+ * Evaluate Mop-Up Bonus
+ * Encourage pushing enemy king to edge and bringing friendly king closer.
+ * Based on rule: cmd(enemyKing) * 4 + (14 - dist(kings)) * 1.5
+ */
+function evaluateMopUp(friendlyKing, enemyKing) {
+  // Center is 4,4. 
+  // Center Manhattan Distance of Enemy King (push to edge)
+  const enemyCmd = Math.abs(enemyKing.r - 4) + Math.abs(enemyKing.c - 4);
+
+  // Distance between kings (close in)
+  const dist = Math.abs(friendlyKing.r - enemyKing.r) + Math.abs(friendlyKing.c - enemyKing.c);
+
+  // Weights (scaled for centipawns)
+  // Max enemyCmd = 8. Max dist = 16.
+  // 10 * 8 = 80cp (edge).
+  // 4 * (14 - 1) = 52cp (close).
+  // Total ~130cp bonus.
+
+  return (enemyCmd * 10) + ((14 - dist) * 4);
 }
 
 /**

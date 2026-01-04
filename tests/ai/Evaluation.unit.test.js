@@ -281,4 +281,49 @@ describe('AI Evaluation Logic', () => {
     const score = evaluatePosition(board8, 'white');
     expect(typeof score).toBe('number');
   });
+
+
+  test('Endgame: Mop-Up Evaluation (Push to Edge)', () => {
+    // White Winning (K+Q vs K)
+    const boardCenter = createEmptyBoard();
+    boardCenter[0][0] = { type: 'k', color: 'white' };
+    boardCenter[0][1] = { type: 'q', color: 'white' };
+    boardCenter[4][4] = { type: 'k', color: 'black' }; // Black King in Center
+
+    const boardEdge = createEmptyBoard();
+    boardEdge[0][0] = { type: 'k', color: 'white' };
+    boardEdge[0][1] = { type: 'q', color: 'white' };
+    boardEdge[0][8] = { type: 'k', color: 'black' }; // Black King at Edge
+
+    const scoreCenter = evaluatePosition(boardCenter, 'white');
+    const scoreEdge = evaluatePosition(boardEdge, 'white');
+
+    // White prefers Black at edge
+    expect(scoreEdge).toBeGreaterThan(scoreCenter);
+  });
+
+  test('Endgame: Mop-Up Evaluation (King Proximity)', () => {
+    // White Winning. Enemy King fixed at edge.
+    // Case A: White King Far
+    const boardFar = createEmptyBoard();
+    boardFar[8][8] = { type: 'k', color: 'white' }; // Far
+    boardFar[0][1] = { type: 'q', color: 'white' };
+    boardFar[0][8] = { type: 'k', color: 'black' };
+
+    // Case B: White King Close
+    const boardClose = createEmptyBoard();
+    boardClose[1][7] = { type: 'k', color: 'white' }; // Close to 0,8
+    boardClose[0][1] = { type: 'q', color: 'white' };
+    boardClose[0][8] = { type: 'k', color: 'black' };
+
+    const scoreFar = evaluatePosition(boardFar, 'white');
+    const scoreClose = evaluatePosition(boardClose, 'white');
+
+    // White prefers King closer
+    // Note: If King gets TOO close (opposition), score might vary, but general proximity is good.
+    // Assuming evaluateMopUp logic: (14 - dist) * 4.
+    // Far dist: ~10. Close dist: ~2.
+    // (14-10)*4 = 16. (14-2)*4 = 48. Close is better.
+    expect(scoreClose).toBeGreaterThan(scoreFar);
+  });
 });
