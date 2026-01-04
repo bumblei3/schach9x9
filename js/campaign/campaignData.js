@@ -85,10 +85,96 @@ export const CAMPAIGN_LEVELS = [
     winCondition: {
       type: 'checkmate',
     },
-    unlocks: [],
+    unlocks: ['endgame_rook'],
     goals: {
       2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
       3: { type: 'promotion', value: 2, description: 'Zwei Bauern zum Engel befördern' },
+    },
+  },
+  // ========================================
+  // Chapter 6: Endgame Training
+  // ========================================
+  {
+    id: 'endgame_rook',
+    title: 'Endspiel 1: Turm-Matt',
+    description:
+      'Lerne das grundlegende Mattmuster: König und Turm gegen König. Dränge den König an den Rand!',
+    difficulty: 'easy',
+    playerColor: 'white',
+    fen: '9/9/9/9/4k4/9/9/4R4/4K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+    },
+    unlocks: ['endgame_queen'],
+    goals: {
+      2: { type: 'moves', value: 20, description: 'Matt in unter 20 Zügen' },
+      3: { type: 'moves', value: 15, description: 'Matt in unter 15 Zügen' },
+    },
+  },
+  {
+    id: 'endgame_queen',
+    title: 'Endspiel 2: Damen-Matt',
+    description: 'Die Dame ist mächtig. Nutze sie, um den gegnerischen König schnell mattzusetzen.',
+    difficulty: 'easy',
+    playerColor: 'white',
+    fen: '9/9/9/4k4/9/9/9/4Q4/4K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+    },
+    unlocks: ['endgame_pawn'],
+    goals: {
+      2: { type: 'moves', value: 12, description: 'Matt in unter 12 Zügen' },
+      3: { type: 'moves', value: 8, description: 'Matt in unter 8 Zügen' },
+    },
+  },
+  {
+    id: 'endgame_pawn',
+    title: 'Endspiel 3: Bauernumwandlung',
+    description:
+      'Ein einzelner Bauer kann das Spiel entscheiden. Führe ihn zur Umwandlung und gewinne!',
+    difficulty: 'medium',
+    playerColor: 'white',
+    fen: '9/9/9/9/4k4/9/4P4/9/4K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+    },
+    unlocks: ['endgame_bishops'],
+    goals: {
+      2: { type: 'moves', value: 25, description: 'Gewinne in unter 25 Zügen' },
+      3: { type: 'promotion', value: 1, description: 'Bauer zur Dame umwandeln' },
+    },
+  },
+  {
+    id: 'endgame_bishops',
+    title: 'Endspiel 4: Zwei Läufer',
+    description: 'Zwei Läufer können den König mattsetzen. Koordiniere sie geschickt!',
+    difficulty: 'hard',
+    playerColor: 'white',
+    fen: '9/9/9/9/4k4/9/9/3B1B3/4K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+    },
+    unlocks: ['endgame_exchange'],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Matt in unter 30 Zügen' },
+      3: { type: 'moves', value: 20, description: 'Matt in unter 20 Zügen' },
+    },
+  },
+  {
+    id: 'endgame_exchange',
+    title: 'Endspiel 5: Turm gegen Läufer',
+    description:
+      'Du hast einen Turm, der Gegner einen Läufer. Nutze deinen Materialvorteil zum Sieg!',
+    difficulty: 'hard',
+    playerColor: 'white',
+    fen: '9/9/9/4k4/9/4b4/9/4R4/4K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 40, description: 'Gewinne in unter 40 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
     },
   },
 ];
