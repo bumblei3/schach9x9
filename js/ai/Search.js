@@ -432,6 +432,10 @@ export function analyzePosition(board, color, depth) {
       topMoves: results.slice(0, 5),
     };
   } catch (e) {
+    if (e.message === 'TimeOut') {
+      logger.warn('[Search] Analysis timed out');
+      return { score: 0, topMoves: [] };
+    }
     logger.error('[Search] Error analyzing position:', e);
     return { score: 0, topMoves: [] };
   }

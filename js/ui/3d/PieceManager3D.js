@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { createPiece3D } from '../../pieces3D.js';
 import { BattleAnimator } from '../../battleAnimations.js';
 import { triggerVibration, shakeScreen } from '../../effects.js';
-import { BOARD_SIZE } from '../../config.js';
+import { BOARD_SIZE, PHASES } from '../../config.js';
 import { logger } from '../../logger.js';
 
 export class PieceManager3D {
@@ -42,6 +42,75 @@ export class PieceManager3D {
         }
       }
     }
+    this.updateSetupHighlights(game);
+  }
+
+  updateSetupHighlights(game) {
+    if (!game) return;
+
+    // Setup Corridors
+    const zones = [];
+    const isHumanSetup =
+      game.phase === PHASES.SETUP_WHITE_KING ||
+      (game.phase === PHASES.SETUP_BLACK_KING && !game.isAI);
+
+    if (isHumanSetup) {
+      const rowStart = game.phase === PHASES.SETUP_WHITE_KING ? 6 : 0;
+      // 3 rows x 9 cols
+      for (let r = rowStart; r < rowStart + 3; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          zones.push({ r, c });
+        }
+      }
+      this.highlightZones(zones, 0x6366f1); // Indigo color matching 2D
+      return;
+    }
+
+    if (game.phase === PHASES.SETUP_WHITE_PIECES && game.whiteCorridor) {
+      const { rowStart, colStart } = game.whiteCorridor;
+      for (let r = rowStart; r < rowStart + 3; r++) {
+        for (let c = colStart; c < colStart + 3; c++) {
+          zones.push({ r, c });
+        }
+      }
+      this.highlightZones(zones, 0x6366f1);
+      return;
+    }
+
+    if (game.phase === PHASES.SETUP_BLACK_PIECES && game.blackCorridor) {
+      const { rowStart, colStart } = game.blackCorridor;
+      for (let r = rowStart; r < rowStart + 3; r++) {
+        for (let c = colStart; c < colStart + 3; c++) {
+          zones.push({ r, c });
+        }
+      }
+      this.highlightZones(zones, 0xef4444); // Red for black (though usually we allow same color highlight)
+      return;
+    }
+  }
+
+  highlightZones(zones, colorHex) {
+    this.clearHighlights();
+
+    const geometry = new THREE.PlaneGeometry(0.9, 0.9);
+    const material = new THREE.MeshBasicMaterial({
+      color: colorHex,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.3,
+    });
+
+    zones.forEach(zone => {
+      const marker = new THREE.Mesh(geometry, material);
+      const pos = this.sceneManager.boardToWorld(zone.r, zone.c);
+      marker.position.set(pos.x, 0.02, pos.z); // Slightly above board
+      marker.rotation.x = -Math.PI / 2;
+      marker.userData = { type: 'highlight', row: zone.r, col: zone.c };
+
+      this.sceneManager.scene.add(marker);
+      this.highlights.push(marker);
+    });
+
   }
 
   addPiece(type, color, row, col) {
