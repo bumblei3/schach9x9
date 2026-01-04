@@ -10,9 +10,11 @@ import { Game } from '../gameEngine.js'; // Assuming GameEngine is exportable fo
 
 const pgnFile = process.argv[2] || 'data/openings.pgn';
 const outputFile = process.argv[3] || 'opening-book.json';
+const mode = process.argv[4] || 'classic';
 
 async function generateBook() {
   console.log(`Reading PGN from ${pgnFile}...`);
+  console.log(`Using mode: ${mode}`);
 
   if (!fs.existsSync(pgnFile)) {
     console.error(`File not found: ${pgnFile}`);
@@ -30,11 +32,15 @@ async function generateBook() {
   // Load existing book or create new
   let bookData = {
     positions: {},
-    metadata: { version: '2.0', generatedAt: new Date().toISOString() },
+    metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode },
   };
   if (fs.existsSync(outputFile)) {
     try {
       bookData = JSON.parse(fs.readFileSync(outputFile, 'utf8'));
+      if (bookData.metadata && bookData.metadata.mode && bookData.metadata.mode !== mode) {
+        console.warn(`Warning: Existing book has mode ${bookData.metadata.mode}, but we are generating for ${mode}. overwriting.`);
+        bookData = { positions: {}, metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode } };
+      }
       console.log(`Loaded existing book with ${Object.keys(bookData.positions).length} positions.`);
     } catch (e) {
       console.warn('Could not parse existing book, starting fresh.');
@@ -44,7 +50,7 @@ async function generateBook() {
   const book = new OpeningBook(bookData);
 
   for (const gameData of games) {
-    const gameEngine = new Game(15, 'classic'); // Use classic mode
+    const gameEngine = new Game(15, mode); // Use selected mode
     // gameEngine.setupClassicBoard() is called in constructor
 
     const history = parser.replayGame(gameData.moves, gameEngine);

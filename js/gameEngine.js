@@ -101,7 +101,7 @@ export class Game {
     this.rulesEngine = new RulesEngine(this);
 
     // KI-Mentor (Coach)
-    const savedMentorLevel = localStorage.getItem('ki_mentor_level');
+    const savedMentorLevel = typeof localStorage !== 'undefined' ? localStorage.getItem('ki_mentor_level') : null;
     this.mentorLevel = savedMentorLevel || 'STANDARD';
     // Backward compatibility: kiMentorEnabled is true if level is not OFF
     this.kiMentorEnabled = this.mentorLevel !== 'OFF';

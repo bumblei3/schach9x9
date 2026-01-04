@@ -156,6 +156,11 @@ export class AIController {
     // Initialize persistent worker pool if not exists
     if (!this.aiWorkers || this.aiWorkers.length === 0) {
       this.initWorkerPool();
+    } else if (this.currentBookMode !== this.game.mode) {
+      // Reload workers if mode changed (different opening book)
+      logger.info(`[AI] Mode changed from ${this.currentBookMode} to ${this.game.mode}. Reloading workers.`);
+      this.terminate();
+      this.initWorkerPool();
     }
 
     // Difficulty to depth mapping
@@ -275,9 +280,12 @@ export class AIController {
     logger.debug(`[AI] Initializing pool with ${numWorkers} workers`);
 
     this.aiWorkers = [];
+    this.currentBookMode = this.game.mode;
+
+    const bookFile = this.game.mode === 'standard8x8' ? 'opening-book-8x8.json' : 'opening-book.json';
 
     // Load opening book once
-    fetch('opening-book.json')
+    fetch(bookFile)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
         return r.json();
