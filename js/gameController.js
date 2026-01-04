@@ -12,6 +12,7 @@ import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
 import { parseFEN } from './utils.js';
+import { AnalysisUI } from './ui/AnalysisUI.js';
 
 export class GameController {
   constructor(game) {
@@ -20,6 +21,7 @@ export class GameController {
     this.timeManager = new TimeManager(game, this);
     this.shopManager = new ShopManager(game, this);
     this.analysisController = new AnalysisController(this);
+    this.analysisUI = new AnalysisUI(game);
     this.moveExecutor = null; // Circular dependency resolved later
     this.game.gameController = this;
     this.gameStartTime = null;
@@ -679,6 +681,13 @@ export class GameController {
     }
 
     this.saveGameToStatistics(saveResult, saveColorArg);
+
+    // Show analysis prompt after a short delay
+    setTimeout(() => {
+      if (this.analysisUI) {
+        this.analysisUI.showAnalysisPrompt();
+      }
+    }, 2000);
 
     if (this.game.campaignMode && result === 'win' && winnerColor === this.game.playerColor) {
       if (this.game.currentLevelId) {

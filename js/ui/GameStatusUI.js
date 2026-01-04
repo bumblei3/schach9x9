@@ -14,6 +14,16 @@ export function updateMoveHistoryUI(game) {
   try {
     historyEl.innerHTML = '';
     const pieceSymbols = { p: '', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K', a: 'A', c: 'C', e: 'E' };
+    const qualityMeta = {
+      brilliant: { symbol: '!!', color: '#31c48d' },
+      great: { symbol: '!', color: '#31c48d' },
+      best: { symbol: '★', color: '#9f5fef' },
+      excellent: { symbol: '□', color: '#93c5fd' },
+      good: { symbol: '✔', color: '#d1d5db' },
+      inaccuracy: { symbol: '?!', color: '#facc15' },
+      mistake: { symbol: '?', color: '#f97316' },
+      blunder: { symbol: '??', color: '#f87171' },
+    };
     game.moveHistory.forEach((move, index) => {
       const moveEl = document.createElement('div');
       moveEl.className = 'move-entry';
@@ -30,6 +40,17 @@ export function updateMoveHistoryUI(game) {
           moveText += `=${pieceSymbols[move.specialMove.promotedTo] || ''}`;
       }
       moveEl.textContent = `${index + 1}. ${moveText}`;
+
+      // Add quality badge if analyzed
+      if (move.classification && qualityMeta[move.classification]) {
+        const badge = document.createElement('span');
+        badge.className = 'move-quality-badge';
+        badge.textContent = qualityMeta[move.classification].symbol;
+        badge.style.backgroundColor = qualityMeta[move.classification].color;
+        badge.title = move.classification.charAt(0).toUpperCase() + move.classification.slice(1);
+        moveEl.appendChild(badge);
+      }
+
       historyEl.appendChild(moveEl);
     });
     historyEl.scrollTop = historyEl.scrollHeight;
