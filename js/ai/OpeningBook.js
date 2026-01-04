@@ -1,4 +1,3 @@
-import { BOARD_SIZE } from '../config.js';
 import { logger } from '../logger.js';
 
 export class OpeningBook {
