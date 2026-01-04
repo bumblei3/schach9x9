@@ -310,7 +310,8 @@ export function finishMove(game, moveController) {
     if (isPlayerWin) confettiSystem.spawn();
 
     if (game.gameController) {
-      game.gameController.handleGameEnd('win', opponentColor);
+      const winningColor = opponentColor === 'white' ? 'black' : 'white';
+      game.gameController.handleGameEnd('win', winningColor);
     }
     return;
   } else if (game.isStalemate(opponentColor)) {

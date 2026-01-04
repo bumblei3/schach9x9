@@ -66,22 +66,20 @@ export class GameController {
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
             </li>
-            ${
-              level.goals[2]
-                ? `
+            ${level.goals[2]
+        ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
             </li>`
-                : ''
-            }
-            ${
-              level.goals[3]
-                ? `
+        : ''
+      }
+            ${level.goals[3]
+        ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
             </li>`
-                : ''
-            }
+        : ''
+      }
           </ul>
         </div>
       </div>
@@ -89,7 +87,7 @@ export class GameController {
 
     // Show intro modal
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
     ]);
   }
 
@@ -360,14 +358,15 @@ export class GameController {
     soundManager.playGameOver(false); // Play defeat sound for resigner
     this.stopClock();
 
-    // Trigger confetti if the winner is the human player (assuming human is white or playing locally)
-    // Or just always celebrate the winner
-    import('./effects.js').then(({ confettiSystem }) => {
-      confettiSystem.spawn();
-    });
+    // Trigger confetti if the winner is the human player
+    if (_winningColor === this.game.playerColor) {
+      import('./effects.js').then(({ confettiSystem }) => {
+        confettiSystem.spawn();
+      });
+    }
 
-    // Save game to statistics
-    this.saveGameToStatistics('loss', resigningColor);
+    // Call central game end handler
+    this.handleGameEnd('win', _winningColor);
   }
 
   offerDraw(color) {
@@ -675,37 +674,15 @@ export class GameController {
 
   handleGameEnd(result, winnerColor) {
     // Save stats
-    // Logic for losingColor derived from result/winnerColor
-    let _losingColor = null;
-    if (result === 'win') {
-      _losingColor = winnerColor === 'white' ? 'black' : 'white';
-    } else if (result === 'loss') {
-      _losingColor = winnerColor; // Logic in saveGameToStatistics expects "losingColor" if result is 'win'??
-      // Wait, saveGameToStatistics(result, losingColor)
-      // If result is 'win', 2nd arg is losingColor.
-      // If result is 'loss', 2nd arg is resigningColor (the loser).
-      // So 2nd arg is ALWAYS the loser?
-      // existing calls: saveGameToStatistics('win', losingColor)
-      // saveGameToStatistics('loss', resigningColor)
-      // So yes, 2nd arg is the loser.
-      _losingColor = winnerColor; // If result is loss (resignation), winnerColor passed here is actually the loser?
-      // Let's standardize: handleGameEnd(result, winningColor)
-      // If result is 'draw', winningColor is null.
-    }
-
-    // Adapt args for legacy saveGameToStatistics
-    const saveResult = result;
     let saveColorArg = null;
 
     if (result === 'win') {
       saveColorArg = winnerColor === 'white' ? 'black' : 'white'; // Loser
-    } else if (result === 'loss') {
-      // Resignation
-      saveColorArg = winnerColor; // The one who resigned (the loser)
-      // Wait, if I resign, result is 'loss', and I pass my color.
+    } else if (result === 'draw') {
+      saveColorArg = null;
     }
 
-    this.saveGameToStatistics(saveResult, saveColorArg);
+    this.saveGameToStatistics(result, saveColorArg);
 
     // Show analysis prompt after a short delay
     setTimeout(() => {
