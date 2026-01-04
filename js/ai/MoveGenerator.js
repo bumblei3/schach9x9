@@ -58,17 +58,52 @@ const PIECE_ATTACKS_ORTHOGONALLY = { r: true, q: true, c: true, e: true };
 /**
  * Apply a move to the board and return undo information
  */
+/**
+ * Apply a move to the board and return undo information
+ */
 export function makeMove(board, move) {
   if (move === null) return null;
 
   const fromPiece = board[move.from.r][move.from.c];
   const capturedPiece = board[move.to.r][move.to.c];
+  const size = board.length;
 
   const undoInfo = {
     capturedPiece,
     oldHasMoved: fromPiece ? fromPiece.hasMoved : false,
     move,
   };
+
+  // En Passant Capture
+  if (fromPiece.type === 'p' && !capturedPiece && move.from.c !== move.to.c) {
+    // It's En Passant (diagonal move to empty square)
+    const direction = fromPiece.color === 'white' ? -1 : 1;
+    const captureRow = move.to.r - direction;
+    undoInfo.enPassantCaptured = board[captureRow][move.to.c];
+    undoInfo.enPassantRow = captureRow;
+    undoInfo.enPassantCol = move.to.c;
+    board[captureRow][move.to.c] = null;
+  }
+
+  // Castling
+  if (fromPiece.type === 'k' && Math.abs(move.from.c - move.to.c) > 1) {
+    const isKingside = move.to.c > move.from.c;
+    const rookCol = isKingside ? size - 1 : 0;
+    const rookDestCol = isKingside ? move.to.c - 1 : move.to.c + 1;
+    const rook = board[move.from.r][rookCol];
+
+    // Move rook
+    board[move.from.r][rookDestCol] = rook;
+    board[move.from.r][rookCol] = null;
+    rook.hasMoved = true;
+
+    undoInfo.castling = {
+      rook,
+      rookFrom: { r: move.from.r, c: rookCol },
+      rookTo: { r: move.from.r, c: rookDestCol },
+      rookOldHasMoved: rook.hasMoved
+    };
+  }
 
   board[move.to.r][move.to.c] = fromPiece;
   board[move.from.r][move.from.c] = null;
@@ -86,7 +121,7 @@ export function makeMove(board, move) {
 export function undoMove(board, undoInfo) {
   if (undoInfo === null) return;
 
-  const { move, capturedPiece, oldHasMoved } = undoInfo;
+  const { move, capturedPiece, oldHasMoved, enPassantCaptured, castling } = undoInfo;
   const piece = board[move.to.r][move.to.c];
 
   if (piece) {
@@ -95,12 +130,25 @@ export function undoMove(board, undoInfo) {
 
   board[move.from.r][move.from.c] = piece;
   board[move.to.r][move.to.c] = capturedPiece;
+
+  // Restore En Passant pawn
+  if (enPassantCaptured) {
+    board[undoInfo.enPassantRow][undoInfo.enPassantCol] = enPassantCaptured;
+  }
+
+  // Undo Castling
+  if (castling) {
+    const { rook, rookFrom, rookTo, rookOldHasMoved } = castling;
+    board[rookFrom.r][rookFrom.c] = rook;
+    board[rookTo.r][rookTo.c] = null;
+    rook.hasMoved = false; // logic simplified: usually false for castling rights
+  }
 }
 
 /**
  * Get all legal moves for a color (validating checks)
  */
-export function getAllLegalMoves(board, color) {
+export function getAllLegalMoves(board, color, lastMove = null) {
   const moves = [];
   const kingPos = findKing(board, color);
   const size = board.length;
@@ -109,28 +157,33 @@ export function getAllLegalMoves(board, color) {
     for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (piece && piece.color === color) {
-        const pieceMoves = getPseudoLegalMoves(board, r, c, piece);
+        // Pass lastMove to getPseudoLegalMoves for En Passant
+        const pieceMoves = getPseudoLegalMoves(board, r, c, piece, false, lastMove);
 
         // Filter out moves that leave king in check
         for (let i = 0; i < pieceMoves.length; i++) {
           const move = pieceMoves[i];
-          // Apply move temporarily
-          const fromPiece = board[move.from.r][move.from.c];
-          const targetPiece = board[move.to.r][move.to.c];
 
-          board[move.to.r][move.to.c] = fromPiece;
-          board[move.from.r][move.from.c] = null;
+          // Special validation for Castling: Path safety
+          if (piece.type === 'k' && Math.abs(move.from.c - move.to.c) > 1) {
+            if (isInCheck(board, color)) continue; // Cannot castle out of check
+            // Check path squares
+            const dir = Math.sign(move.to.c - move.from.c);
+            const midC = move.from.c + dir;
+            // Check if passing through attack
+            if (isSquareAttacked(board, r, midC, color === 'white' ? 'black' : 'white')) continue;
+          }
+
+          const undoInfo = makeMove(board, move);
 
           // If king moves, pass the new position
-          const currentKingPos = fromPiece.type === 'k' ? { r: move.to.r, c: move.to.c } : kingPos;
+          const currentKingPos = piece.type === 'k' ? { r: move.to.r, c: move.to.c } : kingPos;
 
           if (!isInCheck(board, color, currentKingPos)) {
             moves.push(move);
           }
 
-          // Undo move
-          board[move.from.r][move.from.c] = fromPiece;
-          board[move.to.r][move.to.c] = targetPiece;
+          undoMove(board, undoInfo);
         }
       }
     }
@@ -142,7 +195,7 @@ export function getAllLegalMoves(board, color) {
 /**
  * Get pseudo-legal moves for a piece (ignoring check)
  */
-export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
+export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, lastMove = null) {
   const moves = [];
   const size = board.length;
   const isInside = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
@@ -161,8 +214,15 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
     }
     // Capture
     for (const dc of [-1, 1]) {
-      if (isInside(r + forward, c + dc) && isEnemy(r + forward, c + dc)) {
-        moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
+      if (isInside(r + forward, c + dc)) {
+        if (isEnemy(r + forward, c + dc)) {
+          moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
+        } else if (lastMove && lastMove.piece.type === 'p' &&
+          Math.abs(lastMove.from.r - lastMove.to.r) === 2 &&
+          lastMove.to.r === r && lastMove.to.c === c + dc) {
+          // En Passant logic: Opponent pawn moved 2 squares, landed next to us
+          moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
+        }
       }
     }
   } else {
@@ -203,6 +263,35 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
           }
           nr += dr;
           nc += dc;
+        }
+      }
+    }
+
+    // Castling (King only)
+    if (!onlyCaptures && piece.type === 'k' && !piece.hasMoved) {
+      // Kingside
+      const kingsideRookPos = { r, c: size - 1 };
+      const kr = board[kingsideRookPos.r][kingsideRookPos.c];
+      if (kr && kr.type === 'r' && !kr.hasMoved) {
+        let pathClear = true;
+        for (let k = c + 1; k < size - 1; k++) {
+          if (board[r][k]) { pathClear = false; break; }
+        }
+        if (pathClear) {
+          moves.push({ from: { r, c }, to: { r, c: c + 2 } });
+        }
+      }
+
+      // Queenside
+      const queensideRookPos = { r, c: 0 };
+      const qr = board[queensideRookPos.r][queensideRookPos.c];
+      if (qr && qr.type === 'r' && !qr.hasMoved) {
+        let pathClear = true;
+        for (let k = 1; k < c; k++) {
+          if (board[r][k]) { pathClear = false; break; }
+        }
+        if (pathClear) {
+          moves.push({ from: { r, c }, to: { r, c: c - 2 } });
         }
       }
     }

@@ -82,7 +82,7 @@ function sendProgress(maxDepth) {
  * @param {Object} [config] - Personality configuration
  * @returns {Move|null} Best move found
  */
-export function getBestMove(board, color, depth, difficulty, moveNumber, config = null) {
+export function getBestMove(board, color, depth, difficulty, moveNumber, config = null, lastMove = null) {
   activeConfig = config;
   nodesEvaluated = 0;
   currentDepth = 0;
@@ -98,7 +98,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
     return bookMove;
   }
 
-  const moves = getAllLegalMoves(board, color);
+  const moves = getAllLegalMoves(board, color, lastMove);
   if (moves.length === 0) return null;
   if (moves.length === 1) return moves[0];
 
@@ -130,7 +130,7 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
         searchBeta = bestScore + WINDOW_SIZE;
       }
 
-      for (;;) {
+      for (; ;) {
         let alpha = searchAlpha;
         const beta = searchBeta;
         currentBestScoreForDepth = -Infinity;

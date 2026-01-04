@@ -178,6 +178,7 @@ export class AIController {
 
     // Prepare board state for workers
     const boardCopy = JSON.parse(JSON.stringify(this.game.board));
+    const lastMove = this.game.lastMove; // Needed for En Passant
 
     // Track results
     const workerResults = [];
@@ -263,6 +264,7 @@ export class AIController {
           difficulty: this.game.difficulty,
           moveNumber: Math.floor(this.game.moveHistory.length / 2),
           config: AI_PERSONALITIES[this.game.aiPersonality || 'balanced'],
+          lastMove: lastMove,
         },
       });
     });

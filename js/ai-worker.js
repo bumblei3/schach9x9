@@ -29,7 +29,7 @@ self.onmessage = function (e) {
       }
 
       case 'getBestMove': {
-        const { board, color, depth, difficulty, moveNumber, config } = data;
+        const { board, color, depth, difficulty, moveNumber, config, lastMove } = data;
         const startTime = Date.now();
         logger.debug(`[AI Worker] getBestMove started - color:${color} depth:${depth} difficulty:${difficulty} moveNumber:${moveNumber}`);
 
@@ -39,7 +39,7 @@ self.onmessage = function (e) {
         });
 
         try {
-          const bestMove = getBestMove(board, color, depth, difficulty, moveNumber, config);
+          const bestMove = getBestMove(board, color, depth, difficulty, moveNumber, config, lastMove);
           const elapsed = Date.now() - startTime;
           logger.debug(`[AI Worker] getBestMove completed in ${elapsed}ms - move:`, bestMove ? `${bestMove.from?.r},${bestMove.from?.c}->${bestMove.to?.r},${bestMove.to?.c}` : 'null');
           self.postMessage({ type: 'bestMove', data: bestMove });
