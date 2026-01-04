@@ -146,8 +146,8 @@ describe('AI Evaluation Logic', () => {
     boardSupported[7][4] = { type: 'p', color: 'white' };
     boardSupported[7][3] = { type: 'p', color: 'white' };
 
-    const scoreIsolated = evaluatePosition(boardIsolated, 'white');
-    const scoreSupported = evaluatePosition(boardSupported, 'white');
+    evaluatePosition(boardIsolated, 'white');
+    evaluatePosition(boardSupported, 'white');
     // Note: supported has an extra pawn, so it's naturally higher. 
     // Let's add the same pawn elsewhere in isolated case
     boardIsolated[7][0] = { type: 'p', color: 'white' };
