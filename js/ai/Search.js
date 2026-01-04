@@ -42,6 +42,7 @@ let activeConfig = null;
 let currentDepth = 0;
 let bestMoveSoFar = null;
 let lastProgressUpdate = 0;
+let searchEndTime = Infinity;
 
 /**
  * Send progress update to UI
@@ -79,15 +80,19 @@ function sendProgress(maxDepth) {
  * @param {string} color - 'white' or 'black'
  * @param {number} depth - Search depth
  * @param {string} difficulty - Difficulty level
+ * @param {number} moveNumber - Move number
  * @param {Object} [config] - Personality configuration
+ * @param {Object} [lastMove] - Last move for En Passant
+ * @param {number} [timeLimit] - Time limit in ms (default 0 = infinite)
  * @returns {Move|null} Best move found
  */
-export function getBestMove(board, color, depth, difficulty, moveNumber, config = null, lastMove = null) {
+export function getBestMove(board, color, depth, difficulty, moveNumber, config = null, lastMove = null, timeLimit = 0) {
   activeConfig = config;
   nodesEvaluated = 0;
   currentDepth = 0;
   bestMoveSoFar = null;
   lastProgressUpdate = Date.now();
+  searchEndTime = timeLimit > 0 ? Date.now() + timeLimit : Infinity;
 
   // 1. Opening Book
   const bookMove = queryOpeningBook(board);
@@ -233,6 +238,10 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
     }); // Cleanup all
     return bestMove;
   } catch (error) {
+    if (error.message === 'TimeOut') {
+      logger.info(`[AI] Search timed out at depth ${currentDepth}. Returning best move.`);
+      return bestMoveSoFar || moves[0];
+    }
     logger.error('[AI Worker] Error in getBestMove:', error);
     return moves[0];
   }
@@ -245,7 +254,10 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
 function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
   nodesEvaluated++;
 
-  if (nodesEvaluated % 1000 === 0) sendProgress(currentDepth);
+  if (nodesEvaluated % 1000 === 0) {
+    sendProgress(currentDepth);
+    if (Date.now() > searchEndTime) throw new Error('TimeOut');
+  }
 
   // TT Probe
   const ttEntry = probeTT(hash, depth, alpha, beta);

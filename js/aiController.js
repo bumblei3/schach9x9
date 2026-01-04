@@ -259,6 +259,21 @@ export class AIController {
 
       logger.debug(`[AI] Dispatching search to worker ${i}`);
 
+      // Calculate Time Limit based on difficulty
+      let timeLimit = 5000;
+      if (this.game.mode === 'standard8x8' || this.game.mode === 'classic') {
+        timeLimit = 8000;
+      } else {
+        const timeMap = {
+          beginner: 2000,
+          easy: 3000,
+          medium: 4000,
+          hard: 5000,
+          expert: 8000,
+        };
+        timeLimit = timeMap[this.game.difficulty] || 5000;
+      }
+
       // Send search request
       worker.postMessage({
         type: 'getBestMove',
@@ -270,6 +285,7 @@ export class AIController {
           moveNumber: Math.floor(this.game.moveHistory.length / 2),
           config: AI_PERSONALITIES[this.game.aiPersonality || 'balanced'],
           lastMove: lastMove,
+          timeLimit: timeLimit,
         },
       });
     });
