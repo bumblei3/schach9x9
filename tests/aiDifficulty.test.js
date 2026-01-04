@@ -40,6 +40,7 @@ jest.unstable_mockModule('../js/ai/MoveOrdering.js', () => ({
   orderMoves: jest.fn((board, moves) => moves),
   addKillerMove: jest.fn(),
   updateHistory: jest.fn(),
+  updateCounterMove: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/logger.js', () => ({

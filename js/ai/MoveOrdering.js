@@ -25,11 +25,24 @@ export function initHistoryTable() {
       }
     }
   }
+
+  // Initialize Counter-Move Table (81x81)
+  // Maps previous move (from->to) to a good response move
+  for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+    counterMoveTable[i] = new Array(BOARD_SIZE * BOARD_SIZE).fill(null);
+  }
 }
+
+// Counter-Move Table
+// Index: [prevMoveFromIndex][prevMoveToIndex] -> Move
+const counterMoveTable = [];
 
 // Clear killer moves (between moves)
 export function clearKillerMoves() {
   killerMoves.clear();
+  // We generally keep counter moves across searches, or clear them?
+  // Usually kept, but clearing is safer for new games.
+  // For now, let's keep them as they learn general responses.
 }
 
 /**
@@ -62,6 +75,23 @@ export function addKillerMove(depth, move) {
 }
 
 /**
+ * Update Counter-Move Heuristic
+ * @param {Object} prevMove - The move made by the opponent immediately before
+ * @param {Object} goodMove - The move that caused a beta cutoff (response)
+ */
+export function updateCounterMove(prevMove, goodMove) {
+  if (!prevMove || !goodMove) return;
+
+  const fromIdx = prevMove.from.r * BOARD_SIZE + prevMove.from.c;
+  const toIdx = prevMove.to.r * BOARD_SIZE + prevMove.to.c;
+
+  // Store the good response
+  // We can just overwrite, or keep history. Simple overwrite is standard.
+  if (!counterMoveTable[fromIdx]) counterMoveTable[fromIdx] = []; // Safety
+  counterMoveTable[fromIdx][toIdx] = goodMove;
+}
+
+/**
  * Update history heuristic for a good move
  */
 export function updateHistory(piece, move, depth) {
@@ -80,9 +110,18 @@ export function updateHistory(piece, move, depth) {
 
 /**
  * Order moves for better alpha-beta pruning
- * Priority: 1) TT best move, 2) Captures (MVV-LVA), 3) Killer moves, 4) History heuristic
+ * Priority: 1) TT best move, 2) Captures (MVV-LVA), 3) Killer moves, 4) Counter Move, 5) History heuristic
  */
-export function orderMoves(board, moves, ttBestMove, depth = 0) {
+export function orderMoves(board, moves, ttBestMove, depth = 0, prevMove = null) {
+  let counterMove = null;
+  if (prevMove) {
+    const fromIdx = prevMove.from.r * BOARD_SIZE + prevMove.from.c;
+    const toIdx = prevMove.to.r * BOARD_SIZE + prevMove.to.c;
+    if (counterMoveTable[fromIdx]) {
+      counterMove = counterMoveTable[fromIdx][toIdx];
+    }
+  }
+
   for (let i = 0; i < moves.length; i++) {
     const move = moves[i];
     let score = 0;
@@ -114,6 +153,7 @@ export function orderMoves(board, moves, ttBestMove, depth = 0) {
     } else {
       // 3. Killer moves (non-capture moves that caused beta cutoffs)
       const killers = killerMoves.get(depth);
+      let isKiller = false;
       if (killers) {
         // Optimized check for MAX_KILLER_MOVES = 2
         const k0 = killers[0];
@@ -125,6 +165,7 @@ export function orderMoves(board, moves, ttBestMove, depth = 0) {
           move.to.c === k0.to.c
         ) {
           score += 900;
+          isKiller = true;
         } else {
           const k1 = killers[1];
           if (
@@ -135,11 +176,21 @@ export function orderMoves(board, moves, ttBestMove, depth = 0) {
             move.to.c === k1.to.c
           ) {
             score += 800;
+            isKiller = true;
           }
         }
       }
 
-      // 4. History heuristic
+      // 4. Counter Move
+      if (!isKiller && counterMove &&
+        move.from.r === counterMove.from.r &&
+        move.from.c === counterMove.from.c &&
+        move.to.r === counterMove.to.r &&
+        move.to.c === counterMove.to.c) {
+        score += 700; // Priority above history but below Killers
+      }
+
+      // 5. History heuristic
       if (historyTable[fromPiece.type]) {
         const historyValue =
           historyTable[fromPiece.type][move.from.r][move.from.c][move.to.r][move.to.c];

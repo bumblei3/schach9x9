@@ -5,9 +5,19 @@ export const TT_EXACT = 0; // Exact score
 export const TT_ALPHA = 1; // Upper bound (fail-low)
 export const TT_BETA = 2; // Lower bound (fail-high)
 
-// Transposition Table (cache for evaluated positions)
-const transpositionTable = new Map();
-let TT_MAX_SIZE = 100000; // Maximum entries to prevent memory overflow
+// Two-Tier Transposition Table
+// ttDeep: Stores high-depth (valuable) positions. Replacement strategy: Depth-preferred.
+// ttRecent: Stores recent positions. Replacement strategy: Always replace (MRU).
+const ttDeep = new Map();
+const ttRecent = new Map();
+
+let TT_MAX_SIZE = 100000;
+let TT_DEEP_SIZE = 40000; // 40% for deep entries
+let TT_RECENT_SIZE = 60000; // 60% for recent entries
+
+// Threshold to be considered "Deep"
+const DEEP_DEPTH_THRESHOLD = 4;
+
 let ttHits = 0;
 let ttMisses = 0;
 
@@ -15,21 +25,29 @@ let ttMisses = 0;
 const zobristTable = initializeZobrist();
 
 export function getTTSize() {
-  return transpositionTable.size;
+  return ttDeep.size + ttRecent.size;
 }
 
 export function setTTMaxSize(size) {
   TT_MAX_SIZE = size;
+  TT_DEEP_SIZE = Math.floor(size * 0.4);
+  TT_RECENT_SIZE = Math.floor(size * 0.6);
 }
 
 export function clearTT() {
-  transpositionTable.clear();
+  ttDeep.clear();
+  ttRecent.clear();
   ttHits = 0;
   ttMisses = 0;
 }
 
 export function getTTStats() {
-  return { hits: ttHits, misses: ttMisses, size: transpositionTable.size };
+  return {
+    hits: ttHits,
+    misses: ttMisses,
+    deepSize: ttDeep.size,
+    recentSize: ttRecent.size
+  };
 }
 
 /**
@@ -152,47 +170,80 @@ export function getXORSideToMove() {
 /**
  * Store position in transposition table
  */
+/**
+ * Store position in transposition table
+ */
 export function storeTT(hash, depth, score, flag, bestMove) {
-  const existing = transpositionTable.get(hash);
-
-  // Depth-preferred replacement: only replace if the new entry is searched at least as deep
-  if (existing && existing.depth > depth) {
-    return;
-  }
-
-  // Clear oldest entry if table is full (LRU eviction via Map insertion order)
-  if (!existing && transpositionTable.size >= TT_MAX_SIZE) {
-    const oldestKey = transpositionTable.keys().next().value;
-    transpositionTable.delete(oldestKey);
-  }
-
-  // Update entry (re-setting moves it to MRU position in Map)
-  if (existing) {
-    transpositionTable.delete(hash);
-  }
-
-  transpositionTable.set(hash, {
+  const entry = {
     depth,
     score,
     flag,
     bestMove,
-  });
+  };
+
+  // 1. Store in Recent Table (Always Replace strategy)
+  // This ensures we always have the latest path, avoiding cycles/stale data in short term
+  if (ttRecent.has(hash)) {
+    ttRecent.delete(hash); // Refresh MRU
+  }
+  ttRecent.set(hash, entry);
+
+  // Evict if Recent full
+  if (ttRecent.size > TT_RECENT_SIZE) {
+    const oldestKey = ttRecent.keys().next().value;
+    ttRecent.delete(oldestKey);
+  }
+
+  // 2. Store in Deep Table (Depth-Preferred strategy)
+  // Only if depth is significant
+  if (depth >= DEEP_DEPTH_THRESHOLD) {
+    const existingDeep = ttDeep.get(hash);
+
+    // Only replace if new depth is equal or better
+    if (!existingDeep || depth >= existingDeep.depth) {
+      if (existingDeep) {
+        ttDeep.delete(hash); // Refresh MRU
+      }
+      ttDeep.set(hash, entry);
+
+      // Evict if Deep full
+      if (ttDeep.size > TT_DEEP_SIZE) {
+        const oldestKey = ttDeep.keys().next().value;
+        ttDeep.delete(oldestKey);
+      }
+    }
+  }
 }
 
 /**
  * Probe transposition table
  */
 export function probeTT(hash, depth, alpha, beta) {
-  const entry = transpositionTable.get(hash);
+  const deepEntry = ttDeep.get(hash);
+  const recentEntry = ttRecent.get(hash);
+
+  // Choose the best entry (highest depth)
+  let entry = null;
+  if (deepEntry && recentEntry) {
+    entry = deepEntry.depth >= recentEntry.depth ? deepEntry : recentEntry;
+  } else {
+    entry = deepEntry || recentEntry;
+  }
 
   if (!entry) {
     ttMisses++;
     return null;
   }
 
-  // Update entry position to MRU
-  transpositionTable.delete(hash);
-  transpositionTable.set(hash, entry);
+  // Refresh MRU in their respective tables
+  if (deepEntry) {
+    ttDeep.delete(hash);
+    ttDeep.set(hash, deepEntry);
+  }
+  if (recentEntry) {
+    ttRecent.delete(hash);
+    ttRecent.set(hash, recentEntry);
+  }
 
   ttHits++;
 

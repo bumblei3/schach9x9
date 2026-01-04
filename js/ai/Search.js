@@ -19,7 +19,7 @@ import {
   TT_ALPHA,
   TT_BETA,
 } from './TranspositionTable.js';
-import { orderMoves, addKillerMove, updateHistory } from './MoveOrdering.js';
+import { orderMoves, addKillerMove, updateHistory, updateCounterMove } from './MoveOrdering.js';
 
 // Progress tracking
 export let nodesEvaluated = 0;
@@ -190,11 +190,11 @@ export function getBestMove(
 
           let score;
           if (i === 0) {
-            score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal);
+            score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal, move);
           } else {
-            score = -minimax(board, d - 1, -(alpha + 1), -alpha, opponentColor, color, nextHashVal);
+            score = -minimax(board, d - 1, -(alpha + 1), -alpha, opponentColor, color, nextHashVal, move);
             if (score > alpha && score < beta) {
-              score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal);
+              score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal, move);
             }
           }
 
@@ -342,7 +342,7 @@ export function getBestMove(
  * Minimax with Alpha-Beta, PVS, and TT
  * This version uses a NegaMax style for cleaner code
  */
-function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
+function minimax(board, depth, alpha, beta, turnColor, aiColor, hash, prevMove = null) {
   nodesEvaluated++;
 
   if (nodesEvaluated % 1000 === 0) {
@@ -401,12 +401,15 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
       -beta + 1,
       opponentColor,
       aiColor,
-      nextHash
+      opponentColor,
+      aiColor,
+      nextHash,
+      null // Null move has no prevMove logic, or pass prevMove? Pass null to avoid messing up counter.
     );
     if (score >= beta) return beta;
   }
 
-  const orderedMoves = orderMoves(board, moves, ttEntry ? ttEntry.bestMove : null, depth);
+  const orderedMoves = orderMoves(board, moves, ttEntry ? ttEntry.bestMove : null, depth, prevMove);
 
   // SINGULAR EXTENSIONS
   // If TT move is "singular" (much better than alternatives), extend search depth
@@ -444,7 +447,8 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
         -singularBeta,
         opponentColor,
         aiColor,
-        nHash
+        nHash,
+        altMove
       );
 
       undoMove(board, uInfo);
@@ -491,7 +495,7 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
 
     let score;
     if (i === 0) {
-      score = -minimax(board, depth - 1 + singularExtension, -beta, -alpha, opponentColor, aiColor, nextHash);
+      score = -minimax(board, depth - 1 + singularExtension, -beta, -alpha, opponentColor, aiColor, nextHash, move);
     } else {
       // LATE MOVE REDUCTION (LMR)
       let reduction = 0;
@@ -511,16 +515,17 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
         -alpha,
         opponentColor,
         aiColor,
-        nextHash
+        nextHash,
+        move
       );
 
       // Re-search if reduced move was better than alpha
       if (reduction > 0 && score > alpha) {
-        score = -minimax(board, depth - 1, -(alpha + 1), -alpha, opponentColor, aiColor, nextHash);
+        score = -minimax(board, depth - 1, -(alpha + 1), -alpha, opponentColor, aiColor, nextHash, move);
       }
 
       if (score > alpha && score < beta) {
-        score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash);
+        score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash, move);
       }
     }
 
@@ -534,7 +539,10 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
     alpha = Math.max(alpha, bestScore);
     if (alpha >= beta) {
       flag = TT_BETA;
-      if (board[move.to.r][move.to.c] === null) addKillerMove(depth, move);
+      if (board[move.to.r][move.to.c] === null) {
+        addKillerMove(depth, move);
+        updateCounterMove(prevMove, move);
+      }
       updateHistory(board[move.from.r][move.from.c], move, depth);
       break;
     }

@@ -125,44 +125,42 @@ describe('AI Engine', () => {
     });
 
     test('should evict oldest entry when full', () => {
-      setTTMaxSize(3);
+      setTTMaxSize(10); // Recent Table Size = 6 (60%)
 
-      // Add 3 entries
-      testStoreTT(1, 1, 100, 0, null);
-      testStoreTT(2, 1, 200, 0, null);
-      testStoreTT(3, 1, 300, 0, null);
+      // Add 6 entries (Recent capacity)
+      for (let i = 1; i <= 6; i++) {
+        testStoreTT(i, 1, i * 100, 0, null);
+      }
 
-      expect(getTTSize()).toBe(3);
+      expect(getTTSize()).toBe(6);
 
-      // Add 4th entry, should evict oldest (1)
-      testStoreTT(4, 1, 400, 0, null);
+      // Add 7th entry, should evict oldest (1)
+      testStoreTT(7, 1, 700, 0, null);
 
-      expect(getTTSize()).toBe(3);
+      expect(getTTSize()).toBe(6);
       expect(testProbeTT(1, 1, -Infinity, Infinity)).toBeNull(); // 1 should be gone
       expect(testProbeTT(2, 1, -Infinity, Infinity)).not.toBeNull(); // 2 should be there
-      expect(testProbeTT(4, 1, -Infinity, Infinity)).not.toBeNull(); // 4 should be there
+      expect(testProbeTT(7, 1, -Infinity, Infinity)).not.toBeNull(); // 7 should be there
     });
 
     test('should update MRU on access', () => {
-      setTTMaxSize(3);
+      setTTMaxSize(10); // Recent Table Size = 6
 
+      // Store 1, 2, 3
       testStoreTT(1, 1, 100, 0, null);
       testStoreTT(2, 1, 200, 0, null);
       testStoreTT(3, 1, 300, 0, null);
 
-      // Access 1 (making it MRU)
+      // Access 1 (making it MRU). Order: 2, 3, 1
       testProbeTT(1, 1, -Infinity, Infinity);
 
-      // Add 4th entry.
-      // If 1 was updated to MRU, then 2 should be the LRU now (since 1 was accessed after 2 and 3).
-      // Wait:
-      // Insert 1 -> [1]
-      // Insert 2 -> [1, 2]
-      // Insert 3 -> [1, 2, 3]
-      // Access 1 -> [2, 3, 1] (1 moved to end)
-      // Insert 4 -> [3, 1, 4] (2 evicted)
+      // Add 4, 5, 6. Order: 2, 3, 1, 4, 5, 6
+      for (let i = 4; i <= 6; i++) {
+        testStoreTT(i, 1, i * 100, 0, null);
+      }
 
-      testStoreTT(4, 1, 400, 0, null);
+      // Add 7th. Should evict 2 (LRU).
+      testStoreTT(7, 1, 700, 0, null);
 
       expect(testProbeTT(2, 1, -Infinity, Infinity)).toBeNull(); // 2 should be evicted
       expect(testProbeTT(1, 1, -Infinity, Infinity)).not.toBeNull(); // 1 should still be there
