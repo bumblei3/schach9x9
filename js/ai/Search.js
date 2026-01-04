@@ -1,4 +1,5 @@
 import { logger } from '../logger.js';
+import { AI_PIECE_VALUES } from '../config.js';
 import { queryOpeningBook } from './OpeningBook.js';
 import {
   getAllLegalMoves,
@@ -149,8 +150,9 @@ export function getBestMove(
 
       // ASPIRATION WINDOW
       if (d > 1) {
-        searchAlpha = bestScore - WINDOW_SIZE;
-        searchBeta = bestScore + WINDOW_SIZE;
+        let window = 50;
+        searchAlpha = bestScore - window;
+        searchBeta = bestScore + window;
       }
 
       for (; ;) {
@@ -160,6 +162,13 @@ export function getBestMove(
 
         // PVS at Root
         for (let i = 0; i < orderedMoves.length; i++) {
+          // Time Management Check: Check every few moves to ensure responsiveness
+          if ((i % 5 === 0) && timeLimit > 0) {
+            if (Date.now() - startTime >= timeLimit) {
+              throw new Error('TimeOut');
+            }
+          }
+
           const move = orderedMoves[i];
           const piece = board[move.from.r][move.from.c];
           const undoInfo = makeMove(board, move);
@@ -197,10 +206,15 @@ export function getBestMove(
           if (alpha >= beta) break;
         }
 
-        // If search returned a value outside the window, widen it and search again
-        if (currentBestScoreForDepth <= searchAlpha || currentBestScoreForDepth >= searchBeta) {
-          searchAlpha = -Infinity;
-          searchBeta = Infinity;
+        // Aspiration Window Refinement
+        if (currentBestScoreForDepth <= searchAlpha) {
+          searchAlpha -= window;
+          window += 50; // Gradually widen
+          continue;
+        }
+        if (currentBestScoreForDepth >= searchBeta) {
+          searchBeta += window;
+          window += 50; // Gradually widen
           continue;
         }
         break;
@@ -439,6 +453,15 @@ function quiescenceSearch(board, alpha, beta, turnColor, aiColor) {
   const orderedCaptures = orderMoves(board, captures, null, 0);
 
   for (const move of orderedCaptures) {
+    // DELTA PRUNING
+    // If the captured piece value + safety margin is not enough to raise alpha, prune
+    const capturedPiece = board[move.to.r][move.to.c];
+    if (capturedPiece) {
+      const pieceValue = AI_PIECE_VALUES[capturedPiece.type] || 0;
+      const DELTA_MARGIN = 200; // Safety margin for promotions/positional factors
+      if (score + pieceValue + DELTA_MARGIN < alpha) continue;
+    }
+
     const undoInfo = makeMove(board, move);
     const opponentColor = turnColor === 'white' ? 'black' : 'white';
     const captureScore = -quiescenceSearch(board, -beta, -alpha, opponentColor, aiColor);
