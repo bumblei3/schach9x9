@@ -10,9 +10,8 @@ jest.unstable_mockModule('../../js/logger.js', () => ({
   },
 }));
 
-const { getBestMove, resetNodesEvaluated, analyzePosition, extractPV } = await import(
-  '../../js/ai/Search.js'
-);
+const { getBestMove, resetNodesEvaluated, analyzePosition, extractPV, resetActiveConfig } =
+  await import('../../js/ai/Search.js');
 const { clearTT } = await import('../../js/ai/TranspositionTable.js');
 
 describe('AI Search Logic', () => {
@@ -26,6 +25,7 @@ describe('AI Search Logic', () => {
   beforeEach(() => {
     resetNodesEvaluated();
     clearTT();
+    resetActiveConfig();
     jest.clearAllMocks();
   });
 
@@ -49,6 +49,9 @@ describe('AI Search Logic', () => {
     board[6][8] = { type: 'r', color: 'white' };
 
     const move = getBestMove(board, 'white', 2, 'expert', 1);
+    if (move.to.r !== 0) {
+      console.log('Failing move:', move);
+    }
 
     expect(move).toBeDefined();
     // Expect move to 0,8

@@ -186,12 +186,6 @@ export class AnalysisUI {
     });
   }
 
-  getBoardStateAt(moveIndex) {
-    const moveController = this.game.gameController.moveController;
-    // Reconstruct temporarily (this might be slow if done naive, but reconstruction logic is in MoveController)
-    return moveController.reconstructBoardAtMove(moveIndex - 1);
-  }
-
   showProgressModal() {
     const content = `
         <div class="post-game-analysis-overlay">

@@ -1,4 +1,9 @@
-import { classifyMove, calculateAccuracy, MOVE_QUALITY } from '../js/tutor/PostGameAnalyzer.js';
+import {
+  classifyMove,
+  calculateAccuracy,
+  analyzeGame,
+  MOVE_QUALITY,
+} from '../js/tutor/PostGameAnalyzer.js';
 
 describe('PostGameAnalyzer', () => {
   describe('classifyMove', () => {
@@ -54,6 +59,48 @@ describe('PostGameAnalyzer', () => {
 
     test('should handle empty input', () => {
       expect(calculateAccuracy([])).toBe(0);
+      expect(calculateAccuracy(null)).toBe(0);
+    });
+
+    test('should handle objects with quality property', () => {
+      const moves = [{ quality: MOVE_QUALITY.BEST }, { quality: MOVE_QUALITY.GOOD }];
+      expect(calculateAccuracy(moves)).toBe(90); // (100 + 80) / 2
+    });
+
+    test('should handle unknown quality strings by returning 0 points', () => {
+      expect(calculateAccuracy(['invalid'])).toBe(0);
+    });
+  });
+
+  describe('analyzeGame', () => {
+    const mockHistory = [
+      { piece: { color: 'white' }, classification: MOVE_QUALITY.BEST },
+      { piece: { color: 'black' }, classification: MOVE_QUALITY.MISTAKE },
+      { piece: { color: 'white' }, classification: MOVE_QUALITY.EXCELLENT },
+      { piece: { color: 'black' }, classification: MOVE_QUALITY.BLUNDER },
+      { piece: { color: 'white' }, classification: MOVE_QUALITY.BOOK },
+    ];
+
+    test('should summarize counts for a specific player', () => {
+      const result = analyzeGame(mockHistory, 'white');
+      expect(result.totalMoves).toBe(3);
+      expect(result.counts[MOVE_QUALITY.BEST]).toBe(1);
+      expect(result.counts[MOVE_QUALITY.EXCELLENT]).toBe(1);
+      expect(result.counts[MOVE_QUALITY.BOOK]).toBe(1);
+      expect(result.counts[MOVE_QUALITY.BLUNDER]).toBe(0);
+      expect(result.accuracy).toBe(100);
+    });
+
+    test('should handle players with no moves', () => {
+      const result = analyzeGame([], 'white');
+      expect(result.totalMoves).toBe(0);
+      expect(result.accuracy).toBe(0);
+    });
+
+    test('should handle moves without classification by defaulting to GOOD', () => {
+      const history = [{ piece: { color: 'white' } }];
+      const result = analyzeGame(history, 'white');
+      expect(result.accuracy).toBe(80); // Default to GOOD
     });
   });
 });

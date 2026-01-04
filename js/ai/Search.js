@@ -30,6 +30,12 @@ let progressCallback = null;
 export function setProgressCallback(cb) {
   progressCallback = cb;
 }
+/**
+ * Reset active personality config
+ */
+export function resetActiveConfig() {
+  activeConfig = null;
+}
 // Active personality config
 let activeConfig = null;
 
