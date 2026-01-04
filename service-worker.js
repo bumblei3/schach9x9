@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schach9x9-v5';
+const CACHE_NAME = 'schach9x9-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
