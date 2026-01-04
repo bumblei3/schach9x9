@@ -30,7 +30,6 @@ self.onmessage = function (e) {
 
       case 'getBestMove': {
         const { board, color, depth, difficulty, moveNumber, config, lastMove, timeLimit } = data;
-        const startTime = Date.now();
         logger.debug(`[AI Worker] getBestMove started - color:${color} depth:${depth} difficulty:${difficulty} timeLimit:${timeLimit}ms`);
 
         // Setup progress callback
@@ -40,7 +39,6 @@ self.onmessage = function (e) {
 
         try {
           const bestMove = getBestMove(board, color, depth, difficulty, moveNumber, config, lastMove, timeLimit);
-          const elapsed = Date.now() - startTime;
           self.postMessage({ type: 'bestMove', data: bestMove });
         } catch (error) {
           logger.error('[AI Worker] getBestMove failed:', error);

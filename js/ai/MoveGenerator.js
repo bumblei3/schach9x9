@@ -141,7 +141,7 @@ export function undoMove(board, undoInfo) {
     const { rook, rookFrom, rookTo, rookOldHasMoved } = castling;
     board[rookFrom.r][rookFrom.c] = rook;
     board[rookTo.r][rookTo.c] = null;
-    rook.hasMoved = false; // logic simplified: usually false for castling rights
+    rook.hasMoved = rookOldHasMoved;
   }
 }
 
