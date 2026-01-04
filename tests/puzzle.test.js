@@ -79,10 +79,11 @@ describe('PuzzleMode', () => {
     expect(puzzleManager.currentPuzzleIndex).toBe(1);
   });
 
-  test('should return null if no more puzzles', () => {
+  test('should generate new puzzle when list exhausted', () => {
     puzzleManager.loadPuzzle(game, puzzleManager.puzzles.length - 1);
     const next = puzzleManager.nextPuzzle(game);
-    expect(next).toBeNull();
+    expect(next).not.toBeNull();
+    expect(next.id).toMatch(/^proc-/);
   });
 
   test('should find puzzle by id', () => {

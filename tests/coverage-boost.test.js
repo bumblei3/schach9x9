@@ -15,6 +15,9 @@ jest.unstable_mockModule('../js/effects.js', () => ({
   floatingTextManager: {
     show: jest.fn(),
   },
+  shakeScreen: jest.fn(),
+  triggerVibration: jest.fn(),
+  confettiSystem: { spawn: jest.fn() },
 }));
 
 jest.unstable_mockModule('../js/sounds.js', () => ({
@@ -434,7 +437,7 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => {});
+      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => { });
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();

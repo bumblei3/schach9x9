@@ -4,7 +4,7 @@
  */
 import { BOARD_SIZE, PHASES } from '../config.js';
 import { debounce } from '../utils.js';
-import { particleSystem, floatingTextManager } from '../effects.js';
+import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
 
 /**
  * Gibt das SVG-Symbol für eine Figur zurück.
@@ -485,7 +485,17 @@ export async function animateMove(game, from, to, piece) {
     clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
     const targetPiece = game.board[to.r][to.c];
     const isCapture = targetPiece && targetPiece.color !== piece.color;
+    // Animation Loop for Move Trail
+    const trailInterval = setInterval(() => {
+      const rect = clone.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const color = piece.color === 'white' ? '#e2e8f0' : '#475569';
+      particleSystem.spawn(centerX, centerY, 'TRAIL', color);
+    }, 30); // Spawn trail every 30ms
+
     setTimeout(() => {
+      clearInterval(trailInterval);
       if (document.body.contains(clone)) document.body.removeChild(clone);
       if (pieceElement) pieceElement.style.opacity = originalOpacity;
 
@@ -496,6 +506,14 @@ export async function animateMove(game, from, to, piece) {
         const color = targetPiece.color === 'white' ? '#e2e8f0' : '#1e293b';
         particleSystem.spawn(centerX, centerY, 'CAPTURE', color);
 
+        // Shake screen on heavy captures
+        const heavyPieces = ['q', 'a', 'c', 'k', 'r'];
+        if (heavyPieces.includes(targetPiece.type)) {
+          shakeScreen(8, 250); // Stronger shake
+        } else {
+          shakeScreen(4, 150); // Light shake
+        }
+
         // Show floating score
         const values = { p: 1, n: 3, b: 3, r: 5, q: 9, e: 12, a: 7, c: 8, k: 0 };
         const scoreVal = values[targetPiece.type] || 0;
@@ -503,7 +521,7 @@ export async function animateMove(game, from, to, piece) {
           floatingTextManager.show(centerX, centerY, `+${scoreVal}`, 'score');
         }
       } else {
-        // Subtle particles for normal moves
+        // Subtle particles for normal moves (impact at destination)
         const color = piece.color === 'white' ? '#f8fafc' : '#334155';
         particleSystem.spawn(centerX, centerY, 'MOVE', color);
       }

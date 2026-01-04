@@ -20,6 +20,7 @@ jest.unstable_mockModule('../js/utils.js', () => ({
 jest.unstable_mockModule('../js/effects.js', () => ({
   particleSystem: { spawn: jest.fn() },
   floatingTextManager: { show: jest.fn() },
+  shakeScreen: jest.fn(),
 }));
 
 const BoardRenderer = await import('../js/ui/BoardRenderer.js');

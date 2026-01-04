@@ -1,5 +1,6 @@
 // import { BOARD_SIZE } from './config.js';
 import { PuzzleGenerator } from './puzzleGenerator.js';
+import { ProceduralGenerator } from './puzzle/ProceduralGenerator.js';
 
 export class PuzzleManager {
   constructor() {
@@ -94,10 +95,26 @@ export class PuzzleManager {
   }
 
   loadPuzzle(game, index = 0) {
-    if (index < 0 || index >= this.puzzles.length) return false;
+    this.currentPuzzleIndex = index;
+    let puzzle = this.puzzles[index];
+
+    // Check for Infinite Mode loading
+    if (!puzzle && index >= this.puzzles.length) {
+      // Generate on the fly if index is out of bounds
+      const diff = index % 2 === 0 ? 'easy' : 'medium'; // Alternating difficulty
+      const genPuzzle = ProceduralGenerator.generatePuzzle(diff);
+      if (genPuzzle) {
+        genPuzzle.title = `Infinite Puzzle #${index + 1}`;
+        this.puzzles[index] = genPuzzle; // Cache it
+        puzzle = genPuzzle;
+      } else {
+        return false; // Generation failed
+      }
+    }
+
+    if (!puzzle) return false;
 
     this.currentPuzzleIndex = index;
-    const puzzle = this.puzzles[index];
 
     // Reset game to a clean state
     game.phase = 'PLAY';
@@ -153,10 +170,8 @@ export class PuzzleManager {
 
   nextPuzzle(game) {
     const nextIndex = this.currentPuzzleIndex + 1;
-    if (nextIndex < this.puzzles.length) {
-      return this.loadPuzzle(game, nextIndex);
-    }
-    return null;
+    // Always try to load next, even if out of bounds (loadPuzzle will handle generation)
+    return this.loadPuzzle(game, nextIndex);
   }
 
   /**

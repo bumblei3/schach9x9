@@ -40,6 +40,10 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
 
 jest.unstable_mockModule('../js/effects.js', () => ({
   confettiSystem: { spawn: jest.fn() },
+  shakeScreen: jest.fn(),
+  triggerVibration: jest.fn(),
+  particleSystem: { spawn: jest.fn() },
+  floatingTextManager: { show: jest.fn() },
 }));
 
 // Mock 3D globally

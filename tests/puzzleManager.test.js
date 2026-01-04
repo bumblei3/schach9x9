@@ -54,7 +54,10 @@ describe('PuzzleManager', () => {
 
     test('should return false for invalid index', () => {
       expect(manager.loadPuzzle(game, -1)).toBe(false);
-      expect(manager.loadPuzzle(game, 999)).toBe(false);
+      // Index 999 is now valid and triggers infinite generation
+      const puzzle = manager.loadPuzzle(game, 999);
+      expect(puzzle).not.toBe(false);
+      expect(puzzle.id).toMatch(/^proc-/);
     });
 
     test('should set up board from setupStr', () => {
@@ -120,13 +123,14 @@ describe('PuzzleManager', () => {
       expect(manager.currentPuzzleIndex).toBe(1);
     });
 
-    test('should return null when no more puzzles', () => {
+    test('should generate new puzzle when no more static puzzles', () => {
       // Load the last puzzle
       const lastIndex = manager.puzzles.length - 1;
       manager.loadPuzzle(game, lastIndex);
 
       const next = manager.nextPuzzle(game);
-      expect(next).toBeNull();
+      expect(next).not.toBeNull();
+      expect(next.id).toMatch(/^proc-/);
     });
   });
 });

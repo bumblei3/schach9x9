@@ -35,6 +35,12 @@ export function animateCheckmate(game, color) {
     if (cell) {
       cell.classList.add('checkmate');
       setTimeout(() => cell.classList.remove('checkmate'), 3000);
+
+      // Winner is the opposite color
+      // Trigger confetti
+      import('../effects.js').then(({ confettiSystem }) => {
+        confettiSystem.spawn();
+      });
     }
   }
 }

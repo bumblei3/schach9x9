@@ -238,17 +238,17 @@ export class AIController {
 
     // Load opening book once
     fetch('opening-book.json')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+        return r.json();
+      })
       .then(book => {
-        // We can just pass the raw JSON to the workers, they will load it into their own OpeningBook instance
-        // Or if we use the class locally:
-        // this.openingBook = new OpeningBook(book);
-        // But the controller just dispatches to workers.
+        logger.info(`[AIController] Opening book loaded successfully. Positions: ${Object.keys(book.positions || {}).length}`);
         this.openingBookData = book;
         this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
       })
-      .catch(() => {
-        logger.warn('Could not load opening-book.json');
+      .catch(err => {
+        logger.error('[AIController] Could not load opening-book.json:', err);
       });
 
     for (let i = 0; i < numWorkers; i++) {
@@ -694,7 +694,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Prepare board state for worker

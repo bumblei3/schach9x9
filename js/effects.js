@@ -10,7 +10,7 @@ export class ParticleSystem {
   }
 
   spawn(x, y, type, color = '#fff') {
-    const count = type === 'CAPTURE' ? 20 : type === 'MOVE' ? 8 : 15;
+    const count = type === 'CAPTURE' ? 25 : type === 'MOVE' ? 8 : type === 'TRAIL' ? 1 : 15;
 
     for (let i = 0; i < count; i++) {
       const p = document.createElement('div');
@@ -18,19 +18,30 @@ export class ParticleSystem {
 
       // Randomize physics
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 4 + 2;
+      let speed = Math.random() * 4 + 2;
+      let life = Math.random() * 0.5 + 0.3; // seconds
+
+      if (type === 'TRAIL') {
+        speed = Math.random() * 1; // Slow for trail
+        life = 0.25; // Short life
+      }
+
       const vx = Math.cos(angle) * speed;
       const vy = Math.sin(angle) * speed;
-      const life = Math.random() * 0.5 + 0.3; // seconds
 
       p.style.left = x + 'px';
       p.style.top = y + 'px';
       p.style.backgroundColor = color;
 
       if (type === 'CAPTURE') {
-        p.style.width = Math.random() * 6 + 2 + 'px';
+        p.style.width = Math.random() * 6 + 3 + 'px';
         p.style.height = p.style.width;
-        p.style.boxShadow = `0 0 6px ${color}`;
+        p.style.boxShadow = `0 0 8px ${color}`;
+      } else if (type === 'TRAIL') {
+        p.style.width = '4px';
+        p.style.height = '4px';
+        p.style.opacity = '0.6';
+        p.style.borderRadius = '50%';
       } else {
         p.style.width = '3px';
         p.style.height = '3px';
@@ -46,6 +57,7 @@ export class ParticleSystem {
         vy,
         life,
         maxLife: life,
+        type: type, // Store type to allow custom update logic
       });
     }
 
@@ -164,15 +176,17 @@ export const floatingTextManager = new FloatingTextManager();
 
 export class ConfettiSystem {
   constructor() {
-    this.container = document.getElementById('board-container') || document.body;
     this.particles = [];
     this.animating = false;
     this.colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
   }
 
   spawn() {
+    this.container = document.getElementById('board-container') || document.body;
     const count = 150;
-    const rect = this.container.getBoundingClientRect();
+    const rect = this.container && typeof this.container.getBoundingClientRect === 'function'
+      ? this.container.getBoundingClientRect()
+      : { width: window.innerWidth || 800, height: window.innerHeight || 600 };
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 

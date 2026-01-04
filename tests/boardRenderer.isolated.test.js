@@ -7,6 +7,8 @@ jest.unstable_mockModule('../js/config.js', () => ({
 jest.unstable_mockModule('../js/effects.js', () => ({
   particleSystem: { spawn: jest.fn() },
   floatingTextManager: { show: jest.fn() },
+  shakeScreen: jest.fn(),
+  triggerVibration: jest.fn(),
 }));
 jest.unstable_mockModule('../js/utils.js', () => ({
   debounce: fn => fn,

@@ -14,7 +14,7 @@ describe('Effects System', () => {
   test('ParticleSystem spawn and update', () => {
     const ps = new Effects.ParticleSystem();
     ps.spawn(100, 100, 'CAPTURE', '#ff0000');
-    expect(ps.particles.length).toBe(20);
+    expect(ps.particles.length).toBe(25);
 
     // Simulate animation frame
     ps.update();
@@ -41,7 +41,8 @@ describe('Effects System', () => {
 
   test('ConfettiSystem spawn and update', () => {
     const cs = new Effects.ConfettiSystem();
-    // mock getBoundingClientRect
+    // Initialize container manually for test since it's lazy-loaded
+    cs.container = document.createElement('div');
     cs.container.getBoundingClientRect = () => ({ width: 1000, height: 1000 });
 
     cs.spawn();

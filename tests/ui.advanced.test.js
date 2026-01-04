@@ -14,6 +14,9 @@ jest.unstable_mockModule('../js/effects.js', () => ({
   floatingTextManager: {
     show: jest.fn(),
   },
+  shakeScreen: jest.fn(),
+  triggerVibration: jest.fn(),
+  confettiSystem: { spawn: jest.fn() },
 }));
 
 // Import UI module

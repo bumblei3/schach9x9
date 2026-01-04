@@ -287,8 +287,14 @@ export class GameController {
     winnerText.textContent = message;
     overlay.classList.remove('hidden');
 
-    soundManager.playGameOver();
+    soundManager.playGameOver(false); // Play defeat sound for resigner
     this.stopClock();
+
+    // Trigger confetti if the winner is the human player (assuming human is white or playing locally)
+    // Or just always celebrate the winner
+    import('./effects.js').then(({ confettiSystem }) => {
+      confettiSystem.spawn();
+    });
 
     // Save game to statistics
     this.saveGameToStatistics('loss', resigningColor);
