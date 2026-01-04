@@ -502,7 +502,6 @@ function isPassedPawn(board, r, c, color) {
  */
 function isPawnBlocked(board, r, c, color) {
   const nextR = color === 'white' ? r - 1 : r + 1;
-  const size = board.length;
-  if (nextR < 0 || nextR >= size) return false;
+  if (nextR < 0 || nextR >= board.length) return false;
   return board[nextR][c] !== null;
 }

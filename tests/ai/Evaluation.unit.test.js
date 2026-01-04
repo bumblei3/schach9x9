@@ -110,8 +110,8 @@ describe('AI Evaluation Logic', () => {
     boardClosed[8][0] = { type: 'r', color: 'white' };
     boardClosed[7][0] = { type: 'p', color: 'white' }; // Blocked by own pawn
 
-    const scoreOpen = evaluatePosition(boardOpen, 'white');
-    const scoreClosed = evaluatePosition(boardClosed, 'white');
+    evaluatePosition(boardOpen, 'white');
+    evaluatePosition(boardClosed, 'white');
 
     // Rook on open file should be worth more (excluding the material of the pawn in closed case)
     // scoreOpen (~500+25pst+20open) vs scoreClosed (~500+25pst + 100pawn)
