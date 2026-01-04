@@ -1,4 +1,4 @@
-import { BOARD_SIZE, AI_PIECE_VALUES } from '../config.js';
+import { AI_PIECE_VALUES } from '../config.js';
 import { countMobility } from './MoveGenerator.js';
 
 // Piece-Square Tables (PST) for 9x9 board.
@@ -145,6 +145,70 @@ export const PST = {
   ],
 };
 
+// Piece-Square Tables for 8x8 (Standard Chess)
+export const PST_8 = {
+  p: [
+    0, 0, 0, 0, 0, 0, 0, 0,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    10, 10, 20, 30, 30, 20, 10, 10,
+    5, 5, 10, 25, 25, 10, 5, 5,
+    0, 0, 0, 20, 20, 0, 0, 0,
+    5, -5, -10, 0, 0, -10, -5, 5,
+    5, 10, 10, -20, -20, 10, 10, 5,
+    0, 0, 0, 0, 0, 0, 0, 0
+  ],
+  n: [
+    -50, -40, -30, -30, -30, -30, -40, -50,
+    -40, -20, 0, 0, 0, 0, -20, -40,
+    -30, 0, 10, 15, 15, 10, 0, -30,
+    -30, 5, 15, 20, 20, 15, 5, -30,
+    -30, 0, 15, 20, 20, 15, 0, -30,
+    -30, 5, 10, 15, 15, 10, 5, -30,
+    -40, -20, 0, 5, 5, 0, -20, -40,
+    -50, -40, -30, -30, -30, -30, -40, -50
+  ],
+  b: [
+    -20, -10, -10, -10, -10, -10, -10, -20,
+    -10, 0, 0, 0, 0, 0, 0, -10,
+    -10, 0, 5, 10, 10, 5, 0, -10,
+    -10, 5, 5, 10, 10, 5, 5, -10,
+    -10, 0, 10, 10, 10, 10, 0, -10,
+    -10, 10, 10, 10, 10, 10, 10, -10,
+    -10, 5, 0, 0, 0, 0, 5, -10,
+    -20, -10, -10, -10, -10, -10, -10, -20
+  ],
+  r: [
+    0, 0, 0, 0, 0, 0, 0, 0,
+    5, 10, 10, 10, 10, 10, 10, 5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    0, 0, 0, 5, 5, 0, 0, 0
+  ],
+  q: [
+    -20, -10, -10, -5, -5, -10, -10, -20,
+    -10, 0, 0, 0, 0, 0, 0, -10,
+    -10, 0, 5, 5, 5, 5, 0, -10,
+    -5, 0, 5, 5, 5, 5, 0, -5,
+    0, 0, 5, 5, 5, 5, 0, -5,
+    -10, 5, 5, 5, 5, 5, 0, -10,
+    -10, 0, 5, 0, 0, 0, 0, -10,
+    -20, -10, -10, -5, -5, -10, -10, -20
+  ],
+  k: [
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -20, -30, -30, -40, -40, -30, -30, -20,
+    -10, -20, -20, -20, -20, -20, -20, -10,
+    20, 20, 0, 0, 0, 0, 20, 20,
+    20, 30, 10, 0, 0, 10, 30, 20
+  ]
+};
+
 // Endgame Piece-Square Tables (PST)
 export const PST_EG = {
   k: [
@@ -156,8 +220,9 @@ export const PST_EG = {
 };
 
 // Reuse arrays to avoid allocation
-const pawnColumnsWhite = new Int8Array(BOARD_SIZE);
-const pawnColumnsBlack = new Int8Array(BOARD_SIZE);
+// Reuse arrays to avoid allocation (assuming max size 9)
+const pawnColumnsWhite = new Int8Array(9);
+const pawnColumnsBlack = new Int8Array(9);
 
 /**
  * Evaluate board position with advanced heuristics
@@ -186,20 +251,23 @@ export function evaluatePosition(board, forColor, config) {
   let totalPhase = 0;
 
   // First pass: collect pieces and basic material/pst/mobility
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  const size = board.length;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (!piece) continue;
 
       const pieceValue = AI_PIECE_VALUES[piece.type] || 0;
-      const mgBonus = getPositionBonus(r, c, piece.type, piece.color, false);
-      const egBonus = getPositionBonus(r, c, piece.type, piece.color, true);
+      const mgBonus = getPositionBonus(r, c, piece.type, piece.color, size, false);
+      const egBonus = getPositionBonus(r, c, piece.type, piece.color, size, true);
 
       const isWhite = piece.color === 'white';
       const sideMult = isWhite ? 1 : -1;
 
-      // Center Control Bonus
-      if (r >= 3 && r <= 5 && c >= 3 && c <= 5) {
+      // Center Control Bonus (scaled for board size)
+      const centerStart = Math.floor(size / 3);
+      const centerEnd = size - centerStart - 1;
+      if (r >= centerStart && r <= centerEnd && c >= centerStart && c <= centerEnd) {
         const centerBonus = 10 * centerControlWeight;
         mgScore += centerBonus * sideMult;
         egScore += centerBonus * sideMult;
@@ -237,8 +305,8 @@ export function evaluatePosition(board, forColor, config) {
   }
 
   // Second pass: Pawn structure (Isolated, Passed, Doubled)
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (!piece || piece.type !== 'p') continue;
 
@@ -254,7 +322,7 @@ export function evaluatePosition(board, forColor, config) {
 
       // Isolated pawn penalty
       const leftCol = c > 0 ? cols[c - 1] : 0;
-      const rightCol = c < BOARD_SIZE - 1 ? cols[c + 1] : 0;
+      const rightCol = c < size - 1 ? cols[c + 1] : 0;
       if (leftCol === 0 && rightCol === 0) {
         mgScore -= 15 * pawnStructureWeight * sideMult;
         egScore -= 20 * pawnStructureWeight * sideMult;
@@ -262,7 +330,7 @@ export function evaluatePosition(board, forColor, config) {
 
       // Passed pawn bonus
       if (isPassedPawn(board, r, c, piece.color)) {
-        const progress = isWhite ? BOARD_SIZE - 1 - r : r;
+        const progress = isWhite ? size - 1 - r : r;
         let passedBonus = progress * progress * 5 * pawnStructureWeight;
 
         // Bonus for supported passed pawns
@@ -291,22 +359,21 @@ export function evaluatePosition(board, forColor, config) {
 /**
  * Get position bonus for piece placement using PSTs
  */
-function getPositionBonus(r, c, type, color, isEndgame = false) {
-  let table = isEndgame && PST_EG[type] ? PST_EG[type] : PST[type];
-  if (!table) table = PST[type]; // Fallback to normal PST if no EG table
-  if (!table) return 0;
+/**
+ * Get position bonus for piece placement using PSTs
+ */
+function getPositionBonus(r, c, type, color, size, isEndgame = false) {
+  // Select correct PST based on board size
+  // For 9x9, check endgame tables. For 8x8, we currently only have main PSTs.
+  const PST_SET = size === 8 ? PST_8 : (isEndgame && PST_EG[type] ? PST_EG : PST);
+  const table = PST_SET[type];
+
+  if (!table) return 0; // Fallback if type not found
 
   // Mirror row for black pieces
-  const perspectiveRow = color === 'white' ? r : BOARD_SIZE - 1 - r;
-  // White index 0 is TOP (row 0), index 8 is BOTTOM (row 8)
-  // But PST tables are laid out flat.
-  // Assuming the array is row major: index 0 is (0,0), index 80 is (8,8)
-  // White perspective typically puts A1 at index 0?
-  // Previous implementation assumed 0 is Top.
-  // The provided logic in aiEngine.js uses `perspectiveRow * BOARD_SIZE + c`
-  // Where `perspectiveRow` is mirrored for Black.
+  const perspectiveRow = color === 'white' ? r : size - 1 - r;
 
-  return table[perspectiveRow * BOARD_SIZE + c];
+  return table[perspectiveRow * size + c];
 }
 
 /**
@@ -317,12 +384,13 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
   const pawnRow = kingColor === 'white' ? 1 : -1;
   const opponentColor = kingColor === 'white' ? 'black' : 'white';
 
+  const size = board.length;
   // 1. Pawn shield
   for (let dc = -1; dc <= 1; dc++) {
     const checkR = kingR + pawnRow;
     const checkC = kingC + dc;
 
-    if (checkR >= 0 && checkR < BOARD_SIZE && checkC >= 0 && checkC < BOARD_SIZE) {
+    if (checkR >= 0 && checkR < size && checkC >= 0 && checkC < size) {
       const piece = board[checkR][checkC];
       if (piece && piece.type === 'p' && piece.color === kingColor) {
         safety += 15;
@@ -332,8 +400,9 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
 
   // 2. King Zone Attacks (Enemy pieces near king)
   let enemyAttacks = 0;
-  for (let r = Math.max(0, kingR - 2); r <= Math.min(BOARD_SIZE - 1, kingR + 2); r++) {
-    for (let c = Math.max(0, kingC - 2); c <= Math.min(BOARD_SIZE - 1, kingC + 2); c++) {
+  // size already declared above
+  for (let r = Math.max(0, kingR - 2); r <= Math.min(size - 1, kingR + 2); r++) {
+    for (let c = Math.max(0, kingC - 2); c <= Math.min(size - 1, kingC + 2); c++) {
       const piece = board[r][c];
       if (piece && piece.color === opponentColor) {
         // Count pieces that can reach the king's vicinity
@@ -351,11 +420,12 @@ function evaluateKingSafety(board, kingR, kingC, kingColor) {
  */
 function isPawnSupported(board, r, c, color) {
   const supportRow = color === 'white' ? r + 1 : r - 1;
-  if (supportRow < 0 || supportRow >= BOARD_SIZE) return false;
+  const size = board.length;
+  if (supportRow < 0 || supportRow >= size) return false;
 
   for (let dc = -1; dc <= 1; dc += 2) {
     const checkC = c + dc;
-    if (checkC >= 0 && checkC < BOARD_SIZE) {
+    if (checkC >= 0 && checkC < size) {
       const piece = board[supportRow][checkC];
       if (piece && piece.type === 'p' && piece.color === color) {
         return true;
@@ -371,11 +441,12 @@ function isPawnSupported(board, r, c, color) {
 function isPassedPawn(board, r, c, color) {
   const opponentColor = color === 'white' ? 'black' : 'white';
   const startR = color === 'white' ? r - 1 : r + 1;
-  const endR = color === 'white' ? 0 : BOARD_SIZE - 1;
+  const size = board.length;
+  const endR = color === 'white' ? 0 : size - 1;
   const step = color === 'white' ? -1 : 1;
 
   for (let row = startR; row !== endR + step; row += step) {
-    for (let col = Math.max(0, c - 1); col <= Math.min(BOARD_SIZE - 1, c + 1); col++) {
+    for (let col = Math.max(0, c - 1); col <= Math.min(size - 1, c + 1); col++) {
       const piece = board[row][col];
       if (piece && piece.type === 'p' && piece.color === opponentColor) {
         return false;

@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from '../config.js';
+// MoveGenerator.js
 
 // Constants for move generation
 const KNIGHT_MOVES = [
@@ -103,9 +103,10 @@ export function undoMove(board, undoInfo) {
 export function getAllLegalMoves(board, color) {
   const moves = [];
   const kingPos = findKing(board, color);
+  const size = board.length;
 
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (piece && piece.color === color) {
         const pieceMoves = getPseudoLegalMoves(board, r, c, piece);
@@ -143,7 +144,8 @@ export function getAllLegalMoves(board, color) {
  */
 export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
   const moves = [];
-  const isInside = (r, c) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
+  const size = board.length;
+  const isInside = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
   const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
   const isEmpty = (r, c) => !board[r][c];
 
@@ -214,9 +216,10 @@ export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false) {
  */
 export function getAllCaptureMoves(board, color) {
   const moves = [];
+  const size = board.length;
 
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (piece && piece.color === color) {
         const pieceMoves = getPseudoLegalMoves(board, r, c, piece, true); // onlyCaptures = true
@@ -252,9 +255,10 @@ export function isInCheck(board, color, knownKingPos) {
  * Find the king for a specific color
  */
 export function findKing(board, color) {
-  for (let r = 0; r < BOARD_SIZE; r++) {
+  const size = board.length;
+  for (let r = 0; r < size; r++) {
     if (!board[r]) continue;
-    for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (piece && piece.color === color && piece.type === 'k') {
         return { r, c };
@@ -268,15 +272,17 @@ export function findKing(board, color) {
  * Check if a square is attacked by a specific color
  */
 export function isSquareAttacked(board, r, c, attackerColor) {
+  const size = board.length;
+
   // 1. Pawn attacks
   const pawnRow = attackerColor === 'white' ? 1 : -1;
   const pr = r + pawnRow;
-  if (pr >= 0 && pr < BOARD_SIZE) {
+  if (pr >= 0 && pr < size) {
     if (c > 0) {
       const piece = board[pr][c - 1];
       if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
     }
-    if (c < BOARD_SIZE - 1) {
+    if (c < size - 1) {
       const piece = board[pr][c + 1];
       if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
     }
@@ -287,7 +293,7 @@ export function isSquareAttacked(board, r, c, attackerColor) {
     const move = KNIGHT_MOVES[i];
     const nr = r + move[0];
     const nc = c + move[1];
-    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
       const piece = board[nr][nc];
       if (piece && piece.color === attackerColor) {
         const t = piece.type;
@@ -304,7 +310,7 @@ export function isSquareAttacked(board, r, c, attackerColor) {
     let nc = c + dir[1];
 
     // King check (dist 1)
-    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
       const piece = board[nr][nc];
       if (piece) {
         if (piece.color === attackerColor) {
@@ -314,7 +320,7 @@ export function isSquareAttacked(board, r, c, attackerColor) {
         // Sliding
         nr += dir[0];
         nc += dir[1];
-        while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+        while (nr >= 0 && nr < size && nc >= 0 && nc < size) {
           const nextPiece = board[nr][nc];
           if (nextPiece) {
             if (nextPiece.color === attackerColor && PIECE_ATTACKS_DIAGONALLY[nextPiece.type])
@@ -334,7 +340,7 @@ export function isSquareAttacked(board, r, c, attackerColor) {
     let nr = r + dir[0];
     let nc = c + dir[1];
 
-    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
       const piece = board[nr][nc];
       if (piece) {
         if (piece.color === attackerColor) {
@@ -344,7 +350,7 @@ export function isSquareAttacked(board, r, c, attackerColor) {
         // Sliding
         nr += dir[0];
         nc += dir[1];
-        while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+        while (nr >= 0 && nr < size && nc >= 0 && nc < size) {
           const nextPiece = board[nr][nc];
           if (nextPiece) {
             if (nextPiece.color === attackerColor && PIECE_ATTACKS_ORTHOGONALLY[nextPiece.type])
@@ -366,7 +372,8 @@ export function isSquareAttacked(board, r, c, attackerColor) {
  */
 export function countMobility(board, r, c, piece) {
   let count = 0;
-  const isInside = (r, c) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
+  const size = board.length;
+  const isInside = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
   const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
   const isEmpty = (r, c) => !board[r][c];
 

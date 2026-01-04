@@ -73,9 +73,10 @@ function initializeZobrist() {
  */
 export function computeZobristHash(board, colorToMove) {
   let hash = 0;
+  const size = board.length;
 
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const piece = board[r][c];
       if (piece) {
         hash ^= zobristTable[piece.color][piece.type][r][c];
