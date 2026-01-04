@@ -6,6 +6,7 @@ jest.unstable_mockModule('../js/utils.js', () => ({
   debounce: jest.fn(fn => fn),
   formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
   deepCopy: jest.fn(obj => JSON.parse(JSON.stringify(obj))),
+  parseFEN: jest.fn(() => ({ board: [], turn: 'white' })),
 }));
 
 jest.unstable_mockModule('../js/effects.js', () => ({

@@ -581,6 +581,9 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
         <button id="puzzle-start-btn" class="btn-primary full-width mb-2" style="background: linear-gradient(135deg, #f59e0b, #d97706)">
           🧩 Puzzle-Modus
         </button>
+        <button id="campaign-start-btn" class="btn-primary full-width mb-2" style="background: linear-gradient(135deg, #a855f7, #7c3aed)">
+          ⚔️ Kampagne
+        </button>
         <div class="divider"><span>ODER</span></div>
         <p class="small-text">Setup-Modus (Punkte wählen):</p>
         <div class="points-grid">

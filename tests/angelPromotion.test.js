@@ -66,7 +66,7 @@ describe('Angel Piece and Promotion', () => {
 
     game = new Game();
     moveController = new MoveController(game);
-    game.gameController = { saveGameToStatistics: jest.fn() }; // Mock
+    game.gameController = { saveGameToStatistics: jest.fn(), handleGameEnd: jest.fn() }; // Mock
     game.log = jest.fn(); // Mock log
     game.arrowRenderer = { clearArrows: jest.fn() }; // Mock arrow renderer
 
