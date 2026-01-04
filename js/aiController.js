@@ -204,6 +204,19 @@ export class AIController {
         logger.info(`[AI] Executing move: ${bestResult.from.r},${bestResult.from.c} -> ${bestResult.to.r},${bestResult.to.c}`);
         this.game.executeMove(bestResult.from, bestResult.to);
         if (this.game.renderBoard) this.game.renderBoard();
+
+        // Display AI Thinking (PV)
+        if (bestResult.pv && bestResult.pv.length > 0) {
+          const bestMoveEl = document.getElementById('ai-best-move');
+          if (bestMoveEl) {
+            const pvText = bestResult.pv.map(m => {
+              const from = String.fromCharCode(97 + m.from.c) + (BOARD_SIZE - m.from.r);
+              const to = String.fromCharCode(97 + m.to.c) + (BOARD_SIZE - m.to.r);
+              return `${from}${to}`;
+            }).join(' ');
+            bestMoveEl.textContent = `KI Plan: ${pvText}`;
+          }
+        }
       } else {
         logger.warn('[AI] No valid move found in worker results!');
         this.game.log('KI kann nicht ziehen (Patt oder Matt?)');

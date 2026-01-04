@@ -243,11 +243,20 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
     orderedMoves.forEach(m => {
       if (m._score !== undefined) delete m._score;
     }); // Cleanup all
+
+    // Attach PV
+    if (bestMove) {
+      bestMove.pv = extractPV(board, color, currentDepth);
+    }
     return bestMove;
   } catch (error) {
     if (error.message === 'TimeOut') {
       logger.info(`[AI] Search timed out at depth ${currentDepth}. Returning best move.`);
-      return bestMoveSoFar || moves[0];
+      const result = bestMoveSoFar || moves[0];
+      if (result) {
+        result.pv = extractPV(board, color, currentDepth);
+      }
+      return result;
     }
     logger.error('[AI Worker] Error in getBestMove:', error);
     return moves[0];
@@ -442,7 +451,8 @@ export function extractPV(board, color, depth) {
     if (!entry || !entry.bestMove) break;
 
     const move = entry.bestMove;
-    pv.push(move);
+    // Clone move to avoid circular references (if bestMove attempts to include its own PV)
+    pv.push({ from: move.from, to: move.to, promotion: move.promotion });
     undoStack.push(makeMove(board, move));
     currentColor = currentColor === 'white' ? 'black' : 'white';
   }
