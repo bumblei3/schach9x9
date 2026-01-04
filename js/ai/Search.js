@@ -373,6 +373,59 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
   }
 
   const orderedMoves = orderMoves(board, moves, ttEntry ? ttEntry.bestMove : null, depth);
+
+  // SINGULAR EXTENSIONS
+  // If TT move is "singular" (much better than alternatives), extend search depth
+  let singularExtension = 0;
+  if (
+    depth >= 8 &&
+    ttEntry &&
+    ttEntry.bestMove &&
+    !inCheck &&
+    Math.abs(ttEntry.score) < 9000 &&
+    ttEntry.depth >= depth - 3 &&
+    ttEntry.flag !== TT_ALPHA // Must be a lower bound or exact
+  ) {
+    const singularBeta = ttEntry.score - (2 * depth);
+    const reducedDepth = Math.floor((depth - 1) / 2);
+
+    // "Singular Search": Search other moves with reduced depth
+    // If all fail low (score < singularBeta), the TT move is singular
+    // We only check the first few moves (after TT move) for performance
+    const probeCount = Math.min(orderedMoves.length, 4); // Check top 3 alternatives
+    let allOthersFailedLow = true;
+
+    for (let k = 1; k < probeCount; k++) {
+      const altMove = orderedMoves[k];
+      const altPiece = board[altMove.from.r][altMove.from.c];
+      const altCaptured = board[altMove.to.r][altMove.to.c];
+
+      const uInfo = makeMove(board, altMove);
+      const nHash = updateZobristHash(hash, altMove.from, altMove.to, altPiece, altCaptured, uInfo);
+
+      const altScore = -minimax(
+        board,
+        reducedDepth,
+        -(singularBeta + 1),
+        -singularBeta,
+        opponentColor,
+        aiColor,
+        nHash
+      );
+
+      undoMove(board, uInfo);
+
+      if (altScore >= singularBeta) {
+        allOthersFailedLow = false; // Found an alternative that is "good enough"
+        break;
+      }
+    }
+
+    if (allOthersFailedLow) {
+      singularExtension = 1;
+    }
+  }
+
   let bestScore = -Infinity;
   let bestMove = null;
   let flag = TT_ALPHA;
@@ -404,7 +457,7 @@ function minimax(board, depth, alpha, beta, turnColor, aiColor, hash) {
 
     let score;
     if (i === 0) {
-      score = -minimax(board, depth - 1, -beta, -alpha, opponentColor, aiColor, nextHash);
+      score = -minimax(board, depth - 1 + singularExtension, -beta, -alpha, opponentColor, aiColor, nextHash);
     } else {
       // LATE MOVE REDUCTION (LMR)
       let reduction = 0;
