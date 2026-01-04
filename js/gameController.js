@@ -55,17 +55,42 @@ export class GameController {
     logger.info(`Started Campaign Level: ${level.title}`);
 
     // Build description with goals
-    let desc = level.description;
-    if (level.goals) {
-      desc += '<br><br><strong>Ziele:</strong><ul style="text-align: left;">';
-      desc += '<li>⭐ Sieg</li>';
-      if (level.goals[2]) desc += `<li>⭐⭐ ${level.goals[2].description || 'Bonus 1'}</li>`;
-      if (level.goals[3]) desc += `<li>⭐⭐⭐ ${level.goals[3].description || 'Bonus 2'}</li>`;
-      desc += '</ul>';
-    }
+    const desc = `
+      <div class="campaign-intro">
+        <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">${level.description}</p>
+        <div class="campaign-goals-box" style="background: rgba(49, 196, 141, 0.1); border: 1px solid rgba(49, 196, 141, 0.3); border-radius: 8px; padding: 1rem;">
+          <h4 style="margin-top: 0; color: var(--accent-success); display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">🎯</span> Missionsziele
+          </h4>
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
+            </li>
+            ${
+              level.goals[2]
+                ? `
+            <li style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
+            </li>`
+                : ''
+            }
+            ${
+              level.goals[3]
+                ? `
+            <li style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
+            </li>`
+                : ''
+            }
+          </ul>
+        </div>
+      </div>
+    `;
 
     // Show intro modal
-    UI.showModal(level.title, desc, [{ text: 'Start', callback: () => {} }]);
+    UI.showModal(level.title, desc, [
+      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
+    ]);
   }
 
   initGame(initialPoints, mode = 'setup') {
@@ -699,11 +724,20 @@ export class GameController {
         };
 
         const earnedStars = campaignManager.completeLevel(this.game.currentLevelId, stats);
+        const level = campaignManager.getLevel(this.game.currentLevelId);
 
         setTimeout(() => {
-          UI.showModal('Sieg!', `Level abgeschlossen! ${'⭐'.repeat(earnedStars)}`, [
+          UI.showCampaignVictoryModal(level.title, earnedStars, [
             {
-              text: 'Weiter',
+              text: 'Nächste Mission',
+              class: 'btn-primary',
+              callback: () => {
+                window.location.reload();
+              },
+            },
+            {
+              text: 'Hauptmenü',
+              class: 'btn-secondary',
               callback: () => {
                 window.location.reload();
               },

@@ -49,6 +49,25 @@ export class UIEffects {
 
     this.container.appendChild(piece);
   }
+
+  /**
+   * Animate earning stars in the campaign victory modal
+   * @param {number} count - Number of stars earned (1-3)
+   */
+  animateStars(count) {
+    const starContainer = document.querySelector('.victory-stars-container');
+    if (!starContainer) return;
+
+    starContainer.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+      const star = document.createElement('div');
+      star.className = 'victory-star-anim';
+      star.innerHTML = i <= count ? '★' : '☆';
+      if (i > count) star.classList.add('empty');
+      star.style.animationDelay = `${0.3 + i * 0.4}s`;
+      starContainer.appendChild(star);
+    }
+  }
 }
 
 // Add CSS for the floating pieces if not in a CSS file
@@ -69,6 +88,43 @@ style.textContent = `
         pointer-events: none;
         z-index: -1;
         user-select: none;
+    }
+
+    /* Victory Star Animations */
+    .victory-stars-container {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin: 2rem 0;
+        min-height: 80px;
+    }
+
+    .victory-star-anim {
+        font-size: 4rem;
+        color: gold;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        opacity: 0;
+        transform: scale(0) rotate(-45deg);
+        animation: starPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .victory-star-anim.empty {
+        color: #444;
+        text-shadow: none;
+    }
+
+    @keyframes starPopIn {
+        0% {
+            opacity: 0;
+            transform: scale(0) rotate(-45deg);
+        }
+        70% {
+            transform: scale(1.2) rotate(10deg);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) rotate(0);
+        }
     }
 `;
 document.head.appendChild(style);

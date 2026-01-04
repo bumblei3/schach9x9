@@ -57,6 +57,7 @@ export class Game {
       playerMoves: 0,
       playerBestMoves: 0,
       captures: 0,
+      promotions: 0,
       accuracies: [],
     };
     this.clockEnabled = false;

@@ -137,6 +137,7 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
     const promotionRow = piece.color === 'white' ? 0 : BOARD_SIZE - 1;
     if (to.r === promotionRow) {
       piece.type = 'e';
+      game.stats.promotions++;
       moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
       game.log(`${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`);
       soundManager.playMove();

@@ -19,7 +19,7 @@ export function showModal(title, message, actions = []) {
   if (!modal || !titleEl || !messageEl || !actionsEl) return;
 
   titleEl.textContent = title;
-  messageEl.textContent = message;
+  messageEl.innerHTML = message;
   actionsEl.innerHTML = '';
 
   actions.forEach(action => {
@@ -138,4 +138,39 @@ export function showToast(message, type = 'neutral') {
     toast.classList.add('fade-out');
     setTimeout(() => toast.remove(), 300);
   }, 3000);
+}
+
+/**
+ * Zeigt einen speziellen Sieg-Bildschirm für die Kampagne.
+ * @param {string} title - Level Titel
+ * @param {number} stars - Anzahl der verdienten Sterne (1-3)
+ * @param {Array} actions - Button-Aktionen
+ */
+export async function showCampaignVictoryModal(title, stars, actions = []) {
+  const content = `
+        <div class="campaign-victory-content" style="text-align: center;">
+            <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 0.5rem;">Mission erfüllt!</p>
+            <h2 style="color: gold; margin-bottom: 1rem; text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);">${title}</h2>
+            
+            <div class="victory-stars-container">
+                <!-- Stars will be animated here by UIEffects -->
+                <div class="victory-star-anim empty">☆</div>
+                <div class="victory-star-anim empty">☆</div>
+                <div class="victory-star-anim empty">☆</div>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <p style="margin: 0; color: var(--accent-success);">Hervorragende Leistung, Kommandant!</p>
+            </div>
+        </div>
+    `;
+
+  showModal('Sieg!', content, actions);
+
+  // Trigger star animation after a short delay to let modal open
+  setTimeout(async () => {
+    const { UIEffects } = await import('./ui_effects.js');
+    const effects = new UIEffects();
+    effects.animateStars(stars);
+  }, 100);
 }
