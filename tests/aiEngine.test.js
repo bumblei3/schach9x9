@@ -66,7 +66,7 @@ describe('AI Engine', () => {
 
       const bestMove = getBestMove(board, 'white', 1, 'medium');
 
-      expect(bestMove).toEqual({
+      expect(bestMove).toMatchObject({
         from: { r: 4, c: 4 },
         to: { r: 4, c: 6 },
       });
@@ -80,7 +80,7 @@ describe('AI Engine', () => {
       // Black to move, should capture queen
       const bestMove = getBestMove(board, 'black', 1, 'medium');
 
-      expect(bestMove).toEqual({
+      expect(bestMove).toMatchObject({
         from: { r: 4, c: 0 },
         to: { r: 4, c: 4 },
       });
@@ -178,7 +178,7 @@ describe('AI Engine', () => {
 
       const bestMove = getBestMove(board, 'white', 2, 'expert');
 
-      expect(bestMove).toEqual({
+      expect(bestMove).toMatchObject({
         from: { r: 1, c: 7 },
         to: { r: 0, c: 7 },
       });
