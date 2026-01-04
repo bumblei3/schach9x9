@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schach9x9-v4';
+const CACHE_NAME = 'schach9x9-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -71,6 +71,8 @@ const ASSETS_TO_CACHE = [
   './js/ui/TooltipManager.js',
   './js/ui/TutorUI.js',
   './js/utils/PGNGenerator.js',
+  './opening-book.json',
+  './opening-book-8x8.json',
 ];
 
 // Install event: Cache core assets
