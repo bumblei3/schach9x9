@@ -39,7 +39,7 @@ export function safeJSONParse(jsonString, fallback = null) {
 
 /**
  * Parses a 9x9 FEN string into board and game state
- * @param {string} fen 
+ * @param {string} fen
  * @returns {Object} { board, turn, castling, enPassant, halfMove, fullMove }
  */
 export function parseFEN(fen) {
@@ -47,7 +47,9 @@ export function parseFEN(fen) {
   const position = parts[0];
   const turn = parts[1] === 'w' ? 'white' : 'black';
 
-  const board = Array(9).fill(null).map(() => Array(9).fill(null));
+  const board = Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(null));
 
   const rows = position.split('/');
   for (let r = 0; r < 9; r++) {

@@ -448,14 +448,42 @@ export function showTutorSuggestions(game) {
         .querySelectorAll('.suggestion-highlight')
         .forEach(el => el.classList.remove('suggestion-highlight'));
       const quality = index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze';
-      if (game.arrowRenderer)
-        game.arrowRenderer.highlightMove(
-          hint.move.from.r,
-          hint.move.from.c,
-          hint.move.to.r,
-          hint.move.to.c,
-          quality
-        );
+
+      const arrows = [
+        {
+          fromR: hint.move.from.r,
+          fromC: hint.move.from.c,
+          toR: hint.move.to.r,
+          toC: hint.move.to.c,
+          colorKey: quality,
+        },
+      ];
+
+      // Add tactical arrows
+      if (analysis.tacticalPatterns) {
+        analysis.tacticalPatterns.forEach(p => {
+          if (p.targets) {
+            // e.g. Skewer targets
+            p.targets.forEach(t => {
+              // Draw arrow from move destination to target? Or just highlight target?
+              // Let's draw arrow from destination to target to show "Threat"
+              arrows.push({
+                fromR: hint.move.to.r,
+                fromC: hint.move.to.c,
+                toR: t.r,
+                toC: t.c,
+                colorKey: 'red', // Threat
+              });
+            });
+          }
+          // For pinned/forked/etc, existing logic didn't return targets, maybe update TacticsDetector later to be consistent.
+          // Logic for skewer added 'targets'.
+        });
+      }
+
+      if (game.arrowRenderer) {
+        game.arrowRenderer.highlightMoves(arrows);
+      }
       const fromCell = document.querySelector(
         `.cell[data-r="${hint.move.from.r}"][data-c="${hint.move.from.c}"]`
       );

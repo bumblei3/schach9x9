@@ -47,7 +47,7 @@ describe('UI Module - Advanced Features', () => {
       savedGameState: null,
       arrowRenderer: {
         clearArrows: jest.fn(),
-        highlightMove: jest.fn(),
+        highlightMoves: jest.fn(),
       },
       tutorController: {
         getTutorHints: jest.fn(() => []),
@@ -224,7 +224,7 @@ describe('UI Module - Advanced Features', () => {
       const suggestion = document.querySelector('.tutor-suggestion');
       suggestion.click();
 
-      expect(game.arrowRenderer.highlightMove).toHaveBeenCalled();
+      expect(game.arrowRenderer.highlightMoves).toHaveBeenCalled();
       // Check for cell highlights
       expect(document.querySelector('.cell.suggestion-highlight')).toBeDefined();
     });

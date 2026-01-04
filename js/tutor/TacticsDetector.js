@@ -94,6 +94,34 @@ export function detectTacticalPatterns(game, analyzer, move) {
         question: 'Wie kannst du eine deiner bedrohten Figuren am besten schützen?',
       });
     }
+    // 7. SKEWER - Valuable piece forced to move, exposing something behind
+    const skewers = detectSkewers(game, analyzer, to, piece.color);
+    if (skewers.length > 0) {
+      const skewer = skewers[0];
+      patterns.push({
+        type: 'skewer',
+        severity: 'high',
+        explanation: `🍢 Spieß! ${skewer.frontName} muss fliehen und entblößt ${skewer.behindName}`,
+        question:
+          'Kannst du eine wertvolle Figur zwingen wegzuziehen, um eine dahinterstehende anzugreifen?',
+        targets: [skewer.frontPos, skewer.behindPos], // For arrows
+      });
+    }
+
+    // 8. REMOVING THE GUARD - Capturing a defender
+    if (capturedPiece) {
+      const removingGuard = detectRemovingGuard(game, analyzer, to, capturedPiece);
+      if (removingGuard.length > 0) {
+        const undefendedName = removingGuard[0].undefendedName; // Just take first
+        patterns.push({
+          type: 'removing_guard',
+          severity: 'medium',
+          explanation: `🔓 Zerstörung der Verteidigung! ${undefendedName} ist nun angreifbar`,
+          question: 'Kannst du einen Verteidiger ausschalten, um eine andere Figur zu schwächen?',
+          targets: removingGuard.map(rg => rg.undefendedPos),
+        });
+      }
+    }
   } finally {
     // Restore board
     game.board[from.r][from.c] = piece;
@@ -101,6 +129,172 @@ export function detectTacticalPatterns(game, analyzer, move) {
   }
 
   return patterns;
+}
+
+/**
+ * Detect Skewers: Similar to Pin, but valuable piece is in front
+ */
+export function detectSkewers(game, analyzer, pos, attackerColor) {
+  const skewers = [];
+  const piece = game.board[pos.r][pos.c];
+
+  if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
+    return skewers; // Only sliding pieces can skewer
+  }
+
+  const opponentColor = attackerColor === 'white' ? 'black' : 'white';
+  const moves = game.getValidMoves(pos.r, pos.c, piece);
+
+  for (const move of moves) {
+    const targetPiece = game.board[move.r][move.c];
+    if (!targetPiece || targetPiece.color !== opponentColor) continue;
+
+    // Check line behind
+    const dr = Math.sign(move.r - pos.r);
+    const dc = Math.sign(move.c - pos.c);
+
+    let r = move.r + dr;
+    let c = move.c + dc;
+
+    while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+      const behindPiece = game.board[r][c];
+      if (behindPiece) {
+        if (behindPiece.color === opponentColor) {
+          // Heuristic: Front piece value > Behind piece value OR Front is King
+          // Value: k=100, q=9, etc.
+          const val = { k: 100, q: 9, c: 8, a: 7, r: 5, n: 3, b: 3, p: 1, e: 12 };
+          const frontVal = val[targetPiece.type] || 0;
+          const behindVal = val[behindPiece.type] || 0;
+
+          if (frontVal > behindVal || targetPiece.type === 'k') {
+            skewers.push({
+              frontPiece: targetPiece,
+              frontName: analyzer.getPieceName(targetPiece.type),
+              frontPos: { r: move.r, c: move.c },
+              behindPiece: behindPiece,
+              behindName: analyzer.getPieceName(behindPiece.type),
+              behindPos: { r, c },
+            });
+          }
+        }
+        break;
+      }
+      r += dr;
+      c += dc;
+    }
+  }
+  return skewers;
+}
+
+/**
+ * Detect Removing the Guard: Did capturing 'capturedPiece' leave someone undefended?
+ */
+export function detectRemovingGuard(game, analyzer, capturePos, capturedPiece) {
+  const revealedVulnerabilities = [];
+  const defenderColor = capturedPiece.color;
+
+  // We already simulated the capture in the main loop (board has attacker at capturePos).
+  // Now check if any piece that WAS defended by capturedPiece is now UNDER ATTACK and NOT SUFFICIENTLY DEFENDED.
+
+  // 1. Find pieces that were defended by the captured piece
+  // This is hard to do perfectly without "undoing" the capture simulation, checking, then re-doing.
+  // Instead, let's scan all opponent pieces (defenders friends).
+  // If one is under attack, check if the capturedPiece COULD have defended it (was guarding that square).
+
+  // Simplified approach: scan all defender's pieces.
+  // If they are under attack NOW, and they might have been defended by the captured piece.
+
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const p = game.board[r][c];
+      if (!p || p.color !== defenderColor) continue;
+
+      // Is it under attack now?
+      // Wait, attackerColor is 'our' color (the one moving). defenderColor is victim.
+      const ourColor = defenderColor === 'white' ? 'black' : 'white';
+
+      if (game.isSquareUnderAttack(r, c, ourColor)) {
+        // It is under attack. Was it defended by the captured piece?
+        // Check if capturedPiece (at capturePos) had a valid move to (r,c) (pseudo-move)
+        // We need to put capturedPiece back temporarily to check its moves?
+        // Yes, or use geometry. Let's assume standard piece movement geometry.
+
+        // Ideally:
+        // 1. Defenders count NOW.
+        // 2. Defenders count IF captured piece was still there.
+        // If (2) > (1) and (1) < Attackers, then we removed a guard.
+
+        const defendersNow = countDefenders(game, r, c, defenderColor);
+        const attackersNow = countAttackers(game, r, c, ourColor);
+
+        if (attackersNow > defendersNow) {
+          // Was capturedPiece capable of defending (r, c) from capturePos?
+          // Check if capturedPiece *could* attack (r,c)
+          // essentially.
+          const couldDefend = canPieceAttackSquare(game, capturedPiece, capturePos, { r, c });
+
+          if (couldDefend) {
+            revealedVulnerabilities.push({
+              undefendedPiece: p,
+              undefendedName: analyzer.getPieceName(p.type),
+              undefendedPos: { r, c },
+            });
+          }
+        }
+      }
+    }
+  }
+  return revealedVulnerabilities;
+}
+
+function canPieceAttackSquare(game, piece, from, to) {
+  // Check if piece at 'from' can move to 'to' on the current board
+  // (ignoring that 'from' might be occupied by attacker now, assume it's piece)
+
+  // Determine offsets
+  const dr = to.r - from.r;
+  const dc = to.c - from.c;
+  const absDr = Math.abs(dr);
+  const absDc = Math.abs(dc);
+  const signDr = Math.sign(dr);
+  const signDc = Math.sign(dc);
+
+  if (piece.type === 'n') {
+    return (absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2);
+  }
+  if (piece.type === 'p') {
+    // Pawns capture diagonally
+    const forward = piece.color === 'white' ? -1 : 1;
+    return dr === forward && absDc === 1;
+  }
+  if (piece.type === 'k') {
+    return absDr <= 1 && absDc <= 1;
+  }
+
+  // Sliding pieces logic
+  let validDir = false;
+  if (['r', 'c', 'q'].includes(piece.type) && (dr === 0 || dc === 0)) validDir = true;
+  if (['b', 'a', 'q'].includes(piece.type) && absDr === absDc) validDir = true;
+  if (piece.type === 'a' && ((absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2)))
+    validDir = true; // Archbishop is B+N
+  if (piece.type === 'c' && ((absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2)))
+    validDir = true; // Chancellor is R+N
+
+  if (!validDir) return false;
+
+  // Check path for obstruction
+  // For knight/jump parts of A/C, no obstruction check needed.
+  const isKnightMove = (absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2);
+  if (isKnightMove) return true;
+
+  let r = from.r + signDr;
+  let c = from.c + signDc;
+  while (r !== to.r || c !== to.c) {
+    if (game.board[r][c]) return false; // Blocked
+    r += signDr;
+    c += signDc;
+  }
+  return true;
 }
 
 /**

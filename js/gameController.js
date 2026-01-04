@@ -52,10 +52,18 @@ export class GameController {
 
     logger.info(`Started Campaign Level: ${level.title}`);
 
+    // Build description with goals
+    let desc = level.description;
+    if (level.goals) {
+      desc += '<br><br><strong>Ziele:</strong><ul style="text-align: left;">';
+      desc += '<li>⭐ Sieg</li>';
+      if (level.goals[2]) desc += `<li>⭐⭐ ${level.goals[2].description || 'Bonus 1'}</li>`;
+      if (level.goals[3]) desc += `<li>⭐⭐⭐ ${level.goals[3].description || 'Bonus 2'}</li>`;
+      desc += '</ul>';
+    }
+
     // Show intro modal
-    UI.showModal(level.title, level.description, [
-      { text: 'Start', callback: () => { } }
-    ]);
+    UI.showModal(level.title, desc, [{ text: 'Start', callback: () => {} }]);
   }
 
   initGame(initialPoints, mode = 'setup') {
@@ -645,7 +653,7 @@ export class GameController {
     if (result === 'win') {
       _losingColor = winnerColor === 'white' ? 'black' : 'white';
     } else if (result === 'loss') {
-      _losingColor = winnerColor; // Logic in saveGameToStatistics expects "losingColor" if result is 'win'?? 
+      _losingColor = winnerColor; // Logic in saveGameToStatistics expects "losingColor" if result is 'win'??
       // Wait, saveGameToStatistics(result, losingColor)
       // If result is 'win', 2nd arg is losingColor.
       // If result is 'loss', 2nd arg is resigningColor (the loser).
@@ -653,7 +661,7 @@ export class GameController {
       // existing calls: saveGameToStatistics('win', losingColor)
       // saveGameToStatistics('loss', resigningColor)
       // So yes, 2nd arg is the loser.
-      _losingColor = winnerColor; // If result is loss (resignation), winnerColor passed here is actually the loser? 
+      _losingColor = winnerColor; // If result is loss (resignation), winnerColor passed here is actually the loser?
       // Let's standardize: handleGameEnd(result, winningColor)
       // If result is 'draw', winningColor is null.
     }
@@ -664,7 +672,8 @@ export class GameController {
 
     if (result === 'win') {
       saveColorArg = winnerColor === 'white' ? 'black' : 'white'; // Loser
-    } else if (result === 'loss') { // Resignation
+    } else if (result === 'loss') {
+      // Resignation
       saveColorArg = winnerColor; // The one who resigned (the loser)
       // Wait, if I resign, result is 'loss', and I pass my color.
     }
@@ -673,10 +682,23 @@ export class GameController {
 
     if (this.game.campaignMode && result === 'win' && winnerColor === this.game.playerColor) {
       if (this.game.currentLevelId) {
-        campaignManager.completeLevel(this.game.currentLevelId, 3); // Todo: calculate stars
+        // Gather stats for star calculation
+        const stats = {
+          moves: Math.ceil(this.game.stats.totalMoves / 2), // Full moves
+          materialDiff: this.game.calculateMaterialAdvantage(this.game.playerColor),
+          promotedCount: this.game.stats.promotions || 0, // Need to track this!
+        };
+
+        const earnedStars = campaignManager.completeLevel(this.game.currentLevelId, stats);
+
         setTimeout(() => {
-          UI.showModal('Sieg!', 'Level abgeschlossen.', [
-            { text: 'Weiter', callback: () => { window.location.reload(); } } // Temp: reload to menu
+          UI.showModal('Sieg!', `Level abgeschlossen! ${'⭐'.repeat(earnedStars)}`, [
+            {
+              text: 'Weiter',
+              callback: () => {
+                window.location.reload();
+              },
+            },
           ]);
         }, 1500);
       }

@@ -5,6 +5,7 @@ import { PHASES } from '../js/config.js';
 jest.unstable_mockModule('../js/ui.js', () => ({
   renderBoard: jest.fn(),
   showModal: jest.fn(),
+  showToast: jest.fn(),
   updateStatus: jest.fn(),
   updateShopUI: jest.fn(),
   updateClockUI: jest.fn(),

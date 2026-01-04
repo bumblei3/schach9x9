@@ -148,6 +148,64 @@ export function analyzeStrategicValue(game, move) {
     }
   }
 
+  // 5. Open File (Rook/Queen)
+  if ((piece.type === 'r' || piece.type === 'q') && from.c !== to.c) {
+    // Check if file 'to.c' is open (no pawns of either color)
+    // or semi-open (no friendly pawns).
+    // Simplified: Check if file has NO pawns
+    let hasPawn = false;
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      const p = game.board[r][to.c];
+      if (p && p.type === 'p') {
+        hasPawn = true;
+        break;
+      }
+    }
+    if (!hasPawn) {
+      patterns.push({
+        type: 'open_file',
+        explanation: '🛣️ Besetzt eine offene Linie',
+      });
+    }
+  }
+
+  // 6. Knight Outpost
+  if (piece.type === 'n') {
+    // Outpost: Rank 4-6 (indices 3-5 for center, relative to side?)
+    // Let's say central-ish ranks 3,4,5 (indices).
+    if (to.r >= 3 && to.r <= 5) {
+      // Protected by pawn?
+      const pawnOffset = piece.color === 'white' ? 1 : -1; // Pawns are "below" or "above"
+      const rPawn = to.r + pawnOffset;
+      let protectedByPawn = false;
+      if (rPawn >= 0 && rPawn < BOARD_SIZE) {
+        const pLeft = game.board[rPawn][to.c - 1];
+        const pRight = game.board[rPawn][to.c + 1];
+        if (
+          (pLeft && pLeft.type === 'p' && pLeft.color === piece.color) ||
+          (pRight && pRight.type === 'p' && pRight.color === piece.color)
+        ) {
+          protectedByPawn = true;
+        }
+      }
+      if (protectedByPawn) {
+        patterns.push({
+          type: 'outpost',
+          explanation: '🐴 Starker Springer-Vorposten',
+        });
+      }
+    }
+  }
+
+  // 7. Bishop Pair (if this move doesn't trade the bishop, but maybe we just highlight dealing with bishops)
+  // Hard to check "gain" without comparing previous state.
+  // Let's simplified: If we have 2 bishops and opponent doesn't, mention it?
+  // Maybe better to check if this move SAVES a bishop from capture?
+  // Let's check "Fianchetto" type placement?
+  // Or "Good Bishop" (on opposite color of pawns).
+
+  // Let's stick to Open File and Outpost for now as they are very clear moves.
+
   return patterns;
 }
 

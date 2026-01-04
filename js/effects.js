@@ -184,9 +184,10 @@ export class ConfettiSystem {
   spawn() {
     this.container = document.getElementById('board-container') || document.body;
     const count = 150;
-    const rect = this.container && typeof this.container.getBoundingClientRect === 'function'
-      ? this.container.getBoundingClientRect()
-      : { width: window.innerWidth || 800, height: window.innerHeight || 600 };
+    const rect =
+      this.container && typeof this.container.getBoundingClientRect === 'function'
+        ? this.container.getBoundingClientRect()
+        : { width: window.innerWidth || 800, height: window.innerHeight || 600 };
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 

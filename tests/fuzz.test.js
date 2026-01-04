@@ -14,6 +14,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   updateCapturedUI: jest.fn(),
   showShop: jest.fn(),
   showPromotionUI: jest.fn(),
+  showToast: jest.fn(),
   animateMove: jest.fn().mockResolvedValue(),
   animateCheck: jest.fn(),
   animateCheckmate: jest.fn(),

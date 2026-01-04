@@ -136,11 +136,6 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
           const opponentColor = color === 'white' ? 'black' : 'white';
 
           // Incremental Hash Update
-          // XOR out from pos, XOR in to pos
-          // We need zobristTable - let's just use computeZobristHash for root for simplicity,
-          // or import it. It's already available via computeZobristHash.
-          // For root, it's only once per move, so computeZobristHash is OK.
-          // BUT for minimax it's CRITICAL to be fast.
           const nextHashVal = computeZobristHash(board, opponentColor);
 
           let score;
@@ -152,6 +147,8 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
               score = -minimax(board, d - 1, -beta, -alpha, opponentColor, color, nextHashVal);
             }
           }
+
+          move._score = score; // Store score for difficulty adjustment
 
           undoMove(board, undoInfo);
 
@@ -195,8 +192,39 @@ export function getBestMove(board, color, depth, difficulty, moveNumber, config 
       if (Math.abs(bestScore) > 9000) break;
     }
 
+    // Adjust difficulty for beginner at the end of search
+    if (difficulty === 'beginner' && orderedMoves.length > 1) {
+      // Sort available moves by score descending
+      const validMoves = orderedMoves
+        .filter(m => m._score !== undefined)
+        .sort((a, b) => b._score - a._score);
+
+      if (validMoves.length > 0) {
+        // Pick from top 30% or top 3, whichever is larger
+        // This ensures we don't pick absolutely terrible moves (like hanging a queen) unless only few moves exist
+        const count = Math.max(3, Math.ceil(validMoves.length * 0.3));
+        // Ensure we don't exceed length
+        const safeCount = Math.min(count, validMoves.length);
+
+        const candidates = validMoves.slice(0, safeCount);
+        const randomMove = candidates[Math.floor(Math.random() * candidates.length)];
+        logger.info(
+          `[AI] Beginner: Picked move with score ${randomMove._score} (Best was ${validMoves[0]._score})`
+        );
+
+        // Clean up scores
+        orderedMoves.forEach(m => {
+          if (m._score !== undefined) delete m._score;
+        });
+        return randomMove;
+      }
+    }
+
     // Cleanup
     if (bestMove && bestMove._score !== undefined) delete bestMove._score;
+    orderedMoves.forEach(m => {
+      if (m._score !== undefined) delete m._score;
+    }); // Cleanup all
     return bestMove;
   } catch (error) {
     logger.error('[AI Worker] Error in getBestMove:', error);

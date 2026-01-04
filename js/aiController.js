@@ -243,7 +243,9 @@ export class AIController {
         return r.json();
       })
       .then(book => {
-        logger.info(`[AIController] Opening book loaded successfully. Positions: ${Object.keys(book.positions || {}).length}`);
+        logger.info(
+          `[AIController] Opening book loaded successfully. Positions: ${Object.keys(book.positions || {}).length}`
+        );
         this.openingBookData = book;
         this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
       })
@@ -694,7 +696,7 @@ export class AIController {
         .then(book => {
           this.aiWorker.postMessage({ type: 'loadBook', data: { book } });
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     // Prepare board state for worker

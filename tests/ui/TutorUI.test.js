@@ -89,7 +89,7 @@ describe('TutorUI Component', () => {
       })),
       arrowRenderer: {
         clearArrows: jest.fn(),
-        highlightMove: jest.fn(),
+        highlightMoves: jest.fn(),
       },
     };
 
@@ -349,7 +349,7 @@ describe('TutorUI Component', () => {
       const suggEl = document.querySelector('.tutor-suggestion');
       suggEl.click();
 
-      expect(game.arrowRenderer.highlightMove).toHaveBeenCalled();
+      expect(game.arrowRenderer.highlightMoves).toHaveBeenCalled();
       const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
       const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
       expect(fromCell.classList.contains('suggestion-highlight')).toBe(true);

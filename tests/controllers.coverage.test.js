@@ -13,6 +13,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   renderBoard: jest.fn(),
   showShop: jest.fn(),
   showModal: jest.fn(),
+  showPromotionUI: jest.fn(),
   showToast: jest.fn(),
   updateCapturedUI: jest.fn(),
   updateMoveHistoryUI: jest.fn(),

@@ -17,6 +17,7 @@ jest.unstable_mockModule('../../js/ui.js', () => ({
   showPromotionModal: jest.fn(),
   showGameEnd: jest.fn(),
   renderEvalGraph: jest.fn(),
+  showToast: jest.fn(),
 }));
 
 jest.unstable_mockModule('../../js/sounds.js', () => ({
