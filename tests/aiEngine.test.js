@@ -70,7 +70,7 @@ describe('AI Engine', () => {
       board[7][7] = { type: 'k', color: 'white' };
       board[1][1] = { type: 'k', color: 'black' };
 
-      const bestMove = getBestMove(board, 'white', 1, 'medium');
+      const bestMove = getBestMove(board, 'white', 1, 'expert');
 
       expect(bestMove).toMatchObject({
         from: { r: 4, c: 4 },
@@ -86,7 +86,7 @@ describe('AI Engine', () => {
       board[0][0] = { type: 'k', color: 'black' };
 
       // Black to move, should capture queen
-      const bestMove = getBestMove(board, 'black', 1, 'medium');
+      const bestMove = getBestMove(board, 'black', 1, 'expert');
 
       expect(bestMove).toMatchObject({
         from: { r: 4, c: 0 },

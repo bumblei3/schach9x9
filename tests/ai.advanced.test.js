@@ -31,24 +31,6 @@ describe('AI Advanced Evaluation Tests', () => {
     expect(score).toBeGreaterThan(0);
   });
 
-  // Skipped: Material loss from removing blocker pawn outweighs positional gain
-  test.skip('Rook on Open File: should reward rook on file with no pawns', () => {
-    board[0][4] = createPiece('k', 'white');
-    board[8][4] = createPiece('k', 'black');
-
-    board[4][0] = createPiece('r', 'white');
-    board[5][0] = createPiece('p', 'white');
-
-    board[4][8] = createPiece('r', 'black');
-    board[3][8] = createPiece('p', 'black');
-
-    const baseScore = evaluatePosition(board, 'white');
-    board[5][0] = null;
-    const openScore = evaluatePosition(board, 'white');
-
-    expect(openScore).toBeGreaterThan(baseScore);
-  });
-
   test('Passed Pawn: should reward pawn with no opposing pawns ahead', () => {
     board[4][4] = createPiece('p', 'white');
     board[4][0] = createPiece('p', 'black');

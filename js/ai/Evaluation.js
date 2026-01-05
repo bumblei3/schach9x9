@@ -1,5 +1,4 @@
 import {
-  BOARD_SIZE,
   SQUARE_COUNT,
   PIECE_NONE,
   PIECE_PAWN,
@@ -15,16 +14,9 @@ import {
   COLOR_BLACK,
   TYPE_MASK,
   COLOR_MASK,
-  getPieceType,
-  getPieceColor,
   indexToRow,
-  indexToCol,
-  coordsToIndex
+  indexToCol
 } from './BoardDefinitions.js';
-
-import {
-  isSquareAttacked
-} from './MoveGenerator.js';
 
 // Piece Values (Centipawns)
 const PIECE_VALUES = new Int16Array(16);
@@ -173,7 +165,7 @@ export function evaluatePosition(board, turnColorStr, config) {
   const turnColor = turnColorStr === 'white' ? COLOR_WHITE : COLOR_BLACK;
 
   // Config defaults
-  const mobilityWeight = config?.mobilityWeight ?? 1.0;
+  // const mobilityWeight = config?.mobilityWeight ?? 1.0;
 
   let mgScore = 0;
   let egScore = 0;
@@ -194,8 +186,8 @@ export function evaluatePosition(board, turnColorStr, config) {
   const whiteRooks = [];
   const blackRooks = [];
 
-  let whiteBishops = 0;
-  let blackBishops = 0;
+  // let whiteBishops = 0;
+  // let blackBishops = 0;
 
   // Tempo (Add to side to move)
   // Score is White - Black.
@@ -245,9 +237,9 @@ export function evaluatePosition(board, turnColorStr, config) {
     }
 
     // Bishops
-    if (type === PIECE_BISHOP) {
-      if (isWhite) whiteBishops++; else blackBishops++;
-    }
+    // if (type === PIECE_BISHOP) {
+    //   if (isWhite) whiteBishops++; else blackBishops++; // unused for now
+    // }
 
     // Mobility approximation (simple degree heuristic usually better than full movegen)
     // For Grand Refactor, let's skip expensive mobility counting for now, 

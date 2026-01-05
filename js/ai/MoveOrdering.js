@@ -12,7 +12,7 @@ import {
   TYPE_MASK
 } from './BoardDefinitions.js';
 
-import { see } from './MoveGenerator.js';
+// import { see } from './MoveGenerator.js';
 
 // Order Constants
 const HASH_MOVE_SCORE = 3000000;
@@ -21,7 +21,7 @@ const KILLER_MOVE_1_SCORE = 900000;
 const KILLER_MOVE_2_SCORE = 800000;
 const COUNTER_MOVE_SCORE = 700000;
 const HISTORY_SCORE_MAX = 100000; // Cap
-const PROMOTION_SCORE = 1500000;
+// const PROMOTION_SCORE = 1500000;
 
 const PIECE_VALUES = {
   [PIECE_PAWN]: 100,

@@ -2,15 +2,9 @@ import {
   PIECE_NONE,
   COLOR_WHITE,
   COLOR_BLACK,
-  TYPE_MASK,
-  COLOR_MASK,
-  PIECE_KING,
-  PIECE_QUEEN,
-  BOARD_SIZE,
   SQUARE_COUNT,
   indexToRow,
-  indexToCol,
-  pieceToString
+  indexToCol
 } from './BoardDefinitions.js';
 
 import {
@@ -18,8 +12,7 @@ import {
   makeMove,
   undoMove,
   getAllCaptureMoves,
-  isInCheck,
-  isSquareAttacked
+  isInCheck
 } from './MoveGenerator.js';
 
 import {
@@ -29,15 +22,10 @@ import {
 import {
   storeTT,
   probeTT,
-  clearTT,
-  getTTSize,
-  setTTMaxSize,
-  getTTStats,
   computeZobristHash,
   getXORSideToMove,
   getZobristKey,
   TT_EXACT,
-  TT_ALPHA,
   TT_BETA,
   getTTMove
 } from './TranspositionTable.js';
@@ -55,7 +43,7 @@ let nodesEvaluated = 0;
 let searchStartTime = 0;
 let timeLimit = 0;
 let stopSearch = false;
-let softTimeLimit = 0;
+// let softTimeLimit = 0;
 let progressCallback = null;
 
 // History Heuristic: [from][to] -> score
@@ -108,7 +96,7 @@ export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert
   }
 
   timeLimit = allocatedTime;
-  softTimeLimit = allocatedTime * 0.6;
+  // softTimeLimit = allocatedTime * 0.6;
 
   // Clear heuristics
   killerMoves = new Array(MAX_DEPTH).fill(null).map(() => [null, null]);
@@ -353,7 +341,7 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
         // Need implementation
         if (!(board[move.to] !== PIECE_NONE)) { // Quiet
           // updateHistory
-          const idx = move.from * 81 + move.to; // Wait, simplistic index
+          // const idx = move.from * 81 + move.to; // Wait, simplistic index
           // history logic: historyTable[move.from][move.to]
           // We initialized historyTable as 1D array size 81*81.
           const hIdx = move.from * 81 + move.to;
@@ -394,7 +382,7 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
   // Else flag = TT_EXACT.
   // (Beta cutoff handled above).
 
-  const flag = bestScore <= alpha ? TT_ALPHA : TT_EXACT; // Warning: alpha var mutated.
+  // const flag = bestScore <= alpha ? TT_ALPHA : TT_EXACT; // Warning: alpha var mutated.
   // Need alphaOrig.
   // But simplified: Store 'bestScore' with 'flag'.
   // If we raised alpha, it's Exact.
@@ -458,7 +446,7 @@ function areMovesEqual(m1, m2) {
 // Helpers for analyzePosition and extractPV
 export function analyzePosition(board, turnColor) {
   if (!board) return { score: 0, topMoves: [] };
-  const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
+  // const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const moves = getAllLegalMoves(board, turnColor === 'white' ? 'white' : 'black');
 
   // Order moves for better "top moves" suggestion

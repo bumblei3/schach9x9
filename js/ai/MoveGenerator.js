@@ -1,5 +1,4 @@
 import {
-  BOARD_SIZE,
   SQUARE_COUNT,
   PIECE_NONE,
   PIECE_PAWN,
@@ -15,11 +14,8 @@ import {
   COLOR_BLACK,
   TYPE_MASK,
   COLOR_MASK,
-  getPieceType,
-  getPieceColor,
   indexToRow,
-  indexToCol,
-  coordsToIndex
+  indexToCol
 } from './BoardDefinitions.js';
 
 // Offsets
@@ -36,7 +32,7 @@ const ROOK_OFFSETS = [-9, 9, -1, 1];
 /**
  * Generate all legal moves for position
  */
-export function getPseudoLegalMoves(board, r, c, piece, isCheck, lastMove) {
+export function getPseudoLegalMoves(_board, _r, _c, _piece, _isCheck, _lastMove) {
   // Legacy stub for 8x8 tests compatibility
   return [];
 }
@@ -204,7 +200,7 @@ function generateSlidingMoves(board, from, offsets, color, moves) {
     let to = from;
     let dist = 0;
 
-    while (true) {
+    for (; ;) {
       to += offset;
       dist++;
 
@@ -370,7 +366,7 @@ function checkRayAttacks(board, square, ranges, attackerColor, validTypes) {
 
   for (const offset of ranges) {
     let curr = square;
-    while (true) {
+    for (; ;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 
@@ -543,7 +539,7 @@ function findRayLVA(board, square, offsets, attackerColor, usedSquares, validTyp
 
   for (const offset of offsets) {
     let curr = square;
-    while (true) {
+    for (; ;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 
@@ -576,6 +572,3 @@ function findRayLVA(board, square, offsets, attackerColor, usedSquares, validTyp
 function isValidSquare(idx) {
   return idx >= 0 && idx < SQUARE_COUNT;
 }
-
-
-
