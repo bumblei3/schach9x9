@@ -402,9 +402,30 @@ export function evaluatePosition(board, turnColorStr, _config) {
   let whiteBishops = 0;
   let blackBishops = 0;
 
-  // Tempo (Add to side to move)
-  // Score is White - Black.
-  // If White to move, add. If Black to move, subtract.
+  // Personality weights
+  const personality = _config?.personality || 'NORMAL';
+  let pawnStructureWeight = 1.0;
+  let materialWeight = 1.0;
+  let kingSafetyWeight = 1.0;
+  let attackWeight = 1.0;
+
+  switch (personality) {
+    case 'AGGRESSIVE':
+      attackWeight = 1.4;
+      pawnStructureWeight = 0.7;
+      kingSafetyWeight = 0.8;
+      break;
+    case 'SOLID':
+      attackWeight = 0.7;
+      pawnStructureWeight = 1.3;
+      kingSafetyWeight = 1.4;
+      break;
+    case 'GENTLE':
+      materialWeight = 0.9; // Tends to trade more easily
+      attackWeight = 0.8;
+      break;
+  }
+
   const tempoSide = turnColor === COLOR_WHITE ? 1 : -1;
   mgScore += 10 * tempoSide;
   egScore += 5 * tempoSide;
@@ -432,8 +453,8 @@ export function evaluatePosition(board, turnColorStr, _config) {
     const mgPst = getPST(type, r, c, color, false);
     const egPst = getPST(type, r, c, color, true);
 
-    mgScore += (val + mgPst) * sideMult;
-    egScore += (val + egPst) * sideMult;
+    mgScore += (val * materialWeight + mgPst * attackWeight) * sideMult;
+    egScore += (val * materialWeight + egPst * attackWeight) * sideMult;
 
     // Pawn Columns
     if (type === PIECE_PAWN) {
@@ -498,13 +519,13 @@ export function evaluatePosition(board, turnColorStr, _config) {
   for (let c = 0; c < 9; c++) {
     // White doubled
     if (pawnColsWhite[c] > 1) {
-      mgScore -= (pawnColsWhite[c] - 1) * DOUBLED_PAWN_PENALTY;
-      egScore -= (pawnColsWhite[c] - 1) * DOUBLED_PAWN_PENALTY;
+      mgScore -= (pawnColsWhite[c] - 1) * DOUBLED_PAWN_PENALTY * pawnStructureWeight;
+      egScore -= (pawnColsWhite[c] - 1) * DOUBLED_PAWN_PENALTY * pawnStructureWeight;
     }
     // Black doubled
     if (pawnColsBlack[c] > 1) {
-      mgScore += (pawnColsBlack[c] - 1) * DOUBLED_PAWN_PENALTY;
-      egScore += (pawnColsBlack[c] - 1) * DOUBLED_PAWN_PENALTY;
+      mgScore += (pawnColsBlack[c] - 1) * DOUBLED_PAWN_PENALTY * pawnStructureWeight;
+      egScore += (pawnColsBlack[c] - 1) * DOUBLED_PAWN_PENALTY * pawnStructureWeight;
     }
 
     // White isolated
@@ -512,8 +533,8 @@ export function evaluatePosition(board, turnColorStr, _config) {
       const leftC = c > 0 ? pawnColsWhite[c - 1] : 0;
       const rightC = c < 8 ? pawnColsWhite[c + 1] : 0;
       if (leftC === 0 && rightC === 0) {
-        mgScore -= ISOLATED_PAWN_PENALTY;
-        egScore -= ISOLATED_PAWN_PENALTY;
+        mgScore -= ISOLATED_PAWN_PENALTY * pawnStructureWeight;
+        egScore -= ISOLATED_PAWN_PENALTY * pawnStructureWeight;
       }
     }
     // Black isolated
@@ -610,7 +631,7 @@ export function evaluatePosition(board, turnColorStr, _config) {
         }
       }
       if (isSupported) {
-        const LINKED_BONUS = 10;
+        const LINKED_BONUS = 10 * pawnStructureWeight;
         if (isWhite) {
           mgScore += LINKED_BONUS;
           egScore += LINKED_BONUS;
@@ -622,8 +643,29 @@ export function evaluatePosition(board, turnColorStr, _config) {
     }
   }
 
+  // King Safety Penalty (simplified based on pawn shelter)
+  const whiteKingShelter = pawnColsWhite[indexToCol(whiteKingIdx)];
+  const blackKingShelter = pawnColsBlack[indexToCol(blackKingIdx)];
+  const SHELTER_PENALTY = 15 * kingSafetyWeight;
+
+  if (whiteKingShelter === 0) {
+    mgScore -= SHELTER_PENALTY;
+    egScore -= SHELTER_PENALTY * 0.5;
+  }
+  if (blackKingShelter === 0) {
+    mgScore += SHELTER_PENALTY;
+    egScore += SHELTER_PENALTY * 0.5;
+  }
+
   // Final Score (Combined Phase)
-  const total = mgScore * mgWeight + egScore * egWeight;
+  let total = mgScore * mgWeight + egScore * egWeight;
+
+  // Add noise based on Elo
+  if (_config?.elo && _config.elo < 2500) {
+    const noiseRange = Math.max(0, (2500 - _config.elo) / 8);
+    // Use a simple deterministic-simulated random or just Math.random
+    total += Math.floor(Math.random() * (noiseRange * 2 + 1)) - noiseRange;
+  }
 
   // Return from perspective of side to move (NegaMax)
   const perspective = turnColor === COLOR_WHITE ? 1 : -1;

@@ -201,13 +201,24 @@ export function getBestMoveDetailed(
       beta = finalScore + ASPIRATION_WINDOW;
     }
 
-    let score = minimax(board, depth, 0, alpha, beta, colorInt, rootZobrist, null, true);
+    let score = minimax(
+      board,
+      depth,
+      0,
+      alpha,
+      beta,
+      colorInt,
+      rootZobrist,
+      null,
+      true,
+      timeParams
+    );
 
     // Fail-low or Fail-high: Re-search with full window
     if (!stopSearch && (score <= alpha || score >= beta)) {
       alpha = -Infinity;
       beta = Infinity;
-      score = minimax(board, depth, 0, alpha, beta, colorInt, rootZobrist, null, true);
+      score = minimax(board, depth, 0, alpha, beta, colorInt, rootZobrist, null, true, timeParams);
     }
 
     if (!stopSearch) finalScore = score;
@@ -231,7 +242,30 @@ export function getBestMoveDetailed(
   // Retrieve Best Move from TT
   const foundMove = getTTMove(rootZobrist);
   if (foundMove) {
+    // Blunder Simulation for low Elo
+    if (timeParams.elo && timeParams.elo < 1200) {
+      const blunderProb = (1200 - timeParams.elo) / 1000; // up to 0.4 at 800
+      if (Math.random() < blunderProb) {
+        const moves = getAllLegalMoves(board, turnColor);
+        if (moves.length > 1) {
+          // Pick a random move that is NOT the best move
+          const others = moves.filter(m => !areMovesEqual(m, foundMove));
+          if (others.length > 0) {
+            const randomSelected = others[Math.floor(Math.random() * others.length)];
+            return { move: convertMoveToResult(randomSelected), score: finalScore - 200, pv: [] };
+          }
+        }
+      }
+    }
+
     const pv = extractPV(board, turnColor, maxDepth);
+
+    // Add root noise for low Elo (to ensure different games feel different)
+    if (timeParams.elo && timeParams.elo < 2500) {
+      const rootNoiseRange = Math.max(0, (2500 - timeParams.elo) / 20);
+      finalScore += Math.floor(Math.random() * (rootNoiseRange * 2 + 1)) - rootNoiseRange;
+    }
+
     if (progressCallback) {
       progressCallback({
         depth: maxDepth,
@@ -284,11 +318,13 @@ function convertMoveToResult(move) {
   };
 }
 
-function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvNode) {
+function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvNode, config = {}) {
   nodesEvaluated++;
 
   // Max Ply
-  if (ply >= MAX_DEPTH) return evaluatePosition(board, color === COLOR_WHITE ? 'white' : 'black');
+  if (ply >= MAX_DEPTH) {
+    return evaluatePosition(board, color === COLOR_WHITE ? 'white' : 'black', config);
+  }
 
   // Check Time
   if (checkTime()) return 0;
@@ -299,7 +335,7 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
 
   // Horizon
   if (depth <= 0) {
-    return quiescence(board, alpha, beta, color, zobrist);
+    return quiescence(board, alpha, beta, color, zobrist, config);
   }
 
   // TT Probe
@@ -318,7 +354,7 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
   // conditions: depth >= 3, not in check, not PV, has pieces, static eval > beta
   if (!isPvNode && depth >= 3 && !inCheck) {
     // Need static eval
-    const staticEval = evaluatePosition(board, color === COLOR_WHITE ? 'white' : 'black');
+    const staticEval = evaluatePosition(board, color === COLOR_WHITE ? 'white' : 'black', config);
     if (staticEval >= beta) {
       // Try null move
       const R = 3 + Math.floor(depth / 6);
@@ -336,7 +372,8 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
         enemyColor,
         nullZobrist,
         null,
-        false
+        false,
+        config
       );
 
       if (stopSearch) return 0;
@@ -395,7 +432,8 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
         enemyColor,
         nextZobrist,
         move,
-        true
+        true,
+        config
       );
     } else {
       // LMR Logic
@@ -405,7 +443,18 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
       }
 
       // LMR Search (Zw)
-      score = -minimax(board, d, ply + 1, -alpha - 1, -alpha, enemyColor, nextZobrist, move, false);
+      score = -minimax(
+        board,
+        d,
+        ply + 1,
+        -alpha - 1,
+        -alpha,
+        enemyColor,
+        nextZobrist,
+        move,
+        false,
+        config
+      );
 
       // Re-search if LMR failed or PVS failed
       if (score > alpha && score < beta) {
@@ -419,7 +468,8 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
           enemyColor,
           nextZobrist,
           move,
-          true
+          true,
+          config
         );
       }
     }
@@ -490,10 +540,10 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
   return bestScore;
 }
 
-function quiescence(board, alpha, beta, color, zobrist) {
+function quiescence(board, alpha, beta, color, zobrist, config = {}) {
   nodesEvaluated++;
   // Stand Pat
-  const standPat = evaluatePosition(board, color === COLOR_WHITE ? 'white' : 'black');
+  const standPat = evaluatePosition(board, color === COLOR_WHITE ? 'white' : 'black', config);
   if (standPat >= beta) return beta;
   if (standPat > alpha) alpha = standPat;
 
@@ -526,7 +576,7 @@ function quiescence(board, alpha, beta, color, zobrist) {
 
     const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
 
-    const score = -quiescence(board, -beta, -alpha, enemyColor, nextZobrist);
+    const score = -quiescence(board, -beta, -alpha, enemyColor, nextZobrist, config);
 
     undoMove(board, undo);
 

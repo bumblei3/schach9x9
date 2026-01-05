@@ -108,6 +108,25 @@ function convertBoardToInt(uiBoard) {
 
 // --- Bridge Functions ---
 
+/**
+ * Maps Elo rating to search parameters
+ * @param {number} elo
+ * @returns {object} { maxDepth, elo, personality }
+ */
+export function getParamsForElo(elo) {
+  let depth = 4;
+  if (elo < 1000) depth = 3;
+  else if (elo < 1400) depth = 4;
+  else if (elo < 1800) depth = 5;
+  else if (elo < 2200) depth = 6;
+  else depth = 8;
+
+  return {
+    maxDepth: depth,
+    elo: elo,
+  };
+}
+
 export function getBestMove(
   uiBoard,
   turnColor,
@@ -116,8 +135,14 @@ export function getBestMove(
   timeParams = {}
 ) {
   const board = convertBoardToInt(uiBoard);
-  // searchBestMove is the wrapper that already returns the move object (not the detailed result)
-  return searchBestMove(board, turnColor, maxDepth, difficulty, timeParams);
+  // Prepare config (timeParams is used as a carry-all search config)
+  let config = timeParams;
+  if (timeParams.elo) {
+    const eloParams = getParamsForElo(timeParams.elo);
+    config = { ...timeParams, ...eloParams };
+    maxDepth = config.maxDepth;
+  }
+  return searchBestMove(board, turnColor, maxDepth, difficulty, config);
 }
 
 export function getBestMoveDetailed(
@@ -128,7 +153,13 @@ export function getBestMoveDetailed(
   timeParams = {}
 ) {
   const board = convertBoardToInt(uiBoard);
-  return searchBestMoveDetailed(board, turnColor, maxDepth, difficulty, timeParams);
+  let config = timeParams;
+  if (timeParams.elo) {
+    const eloParams = getParamsForElo(timeParams.elo);
+    config = { ...timeParams, ...eloParams };
+    maxDepth = config.maxDepth;
+  }
+  return searchBestMoveDetailed(board, turnColor, maxDepth, difficulty, config);
 }
 
 export function evaluatePosition(uiBoard, forColor) {
