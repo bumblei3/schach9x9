@@ -4,6 +4,8 @@
 
 import { PuzzleManager, puzzleManager as _puzzleManager } from '../js/puzzleManager.js';
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
+import { ProceduralGenerator } from '../js/puzzle/ProceduralGenerator.js';
+import { jest } from '@jest/globals';
 import { BOARD_SIZE } from '../js/config.js';
 
 describe('PuzzleManager', () => {
@@ -124,13 +126,24 @@ describe('PuzzleManager', () => {
     });
 
     test('should generate new puzzle when no more static puzzles', () => {
+      // Mock the heavy generator to avoid 4s wait
+      const mockPuzzle = {
+        id: 'proc-mock',
+        title: 'Mock Puzzle',
+        setupStr: '..'.repeat(81) + 'w',
+        solution: [],
+      };
+      const genSpy = jest.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue(mockPuzzle);
+
       // Load the last puzzle
       const lastIndex = manager.puzzles.length - 1;
       manager.loadPuzzle(game, lastIndex);
 
       const next = manager.nextPuzzle(game);
       expect(next).not.toBeNull();
-      expect(next.id).toMatch(/^proc-/);
+      expect(next.id).toBe('proc-mock'); // Check for our mock ID
+
+      genSpy.mockRestore();
     });
   });
 });
