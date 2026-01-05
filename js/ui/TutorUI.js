@@ -96,8 +96,9 @@ export function updateTutorRecommendations(game) {
 /**
  * Zeigt Tutor-Vorschläge an.
  * @param {object} game - Die Game-Instanz
+ * @param {Array} [providedHints] - Optional bereits berechnete Hints
  */
-export function showTutorSuggestions(game) {
+export async function showTutorSuggestions(game, providedHints = null) {
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');
 
@@ -171,8 +172,8 @@ export function showTutorSuggestions(game) {
       });
       overlay.classList.remove('hidden');
     } else {
-      const hints = game.tutorController.getTutorHints();
-      if (hints.length === 0) {
+      const hints = providedHints || (await game.tutorController.getTutorHints());
+      if (!hints || hints.length === 0) {
         alert('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
         return;
       }
@@ -290,9 +291,9 @@ export function showTutorSuggestions(game) {
     }
   }
 
-  if (!game.getTutorHints) return;
-  const hints = game.getTutorHints();
-  if (hints.length === 0) {
+  if (!game.getTutorHints && !providedHints) return;
+  const hints = providedHints || (await game.getTutorHints());
+  if (!hints || hints.length === 0) {
     suggestionsEl.innerHTML =
       '<p style="padding: 1rem; color: #94a3b8;">Keine Vorschläge verfügbar.</p>';
     tutorPanel.classList.remove('hidden');

@@ -164,27 +164,27 @@ describe('UI Module - Advanced Features', () => {
   });
 
   describe('Tutor Suggestions - Setup Templates', () => {
-    test('should show setup templates in setup phase', () => {
+    test('should show setup templates in setup phase', async () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.tutorController.getSetupTemplates.mockReturnValue([
         { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
       ]);
 
-      UI.showTutorSuggestions(game);
+      await UI.showTutorSuggestions(game);
 
       const suggestions = document.getElementById('tutor-suggestions');
       expect(suggestions.innerHTML).toContain('Classic');
       expect(suggestions.innerHTML).toContain('Empfohlene Aufstellungen');
     });
 
-    test('should apply template on click', () => {
+    test('should apply template on click', async () => {
       window.confirm = jest.fn(() => true);
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.tutorController.getSetupTemplates.mockReturnValue([
         { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
       ]);
 
-      UI.showTutorSuggestions(game);
+      await UI.showTutorSuggestions(game);
       const templateEl = document.querySelector('.setup-template');
       templateEl.click();
 
@@ -210,8 +210,8 @@ describe('UI Module - Advanced Features', () => {
       ]);
     });
 
-    test('should render gameplay hints with analysis', () => {
-      UI.showTutorSuggestions(game);
+    test('should render gameplay hints with analysis', async () => {
+      await UI.showTutorSuggestions(game);
 
       const suggestions = document.getElementById('tutor-suggestions');
       expect(suggestions.innerHTML).toContain('Bester Zug');
@@ -219,8 +219,14 @@ describe('UI Module - Advanced Features', () => {
       expect(suggestions.innerHTML).toContain('Vorsicht vor f7');
     });
 
-    test('should highlight move on click', () => {
-      UI.showTutorSuggestions(game);
+    test('should highlight move on click', async () => {
+      // Create hint elements manually or ensure they exist in DOM
+      document.body.innerHTML += `
+        <div class="cell" data-r="6" data-c="4"></div>
+        <div class="cell" data-r="4" data-c="4"></div>
+      `;
+
+      await UI.showTutorSuggestions(game);
       const suggestion = document.querySelector('.tutor-suggestion');
       suggestion.click();
 
@@ -229,8 +235,8 @@ describe('UI Module - Advanced Features', () => {
       expect(document.querySelector('.cell.suggestion-highlight')).toBeDefined();
     });
 
-    test('should execute move on "Try This" button click', () => {
-      UI.showTutorSuggestions(game);
+    test('should execute move on "Try This" button click', async () => {
+      await UI.showTutorSuggestions(game);
       const tryBtn = document.querySelector('.try-move-btn');
       tryBtn.click();
 

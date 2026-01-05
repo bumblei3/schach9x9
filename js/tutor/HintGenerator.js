@@ -94,9 +94,9 @@ export function updateBestMoves(game, tutorController) {
 /**
  * Shows tutor suggestions in the UI
  */
-export function showTutorSuggestions(game) {
+export async function showTutorSuggestions(game) {
   if (!game.bestMoves || game.bestMoves.length === 0) return;
-  UI.showTutorSuggestions(game, game.bestMoves);
+  await UI.showTutorSuggestions(game, game.bestMoves);
 }
 
 /**
@@ -126,8 +126,8 @@ function createTemplate({ id, name, description, pieces, isRecommended }, expect
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-        `(Pieces: ${pieces.join(', ')})`
+      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+      `(Pieces: ${pieces.join(', ')})`
     );
   }
 

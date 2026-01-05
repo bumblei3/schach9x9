@@ -31,8 +31,8 @@ export class TutorController {
     return MoveAnalyzer.getMoveNotation(this.game, move);
   }
 
-  showTutorSuggestions() {
-    return HintGenerator.showTutorSuggestions(this.game);
+  async showTutorSuggestions() {
+    return await HintGenerator.showTutorSuggestions(this.game);
   }
 
   async showHint() {
@@ -40,7 +40,7 @@ export class TutorController {
     if (!this.game.bestMoves || this.game.bestMoves.length === 0) {
       this.game.bestMoves = await this.getTutorHints();
     }
-    this.showTutorSuggestions();
+    await this.showTutorSuggestions();
   }
 
   getPieceName(type) {

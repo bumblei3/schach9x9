@@ -57,7 +57,7 @@ export class KeyboardManager {
     if (key === 'h') {
       event.preventDefault();
       if (this.app.tutorController) {
-        this.app.tutorController.showHint();
+        await this.app.tutorController.showHint();
       }
       return;
     }

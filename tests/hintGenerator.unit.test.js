@@ -137,19 +137,19 @@ describe('HintGenerator - Unit Tests', () => {
     expect(getSetupTemplates(game)[0].cost).toBe(15);
   });
 
-  test('showTutorSuggestions should return early if no bestMoves', () => {
+  test('showTutorSuggestions should return early if no bestMoves', async () => {
     game.bestMoves = null;
-    showTutorSuggestions(game);
+    await showTutorSuggestions(game);
     expect(UI.showTutorSuggestions).not.toHaveBeenCalled();
 
     game.bestMoves = [];
-    showTutorSuggestions(game);
+    await showTutorSuggestions(game);
     expect(UI.showTutorSuggestions).not.toHaveBeenCalled();
   });
 
-  test('showTutorSuggestions should call UI if bestMoves exists', () => {
+  test('showTutorSuggestions should call UI if bestMoves exists', async () => {
     game.bestMoves = [{ move: {}, notation: 'e4' }];
-    showTutorSuggestions(game);
+    await showTutorSuggestions(game);
     expect(UI.showTutorSuggestions).toHaveBeenCalled();
   });
 

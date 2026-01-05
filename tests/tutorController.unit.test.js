@@ -85,8 +85,8 @@ describe('TutorController', () => {
     expect(MoveAnalyzer.getMoveNotation).toHaveBeenCalledWith(game, { from: 'a2', to: 'a4' });
   });
 
-  test('should delegate showTutorSuggestions to HintGenerator', () => {
-    tutorController.showTutorSuggestions();
+  test('should delegate showTutorSuggestions to HintGenerator', async () => {
+    await tutorController.showTutorSuggestions();
     expect(HintGenerator.showTutorSuggestions).toHaveBeenCalledWith(game);
   });
 

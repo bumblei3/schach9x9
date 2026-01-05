@@ -107,7 +107,7 @@ describe('UI Module', () => {
       expect(overlay.classList.contains('hidden')).toBe(true);
     });
 
-    test('should show tutor suggestions', () => {
+    test('should show tutor suggestions', async () => {
       game.tutorController = {
         getTutorHints: jest.fn(() => [
           {
@@ -121,7 +121,7 @@ describe('UI Module', () => {
           },
         ]),
       };
-      UI.showTutorSuggestions(game);
+      await UI.showTutorSuggestions(game);
       const overlay = document.getElementById('tutor-overlay');
       expect(overlay.classList.contains('hidden')).toBe(false);
     });
