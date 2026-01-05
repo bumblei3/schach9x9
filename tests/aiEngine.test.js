@@ -2,6 +2,7 @@
  * Tests for AI Engine
  */
 
+import { jest } from '@jest/globals';
 import {
   getBestMove,
   evaluatePosition,
@@ -20,6 +21,7 @@ describe('AI Engine', () => {
 
   beforeEach(() => {
     board = createEmptyBoard();
+    clearTT();
   });
 
   describe('evaluatePosition', () => {
@@ -64,8 +66,9 @@ describe('AI Engine', () => {
       // White rook can capture black pawn
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'p', color: 'black' };
-      board[8][8] = { type: 'k', color: 'white' };
-      board[0][0] = { type: 'k', color: 'black' };
+      // Kings positioned diagonally from rook to avoid check scenarios
+      board[7][7] = { type: 'k', color: 'white' };
+      board[1][1] = { type: 'k', color: 'black' };
 
       const bestMove = getBestMove(board, 'white', 1, 'medium');
 
@@ -97,7 +100,7 @@ describe('AI Engine', () => {
       board[0][0] = { type: 'r', color: 'white' };
       const hash1 = computeZobristHash(board, 'white');
       const hash2 = computeZobristHash(board, 'white');
-      expect(hash1).toBe(hash2);
+      expect(String(hash1)).toBe(String(hash2));
     });
 
     test('should produce different hash for different position', () => {
@@ -107,7 +110,7 @@ describe('AI Engine', () => {
       board[0][1] = { type: 'p', color: 'black' };
       const hash2 = computeZobristHash(board, 'white');
 
-      expect(hash1).not.toBe(hash2);
+      expect(String(hash1)).not.toBe(String(hash2));
     });
 
     test('should produce different hash for different turn', () => {
@@ -115,7 +118,7 @@ describe('AI Engine', () => {
       const hash1 = computeZobristHash(board, 'white');
       const hash2 = computeZobristHash(board, 'black');
 
-      expect(hash1).not.toBe(hash2);
+      expect(String(hash1)).not.toBe(String(hash2));
     });
   });
 
@@ -230,6 +233,9 @@ describe('AI Engine', () => {
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'q', color: 'black' }; // High value target
       board[4][7] = { type: 'p', color: 'black' }; // Low value target
+      // Kings positioned diagonally to avoid check scenarios
+      board[7][7] = { type: 'k', color: 'white' };
+      board[1][1] = { type: 'k', color: 'black' };
 
       const bestMove = getBestMove(board, 'white', 2, 'expert');
 
@@ -293,9 +299,18 @@ describe('AI Engine', () => {
     });
 
     test('easy should prefer captures', () => {
+      // Mock random to ensure best move (capture) is picked from candidates
+      const mockRandom = jest.spyOn(global.Math, 'random').mockReturnValue(0);
+
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'q', color: 'black' };
+      // Kings positioned diagonally to avoid check scenarios
+      board[7][7] = { type: 'k', color: 'white' };
+      board[1][1] = { type: 'k', color: 'black' };
+
       const move = getBestMove(board, 'white', 2, 'easy');
+
+      mockRandom.mockRestore();
       expect(move.to).toEqual({ r: 4, c: 6 });
     });
 

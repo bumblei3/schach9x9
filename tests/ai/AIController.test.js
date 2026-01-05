@@ -45,7 +45,7 @@ jest.unstable_mockModule('../../js/puzzleManager.js', () => ({
 const _UI = await import('../../js/ui.js');
 const { soundManager: _soundManager } = await import('../../js/sounds.js');
 const MoveExecutor = await import('../../js/move/MoveExecutor.js');
-const { getBestMove } = await import('../../js/ai/Search.js');
+const { getBestMove } = await import('../../js/aiEngine.js');
 
 describe('AI Integration: Self-Play', () => {
   let game;

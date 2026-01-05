@@ -29,7 +29,6 @@ describe('Smart Time Management', () => {
     beforeEach(() => {
         resetNodesEvaluated();
         clearTT();
-        resetActiveConfig();
     });
 
     test('should respect strict hard limit', () => {

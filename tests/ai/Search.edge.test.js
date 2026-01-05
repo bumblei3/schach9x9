@@ -3,7 +3,7 @@
  * These tests target specific uncovered branches in Search.js and TranspositionTable.js
  */
 import { Game } from '../../js/gameEngine.js';
-import * as Search from '../../js/ai/Search.js';
+import * as Search from '../../js/aiEngine.js';
 import {
     clearTT,
     storeTT,
@@ -132,23 +132,32 @@ describe('Transposition Table - Edge Cases', () => {
     describe('TT Flag Handling', () => {
         test('should return alpha score for TT_ALPHA entries', () => {
             const hash = 123456789n;
+            // Store Alpha entry: depth 5, score 50
             storeTT(hash, 5, 50, TT_ALPHA, null);
+            // Probe: depth 4 (less than stored), alpha 60, beta 100
+            // TT_ALPHA cutoff: stored score (50) <= alpha (60) -> return alpha
             const result = probeTT(hash, 4, 60, 100);
-            expect(result.score).toBe(60);
+            expect(result).toBe(60);
         });
 
         test('should return beta score for TT_BETA entries', () => {
             const hash = 987654321n;
+            // Store Beta entry: depth 5, score 150
             storeTT(hash, 5, 150, TT_BETA, null);
+            // Probe: depth 4, alpha 0, beta 100
+            // TT_BETA cutoff: stored score (150) >= beta (100) -> return beta
             const result = probeTT(hash, 4, 0, 100);
-            expect(result.score).toBe(100);
+            expect(result).toBe(100);
         });
 
         test('should return exact score for TT_EXACT entries', () => {
             const hash = 111222333n;
+            // Store Exact entry: depth 5, score 75
             storeTT(hash, 5, 75, TT_EXACT, { from: { r: 1, c: 2 }, to: { r: 3, c: 4 } });
+            // Probe: depth 4, alpha 0, beta 100
+            // TT_EXACT: return stored score directly
             const result = probeTT(hash, 4, 0, 100);
-            expect(result.score).toBe(75);
+            expect(result).toBe(75);
         });
     });
 

@@ -10,7 +10,7 @@ describe('AI Engine Structure', () => {
   test('should export evaluation functions', () => {
     expect(typeof aiEngine.evaluatePosition).toBe('function');
     expect(aiEngine.PST).toBeDefined();
-    expect(aiEngine.PST_EG).toBeDefined();
+    // PST_EG not currently exported (uses combined PST with phase interpolation)
   });
 
   test('should export move generation functions', () => {

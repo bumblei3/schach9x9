@@ -22,11 +22,17 @@ jest.unstable_mockModule('../js/ai/Evaluation.js', () => ({
 }));
 
 jest.unstable_mockModule('../js/ai/TranspositionTable.js', () => ({
-  computeZobristHash: jest.fn(() => 0),
-  updateZobristHash: jest.fn(() => 0),
-  getXORSideToMove: jest.fn(() => 0),
+  computeZobristHash: jest.fn(() => 0n),
+  updateZobristHash: jest.fn(() => 0n),
+  getZobristKey: jest.fn(() => 0n),
+  getXORSideToMove: jest.fn(() => 0n),
   storeTT: jest.fn(),
-  probeTT: jest.fn(),
+  probeTT: jest.fn(() => null),
+  getTTMove: jest.fn(() => null),
+  clearTT: jest.fn(),
+  getTTSize: jest.fn(() => 0),
+  setTTMaxSize: jest.fn(),
+  getTTStats: jest.fn(() => ({})),
   TT_EXACT: 1,
   TT_ALPHA: 2,
   TT_BETA: 3,
@@ -41,6 +47,7 @@ jest.unstable_mockModule('../js/ai/MoveOrdering.js', () => ({
   addKillerMove: jest.fn(),
   updateHistory: jest.fn(),
   updateCounterMove: jest.fn(),
+  clearMoveOrdering: jest.fn(),
 }));
 
 jest.unstable_mockModule('../js/logger.js', () => ({
@@ -55,59 +62,55 @@ jest.unstable_mockModule('../js/logger.js', () => ({
 const { getBestMove } = await import('../js/ai/Search.js');
 const MoveGenerator = await import('../js/ai/MoveGenerator.js');
 const Evaluation = await import('../js/ai/Evaluation.js');
+const TranspositionTable = await import('../js/ai/TranspositionTable.js');
 
-const mockBoard = Array(9)
-  .fill(null)
-  .map(() => Array(9).fill(null));
+const mockBoard = new Int8Array(81).fill(0);
 
 describe('AI Difficulty', () => {
+  const move1 = { from: 10, to: 20 }; // Best
+  const move2 = { from: 11, to: 21 }; // 2nd
+  const move3 = { from: 12, to: 22 }; // 3rd
+  const move4 = { from: 13, to: 23 }; // Worst
+
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Setup mock moves
-    const moves = [
-      { from: { r: 1, c: 1 }, to: { r: 2, c: 1 }, id: 1 }, // Best
-      { from: { r: 1, c: 2 }, to: { r: 2, c: 2 }, id: 2 }, // 2nd
-      { from: { r: 1, c: 3 }, to: { r: 2, c: 3 }, id: 3 }, // 3rd
-      { from: { r: 1, c: 4 }, to: { r: 2, c: 4 }, id: 4 }, // Worst
-    ];
+    const moves = [move1, move2, move3, move4];
     MoveGenerator.getAllLegalMoves.mockReturnValue(moves);
-    MoveGenerator.getAllCaptureMoves.mockReturnValue([]); // Return no captures to avoid QS recursion crash
-    MoveGenerator.makeMove.mockReturnValue({});
+    MoveGenerator.getAllCaptureMoves.mockReturnValue([]);
+    MoveGenerator.makeMove.mockImplementation(() => ({ piece: 1, captured: 0 }));
     MoveGenerator.undoMove.mockReturnValue();
     MoveGenerator.isInCheck.mockReturnValue(false);
+
+    // Mock TranspositionTable constants
+    TranspositionTable.getZobristKey.mockReturnValue(0n);
+    TranspositionTable.getXORSideToMove.mockReturnValue(0n);
   });
 
   test('Beginner Difficulty should pick from top candidates', () => {
-    const selectedIds = new Set();
+    const selectedKeys = new Set();
 
     // Run 20 iterations to capture the random distribution
     for (let i = 0; i < 20; i++) {
       let count = 0;
       // Setup a fresh mock for each iteration to control evaluation order
       Evaluation.evaluatePosition.mockImplementation(() => {
-        // Return scores from BLACK perspective (opponent)
-        // We want White to perceive these as: 100, 90, 80, 0 centipawns.
-        // Since NegaMax is used: score = -minimax(board, turn=black)
-        // And minimax(depth=0) returns evaluatePosition(board, turn=black)
-        // So -(-100) = 100.
-
         const scores = [-100, -90, -80, 0];
         return scores[count++ % 4];
       });
 
-      const move = getBestMove(mockBoard, 'white', 1, 'beginner', 0);
-      if (move) selectedIds.add(move.id);
+      const move = getBestMove(mockBoard, 'white', 1, 'beginner', {});
+      if (move) selectedKeys.add(`${move.from.r},${move.from.c}->${move.to.r},${move.to.c}`);
     }
 
     // Verify we found at least 2 different moves (proving randomness)
-    expect(selectedIds.size).toBeGreaterThan(1);
-    // With increased randomness/blunder chance, even the worst move might be picked occasionally.
-    // So we just verify variety.
-    expect(selectedIds.size).toBeGreaterThan(1);
+    expect(selectedKeys.size).toBeGreaterThan(1);
   });
 
-  test('Expert Difficulty should always pick the absolute best move', () => {
+  test('Expert Difficulty should always pick the absolute best move from TT', () => {
+    TranspositionTable.getTTMove.mockReturnValue(move1);
+
     for (let i = 0; i < 5; i++) {
       let count = 0;
       Evaluation.evaluatePosition.mockImplementation(() => {
@@ -115,8 +118,12 @@ describe('AI Difficulty', () => {
         return scores[count++ % 4];
       });
 
-      const move = getBestMove(mockBoard, 'white', 1, 'expert', 0);
-      expect(move.id).toBe(1); // Should always be the move with perceived score of 100
+      const move = getBestMove(mockBoard, 'white', 1, 'expert', {});
+      // move1 is {from: 10, to: 20}. 10 is row 1, col 1. 20 is row 2, col 2.
+      expect(move.from.r).toBe(1);
+      expect(move.from.c).toBe(1);
+      expect(move.to.r).toBe(2);
+      expect(move.to.c).toBe(2);
     }
   });
 });

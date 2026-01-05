@@ -16,10 +16,18 @@ jest.unstable_mockModule('../../js/logger.js', () => ({
     },
 }));
 
-const { getBestMove, resetNodesEvaluated, getNodesEvaluated, resetActiveConfig } = await import(
-    '../../js/ai/Search.js'
-);
-const { clearTT, storeTT, TT_EXACT, computeZobristHash } = await import('../../js/ai/TranspositionTable.js');
+const {
+    getBestMove,
+    resetNodesEvaluated,
+    getNodesEvaluated,
+    convertBoardToInt,
+    computeZobristHash,
+    storeTT,
+    clearTT,
+    TT_EXACT
+} = await import('../../js/aiEngine.js');
+
+const { coordsToIndex } = await import('../../js/ai/BoardDefinitions.js');
 
 function createEmptyBoard() {
     return Array(9)
@@ -31,7 +39,7 @@ describe('Advanced Search Features', () => {
     beforeEach(() => {
         resetNodesEvaluated();
         clearTT();
-        resetActiveConfig();
+        // resetActiveConfig removed
     });
 
     describe('Delta Pruning (Quiescence Search)', () => {
@@ -77,35 +85,43 @@ describe('Advanced Search Features', () => {
             board[2][0] = { type: 'k', color: 'white' };
             board[1][7] = { type: 'r', color: 'white' };
 
-            const hash = computeZobristHash(board, 'white');
+            // Convert to Int for Hashing
+            const intBoard = convertBoardToInt(board);
+            const hash = computeZobristHash(intBoard, 'white');
 
-            // Manually seed TT with a "singular" entry
-            // High score, decent depth
-            const bestMove = { from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }; // Mate
+            // Manually seed TT with a "singular" entry (Int Move)
+            // Best Move: Rook from 1,7 to 0,7 (Mate)
+            const bestMove = { from: coordsToIndex(1, 7), to: coordsToIndex(0, 7) };
             storeTT(hash, 6, 20000, TT_EXACT, bestMove);
 
             // Run search at depth 8 (triggers SE condition depth >= 8)
             // We expect the search to find the mate, potentially extending.
-            // Validating extension explicitly is hard without mocking internals,
-            // but we can verify it finds the move correctly and quickly.
 
             const resultMove = getBestMove(board, 'white', 8, 'expert');
-            expect(resultMove).toMatchObject(bestMove);
 
-            // Node count should be reasonable (SE adds some overhead but finds PV fast)
+            // Result is UI Move. Compare with expected UI Move.
+            // Move: 1,7 -> 0,7
+            expect(resultMove.from.r).toBe(1);
+            expect(resultMove.from.c).toBe(7);
+            expect(resultMove.to.r).toBe(0);
+            expect(resultMove.to.c).toBe(7);
+
             expect(getNodesEvaluated()).toBeGreaterThan(0);
         });
 
         test('should NOT trigger extension if alternatives are good', () => {
-            // Position with multiple good moves (e.g., two Queens vs Lone King)
+            // Multiple good moves
             const board = createEmptyBoard();
             board[0][0] = { type: 'k', color: 'black' };
             board[8][8] = { type: 'k', color: 'white' };
             board[7][0] = { type: 'q', color: 'white' }; // Can mate
             board[7][1] = { type: 'q', color: 'white' }; // Can also mate
 
-            const hash = computeZobristHash(board, 'white');
-            const bestMove = { from: { r: 7, c: 0 }, to: { r: 0, c: 0 } };
+            const intBoard = convertBoardToInt(board);
+            const hash = computeZobristHash(intBoard, 'white');
+
+            // Seed
+            const bestMove = { from: coordsToIndex(7, 0), to: coordsToIndex(0, 0) };
             storeTT(hash, 6, 20000, TT_EXACT, bestMove);
 
             const move = getBestMove(board, 'white', 8, 'expert');

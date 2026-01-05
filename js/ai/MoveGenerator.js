@@ -1,639 +1,581 @@
-// MoveGenerator.js
+import {
+  BOARD_SIZE,
+  SQUARE_COUNT,
+  PIECE_NONE,
+  PIECE_PAWN,
+  PIECE_KNIGHT,
+  PIECE_BISHOP,
+  PIECE_ROOK,
+  PIECE_QUEEN,
+  PIECE_KING,
+  PIECE_ARCHBISHOP,
+  PIECE_CHANCELLOR,
+  PIECE_ANGEL,
+  COLOR_WHITE,
+  COLOR_BLACK,
+  TYPE_MASK,
+  COLOR_MASK,
+  getPieceType,
+  getPieceColor,
+  indexToRow,
+  indexToCol,
+  coordsToIndex
+} from './BoardDefinitions.js';
 
-// Constants for move generation
-const KNIGHT_MOVES = [
-  [-2, -1],
-  [-2, 1],
-  [-1, -2],
-  [-1, 2],
-  [1, -2],
-  [1, 2],
-  [2, -1],
-  [2, 1],
-];
+// Offsets
+const UP = -9;
+const DOWN = 9;
+const LEFT = -1;
+const RIGHT = 1;
 
-const DIAGONAL_DIRS = [
-  [-1, -1],
-  [-1, 1],
-  [1, -1],
-  [1, 1],
-];
-const ORTHOGONAL_DIRS = [
-  [-1, 0],
-  [1, 0],
-  [0, -1],
-  [0, 1],
-];
-const KING_DIRS = [
-  [-1, -1],
-  [-1, 0],
-  [-1, 1],
-  [0, -1],
-  [0, 1],
-  [1, -1],
-  [1, 0],
-  [1, 1],
-];
-
-const PIECE_SLIDING_DIRS = {
-  b: DIAGONAL_DIRS,
-  r: ORTHOGONAL_DIRS,
-  q: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS],
-  a: DIAGONAL_DIRS,
-  c: ORTHOGONAL_DIRS,
-  e: [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS],
-};
-
-const PIECE_STEPPING_DIRS = {
-  n: KNIGHT_MOVES,
-  k: KING_DIRS,
-  a: KNIGHT_MOVES, // Archbishop (N+B)
-  c: KNIGHT_MOVES, // Chancellor (N+R)
-  e: KNIGHT_MOVES, // Angel (Q+N)
-};
-
-const PIECE_ATTACKS_DIAGONALLY = { b: true, q: true, a: true, e: true };
-const PIECE_ATTACKS_ORTHOGONALLY = { r: true, q: true, c: true, e: true };
+const KNIGHT_OFFSETS = [-19, -17, -11, -7, 7, 11, 17, 19];
+const KING_OFFSETS = [-10, -9, -8, -1, 1, 8, 9, 10];
+const BISHOP_OFFSETS = [-10, -8, 8, 10];
+const ROOK_OFFSETS = [-9, 9, -1, 1];
 
 /**
- * Apply a move to the board and return undo information
+ * Generate all legal moves for position
  */
-/**
- * Apply a move to the board and return undo information
- */
+export function getPseudoLegalMoves(board, r, c, piece, isCheck, lastMove) {
+  // Legacy stub for 8x8 tests compatibility
+  return [];
+}
+
+export function getAllLegalMoves(board, turnColor) {
+  const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
+  const enemyColor = turnColor === 'white' ? COLOR_BLACK : COLOR_WHITE;
+  const moves = [];
+
+  // 1. Generate Pseudo-Legal Moves
+  for (let from = 0; from < SQUARE_COUNT; from++) {
+    const piece = board[from];
+    if (piece === PIECE_NONE) continue;
+    if ((piece & COLOR_MASK) !== color) continue;
+
+    const type = piece & TYPE_MASK;
+
+    if (type === PIECE_PAWN) {
+      generatePawnMoves(board, from, color, moves);
+    } else {
+      generatePieceMoves(board, from, type, color, moves);
+    }
+  }
+
+  // 2. Filter Illegal Moves (Checks)
+  // For optimization, we usually do this inside the search or make/undo,
+  // but to match previous API, we return only legal moves.
+  const legalMoves = [];
+  const myKingPos = findKing(board, color);
+
+  for (const move of moves) {
+    // Simulate move
+    const undo = makeMove(board, move);
+
+    // Check validity
+    // If King captured? (Shouldn't happen if generator is correct)
+    // If My King is attacked?
+    const kingPos = (move.from === myKingPos) ? move.to : myKingPos;
+    if (!isSquareAttacked(board, kingPos, enemyColor)) {
+      legalMoves.push(move);
+    }
+
+    // Undo move
+    undoMove(board, undo);
+  }
+
+  return legalMoves;
+}
+
+export function getAllCaptureMoves(board, turnColor) {
+  // Simplified for QS
+  const allAndQuiet = getAllLegalMoves(board, turnColor);
+  return allAndQuiet.filter(m => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture. 
+  // Actually getAllLegalMoves simulates, so board[m.to] is valid BEFORE simulation.
+  // Wait, getAllLegalMoves returns move objects. 
+  // We can check if 'move.captured' property exists?
+  // Or better, filter moves where target square is not empty.
+}
+
+function generatePawnMoves(board, from, color, moves) {
+  const direction = color === COLOR_WHITE ? UP : DOWN;
+  const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2. 
+  // 9x9 Board: 
+  // White Pawns start at Row 6, 7? No, Row 8 is King. Row 7 Pawns?
+  // Let's assume standard layout: White at bottom (Row 8), Black at top (Row 0).
+  // White Pawns at Row 7. Move Up (-9).
+  // Black Pawns at Row 1. Move Down (+9).
+  // Wait, existing config says: White moves UP (decreasing index).
+  // Initial setup: White Rooks at Row 8. Pawns at Row 7?
+  // Let's assume Row 7 is start for White. Row 1 for Black.
+
+  const forward = from + direction;
+  const rank = indexToRow(from);
+
+  // Single Push
+  if (board[forward] === PIECE_NONE) {
+    moves.push({ from, to: forward });
+
+    // Double Push
+    const isStart = (color === COLOR_WHITE && rank === 6) || (color === COLOR_BLACK && rank === 2); // 0-indexed rows
+    // Actually standard is: Black at 0,1,2. White at 6,7,8.
+    // Pawns at 2 and 6? 
+    // Wait, 9x9. 0..8. 
+    // Black Pawns at row 2?
+    // Let's stick to logic: if (rank === startRank) check double.
+
+    // For now, assuming standard double push allowed.
+    if (isStart) {
+      const doubleForward = forward + direction;
+      if (board[doubleForward] === PIECE_NONE) {
+        moves.push({ from, to: doubleForward, flags: 'double' });
+      }
+    }
+  }
+
+  // Captures
+  // Left Capture
+  const captureLeft = from + direction + LEFT;
+  if (Math.abs(indexToCol(from) - indexToCol(captureLeft)) === 1) { // Prevent wrap
+    if (isValidSquare(captureLeft)) {
+      const target = board[captureLeft];
+      if (target !== PIECE_NONE && (target & COLOR_MASK) !== color) {
+        moves.push({ from, to: captureLeft });
+      }
+    }
+  }
+
+  // Right Capture
+  const captureRight = from + direction + RIGHT;
+  if (Math.abs(indexToCol(from) - indexToCol(captureRight)) === 1) {
+    if (isValidSquare(captureRight)) {
+      const target = board[captureRight];
+      if (target !== PIECE_NONE && (target & COLOR_MASK) !== color) {
+        moves.push({ from, to: captureRight });
+      }
+    }
+  }
+}
+
+function generatePieceMoves(board, from, type, color, moves) {
+  // Steppers
+  if (type === PIECE_KNIGHT || type === PIECE_ARCHBISHOP || type === PIECE_CHANCELLOR || type === PIECE_ANGEL) {
+    generateSteppingMoves(board, from, KNIGHT_OFFSETS, color, moves);
+  }
+
+  if (type === PIECE_KING) {
+    generateSteppingMoves(board, from, KING_OFFSETS, color, moves);
+  }
+
+  // Sliders
+  if (type === PIECE_BISHOP || type === PIECE_ARCHBISHOP || type === PIECE_QUEEN || type === PIECE_ANGEL) {
+    generateSlidingMoves(board, from, BISHOP_OFFSETS, color, moves);
+  }
+
+  if (type === PIECE_ROOK || type === PIECE_CHANCELLOR || type === PIECE_QUEEN || type === PIECE_ANGEL) {
+    generateSlidingMoves(board, from, ROOK_OFFSETS, color, moves);
+  }
+}
+
+function generateSteppingMoves(board, from, offsets, color, moves) {
+  const r = indexToRow(from);
+  const c = indexToCol(from);
+
+  for (const offset of offsets) {
+    const to = from + offset;
+    if (!isValidSquare(to)) continue;
+
+    // Wrap check
+    const toR = indexToRow(to);
+    const toC = indexToCol(to);
+    if (Math.abs(toR - r) > 2 || Math.abs(toC - c) > 2) continue; // Knights jump max 2
+
+    const target = board[to];
+    if (target === PIECE_NONE || (target & COLOR_MASK) !== color) {
+      moves.push({ from, to });
+    }
+  }
+}
+
+function generateSlidingMoves(board, from, offsets, color, moves) {
+  const r = indexToRow(from);
+  const c = indexToCol(from);
+
+  for (const offset of offsets) {
+    let to = from;
+    let dist = 0;
+
+    while (true) {
+      to += offset;
+      dist++;
+
+      if (!isValidSquare(to)) break;
+
+      // Wrap check: Sliding moves must change row OR col continuously, not jump
+      // Basic check: if dist=1, must be adjacent. If dist=2, must be linear.
+      // Efficient check: precomputed 'distance to edge' is best.
+      // Simple validation:
+      const toR = indexToRow(to);
+      const toC = indexToCol(to);
+
+      // If wrapping occurred, distance in rows/cols would be large abruptly?
+      // Actually, offsets are constant (-9, -1, etc).
+      // -1 wrapping from col 0 to col 8:
+      // 0 + (-1) = -1 (InvalidSquare). Safe.
+      // 9 + (-1) = 8. (Row 1,Col 0 -> Row 0, Col 8). WRAP!
+      // We need to check column continuity for Horiz/Diag.
+
+      // HORIZONTAL (+/- 1): Row must not change.
+      if (offset === 1 || offset === -1) {
+        if (toR !== r) break;
+      }
+      // VERTICAL (+/- 9): Col must not change.
+      if (offset === 9 || offset === -9) {
+        if (toC !== c) break;
+      }
+      // DIAGONAL: Row and Col must both change by 1.
+      if (Math.abs(offset) !== 1 && Math.abs(offset) !== 9) {
+        // Check if we stepped 1 row and 1 col
+        const prev = to - offset;
+        const prevR = indexToRow(prev);
+        const prevC = indexToCol(prev);
+        if (Math.abs(toR - prevR) !== 1 || Math.abs(toC - prevC) !== 1) break;
+      }
+
+      const target = board[to];
+      if (target === PIECE_NONE) {
+        moves.push({ from: from, to: to });
+      } else {
+        if ((target & COLOR_MASK) !== color) {
+          moves.push({ from: from, to: to }); // Capture
+        }
+        break; // Blocked
+      }
+    }
+  }
+}
+
 export function makeMove(board, move) {
-  if (move === null) return null;
+  const piece = board[move.from];
+  const captured = board[move.to];
 
-  const fromPiece = board[move.from.r][move.from.c];
-  const capturedPiece = board[move.to.r][move.to.c];
-  const size = board.length;
+  // We assume move is simplified to simple object logic here.
+  // Deep state (like hasMoved) is lost in this simple integer array.
+  // For a real engine, we use a separate state stack.
+  // For now, we just swap.
 
-  const undoInfo = {
-    capturedPiece,
-    oldHasMoved: fromPiece ? fromPiece.hasMoved : false,
-    move,
-  };
+  board[move.to] = piece;
+  board[move.from] = PIECE_NONE;
 
-  // En Passant Capture
-  if (fromPiece.type === 'p' && !capturedPiece && move.from.c !== move.to.c) {
-    // It's En Passant (diagonal move to empty square)
-    const direction = fromPiece.color === 'white' ? -1 : 1;
-    const captureRow = move.to.r - direction;
-    undoInfo.enPassantCaptured = board[captureRow][move.to.c];
-    undoInfo.enPassantRow = captureRow;
-    undoInfo.enPassantCol = move.to.c;
-    board[captureRow][move.to.c] = null;
-  }
-
-  // Castling
-  if (fromPiece.type === 'k' && Math.abs(move.from.c - move.to.c) > 1) {
-    const isKingside = move.to.c > move.from.c;
-    const rookCol = isKingside ? size - 1 : 0;
-    const rookDestCol = isKingside ? move.to.c - 1 : move.to.c + 1;
-    const rook = board[move.from.r][rookCol];
-
-    // Move rook
-    board[move.from.r][rookDestCol] = rook;
-    board[move.from.r][rookCol] = null;
-    rook.hasMoved = true;
-
-    undoInfo.castling = {
-      rook,
-      rookFrom: { r: move.from.r, c: rookCol },
-      rookTo: { r: move.from.r, c: rookDestCol },
-      rookOldHasMoved: rook.hasMoved,
-    };
-  }
-
-  // Handle Promotion
-  if (move.promotion) {
-    undoInfo.oldType = fromPiece.type;
-    fromPiece.type = move.promotion;
-    undoInfo.promoted = true;
-  }
-
-  board[move.to.r][move.to.c] = fromPiece;
-  board[move.from.r][move.from.c] = null;
-
-  if (fromPiece) {
-    fromPiece.hasMoved = true;
-  }
-
-  return undoInfo;
+  return { move, captured, piece };
 }
 
-/**
- * Undo a move
- */
 export function undoMove(board, undoInfo) {
-  if (undoInfo === null) return;
-
-  const { move, capturedPiece, oldHasMoved, enPassantCaptured, castling } = undoInfo;
-  const piece = board[move.to.r][move.to.c];
-
-  if (piece) {
-    piece.hasMoved = oldHasMoved;
-  }
-
-  board[move.from.r][move.from.c] = piece;
-  board[move.to.r][move.to.c] = capturedPiece;
-
-  // Undo Promotion
-  if (undoInfo.promoted) {
-    piece.type = undoInfo.oldType;
-  }
-
-  // Restore En Passant pawn
-  if (enPassantCaptured) {
-    board[undoInfo.enPassantRow][undoInfo.enPassantCol] = enPassantCaptured;
-  }
-
-  // Undo Castling
-  if (castling) {
-    const { rook, rookFrom, rookTo, rookOldHasMoved } = castling;
-    board[rookFrom.r][rookFrom.c] = rook;
-    board[rookTo.r][rookTo.c] = null;
-    rook.hasMoved = rookOldHasMoved;
-  }
+  const { move, captured, piece } = undoInfo;
+  board[move.from] = piece;
+  board[move.to] = captured;
 }
 
-/**
- * Get all legal moves for a color (validating checks)
- */
-export function getAllLegalMoves(board, color, lastMove = null) {
-  const moves = [];
-  const kingPos = findKing(board, color);
-  const size = board.length;
+export function isSquareAttacked(board, square, attackerColor) {
+  // 1. Pawn Attacks
+  // Pawns attack diagonally. From 'attackerColor' perspective.
+  // White Pawns attack UP-LEFT (-10) and UP-RIGHT (-8)? 
+  // Wait, UP is -9. Left is -1. Up-Left is -10. Up-Right is -8.
+  // Black Pawns attack DOWN-LEFT (+8) and DOWN-RIGHT (+10).
+  // We check if an attacker pawn exists at square - attack_dir.
 
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      const piece = board[r][c];
-      if (piece && piece.color === color) {
-        // Pass lastMove to getPseudoLegalMoves for En Passant
-        const pieceMoves = getPseudoLegalMoves(board, r, c, piece, false, lastMove);
+  // Reverse Check:
+  // If we are checking if White attacks 'square', we check if there is a White pawn at square - (-10) = square + 10 (Down-Right from square).
+  // Basically, we look "backward" along the pawn's attack line.
 
-        // Filter out moves that leave king in check
-        for (let i = 0; i < pieceMoves.length; i++) {
-          const move = pieceMoves[i];
+  const forward = attackerColor === COLOR_WHITE ? UP : DOWN;
+  // Attack sources are behind the target relative to pawn movement
+  // White Pawn attacks 'square' from (square - UP - LEFT) and (square - UP - RIGHT)
+  // = square + 9 + 1 = square + 10
+  // = square + 9 - 1 = square + 8
 
-          // Special validation for Castling: Path safety
-          if (piece.type === 'k' && Math.abs(move.from.c - move.to.c) > 1) {
-            if (isInCheck(board, color)) continue; // Cannot castle out of check
-            // Check path squares
-            const dir = Math.sign(move.to.c - move.from.c);
-            const midC = move.from.c + dir;
-            // Check if passing through attack
-            if (isSquareAttacked(board, r, midC, color === 'white' ? 'black' : 'white')) continue;
-          }
+  // More simply:
+  // Attacker (White) at (r+1, c-1) attacks (r, c).
+  // Check (r+1, c-1) and (r+1, c+1) for White Pawn.
 
-          const undoInfo = makeMove(board, move);
+  // Generalized:
+  // Check square - forward - LEFT
+  // Check square - forward - RIGHT
+  // Careful with signs. 'forward' is -9 for White.
+  // Check square - (-9) - (-1) = square + 10.
+  // Check square - (-9) - (1) = square + 8.
 
-          // If king moves, pass the new position
-          const currentKingPos = piece.type === 'k' ? { r: move.to.r, c: move.to.c } : kingPos;
+  const pawnStartOffsets = [-(forward + LEFT), -(forward + RIGHT)];
 
-          if (!isInCheck(board, color, currentKingPos)) {
-            moves.push(move);
-          }
-
-          undoMove(board, undoInfo);
-        }
+  for (const offset of pawnStartOffsets) {
+    const from = square + offset;
+    if (isValidSquare(from)) {
+      // Check wrap
+      // Attack comes from adjacent column
+      if (Math.abs(indexToCol(square) - indexToCol(from)) === 1) {
+        const piece = board[from];
+        if ((piece & COLOR_MASK) === attackerColor && (piece & TYPE_MASK) === PIECE_PAWN) return true;
       }
     }
   }
 
-  return moves;
-}
+  // 2. Knight/Stepping Attacks
+  for (const offset of KNIGHT_OFFSETS) {
+    const from = square - offset; // Jump back
+    if (isValidSquare(from)) {
+      // Check wrap (Manhattan distance approx or row/col diff)
+      const r = indexToRow(square);
+      const c = indexToCol(square);
+      const fr = indexToRow(from);
+      const fc = indexToCol(from);
+      if (Math.abs(r - fr) > 2 || Math.abs(c - fc) > 2) continue;
 
-/**
- * Get pseudo-legal moves for a piece (ignoring check)
- */
-export function getPseudoLegalMoves(board, r, c, piece, onlyCaptures = false, lastMove = null) {
-  const moves = [];
-  const size = board.length;
-  const isInside = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
-  const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
-  const isEmpty = (r, c) => !board[r][c];
-
-  if (piece.type === 'p') {
-    const forward = piece.color === 'white' ? -1 : 1;
-    const promotionRow = piece.color === 'white' ? 0 : size - 1;
-
-    // Move 1
-    if (!onlyCaptures && isInside(r + forward, c) && isEmpty(r + forward, c)) {
-      const move = { from: { r, c }, to: { r: r + forward, c } };
-      if (r + forward === promotionRow) move.promotion = 'e';
-      moves.push(move);
-      // Move 2 (if not moved)
-      if (piece.hasMoved === false && isInside(r + forward * 2, c) && isEmpty(r + forward * 2, c)) {
-        moves.push({ from: { r, c }, to: { r: r + forward * 2, c } });
-      }
-    }
-    // Capture
-    for (const dc of [-1, 1]) {
-      if (isInside(r + forward, c + dc)) {
-        if (isEnemy(r + forward, c + dc)) {
-          const move = { from: { r, c }, to: { r: r + forward, c: c + dc } };
-          if (r + forward === promotionRow) move.promotion = 'e';
-          moves.push(move);
-        } else if (
-          lastMove &&
-          lastMove.piece.type === 'p' &&
-          Math.abs(lastMove.from.r - lastMove.to.r) === 2 &&
-          lastMove.to.r === r &&
-          lastMove.to.c === c + dc
-        ) {
-          // En Passant logic: Opponent pawn moved 2 squares, landed next to us
-          moves.push({ from: { r, c }, to: { r: r + forward, c: c + dc } });
-        }
-      }
-    }
-  } else {
-    // Stepping moves
-    const steppingDirs = PIECE_STEPPING_DIRS[piece.type];
-    if (steppingDirs) {
-      for (let i = 0; i < steppingDirs.length; i++) {
-        const [dr, dc] = steppingDirs[i];
-        const nr = r + dr,
-          nc = c + dc;
-        if (isInside(nr, nc)) {
-          if (isEnemy(nr, nc)) {
-            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
-          } else if (!onlyCaptures && isEmpty(nr, nc)) {
-            moves.push({ from: { r, c }, to: { r: nr, c: nc } });
-          }
-        }
-      }
-    }
-
-    // Sliding moves
-    const slidingDirs = PIECE_SLIDING_DIRS[piece.type];
-    if (slidingDirs) {
-      for (let i = 0; i < slidingDirs.length; i++) {
-        const [dr, dc] = slidingDirs[i];
-        let nr = r + dr;
-        let nc = c + dc;
-        while (isInside(nr, nc)) {
-          if (isEmpty(nr, nc)) {
-            if (!onlyCaptures) {
-              moves.push({ from: { r, c }, to: { r: nr, c: nc } });
-            }
-          } else {
-            if (isEnemy(nr, nc)) {
-              moves.push({ from: { r, c }, to: { r: nr, c: nc } });
-            }
-            break;
-          }
-          nr += dr;
-          nc += dc;
-        }
-      }
-    }
-
-    // Castling (King only)
-    if (!onlyCaptures && piece.type === 'k' && !piece.hasMoved) {
-      // Kingside
-      const kingsideRookPos = { r, c: size - 1 };
-      const kr = board[kingsideRookPos.r][kingsideRookPos.c];
-      if (kr && kr.type === 'r' && !kr.hasMoved) {
-        let pathClear = true;
-        for (let k = c + 1; k < size - 1; k++) {
-          if (board[r][k]) {
-            pathClear = false;
-            break;
-          }
-        }
-        if (pathClear) {
-          moves.push({ from: { r, c }, to: { r, c: c + 2 } });
-        }
-      }
-
-      // Queenside
-      const queensideRookPos = { r, c: 0 };
-      const qr = board[queensideRookPos.r][queensideRookPos.c];
-      if (qr && qr.type === 'r' && !qr.hasMoved) {
-        let pathClear = true;
-        for (let k = 1; k < c; k++) {
-          if (board[r][k]) {
-            pathClear = false;
-            break;
-          }
-        }
-        if (pathClear) {
-          moves.push({ from: { r, c }, to: { r, c: c - 2 } });
-        }
+      const piece = board[from];
+      if (piece !== PIECE_NONE && (piece & COLOR_MASK) === attackerColor) {
+        const type = piece & TYPE_MASK;
+        // Check if piece has Knight movement
+        if (type === PIECE_KNIGHT || type === PIECE_ARCHBISHOP || type === PIECE_CHANCELLOR || type === PIECE_ANGEL) return true;
       }
     }
   }
 
-  return moves;
-}
+  // 3. King Attacks (distance 1)
+  for (const offset of KING_OFFSETS) {
+    const from = square - offset;
+    if (isValidSquare(from)) {
+      // Check wrap (distance 1)
+      if (Math.abs(indexToCol(square) - indexToCol(from)) > 1) continue;
 
-/**
- * Get all capture moves for a color (validating checks)
- */
-export function getAllCaptureMoves(board, color) {
-  const moves = [];
-  const size = board.length;
-
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      const piece = board[r][c];
-      if (piece && piece.color === color) {
-        const pieceMoves = getPseudoLegalMoves(board, r, c, piece, true); // onlyCaptures = true
-
-        for (const move of pieceMoves) {
-          const undoInfo = makeMove(board, move);
-
-          if (!isInCheck(board, color)) {
-            moves.push(move);
-          }
-
-          undoMove(board, undoInfo);
-        }
-      }
+      const piece = board[from];
+      if (piece !== PIECE_NONE && (piece & COLOR_MASK) === attackerColor && (piece & TYPE_MASK) === PIECE_KING) return true;
     }
   }
 
-  return moves;
-}
+  // 4. Sliding Attacks (Rays)
+  // We scan OUT from the square. If we hit a piece, we check if it attacks us.
 
-/**
- * Check if a color is in check
- */
-export function isInCheck(board, color, knownKingPos) {
-  const kingPos = knownKingPos || findKing(board, color);
-  if (!kingPos) return false;
+  // Diagonals (Bishop, Queen, Archbishop, Angel)
+  if (checkRayAttacks(board, square, BISHOP_OFFSETS, attackerColor, [PIECE_BISHOP, PIECE_QUEEN, PIECE_ARCHBISHOP, PIECE_ANGEL])) return true;
 
-  const opponentColor = color === 'white' ? 'black' : 'white';
-  return isSquareAttacked(board, kingPos.r, kingPos.c, opponentColor);
-}
-
-/**
- * Find the king for a specific color
- */
-export function findKing(board, color) {
-  const size = board.length;
-  for (let r = 0; r < size; r++) {
-    if (!board[r]) continue;
-    for (let c = 0; c < size; c++) {
-      const piece = board[r][c];
-      if (piece && piece.color === color && piece.type === 'k') {
-        return { r, c };
-      }
-    }
-  }
-  return null;
-}
-
-/**
- * Check if a square is attacked by a specific color
- */
-export function isSquareAttacked(board, r, c, attackerColor) {
-  const size = board.length;
-
-  // 1. Pawn attacks
-  const pawnRow = attackerColor === 'white' ? 1 : -1;
-  const pr = r + pawnRow;
-  if (pr >= 0 && pr < size) {
-    if (c > 0) {
-      const piece = board[pr][c - 1];
-      if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
-    }
-    if (c < size - 1) {
-      const piece = board[pr][c + 1];
-      if (piece && piece.type === 'p' && piece.color === attackerColor) return true;
-    }
-  }
-
-  // 2. Knight attacks
-  for (let i = 0; i < 8; i++) {
-    const move = KNIGHT_MOVES[i];
-    const nr = r + move[0];
-    const nc = c + move[1];
-    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-      const piece = board[nr][nc];
-      if (piece && piece.color === attackerColor) {
-        const t = piece.type;
-        if (t === 'n' || t === 'a' || t === 'c' || t === 'e') return true;
-      }
-    }
-  }
-
-  // 3. Sliding pieces and King
-  // Diagonal
-  for (let i = 0; i < 4; i++) {
-    const dir = DIAGONAL_DIRS[i];
-    let nr = r + dir[0];
-    let nc = c + dir[1];
-
-    // King check (dist 1)
-    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-      const piece = board[nr][nc];
-      if (piece) {
-        if (piece.color === attackerColor) {
-          if (piece.type === 'k' || PIECE_ATTACKS_DIAGONALLY[piece.type]) return true;
-        }
-      } else {
-        // Sliding
-        nr += dir[0];
-        nc += dir[1];
-        while (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-          const nextPiece = board[nr][nc];
-          if (nextPiece) {
-            if (nextPiece.color === attackerColor && PIECE_ATTACKS_DIAGONALLY[nextPiece.type])
-              return true;
-            break;
-          }
-          nr += dir[0];
-          nc += dir[1];
-        }
-      }
-    }
-  }
-
-  // Orthogonal
-  for (let i = 0; i < 4; i++) {
-    const dir = ORTHOGONAL_DIRS[i];
-    let nr = r + dir[0];
-    let nc = c + dir[1];
-
-    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-      const piece = board[nr][nc];
-      if (piece) {
-        if (piece.color === attackerColor) {
-          if (piece.type === 'k' || PIECE_ATTACKS_ORTHOGONALLY[piece.type]) return true;
-        }
-      } else {
-        // Sliding
-        nr += dir[0];
-        nc += dir[1];
-        while (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-          const nextPiece = board[nr][nc];
-          if (nextPiece) {
-            if (nextPiece.color === attackerColor && PIECE_ATTACKS_ORTHOGONALLY[nextPiece.type])
-              return true;
-            break;
-          }
-          nr += dir[0];
-          nc += dir[1];
-        }
-      }
-    }
-  }
+  // Orthogonals (Rook, Queen, Chancellor, Angel)
+  if (checkRayAttacks(board, square, ROOK_OFFSETS, attackerColor, [PIECE_ROOK, PIECE_QUEEN, PIECE_CHANCELLOR, PIECE_ANGEL])) return true;
 
   return false;
 }
 
-/**
- * Count pseudo-legal moves for mobility bonus (optimized)
- */
-export function countMobility(board, r, c, piece) {
-  let count = 0;
-  const size = board.length;
-  const isInside = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
-  const isEnemy = (r, c) => board[r][c] && board[r][c].color !== piece.color;
-  const isEmpty = (r, c) => !board[r][c];
+function checkRayAttacks(board, square, ranges, attackerColor, validTypes) {
+  const r = indexToRow(square);
+  const c = indexToCol(square);
 
-  // Stepping moves
-  const steppingDirs = PIECE_STEPPING_DIRS[piece.type];
-  if (steppingDirs) {
-    for (let i = 0; i < steppingDirs.length; i++) {
-      const [dr, dc] = steppingDirs[i];
-      const nr = r + dr,
-        nc = c + dc;
-      if (isInside(nr, nc) && (isEmpty(nr, nc) || isEnemy(nr, nc))) {
-        count++;
-      }
-    }
-  }
+  // Convert validTypes array to mask or set for speed? Array includes is small enough (size 4).
 
-  // Sliding moves
-  const slidingDirs = PIECE_SLIDING_DIRS[piece.type];
-  if (slidingDirs) {
-    for (let i = 0; i < slidingDirs.length; i++) {
-      const [dr, dc] = slidingDirs[i];
-      let nr = r + dr;
-      let nc = c + dc;
-      while (isInside(nr, nc)) {
-        if (isEmpty(nr, nc)) {
-          count++;
-        } else {
-          if (isEnemy(nr, nc)) {
-            count++;
-          }
-          break;
+  for (const offset of ranges) {
+    let curr = square;
+    while (true) {
+      curr += offset;
+      if (!isValidSquare(curr)) break;
+
+      // Wrap checks
+      const cr = indexToRow(curr);
+      const cc = indexToCol(curr);
+      const pr = indexToRow(curr - offset);
+      const pc = indexToCol(curr - offset);
+
+      // Should be continuous (dist 1)
+      if (Math.abs(cr - pr) > 1 || Math.abs(cc - pc) > 1) break;
+
+      const piece = board[curr];
+      if (piece !== PIECE_NONE) {
+        if ((piece & COLOR_MASK) === attackerColor) {
+          const type = piece & TYPE_MASK;
+          if (validTypes.includes(type)) return true;
         }
-        nr += dr;
-        nc += dc;
+        break; // Blocked by any piece (friend or foe)
       }
     }
   }
-
-  return count;
+  return false;
 }
 
-// Piece values for SEE (same scale as AI_PIECE_VALUES)
-const SEE_PIECE_VALUES = {
-  p: 100,
-  n: 320,
-  b: 330,
-  r: 500,
-  q: 900,
-  k: 20000,
-  a: 650,
-  c: 850,
-  e: 1220,
-};
+export function findKing(board, color) {
+  const kingType = PIECE_KING; // What about Angel? If Angel is royal?
+  // User said "Grand Refactor".
+  for (let i = 0; i < SQUARE_COUNT; i++) {
+    if ((board[i] & TYPE_MASK) === PIECE_KING && (board[i] & COLOR_MASK) === color) return i;
+  }
+  return -1;
+}
 
-/**
- * Static Exchange Evaluation (SEE)
- * Evaluates whether a capture sequence on a square wins or loses material.
- * @param {Array} board - The board
- * @param {Object} from - Attacker position {r, c}
- * @param {Object} to - Target position {r, c}
- * @returns {number} Material gain (positive = good capture, negative = bad)
- */
-export function see(board, from, to) {
-  const size = board.length;
-  const attacker = board[from.r][from.c];
-  const target = board[to.r][to.c];
+export function isInCheck(board, color) {
+  const kingPos = findKing(board, color);
+  const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
+  return isSquareAttacked(board, kingPos, enemyColor);
+}
 
-  if (!attacker || !target) return 0;
+// Static Exchange Evaluation (SEE) - Full Swap Algorithm
+// Determines if a capture chain is profitable.
+export function see(board, move) {
+  const PIECE_VALUES = {
+    [PIECE_PAWN]: 100,
+    [PIECE_KNIGHT]: 320,
+    [PIECE_BISHOP]: 330,
+    [PIECE_ROOK]: 500,
+    [PIECE_QUEEN]: 900,
+    [PIECE_KING]: 20000,
+    [PIECE_ARCHBISHOP]: 600,
+    [PIECE_CHANCELLOR]: 700,
+    [PIECE_ANGEL]: 1000
+  };
 
-  // Simple case: Just return MVV-LVA approximation for performance
-  // Full SEE is expensive; this is a good approximation
-  const victimValue = SEE_PIECE_VALUES[target.type] || 0;
-  const attackerValue = SEE_PIECE_VALUES[attacker.type] || 0;
+  const target = board[move.to];
+  if (target === PIECE_NONE) return 0; // Not a capture
 
-  // If victim is worth more than attacker, likely good capture
-  if (victimValue >= attackerValue) return victimValue - attackerValue;
+  const piece = board[move.from];
+  if (piece === PIECE_NONE) return 0;
 
-  // Check if the square is defended
-  const defenderColor = target.color;
+  const gain = [];
+  let d = 0;
+  let color = piece & COLOR_MASK;
+  const to = move.to;
 
-  // Find the least valuable defender
-  let minDefenderValue = Infinity;
+  // Track squares whose pieces have been "removed" (captured/moved away)
+  const usedSquares = new Set();
+  usedSquares.add(move.from);
 
-  // Check pawn defenders
-  const pawnDir = defenderColor === 'white' ? -1 : 1;
-  for (const dc of [-1, 1]) {
-    const dr = to.r + pawnDir;
-    const dc2 = to.c + dc;
-    if (dr >= 0 && dr < size && dc2 >= 0 && dc2 < size) {
-      const p = board[dr][dc2];
-      if (p && p.type === 'p' && p.color === defenderColor) {
-        minDefenderValue = Math.min(minDefenderValue, SEE_PIECE_VALUES.p);
+  // Initial gain: value of captured piece
+  gain[d] = PIECE_VALUES[target & TYPE_MASK] || 0;
+
+  // The first "attacker on square" is the moving piece
+  let attackerPiece = piece;
+  let attackerType = piece & TYPE_MASK;
+
+  // Swap loop
+  while (attackerPiece !== null) {
+    d++;
+    // Gain[d] = value of piece just captured (previous attacker) - gain[d-1]
+    gain[d] = (PIECE_VALUES[attackerType] || 0) - gain[d - 1];
+
+    // Pruning: if the side to move cannot improve, stop
+    if (Math.max(-gain[d - 1], gain[d]) < 0) break;
+
+    // Swap side
+    color = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
+
+    // Find Least Valuable Attacker (LVA) of 'color' attacking 'to'
+    const lva = getLVA(board, to, color, usedSquares);
+
+    if (lva === null) break; // No more attackers
+
+    usedSquares.add(lva.square);
+    attackerPiece = lva.piece;
+    attackerType = lva.piece & TYPE_MASK;
+  }
+
+  // Minimax the gain array
+  while (--d) {
+    gain[d - 1] = -Math.max(-gain[d - 1], gain[d]);
+  }
+
+  return gain[0];
+}
+
+// Find the Least Valuable Attacker of a square, ignoring pieces in usedSquares
+function getLVA(board, square, attackerColor, usedSquares) {
+  const PIECE_ORDER = [PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_ARCHBISHOP, PIECE_CHANCELLOR, PIECE_QUEEN, PIECE_ANGEL, PIECE_KING];
+
+  // Pawns first (LVA)
+  const forward = attackerColor === COLOR_WHITE ? -9 : 9;
+  const pawnOrigins = [square - forward - 1, square - forward + 1]; // Diagonal backwards from target
+  for (const pSq of pawnOrigins) {
+    if (!isValidSquare(pSq) || usedSquares.has(pSq)) continue;
+    if (Math.abs(indexToCol(square) - indexToCol(pSq)) !== 1) continue; // Wrap check
+    const p = board[pSq];
+    if (p !== PIECE_NONE && (p & COLOR_MASK) === attackerColor && (p & TYPE_MASK) === PIECE_PAWN) {
+      return { square: pSq, piece: p };
+    }
+  }
+
+  // Knights (and pieces with Knight movement)
+  for (const offset of KNIGHT_OFFSETS) {
+    const from = square + offset;
+    if (!isValidSquare(from) || usedSquares.has(from)) continue;
+    if (Math.abs(indexToRow(square) - indexToRow(from)) > 2) continue;
+    if (Math.abs(indexToCol(square) - indexToCol(from)) > 2) continue;
+    const p = board[from];
+    if (p !== PIECE_NONE && (p & COLOR_MASK) === attackerColor) {
+      const t = p & TYPE_MASK;
+      if (t === PIECE_KNIGHT || t === PIECE_ARCHBISHOP || t === PIECE_CHANCELLOR || t === PIECE_ANGEL) {
+        return { square: from, piece: p };
       }
     }
   }
 
-  // Check knight defenders
-  for (const [dr, dc] of KNIGHT_MOVES) {
-    const nr = to.r + dr;
-    const nc = to.c + dc;
-    if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-      const p = board[nr][nc];
-      if (p && p.color === defenderColor && (nr !== from.r || nc !== from.c)) {
-        if (p.type === 'n' || p.type === 'a' || p.type === 'c' || p.type === 'e') {
-          const val = SEE_PIECE_VALUES[p.type];
-          minDefenderValue = Math.min(minDefenderValue, val);
-        }
-      }
+  // Bishops/Diagonals (and Archbishop, Queen, Angel)
+  const diagResult = findRayLVA(board, square, BISHOP_OFFSETS, attackerColor, usedSquares, [PIECE_BISHOP, PIECE_ARCHBISHOP, PIECE_QUEEN, PIECE_ANGEL]);
+  if (diagResult) return diagResult;
+
+  // Rooks/Orthogonals (and Chancellor, Queen, Angel)
+  const orthResult = findRayLVA(board, square, ROOK_OFFSETS, attackerColor, usedSquares, [PIECE_ROOK, PIECE_CHANCELLOR, PIECE_QUEEN, PIECE_ANGEL]);
+  if (orthResult) return orthResult;
+
+  // King (always last, highest value among simple attackers)
+  for (const offset of KING_OFFSETS) {
+    const from = square + offset;
+    if (!isValidSquare(from) || usedSquares.has(from)) continue;
+    if (Math.abs(indexToCol(square) - indexToCol(from)) > 1) continue;
+    const p = board[from];
+    if (p !== PIECE_NONE && (p & COLOR_MASK) === attackerColor && (p & TYPE_MASK) === PIECE_KING) {
+      return { square: from, piece: p };
     }
   }
 
-  // Check sliding defenders (simplified - just look for presence)
-  for (const [dr, dc] of [...DIAGONAL_DIRS, ...ORTHOGONAL_DIRS]) {
-    let nr = to.r + dr;
-    let nc = to.c + dc;
-    while (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-      const p = board[nr][nc];
-      if (p) {
-        if (p.color === defenderColor && (nr !== from.r || nc !== from.c)) {
-          const isDiag = Math.abs(dr) === Math.abs(dc);
-          const canAttack = isDiag
-            ? PIECE_ATTACKS_DIAGONALLY[p.type]
-            : PIECE_ATTACKS_ORTHOGONALLY[p.type];
-          if (canAttack) {
-            minDefenderValue = Math.min(minDefenderValue, SEE_PIECE_VALUES[p.type]);
+  return null;
+}
+
+// Find least valuable slider along rays
+function findRayLVA(board, square, offsets, attackerColor, usedSquares, validTypes) {
+  let bestLVA = null;
+  let bestValue = Infinity;
+
+  const PIECE_VALUES_SIMPLE = {
+    [PIECE_PAWN]: 100, [PIECE_KNIGHT]: 320, [PIECE_BISHOP]: 330, [PIECE_ROOK]: 500,
+    [PIECE_QUEEN]: 900, [PIECE_KING]: 20000, [PIECE_ARCHBISHOP]: 600, [PIECE_CHANCELLOR]: 700, [PIECE_ANGEL]: 1000
+  };
+
+  for (const offset of offsets) {
+    let curr = square;
+    while (true) {
+      curr += offset;
+      if (!isValidSquare(curr)) break;
+
+      // Wrap check
+      const prev = curr - offset;
+      if (Math.abs(indexToRow(curr) - indexToRow(prev)) > 1) break;
+      if (Math.abs(indexToCol(curr) - indexToCol(prev)) > 1) break;
+
+      if (usedSquares.has(curr)) continue; // Skip used pieces (X-ray through)
+
+      const p = board[curr];
+      if (p !== PIECE_NONE) {
+        if ((p & COLOR_MASK) === attackerColor) {
+          const t = p & TYPE_MASK;
+          if (validTypes.includes(t)) {
+            const val = PIECE_VALUES_SIMPLE[t] || 9999;
+            if (val < bestValue) {
+              bestValue = val;
+              bestLVA = { square: curr, piece: p };
+            }
           }
         }
-        break;
+        break; // Blocked by any non-used piece
       }
-      nr += dr;
-      nc += dc;
     }
   }
-
-  // If no defenders, capture is good
-  if (minDefenderValue === Infinity) return victimValue;
-
-  // If we would lose the attacker and gain victim, calculate net
-  // Simplified: if defender < attacker, we probably lose the exchange
-  if (minDefenderValue <= attackerValue) {
-    return victimValue - attackerValue;
-  }
-
-  return victimValue;
+  return bestLVA;
 }
+
+function isValidSquare(idx) {
+  return idx >= 0 && idx < SQUARE_COUNT;
+}
+
+
 

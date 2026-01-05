@@ -14,6 +14,13 @@ jest.unstable_mockModule('../js/ai/Evaluation.js', () => ({
   evaluatePosition: jest.fn(() => 100),
   PST: {},
   PST_EG: {},
+  PST_PAWN: new Int8Array(81),
+  PST_KNIGHT: new Int8Array(81),
+  PST_BISHOP: new Int8Array(81),
+  PST_ROOK: new Int8Array(81),
+  PST_QUEEN: new Int8Array(81),
+  PST_KING_MG: new Int8Array(81),
+  PST_KING_EG: new Int8Array(81),
 }));
 
 // Dynamic imports are required for mocked modules in ESM

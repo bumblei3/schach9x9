@@ -10,8 +10,8 @@ jest.unstable_mockModule('../../js/logger.js', () => ({
   },
 }));
 
-const { getBestMove, resetNodesEvaluated, analyzePosition, extractPV, resetActiveConfig } =
-  await import('../../js/ai/Search.js');
+const { getBestMove, resetNodesEvaluated, analyzePosition, extractPV } =
+  await import('../../js/aiEngine.js');
 const { clearTT } = await import('../../js/ai/TranspositionTable.js');
 
 describe('AI Search Logic', () => {
@@ -25,7 +25,6 @@ describe('AI Search Logic', () => {
   beforeEach(() => {
     resetNodesEvaluated();
     clearTT();
-    resetActiveConfig();
     jest.clearAllMocks();
   });
 
