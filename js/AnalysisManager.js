@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from './config.js';
 import * as TacticsDetector from './tutor/TacticsDetector.js';
+import * as aiEngine from './aiEngine.js';
 
 /**
  * Manages tactical and strategic analysis for visualization.
@@ -72,13 +73,13 @@ export class AnalysisManager {
               t.pos.c,
               this.game.turn
             );
-            const myPieceValue = this.getPieceValue(t.type);
-            const opponentPieceValue = this.getPieceValue(piece.type);
 
             // Serious threat if:
             // 1. Hanging piece (no defenders)
             // 2. Trapped more valuable piece (attacker is less valuable)
-            const isSerious = defenders === 0 || opponentPieceValue < myPieceValue;
+            // Use SEE for a more definitive answer
+            const seeScore = aiEngine.see(this.game.board, { r, c }, t.pos);
+            const isSerious = defenders === 0 || seeScore > 0;
 
             if (isSerious) {
               arrows.push({

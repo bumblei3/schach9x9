@@ -15,7 +15,7 @@ import {
   TYPE_MASK,
   COLOR_MASK,
   indexToRow,
-  indexToCol
+  indexToCol,
 } from './BoardDefinitions.js';
 
 // Piece Values (Centipawns)
@@ -28,7 +28,7 @@ PIECE_VALUES[PIECE_QUEEN] = 900;
 PIECE_VALUES[PIECE_KING] = 20000;
 PIECE_VALUES[PIECE_ARCHBISHOP] = 600; // B+N
 PIECE_VALUES[PIECE_CHANCELLOR] = 700; // R+N
-PIECE_VALUES[PIECE_ANGEL] = 1000;    // Q+N
+PIECE_VALUES[PIECE_ANGEL] = 1000; // Q+N
 
 // Phase Values
 const PHASE_VALUES = new Int8Array(16);
@@ -47,87 +47,281 @@ PHASE_VALUES[PIECE_ANGEL] = 4;
 // R0: 0-8. R8: 72-80.
 
 export const PST_PAWN = new Int8Array([
-  0, 0, 0, 0, 0, 0, 0, 0, 0, // R0
-  50, 50, 50, 50, 50, 50, 50, 50, 50, // R1
-  10, 10, 20, 30, 30, 30, 20, 10, 10, // R2
-  5, 5, 10, 25, 25, 25, 10, 5, 5, // R3
-  0, 0, 0, 20, 25, 20, 0, 0, 0, // R4
-  5, -5, -10, 0, 10, 0, -10, -5, 5, // R5
-  5, 10, 10, -20, -20, -20, 10, 10, 5, // R6
-  0, 0, 0, 0, 0, 0, 0, 0, 0, // R7
-  0, 0, 0, 0, 0, 0, 0, 0, 0  // R8
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0, // R0
+  50,
+  50,
+  50,
+  50,
+  50,
+  50,
+  50,
+  50,
+  50, // R1
+  10,
+  10,
+  20,
+  30,
+  30,
+  30,
+  20,
+  10,
+  10, // R2
+  5,
+  5,
+  10,
+  25,
+  25,
+  25,
+  10,
+  5,
+  5, // R3
+  0,
+  0,
+  0,
+  20,
+  25,
+  20,
+  0,
+  0,
+  0, // R4
+  5,
+  -5,
+  -10,
+  0,
+  10,
+  0,
+  -10,
+  -5,
+  5, // R5
+  5,
+  10,
+  10,
+  -20,
+  -20,
+  -20,
+  10,
+  10,
+  5, // R6
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0, // R7
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0, // R8
 ]);
 
 export const PST_KNIGHT = new Int8Array([
-  -50, -40, -30, -30, -30, -30, -30, -40, -50,
-  -40, -20, 0, 0, 0, 0, 0, -20, -40,
-  -30, 0, 10, 15, 15, 15, 10, 0, -30,
-  -30, 5, 15, 20, 20, 20, 15, 5, -30,
-  -30, 0, 15, 20, 25, 20, 15, 0, -30,
-  -30, 5, 15, 20, 20, 20, 15, 5, -30,
-  -30, 0, 10, 15, 15, 15, 10, 0, -30,
-  -40, -20, 0, 5, 5, 5, 0, -20, -40,
-  -50, -40, -30, -30, -30, -30, -30, -40, -50
+  -50, -40, -30, -30, -30, -30, -30, -40, -50, -40, -20, 0, 0, 0, 0, 0, -20, -40, -30, 0, 10, 15,
+  15, 15, 10, 0, -30, -30, 5, 15, 20, 20, 20, 15, 5, -30, -30, 0, 15, 20, 25, 20, 15, 0, -30, -30,
+  5, 15, 20, 20, 20, 15, 5, -30, -30, 0, 10, 15, 15, 15, 10, 0, -30, -40, -20, 0, 5, 5, 5, 0, -20,
+  -40, -50, -40, -30, -30, -30, -30, -30, -40, -50,
 ]);
 
 export const PST_BISHOP = new Int8Array([
-  -20, -10, -10, -10, -10, -10, -10, -10, -20,
-  -10, 0, 0, 0, 0, 0, 0, 0, -10,
-  -10, 0, 5, 10, 10, 10, 5, 0, -10,
-  -10, 5, 5, 10, 10, 10, 5, 5, -10,
-  -10, 0, 10, 10, 15, 10, 10, 0, -10,
-  -10, 10, 10, 10, 10, 10, 10, 10, -10,
-  -10, 5, 0, 0, 0, 0, 0, 5, -10,
-  -10, 0, 0, 0, 0, 0, 0, 0, -10,
-  -20, -10, -10, -10, -10, -10, -10, -10, -20
+  -20, -10, -10, -10, -10, -10, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5, 10, 10, 10,
+  5, 0, -10, -10, 5, 5, 10, 10, 10, 5, 5, -10, -10, 0, 10, 10, 15, 10, 10, 0, -10, -10, 10, 10, 10,
+  10, 10, 10, 10, -10, -10, 5, 0, 0, 0, 0, 0, 5, -10, -10, 0, 0, 0, 0, 0, 0, 0, -10, -20, -10, -10,
+  -10, -10, -10, -10, -10, -20,
 ]);
 
 export const PST_ROOK = new Int8Array([
-  0, 0, 0, 0, 0, 0, 0, 0, 0,
-  5, 10, 10, 10, 10, 10, 10, 10, 5,
-  -5, 0, 0, 0, 0, 0, 0, 0, -5,
-  -5, 0, 0, 0, 0, 0, 0, 0, -5,
-  -5, 0, 0, 0, 0, 0, 0, 0, -5,
-  -5, 0, 0, 0, 0, 0, 0, 0, -5,
-  -5, 0, 0, 0, 0, 0, 0, 0, -5,
-  0, 0, 0, 5, 5, 5, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 10, 10, 10, 10, 10, 10, 5, -5, 0, 0, 0, 0, 0, 0, 0, -5, -5, 0,
+  0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0,
+  0, 0, -5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]);
 
 export const PST_QUEEN = new Int8Array([
-  -20, -10, -10, -5, -5, -5, -10, -10, -20,
-  -10, 0, 0, 0, 0, 0, 0, 0, -10,
-  -10, 0, 5, 5, 5, 5, 5, 0, -10,
-  -5, 0, 5, 5, 5, 5, 5, 0, -5,
-  0, 0, 5, 5, 5, 5, 5, 0, 0,
-  -5, -5, 0, 5, 5, 5, 5, 5, 0,
-  -5, -10, 0, 5, 5, 5, 5, 5, 0,
-  -10, -10, 0, 0, 0, 0, 0, 0, -10,
-  -20, -10, -10, -5, -5, -5, -10, -10, -20
+  -20, -10, -10, -5, -5, -5, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5, 5, 5, 5, 5, 0,
+  -10, -5, 0, 5, 5, 5, 5, 5, 0, -5, 0, 0, 5, 5, 5, 5, 5, 0, 0, -5, -5, 0, 5, 5, 5, 5, 5, 0, -5, -10,
+  0, 5, 5, 5, 5, 5, 0, -10, -10, 0, 0, 0, 0, 0, 0, -10, -20, -10, -10, -5, -5, -5, -10, -10, -20,
 ]);
 
 export const PST_KING_MG = new Int8Array([
-  -30, -40, -40, -50, -50, -50, -40, -40, -30, // R0
-  -30, -40, -40, -50, -50, -50, -40, -40, -30,
-  -30, -40, -40, -50, -50, -50, -40, -40, -30, // Stay back
-  -30, -40, -40, -50, -50, -50, -40, -40, -30,
-  -30, -40, -50, -50, -50, -40, -40, -30, -30,
-  -20, -30, -30, -40, -40, -40, -30, -30, -20,
-  20, 20, 0, 0, 0, 0, 0, 20, 20, // Pawn shelter
-  20, 30, 10, 0, 0, 0, 10, 30, 20,
-  20, 30, 10, 0, 0, 0, 10, 30, 20 // Home
+  -30,
+  -40,
+  -40,
+  -50,
+  -50,
+  -50,
+  -40,
+  -40,
+  -30, // R0
+  -30,
+  -40,
+  -40,
+  -50,
+  -50,
+  -50,
+  -40,
+  -40,
+  -30,
+  -30,
+  -40,
+  -40,
+  -50,
+  -50,
+  -50,
+  -40,
+  -40,
+  -30, // Stay back
+  -30,
+  -40,
+  -40,
+  -50,
+  -50,
+  -50,
+  -40,
+  -40,
+  -30,
+  -30,
+  -40,
+  -50,
+  -50,
+  -50,
+  -40,
+  -40,
+  -30,
+  -30,
+  -20,
+  -30,
+  -30,
+  -40,
+  -40,
+  -40,
+  -30,
+  -30,
+  -20,
+  20,
+  20,
+  0,
+  0,
+  0,
+  0,
+  0,
+  20,
+  20, // Pawn shelter
+  20,
+  30,
+  10,
+  0,
+  0,
+  0,
+  10,
+  30,
+  20,
+  20,
+  30,
+  10,
+  0,
+  0,
+  0,
+  10,
+  30,
+  20, // Home
 ]);
 
 export const PST_KING_EG = new Int8Array([
-  -50, -40, -30, -20, -20, -20, -30, -40, -50, // Avoid corners
-  -30, -20, -10, 0, 0, 0, -10, -20, -30,
-  -30, -10, 10, 20, 20, 20, 10, -10, -30, // Centralize
-  -30, 0, 20, 30, 30, 30, 20, 0, -30,
-  -30, 0, 20, 30, 40, 30, 20, 0, -30,
-  -30, 0, 20, 30, 30, 30, 20, 0, -30,
-  -30, -10, 10, 20, 20, 20, 10, -10, -30,
-  -20, -10, 0, 0, 0, 0, 0, -10, -20, // Less penalty
-  -50, -40, -30, -20, -20, -20, -30, -40, -50
+  -50,
+  -40,
+  -30,
+  -20,
+  -20,
+  -20,
+  -30,
+  -40,
+  -50, // Avoid corners
+  -30,
+  -20,
+  -10,
+  0,
+  0,
+  0,
+  -10,
+  -20,
+  -30,
+  -30,
+  -10,
+  10,
+  20,
+  20,
+  20,
+  10,
+  -10,
+  -30, // Centralize
+  -30,
+  0,
+  20,
+  30,
+  30,
+  30,
+  20,
+  0,
+  -30,
+  -30,
+  0,
+  20,
+  30,
+  40,
+  30,
+  20,
+  0,
+  -30,
+  -30,
+  0,
+  20,
+  30,
+  30,
+  30,
+  20,
+  0,
+  -30,
+  -30,
+  -10,
+  10,
+  20,
+  20,
+  20,
+  10,
+  -10,
+  -30,
+  -20,
+  -10,
+  0,
+  0,
+  0,
+  0,
+  0,
+  -10,
+  -20, // Less penalty
+  -50,
+  -40,
+  -30,
+  -20,
+  -20,
+  -20,
+  -30,
+  -40,
+  -50,
 ]);
 
 // Helper to access PST
@@ -140,16 +334,35 @@ function getPST(type, r, c, color, isEndgame) {
   // Choose table
   let table = null;
   switch (type) {
-    case PIECE_PAWN: table = PST_PAWN; break;
-    case PIECE_KNIGHT: table = PST_KNIGHT; break;
-    case PIECE_BISHOP: table = PST_BISHOP; break;
-    case PIECE_ROOK: table = PST_ROOK; break;
-    case PIECE_QUEEN: table = PST_QUEEN; break;
-    case PIECE_KING: table = isEndgame ? PST_KING_EG : PST_KING_MG; break;
-    case PIECE_ARCHBISHOP: table = PST_KNIGHT; break; // Approximation
-    case PIECE_CHANCELLOR: table = PST_QUEEN; break; // Approximation
-    case PIECE_ANGEL: table = PST_QUEEN; break; // Approximation
-    default: return 0;
+    case PIECE_PAWN:
+      table = PST_PAWN;
+      break;
+    case PIECE_KNIGHT:
+      table = PST_KNIGHT;
+      break;
+    case PIECE_BISHOP:
+      table = PST_BISHOP;
+      break;
+    case PIECE_ROOK:
+      table = PST_ROOK;
+      break;
+    case PIECE_QUEEN:
+      table = PST_QUEEN;
+      break;
+    case PIECE_KING:
+      table = isEndgame ? PST_KING_EG : PST_KING_MG;
+      break;
+    case PIECE_ARCHBISHOP:
+      table = PST_KNIGHT;
+      break; // Approximation
+    case PIECE_CHANCELLOR:
+      table = PST_QUEEN;
+      break; // Approximation
+    case PIECE_ANGEL:
+      table = PST_QUEEN;
+      break; // Approximation
+    default:
+      return 0;
   }
   return table[idx];
 }
@@ -208,7 +421,8 @@ export function evaluatePosition(board, turnColorStr, _config) {
     const val = PIECE_VALUES[type];
 
     // Material
-    if (isWhite) whiteMaterial += val; else blackMaterial += val;
+    if (isWhite) whiteMaterial += val;
+    else blackMaterial += val;
     totalPhase += PHASE_VALUES[type];
 
     const r = indexToRow(i);
@@ -223,17 +437,20 @@ export function evaluatePosition(board, turnColorStr, _config) {
 
     // Pawn Columns
     if (type === PIECE_PAWN) {
-      if (isWhite) pawnColsWhite[c]++; else pawnColsBlack[c]++;
+      if (isWhite) pawnColsWhite[c]++;
+      else pawnColsBlack[c]++;
     }
 
     // King location
     if (type === PIECE_KING) {
-      if (isWhite) whiteKingIdx = i; else blackKingIdx = i;
+      if (isWhite) whiteKingIdx = i;
+      else blackKingIdx = i;
     }
 
     // Rooks
     if (type === PIECE_ROOK) {
-      if (isWhite) whiteRooks.push(i); else blackRooks.push(i);
+      if (isWhite) whiteRooks.push(i);
+      else blackRooks.push(i);
     }
 
     // Bishops
@@ -242,7 +459,7 @@ export function evaluatePosition(board, turnColorStr, _config) {
     // }
 
     // Mobility approximation (simple degree heuristic usually better than full movegen)
-    // For Grand Refactor, let's skip expensive mobility counting for now, 
+    // For Grand Refactor, let's skip expensive mobility counting for now,
     // OR implement simple "safe squares" count.
     // Let's rely on PST + Structure for speed first.
   }
@@ -290,7 +507,7 @@ export function evaluatePosition(board, turnColorStr, _config) {
         // Precise check: iterate squares in front?
         // Or just use the column count as a heuristic.
         // Let's do a more precise check since it's only for pawns.
-        for (let tr = (isWhite ? r - 1 : r + 1); (isWhite ? tr >= 0 : tr < 9); (isWhite ? tr-- : tr++)) {
+        for (let tr = isWhite ? r - 1 : r + 1; isWhite ? tr >= 0 : tr < 9; isWhite ? tr-- : tr++) {
           const tp = board[tr * 9 + targetC];
           if ((tp & TYPE_MASK) === PIECE_PAWN && (tp & COLOR_MASK) !== color) {
             isPassed = false;
@@ -302,7 +519,7 @@ export function evaluatePosition(board, turnColorStr, _config) {
     }
 
     if (isPassed) {
-      const progress = isWhite ? (8 - r) : r;
+      const progress = isWhite ? 8 - r : r;
       const bonus = progress * progress * 5;
       // Supported check
       let isSupported = false;
@@ -332,10 +549,10 @@ export function evaluatePosition(board, turnColorStr, _config) {
   }
 
   // Final Score (Combined Phase)
-  const total = (mgScore * mgWeight) + (egScore * egWeight);
+  const total = mgScore * mgWeight + egScore * egWeight;
 
   // Return from perspective of side to move (NegaMax)
-  const perspective = (turnColor === COLOR_WHITE) ? 1 : -1;
+  const perspective = turnColor === COLOR_WHITE ? 1 : -1;
   return Math.round(total * perspective);
 }
 
@@ -348,5 +565,5 @@ function evaluateMopUp(friendlyKingIdx, enemyKingIdx) {
   const enemyCmd = Math.abs(er - 4) + Math.abs(ec - 4);
   const dist = Math.abs(fr - er) + Math.abs(fc - ec);
 
-  return (enemyCmd * 10) + ((14 - dist) * 4);
+  return enemyCmd * 10 + (14 - dist) * 4;
 }

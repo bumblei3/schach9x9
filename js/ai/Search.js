@@ -4,7 +4,7 @@ import {
   COLOR_BLACK,
   SQUARE_COUNT,
   indexToRow,
-  indexToCol
+  indexToCol,
 } from './BoardDefinitions.js';
 
 import {
@@ -12,12 +12,10 @@ import {
   makeMove,
   undoMove,
   getAllCaptureMoves,
-  isInCheck
+  isInCheck,
 } from './MoveGenerator.js';
 
-import {
-  evaluatePosition
-} from './Evaluation.js';
+import { evaluatePosition } from './Evaluation.js';
 
 import {
   storeTT,
@@ -27,14 +25,10 @@ import {
   getZobristKey,
   TT_EXACT,
   TT_BETA,
-  getTTMove
+  getTTMove,
 } from './TranspositionTable.js';
 
-import {
-  orderMoves,
-  updateCounterMove,
-  clearMoveOrdering
-} from './MoveOrdering.js';
+import { orderMoves, updateCounterMove, clearMoveOrdering } from './MoveOrdering.js';
 
 import { logger } from '../logger.js';
 
@@ -66,7 +60,7 @@ export function resetNodesEvaluated() {
 
 // --- Time Management ---
 function checkTime() {
-  if ((nodesEvaluated % 2048) === 0) {
+  if (nodesEvaluated % 2048 === 0) {
     if (Date.now() - searchStartTime > timeLimit) {
       stopSearch = true;
     }
@@ -75,23 +69,35 @@ function checkTime() {
 }
 
 // --- Main Search Entry ---
-export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert', timeParams = {}) {
+export function getBestMoveDetailed(
+  board,
+  turnColor,
+  maxDepth = 4,
+  difficulty = 'expert',
+  timeParams = {}
+) {
   resetNodesEvaluated();
   stopSearch = false;
   searchStartTime = Date.now();
 
-  // Time Setup
-  const { whiteTime, blackTime, moveTime } = timeParams;
+  // Time Setup - Support both legacy numeric format and new object format
   let allocatedTime = 0;
 
-  if (moveTime) {
-    allocatedTime = moveTime;
+  if (typeof timeParams === 'number') {
+    // Legacy format: timeParams is directly the time limit in ms
+    allocatedTime = timeParams || 1000;
   } else {
-    const remaining = turnColor === 'white' ? whiteTime : blackTime;
-    if (remaining) {
-      allocatedTime = remaining / 20; // safe estimation
+    // New object format
+    const { whiteTime, blackTime, moveTime, maxTime } = timeParams;
+    if (moveTime || maxTime) {
+      allocatedTime = moveTime || maxTime;
     } else {
-      allocatedTime = 1000; // default
+      const remaining = turnColor === 'white' ? whiteTime : blackTime;
+      if (remaining) {
+        allocatedTime = remaining / 20; // safe estimation
+      } else {
+        allocatedTime = 1000; // default
+      }
     }
   }
 
@@ -110,8 +116,9 @@ export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert
   // Also handle 'hard' which should behave like expert but at lower depth
   if (difficulty !== 'expert' && difficulty !== 'hard') {
     const moves = getAllLegalMoves(board, turnColor);
-    if (moves.length === 0) return null;
-    if (moves.length === 1) return convertMoveToResult(moves[0]);
+    if (moves.length === 0) return { move: null, score: 0, pv: [] };
+    if (moves.length === 1)
+      return { move: convertMoveToResult(moves[0]), score: 0, pv: [convertMoveToResult(moves[0])] };
 
     // Order moves by MVV-LVA first for better quality candidates
     const orderedMoves = orderMoves(board, moves, null, null, historyTable, null);
@@ -119,8 +126,23 @@ export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert
     // Score moves at shallow depth (1)
     const scoredMoves = orderedMoves.map(move => {
       const undo = makeMove(board, move);
-      const nextHash = rootZobrist ^ getZobristKey(undo.piece, move.from) ^ getZobristKey(undo.piece, move.to) ^ (undo.captured !== PIECE_NONE ? getZobristKey(undo.captured, move.to) : 0n) ^ getXORSideToMove();
-      const score = -minimax(board, 0, 1, -Infinity, Infinity, colorInt === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE, nextHash, move, false);
+      const nextHash =
+        rootZobrist ^
+        getZobristKey(undo.piece, move.from) ^
+        getZobristKey(undo.piece, move.to) ^
+        (undo.captured !== PIECE_NONE ? getZobristKey(undo.captured, move.to) : 0n) ^
+        getXORSideToMove();
+      const score = -minimax(
+        board,
+        0,
+        1,
+        -Infinity,
+        Infinity,
+        colorInt === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE,
+        nextHash,
+        move,
+        false
+      );
       undoMove(board, undo);
       return { move, score };
     });
@@ -147,29 +169,41 @@ export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert
     if (difficulty === 'easy' || difficulty === 'medium') {
       // 70% chance to pick the best move
       if (Math.random() < 0.7) {
-        return convertMoveToResult(scoredMoves[0].move);
+        return {
+          move: convertMoveToResult(scoredMoves[0].move),
+          score: scoredMoves[0].score,
+          pv: [convertMoveToResult(scoredMoves[0].move)],
+        };
       }
     }
 
     const candidates = scoredMoves.slice(0, candidateCount);
     const selected = candidates[Math.floor(Math.random() * candidates.length)];
-    return convertMoveToResult(selected.move);
+    return {
+      move: convertMoveToResult(selected.move),
+      score: selected.score,
+      pv: [convertMoveToResult(selected.move)],
+    };
   }
 
+  let finalScore = 0;
   // Expert: Standard Iterative Deepening
   for (let depth = 1; depth <= maxDepth; depth++) {
     if (stopSearch) break;
     const score = minimax(board, depth, 0, -Infinity, Infinity, colorInt, rootZobrist, null, true);
+    if (!stopSearch) finalScore = score;
     const m = getTTMove(rootZobrist);
     if (m) {
-      logger.debug(`Depth ${depth}: ${indexToRow(m.from)},${indexToCol(m.from)} -> ${indexToRow(m.to)},${indexToCol(m.to)} (Score: ${score})`);
+      logger.debug(
+        `Depth ${depth}: ${indexToRow(m.from)},${indexToCol(m.from)} -> ${indexToRow(m.to)},${indexToCol(m.to)} (Score: ${score})`
+      );
       if (progressCallback) {
         progressCallback({
           depth,
           score,
           nodes: nodesEvaluated,
           pv: extractPV(board, turnColor, depth), // Expensive? maybe just best move
-          bestMove: m
+          bestMove: m,
         });
       }
     }
@@ -178,15 +212,17 @@ export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert
   // Retrieve Best Move from TT
   const foundMove = getTTMove(rootZobrist);
   if (foundMove) {
+    const pv = extractPV(board, turnColor, maxDepth);
     if (progressCallback) {
       progressCallback({
         depth: maxDepth,
-        score: 0, // Score might be lost if outside loop, but bestMove is key
+        score: finalScore,
         nodes: nodesEvaluated,
-        bestMove: convertMoveToResult(foundMove)
+        bestMove: convertMoveToResult(foundMove),
+        pv,
       });
     }
-    return convertMoveToResult(foundMove);
+    return { move: convertMoveToResult(foundMove), score: finalScore, pv };
   }
 
   // Fallback: First legal move
@@ -198,13 +234,25 @@ export function getBestMove(board, turnColor, maxDepth = 4, difficulty = 'expert
         depth: maxDepth,
         score: 0,
         nodes: nodesEvaluated,
-        bestMove: fallbackMove
+        bestMove: fallbackMove,
+        pv: [fallbackMove],
       });
     }
-    return fallbackMove;
+    return { move: fallbackMove, score: 0, pv: [fallbackMove] };
   }
 
-  return null;
+  return { move: null, score: 0, pv: [] };
+}
+
+export function getBestMove(
+  board,
+  turnColor,
+  maxDepth = 4,
+  difficulty = 'expert',
+  timeParams = {}
+) {
+  const result = getBestMoveDetailed(board, turnColor, maxDepth, difficulty, timeParams);
+  return result ? result.move : null;
 }
 
 // Convert integer/internal move to UI result
@@ -213,7 +261,7 @@ function convertMoveToResult(move) {
   return {
     from: { r: indexToRow(move.from), c: indexToCol(move.from) },
     to: { r: indexToRow(move.to), c: indexToCol(move.to) },
-    promotion: move.promotion // if any
+    promotion: move.promotion, // if any
   };
 }
 
@@ -237,7 +285,8 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
 
   // TT Probe
   const ttScore = probeTT(zobrist, depth, alpha, beta);
-  if (ttScore !== null && !isPvNode) { // Don't use TT cutoff at PV nodes (Root isn't PV? Root is PV.)
+  if (ttScore !== null && !isPvNode) {
+    // Don't use TT cutoff at PV nodes (Root isn't PV? Root is PV.)
     // Actually, isPvNode param passed?
     // Root calls with true.
     // If !isPvNode (e.g. ZW search), use cutoff.
@@ -259,7 +308,17 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
       const nullZobrist = zobrist ^ getXORSideToMove();
       const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
 
-      const score = -minimax(board, depth - R - 1, ply + 1, -beta, -beta + 1, enemyColor, nullZobrist, null, false);
+      const score = -minimax(
+        board,
+        depth - R - 1,
+        ply + 1,
+        -beta,
+        -beta + 1,
+        enemyColor,
+        nullZobrist,
+        null,
+        false
+      );
 
       if (stopSearch) return 0;
       if (score >= beta) return beta; // Cutoff
@@ -308,9 +367,19 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
     let score;
 
     if (moveCount === 0) {
-      score = -minimax(board, depth - 1, ply + 1, -beta, -alpha, enemyColor, nextZobrist, move, true);
+      score = -minimax(
+        board,
+        depth - 1,
+        ply + 1,
+        -beta,
+        -alpha,
+        enemyColor,
+        nextZobrist,
+        move,
+        true
+      );
     } else {
-      // LMR Logic 
+      // LMR Logic
       let d = depth - 1;
       if (depth >= 3 && moveCount > 4 && !inCheck /* && !isCapture */) {
         d -= 1;
@@ -322,7 +391,17 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
       // Re-search if LMR failed or PVS failed
       if (score > alpha && score < beta) {
         // Full depth research
-        score = -minimax(board, depth - 1, ply + 1, -beta, -alpha, enemyColor, nextZobrist, move, true);
+        score = -minimax(
+          board,
+          depth - 1,
+          ply + 1,
+          -beta,
+          -alpha,
+          enemyColor,
+          nextZobrist,
+          move,
+          true
+        );
       }
     }
 
@@ -337,9 +416,10 @@ function minimax(board, depth, ply, alpha, beta, color, zobrist, prevMove, isPvN
       if (score > alpha) {
         alpha = score;
         // Update History
-        // updateHistory(move, depth, color); 
+        // updateHistory(move, depth, color);
         // Need implementation
-        if (!(board[move.to] !== PIECE_NONE)) { // Quiet
+        if (!(board[move.to] !== PIECE_NONE)) {
+          // Quiet
           // updateHistory
           // const idx = move.from * 81 + move.to; // Wait, simplistic index
           // history logic: historyTable[move.from][move.to]
@@ -398,7 +478,7 @@ function quiescence(board, alpha, beta, color, zobrist) {
   if (standPat >= beta) return beta;
   if (standPat > alpha) alpha = standPat;
 
-  // Delta Pruning? 
+  // Delta Pruning?
   // If standPat + 900 < alpha, return alpha?
   const BIG_DELTA = 975;
   if (standPat < alpha - BIG_DELTA) {
@@ -456,8 +536,8 @@ export function analyzePosition(board, turnColor) {
     score: 0,
     topMoves: ordered.slice(0, 3).map(m => ({
       move: convertMoveToResult(m),
-      score: 0
-    }))
+      score: 0,
+    })),
   };
 }
 
@@ -481,5 +561,3 @@ export function extractPV(board, turnColor, depth = 5) {
   }
   return pv;
 }
-
-

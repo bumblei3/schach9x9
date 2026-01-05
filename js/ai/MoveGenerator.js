@@ -15,7 +15,7 @@ import {
   TYPE_MASK,
   COLOR_MASK,
   indexToRow,
-  indexToCol
+  indexToCol,
 } from './BoardDefinitions.js';
 
 // Offsets
@@ -70,7 +70,7 @@ export function getAllLegalMoves(board, turnColor) {
     // Check validity
     // If King captured? (Shouldn't happen if generator is correct)
     // If My King is attacked?
-    const kingPos = (move.from === myKingPos) ? move.to : myKingPos;
+    const kingPos = move.from === myKingPos ? move.to : myKingPos;
     if (!isSquareAttacked(board, kingPos, enemyColor)) {
       legalMoves.push(move);
     }
@@ -85,17 +85,17 @@ export function getAllLegalMoves(board, turnColor) {
 export function getAllCaptureMoves(board, turnColor) {
   // Simplified for QS
   const allAndQuiet = getAllLegalMoves(board, turnColor);
-  return allAndQuiet.filter(m => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture. 
+  return allAndQuiet.filter(m => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture.
   // Actually getAllLegalMoves simulates, so board[m.to] is valid BEFORE simulation.
-  // Wait, getAllLegalMoves returns move objects. 
+  // Wait, getAllLegalMoves returns move objects.
   // We can check if 'move.captured' property exists?
   // Or better, filter moves where target square is not empty.
 }
 
 function generatePawnMoves(board, from, color, moves) {
   const direction = color === COLOR_WHITE ? UP : DOWN;
-  // const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2. 
-  // 9x9 Board: 
+  // const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2.
+  // 9x9 Board:
   // White Pawns start at Row 6, 7? No, Row 8 is King. Row 7 Pawns?
   // Let's assume standard layout: White at bottom (Row 8), Black at top (Row 0).
   // White Pawns at Row 7. Move Up (-9).
@@ -114,8 +114,8 @@ function generatePawnMoves(board, from, color, moves) {
     // Double Push
     const isStart = (color === COLOR_WHITE && rank === 6) || (color === COLOR_BLACK && rank === 2); // 0-indexed rows
     // Actually standard is: Black at 0,1,2. White at 6,7,8.
-    // Pawns at 2 and 6? 
-    // Wait, 9x9. 0..8. 
+    // Pawns at 2 and 6?
+    // Wait, 9x9. 0..8.
     // Black Pawns at row 2?
     // Let's stick to logic: if (rank === startRank) check double.
 
@@ -131,7 +131,8 @@ function generatePawnMoves(board, from, color, moves) {
   // Captures
   // Left Capture
   const captureLeft = from + direction + LEFT;
-  if (Math.abs(indexToCol(from) - indexToCol(captureLeft)) === 1) { // Prevent wrap
+  if (Math.abs(indexToCol(from) - indexToCol(captureLeft)) === 1) {
+    // Prevent wrap
     if (isValidSquare(captureLeft)) {
       const target = board[captureLeft];
       if (target !== PIECE_NONE && (target & COLOR_MASK) !== color) {
@@ -154,7 +155,12 @@ function generatePawnMoves(board, from, color, moves) {
 
 function generatePieceMoves(board, from, type, color, moves) {
   // Steppers
-  if (type === PIECE_KNIGHT || type === PIECE_ARCHBISHOP || type === PIECE_CHANCELLOR || type === PIECE_ANGEL) {
+  if (
+    type === PIECE_KNIGHT ||
+    type === PIECE_ARCHBISHOP ||
+    type === PIECE_CHANCELLOR ||
+    type === PIECE_ANGEL
+  ) {
     generateSteppingMoves(board, from, KNIGHT_OFFSETS, color, moves);
   }
 
@@ -163,11 +169,21 @@ function generatePieceMoves(board, from, type, color, moves) {
   }
 
   // Sliders
-  if (type === PIECE_BISHOP || type === PIECE_ARCHBISHOP || type === PIECE_QUEEN || type === PIECE_ANGEL) {
+  if (
+    type === PIECE_BISHOP ||
+    type === PIECE_ARCHBISHOP ||
+    type === PIECE_QUEEN ||
+    type === PIECE_ANGEL
+  ) {
     generateSlidingMoves(board, from, BISHOP_OFFSETS, color, moves);
   }
 
-  if (type === PIECE_ROOK || type === PIECE_CHANCELLOR || type === PIECE_QUEEN || type === PIECE_ANGEL) {
+  if (
+    type === PIECE_ROOK ||
+    type === PIECE_CHANCELLOR ||
+    type === PIECE_QUEEN ||
+    type === PIECE_ANGEL
+  ) {
     generateSlidingMoves(board, from, ROOK_OFFSETS, color, moves);
   }
 }
@@ -198,7 +214,7 @@ function generateSlidingMoves(board, from, offsets, color, moves) {
 
   for (const offset of offsets) {
     let to = from;
-    for (; ;) {
+    for (;;) {
       to += offset;
       // dist++;
 
@@ -272,7 +288,7 @@ export function undoMove(board, undoInfo) {
 export function isSquareAttacked(board, square, attackerColor) {
   // 1. Pawn Attacks
   // Pawns attack diagonally. From 'attackerColor' perspective.
-  // White Pawns attack UP-LEFT (-10) and UP-RIGHT (-8)? 
+  // White Pawns attack UP-LEFT (-10) and UP-RIGHT (-8)?
   // Wait, UP is -9. Left is -1. Up-Left is -10. Up-Right is -8.
   // Black Pawns attack DOWN-LEFT (+8) and DOWN-RIGHT (+10).
   // We check if an attacker pawn exists at square - attack_dir.
@@ -307,7 +323,8 @@ export function isSquareAttacked(board, square, attackerColor) {
       // Attack comes from adjacent column
       if (Math.abs(indexToCol(square) - indexToCol(from)) === 1) {
         const piece = board[from];
-        if ((piece & COLOR_MASK) === attackerColor && (piece & TYPE_MASK) === PIECE_PAWN) return true;
+        if ((piece & COLOR_MASK) === attackerColor && (piece & TYPE_MASK) === PIECE_PAWN)
+          return true;
       }
     }
   }
@@ -327,7 +344,13 @@ export function isSquareAttacked(board, square, attackerColor) {
       if (piece !== PIECE_NONE && (piece & COLOR_MASK) === attackerColor) {
         const type = piece & TYPE_MASK;
         // Check if piece has Knight movement
-        if (type === PIECE_KNIGHT || type === PIECE_ARCHBISHOP || type === PIECE_CHANCELLOR || type === PIECE_ANGEL) return true;
+        if (
+          type === PIECE_KNIGHT ||
+          type === PIECE_ARCHBISHOP ||
+          type === PIECE_CHANCELLOR ||
+          type === PIECE_ANGEL
+        )
+          return true;
       }
     }
   }
@@ -340,7 +363,12 @@ export function isSquareAttacked(board, square, attackerColor) {
       if (Math.abs(indexToCol(square) - indexToCol(from)) > 1) continue;
 
       const piece = board[from];
-      if (piece !== PIECE_NONE && (piece & COLOR_MASK) === attackerColor && (piece & TYPE_MASK) === PIECE_KING) return true;
+      if (
+        piece !== PIECE_NONE &&
+        (piece & COLOR_MASK) === attackerColor &&
+        (piece & TYPE_MASK) === PIECE_KING
+      )
+        return true;
     }
   }
 
@@ -348,10 +376,26 @@ export function isSquareAttacked(board, square, attackerColor) {
   // We scan OUT from the square. If we hit a piece, we check if it attacks us.
 
   // Diagonals (Bishop, Queen, Archbishop, Angel)
-  if (checkRayAttacks(board, square, BISHOP_OFFSETS, attackerColor, [PIECE_BISHOP, PIECE_QUEEN, PIECE_ARCHBISHOP, PIECE_ANGEL])) return true;
+  if (
+    checkRayAttacks(board, square, BISHOP_OFFSETS, attackerColor, [
+      PIECE_BISHOP,
+      PIECE_QUEEN,
+      PIECE_ARCHBISHOP,
+      PIECE_ANGEL,
+    ])
+  )
+    return true;
 
   // Orthogonals (Rook, Queen, Chancellor, Angel)
-  if (checkRayAttacks(board, square, ROOK_OFFSETS, attackerColor, [PIECE_ROOK, PIECE_QUEEN, PIECE_CHANCELLOR, PIECE_ANGEL])) return true;
+  if (
+    checkRayAttacks(board, square, ROOK_OFFSETS, attackerColor, [
+      PIECE_ROOK,
+      PIECE_QUEEN,
+      PIECE_CHANCELLOR,
+      PIECE_ANGEL,
+    ])
+  )
+    return true;
 
   return false;
 }
@@ -364,7 +408,7 @@ function checkRayAttacks(board, square, ranges, attackerColor, validTypes) {
 
   for (const offset of ranges) {
     let curr = square;
-    for (; ;) {
+    for (;;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 
@@ -417,7 +461,7 @@ export function see(board, move) {
     [PIECE_KING]: 20000,
     [PIECE_ARCHBISHOP]: 600,
     [PIECE_CHANCELLOR]: 700,
-    [PIECE_ANGEL]: 1000
+    [PIECE_ANGEL]: 1000,
   };
 
   const target = board[move.to];
@@ -497,18 +541,33 @@ function getLVA(board, square, attackerColor, usedSquares) {
     const p = board[from];
     if (p !== PIECE_NONE && (p & COLOR_MASK) === attackerColor) {
       const t = p & TYPE_MASK;
-      if (t === PIECE_KNIGHT || t === PIECE_ARCHBISHOP || t === PIECE_CHANCELLOR || t === PIECE_ANGEL) {
+      if (
+        t === PIECE_KNIGHT ||
+        t === PIECE_ARCHBISHOP ||
+        t === PIECE_CHANCELLOR ||
+        t === PIECE_ANGEL
+      ) {
         return { square: from, piece: p };
       }
     }
   }
 
   // Bishops/Diagonals (and Archbishop, Queen, Angel)
-  const diagResult = findRayLVA(board, square, BISHOP_OFFSETS, attackerColor, usedSquares, [PIECE_BISHOP, PIECE_ARCHBISHOP, PIECE_QUEEN, PIECE_ANGEL]);
+  const diagResult = findRayLVA(board, square, BISHOP_OFFSETS, attackerColor, usedSquares, [
+    PIECE_BISHOP,
+    PIECE_ARCHBISHOP,
+    PIECE_QUEEN,
+    PIECE_ANGEL,
+  ]);
   if (diagResult) return diagResult;
 
   // Rooks/Orthogonals (and Chancellor, Queen, Angel)
-  const orthResult = findRayLVA(board, square, ROOK_OFFSETS, attackerColor, usedSquares, [PIECE_ROOK, PIECE_CHANCELLOR, PIECE_QUEEN, PIECE_ANGEL]);
+  const orthResult = findRayLVA(board, square, ROOK_OFFSETS, attackerColor, usedSquares, [
+    PIECE_ROOK,
+    PIECE_CHANCELLOR,
+    PIECE_QUEEN,
+    PIECE_ANGEL,
+  ]);
   if (orthResult) return orthResult;
 
   // King (always last, highest value among simple attackers)
@@ -531,13 +590,20 @@ function findRayLVA(board, square, offsets, attackerColor, usedSquares, validTyp
   let bestValue = Infinity;
 
   const PIECE_VALUES_SIMPLE = {
-    [PIECE_PAWN]: 100, [PIECE_KNIGHT]: 320, [PIECE_BISHOP]: 330, [PIECE_ROOK]: 500,
-    [PIECE_QUEEN]: 900, [PIECE_KING]: 20000, [PIECE_ARCHBISHOP]: 600, [PIECE_CHANCELLOR]: 700, [PIECE_ANGEL]: 1000
+    [PIECE_PAWN]: 100,
+    [PIECE_KNIGHT]: 320,
+    [PIECE_BISHOP]: 330,
+    [PIECE_ROOK]: 500,
+    [PIECE_QUEEN]: 900,
+    [PIECE_KING]: 20000,
+    [PIECE_ARCHBISHOP]: 600,
+    [PIECE_CHANCELLOR]: 700,
+    [PIECE_ANGEL]: 1000,
   };
 
   for (const offset of offsets) {
     let curr = square;
-    for (; ;) {
+    for (;;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 

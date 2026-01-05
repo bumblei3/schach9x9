@@ -9,7 +9,7 @@ import {
   PIECE_ARCHBISHOP,
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
-  TYPE_MASK
+  TYPE_MASK,
 } from './BoardDefinitions.js';
 
 // import { see } from './MoveGenerator.js';
@@ -32,17 +32,17 @@ const PIECE_VALUES = {
   [PIECE_KING]: 20000,
   [PIECE_ARCHBISHOP]: 600,
   [PIECE_CHANCELLOR]: 700,
-  [PIECE_ANGEL]: 1000
+  [PIECE_ANGEL]: 1000,
 };
 
 // Counter Move Table (Indexed by [prevMoveTo][prevMovePieceType] -> BestMove)
-// Or simple [prevTo][currTo]? 
+// Or simple [prevTo][currTo]?
 // Old logic: updateCounterMove(prevMove, bestMove).
 // let counterMoveTable = new Int32Array(SQUARE_COUNT * SQUARE_COUNT); // ?
 // Let's use a simpler structure or Map for now.
 // For Grand Refactor speed, fixed array is best.
 // Index by 'prevMove.to' (0-80). Store 'bestMove' (packed int).
-// This is "Last move reply". 
+// This is "Last move reply".
 // A full [from][to] table is too big? 81*81 = 6561. Small!
 // We can track [prevMove.to] -> responseMove. (1D array).
 // Or [prevMove.from][prevMove.to]? (6561 * 2 bytes). 13KB. Easy.
@@ -69,7 +69,7 @@ function getCounterMove(prevMove) {
   const idx = prevMove.from * 81 + prevMove.to;
   const packed = counterMoveTable[idx];
   if (packed === 0) return null;
-  return { from: (packed >> 8) & 0xFF, to: packed & 0xFF };
+  return { from: (packed >> 8) & 0xff, to: packed & 0xff };
 }
 
 function areMovesEqual(m1, m2) {
@@ -98,7 +98,7 @@ export function orderMoves(board, moves, ttMove, killers, history, prevMove) {
         const attackerVal = PIECE_VALUES[board[move.from] & TYPE_MASK] || 0;
 
         // MVV-LVA
-        score = WINNING_CAPTURE_SCORE + (victimVal * 10) - attackerVal;
+        score = WINNING_CAPTURE_SCORE + victimVal * 10 - attackerVal;
 
         // SEE penalty if bad capture?
         // if (see(board, move) < 0) score -= 500000;

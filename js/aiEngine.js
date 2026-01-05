@@ -6,21 +6,17 @@
 import { logger } from './logger.js';
 import {
   getBestMove as searchBestMove,
+  getBestMoveDetailed as searchBestMoveDetailed,
   analyzePosition as searchAnalyze,
   extractPV as searchExtractPV,
   setProgressCallback,
   getNodesEvaluated,
-  resetNodesEvaluated
+  resetNodesEvaluated,
 } from './ai/Search.js';
 
-import {
-  evaluatePosition as evalInt
-} from './ai/Evaluation.js';
+import { evaluatePosition as evalInt } from './ai/Evaluation.js';
 
-import {
-  setOpeningBook,
-  queryOpeningBook
-} from './ai/OpeningBook.js';
+import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.js';
 
 import {
   getAllLegalMoves as genLegalInt,
@@ -28,8 +24,8 @@ import {
   // undoMove as undoMoveInt,
   getAllCaptureMoves, // Int
   isInCheck as checkInt,
-  isSquareAttacked,
-  findKing,
+  isSquareAttacked as isSquareAttackedInt,
+  findKing as findKingInt,
   see as seeInt,
 } from './ai/MoveGenerator.js';
 
@@ -42,7 +38,7 @@ import {
   setTTMaxSize,
   testStoreTT,
   testProbeTT,
-  getTTMove
+  getTTMove,
 } from './ai/TranspositionTable.js';
 
 import {
@@ -63,7 +59,7 @@ import {
   // COLOR_MASK,
   indexToRow,
   indexToCol,
-  coordsToIndex
+  coordsToIndex,
 } from './ai/BoardDefinitions.js';
 
 // --- Conversion Helpers ---
@@ -77,7 +73,7 @@ const TYPE_MAP_TO_INT = {
   k: PIECE_KING,
   a: PIECE_ARCHBISHOP,
   c: PIECE_CHANCELLOR,
-  e: PIECE_ANGEL
+  e: PIECE_ANGEL,
 };
 
 const TYPE_INT_TO_STR = {
@@ -89,7 +85,7 @@ const TYPE_INT_TO_STR = {
   [PIECE_KING]: 'k',
   [PIECE_ARCHBISHOP]: 'a',
   [PIECE_CHANCELLOR]: 'c',
-  [PIECE_ANGEL]: 'e'
+  [PIECE_ANGEL]: 'e',
 };
 
 function convertBoardToInt(uiBoard) {
@@ -112,9 +108,27 @@ function convertBoardToInt(uiBoard) {
 
 // --- Bridge Functions ---
 
-export function getBestMove(uiBoard, turnColor, maxDepth = 4, difficulty = 'expert', timeParams = {}) {
+export function getBestMove(
+  uiBoard,
+  turnColor,
+  maxDepth = 4,
+  difficulty = 'expert',
+  timeParams = {}
+) {
   const board = convertBoardToInt(uiBoard);
+  // searchBestMove is the wrapper that already returns the move object (not the detailed result)
   return searchBestMove(board, turnColor, maxDepth, difficulty, timeParams);
+}
+
+export function getBestMoveDetailed(
+  uiBoard,
+  turnColor,
+  maxDepth = 4,
+  difficulty = 'expert',
+  timeParams = {}
+) {
+  const board = convertBoardToInt(uiBoard);
+  return searchBestMoveDetailed(board, turnColor, maxDepth, difficulty, timeParams);
 }
 
 export function evaluatePosition(uiBoard, forColor) {
@@ -141,7 +155,7 @@ export function getAllLegalMoves(uiBoard, turnColor) {
   return intMoves.map(m => ({
     from: { r: indexToRow(m.from), c: indexToCol(m.from) },
     to: { r: indexToRow(m.to), c: indexToCol(m.to) },
-    promotion: m.promotion ? TYPE_INT_TO_STR[m.promotion & TYPE_MASK] : undefined
+    promotion: m.promotion ? TYPE_INT_TO_STR[m.promotion & TYPE_MASK] : undefined,
   }));
 }
 
@@ -155,11 +169,25 @@ export function extractPV(uiBoard, turnColor) {
   return searchExtractPV(board, turnColor); // Pass string
 }
 
+function isSquareAttacked(uiBoard, r, c, turnColor) {
+  const board = convertBoardToInt(uiBoard);
+  const colorInt = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
+  return isSquareAttackedInt(board, coordsToIndex(r, c), colorInt);
+}
+
+function findKing(uiBoard, turnColor) {
+  const board = convertBoardToInt(uiBoard);
+  const colorInt = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
+  const index = findKingInt(board, colorInt);
+  if (index === -1) return null;
+  return { r: indexToRow(index), c: indexToCol(index) };
+}
+
 export function see(uiBoard, from, to) {
   const board = convertBoardToInt(uiBoard);
   const move = {
     from: coordsToIndex(from),
-    to: coordsToIndex(to)
+    to: coordsToIndex(to),
   };
   return seeInt(board, move);
 }
@@ -167,8 +195,10 @@ export function see(uiBoard, from, to) {
 // Helpers for tests that expect these functions (Mocking legacy behavior)
 export function makeMove(uiBoard, uiMove) {
   if (!uiMove) return null;
-  const r1 = uiMove.from.r, c1 = uiMove.from.c;
-  const r2 = uiMove.to.r, c2 = uiMove.to.c;
+  const r1 = uiMove.from.r,
+    c1 = uiMove.from.c;
+  const r2 = uiMove.to.r,
+    c2 = uiMove.to.c;
 
   const piece = uiBoard[r1][c1];
   const captured = uiBoard[r2][c2];
@@ -181,15 +211,17 @@ export function makeMove(uiBoard, uiMove) {
   return {
     move: uiMove,
     captured,
-    oldHasMoved: false
+    oldHasMoved: false,
   };
 }
 
 export function undoMove(uiBoard, undoInfo) {
   if (!undoInfo) return;
   const { move, captured } = undoInfo;
-  const r1 = move.from.r, c1 = move.from.c;
-  const r2 = move.to.r, c2 = move.to.c;
+  const r1 = move.from.r,
+    c1 = move.from.c;
+  const r2 = move.to.r,
+    c2 = move.to.c;
 
   const piece = uiBoard[r2][c2];
   uiBoard[r1][c1] = piece;
@@ -204,7 +236,12 @@ export function isInCheck(uiBoard, color) {
 
 // PST Legacy Export
 import {
-  PST_PAWN, PST_KNIGHT, PST_BISHOP, PST_ROOK, PST_QUEEN, PST_KING_MG
+  PST_PAWN,
+  PST_KNIGHT,
+  PST_BISHOP,
+  PST_ROOK,
+  PST_QUEEN,
+  PST_KING_MG,
 } from './ai/Evaluation.js';
 
 const PST = {
@@ -213,7 +250,7 @@ const PST = {
   b: PST_BISHOP,
   r: PST_ROOK,
   q: PST_QUEEN,
-  k: PST_KING_MG
+  k: PST_KING_MG,
 };
 
 // Export everything
@@ -237,5 +274,5 @@ export {
   testStoreTT,
   testProbeTT,
   PST,
-  convertBoardToInt // Internal testing
+  convertBoardToInt, // Internal testing
 };

@@ -3,6 +3,11 @@ import { jest } from '@jest/globals';
 // Use unstable_mockModule for ESM mocking
 jest.unstable_mockModule('../js/ai/Search.js', () => ({
   getBestMove: jest.fn(() => ({ from: { r: 6, c: 4 }, to: { r: 4, c: 4 } })),
+  getBestMoveDetailed: jest.fn(() => ({
+    move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
+    score: 100,
+    pv: [],
+  })),
   analyzePosition: jest.fn(() => Promise.resolve({ score: 100, topMoves: [] })),
   getNodesEvaluated: jest.fn(() => 500),
   resetNodesEvaluated: jest.fn(),

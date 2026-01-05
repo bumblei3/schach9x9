@@ -17,8 +17,8 @@ export const PIECE_ANGEL = 9;
 export const COLOR_WHITE = 16; // 0001 0000
 export const COLOR_BLACK = 32; // 0010 0000
 
-export const TYPE_MASK = 15;   // 0000 1111
-export const COLOR_MASK = 48;  // 0011 0000 (Bits 4 and 5)
+export const TYPE_MASK = 15; // 0000 1111
+export const COLOR_MASK = 48; // 0011 0000 (Bits 4 and 5)
 
 // Combined Pieces
 export const WHITE_PAWN = COLOR_WHITE | PIECE_PAWN;
@@ -43,52 +43,52 @@ export const BLACK_ANGEL = COLOR_BLACK | PIECE_ANGEL;
 
 // Helper Functions
 export function getPieceType(piece) {
-    return piece & TYPE_MASK;
+  return piece & TYPE_MASK;
 }
 
 export function getPieceColor(piece) {
-    return piece & COLOR_MASK;
+  return piece & COLOR_MASK;
 }
 
 export function isWhite(piece) {
-    return (piece & COLOR_WHITE) !== 0;
+  return (piece & COLOR_WHITE) !== 0;
 }
 
 export function isBlack(piece) {
-    return (piece & COLOR_BLACK) !== 0;
+  return (piece & COLOR_BLACK) !== 0;
 }
 
 // Coordinate conversions
 export function indexToRow(index) {
-    return Math.floor(index / BOARD_SIZE);
+  return Math.floor(index / BOARD_SIZE);
 }
 
 export function indexToCol(index) {
-    return index % BOARD_SIZE;
+  return index % BOARD_SIZE;
 }
 
 export function coordsToIndex(r, c) {
-    return r * BOARD_SIZE + c;
+  return r * BOARD_SIZE + c;
 }
 
 // Debug / String conversions
 const TYPE_CHARS = {
-    [PIECE_NONE]: '.',
-    [PIECE_PAWN]: 'p',
-    [PIECE_KNIGHT]: 'n',
-    [PIECE_BISHOP]: 'b',
-    [PIECE_ROOK]: 'r',
-    [PIECE_QUEEN]: 'q',
-    [PIECE_KING]: 'k',
-    [PIECE_ARCHBISHOP]: 'a',
-    [PIECE_CHANCELLOR]: 'c',
-    [PIECE_ANGEL]: 'e'
+  [PIECE_NONE]: '.',
+  [PIECE_PAWN]: 'p',
+  [PIECE_KNIGHT]: 'n',
+  [PIECE_BISHOP]: 'b',
+  [PIECE_ROOK]: 'r',
+  [PIECE_QUEEN]: 'q',
+  [PIECE_KING]: 'k',
+  [PIECE_ARCHBISHOP]: 'a',
+  [PIECE_CHANCELLOR]: 'c',
+  [PIECE_ANGEL]: 'e',
 };
 
 export function pieceToString(piece) {
-    if (piece === 0) return '.';
-    const type = piece & TYPE_MASK;
-    const color = piece & COLOR_MASK;
-    const char = TYPE_CHARS[type] || '?';
-    return color === COLOR_WHITE ? char.toUpperCase() : char;
+  if (piece === 0) return '.';
+  const type = piece & TYPE_MASK;
+  const color = piece & COLOR_MASK;
+  const char = TYPE_CHARS[type] || '?';
+  return color === COLOR_WHITE ? char.toUpperCase() : char;
 }

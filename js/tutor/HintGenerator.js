@@ -1,6 +1,7 @@
 import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as MoveAnalyzer from './MoveAnalyzer.js';
+import * as aiEngine from '../aiEngine.js';
 
 /**
  * Gets tutor hints by calling the AI engine
@@ -15,78 +16,51 @@ export function getTutorHints(game, tutorController) {
     return []; // Don't give hints for AI
   }
 
-  const moves = game.getAllLegalMoves(game.turn);
+  // Use the high-performance engine to get best moves
+  // We search at a moderate depth (6) for high-quality hints
+  const turnColor = game.turn;
+  const result = aiEngine.getBestMoveDetailed(game.board, turnColor, 6, 'expert', {
+    maxTime: 1500, // Limit search time to 1.5s for responsiveness
+  });
 
-  if (moves.length === 0) return [];
+  if (!result || !result.move) return [];
 
-  // Quick heuristic scoring for initial filtering (fast, no deep search)
-  const quickScored = [];
-  for (const move of moves) {
-    const fromPiece = game.board[move.from.r][move.from.c];
-    if (!fromPiece || fromPiece.color !== game.turn) continue;
+  // Verify the move belongs to the current player and is not a self-capture
+  const from = result.move.from;
+  const to = result.move.to;
+  const piece = game.board[from.r][from.c];
+  const targetPiece = game.board[to.r][to.c];
 
-    const targetPiece = game.board[move.to.r][move.to.c];
-    if (targetPiece && targetPiece.color === game.turn) continue;
-
-    // Quick heuristic: captures > center control > other
-    let heuristic = 0;
-    if (targetPiece) {
-      const values = { p: 1, n: 3, b: 3, r: 5, q: 9, e: 12, a: 7, c: 8, k: 100 };
-      heuristic += values[targetPiece.type] * 100; // Prioritize captures
-    }
-    // Center control bonus
-    if (move.to.r >= 3 && move.to.r <= 5 && move.to.c >= 3 && move.to.c <= 5) {
-      heuristic += 20;
-    }
-
-    quickScored.push({ move, heuristic });
+  if (!piece || piece.color !== turnColor) {
+    return [];
   }
 
-  // Sort by heuristic and take top 8 candidates for deep evaluation
-  quickScored.sort((a, b) => b.heuristic - a.heuristic);
-  const topCandidates = quickScored.slice(0, Math.min(8, quickScored.length));
-
-  // Evaluate top candidates with shallow Minimax
-  const evaluatedMoves = [];
-  const depth = 2;
-
-  for (const { move } of topCandidates) {
-    const fromPiece = game.board[move.from.r][move.from.c];
-    const validForPiece = game.getValidMoves(move.from.r, move.from.c, fromPiece);
-    const isReallyValid = validForPiece.some(v => v.r === move.to.r && v.c === move.to.c);
-
-    if (!isReallyValid) continue;
-
-    // Use game's minimax if available, otherwise fallback
-    const score = game.minimax ? game.minimax(move, depth, true, -Infinity, Infinity) : 0;
-    const displayScore = -score;
-    const notation = MoveAnalyzer.getMoveNotation(game, move);
-
-    evaluatedMoves.push({
-      move,
-      score: displayScore,
-      notation,
-    });
+  if (targetPiece && targetPiece.color === turnColor) {
+    return [];
   }
 
-  // Sort by score (best first)
-  evaluatedMoves.sort((a, b) => b.score - a.score);
+  // Currently our search returns 1 best move. Wrap it in array for compatibility with UI.
+  const bestMoves = [result];
 
-  // Get best score for relative comparison
-  const bestScore = evaluatedMoves.length > 0 ? evaluatedMoves[0].score : 0;
-
-  // Return top 3 with analysis
-  return evaluatedMoves.slice(0, 3).map(hint => {
+  // Convert engine moves to hints with explanations
+  return bestMoves.map((hint, index) => {
     const analysis = MoveAnalyzer.analyzeMoveWithExplanation.call(
       tutorController,
       game,
       hint.move,
       hint.score,
-      bestScore
+      bestMoves[0].score
     );
+
+    // Extract PV from engine
+    const pv = aiEngine.extractPV(game.board, turnColor);
+
     return {
-      ...hint,
+      move: hint.move,
+      score: hint.score,
+      notation: MoveAnalyzer.getMoveNotation(game, hint.move),
       analysis,
+      pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
     };
   });
 }

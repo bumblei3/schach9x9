@@ -9,6 +9,16 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   updateShopUI: jest.fn(),
 }));
 
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  getBestMoveDetailed: jest.fn(),
+  extractPV: jest.fn(() => []),
+  evaluatePosition: jest.fn(() => 0),
+  isSquareAttacked: jest.fn(() => false),
+  see: jest.fn(() => 0),
+}));
+
+const aiEngine = await import('../js/aiEngine.js');
+
 const UI = await import('../js/ui.js');
 const {
   getTutorHints,
@@ -54,11 +64,12 @@ describe('HintGenerator - Unit Tests', () => {
     game.isAI = true;
     game.turn = 'white';
 
-    // Mock game methods
-    game.getAllLegalMoves = jest.fn(() => [{ from: { r: 7, c: 4 }, to: { r: 5, c: 4 } }]);
-    game.getValidMoves = jest.fn(() => [{ r: 5, c: 4 }]);
-    game.isSquareUnderAttack = jest.fn(() => false);
-    game.minimax = jest.fn(() => 50);
+    // Mock AI engine result
+    const bestMove = { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } };
+    aiEngine.getBestMoveDetailed.mockReturnValue({
+      move: bestMove,
+      score: 50,
+    });
 
     game.board[7][4] = { type: 'p', color: 'white' };
 
@@ -69,7 +80,10 @@ describe('HintGenerator - Unit Tests', () => {
   test('getTutorHints should filter out pieces of wrong color or missing', () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'black' }; // Wrong color
-    game.getAllLegalMoves = jest.fn(() => [{ from: { r: 7, c: 4 }, to: { r: 5, c: 4 } }]);
+    aiEngine.getBestMoveDetailed.mockReturnValue({
+      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+      score: 50,
+    });
 
     expect(getTutorHints(game, mockTutorController)).toEqual([]);
 
@@ -81,7 +95,10 @@ describe('HintGenerator - Unit Tests', () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'white' };
     game.board[5][4] = { type: 'p', color: 'white' }; // Same color
-    game.getAllLegalMoves = jest.fn(() => [{ from: { r: 7, c: 4 }, to: { r: 5, c: 4 } }]);
+    aiEngine.getBestMoveDetailed.mockReturnValue({
+      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+      score: 50,
+    });
 
     expect(getTutorHints(game, mockTutorController)).toEqual([]);
   });
@@ -100,9 +117,13 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('getTutorHints should skip invalid candidates', () => {
     game.phase = PHASES.PLAY;
-    game.getAllLegalMoves = jest.fn(() => [{ from: { r: 7, c: 4 }, to: { r: 5, c: 4 } }]);
-    game.getValidMoves = jest.fn(() => []); // None valid
-    game.board[7][4] = { type: 'p', color: 'white' };
+    aiEngine.getBestMoveDetailed.mockReturnValue({
+      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+      score: 50,
+    });
+    game.board[7][4] = null; // No piece at 'from' effectively makes it invalid in getTutorHints logic
+    // Actually, getTutorHints filters pieces of wrong color/missing BEFORE calling engine in some tests,
+    // but here we call the engine first in the new logic.
 
     expect(getTutorHints(game, mockTutorController)).toEqual([]);
   });

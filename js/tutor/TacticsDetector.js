@@ -1,4 +1,5 @@
 import { BOARD_SIZE } from '../gameEngine.js';
+import * as aiEngine from '../aiEngine.js';
 
 /**
  * Detects tactical patterns for a given move
@@ -41,10 +42,17 @@ export function detectTacticalPatterns(game, analyzer, move) {
     // 2. CAPTURE - Taking material
     if (capturedPiece) {
       const pieceName = analyzer.getPieceName(capturedPiece.type);
+
+      // Use SEE to check if capture is profitable
+      const seeScore = aiEngine.see(game.board, from, to);
+      const isProfitable = seeScore >= 0;
+
       patterns.push({
         type: 'capture',
-        severity: 'medium',
-        explanation: `⚔️ Schlägt ${pieceName}`,
+        severity: isProfitable ? 'medium' : 'low',
+        explanation: isProfitable
+          ? `⚔️ Schlägt ${pieceName} (Vorteilhaft)`
+          : `⚔️ Schlägt ${pieceName} (Riskant! Verlust möglich)`,
         question: 'Gibt es eine gegnerische Figur, die du vorteilhaft schlagen kannst?',
         targets: [{ r: to.r, c: to.c }],
       });
@@ -517,7 +525,7 @@ export function detectThreatsAfterMove(game, analyzer, move) {
         // Pawns are now included for STRICT mode detection
 
         // Is this piece under attack?
-        const isUnderAttack = game.isSquareUnderAttack(r, c, opponentColor);
+        const isUnderAttack = aiEngine.isSquareAttacked(game.board, r, c, opponentColor);
         if (isUnderAttack) {
           // Is it defended?
           const defenders = countDefenders(game, r, c, piece.color);

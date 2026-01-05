@@ -1,7 +1,7 @@
 import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
-import { evaluatePosition as _evaluatePosition } from '../ai/Evaluation.js';
+import * as aiEngine from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
 
 /**
@@ -17,11 +17,10 @@ export function analyzePlayerMovePreExecution(game, move) {
   const piece = game.board[from.r][from.c];
   if (!piece) return null;
 
-  // 1. Get current evaluation (perspective: white is positive)
-  const currentEval = _evaluatePosition(game.board, 'white');
+  // 1. Get current evaluation
+  const currentEval = aiEngine.evaluatePosition(game.board, 'white');
 
   // 🎯 Add tactical penalty for hanging pieces
-  // We call it BEFORE our manual simulation because detectThreatsAfterMove does its own simulation
   const threats = TacticsDetector.detectThreatsAfterMove(game, { getPieceName: t => t }, move);
   let penalty = 0;
   threats.forEach(t => {
@@ -35,7 +34,7 @@ export function analyzePlayerMovePreExecution(game, move) {
   game.board[from.r][from.c] = null;
 
   // 3. Evaluate resulting position
-  let newEval = _evaluatePosition(game.board, 'white');
+  let newEval = aiEngine.evaluatePosition(game.board, 'white');
 
   const turn = piece.color;
   if (turn === 'white') newEval -= penalty;

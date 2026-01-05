@@ -213,17 +213,21 @@ export class AIController {
       if (spinner) spinner.style.display = 'none';
 
       // Find best result
-      const bestResult = workerResults.find(r => r && r.from && r.to);
+      const bestResult = workerResults.find(r => r && r.move);
       logger.debug(
         '[AI] Worker results:',
-        workerResults.map(r => (r ? `${r.from?.r},${r.from?.c}->${r.to?.r},${r.to?.c}` : 'null'))
+        workerResults.map(r =>
+          r && r.move
+            ? `${r.move.from?.r},${r.move.from?.c}->${r.move.to?.r},${r.move.to?.c}`
+            : 'null'
+        )
       );
 
-      if (bestResult) {
+      if (bestResult && bestResult.move) {
         logger.info(
-          `[AI] Executing move: ${bestResult.from.r},${bestResult.from.c} -> ${bestResult.to.r},${bestResult.to.c}`
+          `[AI] Executing move: ${bestResult.move.from.r},${bestResult.move.from.c} -> ${bestResult.move.to.r},${bestResult.move.to.c}`
         );
-        this.game.executeMove(bestResult.from, bestResult.to);
+        this.game.executeMove(bestResult.move.from, bestResult.move.to);
         if (this.game.renderBoard) this.game.renderBoard();
 
         // Display AI Thinking (PV)

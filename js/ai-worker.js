@@ -5,7 +5,7 @@
 
 import { logger } from './logger.js';
 import {
-  getBestMove,
+  getBestMoveDetailed,
   analyzePosition,
   evaluatePosition,
   setOpeningBook,
@@ -40,7 +40,7 @@ self.onmessage = function (e) {
         });
 
         try {
-          const bestMove = getBestMove(
+          const bestMove = getBestMoveDetailed(
             board,
             color,
             depth,
