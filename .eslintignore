@@ -1,6 +1,6 @@
+engine-wasm/pkg/
+coverage/
+docs/
 node_modules/
 dist/
 build/
-coverage/
-*.min.js
-.gemini/

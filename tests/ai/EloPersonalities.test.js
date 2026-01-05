@@ -1,9 +1,4 @@
 import { getBestMoveDetailed } from '../../js/aiEngine.js';
-import {
-  SQUARE_COUNT,
-  PIECE_NONE,
-  coordsToIndex,
-} from '../../js/ai/BoardDefinitions.js';
 
 describe('AI Elo Personalities', () => {
   let uiBoard;
