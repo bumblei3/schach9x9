@@ -1,65 +1,66 @@
-import { evaluatePosition } from '../../js/ai/Evaluation.js';
+import { getBestMoveDetailed } from '../../js/aiEngine.js';
 import {
   SQUARE_COUNT,
   PIECE_NONE,
-  WHITE_PAWN,
-  WHITE_KING,
-  BLACK_KING,
-  BLACK_PAWN,
   coordsToIndex,
 } from '../../js/ai/BoardDefinitions.js';
 
 describe('AI Elo Personalities', () => {
-  let board;
+  let uiBoard;
 
   beforeEach(() => {
-    board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
+    uiBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
   });
 
-  test('AGGRESSIVE personality should reward forward pieces more', () => {
+  const setPiece = (r, c, type, color) => {
+    uiBoard[r][c] = { type, color };
+  };
+
+  test('AGGRESSIVE personality should reward forward pieces more', async () => {
     // Pawn close to enemy king
-    board[coordsToIndex(1, 4)] = WHITE_PAWN;
-    board[coordsToIndex(0, 4)] = BLACK_KING; // Enemy king
-    board[coordsToIndex(8, 4)] = WHITE_KING;
+    setPiece(1, 4, 'p', 'white');
+    setPiece(0, 4, 'k', 'black'); // Enemy king
+    setPiece(8, 4, 'k', 'white');
 
-    const normalScore = evaluatePosition(board, 'white', { personality: 'NORMAL' });
-    const aggressiveScore = evaluatePosition(board, 'white', { personality: 'AGGRESSIVE' });
+    // Run at depth 1 to get static-like evaluation guidance
+    const normalRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { personality: 'NORMAL' });
+    const aggressiveRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { personality: 'AGGRESSIVE' });
 
-    // AGGRESSIVE has attackWeight = 1.4, NORMAL is 1.0.
-    // PST for Pawn at R1 is 50.
-    // 50 * 1.4 = 70 vs 50 * 1.0 = 50.
-    expect(aggressiveScore).toBeGreaterThan(normalScore);
+    // AGGRESSIVE score should be higher (attack weight)
+    expect(aggressiveRes.score).toBeGreaterThan(normalRes.score);
   });
 
-  test('SOLID personality should reward pawn structure more', () => {
+  test('SOLID personality should reward pawn structure more', async () => {
     // Linked pawns
-    board[coordsToIndex(6, 4)] = WHITE_PAWN;
-    board[coordsToIndex(7, 3)] = WHITE_PAWN;
-    board[coordsToIndex(8, 4)] = WHITE_KING;
-    board[coordsToIndex(0, 4)] = BLACK_KING;
+    setPiece(6, 4, 'p', 'white');
+    setPiece(7, 3, 'p', 'white');
+    setPiece(8, 4, 'k', 'white');
+    setPiece(0, 4, 'k', 'black');
 
-    const normalScore = evaluatePosition(board, 'white', { personality: 'NORMAL' });
-    const solidScore = evaluatePosition(board, 'white', { personality: 'SOLID' });
+    const normalRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { personality: 'NORMAL' });
+    const solidRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { personality: 'SOLID' });
 
-    // SOLID has pawnStructureWeight = 1.3, NORMAL is 1.0.
-    // Linked bonus is 10. 10 * 1.3 = 13 vs 10 * 1.0 = 10.
-    expect(solidScore).toBeGreaterThan(normalScore);
+    expect(solidRes.score).toBeGreaterThan(normalRes.score);
   });
 
-  test('SOLID personality should penalize exposed kings more', () => {
+  test('SOLID personality should penalize exposed kings more', async () => {
     // White king with no pawn shelter
-    board[coordsToIndex(8, 4)] = WHITE_KING;
+    setPiece(8, 4, 'k', 'white');
     // Black king WITH pawn shelter
-    board[coordsToIndex(0, 4)] = BLACK_KING;
-    board[coordsToIndex(1, 4)] = BLACK_PAWN;
+    setPiece(0, 4, 'k', 'black');
+    setPiece(1, 4, 'p', 'black');
 
-    const normalScore = evaluatePosition(board, 'white', { personality: 'NORMAL' });
-    const solidScore = evaluatePosition(board, 'white', { personality: 'SOLID' });
+    const normalRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { personality: 'NORMAL' });
+    const solidRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { personality: 'SOLID' });
 
-    // Shelter penalty is -15. -15 * 0.5 = -7.5 for egScore.
-    // SOLID has kingSafetyWeight = 1.4, so penalty is -21. -21 * 0.5 = -10.5.
-    // normalScore should be around 5 (tempo) - 7.5 (shelter) + black_pieces...
-    // solidScore should be lower than normalScore because it cares MORE about safety.
-    expect(solidScore).toBeLessThan(normalScore);
+    // Solid cares more about safety, so it rates its own safety (exposed) worse?
+    // Wait, evaluation is relative.
+    // White is exposed.
+    // Normal score: -ShelterPenalty.
+    // Solid score: -ShelterPenalty * 1.4.
+    // So Solid Score should be LOWER (more negative).
+    expect(solidRes.score).toBeLessThan(normalRes.score);
   });
 });

@@ -22,7 +22,7 @@ describe('AI Elo Scaling & Noise', () => {
     const results = [];
     for (let i = 0; i < 5; i++) {
       // High Elo (no noise)
-      const res = await getBestMoveDetailed(uiBoard, 'white', 1, 'hard', { elo: 2500 });
+      const res = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { elo: 2500 });
       results.push(res.score);
     }
     // High Elo should be deterministic
@@ -32,7 +32,7 @@ describe('AI Elo Scaling & Noise', () => {
     const lowResults = [];
     for (let i = 0; i < 10; i++) {
       // Low Elo (800)
-      const res = await getBestMoveDetailed(uiBoard, 'white', 1, 'hard', { elo: 800 });
+      const res = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { elo: 800 });
       lowResults.push(res.score);
     }
     // Low Elo with 800 should have a noise range of ~200.
@@ -51,7 +51,7 @@ describe('AI Elo Scaling & Noise', () => {
 
     let blundered = false;
     for (let i = 0; i < 20; i++) {
-      const res = await getBestMoveDetailed(uiBoard, 'white', 2, 'hard', { elo: 800 });
+      const res = await getBestMoveDetailed(uiBoard, 'white', 2, 'expert', { elo: 800 });
       // Best move is (4,4) to (4,5)
       if (!res.move || res.move.from.r !== 4 || res.move.to.c !== 5) {
         blundered = true;

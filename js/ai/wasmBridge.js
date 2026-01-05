@@ -62,13 +62,13 @@ export async function ensureWasmInitialized() {
  * @param {string} personality - AI personality
  * @returns {Object|null} { move, score }
  */
-export async function getBestMoveWasm(boardIntArray, turnColor, depth, personality = 'NORMAL') {
+export async function getBestMoveWasm(boardIntArray, turnColor, depth, personality = 'NORMAL', elo = 2500) {
   const initialized = await ensureWasmInitialized();
   if (!initialized) return null;
 
   try {
     const boardJson = JSON.stringify(Array.from(boardIntArray));
-    const resultJson = get_best_move_wasm(boardJson, turnColor, depth, personality);
+    const resultJson = get_best_move_wasm(boardJson, turnColor, depth, personality, elo);
     const [bestMove, score, nodes] = JSON.parse(resultJson);
 
     nodesEvaluated = nodes || 0;

@@ -11,7 +11,7 @@ use search::*;
 use eval::*;
 
 #[wasm_bindgen]
-pub fn get_best_move_wasm(board_json: &str, color_str: &str, depth: i8, personality_str: &str) -> String {
+pub fn get_best_move_wasm(board_json: &str, color_str: &str, depth: i8, personality_str: &str, elo: i32) -> String {
     let board_vec: Vec<i8> = serde_json::from_str(board_json).unwrap_or_default();
     let mut board: Board = [0; 81];
     for (i, &v) in board_vec.iter().enumerate().take(81) {
@@ -26,9 +26,11 @@ pub fn get_best_move_wasm(board_json: &str, color_str: &str, depth: i8, personal
         _ => Personality::NORMAL,
     };
 
+    let config_elo = if elo > 0 { Some(elo) } else { None };
+
     let config = EvalConfig {
         personality,
-        elo: None,
+        elo: config_elo,
     };
 
     let (best_move, score, nodes) = search(&board, depth, color, &config);

@@ -155,7 +155,8 @@ export async function getBestMove(
       board,
       turnColor,
       maxDepth,
-      config.personality || 'NORMAL'
+      config.personality || 'NORMAL',
+      config.elo || 2500
     );
     if (wasmResult && wasmResult.move) return convertMoveToResult(wasmResult.move);
   }
@@ -181,7 +182,7 @@ export async function getBestMoveDetailed(
   // Experimental: Try Wasm Engine first
   if (difficulty === 'expert') {
     const personality = config.personality || 'NORMAL';
-    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality);
+    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, config.elo || 2500);
     if (wasmResult && wasmResult.move) {
       logger.debug('[AiEngine] Using Wasm Engine Result');
       return {

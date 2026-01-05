@@ -4,6 +4,7 @@ use crate::eval::*;
 use crate::zobrist::*;
 use crate::ordering::*;
 use std::collections::HashMap;
+use rand::Rng;
 
 pub struct SearchContext {
     pub nodes: u64,
@@ -37,6 +38,28 @@ pub fn search(board: &Board, depth: i8, color: i8, config: &EvalConfig) -> (Opti
         if !ctx.stop {
             overall_best_move = m;
             best_score = s;
+        }
+    }
+
+    // Blunder Simulation for low Elo
+    if let Some(best) = overall_best_move {
+        if let Some(elo) = config.elo {
+            if elo < 1200 {
+                let blunder_prob = (1200.0 - elo as f32) / 1000.0;
+                let mut rng = rand::thread_rng();
+                if rng.r#gen::<f32>() < blunder_prob {
+                     let moves = get_all_legal_moves(board, color);
+                     if moves.len() > 1 {
+                          // Pick random not equal to best
+                          let others: Vec<_> = moves.into_iter().filter(|m| *m != best).collect();
+                          if !others.is_empty() {
+                               let random_index = rng.gen_range(0..others.len());
+                               // Return blunder with penalty score
+                               return (Some(others[random_index]), best_score - 200, ctx.nodes);
+                          }
+                     }
+                }
+            }
         }
     }
 
