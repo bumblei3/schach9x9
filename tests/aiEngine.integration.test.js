@@ -21,13 +21,13 @@ describe('AIEngine Integration', () => {
     expect(result.score).toBeDefined();
   });
 
-  test('getBestMove re-export functionality', () => {
+  test('getBestMove re-export functionality', async () => {
     const board = Array(9)
       .fill(null)
       .map(() => Array(9).fill(null));
     board[7][4] = { type: 'k', color: 'white' };
     board[1][4] = { type: 'k', color: 'black' };
-    const result = AIEngine.getBestMove(board, 'white', 1, 'hard', 1);
+    const result = await AIEngine.getBestMove(board, 'white', 1, 'hard', 1);
     console.log('Result of getBestMove:', result);
     expect(result).toBeDefined();
     expect(result.from).toBeDefined();
@@ -38,8 +38,8 @@ describe('AIEngine Integration', () => {
     expect(typeof score).toBe('number');
   });
 
-  test('extractPV re-export functionality', () => {
-    AIEngine.getBestMove(game.board, 'white', 2, 'hard', 1);
+  test('extractPV re-export functionality', async () => {
+    await AIEngine.getBestMove(game.board, 'white', 2, 'hard', 1);
     const pv = AIEngine.extractPV(game.board, 'white', 2);
     expect(Array.isArray(pv)).toBe(true);
   });

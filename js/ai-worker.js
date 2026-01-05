@@ -13,7 +13,7 @@ import {
 } from './aiEngine.js';
 
 // Main message handler
-self.onmessage = function (e) {
+self.onmessage = async function (e) {
   try {
     const { type, data } = e.data;
 
@@ -40,7 +40,7 @@ self.onmessage = function (e) {
         });
 
         try {
-          const bestMove = getBestMoveDetailed(
+          const bestMove = await getBestMoveDetailed(
             board,
             color,
             depth,

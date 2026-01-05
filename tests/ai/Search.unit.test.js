@@ -29,7 +29,7 @@ describe('AI Search Logic', () => {
     jest.clearAllMocks();
   });
 
-  test('Mate in 1: Rook Checkmate', () => {
+  test('Mate in 1: Rook Checkmate', async () => {
     // White Rook at 3,0. Black King at 0,0.
     // Board:
     // 0: [bk, null, null, null, null, null, null, null, null]
@@ -48,7 +48,7 @@ describe('AI Search Logic', () => {
     // Rook at 6,8 ready to move to 0,8 for mate
     board[6][8] = { type: 'r', color: 'white' };
 
-    const move = getBestMove(board, 'white', 2, 'expert', 1);
+    const move = await getBestMove(board, 'white', 2, 'hard', 1);
     if (move.to.r !== 0) {
       console.log('Failing move:', move);
     }
@@ -61,7 +61,7 @@ describe('AI Search Logic', () => {
     expect(move.from.r).toBeGreaterThanOrEqual(0);
   });
 
-  test('Defense: Prevent Mate in 1', () => {
+  test('Defense: Prevent Mate in 1', async () => {
     // Black to move. White threatens Mate.
     // White Rook at 0,8 (attacking 0,0). Black King at 0,0.
     // BUT wait, if White Rook is at 0,8 it's ALREADY check.
@@ -99,14 +99,14 @@ describe('AI Search Logic', () => {
     // It is currently CHECK.
     // getBestMove should find the ONLY legal move (block).
 
-    const move = getBestMove(board, 'black', 2, 'expert', 1);
+    const move = await getBestMove(board, 'black', 2, 'hard', 1);
 
     expect(move).toBeDefined();
     expect(move.to.r).toBe(0);
     expect(move.to.c).toBe(4); // Block
   });
 
-  test('Tactics: Fork (Knight)', () => {
+  test('Tactics: Fork (Knight)', async () => {
     // White Knight can fork King and Rook.
     const board = createEmptyBoard();
     board[8][8] = { type: 'k', color: 'white' }; // Safety
@@ -137,7 +137,7 @@ describe('AI Search Logic', () => {
 
     board[4][2] = { type: 'n', color: 'white' };
 
-    const move = getBestMove(board, 'white', 3, 'expert', 1);
+    const move = await getBestMove(board, 'white', 3, 'hard', 1);
 
     expect(move).toBeDefined();
     // Knight moves to row 2 for a fork (either 2,1 or 2,3 both give check + attack Rook)
@@ -146,7 +146,7 @@ describe('AI Search Logic', () => {
     // This fork wins a Rook eventually.
   });
 
-  test('Material: Capture hanging piece', () => {
+  test('Material: Capture hanging piece', async () => {
     const board = createEmptyBoard();
     // Kings far away to avoid check distractions
     // Black King at 0,7 (Rank 0, File 7) - White Rook at 4,0 (File 0) - Safe
@@ -159,13 +159,13 @@ describe('AI Search Logic', () => {
     // White Rook at 4,0
     board[4][0] = { type: 'r', color: 'white' };
 
-    const move = getBestMove(board, 'white', 2, 'expert', 1);
+    const move = await getBestMove(board, 'white', 2, 'hard', 1);
     expect(move).toBeDefined();
     expect(move.to.r).toBe(4);
     expect(move.to.c).toBe(4); // Capture
   });
 
-  test('Analytics: analyzePosition returns top moves', () => {
+  test('Analytics: analyzePosition returns top moves', async () => {
     const board = createEmptyBoard();
     // Setup initial position roughly
     board[8][4] = { type: 'k', color: 'white' };
@@ -175,7 +175,7 @@ describe('AI Search Logic', () => {
     board[7][4] = { type: 'p', color: 'white' }; // Move to 6,4 or Capture 6,3/6,5
     board[6][3] = { type: 'p', color: 'black' }; // Target
 
-    const result = analyzePosition(board, 'white', 2);
+    const result = await analyzePosition(board, 'white', 2);
 
     expect(result).toBeDefined();
     expect(result.score).toBeDefined();
@@ -187,7 +187,7 @@ describe('AI Search Logic', () => {
     expect(result.topMoves[0].move.to.c).toBe(3);
   });
 
-  test('Analytics: extractPV returns principal variation', () => {
+  test('Analytics: extractPV returns principal variation', async () => {
     const board = createEmptyBoard();
     // Setup Mate in 2 sequence? Or Mate in 1.
     board[0][0] = { type: 'k', color: 'black' };
@@ -196,7 +196,7 @@ describe('AI Search Logic', () => {
     board[6][8] = { type: 'r', color: 'white' }; // Mate attacker
 
     // Run search first to populate TT
-    const move = getBestMove(board, 'white', 2, 'expert', 1);
+    const move = await getBestMove(board, 'white', 2, 'hard', 1);
 
     const pv = extractPV(board, 'white', 2);
     expect(pv.length).toBeGreaterThan(0);

@@ -10,9 +10,15 @@ import {
   analyzePosition as searchAnalyze,
   extractPV as searchExtractPV,
   setProgressCallback,
-  getNodesEvaluated,
-  resetNodesEvaluated,
+  getNodesEvaluated as searchGetNodes,
+  resetNodesEvaluated as searchResetNodes,
+  convertMoveToResult,
 } from './ai/Search.js';
+import {
+  getBestMoveWasm,
+  getWasmNodesEvaluated,
+  resetWasmNodesEvaluated,
+} from './ai/wasmBridge.js';
 
 import { evaluatePosition as evalInt } from './ai/Evaluation.js';
 
@@ -127,7 +133,7 @@ export function getParamsForElo(elo) {
   };
 }
 
-export function getBestMove(
+export async function getBestMove(
   uiBoard,
   turnColor,
   maxDepth = 4,
@@ -142,10 +148,22 @@ export function getBestMove(
     config = { ...timeParams, ...eloParams };
     maxDepth = config.maxDepth;
   }
+
+  // Wasm fallback
+  if (difficulty === 'expert') {
+    const wasmResult = await getBestMoveWasm(
+      board,
+      turnColor,
+      maxDepth,
+      config.personality || 'NORMAL'
+    );
+    if (wasmResult && wasmResult.move) return convertMoveToResult(wasmResult.move);
+  }
+
   return searchBestMove(board, turnColor, maxDepth, difficulty, config);
 }
 
-export function getBestMoveDetailed(
+export async function getBestMoveDetailed(
   uiBoard,
   turnColor,
   maxDepth = 4,
@@ -159,6 +177,20 @@ export function getBestMoveDetailed(
     config = { ...timeParams, ...eloParams };
     maxDepth = config.maxDepth;
   }
+
+  // Experimental: Try Wasm Engine first
+  if (difficulty === 'expert') {
+    const personality = config.personality || 'NORMAL';
+    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality);
+    if (wasmResult && wasmResult.move) {
+      logger.debug('[AiEngine] Using Wasm Engine Result');
+      return {
+        ...wasmResult,
+        move: convertMoveToResult(wasmResult.move),
+      };
+    }
+  }
+
   return searchBestMoveDetailed(board, turnColor, maxDepth, difficulty, config);
 }
 
@@ -246,6 +278,15 @@ export function makeMove(uiBoard, uiMove) {
   };
 }
 
+export function getNodesEvaluated() {
+  return searchGetNodes() + getWasmNodesEvaluated();
+}
+
+export function resetNodesEvaluated() {
+  searchResetNodes();
+  resetWasmNodesEvaluated();
+}
+
 export function undoMove(uiBoard, undoInfo) {
   if (!undoInfo) return;
   const { move, captured } = undoInfo;
@@ -291,8 +332,6 @@ export {
   queryOpeningBook,
   // extractPV, // Explicitly exported above
   setProgressCallback,
-  getNodesEvaluated,
-  resetNodesEvaluated,
   getAllCaptureMoves,
   isSquareAttacked,
   findKing,

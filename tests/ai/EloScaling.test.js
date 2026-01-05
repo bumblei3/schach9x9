@@ -13,7 +13,7 @@ describe('AI Elo Scaling & Noise', () => {
     uiBoard[r][c] = { type, color };
   };
 
-  test('800 Elo should show evaluation noise', () => {
+  test('800 Elo should show evaluation noise', async () => {
     // Simple position
     setPiece(7, 4, 'p', 'white');
     setPiece(8, 4, 'k', 'white');
@@ -22,7 +22,7 @@ describe('AI Elo Scaling & Noise', () => {
     const results = [];
     for (let i = 0; i < 5; i++) {
       // High Elo (no noise)
-      const res = getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { elo: 2500 });
+      const res = await getBestMoveDetailed(uiBoard, 'white', 1, 'hard', { elo: 2500 });
       results.push(res.score);
     }
     // High Elo should be deterministic
@@ -32,7 +32,7 @@ describe('AI Elo Scaling & Noise', () => {
     const lowResults = [];
     for (let i = 0; i < 10; i++) {
       // Low Elo (800)
-      const res = getBestMoveDetailed(uiBoard, 'white', 1, 'expert', { elo: 800 });
+      const res = await getBestMoveDetailed(uiBoard, 'white', 1, 'hard', { elo: 800 });
       lowResults.push(res.score);
     }
     // Low Elo with 800 should have a noise range of ~200.
@@ -42,7 +42,7 @@ describe('AI Elo Scaling & Noise', () => {
     expect(uniqueLow.size).toBeGreaterThan(1);
   });
 
-  test('800 Elo should occasionally blunder material', () => {
+  test('800 Elo should occasionally blunder material', async () => {
     // White has a clear winning move (capture rook)
     setPiece(4, 4, 'rook', 'white');
     setPiece(4, 5, 'rook', 'black');
@@ -51,7 +51,7 @@ describe('AI Elo Scaling & Noise', () => {
 
     let blundered = false;
     for (let i = 0; i < 20; i++) {
-      const res = getBestMoveDetailed(uiBoard, 'white', 2, 'expert', { elo: 800 });
+      const res = await getBestMoveDetailed(uiBoard, 'white', 2, 'hard', { elo: 800 });
       // Best move is (4,4) to (4,5)
       if (!res.move || res.move.from.r !== 4 || res.move.to.c !== 5) {
         blundered = true;

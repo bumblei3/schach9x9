@@ -53,13 +53,13 @@ describe('HintGenerator - Unit Tests', () => {
     };
   });
 
-  test('getTutorHints should return empty if not in PLAY phase', () => {
+  test('getTutorHints should return empty if not in PLAY phase', async () => {
     game.phase = PHASES.SETUP_WHITE_KING;
-    const hints = getTutorHints(game, mockTutorController);
+    const hints = await getTutorHints(game, mockTutorController);
     expect(hints).toEqual([]);
   });
 
-  test('getTutorHints should return hints for human player', () => {
+  test('getTutorHints should return hints for human player', async () => {
     game.phase = PHASES.PLAY;
     game.isAI = true;
     game.turn = 'white';
@@ -73,11 +73,11 @@ describe('HintGenerator - Unit Tests', () => {
 
     game.board[7][4] = { type: 'p', color: 'white' };
 
-    const hints = getTutorHints(game, mockTutorController);
+    const hints = await getTutorHints(game, mockTutorController);
     expect(hints.length).toBeGreaterThan(0);
   });
 
-  test('getTutorHints should filter out pieces of wrong color or missing', () => {
+  test('getTutorHints should filter out pieces of wrong color or missing', async () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'black' }; // Wrong color
     aiEngine.getBestMoveDetailed.mockReturnValue({
@@ -85,13 +85,13 @@ describe('HintGenerator - Unit Tests', () => {
       score: 50,
     });
 
-    expect(getTutorHints(game, mockTutorController)).toEqual([]);
+    expect(await getTutorHints(game, mockTutorController)).toEqual([]);
 
     game.board[7][4] = null; // Missing
-    expect(getTutorHints(game, mockTutorController)).toEqual([]);
+    expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
 
-  test('getTutorHints should skip self-captures (though illegal)', () => {
+  test('getTutorHints should skip self-captures (though illegal)', async () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'white' };
     game.board[5][4] = { type: 'p', color: 'white' }; // Same color
@@ -100,22 +100,22 @@ describe('HintGenerator - Unit Tests', () => {
       score: 50,
     });
 
-    expect(getTutorHints(game, mockTutorController)).toEqual([]);
+    expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
 
-  test('getTutorHints should return empty for AI turn', () => {
+  test('getTutorHints should return empty for AI turn', async () => {
     game.turn = 'black';
     game.isAI = true;
-    expect(getTutorHints(game, mockTutorController)).toEqual([]);
+    expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
 
-  test('getTutorHints should return empty if no legal moves', () => {
+  test('getTutorHints should return empty if no legal moves', async () => {
     game.phase = PHASES.PLAY;
     game.getAllLegalMoves = jest.fn(() => []);
-    expect(getTutorHints(game, mockTutorController)).toEqual([]);
+    expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
 
-  test('getTutorHints should skip invalid candidates', () => {
+  test('getTutorHints should skip invalid candidates', async () => {
     game.phase = PHASES.PLAY;
     aiEngine.getBestMoveDetailed.mockReturnValue({
       move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
@@ -125,7 +125,7 @@ describe('HintGenerator - Unit Tests', () => {
     // Actually, getTutorHints filters pieces of wrong color/missing BEFORE calling engine in some tests,
     // but here we call the engine first in the new logic.
 
-    expect(getTutorHints(game, mockTutorController)).toEqual([]);
+    expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
 
   test('should return setup templates for different budgets', () => {

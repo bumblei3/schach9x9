@@ -90,13 +90,15 @@ schach9x9/
 
 - Node.js (v14+)
 - NPM
+- **Rust & wasm-pack** (für KI-Engine Performance-Optimierung)
 
 ### Schritte
 
 1. **Repository klonen:** `git clone https://github.com/bumblei3/schach9x9.git`
 2. **Abhängigkeiten installieren:** `npm install`
 3. **Spiel starten:** `npm run dev` (Vite dev server)
-4. **Build für Produktion:** `npm run build`
+4. **Wasm Engine bauen (optional aber empfohlen):** `npm run wasm:build`
+5. **Build für Produktion:** `npm run build`
 
 ## 🛠️ Entwicklung & CI
 

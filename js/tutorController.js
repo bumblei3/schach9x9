@@ -10,8 +10,8 @@ export class TutorController {
   constructor(game) {
     this.game = game;
     // Debounce the heavy calculation part
-    this.debouncedGetTutorHints = debounce(() => {
-      this.game.bestMoves = this.getTutorHints();
+    this.debouncedGetTutorHints = debounce(async () => {
+      this.game.bestMoves = await this.getTutorHints();
     }, 300);
   }
 
@@ -35,10 +35,10 @@ export class TutorController {
     return HintGenerator.showTutorSuggestions(this.game);
   }
 
-  showHint() {
+  async showHint() {
     // Force calculation if no hints available (e.g. initialization or race condition)
     if (!this.game.bestMoves || this.game.bestMoves.length === 0) {
-      this.game.bestMoves = this.getTutorHints();
+      this.game.bestMoves = await this.getTutorHints();
     }
     this.showTutorSuggestions();
   }

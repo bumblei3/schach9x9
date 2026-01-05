@@ -88,7 +88,7 @@ describe('AI Difficulty', () => {
     TranspositionTable.getXORSideToMove.mockReturnValue(0n);
   });
 
-  test('Beginner Difficulty should pick from top candidates', () => {
+  test('Beginner Difficulty should pick from top candidates', async () => {
     const selectedKeys = new Set();
 
     // Run 20 iterations to capture the random distribution
@@ -100,7 +100,7 @@ describe('AI Difficulty', () => {
         return scores[count++ % 4];
       });
 
-      const move = getBestMove(mockBoard, 'white', 1, 'beginner', {});
+      const move = await getBestMove(mockBoard, 'white', 1, 'beginner', {});
       if (move) selectedKeys.add(`${move.from.r},${move.from.c}->${move.to.r},${move.to.c}`);
     }
 
@@ -108,7 +108,7 @@ describe('AI Difficulty', () => {
     expect(selectedKeys.size).toBeGreaterThan(1);
   });
 
-  test('Expert Difficulty should always pick the absolute best move from TT', () => {
+  test('Expert Difficulty should always pick the absolute best move from TT', async () => {
     TranspositionTable.getTTMove.mockReturnValue(move1);
 
     for (let i = 0; i < 5; i++) {
@@ -118,7 +118,7 @@ describe('AI Difficulty', () => {
         return scores[count++ % 4];
       });
 
-      const move = getBestMove(mockBoard, 'white', 1, 'expert', {});
+      const move = await getBestMove(mockBoard, 'white', 1, 'expert', {});
       // move1 is {from: 10, to: 20}. 10 is row 1, col 1. 20 is row 2, col 2.
       expect(move.from.r).toBe(1);
       expect(move.from.c).toBe(1);

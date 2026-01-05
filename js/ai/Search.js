@@ -309,7 +309,7 @@ export function getBestMove(
 }
 
 // Convert integer/internal move to UI result
-function convertMoveToResult(move) {
+export function convertMoveToResult(move) {
   if (!move) return null;
   return {
     from: { r: indexToRow(move.from), c: indexToCol(move.from) },

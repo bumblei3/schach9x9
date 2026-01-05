@@ -62,7 +62,7 @@ describe('AI Engine', () => {
   });
 
   describe('getBestMove', () => {
-    test('should find a simple capture', () => {
+    test('should find a simple capture', async () => {
       // White rook can capture black pawn
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'p', color: 'black' };
@@ -70,7 +70,7 @@ describe('AI Engine', () => {
       board[7][7] = { type: 'k', color: 'white' };
       board[1][1] = { type: 'k', color: 'black' };
 
-      const bestMove = getBestMove(board, 'white', 1, 'expert');
+      const bestMove = await getBestMove(board, 'white', 1, 'expert');
 
       expect(bestMove).toMatchObject({
         from: { r: 4, c: 4 },
@@ -78,7 +78,7 @@ describe('AI Engine', () => {
       });
     });
 
-    test('should avoid immediate capture', () => {
+    test('should avoid immediate capture', async () => {
       // White queen threatened by black rook
       board[4][4] = { type: 'q', color: 'white' };
       board[4][0] = { type: 'r', color: 'black' };
@@ -86,7 +86,7 @@ describe('AI Engine', () => {
       board[0][0] = { type: 'k', color: 'black' };
 
       // Black to move, should capture queen
-      const bestMove = getBestMove(board, 'black', 1, 'expert');
+      const bestMove = await getBestMove(board, 'black', 1, 'expert');
 
       expect(bestMove).toMatchObject({
         from: { r: 4, c: 0 },
@@ -171,7 +171,7 @@ describe('AI Engine', () => {
   });
 
   describe('Advanced AI Scenarios', () => {
-    test('should find Mate in 1', () => {
+    test('should find Mate in 1', async () => {
       // Setup Mate in 1 position
       // White King at 2,2 (covers 1,1; 1,2; 1,3)
       // Black King at 0,2
@@ -182,7 +182,7 @@ describe('AI Engine', () => {
       board[0][2] = { type: 'k', color: 'black' };
       board[1][7] = { type: 'r', color: 'white' };
 
-      const bestMove = getBestMove(board, 'white', 2, 'expert');
+      const bestMove = await getBestMove(board, 'white', 2, 'expert');
 
       expect(bestMove).toMatchObject({
         from: { r: 1, c: 7 },
@@ -190,7 +190,7 @@ describe('AI Engine', () => {
       });
     });
 
-    test('should avoid Stalemate when winning', () => {
+    test('should avoid Stalemate when winning', async () => {
       // White King at 0,0
       // Black King at 0,2
       // White Queen at 1,1
@@ -201,13 +201,13 @@ describe('AI Engine', () => {
       board[0][2] = { type: 'k', color: 'black' };
       board[1][1] = { type: 'q', color: 'white' };
 
-      const bestMove = getBestMove(board, 'white', 2, 'expert');
+      const bestMove = await getBestMove(board, 'white', 2, 'expert');
 
       // Should NOT move to 0,1
       expect(bestMove.to).not.toEqual({ r: 0, c: 1 });
     });
 
-    test('should use Quiescence Search to see capture chains', () => {
+    test('should use Quiescence Search to see capture chains', async () => {
       // Setup a position where a capture looks good but leads to material loss
       // White Knight at 4,4
       // Black Pawn at 3,3 (protected by Black Bishop at 1,1)
@@ -217,7 +217,7 @@ describe('AI Engine', () => {
       board[3][3] = { type: 'p', color: 'black' };
       board[1][1] = { type: 'b', color: 'black' }; // Diagonally protects 3,3
 
-      const bestMove = getBestMove(board, 'white', 1, 'expert');
+      const bestMove = await getBestMove(board, 'white', 1, 'expert');
 
       // Should NOT capture the pawn if it leads to losing the knight
       if (bestMove && bestMove.from.r === 4 && bestMove.from.c === 4) {
@@ -228,7 +228,7 @@ describe('AI Engine', () => {
   });
 
   describe('Move Ordering and Optimization', () => {
-    test('should prioritize captures in move ordering', () => {
+    test('should prioritize captures in move ordering', async () => {
       // Setup position with capture available
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'q', color: 'black' }; // High value target
@@ -237,7 +237,7 @@ describe('AI Engine', () => {
       board[7][7] = { type: 'k', color: 'white' };
       board[1][1] = { type: 'k', color: 'black' };
 
-      const bestMove = getBestMove(board, 'white', 2, 'expert');
+      const bestMove = await getBestMove(board, 'white', 2, 'expert');
 
       // Should prefer capturing the queen
       expect(bestMove.to).toEqual({ r: 4, c: 6 });
@@ -286,19 +286,19 @@ describe('AI Engine', () => {
   });
 
   describe('Difficulty Levels and Randomized Behavior', () => {
-    test('beginner should make random moves most of the time', () => {
+    test('beginner should make random moves most of the time', async () => {
       board[4][4] = { type: 'q', color: 'white' };
       board[4][6] = { type: 'p', color: 'black' };
 
       const moves = [];
       for (let i = 0; i < 5; i++) {
-        const move = getBestMove(board, 'white', 2, 'beginner');
+        const move = await getBestMove(board, 'white', 2, 'beginner');
         moves.push(move);
       }
       expect(moves.length).toBeGreaterThan(0);
     });
 
-    test('easy should prefer captures', () => {
+    test('easy should prefer captures', async () => {
       // Mock random to ensure best move (capture) is picked from candidates
       const mockRandom = jest.spyOn(global.Math, 'random').mockReturnValue(0);
 
@@ -308,15 +308,15 @@ describe('AI Engine', () => {
       board[7][7] = { type: 'k', color: 'white' };
       board[1][1] = { type: 'k', color: 'black' };
 
-      const move = getBestMove(board, 'white', 2, 'easy');
+      const move = await getBestMove(board, 'white', 2, 'easy');
 
       mockRandom.mockRestore();
       expect(move.to).toEqual({ r: 4, c: 6 });
     });
 
-    test('Expert should reach target depth via ID', () => {
+    test('Expert should reach target depth via ID', async () => {
       board[4][4] = { type: 'q', color: 'white' };
-      const move = getBestMove(board, 'white', 3, 'expert');
+      const move = await getBestMove(board, 'white', 3, 'expert');
       expect(move).toBeDefined();
     });
   });

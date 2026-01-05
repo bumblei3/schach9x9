@@ -13,6 +13,7 @@ jest.unstable_mockModule('../js/ai/Search.js', () => ({
   resetNodesEvaluated: jest.fn(),
   setProgressCallback: jest.fn(),
   extractPV: jest.fn(() => []),
+  convertMoveToResult: jest.fn(move => move), // Pass-through for tests
 }));
 
 jest.unstable_mockModule('../js/ai/Evaluation.js', () => ({

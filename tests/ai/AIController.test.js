@@ -104,7 +104,7 @@ describe('AI Integration: Self-Play', () => {
     for (let i = 0; i < 10; i++) {
       const turn = game.turn;
       // AI Search (Depth 1 for speed)
-      const bestMove = getBestMove(game.board, turn, 1, 'beginner');
+      const bestMove = await getBestMove(game.board, turn, 1, 'beginner');
 
       if (!bestMove) {
         console.log(`AI cannot find move at ply ${i}. Game Over?`);

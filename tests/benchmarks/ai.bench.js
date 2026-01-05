@@ -13,13 +13,13 @@ async function runBenchmark() {
     board[7][i] = { type: 'p', color: 'white' };
   }
 
-  const depths = [2, 3, 4, 5];
+  const depths = [2, 3, 4, 5, 6, 7];
 
   for (const depth of depths) {
     console.log(`\nTesting Depth ${depth}...`);
     const start = Date.now();
 
-    getBestMove(board, 'white', depth, 'expert');
+    await getBestMove(board, 'white', depth, 'expert');
 
     const end = Date.now();
     const duration = (end - start) / 1000;

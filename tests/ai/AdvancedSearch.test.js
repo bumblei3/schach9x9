@@ -43,7 +43,7 @@ describe('Advanced Search Features', () => {
   });
 
   describe('Delta Pruning (Quiescence Search)', () => {
-    test('should prune bad captures in quiescence search', () => {
+    test('should prune bad captures in quiescence search', async () => {
       // Setup a position with many bad captures
       // White Queen at 4,4
       // Surrounded by protected Black Pawns
@@ -64,7 +64,7 @@ describe('Advanced Search Features', () => {
       board[5][5] = { type: 'p', color: 'black' };
 
       // Run search at depth 1 (forces QS at leaf)
-      getBestMove(board, 'white', 1, 'expert');
+      await getBestMove(board, 'white', 1, 'hard');
       const nodesWithPruning = getNodesEvaluated();
 
       // Without pruning, it would search all captures.
@@ -75,7 +75,7 @@ describe('Advanced Search Features', () => {
   });
 
   describe('Singular Extensions', () => {
-    test('should trigger extension on singular move', () => {
+    test('should trigger extension on singular move', async () => {
       // Setup a position where one move is clearly best
       // White can mate in 3, or prevent mate.
       // Let's use a simpler setup: King and Rook vs King.
@@ -97,7 +97,7 @@ describe('Advanced Search Features', () => {
       // Run search at depth 8 (triggers SE condition depth >= 8)
       // We expect the search to find the mate, potentially extending.
 
-      const resultMove = getBestMove(board, 'white', 8, 'expert');
+      const resultMove = await getBestMove(board, 'white', 8, 'hard');
 
       // Result is UI Move. Compare with expected UI Move.
       // Move: 1,7 -> 0,7
@@ -109,7 +109,7 @@ describe('Advanced Search Features', () => {
       expect(getNodesEvaluated()).toBeGreaterThan(0);
     });
 
-    test('should NOT trigger extension if alternatives are good', () => {
+    test('should NOT trigger extension if alternatives are good', async () => {
       // Multiple good moves
       const board = createEmptyBoard();
       board[0][0] = { type: 'k', color: 'black' };
@@ -124,7 +124,7 @@ describe('Advanced Search Features', () => {
       const bestMove = { from: coordsToIndex(7, 0), to: coordsToIndex(0, 0) };
       storeTT(hash, 6, 20000, TT_EXACT, bestMove);
 
-      const move = getBestMove(board, 'white', 8, 'expert');
+      const move = await getBestMove(board, 'white', 8, 'hard');
       expect(move).toBeDefined();
     });
   });

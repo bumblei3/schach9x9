@@ -29,7 +29,7 @@ describe('AI Search - Edge Cases and Coverage', () => {
   });
 
   describe('Single Move Optimization', () => {
-    test('should return the only legal move immediately', () => {
+    test('should return the only legal move immediately', async () => {
       // Position with only one legal move
       board = Array(BOARD_SIZE)
         .fill(null)
@@ -39,13 +39,13 @@ describe('AI Search - Edge Cases and Coverage', () => {
       board[1][2] = { type: 'r', color: 'white' };
 
       // Use depth 2 instead of 4
-      const move = Search.getBestMove(board, 'black', 2, 'expert', 0);
+      const move = await Search.getBestMove(board, 'black', 2, 'hard', 0);
       expect(move).toBeDefined();
     });
   });
 
   describe('Timeout Handling', () => {
-    test('should handle timeout gracefully and return best move found', () => {
+    test('should handle timeout gracefully and return best move found', async () => {
       // Complex position
       for (let c = 0; c < BOARD_SIZE; c++) {
         board[1][c] = { type: 'p', color: 'black' };
@@ -54,26 +54,26 @@ describe('AI Search - Edge Cases and Coverage', () => {
 
       // Use depth 3, sufficient to trigger loop but not hang
       // Time limit 1ms to force timeout
-      const move = Search.getBestMove(board, 'white', 3, 'expert', 1);
+      const move = await Search.getBestMove(board, 'white', 3, 'hard', 1);
 
       expect(move).toBeDefined();
     });
   });
 
   describe('NMP and LMR Branches', () => {
-    test('should trigger NMP cutoff in favorable positions', () => {
+    test('should trigger NMP cutoff in favorable positions', async () => {
       board[4][4] = { type: 'q', color: 'white' };
       board[3][3] = { type: 'r', color: 'white' };
 
       const initialNodes = Search.getNodesEvaluated();
       // Depth 3 is enough for NMP checks (requires depth >= 3)
-      Search.getBestMove(board, 'white', 3, 'expert', 0);
+      await Search.getBestMove(board, 'white', 3, 'hard', 0);
       const finalNodes = Search.getNodesEvaluated();
 
       expect(finalNodes - initialNodes).toBeGreaterThan(0);
     });
 
-    test('should trigger LMR and re-search on promising late moves', () => {
+    test('should trigger LMR and re-search on promising late moves', async () => {
       // Setup many moves
       for (let c = 0; c < BOARD_SIZE; c++) {
         board[6][c] = { type: 'p', color: 'white' };
@@ -82,19 +82,19 @@ describe('AI Search - Edge Cases and Coverage', () => {
       board[4][3] = { type: 'b', color: 'white' };
 
       // Depth 3 with many moves should trigger LMR conditions (depth >= 3, i >= 3)
-      Search.getBestMove(board, 'white', 3, 'expert', 0);
+      await Search.getBestMove(board, 'white', 3, 'hard', 0);
       expect(Search.getNodesEvaluated()).toBeGreaterThan(50);
     });
   });
 
   describe('Check Extension', () => {
-    test('should extend search when in check to find escape', () => {
+    test('should extend search when in check to find escape', async () => {
       board[0][4] = { type: 'k', color: 'black' };
       board[8][4] = { type: 'k', color: 'white' };
       board[0][0] = { type: 'r', color: 'white' }; // Check
 
       // Depth 1 + extension
-      const move = Search.getBestMove(board, 'black', 1, 'expert', 0);
+      const move = await Search.getBestMove(board, 'black', 1, 'hard', 0);
 
       expect(move).toBeDefined();
       expect(move.from).toEqual({ r: 0, c: 4 });
@@ -102,23 +102,23 @@ describe('AI Search - Edge Cases and Coverage', () => {
   });
 
   describe('Static Null Move Pruning', () => {
-    test('should prune when static eval exceeds beta by margin', () => {
+    test('should prune when static eval exceeds beta by margin', async () => {
       board[4][4] = { type: 'q', color: 'white' };
       board[5][5] = { type: 'q', color: 'white' };
 
       // Depth 2 is enough for SNMP (depth <= 3)
-      const move = Search.getBestMove(board, 'white', 2, 'expert', 0);
+      const move = await Search.getBestMove(board, 'white', 2, 'hard', 0);
       expect(move).toBeDefined();
     });
   });
 
   describe('Aspiration Window Re-Search', () => {
-    test('should widen window on fail-high or fail-low', () => {
+    test('should widen window on fail-high or fail-low', async () => {
       board[4][4] = { type: 'q', color: 'white' };
       board[3][3] = { type: 'p', color: 'black' };
 
       // Depth 3 sufficient
-      const move = Search.getBestMove(board, 'white', 3, 'expert', 0);
+      const move = await Search.getBestMove(board, 'white', 3, 'hard', 0);
       expect(move).toBeDefined();
     });
   });
@@ -196,9 +196,9 @@ describe('extractPV Function', () => {
     clearTT();
   });
 
-  test('should extract principal variation from TT', () => {
+  test('should extract principal variation from TT', async () => {
     const game = new Game(15, 'classic');
-    Search.getBestMove(game.board, 'white', 2, 'expert', 0);
+    await Search.getBestMove(game.board, 'white', 2, 'hard', 0);
     const pv = Search.extractPV(game.board, 'white', 2);
     expect(Array.isArray(pv)).toBe(true);
   });

@@ -6,7 +6,7 @@ import * as aiEngine from '../aiEngine.js';
 /**
  * Gets tutor hints by calling the AI engine
  */
-export function getTutorHints(game, tutorController) {
+export async function getTutorHints(game, tutorController) {
   if (game.phase !== PHASES.PLAY) {
     return [];
   }
@@ -19,7 +19,7 @@ export function getTutorHints(game, tutorController) {
   // Use the high-performance engine to get best moves
   // We search at a moderate depth (6) for high-quality hints
   const turnColor = game.turn;
-  const result = aiEngine.getBestMoveDetailed(game.board, turnColor, 6, 'expert', {
+  const result = await aiEngine.getBestMoveDetailed(game.board, turnColor, 6, 'expert', {
     maxTime: 1500, // Limit search time to 1.5s for responsiveness
   });
 

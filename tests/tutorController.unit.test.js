@@ -164,9 +164,9 @@ describe('TutorController', () => {
     expect(MoveAnalyzer.getScoreDescription).toHaveBeenCalledWith(100);
   });
 
-  test('showHint should force calculation if no bestMoves', () => {
+  test('showHint should force calculation if no bestMoves', async () => {
     game.bestMoves = null;
-    tutorController.showHint();
+    await tutorController.showHint();
     expect(HintGenerator.getTutorHints).toHaveBeenCalled();
     expect(HintGenerator.showTutorSuggestions).toHaveBeenCalled();
   });

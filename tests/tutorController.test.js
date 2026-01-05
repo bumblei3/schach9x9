@@ -85,31 +85,31 @@ describe('TutorController', () => {
       game.isAI = false;
     });
 
-    test('should return empty array when no legal moves', () => {
+    test('should return empty array when no legal moves', async () => {
       // Empty board, no pieces
       game.board = Array(9)
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
 
       expect(hints).toEqual([]);
     });
 
-    test('should return hints for positions with pieces', () => {
+    test('should return hints for positions with pieces', async () => {
       // Add a white pawn that can move
       game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
 
       expect(hints.length).toBeGreaterThan(0);
       expect(hints.length).toBeLessThanOrEqual(3); // Max 3 hints
     });
 
-    test('should include move notation in hints', () => {
+    test('should include move notation in hints', async () => {
       game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
 
       if (hints.length > 0) {
         expect(hints[0]).toHaveProperty('notation');
@@ -118,12 +118,12 @@ describe('TutorController', () => {
       }
     });
 
-    test('should prioritize capture moves', () => {
+    test('should prioritize capture moves', async () => {
       // White pawn can capture black piece
       game.board[5][4] = { type: 'p', color: 'white', hasMoved: false };
       game.board[4][5] = { type: 'p', color: 'black', hasMoved: false };
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
 
       expect(hints.length).toBeGreaterThan(0);
       // Capture moves should be evaluated
@@ -472,7 +472,7 @@ describe('TutorController', () => {
       game.isAI = false;
     });
 
-    test('should handle checkmate position', () => {
+    test('should handle checkmate position', async () => {
       // Set up a checkmate scenario
       game.board = Array(9)
         .fill(null)
@@ -481,25 +481,25 @@ describe('TutorController', () => {
       game.board[8][8] = { type: 'k', color: 'white' };
       game.board[7][7] = { type: 'q', color: 'white' }; // Threatening king
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
       // Should still return hints (unless no legal moves)
       expect(Array.isArray(hints)).toBe(true);
     });
 
-    test('should limit hints to maximum of 3', () => {
+    test('should limit hints to maximum of 3', async () => {
       // Set up a position with many legal moves
       game.board[4][4] = { type: 'q', color: 'white' }; // Queen in center has many moves
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
       expect(hints.length).toBeLessThanOrEqual(3);
     });
 
-    test('should properly evaluate tactical moves', () => {
+    test('should properly evaluate tactical moves', async () => {
       // Setup a position where white can win material
       game.board[4][4] = { type: 'p', color: 'white' };
       game.board[3][5] = { type: 'q', color: 'black' }; // Black queen can be captured
 
-      const hints = tutorController.getTutorHints();
+      const hints = await tutorController.getTutorHints();
       expect(hints.length).toBeGreaterThan(0);
       if (hints.length > 0) {
         expect(hints[0]).toHaveProperty('score');
