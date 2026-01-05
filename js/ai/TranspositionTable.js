@@ -1,10 +1,7 @@
 import {
   SQUARE_COUNT,
   PIECE_NONE,
-  COLOR_WHITE,
-  COLOR_BLACK,
-  TYPE_MASK,
-  COLOR_MASK
+  COLOR_WHITE
 } from './BoardDefinitions.js';
 
 // Transposition Table Constants

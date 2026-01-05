@@ -1,10 +1,10 @@
 import {
     getAllLegalMoves,
-    makeMove,
-    undoMove,
-    isSquareAttacked,
-    isInCheck,
-    findKing
+    // makeMove,
+    // undoMove,
+    // isSquareAttacked,
+    isInCheck
+    // findKing
 } from '../../js/ai/MoveGenerator.js';
 import {
     SQUARE_COUNT,
@@ -12,13 +12,13 @@ import {
     WHITE_PAWN,
     WHITE_KNIGHT,
     WHITE_KING,
-    WHITE_ROOK,
-    BLACK_PAWN,
-    BLACK_KING,
+    // WHITE_ROOK,
+    // BLACK_PAWN,
+    // BLACK_KING,
     BLACK_ROOK,
     coordsToIndex,
-    COLOR_WHITE,
-    COLOR_BLACK
+    COLOR_WHITE
+    // COLOR_BLACK
 } from '../../js/ai/BoardDefinitions.js';
 
 describe('Integer MoveGenerator', () => {

@@ -9,20 +9,15 @@ import {
     TT_EXACT,
 } from '../../js/ai/TranspositionTable.js';
 import {
-    BOARD_SIZE,
+    // BOARD_SIZE,
     SQUARE_COUNT,
     COLOR_WHITE,
-    COLOR_BLACK,
+    // COLOR_BLACK,
     PIECE_PAWN
 } from '../../js/ai/BoardDefinitions.js';
 
 describe('Zobrist Hashing Verification', () => {
-    let board;
-
     beforeEach(() => {
-        board = Array(BOARD_SIZE)
-            .fill(null)
-            .map(() => Array(BOARD_SIZE).fill(null));
         clearTT();
     });
 

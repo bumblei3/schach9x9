@@ -1,19 +1,18 @@
 import {
-    evaluatePosition,
-    PST_KNIGHT
+    evaluatePosition
 } from '../../js/ai/Evaluation.js';
 import {
     SQUARE_COUNT,
     PIECE_NONE,
     WHITE_PAWN,
     WHITE_KNIGHT,
-    WHITE_KING,
-    BLACK_PAWN,
+    // WHITE_KING,
+    // BLACK_PAWN,
     BLACK_KNIGHT,
-    BLACK_KING,
-    coordsToIndex,
-    COLOR_WHITE,
-    COLOR_BLACK
+    // BLACK_KING,
+    coordsToIndex
+    // COLOR_WHITE,
+    // COLOR_BLACK
 } from '../../js/ai/BoardDefinitions.js';
 
 describe('Integer Evaluation', () => {

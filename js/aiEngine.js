@@ -24,8 +24,8 @@ import {
 
 import {
   getAllLegalMoves as genLegalInt,
-  makeMove as makeMoveInt, // Not used by UI directly usually
-  undoMove as undoMoveInt,
+  // makeMove as makeMoveInt, // Not used by UI directly usually
+  // undoMove as undoMoveInt,
   getAllCaptureMoves, // Int
   isInCheck as checkInt,
   isSquareAttacked,
@@ -46,7 +46,6 @@ import {
 } from './ai/TranspositionTable.js';
 
 import {
-  BOARD_SIZE,
   SQUARE_COUNT,
   PIECE_NONE,
   PIECE_PAWN,
@@ -61,7 +60,7 @@ import {
   COLOR_WHITE,
   COLOR_BLACK,
   TYPE_MASK,
-  COLOR_MASK,
+  // COLOR_MASK,
   indexToRow,
   indexToCol,
   coordsToIndex

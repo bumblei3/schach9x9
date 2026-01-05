@@ -94,7 +94,7 @@ export function getAllCaptureMoves(board, turnColor) {
 
 function generatePawnMoves(board, from, color, moves) {
   const direction = color === COLOR_WHITE ? UP : DOWN;
-  const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2. 
+  // const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2. 
   // 9x9 Board: 
   // White Pawns start at Row 6, 7? No, Row 8 is King. Row 7 Pawns?
   // Let's assume standard layout: White at bottom (Row 8), Black at top (Row 0).
@@ -198,11 +198,9 @@ function generateSlidingMoves(board, from, offsets, color, moves) {
 
   for (const offset of offsets) {
     let to = from;
-    let dist = 0;
-
     for (; ;) {
       to += offset;
-      dist++;
+      // dist++;
 
       if (!isValidSquare(to)) break;
 
@@ -359,8 +357,8 @@ export function isSquareAttacked(board, square, attackerColor) {
 }
 
 function checkRayAttacks(board, square, ranges, attackerColor, validTypes) {
-  const r = indexToRow(square);
-  const c = indexToCol(square);
+  // const r = indexToRow(square);
+  // const c = indexToCol(square);
 
   // Convert validTypes array to mask or set for speed? Array includes is small enough (size 4).
 
@@ -393,7 +391,7 @@ function checkRayAttacks(board, square, ranges, attackerColor, validTypes) {
 }
 
 export function findKing(board, color) {
-  const kingType = PIECE_KING; // What about Angel? If Angel is royal?
+  // const kingType = PIECE_KING; // What about Angel? If Angel is royal?
   // User said "Grand Refactor".
   for (let i = 0; i < SQUARE_COUNT; i++) {
     if ((board[i] & TYPE_MASK) === PIECE_KING && (board[i] & COLOR_MASK) === color) return i;
@@ -476,7 +474,7 @@ export function see(board, move) {
 
 // Find the Least Valuable Attacker of a square, ignoring pieces in usedSquares
 function getLVA(board, square, attackerColor, usedSquares) {
-  const PIECE_ORDER = [PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_ARCHBISHOP, PIECE_CHANCELLOR, PIECE_QUEEN, PIECE_ANGEL, PIECE_KING];
+  // const PIECE_ORDER = [PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_ARCHBISHOP, PIECE_CHANCELLOR, PIECE_QUEEN, PIECE_ANGEL, PIECE_KING];
 
   // Pawns first (LVA)
   const forward = attackerColor === COLOR_WHITE ? -9 : 9;

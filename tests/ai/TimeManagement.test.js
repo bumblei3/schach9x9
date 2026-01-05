@@ -14,7 +14,7 @@ jest.unstable_mockModule('../../js/logger.js', () => ({
     },
 }));
 
-const { getBestMove, resetNodesEvaluated, resetActiveConfig } = await import(
+const { getBestMove, resetNodesEvaluated } = await import(
     '../../js/ai/Search.js'
 );
 const { clearTT } = await import('../../js/ai/TranspositionTable.js');

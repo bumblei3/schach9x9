@@ -161,7 +161,7 @@ function getPST(type, r, c, color, isEndgame) {
 const pawnColsWhite = new Int8Array(9);
 const pawnColsBlack = new Int8Array(9);
 
-export function evaluatePosition(board, turnColorStr, config) {
+export function evaluatePosition(board, turnColorStr, _config) {
   const turnColor = turnColorStr === 'white' ? COLOR_WHITE : COLOR_BLACK;
 
   // Config defaults
