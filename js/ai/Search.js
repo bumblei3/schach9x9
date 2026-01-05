@@ -187,10 +187,29 @@ export function getBestMoveDetailed(
   }
 
   let finalScore = 0;
+  let alpha = -Infinity;
+  let beta = Infinity;
+  const ASPIRATION_WINDOW = 50; // centipawns
+
   // Expert: Standard Iterative Deepening
   for (let depth = 1; depth <= maxDepth; depth++) {
     if (stopSearch) break;
-    const score = minimax(board, depth, 0, -Infinity, Infinity, colorInt, rootZobrist, null, true);
+
+    // Use Aspiration Window for deeper searches
+    if (depth >= 3) {
+      alpha = finalScore - ASPIRATION_WINDOW;
+      beta = finalScore + ASPIRATION_WINDOW;
+    }
+
+    let score = minimax(board, depth, 0, alpha, beta, colorInt, rootZobrist, null, true);
+
+    // Fail-low or Fail-high: Re-search with full window
+    if (!stopSearch && (score <= alpha || score >= beta)) {
+      alpha = -Infinity;
+      beta = Infinity;
+      score = minimax(board, depth, 0, alpha, beta, colorInt, rootZobrist, null, true);
+    }
+
     if (!stopSearch) finalScore = score;
     const m = getTTMove(rootZobrist);
     if (m) {

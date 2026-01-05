@@ -399,8 +399,8 @@ export function evaluatePosition(board, turnColorStr, _config) {
   const whiteRooks = [];
   const blackRooks = [];
 
-  // let whiteBishops = 0;
-  // let blackBishops = 0;
+  let whiteBishops = 0;
+  let blackBishops = 0;
 
   // Tempo (Add to side to move)
   // Score is White - Black.
@@ -454,9 +454,10 @@ export function evaluatePosition(board, turnColorStr, _config) {
     }
 
     // Bishops
-    // if (type === PIECE_BISHOP) {
-    //   if (isWhite) whiteBishops++; else blackBishops++; // unused for now
-    // }
+    if (type === PIECE_BISHOP) {
+      if (isWhite) whiteBishops++;
+      else blackBishops++;
+    }
 
     // Mobility approximation (simple degree heuristic usually better than full movegen)
     // For Grand Refactor, let's skip expensive mobility counting for now,
@@ -476,6 +477,53 @@ export function evaluatePosition(board, turnColorStr, _config) {
       egScore += evaluateMopUp(whiteKingIdx, blackKingIdx);
     } else if (blackMaterial > whiteMaterial + 200) {
       egScore -= evaluateMopUp(blackKingIdx, whiteKingIdx);
+    }
+  }
+
+  // Bishop Pair Bonus (e.g., 50 centipawns)
+  const BISHOP_PAIR_BONUS = 50;
+  if (whiteBishops >= 2) {
+    mgScore += BISHOP_PAIR_BONUS;
+    egScore += BISHOP_PAIR_BONUS;
+  }
+  if (blackBishops >= 2) {
+    mgScore -= BISHOP_PAIR_BONUS;
+    egScore -= BISHOP_PAIR_BONUS;
+  }
+
+  // Pawn Structure: Doubled and Isolated Pawns
+  const DOUBLED_PAWN_PENALTY = 15;
+  const ISOLATED_PAWN_PENALTY = 20;
+
+  for (let c = 0; c < 9; c++) {
+    // White doubled
+    if (pawnColsWhite[c] > 1) {
+      mgScore -= (pawnColsWhite[c] - 1) * DOUBLED_PAWN_PENALTY;
+      egScore -= (pawnColsWhite[c] - 1) * DOUBLED_PAWN_PENALTY;
+    }
+    // Black doubled
+    if (pawnColsBlack[c] > 1) {
+      mgScore += (pawnColsBlack[c] - 1) * DOUBLED_PAWN_PENALTY;
+      egScore += (pawnColsBlack[c] - 1) * DOUBLED_PAWN_PENALTY;
+    }
+
+    // White isolated
+    if (pawnColsWhite[c] > 0) {
+      const leftC = c > 0 ? pawnColsWhite[c - 1] : 0;
+      const rightC = c < 8 ? pawnColsWhite[c + 1] : 0;
+      if (leftC === 0 && rightC === 0) {
+        mgScore -= ISOLATED_PAWN_PENALTY;
+        egScore -= ISOLATED_PAWN_PENALTY;
+      }
+    }
+    // Black isolated
+    if (pawnColsBlack[c] > 0) {
+      const leftC = c > 0 ? pawnColsBlack[c - 1] : 0;
+      const rightC = c < 8 ? pawnColsBlack[c + 1] : 0;
+      if (leftC === 0 && rightC === 0) {
+        mgScore += ISOLATED_PAWN_PENALTY;
+        egScore += ISOLATED_PAWN_PENALTY;
+      }
     }
   }
 
@@ -540,10 +588,36 @@ export function evaluatePosition(board, turnColorStr, _config) {
       const totalBonus = isSupported ? Math.round(bonus * 1.3) : bonus;
       if (isWhite) {
         mgScore += totalBonus;
-        egScore += totalBonus * 1.5;
+        egScore += totalBonus * 2.0; // Increased EG bonus for passed pawns
       } else {
         mgScore -= totalBonus;
-        egScore -= totalBonus * 1.5;
+        egScore -= totalBonus * 2.0;
+      }
+    } else {
+      // Linked pawn bonus for non-passed pawns
+      let isSupported = false;
+      const supportRow = isWhite ? r + 1 : r - 1;
+      if (supportRow >= 0 && supportRow < 9) {
+        for (let dc = -1; dc <= 1; dc += 2) {
+          const sc = c + dc;
+          if (sc >= 0 && sc < 9) {
+            const sp = board[supportRow * 9 + sc];
+            if ((sp & TYPE_MASK) === PIECE_PAWN && (sp & COLOR_MASK) === color) {
+              isSupported = true;
+              break;
+            }
+          }
+        }
+      }
+      if (isSupported) {
+        const LINKED_BONUS = 10;
+        if (isWhite) {
+          mgScore += LINKED_BONUS;
+          egScore += LINKED_BONUS;
+        } else {
+          mgScore -= LINKED_BONUS;
+          egScore -= LINKED_BONUS;
+        }
       }
     }
   }
