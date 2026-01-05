@@ -115,7 +115,7 @@ function convertBoardToInt(uiBoard) {
 // --- Worker Management ---
 
 let aiWorker = null;
-let workerPendingRequests = new Map();
+const workerPendingRequests = new Map();
 let workerReqId = 0;
 
 function initAiWorker() {
