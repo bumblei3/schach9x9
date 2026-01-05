@@ -1,6 +1,32 @@
-import { PuzzleManager } from '../js/puzzleManager.js';
-import { Game } from '../js/gameEngine.js';
+import { jest } from '@jest/globals';
 import { BOARD_SIZE } from '../js/gameEngine.js';
+
+// Mock ProceduralGenerator BEFORE importing PuzzleManager
+jest.unstable_mockModule('../js/puzzle/ProceduralGenerator.js', () => ({
+  ProceduralGenerator: {
+    generatePuzzle: jest.fn(() => ({
+      id: 'proc-mock-123',
+      title: 'Mock Generated Puzzle',
+      description: 'Mock description',
+      difficulty: 'Easy',
+      setupStr:
+        '..'.repeat(4) +
+        'bk' +
+        '..'.repeat(7) +
+        'bpbpbp' +
+        '..'.repeat(48) +
+        'wr' +
+        '..'.repeat(3) +
+        'wk' +
+        '..'.repeat(13) +
+        'w',
+      solution: [{ from: { r: 7, c: 0 }, to: { r: 0, c: 0 } }],
+    })),
+  },
+}));
+
+const { PuzzleManager } = await import('../js/puzzleManager.js');
+const { Game } = await import('../js/gameEngine.js');
 
 describe('PuzzleMode', () => {
   let puzzleManager;
@@ -80,6 +106,7 @@ describe('PuzzleMode', () => {
   });
 
   test('should generate new puzzle when list exhausted', () => {
+    // This will now trigger the mock
     puzzleManager.loadPuzzle(game, puzzleManager.puzzles.length - 1);
     const next = puzzleManager.nextPuzzle(game);
     expect(next).not.toBeNull();
