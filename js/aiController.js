@@ -2,6 +2,7 @@ import { PHASES, BOARD_SIZE } from './gameEngine.js';
 import { SHOP_PIECES } from './config.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
+import * as aiEngine from './aiEngine.js';
 
 // Piece values for shop
 const PIECES = SHOP_PIECES;
@@ -133,7 +134,7 @@ export class AIController {
     this.game.finishSetupPhase();
   }
 
-  aiMove() {
+  async aiMove() {
     // Don't move in puzzle mode - player solves alone
     if (this.game.mode === 'puzzle') {
       logger.debug('[AI] Skipping aiMove - puzzle mode');
@@ -144,20 +145,20 @@ export class AIController {
     this._aiMoveStartTime = Date.now();
 
     // Check if AI should resign
-    if (this.aiShouldResign()) {
+    if (await this.aiShouldResign()) {
       this.game.resign('black');
       return;
     }
 
     // Check if AI should offer draw
-    if (this.aiShouldOfferDraw()) {
+    if (await this.aiShouldOfferDraw()) {
       this.game.offerDraw('black');
       // Continue with move if player hasn't responded yet
     }
 
     // Check if there's a pending draw offer from player
     if (this.game.drawOffered && this.game.drawOfferedBy === 'white') {
-      this.aiEvaluateDrawOffer();
+      await this.aiEvaluateDrawOffer();
       // If draw was accepted, game is over, so return
       if (this.game.phase === PHASES.GAME_OVER) {
         return;
@@ -178,6 +179,12 @@ export class AIController {
       this.terminate();
       this.initWorkerPool();
     }
+
+    // ... rest of setup ...
+    // Note: I cannot replace the whole functions easily without context,
+    // but the start of aiMove needs async.
+
+    // ...
 
     // Difficulty to depth mapping
     const depthMap = {
@@ -412,287 +419,9 @@ export class AIController {
     }
   }
 
-  evaluateMove(move) {
-    // Simulate the move
-    const fromPiece = this.game.board[move.from.r][move.from.c];
-    const toPiece = this.game.board[move.to.r][move.to.c];
+  // Removed legacy minimax, quiescenceSearch, evaluatePosition, getBestMoveMinimax
 
-    this.game.board[move.to.r][move.to.c] = fromPiece;
-    this.game.board[move.from.r][move.from.c] = null;
-
-    const score = this.evaluatePosition('black');
-
-    // Undo the move
-    this.game.board[move.from.r][move.from.c] = fromPiece;
-    this.game.board[move.to.r][move.to.c] = toPiece;
-
-    return score;
-  }
-
-  getBestMoveMinimax(moves, depth) {
-    let bestScore = -Infinity;
-    let bestMove = moves[0];
-
-    for (const move of moves) {
-      const score = this.minimax(move, depth - 1, false, -Infinity, Infinity);
-      if (score > bestScore) {
-        bestScore = score;
-        bestMove = move;
-      }
-    }
-
-    return bestMove;
-  }
-
-  minimax(move, depth, isMaximizing, alpha, beta) {
-    // Simulate move
-    const fromPiece = this.game.board[move.from.r][move.from.c];
-    const toPiece = this.game.board[move.to.r][move.to.c];
-
-    // Save piece properties to prevent corruption during recursive simulation
-    const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
-
-    this.game.board[move.to.r][move.to.c] = fromPiece;
-    this.game.board[move.from.r][move.from.c] = null;
-    if (fromPiece) fromPiece.hasMoved = true;
-
-    let score;
-
-    if (depth === 0) {
-      // Use Quiescence Search at leaf nodes (limit depth to 2 in UI thread)
-      score = this.quiescenceSearch(alpha, beta, isMaximizing, 0, 2);
-    } else {
-      const color = isMaximizing ? 'black' : 'white';
-      const moves = this.game.getAllLegalMoves(color);
-
-      if (moves.length === 0) {
-        // Game over
-        score = isMaximizing ? -10000 : 10000;
-      } else if (isMaximizing) {
-        score = -Infinity;
-        for (const nextMove of moves) {
-          score = Math.max(score, this.minimax(nextMove, depth - 1, false, alpha, beta));
-          alpha = Math.max(alpha, score);
-          if (beta <= alpha) break;
-        }
-      } else {
-        score = Infinity;
-        for (const nextMove of moves) {
-          score = Math.min(score, this.minimax(nextMove, depth - 1, true, alpha, beta));
-          beta = Math.min(beta, score);
-          if (beta <= alpha) break;
-        }
-      }
-    }
-
-    // Undo move
-    this.game.board[move.from.r][move.from.c] = fromPiece;
-    this.game.board[move.to.r][move.to.c] = toPiece;
-    // FIX: Restore piece properties
-    if (fromPiece) {
-      fromPiece.hasMoved = fromPieceHasMoved;
-    }
-
-    return score;
-  }
-
-  quiescenceSearch(alpha, beta, isMaximizing, qDepth = 0, maxQDepth = 2) {
-    // Stand-pat score (evaluation of current position)
-    const standPat = this.evaluatePosition('black');
-
-    if (isMaximizing) {
-      if (standPat >= beta) return beta;
-      if (alpha < standPat) alpha = standPat;
-    } else {
-      if (standPat <= alpha) return alpha;
-      if (beta > standPat) beta = standPat;
-    }
-
-    // Limit depth to prevent hangs in the main thread
-    if (qDepth >= maxQDepth) return standPat;
-
-    // Find all CAPTURE moves
-    const color = isMaximizing ? 'black' : 'white';
-    const moves = this.game.getAllLegalMoves(color);
-    const captureMoves = moves.filter(m => this.game.board[m.to.r][m.to.c] !== null);
-
-    if (isMaximizing) {
-      for (const move of captureMoves) {
-        // Simulate
-        const fromPiece = this.game.board[move.from.r][move.from.c];
-        const toPiece = this.game.board[move.to.r][move.to.c];
-        // FIX: Save piece properties
-        const fromPieceType = fromPiece ? fromPiece.type : null;
-        const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
-
-        this.game.board[move.to.r][move.to.c] = fromPiece;
-        this.game.board[move.from.r][move.from.c] = null;
-
-        const score = this.quiescenceSearch(alpha, beta, false, qDepth + 1, maxQDepth);
-
-        // Undo
-        this.game.board[move.from.r][move.from.c] = fromPiece;
-        this.game.board[move.to.r][move.to.c] = toPiece;
-        // FIX: Restore piece properties
-        if (fromPiece) {
-          fromPiece.type = fromPieceType;
-          fromPiece.hasMoved = fromPieceHasMoved;
-        }
-
-        if (score >= beta) return beta;
-        if (score > alpha) alpha = score;
-      }
-      return alpha;
-    } else {
-      for (const move of captureMoves) {
-        // Simulate
-        const fromPiece = this.game.board[move.from.r][move.from.c];
-        const toPiece = this.game.board[move.to.r][move.to.c];
-        // FIX: Save piece properties
-        const fromPieceType = fromPiece ? fromPiece.type : null;
-        const fromPieceHasMoved = fromPiece ? fromPiece.hasMoved : false;
-
-        this.game.board[move.to.r][move.to.c] = fromPiece;
-        this.game.board[move.from.r][move.from.c] = null;
-
-        const score = this.quiescenceSearch(alpha, beta, true, qDepth + 1, maxQDepth);
-
-        // Undo
-        this.game.board[move.from.r][move.from.c] = fromPiece;
-        this.game.board[move.to.r][move.to.c] = toPiece;
-        // FIX: Restore piece properties
-        if (fromPiece) {
-          fromPiece.type = fromPieceType;
-          fromPiece.hasMoved = fromPieceHasMoved;
-        }
-
-        if (score <= alpha) return alpha;
-        if (score < beta) beta = score;
-      }
-      return beta;
-    }
-  }
-
-  evaluatePosition(forColor) {
-    const pieceValues = { p: 100, n: 320, b: 330, r: 500, a: 700, q: 900, c: 900, k: 20000 };
-
-    // Piece-Square Tables (bonus for good positions)
-    const pawnTable = [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [50, 50, 50, 50, 50, 50, 50, 50, 50],
-      [10, 10, 20, 30, 30, 20, 10, 10, 10],
-      [5, 5, 10, 25, 25, 10, 5, 5, 5],
-      [0, 0, 0, 20, 20, 0, 0, 0, 0],
-      [5, -5, -10, 0, 0, -10, -5, 5, 5],
-      [5, 10, 10, -20, -20, 10, 10, 5, 5],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ];
-
-    const knightTable = [
-      [-50, -40, -30, -30, -30, -30, -40, -50, -50],
-      [-40, -20, 0, 0, 0, 0, -20, -40, -40],
-      [-30, 0, 10, 15, 15, 10, 0, -30, -30],
-      [-30, 5, 15, 20, 20, 15, 5, -30, -30],
-      [-30, 0, 15, 20, 20, 15, 0, -30, -30],
-      [-30, 5, 10, 15, 15, 10, 5, -30, -30],
-      [-40, -20, 0, 5, 5, 0, -20, -40, -40],
-      [-50, -40, -30, -30, -30, -30, -40, -50, -50],
-      [-50, -40, -30, -30, -30, -30, -40, -50, -50],
-    ];
-
-    const bishopTable = [
-      [-20, -10, -10, -10, -10, -10, -10, -20, -20],
-      [-10, 0, 0, 0, 0, 0, 0, -10, -10],
-      [-10, 0, 5, 10, 10, 5, 0, -10, -10],
-      [-10, 5, 5, 10, 10, 5, 5, -10, -10],
-      [-10, 0, 10, 10, 10, 10, 0, -10, -10],
-      [-10, 10, 10, 10, 10, 10, 10, -10, -10],
-      [-10, 5, 0, 0, 0, 0, 5, -10, -10],
-      [-20, -10, -10, -10, -10, -10, -10, -20, -20],
-      [-20, -10, -10, -10, -10, -10, -10, -20, -20],
-    ];
-
-    const rookTable = [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [5, 10, 10, 10, 10, 10, 10, 5, 5],
-      [-5, 0, 0, 0, 0, 0, 0, -5, -5],
-      [-5, 0, 0, 0, 0, 0, 0, -5, -5],
-      [-5, 0, 0, 0, 0, 0, 0, -5, -5],
-      [-5, 0, 0, 0, 0, 0, 0, -5, -5],
-      [-5, 0, 0, 0, 0, 0, 0, -5, -5],
-      [0, 0, 0, 5, 5, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ];
-
-    const queenTable = [
-      [-20, -10, -10, -5, -5, -10, -10, -20, -20],
-      [-10, 0, 0, 0, 0, 0, 0, -10, -10],
-      [-10, 0, 5, 5, 5, 5, 0, -10, -10],
-      [-5, 0, 5, 5, 5, 5, 0, -5, -5],
-      [0, 0, 5, 5, 5, 5, 0, -5, 0],
-      [-10, 5, 5, 5, 5, 5, 0, -10, -10],
-      [-10, 0, 5, 0, 0, 0, 0, -10, -10],
-      [-20, -10, -10, -5, -5, -10, -10, -20, -20],
-      [-20, -10, -10, -5, -5, -10, -10, -20, -20],
-    ];
-
-    const kingTable = [
-      [-30, -40, -40, -50, -50, -40, -40, -30, -30],
-      [-30, -40, -40, -50, -50, -40, -40, -30, -30],
-      [-30, -40, -40, -50, -50, -40, -40, -30, -30],
-      [-30, -40, -40, -50, -50, -40, -40, -30, -30],
-      [-20, -30, -30, -40, -40, -30, -30, -20, -20],
-      [-10, -20, -20, -20, -20, -20, -20, -10, -10],
-      [20, 20, 0, 0, 0, 0, 20, 20, 20],
-      [20, 30, 10, 0, 0, 10, 30, 20, 20],
-      [30, 40, 40, 0, 0, 20, 40, 30, 30],
-    ];
-
-    const tables = {
-      p: pawnTable,
-      n: knightTable,
-      b: bishopTable,
-      r: rookTable,
-      q: queenTable,
-      k: kingTable,
-      a: queenTable, // Reuse Queen table for Archbishop
-      c: queenTable, // Reuse Queen table for Chancellor
-    };
-
-    let score = 0;
-
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        const piece = this.game.board[r][c];
-        if (piece) {
-          let value = pieceValues[piece.type];
-
-          // Add piece-square table bonus
-          const table = tables[piece.type];
-          if (table) {
-            const row = piece.color === 'white' ? BOARD_SIZE - 1 - r : r;
-            value += table[row][c];
-          }
-
-          // Center Control Bonus (Central 3x3)
-          if (r >= 3 && r <= 5 && c >= 3 && c <= 5) {
-            value += 15;
-          }
-
-          if (piece.color === forColor) {
-            score += value;
-          } else {
-            score -= value;
-          }
-        }
-      }
-    }
-
-    return score;
-  }
-
-  aiEvaluateDrawOffer() {
+  async aiEvaluateDrawOffer() {
     if (!this.game.drawOffered) {
       return;
     }
@@ -700,8 +429,12 @@ export class AIController {
     const aiColor = 'black'; // Assuming AI is always black
     let shouldAccept = false;
 
-    // Evaluate position
-    const score = this.evaluatePosition(aiColor);
+    // Evaluate position (using Wasm engine via aiController helper or direct import)
+    // We need to import evaluatePosition from aiEngine.js
+    // Since we are in a module, we can import at top level, but to avoid circular deps if any...
+    // But we already import UI etc. Let's assume we imported evaluatePosition.
+    // See top of file for imports.
+    const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
 
     // Accept if position is bad for AI (score <= -200 means AI is losing)
     if (score <= -200) {
@@ -735,13 +468,13 @@ export class AIController {
     }
   }
 
-  aiShouldOfferDraw() {
+  async aiShouldOfferDraw() {
     if (this.game.drawOffered) {
       return false; // Already an offer pending
     }
 
     const aiColor = 'black';
-    const score = this.evaluatePosition(aiColor);
+    const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
 
     // Offer draw if position is bad but not hopeless (-300 to -100)
     if (score >= -300 && score <= -100 && this.game.moveHistory.length > 20) {
@@ -766,9 +499,9 @@ export class AIController {
     return false;
   }
 
-  aiShouldResign() {
+  async aiShouldResign() {
     const aiColor = 'black';
-    const score = this.evaluatePosition(aiColor);
+    const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
 
     // Resign if position is hopeless (score <= -1500 means AI is losing badly)
     if (score <= -1500) {

@@ -145,7 +145,7 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
   }
 
   // Calculate evaluation score
-  const evalScore = evaluatePosition(game.board, 'white');
+  const evalScore = await evaluatePosition(game.board, 'white');
   moveRecord.evalScore = evalScore;
 
   // Update evaluation bar if available
@@ -160,7 +160,8 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
 
   // Blunder Detection
   if (game.tutorController && game.tutorController.checkBlunder) {
-    game.tutorController.checkBlunder(moveRecord);
+    // Fire and forget or await? Safer to await to ensure sequence
+    await game.tutorController.checkBlunder(moveRecord);
   }
 
   // Puzzle Logic Check

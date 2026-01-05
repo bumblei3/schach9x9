@@ -9,7 +9,7 @@ import { MENTOR_LEVELS } from '../config.js';
  * @param {Object} game
  * @param {Object} move {from: {r,c}, to: {r,c}}
  */
-export function analyzePlayerMovePreExecution(game, move) {
+export async function analyzePlayerMovePreExecution(game, move) {
   if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return null;
 
   const from = move.from;
@@ -18,7 +18,7 @@ export function analyzePlayerMovePreExecution(game, move) {
   if (!piece) return null;
 
   // 1. Get current evaluation
-  const currentEval = aiEngine.evaluatePosition(game.board, 'white');
+  const currentEval = await aiEngine.evaluatePosition(game.board, 'white');
 
   // 🎯 Add tactical penalty for hanging pieces
   const threats = TacticsDetector.detectThreatsAfterMove(game, { getPieceName: t => t }, move);
@@ -34,7 +34,7 @@ export function analyzePlayerMovePreExecution(game, move) {
   game.board[from.r][from.c] = null;
 
   // 3. Evaluate resulting position
-  let newEval = aiEngine.evaluatePosition(game.board, 'white');
+  let newEval = await aiEngine.evaluatePosition(game.board, 'white');
 
   const turn = piece.color;
   if (turn === 'white') newEval -= penalty;
@@ -380,7 +380,7 @@ export function handlePlayerMove(game, tutorController, from, to) {
 /**
  * Checks for blunders
  */
-export function checkBlunder(game, tutorController, moveRecord) {
+export async function checkBlunder(game, tutorController, moveRecord) {
   if (!moveRecord || game.mode === 'puzzle') return;
 
   const currentEval = moveRecord.evalScore;
@@ -399,8 +399,7 @@ export function checkBlunder(game, tutorController, moveRecord) {
 
   if (drop >= 200) {
     // 2.0 evaluation drop is a blunder
-    const analysis = analyzeMoveWithExplanation.call(
-      tutorController,
+    const analysis = analyzeMoveWithExplanation(
       game,
       { from: moveRecord.from, to: moveRecord.to },
       currentEval,
@@ -414,8 +413,7 @@ export function checkBlunder(game, tutorController, moveRecord) {
     // We assume the best move score is either the engine's best or the previous eval if no engine ran
     const bestScore =
       game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
-    const analysis = analyzeMoveWithExplanation.call(
-      tutorController,
+    const analysis = analyzeMoveWithExplanation(
       game,
       { from: moveRecord.from, to: moveRecord.to },
       currentEval,
@@ -449,23 +447,23 @@ export function showBlunderWarning(game, analysis, proceedCallback = null) {
 
   const buttons = isPreMove
     ? [
-        { text: 'Abbrechen', class: 'btn-secondary' },
-        { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
-      ]
+      { text: 'Abbrechen', class: 'btn-secondary' },
+      { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
+    ]
     : [
-        { text: 'Nein, weiterspielen', class: 'btn-secondary' },
-        {
-          text: 'Ja, Zug rückgängig machen',
-          class: 'btn-primary',
-          callback: () => {
-            if (game.moveController && game.moveController.undoMove) {
-              game.moveController.undoMove();
-            } else if (game.undoMove) {
-              game.undoMove();
-            }
-          },
+      { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+      {
+        text: 'Ja, Zug rückgängig machen',
+        class: 'btn-primary',
+        callback: () => {
+          if (game.moveController && game.moveController.undoMove) {
+            game.moveController.undoMove();
+          } else if (game.undoMove) {
+            game.undoMove();
+          }
         },
-      ];
+      },
+    ];
 
   UI.showModal(title, message, buttons);
 }

@@ -5,5 +5,5 @@ export default {
   transform: {},
   verbose: true,
   testPathIgnorePatterns: ['/node_modules/', '/tests/browser/', '\\.spec\\.js$'],
-  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.js'],
+  setupFiles: ['<rootDir>/tests/jest.setup.cjs'],
 };

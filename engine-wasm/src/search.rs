@@ -31,7 +31,7 @@ pub fn search(board: &Board, depth: i8, color: i8, config: &EvalConfig) -> (Opti
     };
 
     let mut overall_best_move = None;
-    let mut best_score = -30000;
+    let mut best_score = evaluate_position(board, color, config);
 
     for d in 1..=depth {
         let (m, s) = alphabeta(board, d, -30000, 30000, color, 0, &mut ctx, config);

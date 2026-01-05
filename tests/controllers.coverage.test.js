@@ -33,12 +33,23 @@ jest.unstable_mockModule('../js/storage.js', () => ({
   storageManager: { saveGame: jest.fn(), loadGame: jest.fn(), loadStateIntoGame: jest.fn() },
 }));
 
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(),
+  see: jest.fn(() => 0),
+  isSquareAttacked: jest.fn(() => false),
+  findKing: jest.fn(() => ({ r: 0, c: 0 })),
+  isInCheck: jest.fn(() => false),
+  getAllLegalMoves: jest.fn(() => []),
+  getParamsForElo: jest.fn(() => ({ maxDepth: 4, elo: 2500 })),
+}));
+
 // Use top-level await
 const { GameController } = await import('../js/gameController.js');
 const { AIController } = await import('../js/aiController.js');
 const { TutorController } = await import('../js/tutorController.js');
 const { storageManager } = await import('../js/storage.js');
 const UI = await import('../js/ui.js');
+const { evaluatePosition } = await import('../js/aiEngine.js');
 
 describe('Controllers Coverage Expansion', () => {
   let game, gc, ac, tc;
@@ -114,24 +125,24 @@ describe('Controllers Coverage Expansion', () => {
   });
 
   describe('AIController', () => {
-    test('aiEvaluateDrawOffer should accept if losing', () => {
+    test('aiEvaluateDrawOffer should accept if losing', async () => {
       game.drawOffered = true;
-      jest.spyOn(ac, 'evaluatePosition').mockReturnValue(-500);
+      evaluatePosition.mockResolvedValue(-500);
 
-      ac.aiEvaluateDrawOffer();
+      await ac.aiEvaluateDrawOffer();
       expect(game.acceptDraw).toHaveBeenCalled();
     });
 
-    test('aiShouldOfferDraw should return true if slightly losing', () => {
+    test('aiShouldOfferDraw should return true if slightly losing', async () => {
       game.moveHistory = Array(30).fill({});
-      jest.spyOn(ac, 'evaluatePosition').mockReturnValue(-200);
+      evaluatePosition.mockResolvedValue(-200);
 
-      expect(ac.aiShouldOfferDraw()).toBe(true);
+      expect(await ac.aiShouldOfferDraw()).toBe(true);
     });
 
-    test('aiShouldResign should return true if losing badly', () => {
-      jest.spyOn(ac, 'evaluatePosition').mockReturnValue(-2000);
-      expect(ac.aiShouldResign()).toBe(true);
+    test('aiShouldResign should return true if losing badly', async () => {
+      evaluatePosition.mockResolvedValue(-2000);
+      expect(await ac.aiShouldResign()).toBe(true);
     });
 
     test('analyzePosition should create worker and send message', () => {
@@ -152,18 +163,20 @@ describe('Controllers Coverage Expansion', () => {
       );
     });
 
-    test('aiMove should evaluate draw offer if pending', () => {
+    test('aiMove should evaluate draw offer if pending', async () => {
       game.drawOffered = true;
       game.drawOfferedBy = 'white';
-      const spy = jest.spyOn(ac, 'aiEvaluateDrawOffer');
+      const spy = jest.spyOn(ac, 'aiEvaluateDrawOffer').mockImplementation(() => Promise.resolve());
+      jest.spyOn(ac, 'aiShouldResign').mockResolvedValue(false);
+      jest.spyOn(ac, 'aiShouldOfferDraw').mockResolvedValue(false);
 
-      ac.aiMove();
+      await ac.aiMove();
       expect(spy).toHaveBeenCalled();
     });
   });
 
   describe('TutorController', () => {
-    test('checkBlunder should trigger modal on large eval drop', () => {
+    test('checkBlunder should trigger modal on large eval drop', async () => {
       const moveRecord = {
         from: { r: 6, c: 4 },
         to: { r: 4, c: 4 },
@@ -173,7 +186,7 @@ describe('Controllers Coverage Expansion', () => {
       game.lastEval = 0;
       game.board[6][4] = { type: 'p', color: 'white' };
 
-      tc.checkBlunder(moveRecord);
+      await tc.checkBlunder(moveRecord);
 
       expect(UI.showModal).toHaveBeenCalledWith(
         expect.stringContaining('Fehler'),

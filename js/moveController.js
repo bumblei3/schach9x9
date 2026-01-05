@@ -14,7 +14,7 @@ export class MoveController {
     this.redoStack = [];
   }
 
-  handlePlayClick(r, c) {
+  async handlePlayClick(r, c) {
     const clickedPiece = this.game.board[r][c];
     const isCurrentPlayersPiece = clickedPiece && clickedPiece.color === this.game.turn;
 
@@ -33,11 +33,13 @@ export class MoveController {
     const isSelectedMine = selectedPiece && selectedPiece.color === this.game.turn;
 
     if (isSelectedMine && this.game.validMoves) {
+      // getValidMoves returns destination squares {r, c}
       const move = this.game.validMoves.find(m => m.r === r && m.c === c);
+
       if (move) {
         const from = { ...this.game.selectedSquare };
 
-        const finalizeMove = () => {
+        const finalizeMove = async () => {
           // Track accuracy for human player
           const isHumanMove = this.game.isAI ? this.game.turn === 'white' : true;
           if (isHumanMove) {
@@ -49,12 +51,12 @@ export class MoveController {
               this.game.tutorController.handlePlayerMove(from, move);
             }
           }
-          this.executeMove(from, move);
+          await this.executeMove(from, move);
         };
 
         // 🎯 KI-Mentor (Coach) - Proaktive Warnung vor Fehlern
         if (this.game.kiMentorEnabled && this.game.tutorController) {
-          const analysis = this.game.tutorController.analyzePlayerMovePreExecution({
+          const analysis = await this.game.tutorController.analyzePlayerMovePreExecution({
             from,
             to: move,
           });
@@ -64,7 +66,7 @@ export class MoveController {
           }
         }
 
-        finalizeMove();
+        await finalizeMove();
         return;
       }
     }

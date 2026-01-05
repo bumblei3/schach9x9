@@ -71,20 +71,38 @@ describe('Full-Game Integration Test', () => {
     gc.handleCellClick(6, 4);
     expect(game.board[6][4]).toMatchObject({ type: 'p', color: 'white' });
 
+    gc.handleCellClick(6, 6);
+    expect(game.board[6][6]).toBeNull(); // 6,6 is outside corridor!
+
+    game.selectedShopPiece = 'p'; // Re-select
+    gc.handleCellClick(6, 5);
+    expect(game.board[6][5]).toMatchObject({ type: 'p', color: 'white' });
+
     // 4. Move to PLAY phase
     game.phase = PHASES.PLAY;
     game.turn = 'white';
 
     // Move the pawn: (6,4) to (5,4)
-    gc.handleCellClick(6, 4); // Select
+    game.selectedShopPiece = 'p'; // Simulate shop selection
+    gc.handleCellClick(8, 4);
+    expect(game.selectedSquare).toBeNull(); // Black king, but white turn
+
+    // Select White Pawn
+    gc.handleCellClick(6, 4);
     expect(game.selectedSquare).toEqual({ r: 6, c: 4 });
+    expect(game.validMoves).toBeDefined();
 
-    // We need to await here because executeMove is async and we want to see the result
+    // Select different White Pawn
+    gc.handleCellClick(6, 5);
+    expect(game.selectedSquare).toEqual({ r: 6, c: 5 });
+
+    // Execute Move (6,4 -> 5,4)
+    gc.handleCellClick(6, 4); // Select
     // BUT gc.handleCellClick is sync. We'll wait a tick.
-    gc.handleCellClick(5, 4); // Move
+    await gc.handleCellClick(5, 4); // Move
 
-    await new Promise(resolve => setTimeout(resolve, 10));
-
+    // Check post-move state
+    // White pawn moved to 5,4
     expect(game.board[5][4]).toMatchObject({ type: 'p', color: 'white' });
     expect(game.board[6][4]).toBeNull();
     expect(game.turn).toBe('black');

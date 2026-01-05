@@ -43,26 +43,28 @@ export async function getTutorHints(game, tutorController) {
   const bestMoves = [result];
 
   // Convert engine moves to hints with explanations
-  return bestMoves.map((hint, index) => {
-    const analysis = MoveAnalyzer.analyzeMoveWithExplanation.call(
-      tutorController,
-      game,
-      hint.move,
-      hint.score,
-      bestMoves[0].score
-    );
+  return Promise.all(
+    bestMoves.map(async (hint, index) => {
+      const analysis = await MoveAnalyzer.analyzeMoveWithExplanation.call(
+        tutorController,
+        game,
+        hint.move,
+        hint.score,
+        bestMoves[0].score
+      );
 
-    // Extract PV from engine
-    const pv = aiEngine.extractPV(game.board, turnColor);
+      // Extract PV from engine result
+      const pv = hint.pv || [];
 
-    return {
-      move: hint.move,
-      score: hint.score,
-      notation: MoveAnalyzer.getMoveNotation(game, hint.move),
-      analysis,
-      pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
-    };
-  });
+      return {
+        move: hint.move,
+        score: hint.score,
+        notation: MoveAnalyzer.getMoveNotation(game, hint.move),
+        analysis,
+        pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
+      };
+    })
+  );
 }
 
 /**

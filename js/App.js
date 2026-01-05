@@ -316,18 +316,6 @@ export class App {
     Game.prototype.aiMove = function () {
       return this.aiController.aiMove();
     };
-    Game.prototype.evaluateMove = function (move) {
-      return this.aiController.evaluateMove(move);
-    };
-    Game.prototype.getBestMoveMinimax = function (moves, depth) {
-      return this.aiController.getBestMoveMinimax(moves, depth);
-    };
-    Game.prototype.minimax = function (move, depth, isMax, alpha, beta) {
-      return this.aiController.minimax(move, depth, isMax, alpha, beta);
-    };
-    Game.prototype.quiescenceSearch = function (alpha, beta, isMax) {
-      return this.aiController.quiescenceSearch(alpha, beta, isMax);
-    };
     Game.prototype.evaluatePosition = function (color) {
       return this.aiController.evaluatePosition(color);
     };

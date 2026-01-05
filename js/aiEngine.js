@@ -5,47 +5,21 @@
 
 import { logger } from './logger.js';
 import {
-  getBestMove as searchBestMove,
-  getBestMoveDetailed as searchBestMoveDetailed,
-  analyzePosition as searchAnalyze,
-  extractPV as searchExtractPV,
-  setProgressCallback,
-  getNodesEvaluated as searchGetNodes,
-  resetNodesEvaluated as searchResetNodes,
-  convertMoveToResult,
-} from './ai/Search.js';
-import {
   getBestMoveWasm,
   getWasmNodesEvaluated,
   resetWasmNodesEvaluated,
 } from './ai/wasmBridge.js';
 
-import { evaluatePosition as evalInt } from './ai/Evaluation.js';
-
 import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.js';
 
 import {
   getAllLegalMoves as genLegalInt,
-  // makeMove as makeMoveInt, // Not used by UI directly usually
-  // undoMove as undoMoveInt,
   getAllCaptureMoves, // Int
   isInCheck as checkInt,
   isSquareAttacked as isSquareAttackedInt,
   findKing as findKingInt,
   see as seeInt,
 } from './ai/MoveGenerator.js';
-
-import {
-  computeZobristHash as searchComputeHash,
-  storeTT,
-  probeTT,
-  clearTT,
-  getTTSize,
-  setTTMaxSize,
-  testStoreTT,
-  testProbeTT,
-  getTTMove,
-} from './ai/TranspositionTable.js';
 
 import {
   SQUARE_COUNT,
@@ -62,7 +36,6 @@ import {
   COLOR_WHITE,
   COLOR_BLACK,
   TYPE_MASK,
-  // COLOR_MASK,
   indexToRow,
   indexToCol,
   coordsToIndex,
@@ -97,7 +70,6 @@ const TYPE_INT_TO_STR = {
 function convertBoardToInt(uiBoard) {
   const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
   const size = uiBoard.length;
-  // if (size !== BOARD_SIZE) console.warn('Board Size Mismatch in conversion!');
 
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
@@ -123,7 +95,7 @@ function initAiWorker() {
 
   try {
     aiWorker = new Worker(new URL('./ai/aiWorker.js', import.meta.url), { type: 'module' });
-    aiWorker.onmessage = (e) => {
+    aiWorker.onmessage = e => {
       const { type, id, payload, error } = e.data;
       if (workerPendingRequests.has(id)) {
         const { resolve, reject } = workerPendingRequests.get(id);
@@ -149,9 +121,18 @@ function runWorkerSearch(board, turnColor, depth, personality, elo) {
     aiWorker.postMessage({
       type: 'SEARCH',
       id,
-      payload: { board, turnColor, depth, personality, elo }
+      payload: { board, turnColor, depth, personality, elo },
     });
   });
+}
+
+function convertMoveToResult(move) {
+  if (!move) return null;
+  return {
+    from: { r: indexToRow(move.from), c: indexToCol(move.from) },
+    to: { r: indexToRow(move.to), c: indexToCol(move.to) },
+    promotion: move.promotion,
+  };
 }
 
 // --- Bridge Functions ---
@@ -182,37 +163,15 @@ export async function getBestMove(
   difficulty = 'expert',
   timeParams = {}
 ) {
-  const board = convertBoardToInt(uiBoard);
-  // Prepare config (timeParams is used as a carry-all search config)
-  let config = timeParams;
-  if (timeParams.elo) {
-    const eloParams = getParamsForElo(timeParams.elo);
-    config = { ...timeParams, ...eloParams };
-    maxDepth = config.maxDepth;
-  }
-
-  // Wasm fallback
-  if (difficulty === 'expert') {
-    const wasmResult = await getBestMoveWasm(
-      board,
-      turnColor,
-      maxDepth,
-      config.personality || 'NORMAL',
-      config.elo || 2500
-    );
-    if (wasmResult && wasmResult.move) return convertMoveToResult(wasmResult.move);
-  }
-
-  return searchBestMove(board, turnColor, maxDepth, difficulty, config);
+  const result = await getBestMoveDetailed(uiBoard, turnColor, maxDepth, difficulty, timeParams);
+  if (!result || !result.move) return null;
+  // Flatten result to match legacy API (Move object with extra props)
+  const move = result.move;
+  move.score = result.score;
+  return move;
 }
 
-export async function getBestMoveDetailed(
-  uiBoard,
-  turnColor,
-  maxDepth = 4,
-  difficulty = 'expert',
-  timeParams = {}
-) {
+export async function getBestMoveDetailed(uiBoard, turnColor, maxDepth = 4, timeParams = {}) {
   const board = convertBoardToInt(uiBoard);
   let config = timeParams;
   if (timeParams.elo) {
@@ -221,62 +180,60 @@ export async function getBestMoveDetailed(
     maxDepth = config.maxDepth;
   }
 
-  // Experimental: Try Wasm Engine first
-  if (difficulty === 'expert') {
-    const personality = config.personality || 'NORMAL';
-    const elo = config.elo || 2500;
+  const personality = config.personality || 'NORMAL';
+  const elo = config.elo || 2500;
 
-    // Use Worker if available (Browser)
-    if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
-      try {
-        const result = await runWorkerSearch(board, turnColor, maxDepth, personality, elo);
-        if (result && result.move) {
-          logger.debug('[AiEngine] Using Wasm Worker Result');
-          return {
-            ...result,
-            move: convertMoveToResult(result.move),
-          };
-        }
-      } catch (err) {
-        logger.error('[AiEngine] Worker search failed, falling back to main thread', err);
+  // Use Worker if available (Browser)
+  if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
+    try {
+      const result = await runWorkerSearch(board, turnColor, maxDepth, personality, elo);
+      if (result && result.move) {
+        logger.debug('[AiEngine] Using Wasm Worker Result');
+        return {
+          ...result,
+          move: convertMoveToResult(result.move),
+        };
       }
-    }
-
-    // Fallback or Node.js environment
-    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
-    if (wasmResult && wasmResult.move) {
-      logger.debug('[AiEngine] Using Wasm Engine Result (Main Thread)');
-      return {
-        ...wasmResult,
-        move: convertMoveToResult(wasmResult.move),
-      };
+    } catch (err) {
+      logger.error('[AiEngine] Worker search failed, falling back to main thread', err);
     }
   }
 
-  return searchBestMoveDetailed(board, turnColor, maxDepth, difficulty, config);
+  // Fallback or Node.js environment
+  const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
+  if (wasmResult) {
+    logger.debug('[AiEngine] Using Wasm Engine Result (Main Thread)');
+    return {
+      ...wasmResult,
+      move: convertMoveToResult(wasmResult.move),
+    };
+  }
+
+  return null;
 }
 
-export function evaluatePosition(uiBoard, forColor) {
+export async function evaluatePosition(uiBoard, forColor, config = {}) {
   const board = convertBoardToInt(uiBoard);
-  return evalInt(board, forColor); // evalInt expects string? 'white'/'black'
-  // Evaluation.js: export function evaluatePosition(board, turnColor)
-  // It handles 'white'/'black' strings or Ints?
-  // Evaluation.js: const color = turnColor === 'white' ? COLOR_WHITE : ...
-  // So it expects string.
+  // Use depth 0 search to get static evaluation
+  // Note: This is now ASYNC. Tests must be updated.
+  const wasmResult = await getBestMoveWasm(
+    board,
+    forColor,
+    0,
+    config.personality || 'NORMAL',
+    config.elo || 2500
+  );
+  return wasmResult ? wasmResult.score : 0;
 }
 
-export function computeZobristHash(uiBoard, turnColor) {
-  const board = convertBoardToInt(uiBoard);
-  const colorInt = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
-  return searchComputeHash(board, colorInt);
+// Deprecated/Stubbed
+export function computeZobristHash(_uiBoard, _turnColor) {
+  return 0; // Wasm handles this internally now
 }
 
 export function getAllLegalMoves(uiBoard, turnColor) {
   const board = convertBoardToInt(uiBoard);
-  const intMoves = genLegalInt(board, turnColor); // expects string too?
-  // MoveGenerator.js: getAllLegalMoves(board, turnColor) -> internal conversion.
-
-  // Convert intMoves to UI Moves
+  const intMoves = genLegalInt(board, turnColor);
   return intMoves.map(m => ({
     from: { r: indexToRow(m.from), c: indexToCol(m.from) },
     to: { r: indexToRow(m.to), c: indexToCol(m.to) },
@@ -284,23 +241,21 @@ export function getAllLegalMoves(uiBoard, turnColor) {
   }));
 }
 
-export function analyzePosition(uiBoard, turnColor) {
-  const board = convertBoardToInt(uiBoard);
-  return searchAnalyze(board, turnColor); // Pass string
+export function analyzePosition(_uiBoard, _turnColor) {
+  return null; // Analysis mode temporarily disabled in Wasm port
 }
 
-export function extractPV(uiBoard, turnColor) {
-  const board = convertBoardToInt(uiBoard);
-  return searchExtractPV(board, turnColor); // Pass string
+export function extractPV(_uiBoard, _turnColor) {
+  return []; // PV extraction temporarily disabled
 }
 
-function isSquareAttacked(uiBoard, r, c, turnColor) {
+export function isSquareAttacked(uiBoard, r, c, turnColor) {
   const board = convertBoardToInt(uiBoard);
   const colorInt = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   return isSquareAttackedInt(board, coordsToIndex(r, c), colorInt);
 }
 
-function findKing(uiBoard, turnColor) {
+export function findKing(uiBoard, turnColor) {
   const board = convertBoardToInt(uiBoard);
   const colorInt = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const index = findKingInt(board, colorInt);
@@ -341,11 +296,10 @@ export function makeMove(uiBoard, uiMove) {
 }
 
 export function getNodesEvaluated() {
-  return searchGetNodes() + getWasmNodesEvaluated();
+  return getWasmNodesEvaluated();
 }
 
 export function resetNodesEvaluated() {
-  searchResetNodes();
   resetWasmNodesEvaluated();
 }
 
@@ -368,23 +322,14 @@ export function isInCheck(uiBoard, color) {
   return checkInt(board, c);
 }
 
-// PST Legacy Export
-import {
-  PST_PAWN,
-  PST_KNIGHT,
-  PST_BISHOP,
-  PST_ROOK,
-  PST_QUEEN,
-  PST_KING_MG,
-} from './ai/Evaluation.js';
-
-const PST = {
-  p: PST_PAWN,
-  n: PST_KNIGHT,
-  b: PST_BISHOP,
-  r: PST_ROOK,
-  q: PST_QUEEN,
-  k: PST_KING_MG,
+// Inlined PSTs (Legacy - Stubs)
+export const PST = {
+  p: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  n: [],
+  b: [],
+  r: [],
+  q: [],
+  k: [],
 };
 
 // Export everything
@@ -392,19 +337,23 @@ export {
   logger,
   setOpeningBook,
   queryOpeningBook,
-  // extractPV, // Explicitly exported above
   setProgressCallback,
   getAllCaptureMoves,
-  isSquareAttacked,
-  findKing,
-  storeTT,
-  probeTT,
-  getTTMove,
-  clearTT,
-  getTTSize,
-  setTTMaxSize,
-  testStoreTT,
-  testProbeTT,
-  PST,
   convertBoardToInt, // Internal testing
 };
+
+// Stubbed TT functions
+export function storeTT() { }
+export function probeTT() { }
+export function getTTMove() {
+  return null;
+}
+export function clearTT() { }
+export function getTTSize() {
+  return 0;
+}
+export function setTTMaxSize() { }
+export function testStoreTT() { }
+export function testProbeTT() { }
+
+function setProgressCallback() { }

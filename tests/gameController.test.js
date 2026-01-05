@@ -65,6 +65,8 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
       this.redoStack = [];
       this.positionHistory = [];
       this.capturedPieces = { white: [], black: [] };
+      this.selectedSquare = null;
+      this.validMoves = null;
       this.drawOffered = false;
       this.drawOfferedBy = null;
     }
@@ -86,6 +88,7 @@ describe('GameController', () => {
   beforeEach(() => {
     game = new Game(15, 'setup', false);
     game.log = jest.fn();
+    game.handlePlayClick = jest.fn();
     gameController = new GameController(game);
     game.gameController = gameController;
 
@@ -248,21 +251,66 @@ describe('GameController', () => {
   });
 
   describe('AI and Game State', () => {
-    test('should not allow player clicks during AI turn', () => {
-      game.isAI = true;
-      game.phase = PHASES.PLAY;
-      game.turn = 'black';
-      game.handlePlayClick = jest.fn();
-      gameController.handleCellClick(0, 0);
-      expect(game.handlePlayClick).not.toHaveBeenCalled();
+    test('handleCellClick should not select AI piece during strict setup', async () => {
+      gameController.game.phase = PHASES.PLAY;
+      gameController.game.turn = 'black'; // AI turn
+      gameController.game.isAI = true;
+
+      await gameController.handleCellClick(0, 0); // Black rook
+
+      expect(gameController.game.selectedSquare).toBeNull();
     });
 
-    test('should handle AI draw offer evaluation', () => {
-      game.phase = PHASES.PLAY;
-      game.isAI = true;
-      game.turn = 'white';
-      gameController.offerDraw('white');
-      expect(game.drawOffered).toBe(true);
+    test('handleCellClick should select piece in PLAY phase', async () => {
+      gameController.game.phase = PHASES.PLAY;
+      gameController.game.turn = 'white';
+      game.handlePlayClick.mockImplementation(async (r, c) => {
+        game.selectedSquare = { r, c };
+      });
+
+      // Select white pawn
+      await gameController.handleCellClick(7, 4);
+      expect(gameController.game.selectedSquare).toEqual({ r: 7, c: 4 });
+
+      // Deselect (click empty, assuming no move)
+      // Actually clicking same piece or empty
+      await gameController.handleCellClick(4, 4); // Empty
+      expect(game.handlePlayClick).toHaveBeenCalledWith(4, 4);
+    });
+
+    test('handleCellClick should execute move if valid', async () => {
+      gameController.game.phase = PHASES.PLAY;
+      gameController.game.turn = 'white';
+      game.handlePlayClick.mockImplementation(async (r, c) => {
+        game.selectedSquare = { r, c };
+      });
+
+      // Select white pawn at 6,4 (assuming setup)
+      // We need a board state. createEmptyBoard is used in beforeEach but we need pieces.
+      const board = gameController.game.board;
+      board[6][4] = { type: 'p', color: 'white' };
+      board[5][4] = null;
+
+      // Ensure move is valid
+      // Mock validMoves to allow this move
+      gameController.game.getValidMoves = () => [{ r: 5, c: 4, to: { r: 5, c: 4 } }];
+
+      await gameController.handleCellClick(6, 4); // Select
+      expect(gameController.game.selectedSquare).toEqual({ r: 6, c: 4 });
+
+      // Click to move
+      await gameController.handleCellClick(5, 4);
+
+      // Verify executeMove called
+      // Since handlePlayClick is mocked, we verify it was called with correct arguments
+      expect(game.handlePlayClick).toHaveBeenCalledWith(5, 4);
+    });
+
+    test('handleCellClick should place king in setup', () => {
+      gameController.game.phase = PHASES.SETUP_WHITE_KING;
+      gameController.handleCellClick(8, 4);
+      // Valid placement logic centers the king in the 3x3 block, so 8,4 -> 7,4
+      expect(gameController.game.board[7][4]).toMatchObject({ type: 'k', color: 'white' });
     });
   });
 

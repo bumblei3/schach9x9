@@ -60,7 +60,7 @@ self.onmessage = async function (e) {
 
       case 'evaluatePosition': {
         const { board: evalBoard, forColor } = data;
-        const score = evaluatePosition(evalBoard, forColor);
+        const score = await evaluatePosition(evalBoard, forColor);
         self.postMessage({ type: 'positionScore', data: score });
         break;
       }
