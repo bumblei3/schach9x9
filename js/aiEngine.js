@@ -112,6 +112,48 @@ function convertBoardToInt(uiBoard) {
   return board;
 }
 
+// --- Worker Management ---
+
+let aiWorker = null;
+let workerPendingRequests = new Map();
+let workerReqId = 0;
+
+function initAiWorker() {
+  if (aiWorker || typeof Worker === 'undefined') return;
+
+  try {
+    aiWorker = new Worker(new URL('./ai/aiWorker.js', import.meta.url), { type: 'module' });
+    aiWorker.onmessage = (e) => {
+      const { type, id, payload, error } = e.data;
+      if (workerPendingRequests.has(id)) {
+        const { resolve, reject } = workerPendingRequests.get(id);
+        workerPendingRequests.delete(id);
+
+        if (type === 'SEARCH_ERROR') reject(error);
+        else resolve(payload);
+      }
+    };
+    logger.info('[AiEngine] AI Worker initialized');
+  } catch (err) {
+    logger.error('[AiEngine] Failed to init AI Worker', err);
+  }
+}
+
+function runWorkerSearch(board, turnColor, depth, personality, elo) {
+  if (!aiWorker) initAiWorker();
+  if (!aiWorker) throw new Error('Worker not available');
+
+  return new Promise((resolve, reject) => {
+    const id = workerReqId++;
+    workerPendingRequests.set(id, { resolve, reject });
+    aiWorker.postMessage({
+      type: 'SEARCH',
+      id,
+      payload: { board, turnColor, depth, personality, elo }
+    });
+  });
+}
+
 // --- Bridge Functions ---
 
 /**
@@ -182,9 +224,28 @@ export async function getBestMoveDetailed(
   // Experimental: Try Wasm Engine first
   if (difficulty === 'expert') {
     const personality = config.personality || 'NORMAL';
-    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, config.elo || 2500);
+    const elo = config.elo || 2500;
+
+    // Use Worker if available (Browser)
+    if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
+      try {
+        const result = await runWorkerSearch(board, turnColor, maxDepth, personality, elo);
+        if (result && result.move) {
+          logger.debug('[AiEngine] Using Wasm Worker Result');
+          return {
+            ...result,
+            move: convertMoveToResult(result.move),
+          };
+        }
+      } catch (err) {
+        logger.error('[AiEngine] Worker search failed, falling back to main thread', err);
+      }
+    }
+
+    // Fallback or Node.js environment
+    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
     if (wasmResult && wasmResult.move) {
-      logger.debug('[AiEngine] Using Wasm Engine Result');
+      logger.debug('[AiEngine] Using Wasm Engine Result (Main Thread)');
       return {
         ...wasmResult,
         move: convertMoveToResult(wasmResult.move),
