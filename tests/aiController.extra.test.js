@@ -16,7 +16,9 @@ document.body.innerHTML = `
 
 // Mock Worker before any imports
 class MockWorker {
-  constructor() { this.onmessage = null; }
+  constructor() {
+    this.onmessage = null;
+  }
   postMessage = jest.fn();
   terminate = jest.fn();
 }
@@ -50,7 +52,9 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
 
   beforeEach(() => {
     game = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       phase: PHASES.PLAY,
       turn: 'black',
       difficulty: 'medium',

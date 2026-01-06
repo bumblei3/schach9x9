@@ -278,7 +278,7 @@ describe('TutorUI Component', () => {
       await TutorUI.showTutorSuggestions(game);
 
       const tryBtn = document.querySelector('.try-move-btn');
-      tryBtn.onclick({ stopPropagation: () => { } });
+      tryBtn.onclick({ stopPropagation: () => {} });
 
       expect(game.executeMove).toHaveBeenCalled();
       const panel = document.getElementById('tutor-panel');

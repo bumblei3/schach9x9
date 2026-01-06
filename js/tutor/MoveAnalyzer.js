@@ -447,23 +447,23 @@ export function showBlunderWarning(game, analysis, proceedCallback = null) {
 
   const buttons = isPreMove
     ? [
-      { text: 'Abbrechen', class: 'btn-secondary' },
-      { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
-    ]
+        { text: 'Abbrechen', class: 'btn-secondary' },
+        { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
+      ]
     : [
-      { text: 'Nein, weiterspielen', class: 'btn-secondary' },
-      {
-        text: 'Ja, Zug rückgängig machen',
-        class: 'btn-primary',
-        callback: () => {
-          if (game.moveController && game.moveController.undoMove) {
-            game.moveController.undoMove();
-          } else if (game.undoMove) {
-            game.undoMove();
-          }
+        { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+        {
+          text: 'Ja, Zug rückgängig machen',
+          class: 'btn-primary',
+          callback: () => {
+            if (game.moveController && game.moveController.undoMove) {
+              game.moveController.undoMove();
+            } else if (game.undoMove) {
+              game.undoMove();
+            }
+          },
         },
-      },
-    ];
+      ];
 
   UI.showModal(title, message, buttons);
 }

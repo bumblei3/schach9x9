@@ -126,8 +126,8 @@ function createTemplate({ id, name, description, pieces, isRecommended }, expect
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-      `(Pieces: ${pieces.join(', ')})`
+        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+        `(Pieces: ${pieces.join(', ')})`
     );
   }
 
