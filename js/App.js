@@ -15,9 +15,11 @@ import { AnalysisManager } from './AnalysisManager.js';
 import { EvaluationBar } from './ui/EvaluationBar.js';
 import { UIEffects } from './ui/ui_effects.js';
 import { DOMHandler } from './ui/DOMHandler.js';
+import { errorManager } from './utils/ErrorManager.js';
 
 export class App {
   constructor() {
+    errorManager.init();
     this.game = null;
     this.battleChess3D = null;
     this.domHandler = new DOMHandler(this);
