@@ -13,7 +13,7 @@
     "train:fast": "node opening-book-trainer.cjs --games 50",
     "train:thorough": "node opening-book-trainer.cjs --games 500",
     "wasm:build": "if command -v wasm-pack >/dev/null 2>&1; then wasm-pack build engine-wasm --target web; elif [ -f $HOME/.cargo/bin/wasm-pack ]; then $HOME/.cargo/bin/wasm-pack build engine-wasm --target web; else echo 'Error: wasm-pack not found' && exit 1; fi",
-    "build": "npm run wasm:build && vite build",
+    "build": "npm run wasm:build && npx vite build",
     "start": "npx serve .",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --noEmit --watch",
