@@ -16,7 +16,9 @@
     "build": "npm run wasm:build && vite build",
     "start": "npx serve .",
     "typecheck": "tsc --noEmit",
-    "typecheck:watch": "tsc --noEmit --watch"
+    "typecheck:watch": "tsc --noEmit --watch",
+    "test:visual": "npx playwright test --grep @visual",
+    "test:visual:update": "npx playwright test --grep @visual --update-snapshots"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

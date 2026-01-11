@@ -10,6 +10,6 @@ export default {
   },
   extensionsToTreatAsEsm: ['.ts'],
   verbose: true,
-  testPathIgnorePatterns: ['/node_modules/', '/tests/browser/', '\\.spec\\.js$'],
+  testPathIgnorePatterns: ['/node_modules/', '/tests/browser/', '/e2e/', '\\.spec\\.[jt]s$'],
   setupFiles: ['<rootDir>/tests/jest.setup.cjs'],
 };
