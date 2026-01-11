@@ -61,11 +61,20 @@ test.describe('Scrolling Behavior', () => {
         // Playwright's mouse.wheel is one way
         await shopPanel.evaluate(el => el.scrollTo(0, 0));
 
-        // Move mouse over panel
+        // Move mouse over panel and click to ensure focus
         const box = await shopPanel.boundingBox();
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        if (box) {
+            const x = box.x + box.width / 2;
+            const y = box.y + box.height / 2;
+            console.log(`Mouse moving to: ${x}, ${y}`);
+            await page.mouse.move(x, y);
+            await page.mouse.down();
+            await page.mouse.up(); // Simple click to focus
+        }
 
         // Scroll wheel (deltaY)
+        // Ensure we wait a bit for any focus/events to settle
+        await page.waitForTimeout(500);
         await page.mouse.wheel(0, 500);
 
         // Give it a moment to render/scroll
