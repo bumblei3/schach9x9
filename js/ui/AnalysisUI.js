@@ -163,7 +163,7 @@ export class AnalysisUI {
             color: turn,
             depth: 4, // Reduced from 8 to speed up analysis
             moveNumber: i,
-            isAnalysis: true
+            isAnalysis: true,
           },
         });
       });
@@ -252,10 +252,10 @@ export class AnalysisUI {
       // Normal move or regular capture
       board[to.r][to.c] = capturedPiece
         ? {
-          type: capturedPiece.type || 'p', // Fallback for some tests
-          hasMoved: true,
-          ...capturedPiece,
-        }
+            type: capturedPiece.type || 'p', // Fallback for some tests
+            hasMoved: true,
+            ...capturedPiece,
+          }
         : null;
     }
   }

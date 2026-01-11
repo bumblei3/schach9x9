@@ -360,17 +360,17 @@ export {
 };
 
 // Stubbed TT functions
-export function storeTT() { }
-export function probeTT() { }
+export function storeTT() {}
+export function probeTT() {}
 export function getTTMove() {
   return null;
 }
-export function clearTT() { }
+export function clearTT() {}
 export function getTTSize() {
   return 0;
 }
-export function setTTMaxSize() { }
-export function testStoreTT() { }
-export function testProbeTT() { }
+export function setTTMaxSize() {}
+export function testStoreTT() {}
+export function testProbeTT() {}
 
-function setProgressCallback() { }
+function setProgressCallback() {}

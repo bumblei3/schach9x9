@@ -9,7 +9,9 @@ import * as UI from '../ui.js';
 export function undoMove(game, moveController) {
   if (
     game.moveHistory.length === 0 ||
-    (game.phase !== PHASES.PLAY && game.phase !== PHASES.ANALYSIS && game.phase !== PHASES.GAME_OVER)
+    (game.phase !== PHASES.PLAY &&
+      game.phase !== PHASES.ANALYSIS &&
+      game.phase !== PHASES.GAME_OVER)
   ) {
     return;
   }

@@ -233,5 +233,4 @@ export class PuzzleManager {
   }
 }
 
-
 export const puzzleManager = new PuzzleManager();

@@ -47,7 +47,9 @@ export class PieceManager3D {
         }
       }
     }
-    logger.info(`[PieceManager3D] Created ${count} pieces in ${(performance.now() - start).toFixed(2)}ms`);
+    logger.info(
+      `[PieceManager3D] Created ${count} pieces in ${(performance.now() - start).toFixed(2)}ms`
+    );
     this.updateSetupHighlights(game);
   }
 

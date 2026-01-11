@@ -98,6 +98,13 @@ export class App {
     const toggle3DBtn = document.getElementById('toggle-3d-btn');
     const shopPanel = document.getElementById('shop-panel');
 
+    // Toggle setup-mode class for CSS styling
+    if (mode === 'setup') {
+      document.body.classList.add('setup-mode');
+    } else {
+      document.body.classList.remove('setup-mode');
+    }
+
     if (mode === 'standard8x8') {
       // 3D mode now supported for 8x8 too by dynamic sizing
       // Ensure Shop is hidden
