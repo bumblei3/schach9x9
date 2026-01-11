@@ -2,22 +2,22 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-    base: './',
-    worker: {
-        format: 'es',
+  base: './',
+  worker: {
+    format: 'es',
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+      },
     },
-    build: {
-        outDir: 'dist',
-        assetsDir: 'assets',
-        rollupOptions: {
-            input: {
-                main: resolve(__dirname, 'index.html'),
-            },
-        },
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './js'),
     },
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, './js'),
-        },
-    },
+  },
 });

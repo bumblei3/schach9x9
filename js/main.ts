@@ -2,29 +2,34 @@
  * main.ts
  * Application entry point.
  */
-import { App } from './App.js';
 
-// Initialize the application
-const app = new App();
-
-// Export for legacy access if needed (optional)
-(window as any).app = app;
-
-// Initialize DOM listeners
-document.addEventListener('DOMContentLoaded', () => {
-  app.initDOM();
-
-  // Register Service Worker for PWA
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('service-worker.js')
-        .then(registration => {
-          console.log('SW registered: ', registration);
-        })
-        .catch(registrationError => {
-          console.log('SW registration failed: ', registrationError);
-        });
-    });
+const init = async () => {
+  try {
+    const { App } = await import('./App.js');
+    const app = new App();
+    (window as any).app = app;
+    app.initDOM();
+  } catch (e) {
+    console.error('[Main] Initialization failed:', e);
   }
-});
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+// Register Service Worker for PWA (DISABLED in E2E to avoid interference)
+if ('serviceWorker' in navigator && !window.location.search.includes('disable-sw')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('service-worker.js')
+      .then(registration => {
+        console.log('SW registered: ', registration);
+      })
+      .catch(err => {
+        console.log('SW registration failed: ', err);
+      });
+  });
+}

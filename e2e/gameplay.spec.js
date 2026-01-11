@@ -5,14 +5,22 @@ test.describe('Core Gameplay Loop', () => {
     // Enable console log proxying
     page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
 
+    // Disable AI Mentor to avoid blunder warning modals
+    await page.addInitScript(() => {
+      localStorage.setItem('ki_mentor_level', 'OFF');
+    });
+
     // Go to home
-    await page.goto('/');
+    await page.goto('/?disable-sw');
 
     // Wait for usage overlay
     await expect(page.locator('#points-selection-overlay')).toBeVisible();
   });
 
   test('should start a game and execute a move', async ({ page }) => {
+    // 0. Wait for app-ready (listeners attached)
+    await page.waitForFunction(() => document.body.classList.contains('app-ready'));
+
     // 1. Select 15 Points (Standard Mode)
     await page.click('button[data-points="15"]');
 

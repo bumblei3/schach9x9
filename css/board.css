@@ -88,6 +88,10 @@ body.mode-3d #battle-chess-3d-container {
   pointer-events: all;
 }
 
+body.mode-3d #board-container {
+  padding: 0;
+}
+
 body.mode-3d #board-wrapper {
   opacity: 0;
   pointer-events: none;

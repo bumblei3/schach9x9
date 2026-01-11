@@ -4,76 +4,76 @@
  */
 
 export class UIEffects {
-    container: HTMLElement;
-    pieces: string[];
+  container: HTMLElement;
+  pieces: string[];
 
-    constructor() {
-        this.container = document.body;
-        this.pieces = ['♟', '♞', '♝', '♜', '♛', '♚', '🏰', '⚖️', '👼'];
+  constructor() {
+    this.container = document.body;
+    this.pieces = ['♟', '♞', '♝', '♜', '♛', '♚', '🏰', '⚖️', '👼'];
+  }
+
+  /**
+   * Start the floating pieces effect in the background
+   */
+  startFloatingPieces(): void {
+    const overlay = document.getElementById('points-selection-overlay');
+    if (overlay && !overlay.classList.contains('hidden')) {
+      this.createFloatingPieces(15);
     }
+  }
 
-    /**
-     * Start the floating pieces effect in the background
-     */
-    startFloatingPieces(): void {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay && !overlay.classList.contains('hidden')) {
-            this.createFloatingPieces(15);
-        }
+  /**
+   * Create floating chess pieces
+   * @param count
+   */
+  createFloatingPieces(count: number): void {
+    for (let i = 0; i < count; i++) {
+      this.spawnPiece();
     }
+  }
 
-    /**
-     * Create floating chess pieces
-     * @param count 
-     */
-    createFloatingPieces(count: number): void {
-        for (let i = 0; i < count; i++) {
-            this.spawnPiece();
-        }
+  spawnPiece(): void {
+    const piece = document.createElement('div');
+    piece.className = 'floating-bg-piece';
+    piece.textContent = this.pieces[Math.floor(Math.random() * this.pieces.length)];
+
+    const size = 20 + Math.random() * 60;
+    const left = Math.random() * 100;
+    const duration = 15 + Math.random() * 30;
+    const delay = Math.random() * -30;
+
+    piece.style.left = `${left}%`;
+    piece.style.fontSize = `${size}px`;
+    piece.style.opacity = (Math.random() * 0.1).toString();
+    piece.style.animation = `floatPiece ${duration}s linear ${delay}s infinite`;
+
+    this.container.appendChild(piece);
+  }
+
+  /**
+   * Animate earning stars in the campaign victory modal
+   * @param count - Number of stars earned (1-3)
+   */
+  animateStars(count: number): void {
+    const starContainer = document.querySelector('.victory-stars-container');
+    if (!starContainer) return;
+
+    starContainer.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+      const star = document.createElement('div');
+      star.className = 'victory-star-anim';
+      star.innerHTML = i <= count ? '★' : '☆';
+      if (i > count) star.classList.add('empty');
+      star.style.animationDelay = `${0.3 + i * 0.4}s`;
+      starContainer.appendChild(star);
     }
-
-    spawnPiece(): void {
-        const piece = document.createElement('div');
-        piece.className = 'floating-bg-piece';
-        piece.textContent = this.pieces[Math.floor(Math.random() * this.pieces.length)];
-
-        const size = 20 + Math.random() * 60;
-        const left = Math.random() * 100;
-        const duration = 15 + Math.random() * 30;
-        const delay = Math.random() * -30;
-
-        piece.style.left = `${left}%`;
-        piece.style.fontSize = `${size}px`;
-        piece.style.opacity = (Math.random() * 0.1).toString();
-        piece.style.animation = `floatPiece ${duration}s linear ${delay}s infinite`;
-
-        this.container.appendChild(piece);
-    }
-
-    /**
-     * Animate earning stars in the campaign victory modal
-     * @param count - Number of stars earned (1-3)
-     */
-    animateStars(count: number): void {
-        const starContainer = document.querySelector('.victory-stars-container');
-        if (!starContainer) return;
-
-        starContainer.innerHTML = '';
-        for (let i = 1; i <= 3; i++) {
-            const star = document.createElement('div');
-            star.className = 'victory-star-anim';
-            star.innerHTML = i <= count ? '★' : '☆';
-            if (i > count) star.classList.add('empty');
-            star.style.animationDelay = `${0.3 + i * 0.4}s`;
-            starContainer.appendChild(star);
-        }
-    }
+  }
 }
 
 // Add CSS for the floating pieces if not in a CSS file
 if (typeof document !== 'undefined') {
-    const style = document.createElement('style');
-    style.textContent = `
+  const style = document.createElement('style');
+  style.textContent = `
       @keyframes floatPiece {
           0% {
               transform: translateY(110vh) rotate(0deg);
@@ -128,5 +128,5 @@ if (typeof document !== 'undefined') {
           }
       }
   `;
-    document.head.appendChild(style);
+  document.head.appendChild(style);
 }

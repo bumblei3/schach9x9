@@ -376,7 +376,7 @@ export class AIController {
       });
 
     for (let i = 0; i < numWorkers; i++) {
-      const worker = new Worker('js/ai-worker.js', { type: 'module' });
+      const worker = new Worker(new URL('./ai/aiWorker.js', import.meta.url), { type: 'module' });
       this.aiWorkers.push(worker);
       if (this.openingBookData) {
         worker.postMessage({ type: 'loadBook', data: { book: this.openingBookData } });

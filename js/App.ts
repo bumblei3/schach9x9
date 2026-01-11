@@ -2,33 +2,17 @@
  * App.ts
  * Main application class handling lifecycle and initialization.
  */
-import { Game } from './gameEngine.js';
-import { GameController } from './gameController.js';
 import { logger } from './logger.js';
-import * as UI from './ui.js';
-import { EvaluationBar } from './ui/EvaluationBar.js';
 import { DOMHandler } from './ui/DOMHandler.js';
 import { errorManager } from './utils/ErrorManager.js';
+import type { EvaluationBar } from './ui/EvaluationBar.js';
 import type { Player, Square, Piece } from './types/game.js';
 
-// Types for non-converted modules
-// @ts-ignore
-import { MoveController } from './moveController.js';
-// @ts-ignore
-import { AIController } from './aiController.js';
-// @ts-ignore
-import { TutorController } from './tutorController.js';
-// @ts-ignore
-import { BattleChess3D } from './battleChess3D.js';
-// @ts-ignore
-import { KeyboardManager } from './input/KeyboardManager.js';
-// @ts-ignore
-import { AnalysisManager } from './AnalysisManager.js';
-// @ts-ignore
-import { UIEffects } from './ui/ui_effects.js';
+// Global variable for UI since it's used in many places but we want to avoid static import
+let UI_MODULE: any = null;
 
 export class App {
-  public game: any = null; // Use any for now to facilitate delegation logic
+  public game: any = null;
   public gameController: any = null;
   public moveController: any = null;
   public aiController: any = null;
@@ -39,6 +23,8 @@ export class App {
   public keyboardManager: any = null;
   public battleChess3D: any = null;
   public domHandler: DOMHandler;
+  public battleChess3D_Class: any = null;
+  public Game_Class: any = null;
 
   constructor() {
     errorManager.init();
@@ -55,13 +41,36 @@ export class App {
   public async init(initialPoints: number, mode: string = 'setup'): Promise<void> {
     logger.info('App initializing with', initialPoints, 'points in mode:', mode);
 
+    // Toggle setup-mode class for CSS styling immediately to unblock E2E tests
+    if (mode === 'setup') {
+      document.body.classList.add('setup-mode');
+    } else {
+      document.body.classList.remove('setup-mode');
+    }
+
+    // Dynamic Imports to avoid circular dependencies during module evaluation
+    const { Game } = await import('./gameEngine.js');
+    const { GameController } = await import('./gameController.js');
+    const { MoveController } = await import('./moveController.js');
+    const { AIController } = await import('./aiController.js');
+    const { TutorController } = await import('./tutorController.js');
+    const { AnalysisManager } = await import('./AnalysisManager.js');
+    const { EvaluationBar } = await import('./ui/EvaluationBar.js');
+    const { UIEffects } = await import('./ui/ui_effects.js');
+    const { KeyboardManager } = await import('./input/KeyboardManager.js');
+    const BC3D_MODULE = await import('./battleChess3D.js');
+    UI_MODULE = await import('./ui.js');
+
+    this.Game_Class = Game;
     this.game = new Game(initialPoints, mode as any);
-    (window as any).game = this.game; // Expose for debugging and legacy UI calls
+    (window as any).game = this.game;
 
     // Initialize controllers
     this.game.gameController = new GameController(this.game);
     this.game.moveController = new MoveController(this.game);
     this.game.aiController = new AIController(this.game);
+
+    this.battleChess3D_Class = BC3D_MODULE.BattleChess3D;
 
     // Make controllers accessible to each other (circular dependencies)
     this.aiController = this.game.aiController;
@@ -109,7 +118,11 @@ export class App {
     this.game.gameController.initGame(initialPoints, mode);
 
     // Initialize 3D Battle Chess mode
-    this.init3D();
+    try {
+      this.init3D();
+    } catch (e) {
+      console.warn('[App] 3D initialization failed (continuing):', e);
+    }
 
     // Initialize Service Worker
     this.registerServiceWorker();
@@ -118,22 +131,14 @@ export class App {
     const toggle3DBtn = document.getElementById('toggle-3d-btn');
     const shopPanel = document.getElementById('shop-panel');
 
-    // Toggle setup-mode class for CSS styling
-    if (mode === 'setup') {
-      document.body.classList.add('setup-mode');
-    } else {
-      document.body.classList.remove('setup-mode');
-    }
-
     if (mode === 'standard8x8') {
-      // 3D mode now supported for 8x8 too by dynamic sizing
-      // Ensure Shop is hidden
       if (shopPanel) shopPanel.classList.add('hidden');
     } else {
       if (toggle3DBtn) toggle3DBtn.style.display = 'flex';
     }
 
     logger.info('App initialization complete');
+    document.body.classList.add('game-initialized');
   }
 
   public initDOM(): void {
@@ -143,7 +148,7 @@ export class App {
   public init3D(): void {
     const container3D = document.getElementById('battle-chess-3d-container');
     if (container3D && !this.battleChess3D) {
-      this.battleChess3D = new BattleChess3D(container3D);
+      this.battleChess3D = new (this as any).battleChess3D_Class(container3D);
       (window as any).battleChess3D = this.battleChess3D;
 
       // Hook into Game methods for 3D updates if not handled by event listeners
@@ -176,7 +181,7 @@ export class App {
 
   private applyDelegates(): void {
     const self = this;
-    const GP = Game.prototype as any;
+    const GP = this.Game_Class.prototype as any;
 
     // GameController delegations
     GP.placeKing = function (r: number, c: number, color: Player) {
@@ -279,19 +284,19 @@ export class App {
     };
 
     GP.updateMoveHistoryUI = function () {
-      UI.updateMoveHistoryUI(this);
+      UI_MODULE.updateMoveHistoryUI(this);
     };
     GP.updateUndoRedoButtons = function () {
       return self.moveController.updateUndoRedoButtons();
     };
     GP.updateCapturedUI = function () {
-      UI.updateCapturedUI(this);
+      UI_MODULE.updateCapturedUI(this);
     };
     GP.animateCheck = function (color: Player) {
-      UI.animateCheck(this, color);
+      UI_MODULE.animateCheck(this, color);
     };
     GP.animateCheckmate = function (color: Player) {
-      UI.animateCheckmate(this, color);
+      UI_MODULE.animateCheckmate(this, color);
     };
     GP.calculateMaterialAdvantage = function () {
       return self.moveController.calculateMaterialAdvantage();
@@ -300,7 +305,7 @@ export class App {
       return self.moveController.getMaterialValue(piece);
     };
     GP.updateStatistics = function () {
-      UI.updateStatistics(this);
+      UI_MODULE.updateStatistics(this);
     };
 
     // Replay methods

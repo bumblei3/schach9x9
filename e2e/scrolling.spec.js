@@ -6,7 +6,7 @@ test.describe('Scrolling Behavior', () => {
     page.on('pageerror', err => console.log(`PAGE ERROR: ${err.message}`));
 
     // Go to the page
-    await page.goto('/');
+    await page.goto('/?disable-sw');
 
     // Wait for usage overlay (points selection)
     const overlay = page.locator('#points-selection-overlay');

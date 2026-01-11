@@ -59,7 +59,7 @@ describe('DOMHandler', () => {
   beforeEach(() => {
     // Mock App and Game
     app = {
-      init: jest.fn(),
+      init: jest.fn().mockResolvedValue(),
       battleChess3D: {
         enabled: false,
         scene: null,

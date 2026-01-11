@@ -13,7 +13,7 @@ class MockWorker {
   postMessage(data) {
     // Simulate async worker response
     setTimeout(() => {
-      if (data.type === 'SEARCH') {
+      if (data.type === 'SEARCH' || data.type === 'getBestMove') {
         const { id } = data;
         // Return dummy result
         if (this.onmessage) {

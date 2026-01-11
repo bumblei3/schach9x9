@@ -10,15 +10,15 @@ import type { Game } from '../gameEngine.js';
  * Piece type to standard notation letter.
  */
 const PIECE_NOTATION: Record<string, string> = {
-    k: 'K',
-    q: 'Q',
-    r: 'R',
-    b: 'B',
-    n: 'N',
-    p: '', // Pawns have no letter prefix
-    a: 'A', // Archbishop (custom)
-    c: 'C', // Chancellor (custom)
-    e: 'E', // Angel (custom)
+  k: 'K',
+  q: 'Q',
+  r: 'R',
+  b: 'B',
+  n: 'N',
+  p: '', // Pawns have no letter prefix
+  a: 'A', // Archbishop (custom)
+  c: 'C', // Chancellor (custom)
+  e: 'E', // Angel (custom)
 };
 
 /**
@@ -27,7 +27,7 @@ const PIECE_NOTATION: Record<string, string> = {
  * @returns File letter
  */
 function colToFile(col: number): string {
-    return String.fromCharCode(97 + col); // 'a' = 97
+  return String.fromCharCode(97 + col); // 'a' = 97
 }
 
 /**
@@ -37,7 +37,7 @@ function colToFile(col: number): string {
  * @returns Rank number as string
  */
 function rowToRank(row: number): string {
-    return String(9 - row);
+  return String(9 - row);
 }
 
 /**
@@ -47,49 +47,49 @@ function rowToRank(row: number): string {
  * @returns Algebraic notation string
  */
 export function moveToNotation(move: any, _game: Game | null = null): string {
-    if (!move || !move.from || !move.to) {
-        return '??';
-    }
+  if (!move || !move.from || !move.to) {
+    return '??';
+  }
 
-    // Handle castling
-    const sm = (move as any).specialMove;
-    if (sm?.type === 'castling') {
-        return sm.isKingside ? 'O-O' : 'O-O-O';
-    }
+  // Handle castling
+  const sm = (move as any).specialMove;
+  if (sm?.type === 'castling') {
+    return sm.isKingside ? 'O-O' : 'O-O-O';
+  }
 
-    const pieceType = move.piece?.type || 'p';
-    const pieceLetter = PIECE_NOTATION[pieceType] || '';
-    const fromFile = colToFile(move.from.c);
-    const toFile = colToFile(move.to.c);
-    const toRank = rowToRank(move.to.r);
+  const pieceType = move.piece?.type || 'p';
+  const pieceLetter = PIECE_NOTATION[pieceType] || '';
+  const fromFile = colToFile(move.from.c);
+  const toFile = colToFile(move.to.c);
+  const toRank = rowToRank(move.to.r);
 
-    let notation = '';
+  let notation = '';
 
-    // Piece notation
-    if (pieceLetter) {
-        notation += pieceLetter;
-    }
+  // Piece notation
+  if (pieceLetter) {
+    notation += pieceLetter;
+  }
 
-    // Disambiguation
-    if (!pieceLetter && move.captured) {
-        notation += fromFile;
-    }
+  // Disambiguation
+  if (!pieceLetter && move.captured) {
+    notation += fromFile;
+  }
 
-    // Capture indicator
-    if (move.captured) {
-        notation += 'x';
-    }
+  // Capture indicator
+  if (move.captured) {
+    notation += 'x';
+  }
 
-    // Destination
-    notation += toFile + toRank;
+  // Destination
+  notation += toFile + toRank;
 
-    // Promotion
-    if (sm?.type === 'promotion') {
-        const promotedTo = sm.promotedTo || 'q';
-        notation += '=' + (PIECE_NOTATION[promotedTo] || 'Q');
-    }
+  // Promotion
+  if (sm?.type === 'promotion') {
+    const promotedTo = sm.promotedTo || 'q';
+    notation += '=' + (PIECE_NOTATION[promotedTo] || 'Q');
+  }
 
-    return notation;
+  return notation;
 }
 
 /**
@@ -99,51 +99,51 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
  * @returns PGN formatted string
  */
 export function generatePGN(game: Game, options: any = {}): string {
-    const headers: string[] = [];
+  const headers: string[] = [];
 
-    // Standard headers
-    headers.push(`[Event "${options.event || 'Schach 9x9 Game'}"]`);
-    headers.push(`[Site "${options.site || 'Local'}"]`);
-    headers.push(`[Date "${new Date().toISOString().split('T')[0].replace(/-/g, '.')}"]`);
-    headers.push(`[Round "${options.round || '1'}"]`);
-    headers.push(`[White "${options.white || 'Player'}"]`);
-    headers.push(`[Black "${options.black || 'AI'}"]`);
+  // Standard headers
+  headers.push(`[Event "${options.event || 'Schach 9x9 Game'}"]`);
+  headers.push(`[Site "${options.site || 'Local'}"]`);
+  headers.push(`[Date "${new Date().toISOString().split('T')[0].replace(/-/g, '.')}"]`);
+  headers.push(`[Round "${options.round || '1'}"]`);
+  headers.push(`[White "${options.white || 'Player'}"]`);
+  headers.push(`[Black "${options.black || 'AI'}"]`);
 
-    // Result
-    let result = '*'; // Ongoing
-    const g = game as any;
-    if (g.winner === 'white') result = '1-0';
-    else if (g.winner === 'black') result = '0-1';
-    else if (g.winner === 'draw') result = '1/2-1/2';
-    headers.push(`[Result "${result}"]`);
+  // Result
+  let result = '*'; // Ongoing
+  const g = game as any;
+  if (g.winner === 'white') result = '1-0';
+  else if (g.winner === 'black') result = '0-1';
+  else if (g.winner === 'draw') result = '1/2-1/2';
+  headers.push(`[Result "${result}"]`);
 
-    // Custom variant header
-    headers.push('[Variant "9x9"]');
+  // Custom variant header
+  headers.push('[Variant "9x9"]');
 
-    // Move text
-    const moves = game.moveHistory || [];
-    const moveText: string[] = [];
-    let moveNumber = 1;
+  // Move text
+  const moves = game.moveHistory || [];
+  const moveText: string[] = [];
+  let moveNumber = 1;
 
-    for (let i = 0; i < moves.length; i++) {
-        const move = moves[i];
-        const notation = moveToNotation(move, game);
+  for (let i = 0; i < moves.length; i++) {
+    const move = moves[i];
+    const notation = moveToNotation(move, game);
 
-        if (i % 2 === 0) {
-            // White's move
-            moveText.push(`${moveNumber}. ${notation}`);
-        } else {
-            // Black's move
-            moveText[moveText.length - 1] += ` ${notation}`;
-            moveNumber++;
-        }
+    if (i % 2 === 0) {
+      // White's move
+      moveText.push(`${moveNumber}. ${notation}`);
+    } else {
+      // Black's move
+      moveText[moveText.length - 1] += ` ${notation}`;
+      moveNumber++;
     }
+  }
 
-    // Append result
-    moveText.push(result);
+  // Append result
+  moveText.push(result);
 
-    // Combine
-    return headers.join('\n') + '\n\n' + moveText.join(' ');
+  // Combine
+  return headers.join('\n') + '\n\n' + moveText.join(' ');
 }
 
 /**
@@ -152,13 +152,13 @@ export function generatePGN(game: Game, options: any = {}): string {
  * @returns Success status
  */
 export async function copyPGNToClipboard(pgn: string): Promise<boolean> {
-    try {
-        await navigator.clipboard.writeText(pgn);
-        return true;
-    } catch (err) {
-        console.error('Failed to copy PGN:', err);
-        return false;
-    }
+  try {
+    await navigator.clipboard.writeText(pgn);
+    return true;
+  } catch (err) {
+    console.error('Failed to copy PGN:', err);
+    return false;
+  }
 }
 
 /**
@@ -167,13 +167,13 @@ export async function copyPGNToClipboard(pgn: string): Promise<boolean> {
  * @param filename - Filename (default: 'game.pgn')
  */
 export function downloadPGN(pgn: string, filename: string = 'game.pgn'): void {
-    const blob = new Blob([pgn], { type: 'application/x-chess-pgn' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const blob = new Blob([pgn], { type: 'application/x-chess-pgn' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

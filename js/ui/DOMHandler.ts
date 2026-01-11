@@ -19,12 +19,16 @@ export class DOMHandler {
   private campaignUI?: CampaignUI;
   private domInitialized: boolean = false;
 
+  public get isInitialized(): boolean {
+    return this.domInitialized;
+  }
+
   /**
    * @param app - Reference to the main App instance
    */
   constructor(app: any) {
     this.app = app;
-    this.analysisUI = new AnalysisUI(app.game);
+    this.analysisUI = new AnalysisUI(app);
     if (app.game && app.game.aiController) {
       app.game.aiController.setAnalysisUI(this.analysisUI);
     }
@@ -55,16 +59,33 @@ export class DOMHandler {
     if (this.domInitialized) return;
     this.domInitialized = true;
 
-    // Points selection
-    document.querySelectorAll<HTMLElement>('.points-btn').forEach(btn => {
+    try {
+      document.body.classList.add('app-ready');
+    } catch (e) {
+      console.error('[DOMHandler] Failed to add app-ready class:', e);
+    }
+
+    const pointsButtons = document.querySelectorAll<HTMLElement>('.points-btn');
+    pointsButtons.forEach(btn => {
       btn.addEventListener('click', e => {
-        const target = e.target as HTMLElement;
-        const pointsStr = target.dataset.points;
+        const target = e.currentTarget as HTMLElement;
+        const pointsStr = target.dataset.points || target.getAttribute('data-points');
+        console.log('[DOMHandler] Clicked points button:', target, 'Points:', pointsStr);
+
         if (pointsStr) {
           const points = parseInt(pointsStr);
           const overlay = document.getElementById('points-selection-overlay');
-          if (overlay) overlay.style.display = 'none';
-          this.app.init(points, 'setup');
+          if (overlay) {
+            overlay.style.display = 'none';
+            console.log('[DOMHandler] Overlay hidden');
+          } else {
+            console.error('[DOMHandler] Overlay not found!');
+          }
+          this.app
+            .init(points, 'setup')
+            .catch((err: any) => console.error('[DOMHandler] App init failed:', err));
+        } else {
+          console.error('[DOMHandler] Missing points data on button');
         }
       });
     });
@@ -239,6 +260,7 @@ export class DOMHandler {
             container3D.style.display = 'block';
             void container3D.offsetWidth; // Force reflow
             container3D.classList.add('active');
+            document.body.classList.add('mode-3d');
             toggle3D.classList.add('active-3d');
             boardWrapper.style.opacity = '0'; // Hide 2D board
 
@@ -252,6 +274,7 @@ export class DOMHandler {
             }
           } else {
             container3D.classList.remove('active');
+            document.body.classList.remove('mode-3d');
             toggle3D.classList.remove('active-3d');
             setTimeout(() => {
               if (!this.app.battleChess3D.enabled) {

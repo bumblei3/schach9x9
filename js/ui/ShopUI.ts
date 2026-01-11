@@ -5,7 +5,8 @@
 import { PIECE_VALUES } from '../config.js';
 import { getPieceText } from './BoardRenderer.js';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { updateTutorRecommendations } = (await import('./TutorUI.js')) as any;
+// Removed top-level await preventing circular dependency
+// const { updateTutorRecommendations } = (await import('./TutorUI.js')) as any;
 
 /**
  * Zeigt oder verbirgt das Shop-Panel.
@@ -62,7 +63,11 @@ export function updateShopUI(game: any): void {
     }
   }
 
-  if (updateTutorRecommendations) {
-    updateTutorRecommendations(game);
+  if ((window as any).updateTutorRecommendations) {
+    (window as any).updateTutorRecommendations(game);
+  } else {
+    import('./TutorUI.js').then((module: any) => {
+      if (module.updateTutorRecommendations) module.updateTutorRecommendations(game);
+    });
   }
 }

@@ -81,7 +81,7 @@ describe('AnalysisUI', () => {
       },
     };
 
-    analysisUI = new AnalysisUI(game);
+    analysisUI = new AnalysisUI({ game });
     jest.clearAllMocks();
   });
 

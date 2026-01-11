@@ -141,15 +141,19 @@ function initAiWorker(): void {
   if (aiWorker || typeof Worker === 'undefined') return;
 
   try {
-    aiWorker = new Worker(new URL('./ai/aiWorker.js', import.meta.url), { type: 'module' });
+    aiWorker = new Worker(new URL('./ai/aiWorker.ts', import.meta.url), { type: 'module' });
     aiWorker.onmessage = (e: MessageEvent) => {
-      const { type, id, payload, error } = e.data;
+      const { type, id, data, payload, error } = e.data;
+      logger.debug(`[AiEngine] Received worker message: type=${type} id=${id}`);
       if (workerPendingRequests.has(id)) {
         const { resolve, reject } = workerPendingRequests.get(id)!;
         workerPendingRequests.delete(id);
 
         if (type === 'SEARCH_ERROR') reject(error);
+        else if (type === 'bestMove') resolve(data);
         else resolve(payload);
+      } else {
+        logger.warn(`[AiEngine] Received worker message with unknown id: ${id}`);
       }
     };
     logger.info('[AiEngine] AI Worker initialized');
@@ -175,9 +179,9 @@ function runWorkerSearch(
       reject,
     });
     aiWorker!.postMessage({
-      type: 'SEARCH',
+      type: 'getBestMove', // Use standard protocol
       id,
-      payload: { board, turnColor, depth, personality, elo },
+      data: { board, color: turnColor, depth, config: { personality, elo } }, // map payload to data
     });
   });
 }
@@ -428,18 +432,18 @@ export const PST: Record<string, number[]> = {
 export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves };
 
 // Stubbed TT functions
-export function storeTT(): void { }
-export function probeTT(): void { }
+export function storeTT(): void {}
+export function probeTT(): void {}
 export function getTTMove(): null {
   return null;
 }
-export function clearTT(): void { }
+export function clearTT(): void {}
 export function getTTSize(): number {
   return 0;
 }
-export function setTTMaxSize(): void { }
-export function testStoreTT(): void { }
-export function testProbeTT(): void { }
+export function setTTMaxSize(): void {}
+export function testStoreTT(): void {}
+export function testProbeTT(): void {}
 
 export let progressCallback: ((progress: any) => void) | null = null;
 export function setProgressCallback(cb: (progress: any) => void | null): void {

@@ -1,58 +1,105 @@
 /**
- * Web Worker for AI Engine
- * Handles heavy Wasm search operations off the main thread.
+ * Web Worker for Chess 9x9 AI Calculations
+ * Prevents UI freezing during minimax search
  */
 
-import { getBestMoveWasm } from './wasmBridge.js';
+import { logger } from '../logger.js';
+import {
+  getBestMoveDetailed,
+  analyzePosition,
+  evaluatePosition,
+  setOpeningBook,
+  setProgressCallback,
+} from '../aiEngine.js';
 
-// Simple logger for worker
-const workerLogger = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  info: (...args: any[]) => console.log('[AiWorker]', ...args),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: (...args: any[]) => console.error('[AiWorker]', ...args),
-};
+self.onmessage = async function (e: MessageEvent) {
+  try {
+    const { type, data, id } = e.data;
 
-interface SearchPayload {
-  board: number[] | Int8Array;
-  turnColor: string;
-  depth: number;
-  personality: string;
-  elo: number;
-}
+    switch (type) {
+      case 'loadBook': {
+        if (!data || !data.book) {
+          (logger as any).warn('[AI Worker] loadBook called without book data');
+          break;
+        }
+        setOpeningBook(data.book);
+        (logger as any).info('[AI Worker] Opening book loaded:', data.book.metadata);
+        break;
+      }
 
-interface WorkerMessageData {
-  type: string;
-  payload?: SearchPayload;
-  id?: string;
-}
+      case 'getBestMove': {
+        const { board, color, depth, config, _timeLimit } = data;
+        (logger as any).debug(
+          `[AI Worker] getBestMove started - color:${color} depth:${depth} timeLimit:${_timeLimit}ms`
+        );
+        // Setup progress callback
+        setProgressCallback((progress: any) => {
+          (self as any).postMessage({ type: 'progress', id, data: progress });
+        });
 
-self.onmessage = async (e: MessageEvent<WorkerMessageData>) => {
-  const { type, payload, id } = e.data;
+        try {
+          const timeParams = {
+            elo: config?.elo,
+            personality: config?.personality,
+            maxDepth: depth,
+          };
+          const bestMove = await getBestMoveDetailed(board, color, depth, timeParams);
 
-  if (type === 'SEARCH' && payload) {
-    const { board, turnColor, depth, personality, elo } = payload;
+          // Simple logic without explicit debug logs for now, assuming fix is standardization
+          (self as any).postMessage({ type: 'bestMove', id, data: bestMove });
+        } catch (error) {
+          (logger as any).error('[AI Worker] getBestMove failed:', error);
+          (self as any).postMessage({ type: 'bestMove', id, data: null });
+        }
+        break;
+      }
 
-    try {
-      const start = performance.now();
-      const result = await getBestMoveWasm(board, turnColor, depth, personality, elo);
-      const duration = performance.now() - start;
+      case 'evaluatePosition': {
+        const { board: evalBoard, forColor } = data;
+        const score = await evaluatePosition(evalBoard, forColor);
+        (self as any).postMessage({ type: 'positionScore', id, data: score });
+        break;
+      }
 
-      postMessage({
-        type: 'SEARCH_RESULT',
-        id,
-        payload: result,
-        meta: { duration },
-      });
-    } catch (err: any) {
-      workerLogger.error('Search failed', err);
-      postMessage({
-        type: 'SEARCH_ERROR',
-        id,
-        error: err.toString(),
-      });
+      case 'analyze': {
+        const { board, color } = data;
+
+        setProgressCallback(progress => {
+          (self as any).postMessage({ type: 'progress', id, data: progress });
+        });
+        // Use the new deep analysis function
+        const analysis = analyzePosition(board, color); // Removed unsupported args depth, topMovesCount for now
+
+        (self as any).postMessage({
+          type: 'analysis',
+          id,
+          data: analysis,
+        });
+        break;
+      }
+
+      default: {
+        // Compatible with old protocol just in case? 'SEARCH'
+        if (type === 'SEARCH') {
+          // Adapter for legacy messages if any
+          const { board, turnColor, depth, personality, elo } = e.data.payload;
+          const timeParams = {
+            elo: elo,
+            personality: personality,
+            maxDepth: depth,
+          };
+          const bestMove = await getBestMoveDetailed(board, turnColor, depth, timeParams);
+          (self as any).postMessage({
+            type: 'SEARCH_RESULT',
+            id: e.data.id,
+            payload: bestMove,
+          });
+          return;
+        }
+        (logger as any).warn('Unknown message type:', type);
+      }
     }
+  } catch (error) {
+    (logger as any).error('[AI Worker] Error handling message:', error);
   }
 };
-
-workerLogger.info('Worker initialized');

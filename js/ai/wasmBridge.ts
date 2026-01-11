@@ -2,8 +2,6 @@
  * Bridge for WebAssembly Chess 9x9 Engine
  */
 
-// @ts-ignore
-import init, { get_best_move_wasm } from '../../engine-wasm/pkg/engine_wasm.js';
 import { logger } from '../logger.js';
 
 let wasmInitialized = false;
@@ -30,21 +28,31 @@ export async function ensureWasmInitialized(): Promise<boolean> {
     // Check if we are in Node.js (for tests) to use filesystem instead of fetch
     if (typeof process !== 'undefined' && process.versions && process.versions.node) {
       // @ts-ignore
-      const fs = await import('node:fs/promises');
+      // Use non-static strings to fully hide from Vite's preload/analysis
+      const fsName = ['node', 'fs/promises'].join(':');
+      const pathName = ['node', 'path'].join(':');
+      const urlName = ['node', 'url'].join(':');
+
       // @ts-ignore
-      const path = await import('node:path');
+      const fs = await import(/* @vite-ignore */ fsName);
       // @ts-ignore
-      const url = await import('node:url');
+      const path = await import(/* @vite-ignore */ pathName);
+      // @ts-ignore
+      const url = await import(/* @vite-ignore */ urlName);
 
       const __filename = url.fileURLToPath(import.meta.url);
       const __dirname = path.dirname(__filename);
       const wasmPath = path.resolve(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
 
       const wasmBuffer = await fs.readFile(wasmPath);
-      await init(wasmBuffer);
+      // @ts-ignore
+      const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
+      await wasmModule.default(wasmBuffer);
     } else {
       // Standard wasm-bindgen init for browser (Vite/PWA)
-      await init();
+      // @ts-ignore
+      const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
+      await wasmModule.default();
     }
 
     wasmInitialized = true;
@@ -60,11 +68,6 @@ export async function ensureWasmInitialized(): Promise<boolean> {
 
 /**
  * Calls the Wasm best move search.
- * @param {Array} boardIntArray - Flattened board array (Int8)
- * @param {string} turnColor - 'white' or 'black'
- * @param {number} depth - Search depth
- * @param {string} personality - AI personality
- * @returns {Object|null} { move, score }
  */
 export async function getBestMoveWasm(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,8 +83,16 @@ export async function getBestMoveWasm(
 
   try {
     const boardJson = JSON.stringify(Array.from(boardIntArray));
+    // @ts-ignore
+    const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const resultJson = (get_best_move_wasm as any)(boardJson, turnColor, depth, personality, elo);
+    const resultJson = (wasmModule.get_best_move_wasm as any)(
+      boardJson,
+      turnColor,
+      depth,
+      personality,
+      elo
+    );
     const [bestMove, score, nodes] = JSON.parse(resultJson);
 
     nodesEvaluated = nodes || 0;
@@ -104,16 +115,10 @@ export async function getBestMoveWasm(
   }
 }
 
-/**
- * Returns nodes evaluated in the last Wasm search.
- */
 export function getWasmNodesEvaluated(): number {
   return nodesEvaluated;
 }
 
-/**
- * Resets nodes evaluated count.
- */
 export function resetWasmNodesEvaluated(): void {
   nodesEvaluated = 0;
 }

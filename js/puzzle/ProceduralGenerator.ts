@@ -75,7 +75,7 @@ export class ProceduralGenerator {
     return true;
   }
 
-  static randomSquare(): { r: number, c: number } {
+  static randomSquare(): { r: number; c: number } {
     return {
       r: Math.floor(Math.random() * BOARD_SIZE),
       c: Math.floor(Math.random() * BOARD_SIZE),

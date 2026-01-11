@@ -39,6 +39,8 @@ describe('ShopUI', () => {
       selectedShopPiece: null,
     };
 
+    window.updateTutorRecommendations = updateTutorRecommendations;
+
     jest.clearAllMocks();
   });
 
