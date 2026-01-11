@@ -39,7 +39,7 @@ pub fn get_all_legal_moves(board: &Board, color: i8) -> Vec<Move> {
 
     for m in moves {
         let mut temp_board = *board;
-        let undo = make_move(&mut temp_board, m);
+        make_move(&mut temp_board, m);
         
         let king_pos = if m.from == my_king_pos { m.to } else { my_king_pos };
         if !is_square_attacked(&temp_board, king_pos, enemy_color) {
@@ -242,9 +242,6 @@ pub fn is_square_attacked(board: &Board, square: usize, attacker_color: i8) -> b
 }
 
 fn check_ray_attacks(board: &Board, square: usize, offsets: &[i32], attacker_color: i8, valid_types: &[i8]) -> bool {
-    let r = index_to_row(square) as i32;
-    let c = index_to_col(square) as i32;
-
     for &offset in offsets {
         let mut curr = square as i32;
         loop {

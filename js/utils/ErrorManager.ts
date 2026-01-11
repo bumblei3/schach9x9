@@ -5,26 +5,18 @@
 import { logger } from '../logger.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 
-export interface ErrorOptions {
-  context?: string;
-  critical?: boolean;
-  meta?: Record<string, unknown>;
-}
-
 class ErrorManager {
   private initialized: boolean = false;
+
+  constructor() {
+    this.initialized = false;
+  }
 
   init(): void {
     if (this.initialized) return;
 
     // Global Error Handler
-    window.onerror = (
-      message: string | Event,
-      source?: string,
-      lineno?: number,
-      colno?: number,
-      error?: Error
-    ): boolean => {
+    window.onerror = (message, source, lineno, colno, error) => {
       this.handleError(error || new Error(String(message)), {
         context: 'Global',
         meta: { source, lineno, colno },
@@ -33,7 +25,7 @@ class ErrorManager {
     };
 
     // Unhandled Promise Rejections
-    window.onunhandledrejection = (event: PromiseRejectionEvent): void => {
+    window.onunhandledrejection = (event: PromiseRejectionEvent) => {
       this.handleError(event.reason, {
         context: 'Promise',
         meta: { type: 'unhandledRejection' },
@@ -41,24 +33,26 @@ class ErrorManager {
     };
 
     this.initialized = true;
-    logger.info('ErrorManager initialized');
+    (logger as any).info('ErrorManager initialized');
   }
 
   /**
    * Handle an error
+   * @param error
+   * @param options
    */
-  handleError(error: Error | string, options: ErrorOptions = {}): void {
+  handleError(error: any, options: any = {}): void {
     const context = options.context || 'App';
     const isCritical = options.critical || false;
 
     // Log to internal logger
-    logger.error(`[${context}]`, error);
+    (logger as any).error(`[${context}]`, error);
 
     if (isCritical) {
-      this.showCriticalError(error instanceof Error ? error : new Error(String(error)));
+      this.showCriticalError(error);
     } else {
       // Show toast for non-critical errors
-      const msg = error instanceof Error ? error.message : String(error);
+      const msg = error.message || String(error);
       notificationUI.show(msg, 'error', `Fehler (${context})`);
     }
   }
@@ -67,14 +61,14 @@ class ErrorManager {
    * Report a warning (non-blocking issue)
    */
   warning(message: string, context: string = 'App'): void {
-    logger.warn(`[${context}]`, message);
+    (logger as any).warn(`[${context}]`, message);
     notificationUI.show(message, 'warning', `Warnung (${context})`);
   }
 
   /**
    * Show Critical Error Modal (Game Over state)
    */
-  showCriticalError(error: Error): void {
+  showCriticalError(error: any): void {
     const errorOverlay = document.getElementById('error-overlay');
 
     // Fallback if overlay doesn't exist
@@ -89,11 +83,11 @@ class ErrorManager {
       console.error('Full Stack:', error.stack);
     }
 
-    // Update Modal Content
     const contentContainer = errorOverlay.querySelector('div');
+    if (!contentContainer) return;
 
     // Inject premium error HTML if not present
-    if (contentContainer && !contentContainer.classList.contains('critical-error-content')) {
+    if (!contentContainer.classList.contains('critical-error-content')) {
       contentContainer.innerHTML = `
         <div class="critical-error-content" style="background: var(--bg-panel); padding: 2rem; border-radius: 16px; max-width: 500px; text-align: center;">
              <div class="error-icon-large">💥</div>

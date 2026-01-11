@@ -12,6 +12,7 @@ export * from './ui/GameStatusUI.js';
 
 import type { Player } from './types/game.js';
 import * as AIEngine from './aiEngine.js';
+import { confettiSystem } from './effects.js';
 
 // Zusätzliche Animationen
 /**
@@ -41,9 +42,7 @@ export function animateCheckmate(game: any, color: Player): void {
 
       // Winner is the opposite color
       // Trigger confetti
-      import('./effects.js').then(({ confettiSystem }) => {
-        confettiSystem.spawn();
-      });
+      confettiSystem.spawn();
     }
   }
 }

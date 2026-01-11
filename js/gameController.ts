@@ -21,6 +21,7 @@ import { campaignManager } from './campaign/CampaignManager.js';
 import { parseFEN } from './utils.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
+import { confettiSystem } from './effects.js';
 import type { Player } from './types/game.js';
 import type { GameMode } from './config.js';
 
@@ -117,22 +118,20 @@ export class GameController {
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
             </li>
-            ${
-              level.goals[2]
-                ? `
+            ${level.goals[2]
+        ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
             </li>`
-                : ''
-            }
-            ${
-              level.goals[3]
-                ? `
+        : ''
+      }
+            ${level.goals[3]
+        ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
             </li>`
-                : ''
-            }
+        : ''
+      }
           </ul>
         </div>
       </div>
@@ -140,7 +139,7 @@ export class GameController {
 
     // Show intro modal
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
     ]);
   }
 
@@ -333,7 +332,7 @@ export class GameController {
         'Ungenutzte Punkte',
         `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
         [
-          { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
+          { text: 'Abbrechen', class: 'btn-secondary', callback: () => { } },
           { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition },
         ]
       );
@@ -407,9 +406,7 @@ export class GameController {
 
     // Trigger confetti if the winner is the human player
     if (winningColor === this.game.playerColor) {
-      import('./effects.js').then(({ confettiSystem }) => {
-        confettiSystem.spawn();
-      });
+      confettiSystem.spawn();
     }
 
     // Call central game end handler

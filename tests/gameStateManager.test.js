@@ -133,7 +133,7 @@ describe('GameStateManager', () => {
           from: { r: 8, c: 4 },
           to: { r: 6, c: 4 },
           piece: { type: 'p', color: 'white', hasMoved: true },
-          capturedPiece: { type: 'p', color: 'black' },
+          captured: { type: 'p', color: 'black' },
           positionHistoryLength: 0,
           halfMoveClock: 0,
         },
@@ -428,7 +428,7 @@ describe('GameStateManager', () => {
     test('should handle load error', () => {
       localStorage.setItem('schach9x9_save_autosave', 'invalid json');
       // Silence console.error
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(console, 'error').mockImplementation(() => { });
       expect(GameStateManager.loadGame(game)).toBe(false);
       console.error.mockRestore();
     });

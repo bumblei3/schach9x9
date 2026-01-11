@@ -4,25 +4,12 @@
  */
 import { BOARD_SIZE } from '../config.js';
 import { PuzzleGenerator } from '../puzzleGenerator.js';
-import type { Board, Square, PieceType } from '../types/game.js';
-import type { MoveResult } from '../aiEngine.js';
-
-export interface GeneratedPuzzle {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  setupStr: string;
-  solution: MoveResult[];
-}
 
 export class ProceduralGenerator {
   /**
    * Generates a puzzle for a given difficulty.
-   * @param difficulty - 'easy' (Mate in 1), 'medium' (Mate in 2)
-   * @returns Puzzle object or null if failed
    */
-  static generatePuzzle(difficulty: 'easy' | 'medium' = 'easy'): GeneratedPuzzle | null {
+  static generatePuzzle(difficulty: string = 'easy'): any | null {
     const depth = difficulty === 'easy' ? 1 : 2;
     const maxAttempts = 500;
 
@@ -30,11 +17,9 @@ export class ProceduralGenerator {
       const board = this.createRandomPosition(difficulty);
       if (!board) continue;
 
-      // Ensure position is legal
       if (!this.isPositionLegal(board)) continue;
 
-      // Try to find a forced mate
-      const solution = PuzzleGenerator.findMateSequence(board, 'white', depth);
+      const solution = (PuzzleGenerator as any).findMateSequence(board, 'white', depth);
 
       if (solution) {
         return {
@@ -42,7 +27,7 @@ export class ProceduralGenerator {
           title: `Generated ${difficulty === 'easy' ? 'Mate in 1' : 'Mate in 2'}`,
           description: `White to move. Find the checkmate in ${depth} move${depth > 1 ? 's' : ''}.`,
           difficulty: difficulty === 'easy' ? 'Easy' : 'Medium',
-          setupStr: PuzzleGenerator.boardToString(board, 'white'),
+          setupStr: (PuzzleGenerator as any).boardToString(board, 'white'),
           solution: solution,
         };
       }
@@ -51,35 +36,32 @@ export class ProceduralGenerator {
     return null;
   }
 
-  static createRandomPosition(difficulty: 'easy' | 'medium'): Board {
-    const board: Board = Array(BOARD_SIZE)
+  static createRandomPosition(difficulty: string): any[][] {
+    const board: any[][] = Array(BOARD_SIZE)
       .fill(null)
       .map(() => Array(BOARD_SIZE).fill(null));
 
-    // 1. Place Kings (must not be adjacent)
     const bk = this.randomSquare();
     board[bk.r][bk.c] = { type: 'k', color: 'black', hasMoved: true };
 
-    let wk: Square;
+    let wk;
     do {
       wk = this.randomSquare();
-    } while (Math.abs(wk.r - bk.r) <= 1 && Math.abs(wk.c - bk.c) <= 1); // Kings cannot touch
+    } while (Math.abs(wk.r - bk.r) <= 1 && Math.abs(wk.c - bk.c) <= 1);
     board[wk.r][wk.c] = { type: 'k', color: 'white', hasMoved: true };
 
-    // 2. Add White Material
-    const pieces: Exclude<PieceType, null>[] = difficulty === 'easy' ? ['q', 'r'] : ['r', 'b'];
+    const pieces = difficulty === 'easy' ? ['q', 'r'] : ['r', 'b'];
 
     for (const type of pieces) {
-      let pos: Square;
+      let pos;
       do {
         pos = this.randomSquare();
       } while (board[pos.r][pos.c] !== null);
       board[pos.r][pos.c] = { type, color: 'white', hasMoved: true };
     }
 
-    // 3. Add Black Material
     if (Math.random() > 0.5) {
-      let pos: Square;
+      let pos;
       do {
         pos = this.randomSquare();
       } while (board[pos.r][pos.c] !== null || pos.r === 0 || pos.r === 8);
@@ -89,11 +71,11 @@ export class ProceduralGenerator {
     return board;
   }
 
-  static isPositionLegal(_board: Board): boolean {
+  static isPositionLegal(_board: any[][]): boolean {
     return true;
   }
 
-  static randomSquare(): Square {
+  static randomSquare(): { r: number, c: number } {
     return {
       r: Math.floor(Math.random() * BOARD_SIZE),
       c: Math.floor(Math.random() * BOARD_SIZE),

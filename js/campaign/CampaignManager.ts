@@ -1,9 +1,15 @@
-import { CAMPAIGN_LEVELS } from './campaignData.js';
-import { CampaignLevelRaw, LevelProgress, LevelStats, CampaignGoal } from '../types/campaign.js';
+import { CAMPAIGN_LEVELS, type CampaignLevel, type CampaignGoal } from './campaignData.js';
+
+export interface CampaignProgress {
+  [levelId: string]: {
+    completed: boolean;
+    stars: number;
+  };
+}
 
 export class CampaignManager {
-  public levels: CampaignLevelRaw[];
-  public progress: Record<string, LevelProgress>;
+  private levels: CampaignLevel[];
+  private progress: CampaignProgress;
 
   constructor() {
     this.levels = CAMPAIGN_LEVELS;
@@ -12,9 +18,8 @@ export class CampaignManager {
 
   /**
    * Load progress from storage
-   * @returns {Object} { [levelId]: { completed: boolean, stars: number } }
    */
-  private loadProgress(): Record<string, LevelProgress> {
+  loadProgress(): CampaignProgress {
     const raw = localStorage.getItem('schach9x9_campaign_progress');
     if (!raw) {
       return {};
@@ -27,26 +32,20 @@ export class CampaignManager {
     }
   }
 
-  private saveProgress(): void {
+  saveProgress(): void {
     localStorage.setItem('schach9x9_campaign_progress', JSON.stringify(this.progress));
   }
 
   /**
    * Mark a level as completed and calculate stars
-   * @param levelId
-   * @param gameStats { moves, materialDiff, promotedCount }
    */
-  public completeLevel(
-    levelId: string,
-    gameStats: LevelStats = { moves: 0, materialDiff: 0 }
-  ): number | undefined {
+  completeLevel(levelId: string, gameStats: any = {}): number | undefined {
     const level = this.getLevel(levelId);
-    if (!level) return;
+    if (!level) return undefined;
 
     const stars = this.calculateStars(level, gameStats);
     const current = this.progress[levelId] || { completed: false, stars: 0 };
 
-    // Update if better result (more stars)
     if (stars > current.stars || !current.completed) {
       this.progress[levelId] = {
         completed: true,
@@ -55,20 +54,18 @@ export class CampaignManager {
       this.saveProgress();
     }
 
-    return stars; // Return earned stars for UI display
+    return stars;
   }
 
-  private calculateStars(level: CampaignLevelRaw, stats: LevelStats): number {
-    let stars = 1; // Base star for completing the level
+  calculateStars(level: CampaignLevel, stats: any): number {
+    let stars = 1;
 
     if (!level.goals) return stars;
 
-    // Check 2-star goal
     if (this.checkGoal(level.goals[2], stats)) {
       stars = 2;
     }
 
-    // Check 3-star goal
     if (this.checkGoal(level.goals[3], stats)) {
       stars = 3;
     }
@@ -76,7 +73,7 @@ export class CampaignManager {
     return stars;
   }
 
-  private checkGoal(goal: CampaignGoal | undefined, stats: LevelStats): boolean {
+  checkGoal(goal: CampaignGoal | undefined, stats: any): boolean {
     if (!goal) return false;
 
     switch (goal.type) {
@@ -93,36 +90,26 @@ export class CampaignManager {
 
   /**
    * Check if a level is unlocked
-   * @param levelId
-   * @returns {boolean}
    */
-  public isLevelUnlocked(levelId: string): boolean {
-    // Level 1 is always unlocked
+  isLevelUnlocked(levelId: string): boolean {
     if (this.levels[0].id === levelId) return true;
 
-    // Check if any level that unlocks this one has been completed
     const parentLevel = this.levels.find(l => l.unlocks && l.unlocks.includes(levelId));
 
-    // If no parent found (and not first level), it's probably locked or hidden
     if (!parentLevel) return false;
 
-    // It's unlocked if the parent is completed
     return this.isLevelCompleted(parentLevel.id);
   }
 
-  public isLevelCompleted(levelId: string): boolean {
+  isLevelCompleted(levelId: string): boolean {
     return !!this.progress[levelId]?.completed;
   }
 
-  public getLevel(id: string): CampaignLevelRaw | undefined {
+  getLevel(id: string): CampaignLevel | undefined {
     return this.levels.find(l => l.id === id);
   }
 
-  public getAllLevels(): (CampaignLevelRaw & {
-    unlocked: boolean;
-    completed: boolean;
-    stars: number;
-  })[] {
+  getAllLevels(): any[] {
     return this.levels.map(l => ({
       ...l,
       unlocked: this.isLevelUnlocked(l.id),
@@ -131,7 +118,7 @@ export class CampaignManager {
     }));
   }
 
-  public resetProgress(): void {
+  resetProgress(): void {
     this.progress = {};
     this.saveProgress();
   }

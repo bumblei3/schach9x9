@@ -145,7 +145,7 @@ describe('AnalysisUI', () => {
       from: { r: 1, c: 1 },
       to: { r: 2, c: 2 },
       piece: { type: 'p', color: 'white', hasMoved: false },
-      capturedPiece: { type: 'r', color: 'black' },
+      captured: { type: 'r', color: 'black' },
     };
 
     analysisUI.undoMoveOnBoard(board, move);

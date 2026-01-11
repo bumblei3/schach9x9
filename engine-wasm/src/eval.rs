@@ -155,9 +155,6 @@ pub fn evaluate_position(board: &Board, turn_color: i8, config: &EvalConfig) -> 
     let mut eg_score = 0;
     let mut total_phase = 0;
     
-    let mut white_material = 0;
-    let mut black_material = 0;
-
     let mut attack_weight = 1.0;
     let mut pawn_structure_weight = 1.0;
     let mut king_safety_weight = 1.0;
@@ -201,7 +198,7 @@ pub fn evaluate_position(board: &Board, turn_color: i8, config: &EvalConfig) -> 
         let side_mult = if is_white { 1 } else { -1 };
 
         let val = PIECE_VALUES[piece_type as usize];
-        if is_white { white_material += val; } else { black_material += val; }
+
         total_phase += PHASE_VALUES[piece_type as usize];
 
         let r = index_to_row(i);

@@ -22,6 +22,7 @@ import {
 import { RulesEngine } from './RulesEngine.js';
 // import { makeMove } from './ai/MoveGenerator.js';
 import type { Player, Square, Piece } from './types/game.js';
+export type { Player, Square, Piece };
 
 export { BOARD_SIZE, PHASES, PIECE_VALUES, AI_DELAY_MS };
 
@@ -55,6 +56,7 @@ export interface MoveHistoryEntry {
   isCheckmate?: boolean;
   isCastling?: boolean;
   isEnPassant?: boolean;
+  halfMoveClock?: number;
 }
 
 export interface LastMoveInfo {

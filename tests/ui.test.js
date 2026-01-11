@@ -36,6 +36,7 @@ describe('UI Module', () => {
   beforeEach(() => {
     setupJSDOM();
     game = createMockGame();
+    game.boardSize = 9;
     jest.clearAllMocks();
   });
 

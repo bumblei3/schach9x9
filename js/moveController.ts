@@ -1,4 +1,4 @@
-import { PHASES, PIECE_VALUES } from './gameEngine.js';
+import { PHASES, PIECE_VALUES, type Player } from './gameEngine.js';
 import * as MoveValidator from './move/MoveValidator.js';
 import * as MoveExecutor from './move/MoveExecutor.js';
 import * as GameStateManager from './move/GameStateManager.js';
@@ -112,7 +112,7 @@ export class MoveController {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public finishMove(): any {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveExecutor as any).finishMove(this.game, this);
+    return (MoveExecutor as any).finishMove(this.game);
   }
 
   /**
@@ -149,7 +149,7 @@ export class MoveController {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public showPromotionUI(r: number, c: number, color: string, moveRecord: any): void {
-    UI.showPromotionUI(this.game, r, c, color, moveRecord, () => this.finishMove());
+    UI.showPromotionUI(this.game, r, c, color as Player, moveRecord, () => this.finishMove());
   }
 
   /**

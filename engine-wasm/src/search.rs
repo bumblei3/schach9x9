@@ -70,7 +70,7 @@ fn alphabeta(
     board: &Board,
     depth: i8,
     mut alpha: i32,
-    mut beta: i32,
+    beta: i32,
     color: i8,
     ply: i8,
     ctx: &mut SearchContext,

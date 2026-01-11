@@ -2,26 +2,15 @@
  * TimeManager.ts
  * Handles game clock, time controls, and time expiration.
  */
-import { PHASES } from './gameEngine.js';
+import { PHASES, type Game } from './gameEngine.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
+
 import type { Player } from './types/game.js';
-import type { Phase, TimeControl } from './config.js';
 
 export interface TimeControlMode {
   base: number;
   increment: number;
-}
-
-export interface GameWithTime {
-  clockEnabled: boolean;
-  phase: Phase;
-  lastMoveTime: number;
-  turn: Player;
-  whiteTime: number;
-  blackTime: number;
-  timeControl: TimeControl;
-  log: (message: string) => void;
 }
 
 export interface GameControllerInterface {
@@ -37,11 +26,11 @@ const TIME_CONTROLS: Record<string, TimeControlMode> = {
 };
 
 export class TimeManager {
-  private game: GameWithTime;
+  private game: Game;
   private gameController: GameControllerInterface | null;
   private clockInterval: ReturnType<typeof setInterval> | null = null;
 
-  constructor(game: GameWithTime, gameController: GameControllerInterface | null = null) {
+  constructor(game: Game, gameController: GameControllerInterface | null = null) {
     this.game = game;
     this.gameController = gameController;
     this.clockInterval = null;

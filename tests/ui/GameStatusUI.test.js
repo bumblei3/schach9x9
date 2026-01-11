@@ -58,6 +58,7 @@ describe('GameStatusUI Component', () => {
       board: Array(9)
         .fill(null)
         .map(() => Array(9).fill(null)),
+      boardSize: 9,
       moveHistory: [],
       capturedPieces: { white: [], black: [] },
       stats: { totalMoves: 0, captures: 0, accuracies: [], playerBestMoves: 0 },
@@ -103,7 +104,7 @@ describe('GameStatusUI Component', () => {
         piece: { type: 'n' },
         from: { r: 0, c: 1 },
         to: { r: 2, c: 2 },
-        capturedPiece: { type: 'p' },
+        captured: { type: 'p' },
       }, // Capture
       {
         piece: { type: 'k' },

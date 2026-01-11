@@ -2,9 +2,30 @@
  * Campaign Levels Configuration
  * Defines the scenarios for the single-player campaign.
  */
-import { CampaignLevelRaw } from '../types/campaign.js';
 
-export const CAMPAIGN_LEVELS: CampaignLevelRaw[] = [
+export interface CampaignGoal {
+  type: 'moves' | 'material' | 'promotion';
+  value: number;
+  description: string;
+}
+
+export interface CampaignLevel {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+  playerColor: 'white' | 'black';
+  fen: string;
+  winCondition: {
+    type: string;
+  };
+  unlocks: string[];
+  goals: {
+    [stars: number]: CampaignGoal;
+  };
+}
+
+export const CAMPAIGN_LEVELS: CampaignLevel[] = [
   {
     id: 'tutorial_1',
     title: 'Kapitel 1: Der Hinterhalt',
