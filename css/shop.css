@@ -27,8 +27,6 @@
   /* iOS/Safari smooth scrolling */
   touch-action: pan-y;
   /* Edge/touch: allow vertical scrolling */
-  overscroll-behavior: contain;
-  /* Prevent scroll chaining */
   opacity: 1;
 }
 
