@@ -2,7 +2,8 @@
  * Core game type definitions for Schach 9x9
  */
 
-export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | null;
+export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | null;
+
 export type Player = 'white' | 'black';
 export type GamePhase = 'SETUP' | 'PLAY' | 'END';
 export type GameMode = 'setup' | 'classic' | 'puzzle' | 'campaign' | 'standard8x8';
