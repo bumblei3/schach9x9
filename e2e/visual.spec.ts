@@ -72,7 +72,12 @@ test.describe('Visual Regression Tests @visual', () => {
     });
   });
 
-  test('3D View Static Snapshot', async ({ page }) => {
+  test('3D View Static Snapshot', async ({ page, browserName }) => {
+    // Skip this test in Firefox CI because WebGL support is often missing or flaky in headless Firefox
+    if (browserName === 'firefox' && process.env.CI) {
+      test.skip(true, 'Skip 3D tests in Firefox CI due to WebGL issues');
+    }
+
     await page.click('button.points-btn[data-points="15"]');
 
     // Wait for full game initialization before toggling 3D
