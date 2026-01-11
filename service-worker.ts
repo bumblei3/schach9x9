@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schach9x9-v7';
+const CACHE_NAME = 'schach9x9-v8';
 
 // Types for Service Worker
 interface ExtendableEvent extends Event {
