@@ -13,6 +13,7 @@ import { AnalysisController } from './AnalysisController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
 import { parseFEN } from './utils.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
+import { PuzzleMenu } from './ui/PuzzleMenu.js';
 
 export class GameController {
   constructor(game) {
@@ -22,6 +23,7 @@ export class GameController {
     this.shopManager = new ShopManager(game, this);
     this.analysisController = new AnalysisController(this);
     this.analysisUI = new AnalysisUI(game);
+    this.puzzleMenu = new PuzzleMenu(this);
     this.moveExecutor = null; // Circular dependency resolved later
     this.game.gameController = this;
     this.gameStartTime = null;
@@ -66,22 +68,20 @@ export class GameController {
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
             </li>
-            ${
-              level.goals[2]
-                ? `
+            ${level.goals[2]
+        ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
             </li>`
-                : ''
-            }
-            ${
-              level.goals[3]
-                ? `
+        : ''
+      }
+            ${level.goals[3]
+        ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
             </li>`
-                : ''
-            }
+        : ''
+      }
           </ul>
         </div>
       </div>
@@ -89,7 +89,7 @@ export class GameController {
 
     // Show intro modal
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
     ]);
   }
 
@@ -106,7 +106,10 @@ export class GameController {
       UI.updateShopUI(this.game);
     } else if (mode === 'puzzle') {
       // Puzzle mode: start puzzle directly
-      this.startPuzzleMode();
+      // Puzzle mode: start puzzle directly
+      // this.startPuzzleMode(); // Changed: Show menu instead
+      this.puzzleMenu.show();
+      this.game.mode = 'puzzle';
     } else {
       // In classic mode, we start directly in PLAY phase
       this.game.gameStartTime = Date.now();
@@ -549,8 +552,16 @@ export class GameController {
     }
   }
 
-  startPuzzleMode() {
-    const puzzle = puzzleManager.loadPuzzle(this.game);
+  startPuzzleMode(index) {
+    if (typeof index === 'undefined') {
+      this.puzzleMenu.show();
+      return;
+    }
+    this.loadPuzzle(index);
+  }
+
+  loadPuzzle(index) {
+    const puzzle = puzzleManager.loadPuzzle(this.game, index);
     if (puzzle) {
       this.game.currentPuzzle = puzzle;
       UI.showPuzzleOverlay(puzzle);
@@ -564,6 +575,7 @@ export class GameController {
 
       // Ensure UI controls are appropriate
       this.showShop(false);
+      this.puzzleMenu.hide();
     }
   }
 

@@ -26,22 +26,28 @@ export class PieceManager3D {
 
   updateFromGameState(game) {
     if (!this.sceneManager.scene) return;
+    logger.debug('[PieceManager3D] updateFromGameState started');
 
     // Clear existing pieces
     Object.values(this.pieces).forEach(piece => {
       this.sceneManager.scene.remove(piece);
     });
     this.pieces = {};
+    logger.debug('[PieceManager3D] Existing pieces cleared');
 
     // Add pieces from game board
+    let count = 0;
+    const start = performance.now();
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
         const piece = game.board[row][col];
         if (piece) {
           this.addPiece(piece.type, piece.color, row, col);
+          count++;
         }
       }
     }
+    logger.info(`[PieceManager3D] Created ${count} pieces in ${(performance.now() - start).toFixed(2)}ms`);
     this.updateSetupHighlights(game);
   }
 

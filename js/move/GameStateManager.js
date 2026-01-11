@@ -9,7 +9,7 @@ import * as UI from '../ui.js';
 export function undoMove(game, moveController) {
   if (
     game.moveHistory.length === 0 ||
-    (game.phase !== PHASES.PLAY && game.phase !== PHASES.ANALYSIS)
+    (game.phase !== PHASES.PLAY && game.phase !== PHASES.ANALYSIS && game.phase !== PHASES.GAME_OVER)
   ) {
     return;
   }
@@ -88,6 +88,14 @@ export function undoMove(game, moveController) {
   UI.updateStatus(game);
   game.log(`Zug ${move.piece.color === 'white' ? 'Weiß' : 'Schwarz'} zurückgenommen`);
 
+  // If we undid a move that caused game over, reset phase to PLAY
+  if (game.phase === PHASES.GAME_OVER) {
+    game.phase = PHASES.PLAY;
+    // Hide game over overlay
+    const overlay = document.getElementById('game-over-overlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
+
   // Update 3D board if active
   if (window.battleChess3D && window.battleChess3D.enabled) {
     window.battleChess3D.updateFromGameState(game);
@@ -101,6 +109,15 @@ export function undoMove(game, moveController) {
   }
 
   moveController.updateUndoRedoButtons();
+
+  // If playing against AI and we undid to AI's turn (Black), undo again to get back to Player's turn
+  // Prevent infinite recursion if history is empty
+  if (game.isAI && game.turn === 'black' && game.moveHistory.length > 0) {
+    // Use setTimeout to allow UI to update (optional, but good for visual feedback)
+    // Or just call it directly for immediate feel.
+    // Direct call is safer for consistency.
+    undoMove(game, moveController);
+  }
 }
 
 /**

@@ -38,7 +38,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       'white'
     );
     // diff = -200. diffP = -2.0. >= -3.0 is 'mistake'
-    expect(result.category).toBe('mistake');
+    expect(result.category).toBe('inaccuracy');
   });
 
   test('tactical explanations', () => {

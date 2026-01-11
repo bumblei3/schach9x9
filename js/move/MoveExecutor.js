@@ -178,6 +178,20 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
       soundManager.playSuccess();
     } else {
       UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');
+
+      // Auto-play opponent move if available
+      const nextIndex = game.puzzleState.currentMoveIndex;
+      const puzzle = puzzleManager.getPuzzle(game.puzzleState.puzzleId);
+
+      if (puzzle && nextIndex < puzzle.solution.length) {
+        const nextMove = puzzle.solution[nextIndex];
+        setTimeout(() => {
+          // Ensure we are in a state to move
+          if (game.phase === 'PLAY' || game.phase === 'play') {
+            moveController.executeMove(nextMove.from, nextMove.to);
+          }
+        }, 600);
+      }
     }
   }
 
@@ -186,10 +200,11 @@ export async function executeMove(game, moveController, from, to, isUndoRedo = f
     game.phase = PHASES.GAME_OVER;
     UI.renderBoard(game);
     UI.updateStatus(game);
-    game.log('Unentschieden (Ungenügendes Material)');
+
+    game.log('Unentschieden durch unzureichendes Material.');
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Unentschieden (Ungenügendes Material)';
+    if (winnerText) winnerText.textContent = 'Unentschieden (Material)';
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {

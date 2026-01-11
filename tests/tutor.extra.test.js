@@ -98,7 +98,7 @@ describe('TutorController Extra Coverage', () => {
         from: { r: 6, c: 4 },
         to: { r: 4, c: 4 },
         piece: { color: 'white', type: 'p' },
-        evalScore: -150, // White is now -1.5 (Drop of 2.5)
+        evalScore: -350, // White is now -3.5 (Drop of 4.5)
       };
       // Setup board for getMoveNotation/tactical check
       game.board[6][4] = { type: 'p', color: 'white' };
@@ -114,7 +114,7 @@ describe('TutorController Extra Coverage', () => {
       tutor.checkBlunder(moveRecord);
 
       expect(tutor.showBlunderWarning).toHaveBeenCalled();
-      expect(game.lastEval).toBe(-150);
+      expect(game.lastEval).toBe(-350);
     });
 
     test('should not detect blunder for minor drop', () => {

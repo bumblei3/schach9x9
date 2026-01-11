@@ -74,15 +74,16 @@ export class PuzzleManager {
           'bk' +
           '..'.repeat(13) +
           'wr' +
-          '..'.repeat(8) +
+          '..'.repeat(9) + // Increased gap to place next rook at (3,1)
           'wr' +
-          '..'.repeat(9) +
+          '..'.repeat(8) +
           'wk' +
           '..'.repeat(81 - 38) +
           'w',
         solution: [
-          { from: { r: 2, c: 0 }, to: { r: 1, c: 0 } },
-          { from: { r: 3, c: 1 }, to: { r: 0, c: 1 } },
+          { from: { r: 2, c: 0 }, to: { r: 1, c: 0 } }, // White Rook 1
+          { from: { r: 0, c: 4 }, to: { r: 0, c: 3 } }, // Black King (Forced)
+          { from: { r: 3, c: 1 }, to: { r: 0, c: 1 } }, // White Rook 2 (Mate)
         ],
       },
     ];
@@ -160,6 +161,7 @@ export class PuzzleManager {
       if (game.puzzleState.currentMoveIndex >= puzzle.solution.length) {
         game.puzzleState.solved = true;
         game.puzzleState.active = false;
+        this.markSolved(puzzle.id);
         return 'solved';
       }
       return 'continue';
@@ -194,6 +196,42 @@ export class PuzzleManager {
     this.puzzles.push(puzzle);
     return this.loadPuzzle(game, this.puzzles.length - 1);
   }
+
+  /**
+   * Returns all static puzzles
+   */
+  getPuzzles() {
+    return this.puzzles;
+  }
+
+  /**
+   * Checks if a puzzle is solved (persisted in localStorage)
+   */
+  isSolved(id) {
+    try {
+      const solved = JSON.parse(localStorage.getItem('schach_solved_puzzles') || '[]');
+      return solved.includes(id);
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Marks a puzzle as solved
+   */
+  markSolved(id) {
+    try {
+      const solved = JSON.parse(localStorage.getItem('schach_solved_puzzles') || '[]');
+      if (!solved.includes(id)) {
+        solved.push(id);
+        localStorage.setItem('schach_solved_puzzles', JSON.stringify(solved));
+      }
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
+  }
 }
+
 
 export const puzzleManager = new PuzzleManager();

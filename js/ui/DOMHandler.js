@@ -137,6 +137,15 @@ export class DOMHandler {
       });
     }
 
+    const hintBtn = document.getElementById('hint-btn');
+    if (hintBtn) {
+      hintBtn.addEventListener('click', () => {
+        if (this.game && this.game.tutorController) {
+          this.game.tutorController.showHint();
+        }
+      });
+    }
+
     const analysisBtn = document.getElementById('toggle-analysis-btn');
     if (analysisBtn) {
       analysisBtn.addEventListener('click', () => {
@@ -254,6 +263,7 @@ export class DOMHandler {
   initPuzzleHandlers() {
     const exitBtn = document.getElementById('puzzle-exit-btn');
     const nextBtn = document.getElementById('puzzle-next-btn');
+    const menuCloseBtn = document.getElementById('puzzle-menu-close-btn');
 
     if (exitBtn) {
       exitBtn.addEventListener('click', () => {
@@ -267,6 +277,19 @@ export class DOMHandler {
       nextBtn.addEventListener('click', () => {
         if (this.gameController) {
           this.gameController.nextPuzzle();
+        }
+      });
+    }
+
+    if (menuCloseBtn) {
+      menuCloseBtn.addEventListener('click', () => {
+        if (this.gameController && this.gameController.puzzleMenu) {
+          this.gameController.puzzleMenu.hide();
+          // If we are not in a puzzle, maybe reload or go back to main menu?
+          // If we accessed it from main menu, we should just close it.
+          // But the button 'puzzle-mode-btn' calls startPuzzleMode() which sets mode='puzzle'
+          // If we close this menu without picking a puzzle, we are kind of in limbo if we don't reset gamestate.
+          // However, the main menu is just an overlay.
         }
       });
     }

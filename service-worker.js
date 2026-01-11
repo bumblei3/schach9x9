@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schach9x9-v6';
+const CACHE_NAME = 'schach9x9-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -73,43 +73,13 @@ const ASSETS_TO_CACHE = [
   './js/utils/PGNGenerator.js',
   './opening-book.json',
   './opening-book-8x8.json',
+  './engine-wasm/pkg/engine_wasm_bg.wasm',
+  './engine-wasm/pkg/engine_wasm.js',
 ];
 
-// Install event: Cache core assets
-self.addEventListener('install', event => {
-  console.log('[SW] Installing Service Worker...');
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching app shell');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-      .then(() => self.skipWaiting())
-  );
-});
+// ...
 
-// Activate event: Clean up old caches
-self.addEventListener('activate', event => {
-  console.log('[SW] Activating Service Worker...');
-  event.waitUntil(
-    caches
-      .keys()
-      .then(keyList => {
-        return Promise.all(
-          keyList.map(key => {
-            if (key !== CACHE_NAME) {
-              console.log('[SW] Removing old cache', key);
-              return caches.delete(key);
-            }
-          })
-        );
-      })
-      .then(() => self.clients.claim())
-  );
-});
-
-// Fetch event: Network-First strategy for HTML/JS (to get updates), Cache-First for others
+// Fetch event: Network-First strategy
 self.addEventListener('fetch', event => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
@@ -135,7 +105,17 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         // If network fails, try to serve from cache
-        return caches.match(event.request);
+        return caches.match(event.request).then(response => {
+          if (response) {
+            return response;
+          }
+          // Fallback for missing resources or return simple error response to avoid "Failed to convert value to Response"
+          // This is critical for preventing the TypeError in console
+          return new Response('Network error and not in cache', {
+            status: 408,
+            headers: { 'Content-Type': 'text/plain' },
+          });
+        });
       })
   );
 });

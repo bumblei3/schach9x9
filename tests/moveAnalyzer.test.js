@@ -198,7 +198,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 50, 150); // diff = -1.0
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -50, 150); // diff = -2.0
       expect(analysis.qualityLabel).toContain('Ungenauigkeit');
       expect(analysis.category).toBe('inaccuracy');
     });
@@ -208,7 +208,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -100, 150); // diff = -2.5
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -150, 150); // diff = -3.0
       expect(analysis.qualityLabel).toContain('Fehler');
       expect(analysis.category).toBe('mistake');
     });

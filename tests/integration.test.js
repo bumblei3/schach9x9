@@ -60,6 +60,7 @@ describe('Integration Tests', () => {
       checked: false,
       scrollTop: 0,
       scrollHeight: 100,
+      addEventListener: jest.fn(),
     }));
 
     global.document.querySelector = jest.fn(() => ({

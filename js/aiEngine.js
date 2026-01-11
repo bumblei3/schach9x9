@@ -215,7 +215,24 @@ export async function getBestMoveDetailed(uiBoard, turnColor, maxDepth = 4, time
 export async function evaluatePosition(uiBoard, forColor, config = {}) {
   const board = convertBoardToInt(uiBoard);
   // Use depth 0 search to get static evaluation
-  // Note: This is now ASYNC. Tests must be updated.
+
+  // Use Worker if available to prevent UI freeze
+  if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
+    try {
+      const result = await runWorkerSearch(
+        board,
+        forColor,
+        0, // Depth 0 for static eval
+        config.personality || 'NORMAL',
+        config.elo || 2500
+      );
+      if (result) return result.score;
+    } catch (err) {
+      logger.error('[AiEngine] Worker eval failed, falling back', err);
+    }
+  }
+
+  // Fallback to main thread
   const wasmResult = await getBestMoveWasm(
     board,
     forColor,
@@ -343,17 +360,17 @@ export {
 };
 
 // Stubbed TT functions
-export function storeTT() {}
-export function probeTT() {}
+export function storeTT() { }
+export function probeTT() { }
 export function getTTMove() {
   return null;
 }
-export function clearTT() {}
+export function clearTT() { }
 export function getTTSize() {
   return 0;
 }
-export function setTTMaxSize() {}
-export function testStoreTT() {}
-export function testProbeTT() {}
+export function setTTMaxSize() { }
+export function testStoreTT() { }
+export function testProbeTT() { }
 
-function setProgressCallback() {}
+function setProgressCallback() { }

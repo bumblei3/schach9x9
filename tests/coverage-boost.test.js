@@ -427,18 +427,18 @@ describe('Coverage Boost Tests', () => {
         description: 'Solve it',
       };
       puzzleManager.loadPuzzle = jest.fn(g => {
-        g.puzzleMode = true;
+        g.mode = 'puzzle';
         return mockPuzzle;
       });
       puzzleManager.init = jest.fn();
 
-      controller.startPuzzleMode();
-      expect(game.puzzleMode).toBe(true);
+      controller.startPuzzleMode(0);
+      expect(game.mode).toBe('puzzle');
 
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => {});
+      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => { });
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();

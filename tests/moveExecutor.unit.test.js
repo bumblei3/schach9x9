@@ -24,6 +24,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
 jest.unstable_mockModule('../js/puzzleManager.js', () => ({
   puzzleManager: {
     checkMove: jest.fn(),
+    getPuzzle: jest.fn(() => ({ solution: [] })),
   },
 }));
 
@@ -290,6 +291,7 @@ describe('MoveExecutor Integration Tests', () => {
 
   test('Puzzle Mode: Correct Move', async () => {
     game.mode = 'puzzle';
+    game.puzzleState = { currentMoveIndex: 0, puzzleId: 'test-puzzle' };
     game.board[6][4] = { type: 'p', color: 'white' };
     puzzleManager.checkMove.mockReturnValue('correct');
 

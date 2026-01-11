@@ -178,7 +178,7 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       await import('../js/puzzleManager.js');
 
       // Start puzzle mode
-      gc.startPuzzleMode();
+      gc.startPuzzleMode(0);
 
       expect(game.phase).toBe(PHASES.PLAY);
       expect(game.mode).toBe('puzzle');

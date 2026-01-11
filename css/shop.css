@@ -313,19 +313,125 @@
   gap: 0.5rem;
 }
 
-.puzzle-buttons button {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-}
-
 @media (max-width: 640px) {
   .puzzle-content {
     flex-direction: column;
     text-align: center;
   }
 
+  .puzzle-buttons button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
   .puzzle-buttons {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* --- Puzzle Menu (Selection) --- */
+#puzzle-menu-overlay {
+  z-index: 2000;
+  /* Ensure on top of everything */
+  background: rgba(15, 23, 42, 0.95);
+  /* Deep dark background */
+  backdrop-filter: blur(16px);
+}
+
+.puzzle-menu-container {
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex !important;
+  flex-direction: column;
+}
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.puzzle-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.puzzle-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.puzzle-card.solved {
+  border-color: var(--success);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.puzzle-card.solved:hover {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.puzzle-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.puzzle-title {
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 1.1rem;
+}
+
+.puzzle-check {
+  font-size: 1.2rem;
+}
+
+.puzzle-difficulty {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.puzzle-difficulty.einfach {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.puzzle-difficulty.mittel {
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.1);
+}
+
+.puzzle-difficulty.schwer {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.puzzle-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
 }

@@ -93,14 +93,14 @@ export function analyzeMoveWithExplanation(game, move, score, bestScore) {
   } else if (diffP >= -0.3) {
     category = 'excellent';
     qualityLabel = '✨ Exzellenter Zug! Beinahe perfekt.';
-  } else if (diffP >= -0.8) {
+  } else if (diffP >= -1.5) {
     category = 'good';
     qualityLabel = '✅ Guter Zug.';
-  } else if (diffP >= -1.5) {
+  } else if (diffP >= -2.5) {
     category = 'inaccuracy';
     qualityLabel = `!? Ungenauigkeit (${Math.abs(diffP)} Bauern schwächer)`;
     warnings.push('Es gibt strategisch wertvollere Alternativen.');
-  } else if (diffP >= -3.0) {
+  } else if (diffP >= -4.0) {
     category = 'mistake';
     qualityLabel = `? Fehler (${Math.abs(diffP)} Bauern schlechter)`;
     warnings.push('Dieser Zug verschlechtert deine Stellung spürbar.');
@@ -397,8 +397,8 @@ export async function checkBlunder(game, tutorController, moveRecord) {
   const accuracy = 100 * Math.pow(0.5, clampedDrop / 200);
   game.stats.accuracies.push(accuracy);
 
-  if (drop >= 200) {
-    // 2.0 evaluation drop is a blunder
+  if (drop >= 300) {
+    // 3.0 evaluation drop is a blunder (increased from 2.0 to be less annoying)
     const analysis = analyzeMoveWithExplanation(
       game,
       { from: moveRecord.from, to: moveRecord.to },
@@ -447,23 +447,23 @@ export function showBlunderWarning(game, analysis, proceedCallback = null) {
 
   const buttons = isPreMove
     ? [
-        { text: 'Abbrechen', class: 'btn-secondary' },
-        { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
-      ]
+      { text: 'Abbrechen', class: 'btn-secondary' },
+      { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
+    ]
     : [
-        { text: 'Nein, weiterspielen', class: 'btn-secondary' },
-        {
-          text: 'Ja, Zug rückgängig machen',
-          class: 'btn-primary',
-          callback: () => {
-            if (game.moveController && game.moveController.undoMove) {
-              game.moveController.undoMove();
-            } else if (game.undoMove) {
-              game.undoMove();
-            }
-          },
+      { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+      {
+        text: 'Ja, Zug rückgängig machen',
+        class: 'btn-primary',
+        callback: () => {
+          if (game.moveController && game.moveController.undoMove) {
+            game.moveController.undoMove();
+          } else if (game.undoMove) {
+            game.undoMove();
+          }
         },
-      ];
+      },
+    ];
 
   UI.showModal(title, message, buttons);
 }

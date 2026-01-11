@@ -481,6 +481,19 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
         </div>
       </div>
 
+            <!-- Puzzle Menu Overlay -->
+      <div id="puzzle-menu-overlay" class="fullscreen-overlay hidden">
+        <div class="menu-content puzzle-menu-container">
+          <div class="menu-header">
+            <h2>Puzzles</h2>
+            <button id="puzzle-menu-close-btn" class="close-icon-btn">×</button>
+          </div>
+          <div id="puzzle-menu-list" class="puzzle-grid">
+            <!-- Puzzles injected by JS -->
+          </div>
+        </div>
+      </div>
+
       <!-- Statistics Overlay -->
       <div id="stats-overlay" class="fullscreen-overlay hidden">
         <div class="stats-content">
