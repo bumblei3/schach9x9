@@ -6,6 +6,7 @@ export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | nu
 
 export type Player = 'white' | 'black';
 export type GamePhase = 'SETUP' | 'PLAY' | 'END';
+export type Board = (Piece | null)[][];
 export type GameMode = 'setup' | 'classic' | 'puzzle' | 'campaign' | 'standard8x8';
 
 export interface Square {
@@ -16,6 +17,7 @@ export interface Square {
 export interface Piece {
     type: Exclude<PieceType, null>;
     color: Player;
+    hasMoved?: boolean;
 }
 
 export interface Move {
