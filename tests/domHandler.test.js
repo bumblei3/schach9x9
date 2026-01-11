@@ -388,4 +388,134 @@ describe('DOMHandler', () => {
     exportBtn.click();
     expect(window.alert).toHaveBeenCalledWith('Keine Züge zum Exportieren!');
   });
+
+  test('should handle standard 8x8 mode start', () => {
+    document.getElementById('standard-8x8-btn').click();
+    expect(app.init).toHaveBeenCalledWith(0, 'standard8x8');
+  });
+
+  test('should handle threats and opportunities buttons', () => {
+    app.game.analysisManager.toggleThreats = jest.fn().mockReturnValue(true);
+    app.game.analysisManager.toggleOpportunities = jest.fn().mockReturnValue(true);
+
+    const threatsBtn = document.getElementById('threats-btn');
+    const opportunitiesBtn = document.getElementById('opportunities-btn');
+
+    threatsBtn.click();
+    expect(app.game.analysisManager.toggleThreats).toHaveBeenCalled();
+    expect(threatsBtn.classList.contains('active')).toBe(true);
+
+    opportunitiesBtn.click();
+    expect(app.game.analysisManager.toggleOpportunities).toHaveBeenCalled();
+    expect(opportunitiesBtn.classList.contains('active')).toBe(true);
+  });
+
+  test('should handle close analysis button', () => {
+    // Add close-analysis-btn to DOM if needed
+    const closeBtn = document.getElementById('close-analysis-btn');
+    app.game.aiController.analysisActive = true;
+
+    closeBtn.click();
+    expect(app.game.aiController.toggleAnalysisMode).toHaveBeenCalled();
+  });
+
+  test('should handle continuous analysis button', () => {
+    const continuousBtn = document.getElementById('continuous-analysis-btn');
+    app.game.continuousAnalysis = false;
+
+    continuousBtn.click();
+    expect(app.gameController.toggleContinuousAnalysis).toHaveBeenCalled();
+  });
+
+  test('should handle analysis mode button toggle (enter and exit)', () => {
+    // Add analysis-mode-btn to DOM
+    document.body.innerHTML += '<button id="analysis-mode-btn"></button>';
+    const newHandler = new DOMHandler(app);
+    newHandler.init();
+
+    const analysisBtn = document.getElementById('analysis-mode-btn');
+
+    // Enter analysis mode
+    app.game.analysisMode = false;
+    analysisBtn.click();
+    expect(app.gameController.enterAnalysisMode).toHaveBeenCalled();
+
+    // Exit analysis mode
+    app.game.analysisMode = true;
+    analysisBtn.click();
+    expect(app.gameController.exitAnalysisMode).toHaveBeenCalled();
+  });
+
+  test('should handle 3D toggle off after being enabled', () => {
+    jest.useFakeTimers();
+    const btn = document.getElementById('toggle-3d-btn');
+    const container3D = document.getElementById('battle-chess-3d-container');
+
+    // Enable 3D
+    btn.click();
+    expect(app.battleChess3D.enabled).toBe(true);
+
+    // Disable 3D
+    btn.click();
+    expect(app.battleChess3D.enabled).toBe(false);
+    expect(container3D.classList.contains('active')).toBe(false);
+
+    // Advance timer for the setTimeout
+    jest.advanceTimersByTime(500);
+    jest.useRealTimers();
+  });
+
+  test('should handle 3D toggle when scene already exists', () => {
+    const btn = document.getElementById('toggle-3d-btn');
+
+    // Simulate scene already existing
+    app.battleChess3D.scene = {};
+
+    btn.click();
+
+    expect(app.battleChess3D.updateFromGameState).toHaveBeenCalled();
+    expect(app.battleChess3D.onWindowResize).toHaveBeenCalled();
+  });
+
+  test('should handle puzzle handlers', () => {
+    // Add puzzle DOM elements
+    document.body.innerHTML += `
+      <button id="puzzle-exit-btn"></button>
+      <button id="puzzle-next-btn"></button>
+      <button id="puzzle-menu-close-btn"></button>
+    `;
+
+    app.gameController.exitPuzzleMode = jest.fn();
+    app.gameController.nextPuzzle = jest.fn();
+    app.gameController.puzzleMenu = { hide: jest.fn() };
+
+    const newHandler = new DOMHandler(app);
+    newHandler.init();
+
+    document.getElementById('puzzle-exit-btn').click();
+    expect(app.gameController.exitPuzzleMode).toHaveBeenCalled();
+
+    document.getElementById('puzzle-next-btn').click();
+    expect(app.gameController.nextPuzzle).toHaveBeenCalled();
+
+    document.getElementById('puzzle-menu-close-btn').click();
+    expect(app.gameController.puzzleMenu.hide).toHaveBeenCalled();
+  });
+
+  test('should handle game over overlay buttons', () => {
+    // Add game over DOM elements
+    document.body.innerHTML += `
+      <div id="game-over-overlay"></div>
+      <button id="close-game-over-btn"></button>
+    `;
+
+    const newHandler = new DOMHandler(app);
+    newHandler.init();
+
+    const gameOverOverlay = document.getElementById('game-over-overlay');
+    const closeBtn = document.getElementById('close-game-over-btn');
+
+    closeBtn.click();
+    expect(gameOverOverlay.classList.contains('hidden')).toBe(true);
+  });
 });

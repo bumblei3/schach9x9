@@ -10,6 +10,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   showToast: jest.fn(),
   closeModal: jest.fn(),
   renderBoard: jest.fn(),
+  updateStatus: jest.fn(),
   OverlayManager: { closeAll: jest.fn() },
 }));
 
@@ -263,5 +264,84 @@ describe('KeyboardManager', () => {
     expect(mockGameController.undoMove).not.toHaveBeenCalled();
 
     document.body.removeChild(input);
+  });
+
+  it('should trigger emergency recovery on Ctrl+Shift+F12', async () => {
+    const recoverySpy = jest.spyOn(keyboardManager, 'performEmergencyRecovery');
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'f12',
+      ctrlKey: true,
+      shiftKey: true,
+    });
+    Object.defineProperty(event, 'target', { value: document.body });
+    jest.spyOn(event, 'preventDefault');
+
+    await keyboardManager.handleKeyDown(event);
+
+    expect(recoverySpy).toHaveBeenCalled();
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should perform emergency recovery correctly', async () => {
+    app.game.turn = 'black';
+    app.game.isAnimating = true;
+    app.game.selectedSquare = { r: 0, c: 0 };
+    app.game.validMoves = [{ r: 1, c: 1 }];
+    app.game._forceFullRender = false;
+
+    // Add spinner overlay
+    document.body.innerHTML = '<div id="spinner-overlay" style="display:block"></div>';
+
+    keyboardManager.performEmergencyRecovery();
+
+    expect(app.game.turn).toBe('white');
+    expect(app.game.isAnimating).toBe(false);
+    expect(app.game.selectedSquare).toBeNull();
+    expect(app.game._forceFullRender).toBe(true);
+
+    const spinner = document.getElementById('spinner-overlay');
+    expect(spinner.style.display).toBe('none');
+  });
+
+  it('should update threats button class when pressing "t"', async () => {
+    document.body.innerHTML = '<button id="threats-btn"></button>';
+    app.game.analysisManager = { toggleThreats: jest.fn(() => true) };
+
+    const event = new KeyboardEvent('keydown', { key: 't' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(event);
+
+    const btn = document.getElementById('threats-btn');
+    expect(btn.classList.contains('active')).toBe(true);
+  });
+
+  it('should update opportunities button class when pressing "o"', async () => {
+    document.body.innerHTML = '<button id="opportunities-btn"></button>';
+    app.game.analysisManager = { toggleOpportunities: jest.fn(() => true) };
+
+    const event = new KeyboardEvent('keydown', { key: 'o' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(event);
+
+    const btn = document.getElementById('opportunities-btn');
+    expect(btn.classList.contains('active')).toBe(true);
+  });
+
+  it('should update best-move button class when pressing "b"', async () => {
+    document.body.innerHTML = '<button id="best-move-btn"></button>';
+    app.game.analysisManager = { toggleBestMove: jest.fn(() => true) };
+
+    const event = new KeyboardEvent('keydown', { key: 'b' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(event);
+
+    const btn = document.getElementById('best-move-btn');
+    expect(btn.classList.contains('active')).toBe(true);
+  });
+
+  it('should not crash if game is missing during emergency recovery', () => {
+    delete app.game;
+    expect(() => keyboardManager.performEmergencyRecovery()).not.toThrow();
   });
 });
