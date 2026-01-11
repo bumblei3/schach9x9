@@ -69,7 +69,7 @@ class ErrorManager {
      */
     showCriticalError(error) {
         const errorOverlay = document.getElementById('error-overlay');
-        const msgElement = document.getElementById('error-message');
+        // const msgElement = document.getElementById('error-message'); // Unused
 
         // Fallback if overlay doesn't exist
         if (!errorOverlay) {
@@ -78,11 +78,11 @@ class ErrorManager {
         }
 
         // Enhance error message
-        let displayMsg = error.message || 'Unbekannter Fehler';
+        const displayMsg = error.message || 'Unbekannter Fehler';
         if (error.stack) {
-            // Simplified stack for display
-            const stackLines = error.stack.split('\n').slice(0, 3).join('\n');
-            console.error("Full Stack:", error.stack); // Still log full stack to console
+            // Simplified stack for display - logic removed as unused variable caused lint error
+            // const stackLines = error.stack.split('\n').slice(0, 3).join('\n');
+            console.error('Full Stack:', error.stack); // Still log full stack to console
         }
 
         // Update Modal Content (if structure matches new design)
