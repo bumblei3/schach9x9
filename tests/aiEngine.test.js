@@ -8,7 +8,7 @@ import { jest } from '@jest/globals';
 // Mock WasmBridge with basic material evaluation
 jest.unstable_mockModule('../js/ai/wasmBridge.js', () => ({
   ensureWasmInitialized: jest.fn(() => Promise.resolve(true)),
-  getBestMoveWasm: jest.fn((board, turn, depth) => {
+  getBestMoveWasm: jest.fn((board, turn, _depth) => {
     // Simple material count
     let score = 0;
     const vals = { 1: 100, 2: 300, 3: 300, 4: 500, 5: 900, 6: 0, 7: 800, 8: 800, 9: 1000 };
@@ -16,14 +16,9 @@ jest.unstable_mockModule('../js/ai/wasmBridge.js', () => ({
       const p = board[i];
       if (p === 0) continue;
       const type = p & 0x0F;
-      const color = p & 0x10 ? 'white' : 'black'; // 0x10 is COLOR_WHITE in Definitions?
-      // Check BoardDefinitions.ts: COLOR_WHITE=16 (0x10), COLOR_BLACK=32 (0x20).
-      // Wait, need to be sure about bitmasks.
-      // In BoardDefinitions.ts:
-      // export const COLOR_WHITE = 16;
-      // export const COLOR_BLACK = 32;
+      // const color = p & 0x10 ? 'white' : 'black'; // unused
 
-      let val = vals[type] || 0;
+      const val = vals[type] || 0;
       if ((p & 16) === 16) score += val;
       if ((p & 32) === 32) score -= val;
     }
