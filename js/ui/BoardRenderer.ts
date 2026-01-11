@@ -111,7 +111,10 @@ export function initBoardUI(game: any): void {
       }
       cell.dataset.r = r.toString();
       cell.dataset.c = c.toString();
-      cell.addEventListener('click', () => game.handleCellClick(r, c));
+      cell.addEventListener('click', () => {
+        console.log('[BoardRenderer] Cell click: row=%d, col=%d, phase=%s', r, c, game.phase);
+        game.handleCellClick(r, c);
+      });
 
       // Drag & Drop
       cell.draggable = true;
