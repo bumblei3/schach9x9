@@ -27,7 +27,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
   try {
     logger.info('[WasmBridge] Initializing Wasm AI Engine...');
 
-    // Check if we are in Node.js to use filesystem instead of fetch
+    // Check if we are in Node.js (for tests) to use filesystem instead of fetch
     if (typeof process !== 'undefined' && process.versions && process.versions.node) {
       // @ts-ignore
       const fs = await import('node:fs/promises');
@@ -43,7 +43,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
       const wasmBuffer = await fs.readFile(wasmPath);
       await init(wasmBuffer);
     } else {
-      // Standard wasm-bindgen init for browser
+      // Standard wasm-bindgen init for browser (Vite/PWA)
       await init();
     }
 
