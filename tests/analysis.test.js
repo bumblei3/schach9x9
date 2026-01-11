@@ -88,13 +88,12 @@ describe('AnalysisManager', () => {
   test('should only show serious threats', () => {
     // White knight defended by pawn
     mockGame.board[7][7] = { type: 'n', color: 'white' };
-    mockGame.board[8][7] = { type: 'p', color: 'white' };
-    // Black rook attacking knight
+    mockGame.board[8][6] = { type: 'p', color: 'white' };
     mockGame.board[0][7] = { type: 'r', color: 'black' };
 
     mockGame.getValidMoves.mockImplementation((r, c, piece) => {
       if (r === 0 && c === 7 && piece.type === 'r') return [{ r: 7, c: 7 }];
-      if (r === 8 && c === 7 && piece.type === 'p') return [{ r: 7, c: 7 }];
+      if (r === 8 && c === 6 && piece.type === 'p') return [{ r: 7, c: 7 }];
       return [];
     });
 
@@ -106,7 +105,7 @@ describe('AnalysisManager', () => {
     expect(arrows.length).toBe(0);
 
     // Now move the pawn away (undefended)
-    mockGame.board[8][7] = null;
+    mockGame.board[8][6] = null;
     arrows = analysisManager.getThreatArrows();
     expect(arrows.length).toBe(1);
   });

@@ -70,7 +70,7 @@ describe('AI Engine Worker Integration', () => {
     expect(result.move).toEqual({
       from: { r: 0, c: 1 }, // 1 -> row 0 col 1
       to: { r: 0, c: 2 }, // 2 -> row 0 col 2
-      promotion: 0,
+      promotion: undefined,
     });
   });
 });

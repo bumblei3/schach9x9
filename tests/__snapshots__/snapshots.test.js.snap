@@ -667,7 +667,7 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
     </div>
 
     <script type="module" src="js/debug.js"></script>
-    <script type="module" src="js/main.js?v=28"></script>
+    <script type="module" src="js/main.ts"></script>
   
 
 "

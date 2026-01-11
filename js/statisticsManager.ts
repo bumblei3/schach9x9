@@ -10,38 +10,38 @@ import type { Move, Player } from './types/game.js';
 const STORAGE_KEY = 'chess9x9-game-history';
 
 export interface GameRecord {
-    id: string;
-    date: string;
-    result: 'win' | 'loss' | 'draw';
-    playerColor: Player;
-    opponent: string;
-    moves: number;
-    duration: number;
-    moveHistory: Move[];
-    finalPosition: string;
+  id: string;
+  date: string;
+  result: 'win' | 'loss' | 'draw';
+  playerColor: Player;
+  opponent: string;
+  moves: number;
+  duration: number;
+  moveHistory: Move[];
+  finalPosition: string;
 }
 
 export interface StatsSummary {
-    totalGames: number;
-    wins: number;
-    losses: number;
-    draws: number;
-    winRate: number;
+  totalGames: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  winRate: number;
 }
 
 export interface StatisticsData {
-    games: GameRecord[];
-    stats: StatsSummary;
-    tutorPoints: number;
+  games: GameRecord[];
+  stats: StatsSummary;
+  tutorPoints: number;
 }
 
 export interface GameDataInput {
-    result: 'win' | 'loss' | 'draw';
-    playerColor: Player;
-    opponent: string;
-    moveHistory?: Move[];
-    duration?: number;
-    finalPosition?: string;
+  result: 'win' | 'loss' | 'draw';
+  playerColor: Player;
+  opponent: string;
+  moveHistory?: Move[];
+  duration?: number;
+  finalPosition?: string;
 }
 
 /**
@@ -49,318 +49,322 @@ export interface GameDataInput {
  * @returns UUID-like string
  */
 function generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 /**
  * Manages persistent game statistics and history
  */
 export class StatisticsManager {
-    private data: StatisticsData;
+  private data: StatisticsData;
 
-    constructor() {
-        this.data = this.loadData();
-        logger.info('StatisticsManager initialized');
+  constructor() {
+    this.data = this.loadData();
+    logger.info('StatisticsManager initialized');
+  }
+
+  /**
+   * Loads data from localStorage
+   * @returns Game history data
+   */
+  private loadData(): StatisticsData {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = safeJSONParse(stored, null) as StatisticsData | null;
+        if (parsed && parsed.games) {
+          logger.info(`Loaded ${parsed.games.length} games from storage`);
+          return parsed;
+        }
+      }
+    } catch (err) {
+      logger.error('Error loading game history:', err);
     }
 
-    /**
-     * Loads data from localStorage
-     * @returns Game history data
-     */
-    private loadData(): StatisticsData {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const parsed = safeJSONParse(stored, null) as StatisticsData | null;
-                if (parsed && parsed.games) {
-                    logger.info(`Loaded ${parsed.games.length} games from storage`);
-                    return parsed;
-                }
-            }
-        } catch (err) {
-            logger.error('Error loading game history:', err);
-        }
+    // Return default structure
+    return {
+      games: [],
+      stats: {
+        totalGames: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+        winRate: 0,
+      },
+      tutorPoints: 0,
+    };
+  }
 
-        // Return default structure
-        return {
-            games: [],
-            stats: {
-                totalGames: 0,
-                wins: 0,
-                losses: 0,
-                draws: 0,
-                winRate: 0,
-            },
-            tutorPoints: 0,
+  /**
+   * Saves data to localStorage
+   */
+  private saveData(): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+      logger.debug('Game history saved to storage');
+    } catch (err) {
+      logger.error('Error saving game history:', err);
+    }
+  }
+
+  /**
+   * Saves a completed game to history
+   * @param gameData Game data object
+   */
+  public saveGame(gameData: GameDataInput): void {
+    const game: GameRecord = {
+      id: generateId(),
+      date: new Date().toISOString(),
+      result: gameData.result || 'draw',
+      playerColor: gameData.playerColor || 'white',
+      opponent: gameData.opponent || 'Unknown',
+      moves: gameData.moveHistory?.length || 0,
+      duration: gameData.duration || 0,
+      moveHistory: gameData.moveHistory || [],
+      finalPosition: gameData.finalPosition || '',
+    };
+
+    this.data.games.push(game);
+
+    // Update statistics
+    this.data.stats.totalGames++;
+    if (game.result === 'win') {
+      this.data.stats.wins++;
+    } else if (game.result === 'loss') {
+      this.data.stats.losses++;
+    } else {
+      this.data.stats.draws++;
+    }
+
+    // Calculate win rate
+    this.data.stats.winRate =
+      this.data.stats.totalGames > 0 ? this.data.stats.wins / this.data.stats.totalGames : 0;
+
+    this.saveData();
+    logger.info(`Game saved: ${game.result} vs ${game.opponent} (${game.moves} moves)`);
+  }
+
+  /**
+   * Saves tutor points to storage
+   * @param points
+   */
+  public saveTutorPoints(points: number): void {
+    this.data.tutorPoints = points;
+    this.saveData();
+    logger.debug(`Tutor points saved: ${points}`);
+  }
+
+  /**
+   * Gets current tutor points
+   * @returns
+   */
+  public getTutorPoints(): number {
+    return this.data.tutorPoints || 0;
+  }
+
+  /**
+   * Gets aggregate statistics
+   * @returns Statistics object
+   */
+  public getStatistics(): StatsSummary {
+    return { ...this.data.stats };
+  }
+
+  /**
+   * Gets game history with optional filters
+   * @param filters Filter options
+   * @returns Filtered game history
+   */
+  public getGameHistory(
+    filters: { result?: string; opponent?: string; limit?: number } = {}
+  ): GameRecord[] {
+    let games = [...this.data.games];
+
+    // Filter by result
+    if (filters.result) {
+      games = games.filter(g => g.result === filters.result);
+    }
+
+    // Filter by opponent
+    if (filters.opponent) {
+      games = games.filter(g => g.opponent.includes(filters.opponent!));
+    }
+
+    // Sort by date (newest first)
+    games.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // Limit results
+    if (filters.limit && filters.limit > 0) {
+      games = games.slice(0, filters.limit);
+    }
+
+    return games;
+  }
+
+  /**
+   * Gets a specific game by ID
+   * @param id Game ID
+   * @returns Game data or null if not found
+   */
+  public getGameById(id: string): GameRecord | null {
+    return this.data.games.find(g => g.id === id) || null;
+  }
+
+  /**
+   * Exports all games as JSON
+   * @returns JSON string of all game data
+   */
+  public exportGames(): string {
+    const exportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      data: this.data,
+    };
+
+    logger.info(`Exported ${this.data.games.length} games`);
+    return JSON.stringify(exportData, null, 2);
+  }
+
+  /**
+   * Imports games from JSON
+   * @param jsonData JSON string to import
+   * @param merge If true, merge with existing data; if false, replace
+   * @returns Success status
+   */
+  public importGames(jsonData: string, merge: boolean = true): boolean {
+    try {
+      const importData = safeJSONParse(jsonData, null) as any;
+      if (!importData) throw new Error('Invalid JSON format');
+
+      if (!importData.data || !importData.data.games) {
+        throw new Error('Invalid import format');
+      }
+
+      if (merge) {
+        // Merge games (avoid duplicates by ID)
+        const existingIds = new Set(this.data.games.map(g => g.id));
+        const newGames = importData.data.games.filter((g: any) => !existingIds.has(g.id));
+        this.data.games.push(...newGames);
+
+        // Recalculate stats from all games
+        this.recalculateStats();
+        logger.info(`Imported ${newGames.length} new games (merged)`);
+      } else {
+        // Replace all data
+        this.data = importData.data;
+        logger.info(`Imported ${this.data.games.length} games (replaced)`);
+      }
+
+      this.saveData();
+      return true;
+    } catch (err) {
+      logger.error('Error importing games:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Recalculates statistics from game history
+   */
+  public recalculateStats(): void {
+    const stats: StatsSummary = {
+      totalGames: this.data.games.length,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      winRate: 0,
+    };
+
+    this.data.games.forEach(game => {
+      if (game.result === 'win') stats.wins++;
+      else if (game.result === 'loss') stats.losses++;
+      else stats.draws++;
+    });
+
+    stats.winRate = stats.totalGames > 0 ? stats.wins / stats.totalGames : 0;
+    this.data.stats = stats;
+  }
+
+  /**
+   * Clears all game history
+   * @param confirm Confirmation flag
+   */
+  public clearHistory(confirm: boolean = false): void {
+    if (!confirm) {
+      logger.warn('clearHistory called without confirmation');
+      return;
+    }
+
+    this.data = {
+      games: [],
+      stats: {
+        totalGames: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+        winRate: 0,
+      },
+      tutorPoints: 0,
+    };
+
+    this.saveData();
+    logger.info('Game history cleared');
+  }
+
+  /**
+   * Gets statistics for a specific time period
+   * @param days Number of days to look back
+   * @returns Statistics for the period
+   */
+  public getRecentStats(days: number = 30): Omit<StatsSummary, 'winRate'> & { winRate: number } {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const recentGames = this.data.games.filter(
+      g => new Date(g.date).getTime() > cutoffDate.getTime()
+    );
+
+    const stats = {
+      totalGames: recentGames.length,
+      wins: recentGames.filter(g => g.result === 'win').length,
+      losses: recentGames.filter(g => g.result === 'loss').length,
+      draws: recentGames.filter(g => g.result === 'draw').length,
+      winRate: 0,
+    };
+
+    stats.winRate = stats.totalGames > 0 ? stats.wins / stats.totalGames : 0;
+
+    return stats;
+  }
+
+  /**
+   * Gets statistics grouped by opponent
+   * @returns Stats by opponent
+   */
+  public getStatsByOpponent(): Record<string, StatsSummary> {
+    const byOpponent: Record<string, StatsSummary> = {};
+
+    this.data.games.forEach(game => {
+      if (!byOpponent[game.opponent]) {
+        byOpponent[game.opponent] = {
+          totalGames: 0,
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          winRate: 0,
         };
-    }
+      }
 
-    /**
-     * Saves data to localStorage
-     */
-    private saveData(): void {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
-            logger.debug('Game history saved to storage');
-        } catch (err) {
-            logger.error('Error saving game history:', err);
-        }
-    }
+      const stats = byOpponent[game.opponent];
+      stats.totalGames++;
+      if (game.result === 'win') stats.wins++;
+      else if (game.result === 'loss') stats.losses++;
+      else stats.draws++;
+      stats.winRate = stats.wins / stats.totalGames;
+    });
 
-    /**
-     * Saves a completed game to history
-     * @param gameData Game data object
-     */
-    public saveGame(gameData: GameDataInput): void {
-        const game: GameRecord = {
-            id: generateId(),
-            date: new Date().toISOString(),
-            result: gameData.result || 'draw',
-            playerColor: gameData.playerColor || 'white',
-            opponent: gameData.opponent || 'Unknown',
-            moves: gameData.moveHistory?.length || 0,
-            duration: gameData.duration || 0,
-            moveHistory: gameData.moveHistory || [],
-            finalPosition: gameData.finalPosition || '',
-        };
-
-        this.data.games.push(game);
-
-        // Update statistics
-        this.data.stats.totalGames++;
-        if (game.result === 'win') {
-            this.data.stats.wins++;
-        } else if (game.result === 'loss') {
-            this.data.stats.losses++;
-        } else {
-            this.data.stats.draws++;
-        }
-
-        // Calculate win rate
-        this.data.stats.winRate =
-            this.data.stats.totalGames > 0 ? this.data.stats.wins / this.data.stats.totalGames : 0;
-
-        this.saveData();
-        logger.info(`Game saved: ${game.result} vs ${game.opponent} (${game.moves} moves)`);
-    }
-
-    /**
-     * Saves tutor points to storage
-     * @param points
-     */
-    public saveTutorPoints(points: number): void {
-        this.data.tutorPoints = points;
-        this.saveData();
-        logger.debug(`Tutor points saved: ${points}`);
-    }
-
-    /**
-     * Gets current tutor points
-     * @returns
-     */
-    public getTutorPoints(): number {
-        return this.data.tutorPoints || 0;
-    }
-
-    /**
-     * Gets aggregate statistics
-     * @returns Statistics object
-     */
-    public getStatistics(): StatsSummary {
-        return { ...this.data.stats };
-    }
-
-    /**
-     * Gets game history with optional filters
-     * @param filters Filter options
-     * @returns Filtered game history
-     */
-    public getGameHistory(filters: { result?: string; opponent?: string; limit?: number } = {}): GameRecord[] {
-        let games = [...this.data.games];
-
-        // Filter by result
-        if (filters.result) {
-            games = games.filter(g => g.result === filters.result);
-        }
-
-        // Filter by opponent
-        if (filters.opponent) {
-            games = games.filter(g => g.opponent.includes(filters.opponent!));
-        }
-
-        // Sort by date (newest first)
-        games.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-        // Limit results
-        if (filters.limit && filters.limit > 0) {
-            games = games.slice(0, filters.limit);
-        }
-
-        return games;
-    }
-
-    /**
-     * Gets a specific game by ID
-     * @param id Game ID
-     * @returns Game data or null if not found
-     */
-    public getGameById(id: string): GameRecord | null {
-        return this.data.games.find(g => g.id === id) || null;
-    }
-
-    /**
-     * Exports all games as JSON
-     * @returns JSON string of all game data
-     */
-    public exportGames(): string {
-        const exportData = {
-            version: '1.0',
-            exportDate: new Date().toISOString(),
-            data: this.data,
-        };
-
-        logger.info(`Exported ${this.data.games.length} games`);
-        return JSON.stringify(exportData, null, 2);
-    }
-
-    /**
-     * Imports games from JSON
-     * @param jsonData JSON string to import
-     * @param merge If true, merge with existing data; if false, replace
-     * @returns Success status
-     */
-    public importGames(jsonData: string, merge: boolean = true): boolean {
-        try {
-            const importData = safeJSONParse(jsonData, null) as any;
-            if (!importData) throw new Error('Invalid JSON format');
-
-            if (!importData.data || !importData.data.games) {
-                throw new Error('Invalid import format');
-            }
-
-            if (merge) {
-                // Merge games (avoid duplicates by ID)
-                const existingIds = new Set(this.data.games.map(g => g.id));
-                const newGames = importData.data.games.filter((g: any) => !existingIds.has(g.id));
-                this.data.games.push(...newGames);
-
-                // Recalculate stats from all games
-                this.recalculateStats();
-                logger.info(`Imported ${newGames.length} new games (merged)`);
-            } else {
-                // Replace all data
-                this.data = importData.data;
-                logger.info(`Imported ${this.data.games.length} games (replaced)`);
-            }
-
-            this.saveData();
-            return true;
-        } catch (err) {
-            logger.error('Error importing games:', err);
-            return false;
-        }
-    }
-
-    /**
-     * Recalculates statistics from game history
-     */
-    public recalculateStats(): void {
-        const stats: StatsSummary = {
-            totalGames: this.data.games.length,
-            wins: 0,
-            losses: 0,
-            draws: 0,
-            winRate: 0,
-        };
-
-        this.data.games.forEach(game => {
-            if (game.result === 'win') stats.wins++;
-            else if (game.result === 'loss') stats.losses++;
-            else stats.draws++;
-        });
-
-        stats.winRate = stats.totalGames > 0 ? stats.wins / stats.totalGames : 0;
-        this.data.stats = stats;
-    }
-
-    /**
-     * Clears all game history
-     * @param confirm Confirmation flag
-     */
-    public clearHistory(confirm: boolean = false): void {
-        if (!confirm) {
-            logger.warn('clearHistory called without confirmation');
-            return;
-        }
-
-        this.data = {
-            games: [],
-            stats: {
-                totalGames: 0,
-                wins: 0,
-                losses: 0,
-                draws: 0,
-                winRate: 0,
-            },
-            tutorPoints: 0,
-        };
-
-        this.saveData();
-        logger.info('Game history cleared');
-    }
-
-    /**
-     * Gets statistics for a specific time period
-     * @param days Number of days to look back
-     * @returns Statistics for the period
-     */
-    public getRecentStats(days: number = 30): Omit<StatsSummary, 'winRate'> & { winRate: number } {
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - days);
-
-        const recentGames = this.data.games.filter(g => new Date(g.date).getTime() > cutoffDate.getTime());
-
-        const stats = {
-            totalGames: recentGames.length,
-            wins: recentGames.filter(g => g.result === 'win').length,
-            losses: recentGames.filter(g => g.result === 'loss').length,
-            draws: recentGames.filter(g => g.result === 'draw').length,
-            winRate: 0,
-        };
-
-        stats.winRate = stats.totalGames > 0 ? stats.wins / stats.totalGames : 0;
-
-        return stats;
-    }
-
-    /**
-     * Gets statistics grouped by opponent
-     * @returns Stats by opponent
-     */
-    public getStatsByOpponent(): Record<string, StatsSummary> {
-        const byOpponent: Record<string, StatsSummary> = {};
-
-        this.data.games.forEach(game => {
-            if (!byOpponent[game.opponent]) {
-                byOpponent[game.opponent] = {
-                    totalGames: 0,
-                    wins: 0,
-                    losses: 0,
-                    draws: 0,
-                    winRate: 0,
-                };
-            }
-
-            const stats = byOpponent[game.opponent];
-            stats.totalGames++;
-            if (game.result === 'win') stats.wins++;
-            else if (game.result === 'loss') stats.losses++;
-            else stats.draws++;
-            stats.winRate = stats.wins / stats.totalGames;
-        });
-
-        return byOpponent;
-    }
+    return byOpponent;
+  }
 }
 
 export const statisticsManager = new StatisticsManager();
