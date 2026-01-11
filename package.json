@@ -12,7 +12,7 @@
     "train": "node opening-book-trainer.cjs",
     "train:fast": "node opening-book-trainer.cjs --games 50",
     "train:thorough": "node opening-book-trainer.cjs --games 500",
-    "wasm:build": "export PATH=$PATH:$HOME/.cargo/bin; wasm-pack build engine-wasm --target web",
+    "wasm:build": "if command -v wasm-pack >/dev/null 2>&1; then wasm-pack build engine-wasm --target web; elif [ -f $HOME/.cargo/bin/wasm-pack ]; then $HOME/.cargo/bin/wasm-pack build engine-wasm --target web; else echo 'Error: wasm-pack not found' && exit 1; fi",
     "build": "npm run wasm:build && vite build",
     "start": "npx serve .",
     "typecheck": "tsc --noEmit",
