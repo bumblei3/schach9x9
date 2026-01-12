@@ -130,4 +130,62 @@ describe('AnalysisController', () => {
       expect(game.continuousAnalysis).toBe(false);
     });
   });
+
+  describe('Navigation', () => {
+    beforeEach(() => {
+      game.moveController = {
+        reconstructBoardAtMove: jest.fn(),
+      };
+      game.analysisMode = true;
+    });
+
+    test('should jump to specific move', () => {
+      analysisController.jumpToMove(5);
+      expect(game.moveController.reconstructBoardAtMove).toHaveBeenCalledWith(5);
+      expect(game.replayPosition).toBe(5);
+      expect(UI.renderBoard).toHaveBeenCalled();
+    });
+
+    test('should jump to start', () => {
+      analysisController.jumpToStart();
+      expect(game.moveController.reconstructBoardAtMove).toHaveBeenCalledWith(0);
+      expect(game.replayPosition).toBe(-1);
+      expect(UI.renderBoard).toHaveBeenCalled();
+    });
+
+    test('should trigger analysis after jump if continuous analysis is on', () => {
+      game.continuousAnalysis = true;
+      analysisController.jumpToMove(3);
+      expect(game.aiController.analyzePosition).toHaveBeenCalled();
+    });
+
+    test('should not crash if moveController is missing', () => {
+      delete game.moveController;
+      expect(() => analysisController.jumpToMove(1)).not.toThrow();
+      expect(() => analysisController.jumpToStart()).not.toThrow();
+    });
+  });
+
+  describe('AI and Clock Integration', () => {
+    test('should request analysis safely', () => {
+      game.aiController = undefined;
+      expect(() => analysisController.requestPositionAnalysis()).not.toThrow();
+    });
+
+    test('should restart clock on exit if clockEnabled', () => {
+      game.analysisMode = true;
+      game.clockEnabled = true;
+
+      analysisController.exitAnalysisMode();
+      expect(gameController.startClock).toHaveBeenCalled();
+    });
+
+    test('should not restart clock on exit if clock disabled', () => {
+      game.analysisMode = true;
+      game.clockEnabled = false;
+
+      analysisController.exitAnalysisMode();
+      expect(gameController.startClock).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -30,8 +30,8 @@ describe('ShopManager', () => {
       turn: 'white',
       phase: PHASES.SETUP_WHITE_PIECES,
       points: 15,
-      whiteCorridor: { rowStart: 6, colStart: 3 },
-      blackCorridor: { rowStart: 0, colStart: 3 },
+      whiteCorridor: 3,
+      blackCorridor: 3,
       selectedShopPiece: null,
       log: jest.fn(),
     };

@@ -87,7 +87,7 @@ describe('Setup Phase Integration', () => {
     game.points = 20;
 
     controller.selectShopPiece('q');
-    game.whiteCorridor = { rowStart: 6, colStart: 6 };
+    game.whiteCorridor = 6;
     controller.placeShopPiece(7, 7);
 
     expect(game.points).toBe(11); // 20 - 9 = 11

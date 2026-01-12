@@ -51,8 +51,8 @@ describe('Shop System', () => {
     game.log = jest.fn();
 
     // Set up corridors for testing
-    game.whiteCorridor = { rowStart: 6, colStart: 0 };
-    game.blackCorridor = { rowStart: 0, colStart: 0 };
+    game.whiteCorridor = 0;
+    game.blackCorridor = 0;
 
     jest.clearAllMocks();
   });

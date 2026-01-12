@@ -91,19 +91,19 @@ export class ShopManager {
   handleBuyPiece(r: number, c: number): void {
     const isWhiteTurn = (this.game.phase as any) === PHASES.SETUP_WHITE_PIECES;
     const color = isWhiteTurn ? 'white' : 'black';
-    const corridor = isWhiteTurn
+    const colStart = isWhiteTurn
       ? (this.game as any).whiteCorridor
       : (this.game as any).blackCorridor;
 
-    if (!corridor) return;
+    if (typeof colStart !== 'number') return;
+
+    // Fixed row ranges for 9x9 board
+    // Black: Rows 0-2
+    // White: Rows 6-8
+    const rowStart = isWhiteTurn ? 6 : 0;
 
     // Validate placement area (must be in own corridor)
-    if (
-      r < corridor.rowStart ||
-      r >= corridor.rowStart + 3 ||
-      c < corridor.colStart ||
-      c >= corridor.colStart + 3
-    ) {
+    if (r < rowStart || r >= rowStart + 3 || c < colStart || c >= colStart + 3) {
       if (this.game.log) this.game.log('Muss im eigenen Korridor platziert werden!');
       return;
     }

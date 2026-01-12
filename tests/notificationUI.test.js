@@ -18,6 +18,12 @@ describe('NotificationUI', () => {
     expect(document.getElementById('toast-container')).not.toBeNull();
   });
 
+  test('should reuse existing container', () => {
+    const container = document.getElementById('toast-container');
+    notificationUI.show('Second message', 'info');
+    expect(document.getElementById('toast-container')).toBe(container);
+  });
+
   test('should show success toast', () => {
     notificationUI.show('Saved successfully', 'success');
 
@@ -26,6 +32,15 @@ describe('NotificationUI', () => {
     expect(toast.textContent).toContain('Saved successfully');
     expect(toast.textContent).toContain('Erfolg');
     expect(toast.textContent).toContain('✅');
+  });
+
+  test('should show warning toast', () => {
+    notificationUI.show('Disk almost full', 'warning');
+
+    const toast = document.querySelector('.toast-warning');
+    expect(toast).not.toBeNull();
+    expect(toast.textContent).toContain('Warnung');
+    expect(toast.textContent).toContain('⚠️');
   });
 
   test('should show error toast with longer duration', () => {

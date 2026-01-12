@@ -118,20 +118,22 @@ export class GameController {
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
             </li>
-            ${level.goals[2]
-        ? `
+            ${
+              level.goals[2]
+                ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
             </li>`
-        : ''
-      }
-            ${level.goals[3]
-        ? `
+                : ''
+            }
+            ${
+              level.goals[3]
+                ? `
             <li style="display: flex; align-items: center; gap: 10px;">
               <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
             </li>`
-        : ''
-      }
+                : ''
+            }
           </ul>
         </div>
       </div>
@@ -139,7 +141,7 @@ export class GameController {
 
     // Show intro modal
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
     ]);
   }
 
@@ -194,7 +196,12 @@ export class GameController {
   }
 
   async handleCellClick(r: number, c: number): Promise<void> {
-    console.log('[GameController] handleCellClick called: row=%d, col=%d, phase=%s', r, c, this.game.phase);
+    console.log(
+      '[GameController] handleCellClick called: row=%d, col=%d, phase=%s',
+      r,
+      c,
+      this.game.phase
+    );
 
     // Prevent interaction in replay mode
     if (this.game.replayMode) {
@@ -340,7 +347,7 @@ export class GameController {
         'Ungenutzte Punkte',
         `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
         [
-          { text: 'Abbrechen', class: 'btn-secondary', callback: () => { } },
+          { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
           { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition },
         ]
       );

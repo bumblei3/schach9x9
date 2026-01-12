@@ -175,58 +175,245 @@ function createTemplate(
  * Returns available setup templates
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+/**
+ * Calculates a score for placing a piece at a specific square
+ */
+function getSquareScore(
+  r: number,
+  c: number,
+  pieceType: string,
+  isWhite: boolean,
+  game: any
+): number {
+  let score = 0;
+
+  const corruptedColStart = isWhite ? game.whiteCorridor : game.blackCorridor;
+  const isCenterCol = c === corruptedColStart + 1;
+  const isCornerCol = c === corruptedColStart || c === corruptedColStart + 2;
+
+  // King location
+  const king = game.availableKingPos
+    ? game.availableKingPos
+    : game.rulesEngine.findKing(isWhite ? 'white' : 'black');
+
+  // Row definitions relative to player
+  let frontRow, middleRow, backRow;
+  if (isWhite) {
+    frontRow = 6;
+    middleRow = 7;
+    backRow = 8;
+  } else {
+    frontRow = 2;
+    middleRow = 1;
+    backRow = 0;
+  }
+
+  const isFrontRow = r === frontRow;
+  const isMiddleRow = r === middleRow;
+  const isBackRow = r === backRow;
+
+  // -- Heuristics --
+
+  // 1. King Safety (Pawns)
+  if (pieceType === 'p') {
+    if (isFrontRow) score += 40;
+    if (isMiddleRow) score += 20;
+
+    if (king) {
+      // In front of King
+      if (c === king.c && Math.abs(r - king.r) === 1) score += 50;
+      // Diagonally in front
+      if (Math.abs(c - king.c) === 1 && Math.abs(r - king.r) === 1) score += 30;
+    }
+  }
+
+  // 2. Knights (Center Control)
+  if (pieceType === 'n') {
+    if (isCenterCol) score += 20;
+    if (isMiddleRow) score += 30;
+    if (isFrontRow) score += 20;
+    if (isCornerCol) score -= 10; // Avoid edges
+  }
+
+  // 3. Bishops (Long Diagonals)
+  if (pieceType === 'b' || pieceType === 'a') {
+    if (isBackRow) score += 30;
+    if (isMiddleRow) score += 20;
+    // Bonus for being on long diagonals relative to corridor?
+    // Simplified: Back row center is good
+    if (isBackRow && isCenterCol) score += 10;
+  }
+
+  // 4. Rooks (Corners/Files)
+  if (pieceType === 'r' || pieceType === 'c') {
+    if (isBackRow) score += 40;
+    if (isCornerCol) score += 20;
+  }
+
+  // 5. Queens (Safe Back/Middle)
+  if (pieceType === 'q' || pieceType === 'e') {
+    if (isBackRow) score += 50;
+    if (isMiddleRow) score += 10;
+    // Prefer protection
+    if (king && Math.abs(c - king.c) <= 1) score += 10;
+  }
+
+  // 6. Occupancy Penalty (should be handled by only checking empty squares)
+
+  return score;
+}
+
+/**
+ * Finds the best empty square for a piece in the corridor
+ */
+function getOptimalSquare(
+  game: any,
+  pieceType: string,
+  isWhite: boolean
+): { r: number; c: number } | null {
+  const colStart = isWhite ? game.whiteCorridor : game.blackCorridor;
+  const rowStart = isWhite ? 6 : 0;
+
+  let bestSquare = null;
+  let maxScore = -Infinity;
+
+  for (let r = rowStart; r < rowStart + 3; r++) {
+    for (let c = colStart; c < colStart + 3; c++) {
+      // Check boundaries and occupancy
+      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
+      const piece = game.board[r][c];
+      if (piece) continue; // Skip occupied
+
+      const score = getSquareScore(r, c, pieceType, isWhite, game);
+      if (score > maxScore) {
+        maxScore = score;
+        bestSquare = { r, c };
+      }
+    }
+  }
+
+  return bestSquare;
+}
+
+/**
+ * Returns available setup templates
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getSetupTemplates(game: any): any[] {
   const points = game.initialPoints;
 
   // Templates for 12 points
-  const templates12 = [
-    createTemplate(
-      {
-        id: 'fortress_12',
-        name: '🏰 Die Festung',
-        description: 'Defensiv mit Turm und Läufern.',
-        pieces: ['r', 'b', 'b', 'p'],
-      },
-      12
-    ),
-    createTemplate(
-      {
-        id: 'rush_12',
-        name: '⚡ Der Ansturm',
-        description: 'Aggressiv mit Dame und Bauern.',
-        pieces: ['q', 'p', 'p', 'p'],
-      },
-      12
-    ),
-    createTemplate(
-      {
-        id: 'flexible_12',
-        name: '🔄 Flexibel',
-        description: 'Ausgewogen mit Springer und Läufer.',
-        pieces: ['n', 'n', 'b', 'p', 'p', 'p'],
-        isRecommended: true,
-      },
-      12
-    ),
-    createTemplate(
-      {
-        id: 'swarm_12',
-        name: '🐝 Der Schwarm',
-        description: 'Viele leichte Figuren für maximale Feldpräsenz.',
-        pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p'],
-      },
-      12
-    ),
-  ];
+  if (points === 12) {
+    return [
+      createTemplate(
+        {
+          id: 'fortress_12',
+          name: '🏰 Die Festung',
+          description: 'Defensiv mit Turm und Läufern.',
+          pieces: ['r', 'b', 'b', 'p'],
+        },
+        12
+      ),
+      createTemplate(
+        {
+          id: 'rush_12',
+          name: '⚡ Der Ansturm',
+          description: 'Aggressiv mit Dame und Bauern.',
+          pieces: ['q', 'p', 'p', 'p'],
+        },
+        12
+      ),
+      createTemplate(
+        {
+          id: 'flexible_12',
+          name: '🔄 Flexibel',
+          description: 'Ausgewogen mit Springer und Läufer.',
+          pieces: ['n', 'n', 'b', 'p', 'p', 'p'],
+          isRecommended: true,
+        },
+        12
+      ),
+      // New: Gambit (Light pieces)
+      createTemplate(
+        {
+          id: 'gambit_12',
+          name: '⚔️ Gambit',
+          description: 'Schnelle Entwicklung mit Springern und Läufern. Wenig Bauern.',
+          pieces: ['n', 'n', 'b', 'b'],
+        },
+        12
+      ),
+      createTemplate(
+        {
+          id: 'swarm_12',
+          name: '🐝 Der Schwarm',
+          description: 'Viele leichte Figuren für maximale Feldpräsenz.',
+          pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p'],
+        },
+        12
+      ),
+    ];
+  }
 
-  // Templates for 15 points
-  const templates15 = [
+  // Templates for 18 points
+  if (points === 18) {
+    return [
+      createTemplate(
+        {
+          id: 'fortress_18',
+          name: '🏰 Die Festung',
+          description: 'Maximale Defensive mit 2 Türmen und Erzbischof.',
+          pieces: ['r', 'r', 'a', 'p'],
+        },
+        18
+      ),
+      createTemplate(
+        {
+          id: 'siege_18',
+          name: '🔨 Belagerung',
+          description: 'Schwere Artillerie: Kanzler und Turm.',
+          pieces: ['c', 'r', 'r'],
+        },
+        18
+      ),
+      createTemplate(
+        {
+          id: 'royal_guard_18',
+          name: '🛡️ Königsgarde',
+          description: 'Maximaler Schutz mit Engel und Bauern.',
+          pieces: ['e', 'n', 'p', 'p', 'p'],
+        },
+        18
+      ),
+      createTemplate(
+        {
+          id: 'flexible_18',
+          name: '🔄 Flexibel',
+          description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
+          pieces: ['c', 'q', 'p'],
+          isRecommended: true,
+        },
+        18
+      ),
+      createTemplate(
+        {
+          id: 'swarm_18',
+          name: '🐝 Der Schwarm',
+          description: 'Maximale Anzahl an Figuren (8 Stk) für totale Dominanz.',
+          pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p'],
+        },
+        18
+      ),
+    ];
+  }
+
+  // Default: 15 points
+  return [
     createTemplate(
       {
         id: 'fortress_15',
         name: '🏰 Die Festung',
-        description:
-          'Defensive Strategie: 2 Türme kontrollieren wichtige Linien, Läufer unterstützt. Ideal gegen aggressive Gegner.',
+        description: 'Defensive Strategie: 2 Türme. Ideal gegen aggressive Gegner.',
         pieces: ['r', 'r', 'b', 'p', 'p'],
       },
       15
@@ -235,8 +422,7 @@ export function getSetupTemplates(game: any): any[] {
       {
         id: 'rush_15',
         name: '⚡ Der Ansturm',
-        description:
-          'Offensive Strategie: Dame + 2 Springer für frühen Angriffsdruck. Für erfahrene Spieler, die schnell zuschlagen wollen.',
+        description: 'Offensive: Dame + 2 Springer.',
         pieces: ['q', 'n', 'n'],
       },
       15
@@ -245,8 +431,7 @@ export function getSetupTemplates(game: any): any[] {
       {
         id: 'flexible_15',
         name: '🔄 Flexibel',
-        description:
-          'Ausgewogene Strategie: Erzbischof (Läufer+Springer-Hybrid) bietet Vielseitigkeit. Anpassbar an jede Situation.',
+        description: 'Erzbischof bietet Vielseitigkeit.',
         pieces: ['a', 'r', 'b'],
         isRecommended: true,
       },
@@ -254,61 +439,14 @@ export function getSetupTemplates(game: any): any[] {
     ),
     createTemplate(
       {
-        id: 'swarm_15',
-        name: '🐝 Der Schwarm',
-        description:
-          'Zahlenüberlegenheit: Viele leichte Figuren für Feldkontrolle und Flexibilität. Schwer für Gegner zu verteidigen.',
+        id: 'gambit_15',
+        name: '⚔️ Das Gambit',
+        description: 'Opfere Material für Position? Viele leichte Figuren.',
         pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'],
       },
       15
     ),
   ];
-
-  // Templates for 18 points
-  const templates18 = [
-    createTemplate(
-      {
-        id: 'fortress_18',
-        name: '🏰 Die Festung',
-        description: 'Maximale Defensive mit 2 Türmen und Erzbischof.',
-        pieces: ['r', 'r', 'a', 'p'],
-      },
-      18
-    ),
-    createTemplate(
-      {
-        id: 'rush_18',
-        name: '⚡ Der Ansturm',
-        description: 'Doppelte Damen für maximalen Druck.',
-        pieces: ['q', 'q'],
-      },
-      18
-    ),
-    createTemplate(
-      {
-        id: 'flexible_18',
-        name: '🔄 Flexibel',
-        description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
-        pieces: ['c', 'q', 'p'],
-        isRecommended: true,
-      },
-      18
-    ),
-    createTemplate(
-      {
-        id: 'swarm_18',
-        name: '🐝 Der Schwarm',
-        description: 'Maximale Anzahl an Figuren (8 Stk) für totale Dominanz.',
-        pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p'],
-      },
-      18
-    ),
-  ];
-
-  // Return templates matching the current game's point budget
-  if (points === 12) return templates12;
-  if (points === 18) return templates18;
-  return templates15; // Default to 15 points
 }
 
 /**
@@ -317,169 +455,70 @@ export function getSetupTemplates(game: any): any[] {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applySetupTemplate(game: any, tutorController: any, templateId: string): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const template = tutorController.getSetupTemplates().find((t: any) => t.id === templateId);
+  let template;
+  if (tutorController && tutorController.getSetupTemplates) {
+    template = tutorController.getSetupTemplates().find((t: any) => t.id === templateId);
+  } else {
+    template = getSetupTemplates(game).find((t: any) => t.id === templateId);
+  }
+
   if (!template) return;
 
-  // Determine current corridor
+  // Determine orientation
   const isWhite = game.phase === PHASES.SETUP_WHITE_PIECES;
-  const corridor = isWhite ? game.whiteCorridor : game.blackCorridor;
-  if (!corridor) return;
+  const colStart = isWhite ? game.whiteCorridor : game.blackCorridor;
+  if (typeof colStart !== 'number') return;
+
+  const rowStart = isWhite ? 6 : 0;
 
   // Clear existing pieces in corridor (except King)
-  // And refund points
-  for (let r = corridor.rowStart; r < Math.min(corridor.rowStart + 3, BOARD_SIZE); r++) {
-    for (let c = corridor.colStart; c < Math.min(corridor.colStart + 3, BOARD_SIZE); c++) {
+  let kingPos = null;
+  for (let r = rowStart; r < rowStart + 3; r++) {
+    for (let c = colStart; c < colStart + 3; c++) {
       if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
 
       const piece = game.board[r][c];
-      if (piece && piece.type !== 'k') {
+      if (piece && piece.type === 'k') {
+        kingPos = { r, c };
+      } else {
         game.board[r][c] = null;
       }
     }
   }
 
+  // Store king pos temporarily for heuristic
+  game.availableKingPos = kingPos;
+
   // Reset points
   game.points = game.initialPoints;
 
-  // 1. Define Rows based on color
-  let frontRow, middleRow, backRow;
-  if (isWhite) {
-    frontRow = corridor.rowStart;
-    middleRow = corridor.rowStart + 1;
-    backRow = corridor.rowStart + 2;
-  } else {
-    frontRow = corridor.rowStart + 2;
-    middleRow = corridor.rowStart + 1;
-    backRow = corridor.rowStart;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getAvailableInRow = (r: number): any[] => {
-    if (r < 0 || r >= BOARD_SIZE) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const squares: any[] = [];
-    for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
-      const piece = game.board[r][c];
-      if (!piece || piece.type !== 'k') {
-        squares.push({ r, c });
-      }
-    }
-    return squares;
+  // Sort pieces by "importance" or placement difficulty
+  // Placing Pawns first is good for King safety
+  // Then heavy pieces to secure back ranks
+  // Then minor pieces
+  const priority: Record<string, number> = {
+    p: 10,
+    k: 0,
+    q: 1,
+    r: 2,
+    c: 3,
+    e: 1,
+    b: 4,
+    n: 5,
+    a: 4,
   };
+  const sortedPieces = [...template.pieces].sort((a, b) => (priority[a] || 9) - (priority[b] || 9));
 
-  const frontSquares = getAvailableInRow(frontRow);
-  let middleSquares = getAvailableInRow(middleRow);
-  let backSquares = getAvailableInRow(backRow);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const placeInSlotsInternal = (pieceType: string, slots: any[]): boolean => {
-    if (slots.length > 0) {
-      const sq = slots.shift();
-      placePiece(game, sq.r, sq.c, pieceType, isWhite);
-      return true;
-    }
-    return false;
-  };
-
-  const placeAnywhere = (pieceType: string) => {
-    if (placeInSlotsInternal(pieceType, backSquares)) return;
-    if (placeInSlotsInternal(pieceType, middleSquares)) return;
-    if (placeInSlotsInternal(pieceType, frontSquares)) return;
-  };
-
-  const pieces = template.pieces;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pawns = pieces.filter((p: string) => p === 'p');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rooks = pieces.filter((p: string) => p === 'r' || p === 'c');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bishops = pieces.filter((p: string) => p === 'b' || p === 'a');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const knights = pieces.filter((p: string) => p === 'n');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const queens = pieces.filter((p: string) => p === 'q');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const others = pieces.filter((p: string) => !['p', 'r', 'c', 'b', 'a', 'n', 'q'].includes(p));
-
-  // 1. Pawns
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pawns.forEach((p: string) => {
-    if (!placeInSlotsInternal(p, frontSquares)) {
-      if (!placeInSlotsInternal(p, middleSquares)) {
-        placeInSlotsInternal(p, backSquares);
-      }
-    }
-  });
-
-  // 2. Rooks/Chancellors
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  rooks.forEach((p: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const corners = backSquares.filter(
-      (sq: any) => sq.c === corridor.colStart || sq.c === corridor.colStart + 2
-    );
-    if (corners.length > 0) {
-      const sq = corners[0];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      backSquares = backSquares.filter((s: any) => s !== sq);
-      placePiece(game, sq.r, sq.c, p, isWhite);
+  sortedPieces.forEach((pieceType: string) => {
+    const bestSq = getOptimalSquare(game, pieceType, isWhite);
+    if (bestSq) {
+      placePiece(game, bestSq.r, bestSq.c, pieceType, isWhite);
     } else {
-      placeAnywhere(p);
+      console.warn(`[Tutor] Could not find slot for ${pieceType}`);
     }
   });
 
-  // 3. Bishops/Archbishops
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bishops.forEach((p: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const centerBack = backSquares.find((sq: any) => sq.c === corridor.colStart + 1);
-    if (centerBack) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      backSquares = backSquares.filter((s: any) => s !== centerBack);
-      placePiece(game, centerBack.r, centerBack.c, p, isWhite);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const cornersMiddle = middleSquares.filter(
-        (sq: any) => sq.c === corridor.colStart || sq.c === corridor.colStart + 2
-      );
-      if (cornersMiddle.length > 0) {
-        const sq = cornersMiddle[0];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        middleSquares = middleSquares.filter((s: any) => s !== sq);
-        placePiece(game, sq.r, sq.c, p, isWhite);
-      } else {
-        placeAnywhere(p);
-      }
-    }
-  });
-
-  // 4. Queens
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  queens.forEach((p: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const centerBack = backSquares.find((sq: any) => sq.c === corridor.colStart + 1);
-    if (centerBack) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      backSquares = backSquares.filter((s: any) => s !== centerBack);
-      placePiece(game, centerBack.r, centerBack.c, p, isWhite);
-    } else {
-      placeAnywhere(p);
-    }
-  });
-
-  // 5. Knights
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  knights.forEach((p: string) => {
-    if (!placeInSlotsInternal(p, middleSquares)) {
-      placeAnywhere(p);
-    }
-  });
-
-  // 6. Others
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  others.forEach((p: string) => {
-    placeAnywhere(p);
-  });
+  delete game.availableKingPos;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (UI as any).renderBoard(game);

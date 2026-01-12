@@ -56,4 +56,79 @@ describe('ErrorManager', () => {
       expect.stringContaining('Warnung')
     );
   });
+
+  test('should default to "App" context if not provided', () => {
+    const error = new Error('Generic Error');
+    errorManager.handleError(error);
+
+    expect(logger.error).toHaveBeenCalledWith('[App]', error);
+  });
+
+  test('should use provided context', () => {
+    const error = new Error('Network Error');
+    errorManager.handleError(error, { context: 'Network' });
+
+    expect(logger.error).toHaveBeenCalledWith('[Network]', error);
+  });
+
+  test('should use alert fallback if overlay is missing', () => {
+    // Remove overlay
+    document.body.innerHTML = '';
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+
+    const error = new Error('Critical No UI');
+    errorManager.handleError(error, { critical: true });
+
+    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('KRITISCHER FEHLER'));
+    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Critical No UI'));
+
+    alertSpy.mockRestore();
+  });
+
+  test('should initialize global handlers', () => {
+    // Mock window.onerror
+    const originalOnError = window.onerror;
+    const originalOnUnhandledRejection = window.onunhandledrejection;
+
+    window.onerror = null;
+    window.onunhandledrejection = null;
+
+    errorManager.init();
+
+    expect(window.onerror).toBeDefined();
+    expect(window.onunhandledrejection).toBeDefined();
+    expect(logger.info).toHaveBeenCalledWith('ErrorManager initialized');
+
+    // Test the handlers
+    const errorSpy = jest.spyOn(errorManager, 'handleError');
+
+    // Test onerror
+    if (window.onerror) {
+      // @ts-ignore
+      window.onerror('Script Error', 'script.js', 10, 20, new Error('Script Error'));
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ context: 'Global' })
+      );
+    }
+
+    // Test onunhandledrejection
+    if (window.onunhandledrejection) {
+      const event = {
+        type: 'unhandledrejection',
+        promise: Promise.resolve(), // Just a dummy promise
+        reason: new Error('Async Fail'),
+      };
+
+      window.onunhandledrejection(event);
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ context: 'Promise' })
+      );
+    }
+
+    // Cleanup
+    window.onerror = originalOnError;
+    window.onunhandledrejection = originalOnUnhandledRejection;
+  });
 });

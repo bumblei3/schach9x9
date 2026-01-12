@@ -155,7 +155,7 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('applySetupTemplate for black pieces', () => {
     game.phase = PHASES.SETUP_BLACK_PIECES;
-    game.blackCorridor = { rowStart: 0, colStart: 3 };
+    game.blackCorridor = 3;
     const template = {
       id: 'rush_12',
       name: 'Rush',
@@ -171,7 +171,7 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('applySetupTemplate with piece placement fallback', () => {
     game.phase = PHASES.SETUP_WHITE_PIECES;
-    game.whiteCorridor = { rowStart: 6, colStart: 3 };
+    game.whiteCorridor = 3;
     // Fill up rows
     for (let c = 3; c < 6; c++) {
       game.board[6][c] = { type: 'p' };
@@ -192,7 +192,7 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('applySetupTemplate fallbacks for queens, knights and others', () => {
     game.phase = PHASES.SETUP_WHITE_PIECES;
-    game.whiteCorridor = { rowStart: 6, colStart: 3 };
+    game.whiteCorridor = 3;
 
     // Block all normal slots
     for (let r = 6; r <= 8; r++) {
@@ -217,7 +217,7 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('applySetupTemplate with blocked corners for rooks/bishops', () => {
     game.phase = PHASES.SETUP_WHITE_PIECES;
-    game.whiteCorridor = { rowStart: 6, colStart: 3 };
+    game.whiteCorridor = 3;
 
     // Pieces everywhere
     for (let r = 6; r <= 8; r++) {
@@ -239,36 +239,60 @@ describe('HintGenerator - Unit Tests', () => {
     expect(game.board[7][4]).toBeDefined();
   });
 
-  test('applySetupTemplate with fallback for bishops/queens/knights', () => {
+  test('applySetupTemplate should place pieces around key blocker (King)', () => {
     game.phase = PHASES.SETUP_WHITE_PIECES;
-    game.whiteCorridor = { rowStart: 6, colStart: 3 };
+    game.whiteCorridor = 3;
 
-    // Fill all slots
-    for (let r = 6; r <= 8; r++) {
-      for (let c = 3; c <= 5; c++) {
-        game.board[r][c] = { type: 'p' };
-      }
-    }
+    // Place King in the best spot for a Queen (Back row centerish)
+    // White Back Row is 8. Center col of corridor (3,4,5) is 4.
+    game.board[8][4] = { type: 'k', color: 'white' };
 
-    // Open one distant slot (though theoretically not possible in corridor but good for fallback test)
-    game.board[0][0] = null;
-
+    // Template with Queen
     const template = {
-      id: 'super_fallback',
-      pieces: ['b', 'q', 'n'],
+      id: 'queen_test',
+      pieces: ['q'],
     };
     mockTutorController.getSetupTemplates.mockReturnValue([template]);
 
-    // This might fail if placeAnywhere only checks a narrow range,
-    // let's check placeAnywhere: it checks backSquares, middleSquares, frontSquares.
-    // So it only checks the corridor!
-    // If corridor is full, it will just not place it.
+    applySetupTemplate(game, mockTutorController, 'queen_test');
 
-    // Let's open one slot in the corridor.
-    game.board[6][3] = null; // front row, first slot
+    // Queen prefers back row (8). 8,4 is taken by King.
+    // Should go to 8,3 or 8,5 or 7,4.
+    // Check Queen is placed and NOT at 8,4
+    let queenPos = null;
+    for (let r = 6; r <= 8; r++) {
+      for (let c = 3; c <= 5; c++) {
+        if (game.board[r][c] && game.board[r][c].type === 'q') {
+          queenPos = { r, c };
+        }
+      }
+    }
 
-    applySetupTemplate(game, mockTutorController, 'super_fallback');
-    expect(game.board[6][3]).toBeDefined();
+    expect(queenPos).not.toBeNull();
+    // Verify it didn't overwrite King
+    expect(game.board[8][4].type).toBe('k');
+    // Verify it found a spot (likely 8,3 or 8,5 as they are back row score 50+20=70 vs middle row 10)
+    expect(queenPos.r).toBe(8);
+  });
+
+  test('applySetupTemplate heuristics: Pawn preference', () => {
+    game.phase = PHASES.SETUP_WHITE_PIECES;
+    game.whiteCorridor = 3;
+
+    // We use a custom template with 1 pawn and 1 rook
+    const template = { id: 'heuristic_test', pieces: ['p', 'r'] };
+    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+
+    // Apply
+    applySetupTemplate(game, mockTutorController, 'heuristic_test');
+
+    // Expected: Pawn in front row (6), Rook in back row (8)
+    // We check if ANY pawn is in row 6, and ANY rook is in row 8
+    const pawnsInFront = [3, 4, 5].some(c => game.board[6][c] && game.board[6][c].type === 'p');
+    const rooksInBack = [3, 4, 5].some(c => game.board[8][c] && game.board[8][c].type === 'r');
+
+    expect(pawnsInFront).toBe(true);
+    expect(rooksInBack).toBe(true);
   });
 
   test('isTutorMove should identify moves correctly', () => {

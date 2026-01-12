@@ -92,22 +92,24 @@ export class PieceManager3D {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const g = game as any;
 
-    if (game.phase === PHASES.SETUP_WHITE_PIECES && g.whiteCorridor) {
-      const { rowStart, colStart } = g.whiteCorridor;
+    if (game.phase === PHASES.SETUP_WHITE_PIECES && typeof g.whiteCorridor === 'number') {
+      const colStart = g.whiteCorridor;
+      const rowStart = 6;
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {
-          zones.push({ r, c });
+          zones.push({ r: r as any, c: c as any });
         }
       }
       this.highlightZones(zones, 0x6366f1);
       return;
     }
 
-    if (game.phase === PHASES.SETUP_BLACK_PIECES && g.blackCorridor) {
-      const { rowStart, colStart } = g.blackCorridor;
+    if (game.phase === PHASES.SETUP_BLACK_PIECES && typeof g.blackCorridor === 'number') {
+      const colStart = g.blackCorridor;
+      const rowStart = 0;
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {
-          zones.push({ r, c });
+          zones.push({ r: r as any, c: c as any });
         }
       }
       this.highlightZones(zones, 0xef4444); // Red for black (though usually we allow same color highlight)

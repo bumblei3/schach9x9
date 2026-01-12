@@ -429,25 +429,15 @@ export function renderBoard(game: any): void {
         }
       }
       if (
-        game.whiteCorridor &&
+        typeof game.whiteCorridor === 'number' &&
         (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)
       ) {
-        if (
-          r >= game.whiteCorridor.rowStart &&
-          r < game.whiteCorridor.rowStart + 3 &&
-          c >= game.whiteCorridor.colStart &&
-          c < game.whiteCorridor.colStart + 3
-        ) {
+        if (r >= 6 && r < 9 && c >= game.whiteCorridor && c < game.whiteCorridor + 3) {
           cell.classList.add('selectable-corridor');
         }
       }
-      if (game.blackCorridor && game.phase === PHASES.SETUP_BLACK_PIECES) {
-        if (
-          r >= game.blackCorridor.rowStart &&
-          r < game.blackCorridor.rowStart + 3 &&
-          c >= game.blackCorridor.colStart &&
-          c < game.blackCorridor.colStart + 3
-        ) {
+      if (typeof game.blackCorridor === 'number' && game.phase === PHASES.SETUP_BLACK_PIECES) {
+        if (r >= 0 && r < 3 && c >= game.blackCorridor && c < game.blackCorridor + 3) {
           cell.classList.add('selectable-corridor');
         }
       }

@@ -248,7 +248,7 @@ describe('BoardRenderer Full Coverage', () => {
     expect(cell60.classList.contains('selectable-corridor')).toBe(true);
 
     game.phase = 'setup_white_pieces';
-    game.whiteCorridor = { rowStart: 6, colStart: 3 };
+    game.whiteCorridor = 3;
     BoardRenderer.renderBoard(game);
     const cell63 = document.querySelector('.cell[data-r="6"][data-c="3"]');
     expect(cell63.classList.contains('selectable-corridor')).toBe(true);
@@ -329,7 +329,7 @@ describe('BoardRenderer Full Coverage', () => {
 
   test('renderBoard highlights black corridor', () => {
     game.phase = 'setup_black_pieces';
-    game.blackCorridor = { rowStart: 0, colStart: 3 };
+    game.blackCorridor = 3;
     BoardRenderer.renderBoard(game);
     const cell03 = document.querySelector('.cell[data-r="0"][data-c="3"]');
     expect(cell03.classList.contains('selectable-corridor')).toBe(true);

@@ -259,8 +259,8 @@ describe('TutorController', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.initialPoints = 15;
       game.points = 15;
-      game.whiteCorridor = { rowStart: 6, colStart: 3 }; // Standard white corridor
-      game.blackCorridor = { rowStart: 0, colStart: 3 }; // Standard black corridor
+      game.whiteCorridor = 3; // Standard white corridor starting column
+      game.blackCorridor = 3; // Standard black corridor starting column
 
       // Clear board
       game.board = Array(9)
@@ -383,8 +383,8 @@ describe('TutorController', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.initialPoints = 15;
       game.points = 15;
-      game.whiteCorridor = { rowStart: 6, colStart: 3 };
-      game.blackCorridor = { rowStart: 0, colStart: 3 };
+      game.whiteCorridor = 3;
+      game.blackCorridor = 3;
       game.board = Array(9)
         .fill(null)
         .map(() => Array(9).fill(null));
@@ -414,7 +414,7 @@ describe('TutorController', () => {
 
     test('should handle corridor placement at board edges', () => {
       // Test with corridor at edge
-      game.whiteCorridor = { rowStart: 7, colStart: 0 };
+      game.whiteCorridor = 0;
       const mockTemplate = {
         id: 'edge_test',
         name: 'Edge Test',

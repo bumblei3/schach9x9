@@ -55,8 +55,8 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
       this.phase = PHASES.SETUP_WHITE_KING;
       this.turn = 'white';
       this.points = initialPoints;
-      this.whiteCorridor = { rowStart: 6, colStart: 3 };
-      this.blackCorridor = { rowStart: 0, colStart: 3 };
+      this.whiteCorridor = 3;
+      this.blackCorridor = 3;
       this.log = jest.fn();
       this.whiteTime = 300;
       this.blackTime = 300;
@@ -80,6 +80,7 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
 const { GameController } = await import('../js/gameController.js');
 const { Game } = await import('../js/gameEngine.js');
 const UI = await import('../js/ui.js');
+const { soundManager } = await import('../js/sounds.js');
 
 describe('GameController', () => {
   let game;
@@ -341,6 +342,70 @@ describe('GameController', () => {
       Storage.prototype.getItem.mockReturnValueOnce('invalid');
       gameController.loadGame();
       expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Fehler'));
+    });
+  });
+
+  describe('Resignation', () => {
+    test('should allow resignation in PLAY phase', () => {
+      game.phase = PHASES.PLAY;
+      game.turn = 'white';
+      gameController.resign('white');
+
+      expect(game.phase).toBe(PHASES.GAME_OVER);
+      expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Weiß gibt auf'));
+      expect(soundManager.playGameOver).toHaveBeenCalled();
+    });
+
+    test('should prevent resignation in non-PLAY phase', () => {
+      game.phase = PHASES.SETUP_WHITE_KING;
+      gameController.resign('white');
+      expect(game.phase).toBe(PHASES.SETUP_WHITE_KING);
+    });
+  });
+
+  describe('Draw Offers', () => {
+    test('should handle draw offer', () => {
+      game.phase = PHASES.PLAY;
+      game.turn = 'white';
+      gameController.offerDraw('white');
+
+      expect(game.drawOffered).toBe(true);
+      expect(game.drawOfferedBy).toBe('white');
+      expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Weiß bietet Remis an'));
+    });
+
+    test('should accept draw', () => {
+      game.phase = PHASES.PLAY;
+      game.drawOffered = true;
+      game.drawOfferedBy = 'black';
+
+      gameController.acceptDraw();
+
+      expect(game.phase).toBe(PHASES.GAME_OVER);
+      expect(game.log).toHaveBeenCalledWith('Remis vereinbart!');
+    });
+
+    test('should decline draw', () => {
+      game.phase = PHASES.PLAY;
+      game.drawOffered = true;
+      game.drawOfferedBy = 'black';
+      game.turn = 'white';
+
+      gameController.declineDraw();
+
+      expect(game.drawOffered).toBe(false);
+      expect(game.log).toHaveBeenCalledWith(expect.stringContaining('lehnt das Remis-Angebot ab'));
+    });
+  });
+
+  describe('Campaign Level', () => {
+    test('should handle invalid level ID gracefully', () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      gameController.startCampaignLevel('invalid-id');
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Level not found'),
+        expect.anything()
+      );
     });
   });
 });
