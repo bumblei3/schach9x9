@@ -87,6 +87,12 @@ describe('Tutorial', () => {
       // expect(shopDemo).toContain('Shop'); // "Shop" word not in demo text
       expect(shopDemo).toContain('Punkte');
     });
+
+    test('should create upgrade demo', () => {
+      const upgradeDemo = tutorial.createUpgradeDemo();
+      expect(upgradeDemo).toContain('Upgrade-Modus');
+      expect(upgradeDemo).toContain('Kanzler');
+    });
   });
 
   describe('Move Grid Creation', () => {

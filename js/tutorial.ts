@@ -54,6 +54,10 @@ export class Tutorial {
         title: '💰 Der Shop',
         content: this.createShopDemo(),
       },
+      {
+        title: '⭐ Truppen Upgrades',
+        content: this.createUpgradeDemo(),
+      },
     ];
   }
 
@@ -87,6 +91,33 @@ export class Tutorial {
     `;
   }
 
+  public createUpgradeDemo(): string {
+    return `
+      <p>Im <strong>Upgrade-Modus</strong> kannst du deine Figuren verbessern, indem du Punkte investierst.</p>
+      <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px;">
+          <div style="text-align: center;">
+            <div style="width: 50px; height: 50px; margin: 0 auto;">${PIECE_SVGS.white.r}</div>
+            <p>Turm (5)</p>
+          </div>
+          <div style="font-size: 20px; color: #4ecca3;">➔</div>
+          <div style="text-align: center;">
+            <div style="width: 50px; height: 50px; margin: 0 auto; filter: drop-shadow(0 0 5px #4ecca3);">${PIECE_SVGS.white.c}</div>
+            <p style="color: #4ecca3;">Kanzler (9)</p>
+          </div>
+        </div>
+        <p><strong>Kosten: 4 Punkte</strong> (9 - 5)</p>
+      </div>
+      <p><strong>So funktioniert's:</strong></p>
+      <ol style="text-align: left; margin-top: 10px;">
+        <li>Achte auf grün leuchtende Figuren</li>
+        <li>Klicke eine Figur an</li>
+        <li>Wähle das gewünschte Upgrade</li>
+      </ol>
+      <p><em>Pro-Tipp: Starte ein "8x8 mit Upgrades" Spiel, um es auszuprobieren!</em></p>
+    `;
+  }
+
   public createMoveGrid(piece: string): string {
     // Create 5x5 demo grid
     const moves = this.getPieceMoves(piece);
@@ -96,14 +127,12 @@ export class Tutorial {
         const isCenter = r === 2 && c === 2;
         const isHighlight = moves.some(m => m.r === r && m.c === c);
         const moveType = isHighlight ? this.getMoveType(piece, r, c) : null;
-        const cellClass = `demo-cell ${(r + c) % 2 === 0 ? 'light' : 'dark'} ${
-          isCenter ? 'piece-position' : isHighlight ? `highlight ${moveType}` : ''
-        }`;
+        const cellClass = `demo-cell ${(r + c) % 2 === 0 ? 'light' : 'dark'} ${isCenter ? 'piece-position' : isHighlight ? `highlight ${moveType}` : ''
+          }`;
         html += `<div class="${cellClass}">`;
         if (isCenter) {
-          html += `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${
-            (PIECE_SVGS.white as any)[piece === 'archbishop' ? 'a' : 'c']
-          }</div>`;
+          html += `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${(PIECE_SVGS.white as any)[piece === 'archbishop' ? 'a' : 'c']
+            }</div>`;
         } else if (isHighlight) {
           html += `<div class="move-indicator ${moveType}"></div>`;
         }
