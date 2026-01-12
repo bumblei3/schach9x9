@@ -46,8 +46,8 @@ describe('AI Engine Worker Integration', () => {
     global.window = {}; // Mock window existence
 
     // Silence logs
-    vi.spyOn(logger, 'info').mockImplementation(() => {});
-    vi.spyOn(logger, 'debug').mockImplementation(() => {});
+    vi.spyOn(logger, 'info').mockImplementation(function () {});
+    vi.spyOn(logger, 'debug').mockImplementation(function () {});
   });
 
   afterAll(() => {

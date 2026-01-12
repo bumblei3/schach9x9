@@ -4,12 +4,12 @@ import { notificationUI } from '../js/ui/NotificationUI.js';
 import { logger } from '../js/logger.js';
 
 // Use spyOn for notificationUI
-vi.spyOn(notificationUI, 'show').mockImplementation(() => {});
+vi.spyOn(notificationUI, 'show').mockImplementation(function () {});
 
 // Spy on logger instead of mocking entire module to avoid ESM issues
-vi.spyOn(logger, 'error').mockImplementation(() => {});
-vi.spyOn(logger, 'warn').mockImplementation(() => {});
-vi.spyOn(logger, 'info').mockImplementation(() => {});
+vi.spyOn(logger, 'error').mockImplementation(function () {});
+vi.spyOn(logger, 'warn').mockImplementation(function () {});
+vi.spyOn(logger, 'info').mockImplementation(function () {});
 
 describe('ErrorManager', () => {
   beforeEach(() => {
@@ -74,7 +74,7 @@ describe('ErrorManager', () => {
   test('should use alert fallback if overlay is missing', () => {
     // Remove overlay
     document.body.innerHTML = '';
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(function () {});
 
     const error = new Error('Critical No UI');
     errorManager.handleError(error, { critical: true });

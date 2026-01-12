@@ -109,7 +109,7 @@ describe('AnalysisUI', () => {
     ];
 
     // Mock undoMoveOnBoard to change board
-    vi.spyOn(analysisUI, 'undoMoveOnBoard').mockImplementation(board => {
+    vi.spyOn(analysisUI, 'undoMoveOnBoard').mockImplementation(function (board) {
       board[0][0] = 'initial';
     });
 

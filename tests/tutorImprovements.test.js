@@ -115,13 +115,13 @@ describe('Tutor Improvements', () => {
       mockGame.board[8][4] = { type: 'r', color: 'white' }; // piece attacking Victim
 
       // isSquareUnderAttack(e8, white) should be true
-      mockGame.isSquareUnderAttack.mockImplementation((r, c, color) => {
+      mockGame.isSquareUnderAttack.mockImplementation(function (r, c, color) {
         if (r === 0 && c === 4 && color === 'white') return true;
         return false;
       });
 
       // Mock getValidMoves to show Rook e1 attacks e8
-      mockGame.getValidMoves.mockImplementation((r, c) => {
+      mockGame.getValidMoves.mockImplementation(function (r, c) {
         if (r === 8 && c === 4) return [{ r: 0, c: 4 }]; // Rook at e1 attacks e8
         return [];
       });

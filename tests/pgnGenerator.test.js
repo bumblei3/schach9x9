@@ -325,8 +325,8 @@ describe('PGNGenerator', () => {
         click: vi.fn(),
       };
       vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor);
-      vi.spyOn(document.body, 'appendChild').mockImplementation(() => {});
-      vi.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+      vi.spyOn(document.body, 'appendChild').mockImplementation(function () {});
+      vi.spyOn(document.body, 'removeChild').mockImplementation(function () {});
 
       downloadPGN('test pgn', 'test.pgn');
 

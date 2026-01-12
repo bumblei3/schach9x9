@@ -11,7 +11,7 @@ describe('Logger Enhanced', () => {
   let originalEnabled;
 
   beforeEach(() => {
-    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(function () {});
     // Save original state
     originalLevel = logger.level;
     originalEnabled = logger.enabled;

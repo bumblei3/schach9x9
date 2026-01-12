@@ -414,7 +414,7 @@ describe('GameController', () => {
 
   describe('Campaign Level', () => {
     test('should handle invalid level ID gracefully', () => {
-      vi.spyOn(console, 'error').mockImplementation(() => { });
+      vi.spyOn(console, 'error').mockImplementation(function () { });
       gameController.startCampaignLevel('invalid-id');
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('Level not found'),

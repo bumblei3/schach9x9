@@ -132,7 +132,7 @@ describe('MoveController', () => {
     const to = { r: 0, c: 4 };
 
     // Mock showPromotionUI to immediately call callback
-    UI.showPromotionUI.mockImplementation((game, r, c, color, record, callback) => {
+    UI.showPromotionUI.mockImplementation(function (game, r, c, color, record, callback) {
       // Simulate user choosing Queen
       // Note: The callback in MoveController.js calls finishMove(), but doesn't take arguments.
       // The choice is usually handled inside showPromotionUI which updates the board/record.
@@ -549,7 +549,7 @@ describe('MoveController', () => {
       // Mock UI updates that are called during load
       // UI.updateShopUI is already mocked globally
 
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
       moveController.loadGame();
 

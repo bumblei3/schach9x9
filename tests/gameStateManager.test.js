@@ -428,7 +428,7 @@ describe('GameStateManager', () => {
     test('should handle load error', () => {
       localStorage.setItem('schach9x9_save_autosave', 'invalid json');
       // Silence console.error
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockImplementation(function () {});
       expect(GameStateManager.loadGame(game)).toBe(false);
       console.error.mockRestore();
     });

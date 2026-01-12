@@ -222,7 +222,7 @@ describe('StatisticsManager', () => {
     });
 
     test('should handle invalid import data', () => {
-      const errorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(logger, 'error').mockImplementation(function () {});
       const success = manager.importGames('invalid json');
       expect(success).toBe(false);
       expect(errorSpy).toHaveBeenCalled();

@@ -171,7 +171,7 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       // Mock UI to select 'e' (Angel)
       const UI = await import('../js/ui.js');
       // showPromotionUI usually calls mc.choosePromotion
-      UI.showPromotionUI.mockImplementation((game, r, c, color, moveRecord, callback) => {
+      UI.showPromotionUI.mockImplementation(function (game, r, c, color, moveRecord, callback) {
         // Callback logic to simulate user selection
         // In the real code, this callback might take the piece type or handling validation
         // But MoveExecutor passes a closure () => completeMoveExecution...

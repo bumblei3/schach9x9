@@ -283,7 +283,7 @@ describe('Coverage Boost Tests', () => {
       mockState.board[4][4] = { type: 'p', color: 'white' };
 
       storageManager.loadGame.mockReturnValue(mockState);
-      storageManager.loadStateIntoGame.mockImplementation((g, s) => {
+      storageManager.loadStateIntoGame.mockImplementation(function (g, s) {
         Object.assign(g, s);
         return true;
       });
@@ -453,7 +453,7 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = vi.spyOn(controller, 'reloadPage').mockImplementation(() => { });
+      const reloadSpy = vi.spyOn(controller, 'reloadPage').mockImplementation(function () { });
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();

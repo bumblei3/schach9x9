@@ -3,7 +3,6 @@
  */
 
 
-
 // Mock WasmBridge with basic material evaluation
 // Real WASM loading via wasmBridge's Node.js support
 // No mock needed for integration tests!

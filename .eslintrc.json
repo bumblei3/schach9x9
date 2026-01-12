@@ -2,8 +2,7 @@
   "env": {
     "browser": true,
     "es2021": true,
-    "node": true,
-    "jest": true
+    "node": true
   },
   "extends": "eslint:recommended",
   "parserOptions": {
@@ -12,7 +11,10 @@
   },
   "rules": {
     "indent": "off",
-    "linebreak-style": ["error", "unix"],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
     "quotes": [
       "error",
       "single",
@@ -20,7 +22,10 @@
         "avoidEscape": true
       }
     ],
-    "semi": ["error", "always"],
+    "semi": [
+      "error",
+      "always"
+    ],
     "no-unused-vars": [
       "warn",
       {
@@ -32,7 +37,7 @@
     "no-debugger": "warn",
     "no-var": "error",
     "prefer-const": "error",
-    "prefer-arrow-callback": "warn",
+    "prefer-arrow-callback": "off",
     "arrow-spacing": "error",
     "no-multiple-empty-lines": [
       "error",
@@ -40,10 +45,22 @@
         "max": 2
       }
     ],
-    "eol-last": ["error", "always"],
-    "comma-dangle": ["error", "only-multiline"],
-    "object-curly-spacing": ["error", "always"],
-    "array-bracket-spacing": ["error", "never"],
+    "eol-last": [
+      "error",
+      "always"
+    ],
+    "comma-dangle": [
+      "error",
+      "only-multiline"
+    ],
+    "object-curly-spacing": [
+      "error",
+      "always"
+    ],
+    "array-bracket-spacing": [
+      "error",
+      "never"
+    ],
     "space-before-function-paren": [
       "error",
       {
@@ -55,6 +72,15 @@
   },
   "globals": {
     "BOARD_SIZE": "readonly",
-    "PHASES": "readonly"
+    "PHASES": "readonly",
+    "vi": "readonly",
+    "describe": "readonly",
+    "it": "readonly",
+    "test": "readonly",
+    "expect": "readonly",
+    "beforeEach": "readonly",
+    "afterEach": "readonly",
+    "beforeAll": "readonly",
+    "afterAll": "readonly"
   }
 }

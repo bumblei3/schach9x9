@@ -73,8 +73,8 @@ describe('SoundManager', () => {
   });
 
   test('loadSettings error handling', () => {
-    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const mockGetItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(function () {});
+    const mockGetItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(function () {
       throw new Error('access');
     });
 
@@ -85,8 +85,8 @@ describe('SoundManager', () => {
   });
 
   test('saveSettings error handling', () => {
-    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const mockSetItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(function () {});
+    const mockSetItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function () {
       throw new Error('quota');
     });
 

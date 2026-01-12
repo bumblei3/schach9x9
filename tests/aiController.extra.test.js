@@ -22,7 +22,7 @@ class MockWorker {
   postMessage = vi.fn();
   terminate = vi.fn();
 }
-global.Worker = vi.fn().mockImplementation(() => new MockWorker());
+global.Worker = vi.fn().mockImplementation(function () { return new MockWorker(); });
 
 // Mock fetch
 global.fetch = vi.fn(() =>

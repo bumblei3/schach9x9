@@ -3,7 +3,7 @@ import { logger } from '../js/logger.js';
 
 
 // Mock logger to avoid clutter
-vi.spyOn(logger, 'debug').mockImplementation(() => {});
+vi.spyOn(logger, 'debug').mockImplementation(function () {});
 
 describe('OpeningBook', () => {
   const mockBoard = Array(9)

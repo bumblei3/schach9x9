@@ -202,7 +202,7 @@ describe('BattleAnimator Class', () => {
     const pos = { x: 0, y: 0, z: 0 };
 
     // Mock requestAnimationFrame to call the callback immediately
-    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(cb => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(function (cb) {
       setTimeout(cb, 0);
       return 1;
     });

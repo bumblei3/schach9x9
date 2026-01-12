@@ -3,7 +3,6 @@
  */
 
 
-
 // Mock BoardRenderer
 vi.mock('../../js/ui/BoardRenderer.js', () => ({
   renderBoard: vi.fn(),

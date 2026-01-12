@@ -46,7 +46,7 @@ describe('AnalysisManager', () => {
     mockGame.turn = 'white';
 
     // Mock black rook moves: it can go to (4,4) to capture the queen
-    mockGame.getValidMoves.mockImplementation((r, c, piece) => {
+    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
       if (r === 0 && c === 4 && piece.type === 'r') {
         return [{ r: 4, c: 4 }];
       }
@@ -91,7 +91,7 @@ describe('AnalysisManager', () => {
     mockGame.board[8][6] = { type: 'p', color: 'white' };
     mockGame.board[0][7] = { type: 'r', color: 'black' };
 
-    mockGame.getValidMoves.mockImplementation((r, c, piece) => {
+    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
       if (r === 0 && c === 7 && piece.type === 'r') return [{ r: 7, c: 7 }];
       if (r === 8 && c === 6 && piece.type === 'p') return [{ r: 7, c: 7 }];
       return [];
@@ -116,7 +116,7 @@ describe('AnalysisManager', () => {
     mockGame.board[4][7] = { type: 'q', color: 'black' };
     mockGame.turn = 'white';
 
-    mockGame.getValidMoves.mockImplementation((r, c, piece) => {
+    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
       if (r === 5 && c === 5 && piece.type === 'n') {
         return [
           { r: 3, c: 4 },
@@ -155,7 +155,7 @@ describe('AnalysisManager', () => {
     mockGame.board[8][4] = { type: 'k', color: 'black' };
     mockGame.turn = 'white';
 
-    mockGame.getValidMoves.mockImplementation((r, c, piece) => {
+    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
       // White rook at (0,4) attacks along the 4th column
       if (r === 0 && c === 4 && piece.type === 'r') {
         return [
