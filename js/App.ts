@@ -87,10 +87,15 @@ export class App {
     this.analysisManager = new AnalysisManager(this.game);
     this.game.analysisManager = this.analysisManager;
 
-    this.evaluationBar = new EvaluationBar('board-container');
-    this.uiEffects = new UIEffects();
-    this.uiEffects.startFloatingPieces();
+    if (!this.evaluationBar) {
+      this.evaluationBar = new EvaluationBar('board-container');
+    }
     this.game.evaluationBar = this.evaluationBar;
+
+    if (!this.uiEffects) {
+      this.uiEffects = new UIEffects();
+    }
+    this.uiEffects.startFloatingPieces();
 
     // Input handlers
     this.keyboardManager = new KeyboardManager(this);
@@ -131,9 +136,12 @@ export class App {
     const toggle3DBtn = document.getElementById('toggle-3d-btn');
     const shopPanel = document.getElementById('shop-panel');
 
-    if (mode === 'standard8x8') {
-      if (shopPanel) shopPanel.classList.add('hidden');
-    } else {
+    // UI Adjustments for Game Modes - DEPRECATED/MOVED TO STRATEGIES
+    // Strategies should handle initial UI state (shop, 3d button, etc)
+    // We leave toggle3DBtn logic here or better, move it too?
+    // For now, removing the shopPanel hiding which broke Standard upgrades.
+
+    if (mode !== 'standard8x8') {
       if (toggle3DBtn) toggle3DBtn.style.display = 'flex';
     }
 

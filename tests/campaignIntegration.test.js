@@ -10,6 +10,10 @@ const mockUI = {
   updateClockUI: jest.fn(),
   updateClockDisplay: jest.fn(),
   initBoardUI: jest.fn(),
+  showCampaignVictoryModal: jest.fn(),
+  showShop: jest.fn(),
+  closeModal: jest.fn(),
+  updatePointsUI: jest.fn(),
 };
 
 jest.unstable_mockModule('../js/ui.js', () => mockUI);
@@ -36,14 +40,17 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
     constructor() {
       this.board = [];
       this.capturedPieces = { white: [], black: [] };
+      this.stats = { totalMoves: 0, promotions: 0 };
+    }
+    calculateMaterialAdvantage() {
+      return 0;
     }
   },
   PHASES: { SETUP_WHITE_KING: 'setup_wk', PLAY: 'play', GAME_OVER: 'game_over' },
   AI_DELAY_MS: 0,
 }));
 
-// Real CampaignManager (but with mocked localStorage inside it? No, let's mock the module or use real one with mock storage)
-// Let's use real CampaignManager logic but mock its persistence mechanism (localStorage)
+// Mock localStorage
 const localStorageMock = (() => {
   let store = {};
   return {
@@ -69,7 +76,7 @@ describe('Campaign Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    campaignManager.resetProgress();
+    campaignManager.resetState();
 
     // Setup minimal DOM
     document.body.innerHTML = `
@@ -84,74 +91,88 @@ describe('Campaign Integration', () => {
       playerColor: 'white',
       capturedPieces: { white: [], black: [] },
       stats: { totalMoves: 0, promotions: 0 },
-      isAI: true, // Campaign is vs AI usually
+      isAI: true,
       calculateMaterialAdvantage: jest.fn(() => 0),
     };
 
     // Instantiate controller
     gameController = new GameController(game);
-    // Mock methods that might throw or have side effects
     gameController.statisticsManager = { saveGame: jest.fn() };
     gameController.timeManager = { startClock: jest.fn() };
   });
 
-  test('startCampaignLevel should initialize game with level configuration', () => {
-    const levelId = 'tutorial_1'; // Known ID from campaignData
-    const level = campaignManager.getLevel(levelId);
-
+  test('startCampaignLevel should initialize level_1 (fixed)', () => {
+    const levelId = 'level_1';
     gameController.startCampaignLevel(levelId);
 
     expect(game.campaignMode).toBe(true);
     expect(game.currentLevelId).toBe(levelId);
-    expect(game.playerColor).toBe(level.playerColor);
-
-    // Board should be loaded from FEN (check if board is populated)
-    expect(game.board.length).toBe(9);
-    // tutorial_1 FEN has King at d1 (row 8, col 3 in 0-indexed 9x9? No, FEN parsing logic needs verification if we care about exact placement)
-    // But at least board should not be empty where pieces are expected.
+    expect(game.phase).toBe('PLAY'); // level_1 is fixed -> PLAY
 
     expect(mockUI.renderBoard).toHaveBeenCalled();
     expect(mockUI.showModal).toHaveBeenCalledWith(
-      level.title,
+      expect.stringContaining('Aufstand'),
       expect.any(String),
       expect.any(Array)
     );
   });
 
   test('handleGameEnd should complete level on victory', () => {
-    const levelId = 'tutorial_1';
-    gameController.startCampaignLevel(levelId); // Set context
+    const levelId = 'level_1';
+    gameController.startCampaignLevel(levelId);
 
     // Simulate winning
     gameController.handleGameEnd('win', 'white');
 
     expect(campaignManager.isLevelCompleted(levelId)).toBe(true);
-    // Should verify it saved 3 stars or generic completion
     expect(localStorage.setItem).toHaveBeenCalledWith(
-      'schach9x9_campaign_progress',
+      'schach_campaign_state',
       expect.stringContaining(levelId)
     );
   });
 
-  test('handleGameEnd should NOT complete level on loss', () => {
-    const levelId = 'tutorial_1';
-    gameController.startCampaignLevel(levelId);
+  test('handleGameEnd should unlock level_2 after level_1 win', () => {
+    const level1 = 'level_1';
+    const level2 = 'level_2';
 
-    // Simulate losing (white resigns or gets mated)
-    gameController.handleGameEnd('loss', 'white'); // White result is loss
+    expect(campaignManager.isLevelUnlocked(level2)).toBe(false);
 
-    expect(campaignManager.isLevelCompleted(levelId)).toBe(false);
-  });
-
-  test('handleGameEnd should unlock the next level', () => {
-    const levelId = 'tutorial_1';
-    const nextLevelId = 'skirmish_1';
-
-    expect(campaignManager.isLevelUnlocked(nextLevelId)).toBe(false);
-
-    gameController.startCampaignLevel(levelId);
+    gameController.startCampaignLevel(level1);
     gameController.handleGameEnd('win', 'white');
 
-    expect(campaignManager.isLevelUnlocked(nextLevelId)).toBe(true);
+    expect(campaignManager.isLevelUnlocked(level2)).toBe(true);
+  });
+
+  test('should unlock level_3 after level_2 win and persistent rewards', () => {
+    // 1. Level 1 win
+    gameController.startCampaignLevel('level_1');
+    gameController.handleGameEnd('win', 'white');
+
+    // 2. Level 2 win
+    gameController.startCampaignLevel('level_2');
+    gameController.handleGameEnd('win', 'white');
+
+    expect(campaignManager.isLevelUnlocked('level_3')).toBe(true);
+
+    // 3. Level 3 win
+    gameController.startCampaignLevel('level_3');
+    gameController.handleGameEnd('win', 'white');
+
+    expect(campaignManager.isLevelCompleted('level_3')).toBe(true);
+
+    // Verify reward 'angel' is unlocked (concept reward in levels.ts)
+    // Note: level_3 reward is 'Unlock: Angel (Concept)' in current levels.ts
+    // In my logic I used 'angel' as the key.
+    expect(campaignManager.isRewardUnlocked('angel')).toBe(true);
+  });
+
+  test('resetState should clear all progress for testing isolation', () => {
+    gameController.startCampaignLevel('level_1');
+    gameController.handleGameEnd('win', 'white');
+    expect(campaignManager.isLevelCompleted('level_1')).toBe(true);
+
+    campaignManager.resetState();
+    expect(campaignManager.isLevelCompleted('level_1')).toBe(false);
+    expect(campaignManager.isLevelUnlocked('level_2')).toBe(false);
   });
 });

@@ -141,4 +141,48 @@ describe('ShopManager', () => {
       expect(mockGame.points).toBe(originalPoints);
     });
   });
+
+  describe('getAvailableUpgrades', () => {
+    test('should NOT include Angel if reward is locked', () => {
+      // Accessing private method for test, no 'as any' needed in JS
+      const upgrades = shopManager.getAvailableUpgrades('q');
+      const hasAngel = upgrades.some(u => u.symbol === 'e');
+      expect(hasAngel).toBe(false);
+    });
+
+    test('should include Knight upgrades correctly', () => {
+      const upgrades = shopManager.getAvailableUpgrades('n');
+      const hasNightrider = upgrades.some(u => u.symbol === 'j');
+      expect(hasNightrider).toBe(true);
+    });
+  });
+
+  describe('upgradePiece', () => {
+    test('should upgrade knight to nightrider and deduct correct points', () => {
+      // Knight (3) -> Nightrider (6) costs 3 points
+      mockGame.board[7][4] = { type: 'n', color: 'white' };
+      mockGame.points = 10;
+
+      shopManager.upgradePiece(7, 4, 'j');
+
+      expect(mockGame.board[7][4].type).toBe('j');
+      expect(mockGame.points).toBe(7); // 10 - 3
+    });
+
+    test('should allow chain upgrade: Knight -> Nightrider -> Chancellor', () => {
+      // Knight (3) -> Nightrider (6) -> Chancellor (8)
+      mockGame.board[7][4] = { type: 'n', color: 'white' };
+      mockGame.points = 10;
+
+      // Step 1: Knight -> Nightrider (Costs 3)
+      shopManager.upgradePiece(7, 4, 'j');
+      expect(mockGame.board[7][4].type).toBe('j');
+      expect(mockGame.points).toBe(7); // 10 - 3
+
+      // Step 2: Nightrider -> Chancellor (Costs 2: 8-6)
+      shopManager.upgradePiece(7, 4, 'c');
+      expect(mockGame.board[7][4].type).toBe('c');
+      expect(mockGame.points).toBe(5); // 7 - 2
+    });
+  });
 });

@@ -148,6 +148,12 @@ export function updateStatus(game: Game): void {
     case PHASES.SETUP_BLACK_PIECES:
       text = 'Schwarz: Kaufe Truppen';
       break;
+    case PHASES.SETUP_WHITE_UPGRADES:
+      text = 'Weiß: Klicke eine Figur für Upgrades';
+      break;
+    case PHASES.SETUP_BLACK_UPGRADES:
+      text = 'Schwarz: Klicke eine Figur für Upgrades';
+      break;
     case PHASES.PLAY:
       text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
       break;

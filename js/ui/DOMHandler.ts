@@ -137,7 +137,26 @@ export class DOMHandler {
       campaignStartBtn.addEventListener('click', () => {
         const overlay = document.getElementById('points-selection-overlay');
         if (overlay) overlay.style.display = 'none';
+
+        const mainMenu = document.getElementById('main-menu');
+        if (mainMenu) mainMenu.classList.remove('active');
+
         this.campaignUI?.show();
+      });
+    }
+
+    // Tutorial Mode
+    const tutorialStartBtn = document.getElementById('start-tutorial-btn');
+    if (tutorialStartBtn) {
+      tutorialStartBtn.addEventListener('click', () => {
+        const mainMenu = document.getElementById('main-menu');
+        if (mainMenu) mainMenu.classList.remove('active');
+
+        if (this.gameController && this.gameController.startTutorial) {
+          this.gameController.startTutorial();
+        } else {
+          console.error('[DOMHandler] startTutorial not found on GameController');
+        }
       });
     }
 
@@ -233,8 +252,8 @@ export class DOMHandler {
     const finishSetupBtn = document.getElementById('finish-setup-btn');
     if (finishSetupBtn) {
       finishSetupBtn.addEventListener('click', () => {
-        if (this.game && this.game.finishSetupPhase) {
-          this.game.finishSetupPhase();
+        if (this.gameController && this.gameController.finishSetupPhase) {
+          this.gameController.finishSetupPhase();
         }
       });
     }
@@ -336,7 +355,6 @@ export class DOMHandler {
     const analysisModeBtn = document.getElementById('analysis-mode-btn');
     const closeAnalysisBtn = document.getElementById('close-analysis-btn');
     const continuousBtn = document.getElementById('continuous-analysis-btn');
-    const menuOverlay = document.getElementById('menu-overlay');
 
     if (analysisModeBtn) {
       analysisModeBtn.addEventListener('click', () => {
@@ -346,9 +364,9 @@ export class DOMHandler {
           } else {
             this.gameController.exitAnalysisMode();
           }
-          if (menuOverlay) {
-            menuOverlay.classList.add('hidden');
-            menuOverlay.style.display = 'none';
+          const mainMenu = document.getElementById('main-menu');
+          if (mainMenu) {
+            mainMenu.classList.remove('active');
           }
         }
       });
@@ -375,22 +393,58 @@ export class DOMHandler {
 
   private initMenuHandlers(): void {
     const menuBtn = document.getElementById('menu-btn');
-    const menuOverlay = document.getElementById('menu-overlay');
-    const menuCloseBtn = document.getElementById('menu-close-btn');
+    const mainMenu = document.getElementById('main-menu');
 
-    if (menuBtn && menuOverlay) {
+    // Header Menu Button
+    if (menuBtn && mainMenu) {
       menuBtn.addEventListener('click', () => {
-        menuOverlay.classList.remove('hidden');
-        menuOverlay.style.display = 'flex';
+        mainMenu.classList.add('active');
+        this.updateResumeButton();
       });
     }
 
-    if (menuCloseBtn && menuOverlay) {
-      menuCloseBtn.addEventListener('click', () => {
-        menuOverlay.classList.add('hidden');
-        menuOverlay.style.display = 'none';
+    // Tab Navigation
+    document.querySelectorAll('.menu-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        if (!tab) return; // e.g. resume button might not have standard tab behavior in all cases
+
+        // Handle "Resume" special case
+        if (btn.id === 'resume-game-btn') {
+          if (mainMenu) mainMenu.classList.remove('active');
+          return;
+        }
+
+        // Update active tab styles
+        document.querySelectorAll('.menu-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Switch View
+        document.querySelectorAll('.menu-view').forEach(view => view.classList.remove('active'));
+        const targetView = document.getElementById(`view-${tab}`);
+        if (targetView) targetView.classList.add('active');
       });
-    }
+    });
+
+    // Escape Key Handler
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        // Toggle menu if game is running, otherwise ignore (or always toggle?)
+        // Better: if menu is setup-only (initial state), maybe prevent closing?
+        // But for now, simple toggle is good.
+        if (this.game && this.game.phase !== 'SETUP') {
+          // Simplistic check
+          if (mainMenu) {
+            if (mainMenu.classList.contains('active')) {
+              mainMenu.classList.remove('active');
+            } else {
+              mainMenu.classList.add('active');
+              this.updateResumeButton();
+            }
+          }
+        }
+      }
+    });
 
     const restartBtn = document.getElementById('restart-btn');
     if (restartBtn) {
@@ -406,9 +460,8 @@ export class DOMHandler {
       saveBtn.addEventListener('click', () => {
         if (this.gameController) {
           this.gameController.saveGame();
-          if (menuOverlay) {
-            menuOverlay.classList.add('hidden');
-            menuOverlay.style.display = 'none';
+          if (mainMenu) {
+            mainMenu.classList.remove('active');
           }
         }
       });
@@ -419,9 +472,8 @@ export class DOMHandler {
       resignBtn.addEventListener('click', () => {
         if (this.gameController && confirm('Wirklich aufgeben?')) {
           this.gameController.resign(this.game.turn);
-          if (menuOverlay) {
-            menuOverlay.classList.add('hidden');
-            menuOverlay.style.display = 'none';
+          if (mainMenu) {
+            mainMenu.classList.remove('active');
           }
         }
       });
@@ -432,7 +484,7 @@ export class DOMHandler {
       loadBtn.addEventListener('click', () => {
         if (this.gameController) {
           this.gameController.loadGame();
-          if (menuOverlay) menuOverlay.classList.add('hidden');
+          if (mainMenu) mainMenu.classList.remove('active');
         }
       });
     }
@@ -442,7 +494,7 @@ export class DOMHandler {
       drawBtn.addEventListener('click', () => {
         if (this.gameController && confirm('Remis anbieten?')) {
           this.gameController.offerDraw(this.game.turn);
-          if (menuOverlay) menuOverlay.classList.add('hidden');
+          if (mainMenu) mainMenu.classList.remove('active');
         }
       });
     }
@@ -452,9 +504,8 @@ export class DOMHandler {
       puzzleBtn.addEventListener('click', () => {
         if (this.gameController && this.gameController.startPuzzleMode) {
           this.gameController.startPuzzleMode();
-          if (menuOverlay) {
-            menuOverlay.classList.add('hidden');
-            menuOverlay.style.display = 'none';
+          if (mainMenu) {
+            mainMenu.classList.remove('active');
           }
         }
       });
@@ -467,7 +518,7 @@ export class DOMHandler {
       helpBtn.addEventListener('click', () => {
         helpOverlay.classList.remove('hidden');
         helpOverlay.style.display = 'flex';
-        if (menuOverlay) menuOverlay.classList.add('hidden');
+        if (mainMenu) mainMenu.classList.remove('active');
       });
       if (closeHelpBtn) {
         closeHelpBtn.addEventListener('click', () => {
@@ -506,9 +557,8 @@ export class DOMHandler {
         } else {
           downloadPGN(pgn);
         }
-        if (menuOverlay) {
-          menuOverlay.classList.add('hidden');
-          menuOverlay.style.display = 'none';
+        if (mainMenu) {
+          mainMenu.classList.remove('active');
         }
       });
     }
@@ -639,5 +689,16 @@ export class DOMHandler {
       }
     }
     btn.classList.toggle('active-fullscreen', isFullscreen);
+  }
+
+  private updateResumeButton(): void {
+    const resumeBtn = document.getElementById('resume-game-btn');
+    if (resumeBtn) {
+      if (this.game && this.game.phase !== 'SETUP') {
+        resumeBtn.classList.remove('hidden');
+      } else {
+        resumeBtn.classList.add('hidden');
+      }
+    }
   }
 }

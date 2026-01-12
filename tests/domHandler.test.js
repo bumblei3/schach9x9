@@ -103,6 +103,7 @@ describe('DOMHandler', () => {
         enterAnalysisMode: jest.fn(),
         exitAnalysisMode: jest.fn(),
         toggleContinuousAnalysis: jest.fn(),
+        finishSetupPhase: jest.fn(),
       },
     };
 
@@ -121,8 +122,9 @@ describe('DOMHandler', () => {
             <button id="hint-btn"></button>
             <button id="toggle-analysis-btn"></button>
             <button id="toggle-3d-btn"></button>
+            <button id="toggle-3d-btn"></button>
             <button id="menu-btn"></button>
-            <div id="menu-overlay" class="hidden"></div>
+            <div id="main-menu"></div>
             <button id="menu-close-btn"></button>
             <button id="restart-btn"></button>
             <button id="restart-btn-overlay"></button>
@@ -152,6 +154,7 @@ describe('DOMHandler', () => {
                 <option value="classic">Classic</option>
                 <option value="blue">Blue</option>
             </select>
+            <button id="resume-game-btn" class="hidden"></button>
             <div class="shop-item" data-piece="p"></div>
             <div id="battle-chess-3d-container"></div>
             <div id="board-wrapper"></div>
@@ -178,7 +181,7 @@ describe('DOMHandler', () => {
 
   test('should wire up finish setup button', () => {
     document.getElementById('finish-setup-btn').click();
-    expect(app.game.finishSetupPhase).toHaveBeenCalled();
+    expect(app.gameController.finishSetupPhase).toHaveBeenCalled();
   });
 
   test('should wire up shop item selection', () => {
@@ -200,13 +203,16 @@ describe('DOMHandler', () => {
 
   test('should handle menu toggle', () => {
     const menuBtn = document.getElementById('menu-btn');
-    const menuOverlay = document.getElementById('menu-overlay');
+    const mainMenu = document.getElementById('main-menu');
 
     menuBtn.click();
-    expect(menuOverlay.classList.contains('hidden')).toBe(false);
+    expect(mainMenu.classList.contains('active')).toBe(true);
 
-    document.getElementById('menu-close-btn').click();
-    expect(menuOverlay.classList.contains('hidden')).toBe(true);
+    // Escape key check
+    const escEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+    document.dispatchEvent(escEvent);
+    // Should toggle active off (because game is not SETUP in default mock)
+    expect(mainMenu.classList.contains('active')).toBe(false);
   });
 
   test('should handle theme selection', () => {

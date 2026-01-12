@@ -192,6 +192,9 @@ export function createPiece3D(
     case 'e': // Angel
       createAngel(pieceGroup, material, accentMaterial);
       break;
+    case 'j': // Nightrider
+      createNightrider(pieceGroup, material, accentMaterial);
+      break;
     default:
       createPawn(pieceGroup, material);
   }
@@ -555,4 +558,51 @@ function createAngel(group: THREE.Group, material: any, accentMaterial: any): vo
   rightWing.position.set(0.25, 0.8, -0.1);
   rightWing.rotation.set(0.3, 0.3, 0.5);
   group.add(rightWing);
+}
+
+/**
+ * Create a Nightrider (sliding knight)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createNightrider(group: THREE.Group, material: any, accentMaterial: any): void {
+  // Base
+  const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.15, 16);
+  const base = new THREE.Mesh(baseGeo, material);
+  base.position.y = 0.075;
+  group.add(base);
+
+  // Body
+  const bodyGeo = new THREE.CylinderGeometry(0.2, 0.25, 0.5, 12);
+  const body = new THREE.Mesh(bodyGeo, material);
+  body.position.y = 0.4;
+  group.add(body);
+
+  // Elongated Neck
+  const neckGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
+  const neck = new THREE.Mesh(neckGeo, material);
+  neck.position.set(0, 0.75, 0.1);
+  neck.rotation.x = 0.4;
+  group.add(neck);
+
+  // Sharp Head
+  const headGeo = new THREE.BoxGeometry(0.2, 0.22, 0.35);
+  const head = new THREE.Mesh(headGeo, material);
+  head.position.set(0, 1.05, 0.3);
+  group.add(head);
+
+  // Spiky ears or mane (Accent)
+  const maneGeo = new THREE.BoxGeometry(0.04, 0.4, 0.2);
+  const mane = new THREE.Mesh(maneGeo, accentMaterial);
+  mane.position.set(0, 0.85, -0.05);
+  mane.rotation.x = -0.2;
+  group.add(mane);
+
+  const earGeo = new THREE.ConeGeometry(0.04, 0.15, 8);
+  const ear1 = new THREE.Mesh(earGeo, accentMaterial);
+  ear1.position.set(-0.08, 1.2, 0.3);
+  group.add(ear1);
+
+  const ear2 = new THREE.Mesh(earGeo, accentMaterial);
+  ear2.position.set(0.08, 1.2, 0.3);
+  group.add(ear2);
 }

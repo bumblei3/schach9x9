@@ -133,7 +133,7 @@ const PIECE_VALUES: [i32; 16] = {
     v[PIECE_KING as usize] = 20000;
     v[PIECE_ARCHBISHOP as usize] = 600;
     v[PIECE_CHANCELLOR as usize] = 700;
-    v[PIECE_ANGEL as usize] = 1000;
+    v[PIECE_ANGEL as usize] = 1220;
     v
 };
 

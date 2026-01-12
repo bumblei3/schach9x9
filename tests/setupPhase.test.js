@@ -73,6 +73,7 @@ describe('Setup Phase Integration', () => {
 
     game = new Game(20, 'setup'); // 20 points
     controller = new GameController(game);
+    controller.initGame(20, 'setup');
     jest.clearAllMocks();
   });
 

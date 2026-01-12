@@ -236,6 +236,7 @@ describe('Coverage Boost Tests', () => {
 
   test('finishSetupPhase should cycle through setup stages', () => {
     const controller = new GameController(game);
+    controller.initGame(15, 'setup');
 
     // Stage 1: White pieces setup -> White upgrades
     game.phase = PHASES.SETUP_WHITE_PIECES;

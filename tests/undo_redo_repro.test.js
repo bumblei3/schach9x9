@@ -23,10 +23,22 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   updateClockDisplay: jest.fn(),
   updateClockUI: jest.fn(),
   renderEvalGraph: jest.fn(),
-  showPromotionUI: jest.fn(),
+  showPromotionUI: jest.fn((game, r, c, color, moveRecord, callback) => {
+    // Simulate selection of Angel
+    if (game.board[r][c]) {
+      game.board[r][c].type = 'e';
+    }
+    callback();
+  }),
   animateCheck: jest.fn(),
   animateCheckmate: jest.fn(),
   showToast: jest.fn(),
+}));
+
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(() => 0),
+  findKing: jest.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: jest.fn().mockResolvedValue(null),
 }));
 
 // Dynamic imports required for mocked modules

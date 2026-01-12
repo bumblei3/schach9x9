@@ -18,25 +18,19 @@ import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
-import { parseFEN } from './utils.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
+import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
 import type { Player } from './types/game.js';
 import type { GameMode } from './config.js';
+import type { Level } from './campaign/types.js';
 
-export interface CampaignGoal {
-  description: string;
-}
-
-export interface CampaignLevel {
-  id: string;
-  title: string;
-  description: string;
-  fen: string;
-  playerColor: Player;
-  goals: Record<number, CampaignGoal>;
-}
+import type { GameModeStrategy } from './modes/GameModeStrategy.js';
+import { SetupModeStrategy } from './modes/strategies/SetupMode.js';
+import { ClassicModeStrategy } from './modes/strategies/ClassicMode.js';
+import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
+import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 
 export interface GameExtended extends Game {
   campaignMode?: boolean;
@@ -65,6 +59,7 @@ export class GameController {
   puzzleMenu: any;
   moveExecutor: any;
   gameStartTime: number | null;
+  currentModeStrategy: GameModeStrategy | null = null;
 
   constructor(game: GameExtended) {
     this.game = game;
@@ -80,113 +75,60 @@ export class GameController {
   }
 
   startCampaignLevel(levelId: string): void {
-    const level = (campaignManager as any).getLevel(levelId) as CampaignLevel;
-    if (!level) {
-      console.error('Level not found:', levelId);
-      return;
-    }
-
-    // Reset Game
-    this.initGame(0, 'campaign' as any);
-
-    // Load FEN
-    const { board, turn } = parseFEN(level.fen);
-    this.game.board = board as any;
-    this.game.turn = turn; // Usually white
-    this.game.campaignMode = true;
-    this.game.currentLevelId = levelId;
-    this.game.points = 0;
-
-    // Specific Level Settings
-    this.game.playerColor = level.playerColor;
-
-    // UI Updates
-    UI.updateStatus(this.game);
-    UI.renderBoard(this.game);
-
-    logger.info(`Started Campaign Level: ${level.title}`);
-
-    // Build description with goals
-    const desc = `
-      <div class="campaign-intro">
-        <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">${level.description}</p>
-        <div class="campaign-goals-box" style="background: rgba(49, 196, 141, 0.1); border: 1px solid rgba(49, 196, 141, 0.3); border-radius: 8px; padding: 1rem;">
-          <h4 style="margin-top: 0; color: var(--accent-success); display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 1.2rem;">🎯</span> Missionsziele
-          </h4>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
-            <li style="display: flex; align-items: center; gap: 10px;">
-              <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>Level abschließen</span>
-            </li>
-            ${
-              level.goals[2]
-                ? `
-            <li style="display: flex; align-items: center; gap: 10px;">
-              <span style="color: gold; font-size: 1.2rem;">⭐⭐</span> <span>${level.goals[2].description}</span>
-            </li>`
-                : ''
-            }
-            ${
-              level.goals[3]
-                ? `
-            <li style="display: flex; align-items: center; gap: 10px;">
-              <span style="color: gold; font-size: 1.2rem;">⭐⭐⭐</span> <span>${level.goals[3].description}</span>
-            </li>`
-                : ''
-            }
-          </ul>
-        </div>
-      </div>
-    `;
-
-    // Show intro modal
-    UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
-    ]);
+    this.currentModeStrategy = new CampaignModeStrategy();
+    (this.currentModeStrategy as CampaignModeStrategy).startLevel(this.game, this, levelId);
   }
 
   initGame(initialPoints: number, mode: GameMode = 'setup'): void {
+    // Ensure Main Menu is hidden when starting any game
+    const mainMenu = document.getElementById('main-menu');
+    if (mainMenu) mainMenu.classList.remove('active');
+
+    // Select Strategy
+    if (mode === 'setup') {
+      this.currentModeStrategy = new SetupModeStrategy();
+    } else if (mode === 'classic') {
+      this.currentModeStrategy = new ClassicModeStrategy();
+    } else if (mode === 'standard8x8') {
+      this.currentModeStrategy = new StandardModeStrategy();
+    } else if (mode === 'campaign') {
+      this.currentModeStrategy = new CampaignModeStrategy();
+    } else if ((mode as string) === 'puzzle') {
+      // Puzzle mode currently handled slightly differently,
+      // but could be a strategy. For now, let's defer if it's not a Strategy yet
+      // OR add a basic one.
+      // Based on plan, we didn't explicitly make PuzzleStrategy yet but we can stub it or keep legacy logic for puzzle.
+      // Actually, let's handle puzzle legacy logic or simple strategy.
+      // Re-using legacy logic inside here for simplicity until PuzzleStrategy is prioritized?
+      // Wait, the plan said "Missing Coverage: Puzzle Mode", and "New E2E Tests: puzzle.spec.ts".
+      // Plan didn't explicitly say Implement PuzzleStrategy, just Classic, Setup, Standard, Campaign.
+      this.currentModeStrategy = null; // Puzzle handled ad-hoc or we adhere to legacy for now.
+    } else {
+      // Fallback
+      this.currentModeStrategy = new SetupModeStrategy();
+    }
+
     this.game.points = initialPoints;
     this.game.initialPoints = initialPoints;
-    this.game.phase = (mode === 'setup' ? PHASES.SETUP_WHITE_KING : PHASES.PLAY) as any;
 
-    // Initialize UI
+    // Initialize basic stuff common to all
     UI.initBoardUI(this.game);
     UI.updateStatus(this.game);
 
-    if (mode === 'setup' || (mode === 'standard8x8' && initialPoints > 0)) {
-      UI.updateShopUI(this.game);
-      if (mode === 'standard8x8') this.showShop(true);
+    // Delegate to Strategy
+    if (this.currentModeStrategy) {
+      this.currentModeStrategy.init(this.game, this, initialPoints);
     } else if ((mode as string) === 'puzzle') {
+      // Legacy Puzzle initialization
       this.puzzleMenu.show();
       this.game.mode = 'puzzle' as any;
-    } else {
-      // In classic mode, we start directly in PLAY phase
-      this.gameStartTime = Date.now();
-      this.startClock();
-
-      // Show game controls immediately
-      const infoTabsContainer = document.getElementById('info-tabs-container');
-      if (infoTabsContainer) infoTabsContainer.classList.remove('hidden');
-
-      const quickActions = document.getElementById('quick-actions');
-      if (quickActions) quickActions.classList.remove('hidden');
+      UI.renderBoard(this.game);
     }
 
-    UI.updateStatistics(this.game);
-    UI.updateClockUI(this.game);
-    UI.updateClockDisplay(this.game);
-
-    // Render board to show corridor highlighting
-    UI.renderBoard(this.game);
-
-    // Initialize Sound Manager
+    // Initialize helpers common to all
     soundManager.init();
-
-    // Initialize Tutorial
     new Tutorial();
 
-    // Initialize Arrow Renderer
     const boardEl = document.querySelector('#board');
     const boardContainer = boardEl ? boardEl.parentElement : null;
     if (boardContainer) {
@@ -225,25 +167,17 @@ export class GameController {
       return; // Block input during animation
     }
 
-    if (this.game.phase === (PHASES.SETUP_WHITE_KING as any)) {
-      console.log('[GameController] Calling placeKing for white');
-      this.placeKing(r, c, 'white');
-    } else if (this.game.phase === (PHASES.SETUP_BLACK_KING as any)) {
-      this.placeKing(r, c, 'black');
-    } else if (
-      this.game.phase === (PHASES.SETUP_WHITE_PIECES as any) ||
-      this.game.phase === (PHASES.SETUP_BLACK_PIECES as any)
-    ) {
-      this.placeShopPiece(r, c);
-    } else if (
-      this.game.phase === (PHASES.SETUP_WHITE_UPGRADES as any) ||
-      this.game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)
-    ) {
-      this.upgradePiece(r, c);
-    } else if (
-      this.game.phase === (PHASES.PLAY as any) ||
-      (this.game.phase as any) === 'ANALYSIS'
-    ) {
+    // Delegate to Strategy
+    if (this.currentModeStrategy) {
+      const handled = await this.currentModeStrategy.handleInteraction(this.game, this, r, c);
+      if (handled) {
+        UI.renderBoard(this.game);
+        return;
+      }
+    }
+
+    // Fallback or Global Interactions (like Play Phase default if strategy didn't handle it detailedly)
+    if (this.game.phase === (PHASES.PLAY as any) || (this.game.phase as any) === 'ANALYSIS') {
       if (this.game.handlePlayClick) {
         await this.game.handlePlayClick(r, c);
       }
@@ -252,6 +186,7 @@ export class GameController {
     UI.renderBoard(this.game);
   }
 
+  // Helper methods made public for Strategies
   placeKing(r: number, c: number, color: Player): void {
     // White at bottom (6), Black at top (0)
     const validRowStart = color === 'white' ? 6 : 0;
@@ -316,94 +251,11 @@ export class GameController {
   }
 
   finishSetupPhase(): void {
-    const handleTransition = () => {
-      if (this.game.phase === (PHASES.SETUP_WHITE_PIECES as any)) {
-        this.game.phase = PHASES.SETUP_WHITE_UPGRADES as any;
-        this.game.selectedShopPiece = null;
-        this.updateShopUI();
-        this.game.log('Weiß: Truppen-Upgrades möglich.');
-      } else if (this.game.phase === (PHASES.SETUP_WHITE_UPGRADES as any)) {
-        if (this.game.mode === 'standard8x8') {
-          // In 8x8 mode, white finishes then it's black's turn or play starts
-          // For simplicity, let's give black same points and transition
-          this.game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
-          this.game.points = this.game.initialPoints;
-          this.game.log('Weiß fertig. Schwarz: Truppen-Upgrades möglich.');
-
-          if (this.game.isAI) {
-            setTimeout(() => this.finishSetupPhase(), 500);
-          }
-        } else {
-          this.game.phase = PHASES.SETUP_BLACK_PIECES as any;
-          this.game.points = this.game.initialPoints;
-          this.game.selectedShopPiece = null;
-          this.updateShopUI();
-          this.game.log('Weiß fertig. Schwarz kauft ein.');
-        }
-        this.autoSave();
-
-        if (this.game.isAI) {
-          setTimeout(() => {
-            if (this.game.aiSetupPieces) this.game.aiSetupPieces();
-          }, AI_DELAY_MS);
-        }
-      } else if (this.game.phase === (PHASES.SETUP_BLACK_PIECES as any)) {
-        this.game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
-        this.game.selectedShopPiece = null;
-        this.updateShopUI();
-        this.game.log('Schwarz: Truppen-Upgrades möglich.');
-
-        if (this.game.isAI) {
-          // AI Skip upgrades for now or implement AI upgrade logic later
-          setTimeout(() => this.finishSetupPhase(), 500);
-        }
-      } else if (this.game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)) {
-        this.game.phase = PHASES.PLAY as any;
-        this.showShop(false);
-
-        // Track game start time for statistics
-        this.gameStartTime = Date.now();
-
-        document.querySelectorAll('.cell.selectable-corridor').forEach(cell => {
-          cell.classList.remove('selectable-corridor');
-        });
-        logger.debug('Removed all corridor highlighting for PLAY phase');
-
-        // Ensure Action Bar is visible
-        const actionBar = document.querySelector('.action-bar');
-        if (actionBar) actionBar.classList.remove('hidden');
-
-        this.game.log('Spiel beginnt! Weiß ist am Zug.');
-        if (this.game.updateBestMoves) this.game.updateBestMoves();
-        this.startClock();
-        UI.updateStatistics(this.game);
-        soundManager.playGameStart();
-        this.autoSave();
-      }
-      UI.updateStatus(this.game);
-      UI.renderBoard(this.game);
-    };
-
-    // Check for unspent points
-    if (this.game.points > 0) {
-      // Don't warn AI
-      if (this.game.phase === (PHASES.SETUP_BLACK_PIECES as any) && this.game.isAI) {
-        handleTransition();
-        return;
-      }
-
-      UI.showModal(
-        'Ungenutzte Punkte',
-        `Du hast noch ${this.game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
-        [
-          { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
-          { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition },
-        ]
-      );
-      return;
+    if (this.currentModeStrategy) {
+      this.currentModeStrategy.onPhaseEnd(this.game, this);
+    } else {
+      logger.warn('finishSetupPhase called with no active strategy');
     }
-
-    handleTransition();
   }
 
   setTimeControl(mode: string): void {
@@ -707,6 +559,10 @@ export class GameController {
     location.reload();
   }
 
+  startTutorial(): void {
+    new Tutorial();
+  }
+
   // ===== ANALYSIS MODE METHODS =====
 
   enterAnalysisMode(): any {
@@ -811,32 +667,58 @@ export class GameController {
           promotedCount: this.game.stats.promotions || 0,
         };
 
+        const levelBefore = (campaignManager as any).getLevel(this.game.currentLevelId) as Level;
+        const rewardsBefore = [...(campaignManager as any).state.unlockedRewards];
+
         (campaignManager as any).completeLevel(this.game.currentLevelId, stats);
-        const level = (campaignManager as any).getLevel(this.game.currentLevelId) as CampaignLevel;
+
+        const rewardsAfter = (campaignManager as any).state.unlockedRewards;
+        const newRewards = rewardsAfter.filter((r: string) => !rewardsBefore.includes(r));
+
+        // Feedback: Level Complete Toast
+        notificationUI.show(`Level "${levelBefore.title}" abgeschlossen!`, 'success');
+
+        // Feedback: Reward Unlocked Toasts
+        newRewards.forEach((rewardId: string) => {
+          notificationUI.show(
+            `Belohnung freigeschaltet: ${rewardId.toUpperCase()}!`,
+            'success',
+            'Neue Belohnung'
+          );
+        });
 
         setTimeout(() => {
-          (UI as any).showCampaignVictoryModal(
-            level.title,
-            3 /* Needs actual star calculation return */,
-            [
-              {
-                text: 'Nächste Mission',
-                class: 'btn-primary',
-                callback: () => {
-                  window.location.reload();
-                },
+          (UI as any).showCampaignVictoryModal(levelBefore.title, 3, [
+            {
+              text: 'Nächste Mission',
+              class: 'btn-primary',
+              callback: () => {
+                window.location.reload();
               },
-              {
-                text: 'Hauptmenü',
-                class: 'btn-secondary',
-                callback: () => {
-                  window.location.reload();
-                },
+            },
+            {
+              text: 'Hauptmenü',
+              class: 'btn-secondary',
+              callback: () => {
+                window.location.reload();
               },
-            ]
-          );
+            },
+          ]);
         }, 1500);
       }
+    }
+  }
+  checkCampaignObjectives(): void {
+    if (!this.game.campaignMode || !this.game.currentLevelId) return;
+
+    const level = (campaignManager as any).getLevel(this.game.currentLevelId) as Level;
+    if (!level) return;
+
+    // Check custom win conditions
+    if (level.winCondition === 'capture_target') {
+      // TODO: Implement capture logic check
+    } else if (level.winCondition === 'survival') {
+      // TODO: Implement survival logic
     }
   }
 }

@@ -52,6 +52,10 @@ describe('Full-Game Integration Test', () => {
     gc = new GameController(game);
     mc = new MoveController(game);
     game.handlePlayClick = mc.handlePlayClick.bind(mc);
+
+    // Initialize strategy
+    gc.initGame(15, 'setup');
+
     jest.clearAllMocks();
   });
 

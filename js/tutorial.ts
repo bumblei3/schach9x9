@@ -127,12 +127,14 @@ export class Tutorial {
         const isCenter = r === 2 && c === 2;
         const isHighlight = moves.some(m => m.r === r && m.c === c);
         const moveType = isHighlight ? this.getMoveType(piece, r, c) : null;
-        const cellClass = `demo-cell ${(r + c) % 2 === 0 ? 'light' : 'dark'} ${isCenter ? 'piece-position' : isHighlight ? `highlight ${moveType}` : ''
-          }`;
+        const cellClass = `demo-cell ${(r + c) % 2 === 0 ? 'light' : 'dark'} ${
+          isCenter ? 'piece-position' : isHighlight ? `highlight ${moveType}` : ''
+        }`;
         html += `<div class="${cellClass}">`;
         if (isCenter) {
-          html += `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${(PIECE_SVGS.white as any)[piece === 'archbishop' ? 'a' : 'c']
-            }</div>`;
+          html += `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${
+            (PIECE_SVGS.white as any)[piece === 'archbishop' ? 'a' : 'c']
+          }</div>`;
         } else if (isHighlight) {
           html += `<div class="move-indicator ${moveType}"></div>`;
         }

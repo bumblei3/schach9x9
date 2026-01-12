@@ -79,6 +79,7 @@ export const GAME_MODES = {
   SETUP: 'setup', // Original mode with points and shop (9x9)
   CLASSIC: 'classic', // Fixed 9x9 setup
   STANDARD_8X8: 'standard8x8', // Standard 8x8 chess
+  CAMPAIGN: 'campaign', // Story Mode
 } as const;
 
 export type GameMode = (typeof GAME_MODES)[keyof typeof GAME_MODES];
@@ -91,6 +92,7 @@ export const PIECE_VALUES: Record<string, number> = {
   n: 3,
   b: 3,
   r: 5,
+  j: 6, // Nightrider (Sliding Knight)
   a: 7, // Archbishop (Bishop + Knight)
   c: 8, // Chancellor (Rook + Knight) - Fixed from 9 to 8
   q: 9,
@@ -106,6 +108,7 @@ export const AI_PIECE_VALUES: Record<string, number> = {
   n: 320,
   b: 330,
   r: 500,
+  j: 600, // Nightrider (Sliding Knight)
   q: 900,
   k: 20000,
   a: 650, // Archbishop (Bishop + Knight)
@@ -134,6 +137,7 @@ export const SHOP_PIECES: Record<string, ShopPieceConfig> = {
   QUEEN: { points: 9, symbol: 'q', name: 'Dame' },
   CHANCELLOR: { points: 8, symbol: 'c', name: 'Kanzler' },
   ANGEL: { points: 12, symbol: 'e', name: 'Engel' },
+  NIGHTRIDER: { points: 6, symbol: 'j', name: 'Nachtreiter' },
 };
 
 /**

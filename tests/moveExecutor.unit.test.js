@@ -2,6 +2,10 @@ import { jest } from '@jest/globals';
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(() => Promise.resolve(0)),
+}));
+
 // --- MOCKS FOR I/O ONLY ---
 jest.unstable_mockModule('../js/ui.js', () => ({
   renderBoard: jest.fn(),
@@ -19,6 +23,10 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   showToast: jest.fn(),
   showShop: jest.fn(),
   showTutorSuggestions: jest.fn(),
+  showPromotionUI: jest.fn((g, r, c, col, mr, cb) => {
+    if (g.board[r][c]) g.board[r][c].type = 'e';
+    cb();
+  }),
 }));
 
 jest.unstable_mockModule('../js/puzzleManager.js', () => ({
@@ -154,6 +162,7 @@ describe('MoveExecutor Integration Tests', () => {
     game.board[1][0] = { type: 'p', color: 'white' };
 
     await MoveExecutor.executeMove(game, moveController, { r: 1, c: 0 }, { r: 0, c: 0 });
+    await new Promise(resolve => setTimeout(resolve, 0)); // Allow completeMoveExecution to finish
 
     expect(game.board[0][0].type).toBe('e'); // Angel
     expect(game.turn).toBe('black');

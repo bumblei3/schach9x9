@@ -23,16 +23,29 @@ global.window.AudioContext = jest.fn().mockImplementation(() => ({
 }));
 global.window.webkitAudioContext = global.window.AudioContext;
 
-import { Game, BOARD_SIZE } from '../js/gameEngine.js';
-import { MoveController } from '../js/moveController.js';
+// Mock PIECE_SVGS
+global.window.PIECE_SVGS = {
+  white: { p: 'wp', n: 'wn', b: 'wb', r: 'wr', q: 'wq', k: 'wk', e: 'we' },
+  black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', e: 'be' },
+};
 
-jest.mock('../js/ui.js', () => ({
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(() => Promise.resolve(0)),
+  findKing: jest.fn(() => ({ r: 0, c: 0 })), // Mock findKing
+}));
+
+jest.unstable_mockModule('../js/ui.js', () => ({
   renderBoard: jest.fn(),
   showModal: jest.fn(),
   updateCapturedUI: jest.fn(),
   updateMoveHistoryUI: jest.fn(),
   updateStatus: jest.fn(),
-  showPromotionUI: jest.fn(),
+  showPromotionUI: jest.fn((g, r, c, col, mr, cb) => {
+    if (g.board[r][c]) {
+      g.board[r][c].type = 'e';
+    }
+    if (cb) cb();
+  }),
   animateMove: jest.fn().mockResolvedValue(),
   updateStatistics: jest.fn(),
   updateClockDisplay: jest.fn(),
@@ -42,7 +55,7 @@ jest.mock('../js/ui.js', () => ({
   renderEvalGraph: jest.fn(),
 }));
 
-jest.mock('../js/sounds.js', () => ({
+jest.unstable_mockModule('../js/sounds.js', () => ({
   soundManager: {
     playMove: jest.fn(),
     playCapture: jest.fn(),
@@ -50,6 +63,9 @@ jest.mock('../js/sounds.js', () => ({
     playGameOver: jest.fn(),
   },
 }));
+
+const { Game, BOARD_SIZE } = await import('../js/gameEngine.js');
+const MoveExecutor = await import('../js/move/MoveExecutor.js');
 
 describe('Angel Piece and Promotion', () => {
   let game;
@@ -61,11 +77,32 @@ describe('Angel Piece and Promotion', () => {
             <div id="game-over-overlay" class="hidden"></div>
             <div id="winner-text"></div>
             <div id="promotion-overlay" class="hidden"></div>
+            <div id="winner-text"></div>
+            <div id="promotion-overlay" class="hidden"></div>
             <div id="promotion-options"></div>
+            <div id="log-panel"></div>
+            <div id="ai-status"></div>
+            <div id="tutorial-panel" class="hidden">
+                <div id="tutorial-title"></div>
+                <div id="tutorial-content"></div>
+                <div id="tutorial-steps"></div>
+                <div id="tutorial-controls">
+                    <button id="prev-step-btn"></button>
+                    <button id="next-step-btn"></button>
+                    <button id="close-tutorial-btn"></button>
+                </div>
+            </div>
         `;
 
-    game = new Game();
-    moveController = new MoveController(game);
+    game = new Game(15, 'classic');
+    moveController = {
+      handleGameEnd: jest.fn(),
+      updateMoveHistory: jest.fn(),
+      updateStatus: jest.fn(),
+      updateUndoRedoButtons: jest.fn(),
+      redoStack: [],
+      game: game,
+    };
     game.gameController = { saveGameToStatistics: jest.fn(), handleGameEnd: jest.fn() }; // Mock
     game.log = jest.fn(); // Mock log
     game.arrowRenderer = { clearArrows: jest.fn() }; // Mock arrow renderer
@@ -74,6 +111,10 @@ describe('Angel Piece and Promotion', () => {
     game.board = Array(BOARD_SIZE)
       .fill(null)
       .map(() => Array(BOARD_SIZE).fill(null));
+
+    // Place Kings to satisfy validation
+    game.board[4][0] = { type: 'k', color: 'black', hasMoved: false };
+    game.board[4][8] = { type: 'k', color: 'white', hasMoved: false };
   });
 
   test('Angel should move like a Queen', () => {
@@ -162,7 +203,8 @@ describe('Angel Piece and Promotion', () => {
     const from = { r: 1, c: 0 };
     const to = { r: 0, c: 0 };
 
-    await moveController.executeMove(from, to);
+    await MoveExecutor.executeMove(game, moveController, from, to);
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     // Check if piece at to is Angel
     const promotedPiece = game.board[0][0];
@@ -177,7 +219,8 @@ describe('Angel Piece and Promotion', () => {
     game.board[8][4] = null;
     game.turn = 'black';
 
-    await moveController.executeMove({ r: 7, c: 4 }, { r: 8, c: 4 });
+    await MoveExecutor.executeMove(game, moveController, { r: 7, c: 4 }, { r: 8, c: 4 });
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     const promotedPiece = game.board[8][4];
     expect(promotedPiece).not.toBeNull();
@@ -360,19 +403,22 @@ describe('Angel Piece and Promotion', () => {
     test('Multiple promotions to Angel in same game', async () => {
       // Promote first white pawn
       game.board[1][0] = { type: 'p', color: 'white', hasMoved: true };
-      await moveController.executeMove({ r: 1, c: 0 }, { r: 0, c: 0 });
+      await MoveExecutor.executeMove(game, moveController, { r: 1, c: 0 }, { r: 0, c: 0 });
+      await new Promise(resolve => setTimeout(resolve, 0));
       expect(game.board[0][0].type).toBe('e');
 
       // Switch to black and promote
       game.board[7][4] = { type: 'p', color: 'black', hasMoved: true };
       game.turn = 'black';
-      await moveController.executeMove({ r: 7, c: 4 }, { r: 8, c: 4 });
+      await MoveExecutor.executeMove(game, moveController, { r: 7, c: 4 }, { r: 8, c: 4 });
+      await new Promise(resolve => setTimeout(resolve, 0));
       expect(game.board[8][4].type).toBe('e');
 
       // Promote second white pawn
       game.board[1][8] = { type: 'p', color: 'white', hasMoved: true };
       game.turn = 'white';
-      await moveController.executeMove({ r: 1, c: 8 }, { r: 0, c: 8 });
+      await MoveExecutor.executeMove(game, moveController, { r: 1, c: 8 }, { r: 0, c: 8 });
+      await new Promise(resolve => setTimeout(resolve, 0));
       expect(game.board[0][8].type).toBe('e');
 
       // Count Angels on board

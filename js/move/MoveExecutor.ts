@@ -21,7 +21,8 @@ export async function executeMove(
   moveController: MoveController,
   from: Square,
   to: Square,
-  isUndoRedo: boolean = false
+  isUndoRedo: boolean = false,
+  promotionType?: string
 ): Promise<void> {
   // Clear redo stack if this is a new move
   if (!isUndoRedo) {
@@ -149,15 +150,61 @@ export async function executeMove(
   if (piece.type === 'p') {
     const promotionRow = piece.color === 'white' ? 0 : BOARD_SIZE - 1;
     if (to.r === promotionRow) {
-      piece.type = 'e';
-      game.stats.promotions++;
-      (moveRecord as any).specialMove = { type: 'promotion', promotedTo: 'e' };
-      moveRecord.promotion = 'e';
-      game.log(`${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`);
-      soundManager.playMove();
+      if (promotionType) {
+        // Use provided promotion type (AI, Undo/Redo, or after selection)
+        piece.type = promotionType as any;
+        game.stats.promotions++;
+        (moveRecord as any).specialMove = { type: 'promotion', promotedTo: promotionType };
+        moveRecord.promotion = promotionType;
+        game.log(
+          `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${promotionType} befördert!`
+        );
+        soundManager.playMove();
+      } else {
+        const isHuman = (game.isAI && piece.color === 'white') || !game.isAI;
+
+        if (isHuman) {
+          // Pause and show promotion UI
+          UI.showPromotionUI(game, to.r, to.c, piece.color, moveRecord, () => {
+            // Update moveRecord validation
+            const actualType = game.board[to.r][to.c]?.type || 'q'; // Fallback
+            if (actualType !== 'p') {
+              (moveRecord as any).specialMove = { type: 'promotion', promotedTo: actualType };
+              moveRecord.promotion = actualType;
+              game.stats.promotions++;
+              game.log(
+                `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${actualType} befördert!`
+              );
+            }
+            completeMoveExecution(game, moveController, moveRecord);
+          });
+          return;
+        } else {
+          // Default for AI if no type was passed (should not happen with updated AI)
+          piece.type = 'e';
+          game.stats.promotions++;
+          (moveRecord as any).specialMove = { type: 'promotion', promotedTo: 'e' };
+          moveRecord.promotion = 'e';
+          game.log(
+            `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`
+          );
+          soundManager.playMove();
+        }
+      }
     }
   }
 
+  await completeMoveExecution(game, moveController, moveRecord);
+}
+
+/**
+ * Completes the move execution (evaluation, history, status, turn switch)
+ */
+export async function completeMoveExecution(
+  game: Game,
+  moveController: MoveController,
+  moveRecord: MoveHistoryEntry
+): Promise<void> {
   // Calculate evaluation score
   const evalScore = await evaluatePosition(game.board, 'white');
   (moveRecord as any).evalScore = evalScore;

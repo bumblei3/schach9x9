@@ -238,9 +238,14 @@ export class AIController {
 
       if (bestResult && bestResult.move) {
         logger.info(
-          `[AI] Executing move: ${bestResult.move.from.r},${bestResult.move.from.c} -> ${bestResult.move.to.r},${bestResult.move.to.c}`
+          `[AI] Executing move: ${bestResult.move.from.r},${bestResult.move.from.c} -> ${bestResult.move.to.r},${bestResult.move.to.c}${bestResult.move.promotion ? ` (Promote to ${bestResult.move.promotion})` : ''}`
         );
-        this.game.executeMove(bestResult.move.from, bestResult.move.to);
+        this.game.executeMove(
+          bestResult.move.from,
+          bestResult.move.to,
+          false,
+          bestResult.move.promotion
+        );
         if (this.game.renderBoard) this.game.renderBoard();
 
         // Display AI Thinking (PV)

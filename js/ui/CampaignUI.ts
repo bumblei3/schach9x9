@@ -1,4 +1,5 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
+import { Level } from '../campaign/types.js';
 
 export class CampaignUI {
   app: any;
@@ -10,7 +11,6 @@ export class CampaignUI {
   }
 
   init(): void {
-    // Lazy create the overlay
     if (!document.getElementById('campaign-overlay')) {
       const overlay = document.createElement('div');
       overlay.id = 'campaign-overlay';
@@ -52,58 +52,87 @@ export class CampaignUI {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const levels = (campaignManager as any).getAllLevels();
+    const levels = campaignManager.getAllLevels();
 
-    levels.forEach((level: any) => {
+    levels.forEach((level: Level) => {
+      const isUnlocked = campaignManager.isLevelUnlocked(level.id);
+      const isCompleted = campaignManager.isLevelCompleted(level.id);
+
       const btn = document.createElement('button');
-      btn.className = `campaign-level-card ${level.unlocked ? 'unlocked' : 'locked'} ${level.completed ? 'completed' : ''}`;
+      btn.className = `campaign-level-card ${isUnlocked ? 'unlocked' : 'locked'} ${isCompleted ? 'completed' : ''}`;
 
       btn.style.cssText = `
-        background: ${level.unlocked ? 'var(--input-bg)' : '#1e1e2e'};
-        border: 1px solid ${level.completed ? 'var(--accent-success)' : 'var(--border-color)'};
+        background: ${isUnlocked ? 'var(--input-bg)' : '#1a1a2e'};
+        border: 2px solid ${isCompleted ? 'var(--accent-success)' : 'rgba(255,255,255,0.05)'};
         padding: 1.5rem;
-        border-radius: 12px;
+        border-radius: 16px;
         text-align: left;
-        cursor: ${level.unlocked ? 'pointer' : 'not-allowed'};
-        opacity: ${level.unlocked ? '1' : '0.5'};
+        cursor: ${isUnlocked ? 'pointer' : 'not-allowed'};
+        opacity: ${isUnlocked ? '1' : '0.4'};
         position: relative;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        transition: transform 0.2s, border-color 0.2s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       `;
 
-      if (level.unlocked) {
-        btn.onmouseover = () => (btn.style.borderColor = 'var(--accent-primary)');
-        btn.onmouseout = () =>
-          (btn.style.borderColor = level.completed
-            ? 'var(--accent-success)'
-            : 'var(--border-color)');
+      if (isUnlocked) {
+        btn.onmouseover = () => {
+          btn.style.borderColor = 'var(--accent-primary)';
+          btn.style.transform = 'translateY(-5px)';
+          btn.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)';
+        };
+        btn.onmouseout = () => {
+          btn.style.borderColor = isCompleted ? 'var(--accent-success)' : 'rgba(255,255,255,0.05)';
+          btn.style.transform = 'translateY(0)';
+          btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        };
         btn.onclick = () => {
           this.hide();
-          this.app.startCampaignLevel(level.id);
+          if (this.app.startCampaignLevel) {
+            this.app.startCampaignLevel(level.id);
+          }
         };
       }
 
-      const icon = level.completed ? '✅' : level.unlocked ? '⚔️' : '🔒';
-
-      let starHtml = '';
-      if (level.unlocked) {
-        starHtml = '<div style="margin-top: auto; color: gold; font-size: 1.2rem;">';
-        for (let i = 1; i <= 3; i++) {
-          starHtml += i <= (level.stars || 0) ? '★' : '<span style="color: #444;">☆</span>';
-        }
-        starHtml += '</div>';
-      }
+      const statusIcon = isCompleted ? '✅' : isUnlocked ? '⚔️' : '🔒';
 
       btn.innerHTML = `
-        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${icon}</div>
-        <div style="font-weight: bold; color: var(--text-main);">${level.title || (level as any).name}</div>
-        <div style="font-size: 0.9rem; color: var(--text-muted);">${(level.difficulty || 'unknown').toUpperCase()}</div>
-        ${starHtml}
+        <div class="level-status-badge" style="
+            position: absolute; top: 1rem; right: 1rem; 
+            font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+        ">${statusIcon}</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-primary); opacity: 0.8; margin-bottom: -0.2rem;">
+            Mission ${levels.indexOf(level) + 1}
+        </div>
+        <div style="font-weight: 800; font-size: 1.25rem; color: var(--text-main); line-height: 1.2;">${level.title}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+            <span style="opacity: 0.6;">Schwierigkeit:</span>
+            <span style="color: ${this.getDifficultyColor(level.difficulty)}; font-weight: bold;">${level.difficulty.toUpperCase()}</span>
+        </div>
+        ${isCompleted ? '<div style="margin-top: 0.5rem; color: var(--accent-success); font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;"><span>🏆</span> Abgeschlossen</div>' : ''}
       `;
 
       grid.appendChild(btn);
     });
+  }
+
+  private getDifficultyColor(diff: string): string {
+    switch (diff) {
+      case 'beginner':
+        return '#a3e635';
+      case 'easy':
+        return '#4ade80';
+      case 'medium':
+        return '#fbbf24';
+      case 'hard':
+        return '#f87171';
+      case 'expert':
+        return '#c084fc';
+      default:
+        return 'var(--text-muted)';
+    }
   }
 }

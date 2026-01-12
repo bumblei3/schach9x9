@@ -229,6 +229,9 @@ export class RulesEngine {
       // Angel: Queen + Knight
       this.addSlidingMoves(moves, r, c, piece, DIRECTIONS['q'], isInside, isFriend, isEnemy);
       this.addJumpMoves(moves, r, c, DIRECTIONS['n'], isInside, isFriend);
+    } else if (piece.type === 'j') {
+      // Nightrider: Sliding Knight
+      this.addSlidingMoves(moves, r, c, piece, DIRECTIONS['n'], isInside, isFriend, isEnemy);
     } else if (piece.type === 'k') {
       DIRECTIONS['k'].forEach(([dr, dc]) => {
         const nr = r + dr,
@@ -402,6 +405,21 @@ export class RulesEngine {
             (Math.abs(nr - r) === 1 || Math.abs(nc - c) === 1)
           )
             return true;
+          break;
+        }
+        nr += dr;
+        nc += dc;
+      }
+    }
+
+    // Nightrider attacks (sliding knight)
+    for (const [dr, dc] of DIRECTIONS['n']) {
+      let nr = r + dr,
+        nc = c + dc;
+      while (isInside(nr, nc)) {
+        const piece = this.board[nr][nc];
+        if (piece) {
+          if (piece.color === attackerColor && piece.type === 'j') return true;
           break;
         }
         nr += dr;

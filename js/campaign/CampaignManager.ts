@@ -1,126 +1,103 @@
-import { CAMPAIGN_LEVELS, type CampaignLevel, type CampaignGoal } from './campaignData.js';
-
-export interface CampaignProgress {
-  [levelId: string]: {
-    completed: boolean;
-    stars: number;
-  };
-}
+import { CAMPAIGN_LEVELS } from './levels.js';
+import { CampaignState, Level } from './types.js';
 
 export class CampaignManager {
-  private levels: CampaignLevel[];
-  private progress: CampaignProgress;
+  private state: CampaignState;
 
   constructor() {
-    this.levels = CAMPAIGN_LEVELS;
-    this.progress = this.loadProgress();
+    this.state = this.loadState();
   }
 
-  /**
-   * Load progress from storage
-   */
-  loadProgress(): CampaignProgress {
-    const raw = localStorage.getItem('schach9x9_campaign_progress');
-    if (!raw) {
-      return {};
-    }
-    try {
-      return JSON.parse(raw);
-    } catch (e) {
-      console.warn('Failed to parse campaign progress', e);
-      return {};
-    }
-  }
-
-  saveProgress(): void {
-    localStorage.setItem('schach9x9_campaign_progress', JSON.stringify(this.progress));
-  }
-
-  /**
-   * Mark a level as completed and calculate stars
-   */
-  completeLevel(levelId: string, gameStats: any = {}): number | undefined {
-    const level = this.getLevel(levelId);
-    if (!level) return undefined;
-
-    const stars = this.calculateStars(level, gameStats);
-    const current = this.progress[levelId] || { completed: false, stars: 0 };
-
-    if (stars > current.stars || !current.completed) {
-      this.progress[levelId] = {
-        completed: true,
-        stars: Math.max(current.stars, stars),
+  private loadState(): CampaignState {
+    if (typeof localStorage === 'undefined') {
+      return {
+        currentLevelId: 'level_1',
+        unlockedLevels: ['level_1'],
+        completedLevels: [],
+        unlockedRewards: [],
       };
-      this.saveProgress();
     }
-
-    return stars;
+    const saved = localStorage.getItem('schach_campaign_state');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse campaign state', e);
+      }
+    }
+    // Default state: Level 1 unlocked
+    return {
+      currentLevelId: 'level_1',
+      unlockedLevels: ['level_1'],
+      completedLevels: [],
+      unlockedRewards: [],
+    };
   }
 
-  calculateStars(level: CampaignLevel, stats: any): number {
-    let stars = 1;
-
-    if (!level.goals) return stars;
-
-    if (this.checkGoal(level.goals[2], stats)) {
-      stars = 2;
-    }
-
-    if (this.checkGoal(level.goals[3], stats)) {
-      stars = 3;
-    }
-
-    return stars;
-  }
-
-  checkGoal(goal: CampaignGoal | undefined, stats: any): boolean {
-    if (!goal) return false;
-
-    switch (goal.type) {
-      case 'moves':
-        return stats.moves <= goal.value;
-      case 'material':
-        return stats.materialDiff >= goal.value;
-      case 'promotion':
-        return (stats.promotedCount || 0) >= goal.value;
-      default:
-        return false;
+  private saveState(): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('schach_campaign_state', JSON.stringify(this.state));
     }
   }
 
-  /**
-   * Check if a level is unlocked
-   */
-  isLevelUnlocked(levelId: string): boolean {
-    if (this.levels[0].id === levelId) return true;
-
-    const parentLevel = this.levels.find(l => l.unlocks && l.unlocks.includes(levelId));
-
-    if (!parentLevel) return false;
-
-    return this.isLevelCompleted(parentLevel.id);
+  public getLevel(levelId: string): Level | undefined {
+    return CAMPAIGN_LEVELS.find(l => l.id === levelId);
   }
 
-  isLevelCompleted(levelId: string): boolean {
-    return !!this.progress[levelId]?.completed;
+  public getAllLevels(): Level[] {
+    return CAMPAIGN_LEVELS;
   }
 
-  getLevel(id: string): CampaignLevel | undefined {
-    return this.levels.find(l => l.id === id);
+  public isLevelUnlocked(levelId: string): boolean {
+    return this.state.unlockedLevels.includes(levelId);
   }
 
-  getAllLevels(): any[] {
-    return this.levels.map(l => ({
-      ...l,
-      unlocked: this.isLevelUnlocked(l.id),
-      completed: this.isLevelCompleted(l.id),
-      stars: this.progress[l.id]?.stars || 0,
-    }));
+  public isLevelCompleted(levelId: string): boolean {
+    return this.state.completedLevels.includes(levelId);
   }
 
-  resetProgress(): void {
-    this.progress = {};
-    this.saveProgress();
+  public isRewardUnlocked(rewardId: string): boolean {
+    return this.state.unlockedRewards.includes(rewardId);
+  }
+
+  public completeLevel(levelId: string): void {
+    if (!this.state.completedLevels.includes(levelId)) {
+      this.state.completedLevels.push(levelId);
+    }
+
+    // Reward Logic
+    const level = this.getLevel(levelId);
+    if (level && level.reward && !this.state.unlockedRewards.includes(level.reward)) {
+      this.state.unlockedRewards.push(level.reward);
+      console.log(`[Campaign] Unlocked Reward: ${level.reward}`);
+    }
+
+    // Unlock next level logic
+    const currentIndex = CAMPAIGN_LEVELS.findIndex(l => l.id === levelId);
+    if (currentIndex !== -1 && currentIndex < CAMPAIGN_LEVELS.length - 1) {
+      // ... existing next level code ...
+      const nextLevel = CAMPAIGN_LEVELS[currentIndex + 1];
+      if (!this.state.unlockedLevels.includes(nextLevel.id)) {
+        this.state.unlockedLevels.push(nextLevel.id);
+        this.state.currentLevelId = nextLevel.id;
+      }
+    }
+
+    this.saveState();
+  }
+
+  public getCurrentLevelId(): string {
+    return this.state.currentLevelId;
+  }
+
+  public resetState(): void {
+    this.state = {
+      currentLevelId: 'level_1',
+      unlockedLevels: ['level_1'],
+      completedLevels: [],
+      unlockedRewards: [],
+    };
+    this.saveState();
   }
 }
 

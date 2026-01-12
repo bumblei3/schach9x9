@@ -8,30 +8,23 @@ test.describe('Scrolling Behavior', () => {
     // Go to the page
     await page.goto('/?disable-sw');
 
-    // Wait for usage overlay (points selection)
-    const overlay = page.locator('#points-selection-overlay');
-    await expect(overlay).toBeVisible();
+    // Wait for App Initialization
+    await page.waitForFunction(() => document.body.classList.contains('app-ready'));
+    await expect(page.locator('#main-menu')).toBeVisible();
   });
 
   test('Shop panel should be scrollable in setup mode', async ({ page }) => {
-    // 1. Enter Setup Mode (click 15 points)
-    await page.click('button[data-points="15"]');
+    // 1. Enter Setup Mode (click Hiring mode)
+    await page.click('.gamemode-card:has-text("Truppen anheuern")');
 
-    // 1b. Place White King (Required to reach shop phase)
-    // Wait for board to be visible
+    // 1b. Place White King
     await expect(page.locator('#board')).toBeVisible();
-    // Place White King at Row 7, Col 4 (Valid zone: Rows 6-8)
     const cell = page.locator('.cell[data-r="7"][data-c="4"]');
     await cell.click();
 
-    // 1c. Wait for AI to place Black King (AI_DELAY_MS is 1000ms)
-    // We wait for the phase to change or shop to appear
-    // The shop panel appears when phase becomes SETUP_WHITE_PIECES
+    // 1c. Wait Phase Change / Shop
     const shopPanel = page.locator('#shop-panel');
-    await expect(shopPanel).toBeVisible({ timeout: 10000 }); // Give AI time
-
-    // 2. Wait for shop panel content
-    await expect(shopPanel).toBeVisible();
+    await expect(shopPanel).toBeVisible({ timeout: 10000 });
 
     // 3. Ensure we are in setup mode class on body
     await expect(page.locator('body')).toHaveClass(/setup-mode/);
@@ -58,7 +51,6 @@ test.describe('Scrolling Behavior', () => {
     expect(newScrollTop).toBeGreaterThan(0);
 
     // 7. Reset and try simulating user wheel/touch events if possible
-    // Playwright's mouse.wheel is one way
     await shopPanel.evaluate(el => el.scrollTo(0, 0));
 
     // Move mouse over panel and click to ensure focus

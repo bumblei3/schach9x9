@@ -13,39 +13,36 @@ test.describe('Core Gameplay Loop', () => {
     // Go to home
     await page.goto('/?disable-sw');
 
-    // Wait for usage overlay
-    await expect(page.locator('#points-selection-overlay')).toBeVisible();
+    // Wait for App Initialization
+    await page.waitForFunction(
+      () => document.body.classList.contains('app-ready') && (window as any).app !== undefined
+    );
+    await expect(page.locator('#main-menu')).toBeVisible();
   });
 
   test('should start a game and execute a move', async ({ page }) => {
-    // 0. Wait for app-ready (listeners attached)
-    await page.waitForFunction(() => document.body.classList.contains('app-ready'));
-
-    // 1. Select 15 Points (Standard Mode)
-    await page.click('button[data-points="15"]');
+    // 1. Select Hiring Mode (25 Points)
+    await page.click('.gamemode-card:has-text("Truppen anheuern")');
 
     // 2. Wait for Board & Setup Mode
     await expect(page.locator('#board')).toBeVisible();
+    const mainMenu = page.locator('#main-menu');
+    await expect(page.locator('body')).toHaveClass(/game-initialized/);
+    await expect(mainMenu).not.toHaveClass(/active/);
+    await expect(mainMenu).toHaveCSS('pointer-events', 'none');
     await expect(page.locator('body')).toHaveClass(/setup-mode/);
 
-    // 3. Place White King (Row 7, Col 4)
+    // 3. Place White King
     const whiteKingCell = page.locator('.cell[data-r="7"][data-c="4"]');
     await whiteKingCell.click();
 
-    // 4. Wait for AI to place Black King & Phase Change
-    // Phase changes from SETUP_INGS -> SETUP_WHITE_PIECES -> GAME (after "Fertig")
-    // For this test, let's just place the king and sufficient pieces to start,
-    // OR simpler: check that we can place pieces in the shop phase.
-
-    // Wait for Shop Panel (means Kings are placed)
+    // 4. Wait for Phase Change & Shop
     const shopPanel = page.locator('#shop-panel');
     await expect(shopPanel).toBeVisible({ timeout: 10000 });
+    const setupStatusDisplay = page.locator('#status-display');
+    await expect(setupStatusDisplay).toContainText(/Weiß: Kaufe Truppen/i, { timeout: 10000 });
 
-    // 5. Finish Setup / Start Game
-    // We need to place at least one piece or just click "Fertig" (Done) if allowed?
-    // Usually need to spend points. Let's buy a Pawn.
-
-    // Click Pawn in shop (Cost 1) - data-piece="p"
+    // 5. Buy a Pawn
     const pawnItem = page.locator('.shop-item[data-piece="p"]');
     await expect(pawnItem).toBeVisible();
     await pawnItem.click();
@@ -54,38 +51,33 @@ test.describe('Core Gameplay Loop', () => {
     const pawnPlaceCell = page.locator('.cell[data-r="6"][data-c="4"]');
     await pawnPlaceCell.click();
 
-    // Verify pawn is rendered (contains svg)
+    // Verify pawn is rendered
     await expect(pawnPlaceCell.locator('.piece-svg')).toBeVisible();
 
-    // Click "Fertig" to start game (White finishes setup)
+    // 6. Finish Setup (Pieces Phase)
     const doneButton = page.locator('#finish-setup-btn');
     await expect(doneButton).toBeVisible();
     await doneButton.click();
 
-    // Handle "Unused Points" modal if present
+    // Handle "Unused Points" modal (Pieces Phase)
     const modalConfirm = page.locator('.modal-content .btn-primary:has-text("Fortfahren")');
-    if (await modalConfirm.isVisible()) {
+    if (await modalConfirm.isVisible({ timeout: 2000 })) {
       await modalConfirm.click();
     }
 
-    // NOW: Phase switches to SETUP_BLACK_PIECES (AI's turn)
-    // We must wait for AI to finish placing pieces and game to start.
-    // The game status will eventually show "Spiel läuft"
+    // Skip Upgrade Phase
+    await doneButton.click();
 
+    // Handle "Unused Points" modal AGAIN (Upgrade Phase)
+    if (await modalConfirm.isVisible({ timeout: 2000 })) {
+      await modalConfirm.click();
+    }
+
+    // 7. Wait for Game Start (White's Turn)
     const statusDisplay = page.locator('#status-display');
-
-    // Expect "Weiß am Zug" part of "Spiel läuft - Weiß am Zug"
     await expect(statusDisplay).toContainText(/Weiß am Zug/i, { timeout: 15000 });
 
-    // 7. Make a Move (White King or Pawn)
-    // Select King at 7,4
-    await whiteKingCell.click();
-
-    // Checking for valid moves might be tricky if pieces are blocking?
-    // King is at 7,4. Valid moves should exist unless surrounded.
-    // White Pawn is at 6,4.
-
-    // Let's select the Pawn at 6,4 instead, it definitely has forward moves
+    // 8. Make a Move (White Pawn at 6,4)
     const pawnCell = page.locator('.cell[data-r="6"][data-c="4"]');
     await pawnCell.click();
 
@@ -96,8 +88,7 @@ test.describe('Core Gameplay Loop', () => {
     // Execute move
     await validMove.click();
 
-    // 8. Verify Turn Switch
-    // Should now be Black's turn
+    // 9. Verify Turn Switch
     await expect(statusDisplay).toContainText(/Schwarz am Zug/i);
   });
 });

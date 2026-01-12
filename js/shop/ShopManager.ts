@@ -1,6 +1,7 @@
 import { SHOP_PIECES, PIECE_VALUES } from '../config.js';
 import { PIECE_SVGS } from '../chess-pieces.js';
 import { PHASES, type Game } from '../gameEngine.js';
+import { campaignManager } from '../campaign/CampaignManager.js';
 import * as UI from '../ui.js';
 
 /**
@@ -195,12 +196,22 @@ export class ShopManager {
       q: ['e'], // Queen -> Angel
       r: ['c'], // Rook -> Chancellor
       b: ['a'], // Bishop -> Archbishop
-      n: ['a', 'c', 'e'], // Knight -> Archbishop, Chancellor or Angel
+      n: ['a', 'c', 'e', 'j'], // Knight -> Archbishop, Chancellor, Angel or Nightrider
+      j: ['a', 'c', 'e'], // Nightrider -> Archbishop, Chancellor or Angel
     };
 
     const symbols = upgrades[type] || [];
     return symbols
       .map(sym => Object.values(SHOP_PIECES).find(p => p.symbol === sym))
+      .filter(p => {
+        if (!p) return false;
+        // Check for specific unlock conditions
+        // Angel ('e') requires campaign unlock
+        if (p.symbol === 'e') {
+          return (campaignManager as any).isRewardUnlocked('angel');
+        }
+        return true;
+      })
       .filter(Boolean);
   }
 

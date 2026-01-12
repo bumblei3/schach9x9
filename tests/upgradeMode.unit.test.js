@@ -11,6 +11,7 @@ jest.unstable_mockModule('../js/ui.js', () => ({
 }));
 
 const { ShopManager } = await import('../js/shop/ShopManager.js');
+const { campaignManager } = await import('../js/campaign/CampaignManager.js');
 
 describe('Troop Upgrade Mode - Unit Tests', () => {
   let game;
@@ -33,6 +34,11 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
         shopManager: shopManager,
       },
     };
+
+    // Unlock Angel for testing upgrade logic
+    if (!campaignManager.isRewardUnlocked('angel')) {
+      campaignManager.state.unlockedRewards.push('angel');
+    }
   });
 
   test('should correctly identify available upgrades', () => {
@@ -43,7 +49,7 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
     expect(queenUpgrades.some(u => u.symbol === 'e')).toBe(true); // Angel
 
     const knightUpgrades = shopManager.getAvailableUpgrades('n');
-    expect(knightUpgrades.length).toBe(3); // n -> a, c, e
+    expect(knightUpgrades.length).toBe(4); // n -> a, c, e, j
   });
 
   test('should upgrade piece and deduct points', () => {

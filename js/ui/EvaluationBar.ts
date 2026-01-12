@@ -16,27 +16,32 @@ export class EvaluationBar {
   private init(): void {
     if (!this.container) return;
 
-    const wrapper = document.createElement('div');
-    wrapper.id = 'evaluation-bar-wrapper';
-    wrapper.className = 'evaluation-bar-wrapper';
-    wrapper.innerHTML = `
-      <div class="evaluation-bar">
-        <div id="eval-bar-fill" class="eval-bar-fill"></div>
-        <div class="eval-bar-labels">
-          <span class="eval-label pos">+5</span>
-          <span class="eval-label zero">0</span>
-          <span class="eval-label neg">-5</span>
-        </div>
-      </div>
-      <div id="eval-bar-score" class="eval-bar-score">0.0</div>
-    `;
+    // Check if bar already exists
+    let wrapper = document.getElementById('evaluation-bar-wrapper');
 
-    // Insert as first child of board-container or next to board-wrapper
-    const boardWrapper = document.getElementById('board-wrapper');
-    if (boardWrapper) {
-      this.container.insertBefore(wrapper, boardWrapper);
-    } else {
-      this.container.appendChild(wrapper);
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.id = 'evaluation-bar-wrapper';
+      wrapper.className = 'evaluation-bar-wrapper';
+      wrapper.innerHTML = `
+        <div class="evaluation-bar">
+          <div id="eval-bar-fill" class="eval-bar-fill"></div>
+          <div class="eval-bar-labels">
+            <span class="eval-label pos">+5</span>
+            <span class="eval-label zero">0</span>
+            <span class="eval-label neg">-5</span>
+          </div>
+        </div>
+        <div id="eval-bar-score" class="eval-bar-score">0.0</div>
+      `;
+
+      // Insert as first child of board-container or next to board-wrapper
+      const boardWrapper = document.getElementById('board-wrapper');
+      if (boardWrapper) {
+        this.container.insertBefore(wrapper, boardWrapper);
+      } else {
+        this.container.appendChild(wrapper);
+      }
     }
 
     this.fill = document.getElementById('eval-bar-fill');

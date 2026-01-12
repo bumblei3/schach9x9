@@ -16,6 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="css/notifications.css" />
+    <link rel="stylesheet" href="css/menu.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap"
       rel="stylesheet"
@@ -725,48 +726,239 @@
       </div>
     </div>
 
-    <div id="points-selection-overlay" class="modal-overlay">
-      <div class="modal-content">
-        <h2>Neues Spiel</h2>
-        <p>Wähle einen Modus:</p>
-        <button
-          id="standard-8x8-btn"
-          class="btn-primary full-width mb-2"
-          style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"
-        >
-          ♟️ Standard Schach (8x8)
-        </button>
-        <button
-          id="upgrade-8x8-btn"
-          class="btn-primary full-width mb-2"
-          style="background: linear-gradient(135deg, #0ea5e9, #0284c7)"
-        >
-          ⚔️ 8x8 mit Upgrades (+5 Pkt)
-        </button>
-        <button id="classic-mode-btn" class="btn-primary full-width mb-2">
-          ♟️ Klassisch (9x9)
-        </button>
-        <button
-          id="puzzle-start-btn"
-          class="btn-primary full-width mb-2"
-          style="background: linear-gradient(135deg, #f59e0b, #d97706)"
-        >
-          🧩 Puzzle-Modus
-        </button>
-        <button
-          id="campaign-start-btn"
-          class="btn-primary full-width mb-2"
-          style="background: linear-gradient(135deg, #a855f7, #7c3aed)"
-        >
-          ⚔️ Kampagne
-        </button>
-        <div class="divider"><span>ODER</span></div>
-        <p class="small-text">Setup-Modus (Punkte wählen):</p>
-        <div class="points-grid">
-          <button class="btn-secondary points-btn" data-points="12">12</button>
-          <button class="btn-secondary points-btn" data-points="15">15</button>
-          <button class="btn-secondary points-btn" data-points="18">18</button>
-        </div>
+    <!-- Premium Main Menu -->
+    <div id="main-menu" class="active">
+      <div class="menu-container">
+        <!-- Sidebar -->
+        <nav class="menu-sidebar">
+          <div class="menu-logo">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M7 7h10" />
+              <path d="M7 12h10" />
+              <path d="M7 17h10" />
+              <path d="M12 3v18" />
+            </svg>
+            Schach 9x9
+          </div>
+          <div class="menu-nav">
+            <button class="menu-tab-btn active" data-tab="play">
+              <span class="icon">🎮</span> Spielen
+            </button>
+            <button class="menu-tab-btn" data-tab="learn">
+              <span class="icon">🎓</span> Lernen
+            </button>
+            <button class="menu-tab-btn" data-tab="settings">
+              <span class="icon">⚙️</span> Einstellungen
+            </button>
+            <button class="menu-tab-btn" data-tab="credits">
+              <span class="icon">❤️</span> Credits
+            </button>
+            <div style="flex: 1"></div>
+            <button id="resume-game-btn" class="menu-tab-btn hidden" style="color: #4ade80">
+              <span class="icon">▶️</span> Fortsetzen
+            </button>
+          </div>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="menu-content-area">
+          <!-- Play View -->
+          <div id="view-play" class="menu-view active">
+            <h2 class="section-title">Neues Spiel</h2>
+            <p class="section-subtitle">Wähle deinen Modus und beginne das Abenteuer.</p>
+
+            <div class="gamemode-grid">
+              <!-- Campaign -->
+              <div class="gamemode-card" id="campaign-start-btn">
+                <span class="card-tag tag-new">Neu</span>
+                <div class="card-icon">⚔️</div>
+                <div class="card-title">Kampagne</div>
+                <div class="card-desc">
+                  Erlebe eine epische Geschichte und kämpfe gegen immer stärkere Gegner.
+                </div>
+              </div>
+
+              <!-- 9x9 Classic -->
+              <div
+                class="gamemode-card"
+                onclick="window.app.init(0, 'classic'); document.getElementById('main-menu').classList.remove('active');"
+              >
+                <div class="card-icon">🏰</div>
+                <div class="card-title">Klassisch 9x9</div>
+                <div class="card-desc">
+                  Das volle Erlebnis mit Erzbischof, Kanzler und 3 Korridoren.
+                </div>
+              </div>
+
+              <!-- Truppen anheuern -->
+              <div
+                class="gamemode-card"
+                onclick="window.app.init(25, 'setup'); document.getElementById('main-menu').classList.remove('active');"
+              >
+                <span class="card-tag tag-hot">Hiring</span>
+                <div class="card-icon">💰</div>
+                <div class="card-title">Truppen anheuern</div>
+                <div class="card-desc">Stelle deine eigene 9x9 Armee mit 25 Punkten zusammen.</div>
+              </div>
+
+              <!-- 8x8 Upgrades -->
+              <div
+                class="gamemode-card"
+                onclick="window.app.init(5, 'standard8x8'); document.getElementById('main-menu').classList.remove('active');"
+              >
+                <span class="card-tag tag-hot">Beliebt</span>
+                <div class="card-icon">💎</div>
+                <div class="card-title">8x8 + Upgrades</div>
+                <div class="card-desc">
+                  Starte mit 5 Punkten auf einem Standard-Brett und verbessere deine Armee.
+                </div>
+              </div>
+
+              <!-- 8x8 Standard -->
+              <div
+                class="gamemode-card"
+                onclick="window.app.init(0, 'standard8x8'); document.getElementById('main-menu').classList.remove('active');"
+              >
+                <div class="card-icon">♟️</div>
+                <div class="card-title">Standard 8x8</div>
+                <div class="card-desc">Klassisches Schachbrett, aber mit 9x9 Regeln.</div>
+              </div>
+
+              <!-- Puzzle -->
+              <div
+                class="gamemode-card"
+                onclick="window.app.init(0, 'puzzle'); document.getElementById('main-menu').classList.remove('active');"
+              >
+                <span class="card-tag tag-pro">Training</span>
+                <div class="card-icon">🧩</div>
+                <div class="card-title">Puzzle-Modus</div>
+                <div class="card-desc">Löse taktische Aufgaben und verbessere dein Spiel.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Learn View -->
+          <div id="view-learn" class="menu-view">
+            <h2 class="section-title">Lernen & Regeln</h2>
+            <div class="gamemode-grid">
+              <div class="gamemode-card" onclick="window.gameController.startTutorial()">
+                <div class="card-icon">🎓</div>
+                <div class="card-title">Interaktives Tutorial</div>
+                <div class="card-desc">
+                  Lerne die Regeln, Figuren und Special Moves in einer geführten Tour.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings View -->
+          <div id="view-settings" class="menu-view">
+            <h2 class="section-title">Einstellungen</h2>
+            <div class="settings-grid">
+              <div class="setting-group">
+                <h3>Darstellung</h3>
+                <div class="setting-row">
+                  <label>Brett-Design</label>
+                  <select id="theme-select" class="menu-select">
+                    <option value="classic">Klassisch</option>
+                    <option value="blue">Blau</option>
+                    <option value="green">Grün</option>
+                    <option value="dark">Dunkel</option>
+                    <option value="wood">Holz</option>
+                  </select>
+                </div>
+                <div class="setting-row" style="margin-top: 10px">
+                  <label>Figuren-Skin</label>
+                  <select
+                    id="skin-selector-menu"
+                    class="menu-select"
+                    onchange="document.getElementById('skin-selector').value = this.value; document.getElementById('skin-selector').dispatchEvent(new Event('change'));"
+                  >
+                    <option value="classic">Klassisch</option>
+                    <option value="modern">Modern</option>
+                    <option value="pixel">Pixel</option>
+                    <option value="infernale">Infernale</option>
+                    <option value="wood">Holz</option>
+                    <option value="neon">Neon</option>
+                    <option value="minimalist">Minimalistisch</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <h3>Spiel & Sound</h3>
+                <div class="setting-row">
+                  <label>Sound</label>
+                  <div class="volume-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="sound-toggle" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="setting-row" style="margin-top: 10px">
+                  <label>Lautstärke</label>
+                  <input
+                    type="range"
+                    id="volume-slider"
+                    min="0"
+                    max="100"
+                    value="30"
+                    class="volume-slider"
+                  />
+                </div>
+                <div class="setting-row" style="margin-top: 10px">
+                  <label>Schwierigkeit</label>
+                  <select id="difficulty-select" class="menu-select">
+                    <option value="beginner">Anfänger</option>
+                    <option value="easy">Einfach</option>
+                    <option value="medium">Mittel</option>
+                    <option value="hard">Schwer</option>
+                    <option value="expert">Experte</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <h3>KI & Hilfe</h3>
+                <div class="setting-row">
+                  <label>KI-Persönlichkeit</label>
+                  <select id="ai-personality-select" class="menu-select">
+                    <option value="balanced">⚖️ Ausgeglichen</option>
+                    <option value="aggressive">⚔️ Aggressiv</option>
+                    <option value="defensive">🛡️ Defensiv</option>
+                    <option value="positional">♟️ Positionell</option>
+                  </select>
+                </div>
+                <div class="setting-row" style="margin-top: 10px">
+                  <label>KI-Mentor</label>
+                  <select id="ki-mentor-level-select" class="menu-select">
+                    <option value="OFF">Aus</option>
+                    <option value="STANDARD" selected>Standard (Nur Patzer)</option>
+                    <option value="STRICT">Streng (Auch Fehler)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credits View -->
+          <div id="view-credits" class="menu-view">
+            <h2 class="section-title">Credits</h2>
+            <p>Entwickelt mit ❤️ vom Google Deepmind Team</p>
+          </div>
+        </main>
       </div>
     </div>
 

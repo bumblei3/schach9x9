@@ -65,6 +65,7 @@ export function getPieceText(piece: Piece | null): string {
       a: 'A',
       c: 'C',
       e: 'E',
+      j: 'J',
     },
     black: {
       p: '♟',
@@ -76,6 +77,7 @@ export function getPieceText(piece: Piece | null): string {
       a: 'A',
       c: 'C',
       e: 'E',
+      j: 'J',
     },
   };
   return symbols[piece.color][piece.type];
@@ -392,11 +394,19 @@ export function renderBoard(game: any): void {
   game._forceFullRender = false;
 
   for (const { r, c } of cellsToRender) {
-    const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`) as HTMLElement;
     if (!cell) continue;
     const piece = game.board[r][c];
     const symbol = getPieceSymbol(piece);
     if (cell.innerHTML !== symbol) cell.innerHTML = symbol;
+
+    if (piece) {
+      cell.dataset.piece = piece.type;
+      cell.dataset.color = piece.color;
+    } else {
+      delete cell.dataset.piece;
+      delete cell.dataset.color;
+    }
     cell.classList.remove(
       'highlight',
       'corridor',
@@ -553,9 +563,23 @@ export async function animateMove(
       const rect = clone.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-      const color = piece.color === 'white' ? '#e2e8f0' : '#475569';
-      particleSystem.spawn(centerX, centerY, 'TRAIL', color);
-    }, 30); // Spawn trail every 30ms
+
+      // Special trail for elite pieces
+      const isElite = ['j', 'a', 'c', 'e', 'q'].includes(piece.type);
+      const color = isElite
+        ? piece.color === 'white'
+          ? '#60a5fa'
+          : '#2563eb' // Blue for elite
+        : piece.color === 'white'
+          ? '#e2e8f0'
+          : '#475569'; // Default gray
+
+      if (isElite) {
+        particleSystem.spawnTrail(centerX, centerY, color);
+      } else {
+        particleSystem.spawn(centerX, centerY, 'TRAIL', color);
+      }
+    }, 20); // Faster interval for smoother trails
 
     setTimeout(() => {
       clearInterval(trailInterval);
@@ -587,6 +611,7 @@ export async function animateMove(
           e: 12,
           a: 7,
           c: 8,
+          j: 6,
           k: 0,
         };
         const scoreVal = values[targetPiece.type as Exclude<PieceType, null>] || 0;

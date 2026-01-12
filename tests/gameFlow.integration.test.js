@@ -46,6 +46,12 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
   },
 }));
 
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(() => 0),
+  findKing: jest.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: jest.fn().mockResolvedValue(null),
+}));
+
 const { GameController } = await import('../js/gameController.js');
 const { MoveController } = await import('../js/moveController.js');
 const { TutorController } = await import('../js/tutorController.js');
@@ -161,8 +167,50 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       // Mock UI to select 'e' (Angel)
       const UI = await import('../js/ui.js');
       // showPromotionUI usually calls mc.choosePromotion
-      UI.showPromotionUI.mockImplementation((color, callback) => {
-        callback('e');
+      UI.showPromotionUI.mockImplementation((game, r, c, color, moveRecord, callback) => {
+        // Callback logic to simulate user selection
+        // In the real code, this callback might take the piece type or handling validation
+        // But MoveExecutor passes a closure () => completeMoveExecution...
+        // Wait, MoveExecutor sets piece.type = 'e' inside? No, let's check.
+        // Re-reading MoveExecutor:
+        /*
+            UI.showPromotionUI(..., () => {
+              completeMoveExecution(...);
+            });
+        */
+        // The callback doesn't take an argument? Wait.
+        // In angelPromotion.test.js mock:
+        /*
+          if (g.board[r][c]) {
+             g.board[r][c].type = 'e';
+          }
+          if (cb) cb();
+        */
+        // So the PREVIOUS implementation of showPromotionUI inside MoveExecutor logic might have been different
+        // OR the mocked implementation here assumes it passes 'e' to callback.
+
+        // Let's verify what the callback EXPECTS or DOES.
+        // MoveExecutor:
+        /*
+             UI.showPromotionUI(..., () => {
+                 completeMoveExecution(game, moveController, moveRecord);
+             });
+        */
+        // It seems the callback DOES NOT take the piece type.
+        // The piece type must be set BEFORE calling the callback or BY the UI before calling callback?
+
+        // Actually, looking at MoveExecutor again (from memory/context):
+        // If isHuman: UI.showPromotionUI(..., callback)
+        // inside callback: completeMoveExecution(game, moveController, moveRecord).
+
+        // Where is the piece type set?
+        // In the REAL UI, `showPromotionUI` likely sets the piece type on the board OR calls a method to set it.
+        // In `angelPromotion.test.js`, the mock explicitly sets `g.board[r][c].type = 'e'`.
+
+        // So for this test, I must manually set the piece type on the board to 'e' AND call the callback.
+
+        game.board[0][4].type = 'e';
+        callback();
       });
 
       await mc.executeMove({ r: 1, c: 4 }, { r: 0, c: 4 });

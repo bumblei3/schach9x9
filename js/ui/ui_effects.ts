@@ -18,6 +18,10 @@ export class UIEffects {
   startFloatingPieces(): void {
     const overlay = document.getElementById('points-selection-overlay');
     if (overlay && !overlay.classList.contains('hidden')) {
+      // Clear existing pieces to prevent stacking on re-init
+      const existingPieces = document.querySelectorAll('.floating-bg-piece');
+      existingPieces.forEach(p => p.remove());
+
       this.createFloatingPieces(15);
     }
   }

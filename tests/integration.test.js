@@ -4,6 +4,7 @@ import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../js/ui.js', () => ({
+  initBoardUI: jest.fn(),
   renderBoard: jest.fn(),
   showModal: jest.fn((title, message, buttons) => {
     const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.class === 'btn-primary');
@@ -66,7 +67,9 @@ describe('Integration Tests', () => {
     global.document.querySelector = jest.fn(() => ({
       classList: { add: jest.fn(), remove: jest.fn() },
       innerHTML: '',
-      parentElement: {},
+      parentElement: {
+        querySelector: jest.fn(() => ({ offsetWidth: 50 })),
+      },
     }));
 
     global.document.querySelectorAll = jest.fn(() => []);
@@ -99,6 +102,9 @@ describe('Integration Tests', () => {
 
     game.gameController = gameController;
     game.moveController = moveController;
+
+    // Initialize strategy
+    gameController.initGame(15, 'setup');
 
     // Mock AI Engine if needed
     game.aiEngine = {

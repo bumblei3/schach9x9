@@ -35,7 +35,12 @@ jest.unstable_mockModule('../js/ui.js', () => ({
   updateStatistics: jest.fn(),
   animateMove: jest.fn().mockResolvedValue(),
   addCapturedPiece: jest.fn(),
-  showPromotionUI: jest.fn((game, r, c, color, moveRecord, callback) => callback()),
+  showPromotionUI: jest.fn((game, r, c, color, moveRecord, callback) => {
+    if (game && game.board && game.board[r] && game.board[r][c]) {
+      game.board[r][c].type = 'e';
+    }
+    callback();
+  }),
   showShop: jest.fn(),
   renderEvalGraph: jest.fn(),
 }));
@@ -48,6 +53,12 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
     playGameStart: jest.fn(),
     init: jest.fn(),
   },
+}));
+
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(() => 0),
+  findKing: jest.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: jest.fn().mockResolvedValue(null),
 }));
 
 const { Game } = await import('../js/gameEngine.js');

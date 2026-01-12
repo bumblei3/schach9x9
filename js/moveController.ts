@@ -101,9 +101,14 @@ export class MoveController {
    * @param {boolean} isUndoRedo Whether this move is from an undo/redo operation
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async executeMove(from: any, to: any, isUndoRedo: boolean = false): Promise<any> {
+  public async executeMove(
+    from: any,
+    to: any,
+    isUndoRedo: boolean = false,
+    promotionType?: string
+  ): Promise<any> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveExecutor as any).executeMove(this.game, this, from, to, isUndoRedo);
+    return (MoveExecutor as any).executeMove(this.game, this, from, to, isUndoRedo, promotionType);
   }
 
   /**

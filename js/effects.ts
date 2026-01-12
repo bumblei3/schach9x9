@@ -80,15 +80,47 @@ export class ParticleSystem {
     }
   }
 
+  spawnTrail(x: number, y: number, color: string = '#fff'): void {
+    const p = document.createElement('div');
+    p.className = 'particle';
+
+    const life = 0.4; // seconds
+    const vx = (Math.random() - 0.5) * 0.5;
+    const vy = (Math.random() - 0.5) * 0.5;
+
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.backgroundColor = color;
+    p.style.width = '6px';
+    p.style.height = '6px';
+    p.style.borderRadius = '50%';
+    p.style.opacity = '0.6';
+    p.style.boxShadow = `0 0 10px ${color}`;
+
+    this.container.appendChild(p);
+
+    this.particles.push({
+      el: p,
+      x,
+      y,
+      vx,
+      vy,
+      life,
+      maxLife: life,
+      type: 'TRAIL',
+    });
+
+    if (!this.animating) {
+      this.animating = true;
+      requestAnimationFrame(() => this.update());
+    }
+  }
+
   update(): void {
     if (this.particles.length === 0) {
       this.animating = false;
       return;
     }
-
-    // const now = Date.now();
-    // Use fixed time step or delta for smoother animation if needed,
-    // but simple per-frame update is fine for this.
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];

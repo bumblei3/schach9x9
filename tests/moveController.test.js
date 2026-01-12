@@ -34,6 +34,12 @@ jest.unstable_mockModule('../js/sounds.js', () => ({
   },
 }));
 
+jest.unstable_mockModule('../js/aiEngine.js', () => ({
+  evaluatePosition: jest.fn(() => 0),
+  findKing: jest.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: jest.fn().mockResolvedValue(null),
+}));
+
 // DOM setup is handled in setupJSDOM
 
 // Mock localStorage
