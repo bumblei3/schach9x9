@@ -127,7 +127,10 @@ describe('Integration Tests', () => {
       gameController.selectShopPiece('r');
       gameController.placeShopPiece(8, 3);
       gameController.finishSetupPhase();
+      expect(game.phase).toBe(PHASES.SETUP_WHITE_UPGRADES);
 
+      // Skip white upgrades and proceed to black setup
+      gameController.finishSetupPhase();
       expect(game.phase).toBe(PHASES.SETUP_BLACK_PIECES);
 
       // Phase 4: Black Piece Setup
@@ -135,6 +138,10 @@ describe('Integration Tests', () => {
       gameController.placeShopPiece(2, 3);
       gameController.selectShopPiece('r');
       gameController.placeShopPiece(0, 3);
+      gameController.finishSetupPhase();
+      expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
+
+      // Skip black upgrades (AI might do this automatically but we'll call it for consistency if needed)
       gameController.finishSetupPhase();
 
       // Should now be in PLAY phase

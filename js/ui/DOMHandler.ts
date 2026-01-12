@@ -100,6 +100,16 @@ export class DOMHandler {
       });
     }
 
+    // Standard 8x8 Mode with Upgrades
+    const upgrade8x8Btn = document.getElementById('upgrade-8x8-btn');
+    if (upgrade8x8Btn) {
+      upgrade8x8Btn.addEventListener('click', () => {
+        const overlay = document.getElementById('points-selection-overlay');
+        if (overlay) overlay.style.display = 'none';
+        this.app.init(5, 'standard8x8');
+      });
+    }
+
     // Classic Mode (9x9)
     const classicBtn = document.getElementById('classic-mode-btn');
     if (classicBtn) {

@@ -112,6 +112,10 @@ describe('Setup Phase Integration', () => {
 
     controller.finishSetupPhase();
 
+    expect(game.phase).toBe(PHASES.SETUP_WHITE_UPGRADES);
+
+    // Transition through upgrades to black pieces
+    controller.finishSetupPhase();
     expect(game.phase).toBe(PHASES.SETUP_BLACK_PIECES);
     expect(game.points).toBe(20); // Reset for black
   });

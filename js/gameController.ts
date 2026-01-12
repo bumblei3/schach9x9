@@ -154,8 +154,9 @@ export class GameController {
     UI.initBoardUI(this.game);
     UI.updateStatus(this.game);
 
-    if (mode === 'setup') {
+    if (mode === 'setup' || (mode === 'standard8x8' && initialPoints > 0)) {
       UI.updateShopUI(this.game);
+      if (mode === 'standard8x8') this.showShop(true);
     } else if ((mode as string) === 'puzzle') {
       this.puzzleMenu.show();
       this.game.mode = 'puzzle' as any;
@@ -235,6 +236,11 @@ export class GameController {
     ) {
       this.placeShopPiece(r, c);
     } else if (
+      this.game.phase === (PHASES.SETUP_WHITE_UPGRADES as any) ||
+      this.game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)
+    ) {
+      this.upgradePiece(r, c);
+    } else if (
       this.game.phase === (PHASES.PLAY as any) ||
       (this.game.phase as any) === 'ANALYSIS'
     ) {
@@ -293,14 +299,47 @@ export class GameController {
     this.shopManager.placeShopPiece(r, c);
   }
 
+  upgradePiece(r: number, c: number): void {
+    const piece = this.game.board[r][c];
+    if (!piece) return;
+
+    const isWhiteTurn = this.game.phase === (PHASES.SETUP_WHITE_UPGRADES as any);
+    const color = isWhiteTurn ? 'white' : 'black';
+
+    if (piece.color !== color) {
+      this.game.log('Nur eigene Figuren können verbessert werden!');
+      return;
+    }
+
+    // Call ShopManager to handle the upgrade logic/UI
+    this.shopManager.showUpgradeOptions(r, c);
+  }
+
   finishSetupPhase(): void {
     const handleTransition = () => {
       if (this.game.phase === (PHASES.SETUP_WHITE_PIECES as any)) {
-        this.game.phase = PHASES.SETUP_BLACK_PIECES as any;
-        this.game.points = this.game.initialPoints;
+        this.game.phase = PHASES.SETUP_WHITE_UPGRADES as any;
         this.game.selectedShopPiece = null;
         this.updateShopUI();
-        this.game.log('Weiß fertig. Schwarz kauft ein.');
+        this.game.log('Weiß: Truppen-Upgrades möglich.');
+      } else if (this.game.phase === (PHASES.SETUP_WHITE_UPGRADES as any)) {
+        if (this.game.mode === 'standard8x8') {
+          // In 8x8 mode, white finishes then it's black's turn or play starts
+          // For simplicity, let's give black same points and transition
+          this.game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
+          this.game.points = this.game.initialPoints;
+          this.game.log('Weiß fertig. Schwarz: Truppen-Upgrades möglich.');
+
+          if (this.game.isAI) {
+            setTimeout(() => this.finishSetupPhase(), 500);
+          }
+        } else {
+          this.game.phase = PHASES.SETUP_BLACK_PIECES as any;
+          this.game.points = this.game.initialPoints;
+          this.game.selectedShopPiece = null;
+          this.updateShopUI();
+          this.game.log('Weiß fertig. Schwarz kauft ein.');
+        }
         this.autoSave();
 
         if (this.game.isAI) {
@@ -309,6 +348,16 @@ export class GameController {
           }, AI_DELAY_MS);
         }
       } else if (this.game.phase === (PHASES.SETUP_BLACK_PIECES as any)) {
+        this.game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
+        this.game.selectedShopPiece = null;
+        this.updateShopUI();
+        this.game.log('Schwarz: Truppen-Upgrades möglich.');
+
+        if (this.game.isAI) {
+          // AI Skip upgrades for now or implement AI upgrade logic later
+          setTimeout(() => this.finishSetupPhase(), 500);
+        }
+      } else if (this.game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)) {
         this.game.phase = PHASES.PLAY as any;
         this.showShop(false);
 

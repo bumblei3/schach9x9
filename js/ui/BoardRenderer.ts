@@ -404,7 +404,8 @@ export function renderBoard(game: any): void {
       'last-move',
       'tutor-move',
       'threatened',
-      'selectable-corridor'
+      'selectable-corridor',
+      'upgradable-piece'
     );
   }
 
@@ -443,7 +444,27 @@ export function renderBoard(game: any): void {
       }
 
       // Andere Highlights
-      cell.classList.remove('highlight', 'valid-move', 'tutor-move', 'last-move', 'threatened');
+      cell.classList.remove(
+        'highlight',
+        'valid-move',
+        'tutor-move',
+        'last-move',
+        'threatened',
+        'upgradable-piece'
+      );
+
+      const p = game.board[r][c];
+
+      // Upgrade mode highlighting
+      const isUpgradePhase =
+        game.phase === PHASES.SETUP_WHITE_UPGRADES || game.phase === PHASES.SETUP_BLACK_UPGRADES;
+      if (isUpgradePhase && p && p.type !== 'k') {
+        const turnColor = game.phase === PHASES.SETUP_WHITE_UPGRADES ? 'white' : 'black';
+        if (p.color === turnColor) {
+          cell.classList.add('upgradable-piece');
+        }
+      }
+
       if (game.selectedSquare && game.selectedSquare.r === r && game.selectedSquare.c === c)
         cell.classList.add('highlight');
       if (game.validMoves) {
@@ -461,7 +482,6 @@ export function renderBoard(game: any): void {
       ) {
         cell.classList.add('last-move');
       }
-      const p = game.board[r][c];
       if (game.phase === PHASES.PLAY && p) {
         const opponent = p.color === 'white' ? 'black' : 'white';
         if (game.isSquareUnderAttack && game.isSquareUnderAttack(r, c, opponent))

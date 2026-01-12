@@ -237,15 +237,23 @@ describe('Coverage Boost Tests', () => {
   test('finishSetupPhase should cycle through setup stages', () => {
     const controller = new GameController(game);
 
-    // Stage 1: White pieces setup -> Black pieces setup
+    // Stage 1: White pieces setup -> White upgrades
     game.phase = PHASES.SETUP_WHITE_PIECES;
     game.points = 0; // No unspent points
     controller.finishSetupPhase();
+    expect(game.phase).toBe(PHASES.SETUP_WHITE_UPGRADES);
+
+    // Stage 2: White upgrades -> Black pieces setup
+    controller.finishSetupPhase();
     expect(game.phase).toBe(PHASES.SETUP_BLACK_PIECES);
 
-    // Stage 2: Black pieces setup -> Play
+    // Stage 3: Black pieces setup -> Black upgrades
     game.phase = PHASES.SETUP_BLACK_PIECES;
     game.points = 0;
+    controller.finishSetupPhase();
+    expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
+
+    // Stage 4: Black upgrades -> Play
     controller.finishSetupPhase();
     expect(game.phase).toBe(PHASES.PLAY);
   });

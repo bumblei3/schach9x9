@@ -262,6 +262,16 @@ body.mode-3d #board-wrapper {
     inset 0 0 0 1px var(--corridor-border-hover) !important;
 }
 
+.cell.upgradable-piece {
+  box-shadow: inset 0 0 0 2px #22c55e !important;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.cell.upgradable-piece:hover {
+  box-shadow: inset 0 0 15px 4px #22c55e !important;
+}
+
 /* --- Pieces --- */
 .piece {
   width: 90%;

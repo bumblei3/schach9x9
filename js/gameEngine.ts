@@ -149,8 +149,8 @@ export class Game {
       this.phase = PHASES.PLAY;
       this.setupClassicBoard();
     } else if (this.mode === 'standard8x8') {
-      this.phase = PHASES.PLAY;
       this.setupStandard8x8Board();
+      this.phase = initialPoints > 0 ? PHASES.SETUP_WHITE_UPGRADES : PHASES.PLAY;
     } else {
       this.phase = PHASES.SETUP_WHITE_KING;
     }

@@ -609,6 +609,9 @@ exports[`Visual DOM Snapshot Tests Initial setup phase snapshot 1`] = `
         <button id="standard-8x8-btn" class="btn-primary full-width mb-2" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)">
           ♟️ Standard Schach (8x8)
         </button>
+        <button id="upgrade-8x8-btn" class="btn-primary full-width mb-2" style="background: linear-gradient(135deg, #0ea5e9, #0284c7)">
+          ⚔️ 8x8 mit Upgrades (+5 Pkt)
+        </button>
         <button id="classic-mode-btn" class="btn-primary full-width mb-2">
           ♟️ Klassisch (9x9)
         </button>
