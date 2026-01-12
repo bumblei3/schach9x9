@@ -142,7 +142,11 @@ export function initBoardUI(game: any): void {
           dragImage.style.position = 'absolute';
           dragImage.style.top = '-1000px';
           e.dataTransfer.setDragImage(dragImage, cell.offsetWidth / 2, cell.offsetHeight / 2);
-          setTimeout(() => document.body.removeChild(dragImage), 0);
+          setTimeout(() => {
+            if (document.body.contains(dragImage)) {
+              document.body.removeChild(dragImage);
+            }
+          }, 0);
         }
 
         const validMoves = game.getValidMoves(r, c, piece);
@@ -268,7 +272,9 @@ export function initBoardUI(game: any): void {
         if (!draggedElement) return;
 
         // Clean up visual elements
-        document.body.removeChild(draggedElement);
+        if (draggedElement && document.body.contains(draggedElement)) {
+          document.body.removeChild(draggedElement);
+        }
         draggedElement = null;
         cell.classList.remove('dragging');
         document

@@ -1,12 +1,12 @@
-import { jest } from '@jest/globals';
+
 
 // Mock logger
-jest.unstable_mockModule('../js/logger.js', () => ({
+vi.mock('../js/logger.js', () => ({
   logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
   },
 }));
 
@@ -18,14 +18,14 @@ describe('StatisticsManager', () => {
 
   beforeEach(() => {
     localStorageMock = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn(),
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
     };
     Object.defineProperty(global, 'localStorage', { value: localStorageMock, writable: true });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     stats = new StatisticsManager();
   });
 

@@ -21,6 +21,12 @@ coverage/
 # Build output
 dist/
 build/
+*.d.ts
+*.d.ts.map
+*.js.map
+*.spec.js
+*.spec.d.ts
+*.spec.d.ts.map
 
 # Environment variables
 .env

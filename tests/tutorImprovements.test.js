@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import * as TacticsDetector from '../js/tutor/TacticsDetector.js';
 import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
 
@@ -7,8 +7,8 @@ const mockGame = {
   board: Array(9)
     .fill(null)
     .map(() => Array(9).fill(null)),
-  getValidMoves: jest.fn(),
-  isSquareUnderAttack: jest.fn(),
+  getValidMoves: vi.fn(),
+  isSquareUnderAttack: vi.fn(),
 };
 
 const mockAnalyzer = {
@@ -21,7 +21,7 @@ describe('Tutor Improvements', () => {
     mockGame.board = Array(9)
       .fill(null)
       .map(() => Array(9).fill(null));
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('TacticsDetector: Skewers', () => {

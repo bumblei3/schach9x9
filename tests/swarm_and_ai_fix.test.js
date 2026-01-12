@@ -1,21 +1,21 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import * as HintGenerator from '../js/tutor/HintGenerator.js';
 
 // Mock UI module to prevent errors when calling UI.renderBoard etc.
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showTutorSuggestions: jest.fn(),
-  updateShopUI: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showTutorSuggestions: vi.fn(),
+  updateShopUI: vi.fn(),
 }));
 
 // Mock DOM
 global.document = {
-  querySelectorAll: jest.fn(() => ({
-    forEach: jest.fn(),
+  querySelectorAll: vi.fn(() => ({
+    forEach: vi.fn(),
   })),
-  querySelector: jest.fn(() => null),
-  getElementById: jest.fn(() => ({
+  querySelector: vi.fn(() => null),
+  getElementById: vi.fn(() => ({
     style: {},
     textContent: '',
   })),

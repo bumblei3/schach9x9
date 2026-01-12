@@ -1,9 +1,9 @@
-import { jest } from '@jest/globals';
+
 import { setupJSDOM, createMockGame } from './test-utils.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/chess-pieces.js', () => ({
-  setPieceSkin: jest.fn(),
+vi.mock('../js/chess-pieces.js', () => ({
+  setPieceSkin: vi.fn(),
   PIECE_SVGS: {
     white: { p: 'wp' },
     black: { p: 'bp' },
@@ -13,7 +13,7 @@ jest.unstable_mockModule('../js/chess-pieces.js', () => ({
 const AppMock = {
   game: null,
   moveController: {
-    setTheme: jest.fn(),
+    setTheme: vi.fn(),
   },
 };
 
@@ -24,7 +24,7 @@ describe('UI Settings Tests', () => {
 
   beforeEach(async () => {
     setupJSDOM();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Import modules after mocks
     UI = await import('../js/ui.js');

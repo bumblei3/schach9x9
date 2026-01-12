@@ -1,30 +1,30 @@
-import { jest } from '@jest/globals';
+
 import { PHASES, BOARD_SIZE } from '../js/config.js';
 import { setupJSDOM, createMockGame } from './test-utils.js';
 
 // Mocks for ui.js dependencies are handled here
-jest.unstable_mockModule('../js/chess-pieces.js', () => ({
+vi.mock('../js/chess-pieces.js', () => ({
   PIECE_SVGS: {
     white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
     black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
   },
 }));
 
-jest.unstable_mockModule('../js/utils.js', () => ({
-  formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
-  debounce: jest.fn(fn => fn),
+vi.mock('../js/utils.js', () => ({
+  formatTime: vi.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
+  debounce: vi.fn(fn => fn),
 }));
 
-jest.unstable_mockModule('../js/effects.js', () => ({
+vi.mock('../js/effects.js', () => ({
   particleSystem: {
-    spawn: jest.fn(),
+    spawn: vi.fn(),
   },
   floatingTextManager: {
-    show: jest.fn(),
+    show: vi.fn(),
   },
-  shakeScreen: jest.fn(),
-  triggerVibration: jest.fn(),
-  confettiSystem: { spawn: jest.fn() },
+  shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
+  confettiSystem: { spawn: vi.fn() },
 }));
 
 // Import UI module
@@ -37,7 +37,7 @@ describe('UI Module', () => {
     setupJSDOM();
     game = createMockGame();
     game.boardSize = 9;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Board Rendering and Interactions', () => {
@@ -59,7 +59,7 @@ describe('UI Module', () => {
       game.phase = PHASES.PLAY;
       game.board[4][4] = { type: 'k', color: 'white' };
       // isSquareUnderAttack(r, c, attackerColor)
-      game.isSquareUnderAttack = jest.fn((r, c, color) => color === 'black');
+      game.isSquareUnderAttack = vi.fn((r, c, color) => color === 'black');
 
       UI.initBoardUI(game);
       UI.renderBoard(game);
@@ -95,7 +95,7 @@ describe('UI Module', () => {
 
   describe('Special Overlays', () => {
     test('should show promotion UI and handle choice', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       game.board[0][4] = { type: 'p', color: 'white' };
       UI.showPromotionUI(game, 0, 4, 'white', {}, callback);
       const overlay = document.getElementById('promotion-overlay');
@@ -110,7 +110,7 @@ describe('UI Module', () => {
 
     test('should show tutor suggestions', async () => {
       game.tutorController = {
-        getTutorHints: jest.fn(() => [
+        getTutorHints: vi.fn(() => [
           {
             move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } },
             analysis: {
@@ -149,12 +149,12 @@ describe('UI Module', () => {
       fromCell.getBoundingClientRect = () => ({ left: 0, top: 0, width: 50, height: 50 });
       toCell.getBoundingClientRect = () => ({ left: 50, top: 50, width: 50, height: 50 });
 
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const animPromise = UI.animateMove(game, from, to, piece);
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
       await animPromise;
       expect(game.isAnimating).toBe(false);
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

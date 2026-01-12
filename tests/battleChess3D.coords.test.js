@@ -1,88 +1,88 @@
-import { jest } from '@jest/globals';
+
 
 import { BattleChess3D } from '../js/battleChess3D.js';
 
 // Mock THREE
-jest.mock('three', () => {
+vi.mock('three', () => {
   return {
-    Scene: jest.fn(() => ({
-      add: jest.fn(),
-      remove: jest.fn(),
+    Scene: vi.fn(() => ({
+      add: vi.fn(),
+      remove: vi.fn(),
       background: null,
-      traverse: jest.fn(),
+      traverse: vi.fn(),
     })),
-    PerspectiveCamera: jest.fn(() => ({
-      position: { set: jest.fn(), clone: jest.fn() },
-      lookAt: jest.fn(),
+    PerspectiveCamera: vi.fn(() => ({
+      position: { set: vi.fn(), clone: vi.fn() },
+      lookAt: vi.fn(),
       aspect: 1,
-      updateProjectionMatrix: jest.fn(),
+      updateProjectionMatrix: vi.fn(),
     })),
-    WebGLRenderer: jest.fn(() => ({
-      setSize: jest.fn(),
-      setPixelRatio: jest.fn(),
-      render: jest.fn(),
-      dispose: jest.fn(),
+    WebGLRenderer: vi.fn(() => ({
+      setSize: vi.fn(),
+      setPixelRatio: vi.fn(),
+      render: vi.fn(),
+      dispose: vi.fn(),
       domElement: {
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        getBoundingClientRect: jest.fn(() => ({ left: 0, top: 0, width: 100, height: 100 })),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        getBoundingClientRect: vi.fn(() => ({ left: 0, top: 0, width: 100, height: 100 })),
       },
       shadowMap: { enabled: false, type: null },
     })),
-    AmbientLight: jest.fn(),
-    DirectionalLight: jest.fn(() => ({
-      position: { set: jest.fn() },
+    AmbientLight: vi.fn(),
+    DirectionalLight: vi.fn(() => ({
+      position: { set: vi.fn() },
       shadow: {
         camera: {},
         mapSize: {},
       },
     })),
-    Group: jest.fn(() => ({
-      add: jest.fn(),
+    Group: vi.fn(() => ({
+      add: vi.fn(),
       children: [],
     })),
-    BoxGeometry: jest.fn(),
-    MeshStandardMaterial: jest.fn(),
-    Mesh: jest.fn(() => ({
-      position: { set: jest.fn() },
+    BoxGeometry: vi.fn(),
+    MeshStandardMaterial: vi.fn(),
+    Mesh: vi.fn(() => ({
+      position: { set: vi.fn() },
       rotation: { x: 0 },
       userData: {},
     })),
-    Vector2: jest.fn(),
-    Vector3: jest.fn((x, y, z) => ({ x, y, z })),
-    Raycaster: jest.fn(),
-    Color: jest.fn(),
-    SphereGeometry: jest.fn(),
-    MeshBasicMaterial: jest.fn(),
-    RingGeometry: jest.fn(),
+    Vector2: vi.fn(),
+    Vector3: vi.fn((x, y, z) => ({ x, y, z })),
+    Raycaster: vi.fn(),
+    Color: vi.fn(),
+    SphereGeometry: vi.fn(),
+    MeshBasicMaterial: vi.fn(),
+    RingGeometry: vi.fn(),
     PCFSoftShadowMap: 'PCFSoftShadowMap',
     DoubleSide: 'DoubleSide',
   };
 });
 
 // Mock OrbitControls
-jest.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
-  OrbitControls: jest.fn(() => ({
+vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
+  OrbitControls: vi.fn(() => ({
     enableDamping: false,
-    target: { set: jest.fn() },
-    update: jest.fn(),
-    dispose: jest.fn(),
+    target: { set: vi.fn() },
+    update: vi.fn(),
+    dispose: vi.fn(),
   })),
 }));
 
 // Mock pieces3D
-jest.mock('../js/pieces3D.js', () => ({
-  createPiece3D: jest.fn(() => ({
-    position: { set: jest.fn() },
+vi.mock('../js/pieces3D.js', () => ({
+  createPiece3D: vi.fn(() => ({
+    position: { set: vi.fn() },
     userData: {},
   })),
   PIECE_COLORS: {},
 }));
 
 // Mock battleAnimations
-jest.mock('../js/battleAnimations.js', () => ({
-  BattleAnimator: jest.fn(() => ({
-    playBattle: jest.fn().mockResolvedValue(),
+vi.mock('../js/battleAnimations.js', () => ({
+  BattleAnimator: vi.fn(() => ({
+    playBattle: vi.fn().mockResolvedValue(),
   })),
 }));
 
@@ -101,14 +101,14 @@ describe('BattleChess3D Debug Tests', () => {
     // but init() is async and complex.
     // We can just mock the battleAnimator property directly if we don't call init.
     battleChess.battleAnimator = {
-      playBattle: jest.fn().mockResolvedValue(),
+      playBattle: vi.fn().mockResolvedValue(),
     };
     battleChess.scene = {}; // Mock scene
   });
 
   afterEach(() => {
     document.body.removeChild(container);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('playBattleSequence should convert board coords to world coords', async () => {

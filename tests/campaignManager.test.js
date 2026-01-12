@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+
 
 // Mock localStorage
 const localStorageMock = (() => {
   let store = {};
   return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => {
+    getItem: vi.fn(key => store[key] || null),
+    setItem: vi.fn((key, value) => {
       store[key] = value.toString();
     }),
-    clear: jest.fn(() => {
+    clear: vi.fn(() => {
       store = {};
     }),
   };
@@ -16,7 +16,7 @@ const localStorageMock = (() => {
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
 // Mock dependencies
-jest.unstable_mockModule('../js/storage.js', () => ({
+vi.mock('../js/storage.js', () => ({
   storageManager: {},
 }));
 
@@ -28,7 +28,7 @@ describe('CampaignManager', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     manager = new CampaignManager();
   });
 
@@ -86,7 +86,7 @@ describe('CampaignManager', () => {
     // Simulate completing a level with a reward
     // We'll mock a level with a reward for testing
     const mockLevel = { id: 'mock', reward: 'medal' };
-    jest.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
+    vi.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
 
     manager.completeLevel('mock');
     expect(manager.isRewardUnlocked('medal')).toBe(true);

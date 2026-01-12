@@ -1,94 +1,94 @@
-import { jest } from '@jest/globals';
+
 import { debounce, deepCopy, coordToAlgebraic } from '../js/utils.js';
 
 describe('Utils', () => {
   describe('debounce', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
     });
 
     test('should delay function execution', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
 
       debouncedFn();
       expect(mockFn).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
     test('should cancel previous call if called again within delay', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
 
       debouncedFn();
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
       debouncedFn();
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
 
       expect(mockFn).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
     test('should pass arguments to debounced function', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
 
       debouncedFn('arg1', 'arg2');
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
 
       expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2');
     });
 
     test('should use default delay of 150ms when not specified', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn);
 
       debouncedFn();
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockFn).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
     test('should handle multiple rapid calls correctly', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
 
       debouncedFn();
-      jest.advanceTimersByTime(20);
+      vi.advanceTimersByTime(20);
       debouncedFn();
-      jest.advanceTimersByTime(20);
+      vi.advanceTimersByTime(20);
       debouncedFn();
-      jest.advanceTimersByTime(20);
+      vi.advanceTimersByTime(20);
       debouncedFn();
 
       expect(mockFn).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
     test('should preserve context when calling debounced function', () => {
       const obj = {
         value: 42,
-        method: jest.fn(function () {
+        method: vi.fn(function () {
           return this.value;
         }),
       };
       const debouncedMethod = debounce(obj.method.bind(obj), 100);
 
       debouncedMethod();
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
 
       expect(obj.method).toHaveBeenCalled();
     });

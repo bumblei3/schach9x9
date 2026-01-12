@@ -1,60 +1,60 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  showToast: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  initBoardUI: jest.fn(),
-  showShop: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  renderEvalGraph: jest.fn(),
-  animateCheckmate: jest.fn(),
-  animateCheck: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  showToast: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  initBoardUI: vi.fn(),
+  showShop: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  renderEvalGraph: vi.fn(),
+  animateCheckmate: vi.fn(),
+  animateCheck: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playGameStart: jest.fn(),
-    playGameOver: jest.fn(),
-    playSound: jest.fn(),
-    playCheck: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playGameStart: vi.fn(),
+    playGameOver: vi.fn(),
+    playSound: vi.fn(),
+    playCheck: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/AnalysisController.js', () => ({
+vi.mock('../js/AnalysisController.js', () => ({
   AnalysisController: class {
-    constructor(_gameController) {}
-    enterAnalysisMode = jest.fn(() => true);
-    exitAnalysisMode = jest.fn(() => true);
-    requestPositionAnalysis = jest.fn();
-    toggleContinuousAnalysis = jest.fn();
-    jumpToMove = jest.fn();
-    jumpToStart = jest.fn();
+    constructor(_gameController) { }
+    enterAnalysisMode = vi.fn(() => true);
+    exitAnalysisMode = vi.fn(() => true);
+    requestPositionAnalysis = vi.fn();
+    toggleContinuousAnalysis = vi.fn();
+    jumpToMove = vi.fn();
+    jumpToStart = vi.fn();
   },
 }));
 
-jest.unstable_mockModule('../js/tutorial.js', () => ({
+vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
-    constructor() {}
-    initUI() {}
-    show() {}
-    hide() {}
-    nextStep() {}
-    prevStep() {}
+    constructor() { }
+    initUI() { }
+    show() { }
+    hide() { }
+    nextStep() { }
+    prevStep() { }
   },
 }));
 
-jest.unstable_mockModule('../js/gameEngine.js', () => ({
+vi.mock('../js/gameEngine.js', () => ({
   Game: class {
     constructor(initialPoints = 15, mode = 'classic', isAI = false) {
       this.initialPoints = initialPoints;
@@ -68,7 +68,7 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
       this.points = initialPoints;
       this.whiteCorridor = 3;
       this.blackCorridor = 3;
-      this.log = jest.fn();
+      this.log = vi.fn();
       this.whiteTime = 300;
       this.blackTime = 300;
       this.clockEnabled = false;
@@ -98,8 +98,8 @@ describe('GameController', () => {
 
   beforeEach(async () => {
     game = new Game(15, 'setup', false);
-    game.log = jest.fn();
-    game.handlePlayClick = jest.fn();
+    game.log = vi.fn();
+    game.handlePlayClick = vi.fn();
     gameController = new GameController(game);
     game.gameController = gameController;
 
@@ -107,10 +107,10 @@ describe('GameController', () => {
     const createMockElement = () => {
       const element = {
         classList: {
-          remove: jest.fn(),
-          add: jest.fn(),
-          contains: jest.fn(() => false),
-          toggle: jest.fn(),
+          remove: vi.fn(),
+          add: vi.fn(),
+          contains: vi.fn(() => false),
+          toggle: vi.fn(),
         },
         style: {},
         disabled: false,
@@ -118,9 +118,9 @@ describe('GameController', () => {
         checked: false,
         scrollTop: 0,
         scrollHeight: 100,
-        appendChild: jest.fn(),
+        appendChild: vi.fn(),
         dataset: {},
-        addEventListener: jest.fn(),
+        addEventListener: vi.fn(),
       };
       let innerHTML = '';
       let textContent = '';
@@ -141,31 +141,31 @@ describe('GameController', () => {
       return element;
     };
 
-    jest.spyOn(document, 'getElementById').mockImplementation(() => createMockElement());
-    jest.spyOn(document, 'querySelector').mockImplementation(() => ({
-      classList: { add: jest.fn(), remove: jest.fn() },
+    vi.spyOn(document, 'getElementById').mockImplementation(() => createMockElement());
+    vi.spyOn(document, 'querySelector').mockImplementation(() => ({
+      classList: { add: vi.fn(), remove: vi.fn() },
     }));
-    jest
+    vi
       .spyOn(document, 'querySelectorAll')
       .mockImplementation(() => [
-        { classList: { remove: jest.fn() } },
-        { classList: { remove: jest.fn() } },
+        { classList: { remove: vi.fn() } },
+        { classList: { remove: vi.fn() } },
       ]);
-    jest.spyOn(document, 'createElement').mockImplementation(() => ({
-      classList: { add: jest.fn() },
+    vi.spyOn(document, 'createElement').mockImplementation(() => ({
+      classList: { add: vi.fn() },
       dataset: {},
-      addEventListener: jest.fn(),
+      addEventListener: vi.fn(),
     }));
 
-    global.alert = jest.fn();
-    global.confirm = jest.fn(() => true);
+    global.alert = vi.fn();
+    global.confirm = vi.fn(() => true);
 
-    Storage.prototype.getItem = jest.fn(() => null);
-    Storage.prototype.setItem = jest.fn();
-    Storage.prototype.removeItem = jest.fn();
-    Storage.prototype.clear = jest.fn();
+    Storage.prototype.getItem = vi.fn(() => null);
+    Storage.prototype.setItem = vi.fn();
+    Storage.prototype.removeItem = vi.fn();
+    Storage.prototype.clear = vi.fn();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Initialize game after mocks are set up
     await gameController.initGame(15, 'setup');
@@ -333,7 +333,7 @@ describe('GameController', () => {
   describe('Clock Management', () => {
     it('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_KING;
-      gameController.timeManager.clockInterval = setInterval(() => {}, 100);
+      gameController.timeManager.clockInterval = setInterval(() => { }, 100);
       gameController.tickClock(); // Delegates to timeManager
       expect(gameController.timeManager.clockInterval).toBeNull();
     });
@@ -414,7 +414,7 @@ describe('GameController', () => {
 
   describe('Campaign Level', () => {
     test('should handle invalid level ID gracefully', () => {
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockImplementation(() => { });
       gameController.startCampaignLevel('invalid-id');
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('Level not found'),

@@ -1,18 +1,18 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { generateRandomBoard, createPRNG } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
 // Mock UI and sounds to avoid initialization issues
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  updateStatus: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  updateStatus: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
-  soundManager: { playMove: jest.fn(), playCapture: jest.fn() },
+vi.mock('../js/sounds.js', () => ({
+  soundManager: { playMove: vi.fn(), playCapture: vi.fn() },
 }));
 
 describe('Game Engine Property-Based Tests', () => {

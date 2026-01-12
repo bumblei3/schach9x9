@@ -5,7 +5,7 @@
 import { PuzzleManager, puzzleManager as _puzzleManager } from '../js/puzzleManager.js';
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
 import { ProceduralGenerator } from '../js/puzzle/ProceduralGenerator.js';
-import { jest } from '@jest/globals';
+
 import { BOARD_SIZE } from '../js/config.js';
 
 describe('PuzzleManager', () => {
@@ -133,7 +133,7 @@ describe('PuzzleManager', () => {
         setupStr: '..'.repeat(81) + 'w',
         solution: [],
       };
-      const genSpy = jest.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue(mockPuzzle);
+      const genSpy = vi.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue(mockPuzzle);
 
       // Load the last puzzle
       const lastIndex = manager.puzzles.length - 1;

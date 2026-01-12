@@ -1,44 +1,44 @@
-import { jest } from '@jest/globals';
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playGameStart: jest.fn(),
-    playGameOver: jest.fn(),
-    playError: jest.fn(),
-    playSuccess: jest.fn(),
-    playCheck: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playGameStart: vi.fn(),
+    playGameOver: vi.fn(),
+    playError: vi.fn(),
+    playSuccess: vi.fn(),
+    playCheck: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/ui.js', () => ({
-  animateMove: jest.fn().mockResolvedValue(),
-  renderBoard: jest.fn(),
-  updateStatus: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateClockUI: jest.fn(),
-  renderEvalGraph: jest.fn(),
-  showPromotionUI: jest.fn((game, r, c, color, moveRecord, callback) => {
+vi.mock('../js/ui.js', () => ({
+  animateMove: vi.fn().mockResolvedValue(),
+  renderBoard: vi.fn(),
+  updateStatus: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateClockUI: vi.fn(),
+  renderEvalGraph: vi.fn(),
+  showPromotionUI: vi.fn((game, r, c, color, moveRecord, callback) => {
     // Simulate selection of Angel
     if (game.board[r][c]) {
       game.board[r][c].type = 'e';
     }
     callback();
   }),
-  animateCheck: jest.fn(),
-  animateCheckmate: jest.fn(),
-  showToast: jest.fn(),
+  animateCheck: vi.fn(),
+  animateCheckmate: vi.fn(),
+  showToast: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(() => 0),
-  findKing: jest.fn(() => ({ r: 0, c: 0 })),
-  getBestMove: jest.fn().mockResolvedValue(null),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(() => 0),
+  findKing: vi.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: vi.fn().mockResolvedValue(null),
 }));
 
 // Dynamic imports required for mocked modules
@@ -68,7 +68,7 @@ describe('Undo/Redo System Reproduction Tests', () => {
     game.moveHistory = [];
 
     // Mock UI methods to avoid errors
-    game.log = jest.fn();
+    game.log = vi.fn();
 
     // Initialize MoveController
     moveController = new MoveController(game);
@@ -159,7 +159,7 @@ describe('Undo/Redo System Reproduction Tests', () => {
 
     // Wait for the recursive undo which might be async or immediate
     // Since my impl calls `undoMove` recursively directly, it's synchronous.
-    // If I used setTimeout, I'd need `jest.runAllTimers()`.
+    // If I used setTimeout, I'd need `vi.runAllTimers()`.
     // I put it directly.
 
     expect(game.moveHistory.length).toBe(0);

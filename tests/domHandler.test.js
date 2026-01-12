@@ -1,53 +1,57 @@
-import { jest } from '@jest/globals';
+
 
 // Mock all internal dependencies of DOMHandler BEFORE importing it
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  showToast: jest.fn(),
-  clearPieceCache: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  showToast: vi.fn(),
+  clearPieceCache: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/utils/PGNGenerator.js', () => ({
-  generatePGN: jest.fn(() => 'MOCK PGN'),
-  copyPGNToClipboard: jest.fn(),
-  downloadPGN: jest.fn(),
+vi.mock('../js/utils/PGNGenerator.js', () => ({
+  generatePGN: vi.fn(() => 'MOCK PGN'),
+  copyPGNToClipboard: vi.fn(),
+  downloadPGN: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    setEnabled: jest.fn(),
-    setVolume: jest.fn(),
+    setEnabled: vi.fn(),
+    setVolume: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/chess-pieces.js', () => ({
-  setPieceSkin: jest.fn(),
+vi.mock('../js/chess-pieces.js', () => ({
+  setPieceSkin: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/ui/CampaignUI.js', () => ({
-  CampaignUI: jest.fn().mockImplementation(() => ({
-    show: jest.fn(),
-  })),
+vi.mock('../js/ui/CampaignUI.js', () => ({
+  CampaignUI: vi.fn().mockImplementation(function () {
+    return {
+      show: vi.fn(),
+    };
+  }),
 }));
 
-jest.unstable_mockModule('../js/ui/AnalysisUI.js', () => ({
-  AnalysisUI: jest.fn().mockImplementation(() => ({
-    init: jest.fn(),
-    togglePanel: jest.fn(),
-    panel: {
-      classList: {
-        add: jest.fn(),
-        remove: jest.fn(),
-        toggle: jest.fn(),
+vi.mock('../js/ui/AnalysisUI.js', () => ({
+  AnalysisUI: vi.fn().mockImplementation(function () {
+    return {
+      init: vi.fn(),
+      togglePanel: vi.fn(),
+      panel: {
+        classList: {
+          add: vi.fn(),
+          remove: vi.fn(),
+          toggle: vi.fn(),
+        },
       },
-    },
-  })),
+    };
+  }),
 }));
 
 // Mock URL methods for JSDOM
-global.URL.createObjectURL = jest.fn(() => 'blob:mock');
-global.URL.revokeObjectURL = jest.fn();
+global.URL.createObjectURL = vi.fn(() => 'blob:mock');
+global.URL.revokeObjectURL = vi.fn();
 
 // Now import DOMHandler (must be dynamic because of ESM mocks)
 const { DOMHandler } = await import('../js/ui/DOMHandler.js');
@@ -59,35 +63,35 @@ describe('DOMHandler', () => {
   beforeEach(() => {
     // Mock App and Game
     app = {
-      init: jest.fn().mockResolvedValue(),
+      init: vi.fn().mockResolvedValue(),
       battleChess3D: {
         enabled: false,
         scene: null,
-        init: jest.fn().mockResolvedValue(),
-        updateFromGameState: jest.fn(),
-        onWindowResize: jest.fn(),
+        init: vi.fn().mockResolvedValue(),
+        updateFromGameState: vi.fn(),
+        onWindowResize: vi.fn(),
         pieceManager: {
-          setSkin: jest.fn(),
-          updateFromGameState: jest.fn(),
+          setSkin: vi.fn(),
+          updateFromGameState: vi.fn(),
         },
       },
       game: {
         aiController: {
-          setAnalysisUI: jest.fn(),
-          toggleAnalysisMode: jest.fn(),
+          setAnalysisUI: vi.fn(),
+          toggleAnalysisMode: vi.fn(),
           analysisActive: false,
         },
         analysisManager: {
-          toggleBestMove: jest.fn(),
-          toggleThreats: jest.fn(),
-          toggleOpportunities: jest.fn(),
+          toggleBestMove: vi.fn(),
+          toggleThreats: vi.fn(),
+          toggleOpportunities: vi.fn(),
         },
         tutorController: {
-          showHint: jest.fn(),
+          showHint: vi.fn(),
         },
-        finishSetupPhase: jest.fn(),
-        selectShopPiece: jest.fn(),
-        setTheme: jest.fn(),
+        finishSetupPhase: vi.fn(),
+        selectShopPiece: vi.fn(),
+        setTheme: vi.fn(),
         moveHistory: [],
         personality: 'balanced',
         analysisMode: false,
@@ -95,15 +99,15 @@ describe('DOMHandler', () => {
       },
 
       gameController: {
-        saveGame: jest.fn(),
-        loadGame: jest.fn(),
-        resign: jest.fn(),
-        offerDraw: jest.fn(),
-        startPuzzleMode: jest.fn(),
-        enterAnalysisMode: jest.fn(),
-        exitAnalysisMode: jest.fn(),
-        toggleContinuousAnalysis: jest.fn(),
-        finishSetupPhase: jest.fn(),
+        saveGame: vi.fn(),
+        loadGame: vi.fn(),
+        resign: vi.fn(),
+        offerDraw: vi.fn(),
+        startPuzzleMode: vi.fn(),
+        enterAnalysisMode: vi.fn(),
+        exitAnalysisMode: vi.fn(),
+        toggleContinuousAnalysis: vi.fn(),
+        finishSetupPhase: vi.fn(),
       },
     };
 
@@ -235,7 +239,7 @@ describe('DOMHandler', () => {
     document.getElementById('load-btn').click();
     expect(app.gameController.loadGame).toHaveBeenCalled();
 
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     document.getElementById('draw-offer-btn').click();
     expect(app.gameController.offerDraw).toHaveBeenCalled();
 
@@ -257,7 +261,7 @@ describe('DOMHandler', () => {
     const exportBtn = document.getElementById('export-pgn-btn');
     app.game.moveHistory = [{ r: 0, c: 0 }];
 
-    window.alert = jest.fn();
+    window.alert = vi.fn();
 
     exportBtn.click();
     expect(window.alert).not.toHaveBeenCalled();
@@ -272,23 +276,23 @@ describe('DOMHandler', () => {
   });
 
   test('should handle volume slider input', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const slider = document.getElementById('volume-slider');
     const valueDisplay = document.getElementById('volume-value');
     slider.value = '50';
     slider.dispatchEvent(new Event('input'));
 
     // Trigger debounce
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
 
     expect(valueDisplay.textContent).toBe('50%');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should handle fullscreen toggle and change', () => {
     const btn = document.getElementById('fullscreen-btn');
-    document.documentElement.requestFullscreen = jest.fn().mockReturnValue(Promise.resolve());
-    document.exitFullscreen = jest.fn();
+    document.documentElement.requestFullscreen = vi.fn().mockReturnValue(Promise.resolve());
+    document.exitFullscreen = vi.fn();
 
     btn.click();
     expect(document.documentElement.requestFullscreen).toHaveBeenCalled();
@@ -352,7 +356,7 @@ describe('DOMHandler', () => {
     const analysisBtn = document.getElementById('toggle-analysis-btn');
 
     // Mock the aiController.toggleAnalysisMode to return true
-    app.game.aiController.toggleAnalysisMode = jest.fn().mockReturnValue(true);
+    app.game.aiController.toggleAnalysisMode = vi.fn().mockReturnValue(true);
 
     analysisBtn.click();
     expect(app.game.aiController.toggleAnalysisMode).toHaveBeenCalled();
@@ -360,7 +364,7 @@ describe('DOMHandler', () => {
 
   test('should handle restart action', () => {
     const restartBtn = document.getElementById('restart-btn');
-    window.confirm = jest.fn(() => false); // User cancels
+    window.confirm = vi.fn(() => false); // User cancels
 
     restartBtn.click();
     expect(window.confirm).toHaveBeenCalled();
@@ -389,7 +393,7 @@ describe('DOMHandler', () => {
   test('should handle PGN export "Keine Züge" case', () => {
     const exportBtn = document.getElementById('export-pgn-btn');
     app.game.moveHistory = [];
-    window.alert = jest.fn();
+    window.alert = vi.fn();
 
     exportBtn.click();
     expect(window.alert).toHaveBeenCalledWith('Keine Züge zum Exportieren!');
@@ -401,8 +405,8 @@ describe('DOMHandler', () => {
   });
 
   test('should handle threats and opportunities buttons', () => {
-    app.game.analysisManager.toggleThreats = jest.fn().mockReturnValue(true);
-    app.game.analysisManager.toggleOpportunities = jest.fn().mockReturnValue(true);
+    app.game.analysisManager.toggleThreats = vi.fn().mockReturnValue(true);
+    app.game.analysisManager.toggleOpportunities = vi.fn().mockReturnValue(true);
 
     const threatsBtn = document.getElementById('threats-btn');
     const opportunitiesBtn = document.getElementById('opportunities-btn');
@@ -453,7 +457,7 @@ describe('DOMHandler', () => {
   });
 
   test('should handle 3D toggle off after being enabled', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const btn = document.getElementById('toggle-3d-btn');
     const container3D = document.getElementById('battle-chess-3d-container');
 
@@ -467,8 +471,8 @@ describe('DOMHandler', () => {
     expect(container3D.classList.contains('active')).toBe(false);
 
     // Advance timer for the setTimeout
-    jest.advanceTimersByTime(500);
-    jest.useRealTimers();
+    vi.advanceTimersByTime(500);
+    vi.useRealTimers();
   });
 
   test('should handle 3D toggle when scene already exists', () => {
@@ -491,9 +495,9 @@ describe('DOMHandler', () => {
       <button id="puzzle-menu-close-btn"></button>
     `;
 
-    app.gameController.exitPuzzleMode = jest.fn();
-    app.gameController.nextPuzzle = jest.fn();
-    app.gameController.puzzleMenu = { hide: jest.fn() };
+    app.gameController.exitPuzzleMode = vi.fn();
+    app.gameController.nextPuzzle = vi.fn();
+    app.gameController.puzzleMenu = { hide: vi.fn() };
 
     const newHandler = new DOMHandler(app);
     newHandler.init();

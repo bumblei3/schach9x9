@@ -12,6 +12,7 @@ import * as aiEngine from '../aiEngine.js';
 export function detectTacticalPatterns(game: any, analyzer: any, move: any): any[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const patterns: any[] = [];
+  if (!move || !move.from || !move.to) return patterns;
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];

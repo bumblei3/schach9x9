@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 
 // Mock PIECE_SVGS
 global.window.PIECE_SVGS = {
@@ -7,7 +7,7 @@ global.window.PIECE_SVGS = {
 };
 
 // Mock dependencies
-jest.unstable_mockModule('../js/chess-pieces.js', () => ({
+vi.mock('../js/chess-pieces.js', () => ({
   PIECE_SVGS: global.window.PIECE_SVGS,
 }));
 
@@ -31,7 +31,7 @@ describe('Tutorial System', () => {
             </div>
         `;
     tutorial = new Tutorial();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should initialize with correct number of steps', () => {

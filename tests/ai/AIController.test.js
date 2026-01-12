@@ -1,45 +1,45 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../../js/gameEngine.js';
 import { PHASES } from '../../js/config.js';
 
 // --- MOCKS ---
-jest.unstable_mockModule('../../js/ui.js', () => ({
-  updateCapturedUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  renderBoard: jest.fn(),
-  showShop: jest.fn(),
-  updateShopUI: jest.fn(),
-  animateMove: jest.fn(() => Promise.resolve()),
-  animateCheck: jest.fn(),
-  animateCheckmate: jest.fn(),
-  showPromotionModal: jest.fn(),
-  showGameEnd: jest.fn(),
-  renderEvalGraph: jest.fn(),
-  showToast: jest.fn(),
+vi.mock('../../js/ui.js', () => ({
+  updateCapturedUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  renderBoard: vi.fn(),
+  showShop: vi.fn(),
+  updateShopUI: vi.fn(),
+  animateMove: vi.fn(() => Promise.resolve()),
+  animateCheck: vi.fn(),
+  animateCheckmate: vi.fn(),
+  showPromotionModal: vi.fn(),
+  showGameEnd: vi.fn(),
+  renderEvalGraph: vi.fn(),
+  showToast: vi.fn(),
 }));
 
-jest.unstable_mockModule('../../js/sounds.js', () => ({
+vi.mock('../../js/sounds.js', () => ({
   soundManager: {
-    playSound: jest.fn(),
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playCheck: jest.fn(),
-    playGameStart: jest.fn(),
-    playGameEnd: jest.fn(),
-    playError: jest.fn(),
+    playSound: vi.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playCheck: vi.fn(),
+    playGameStart: vi.fn(),
+    playGameEnd: vi.fn(),
+    playError: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../../js/effects.js', () => ({
-  particleSystem: { spawnParticles: jest.fn() },
-  screenShake: jest.fn(),
-  confettiSystem: { trigger: jest.fn() },
+vi.mock('../../js/effects.js', () => ({
+  particleSystem: { spawnParticles: vi.fn() },
+  screenShake: vi.fn(),
+  confettiSystem: { trigger: vi.fn() },
 }));
 
-jest.unstable_mockModule('../../js/puzzleManager.js', () => ({
-  puzzleManager: { active: false, checkMove: jest.fn() },
+vi.mock('../../js/puzzleManager.js', () => ({
+  puzzleManager: { active: false, checkMove: vi.fn() },
 }));
 
 const _UI = await import('../../js/ui.js');
@@ -52,24 +52,24 @@ describe('AI Integration: Self-Play', () => {
   let moveController;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock DOM
-    document.getElementById = jest.fn(_id => {
+    document.getElementById = vi.fn(_id => {
       return {
-        appendChild: jest.fn(),
-        removeChild: jest.fn(),
+        appendChild: vi.fn(),
+        removeChild: vi.fn(),
         textContent: '',
         classList: {
-          add: jest.fn(),
-          remove: jest.fn(),
-          contains: jest.fn(),
-          toggle: jest.fn(),
+          add: vi.fn(),
+          remove: vi.fn(),
+          contains: vi.fn(),
+          toggle: vi.fn(),
         },
         style: {},
         scrollTop: 0,
         scrollHeight: 0,
-        addEventListener: jest.fn(),
+        addEventListener: vi.fn(),
       };
     });
     document.body.innerHTML = '<div id="game-container"></div>';
@@ -79,16 +79,16 @@ describe('AI Integration: Self-Play', () => {
     // game.init() does not exist in gameEngine.js Game class
     // but MoveExecutor expects game.gameController to exist for saving
     game.gameController = {
-      saveGame: jest.fn(),
-      updateStatus: jest.fn(),
-      checkGameState: jest.fn(),
+      saveGame: vi.fn(),
+      updateStatus: vi.fn(),
+      checkGameState: vi.fn(),
     };
 
     // Mock moveController
     moveController = {
-      updateUndoRedoButtons: jest.fn(),
-      playSound: jest.fn(),
-      handleMove: jest.fn(), // We won't use handleMove full pipeline, but MoveExecutor directly
+      updateUndoRedoButtons: vi.fn(),
+      playSound: vi.fn(),
+      handleMove: vi.fn(), // We won't use handleMove full pipeline, but MoveExecutor directly
     };
 
     // Disable window interaction

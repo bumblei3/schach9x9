@@ -1,7 +1,7 @@
-import { jest } from '@jest/globals';
+
 
 // Mock config
-jest.unstable_mockModule('../../js/config.js', () => ({
+vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: {
     PLAY: 'play',
@@ -16,8 +16,8 @@ jest.unstable_mockModule('../../js/config.js', () => ({
 }));
 
 // Mock BoardRenderer
-jest.unstable_mockModule('../../js/ui/BoardRenderer.js', () => ({
-  renderBoard: jest.fn(),
+vi.mock('../../js/ui/BoardRenderer.js', () => ({
+  renderBoard: vi.fn(),
 }));
 
 const GameStatusUI = await import('../../js/ui/GameStatusUI.js');
@@ -63,20 +63,20 @@ describe('GameStatusUI Component', () => {
       capturedPieces: { white: [], black: [] },
       stats: { totalMoves: 0, captures: 0, accuracies: [], playerBestMoves: 0 },
       gameController: {
-        jumpToMove: jest.fn(),
-        jumpToStart: jest.fn(),
-        saveGameToStatistics: jest.fn(),
+        jumpToMove: vi.fn(),
+        jumpToStart: vi.fn(),
+        saveGameToStatistics: vi.fn(),
       },
-      calculateMaterialAdvantage: jest.fn(() => 0),
-      getEstimatedElo: jest.fn(() => '1000'),
+      calculateMaterialAdvantage: vi.fn(() => 0),
+      getEstimatedElo: vi.fn(() => '1000'),
       whiteTime: 600,
       blackTime: 600,
-      startClock: jest.fn(),
-      stopClock: jest.fn(),
+      startClock: vi.fn(),
+      stopClock: vi.fn(),
       clockEnabled: true,
     };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should updateStatus for all phases', () => {
@@ -202,7 +202,7 @@ describe('GameStatusUI Component', () => {
     expect(point).toBeDefined();
 
     // Configure jumpToMove
-    game.gameController.jumpToMove = jest.fn();
+    game.gameController.jumpToMove = vi.fn();
 
     // Manually trigger the event on the SVG listener to avoid JSDOM bubbling issues
     // We simulate what the event listener receives
@@ -213,7 +213,7 @@ describe('GameStatusUI Component', () => {
     // The issue is likely 'closest'.
 
     // Workaround: Mock closest on the element instance we found
-    point.closest = jest.fn(selector => {
+    point.closest = vi.fn(selector => {
       return selector === '.eval-point' ? point : null;
     });
 

@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 // Mock UI module
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  getPieceText: jest.fn(piece => {
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  getPieceText: vi.fn(piece => {
     if (!piece) return '';
     const symbols = {
       p: '♟',
@@ -23,12 +23,12 @@ jest.unstable_mockModule('../js/ui.js', () => ({
     };
     return symbols[piece.type] || '?';
   }),
-  renderEvalGraph: jest.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
 // Mock sounds module
-jest.unstable_mockModule('../js/sounds.js', () => ({
-  soundManager: { init: jest.fn() },
+vi.mock('../js/sounds.js', () => ({
+  soundManager: { init: vi.fn() },
 }));
 
 // Import after mocking
@@ -42,8 +42,8 @@ describe('TutorController', () => {
     game = new Game(15, 'classic', false);
     tutorController = new TutorController(game);
     game.tutorController = tutorController;
-    game.log = jest.fn();
-    game.minimax = jest.fn().mockReturnValue(100); // Mock minimax to return a score
+    game.log = vi.fn();
+    game.minimax = vi.fn().mockReturnValue(100); // Mock minimax to return a score
   });
 
   describe('updateBestMoves', () => {
@@ -279,7 +279,7 @@ describe('TutorController', () => {
       };
 
       // Spy on getSetupTemplates
-      jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+      vi.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
       tutorController.applySetupTemplate('test_pawns');
 
@@ -305,7 +305,7 @@ describe('TutorController', () => {
         pieces: ['r', 'r'],
         cost: 10,
       };
-      jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+      vi.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
       tutorController.applySetupTemplate('test_rooks');
 
@@ -321,7 +321,7 @@ describe('TutorController', () => {
         pieces: ['q', 'p'], // 9 + 1 = 10
         cost: 10,
       };
-      jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+      vi.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
       tutorController.applySetupTemplate('test_cost');
 
@@ -338,7 +338,7 @@ describe('TutorController', () => {
         pieces: ['p'],
         cost: 1,
       };
-      jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+      vi.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
       tutorController.applySetupTemplate('test_clear');
 
@@ -391,7 +391,7 @@ describe('TutorController', () => {
     });
 
     test('should handle invalid template ID', () => {
-      jest.spyOn(game, 'log');
+      vi.spyOn(game, 'log');
       tutorController.applySetupTemplate('invalid_template_id');
       // Should not crash, may log an error
       expect(game.points).toBe(15); // Points unchanged
@@ -404,7 +404,7 @@ describe('TutorController', () => {
         pieces: ['q', 'q', 'q'], // 27 points
         cost: 27,
       };
-      jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockExpensiveTemplate]);
+      vi.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockExpensiveTemplate]);
       game.points = 15;
 
       tutorController.applySetupTemplate('expensive');
@@ -421,7 +421,7 @@ describe('TutorController', () => {
         pieces: ['p', 'p', 'p'],
         cost: 3,
       };
-      jest.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
+      vi.spyOn(tutorController, 'getSetupTemplates').mockReturnValue([mockTemplate]);
 
       tutorController.applySetupTemplate('edge_test');
       // Should not crash

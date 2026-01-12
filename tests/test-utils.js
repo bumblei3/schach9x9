@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -23,15 +23,15 @@ export function setupJSDOM() {
   // Mock HTMLCanvasElement.prototype.getContext to prevent 3D test failures
   HTMLCanvasElement.prototype.getContext = () => ({
     fillStyle: '',
-    fillRect: jest.fn(),
+    fillRect: vi.fn(),
     font: '',
     textAlign: '',
     textBaseline: '',
     strokeStyle: '',
     lineWidth: 0,
-    strokeText: jest.fn(),
-    fillText: jest.fn(),
-    measureText: jest.fn(() => ({ width: 0 })),
+    strokeText: vi.fn(),
+    fillText: vi.fn(),
+    measureText: vi.fn(() => ({ width: 0 })),
   });
 }
 
@@ -68,18 +68,18 @@ export function createMockGame(overrides = {}) {
     isAI: false,
     isAnimating: false,
     replayMode: false,
-    log: jest.fn(),
-    getValidMoves: jest.fn(() => []),
-    handleCellClick: jest.fn(),
-    isInCheck: jest.fn(() => false),
-    isSquareUnderAttack: jest.fn(() => false),
-    isInsufficientMaterial: jest.fn(() => false),
-    calculateMaterialAdvantage: jest.fn(() => 0),
-    acceptDraw: jest.fn(),
-    declineDraw: jest.fn(),
-    offerDraw: jest.fn(),
-    undoMove: jest.fn(),
-    updateBestMoves: jest.fn(),
+    log: vi.fn(),
+    getValidMoves: vi.fn(() => []),
+    handleCellClick: vi.fn(),
+    isInCheck: vi.fn(() => false),
+    isSquareUnderAttack: vi.fn(() => false),
+    isInsufficientMaterial: vi.fn(() => false),
+    calculateMaterialAdvantage: vi.fn(() => 0),
+    acceptDraw: vi.fn(),
+    declineDraw: vi.fn(),
+    offerDraw: vi.fn(),
+    undoMove: vi.fn(),
+    updateBestMoves: vi.fn(),
     gameStartTime: Date.now(),
     ...overrides,
   };
@@ -89,17 +89,17 @@ export function createMockGame(overrides = {}) {
  * Mocks Three.js basics for testing 3D components without loading the full library.
  */
 export function mockThreeJS() {
-  const mockScene = { add: jest.fn(), remove: jest.fn(), traverse: jest.fn() };
+  const mockScene = { add: vi.fn(), remove: vi.fn(), traverse: vi.fn() };
   const mockCamera = {
-    position: { set: jest.fn() },
-    lookAt: jest.fn(),
-    updateProjectionMatrix: jest.fn(),
+    position: { set: vi.fn() },
+    lookAt: vi.fn(),
+    updateProjectionMatrix: vi.fn(),
   };
   const mockRenderer = {
-    setSize: jest.fn(),
-    setPixelRatio: jest.fn(),
-    render: jest.fn(),
-    dispose: jest.fn(),
+    setSize: vi.fn(),
+    setPixelRatio: vi.fn(),
+    render: vi.fn(),
+    dispose: vi.fn(),
     domElement: document.createElement('canvas'),
   };
 

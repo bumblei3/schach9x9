@@ -1,42 +1,42 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  initBoardUI: jest.fn(),
-  renderBoard: jest.fn(),
-  showModal: jest.fn((title, message, buttons) => {
+vi.mock('../js/ui.js', () => ({
+  initBoardUI: vi.fn(),
+  renderBoard: vi.fn(),
+  showModal: vi.fn((title, message, buttons) => {
     const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.class === 'btn-primary');
     if (continueBtn && continueBtn.callback) {
       continueBtn.callback();
     }
   }),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  showShop: jest.fn(),
-  showPromotionUI: jest.fn(),
-  showToast: jest.fn(),
-  animateMove: jest.fn().mockResolvedValue(),
-  animateCheck: jest.fn(),
-  addMoveToHistory: jest.fn(),
-  renderEvalGraph: jest.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  showShop: vi.fn(),
+  showPromotionUI: vi.fn(),
+  showToast: vi.fn(),
+  animateMove: vi.fn().mockResolvedValue(),
+  animateCheck: vi.fn(),
+  addMoveToHistory: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playCheck: jest.fn(),
-    playCheckmate: jest.fn(),
-    playGameStart: jest.fn(),
-    playGameOver: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playCheck: vi.fn(),
+    playCheckmate: vi.fn(),
+    playGameStart: vi.fn(),
+    playGameOver: vi.fn(),
   },
 }));
 
@@ -50,48 +50,48 @@ describe('Integration Tests', () => {
 
   beforeEach(() => {
     // Mock DOM elements
-    global.document.getElementById = jest.fn(() => ({
+    global.document.getElementById = vi.fn(() => ({
       textContent: '',
       innerHTML: '',
-      classList: { add: jest.fn(), remove: jest.fn() },
+      classList: { add: vi.fn(), remove: vi.fn() },
       style: {},
       disabled: false,
-      appendChild: jest.fn(),
+      appendChild: vi.fn(),
       value: '',
       checked: false,
       scrollTop: 0,
       scrollHeight: 100,
-      addEventListener: jest.fn(),
+      addEventListener: vi.fn(),
     }));
 
-    global.document.querySelector = jest.fn(() => ({
-      classList: { add: jest.fn(), remove: jest.fn() },
+    global.document.querySelector = vi.fn(() => ({
+      classList: { add: vi.fn(), remove: vi.fn() },
       innerHTML: '',
       parentElement: {
-        querySelector: jest.fn(() => ({ offsetWidth: 50 })),
+        querySelector: vi.fn(() => ({ offsetWidth: 50 })),
       },
     }));
 
-    global.document.querySelectorAll = jest.fn(() => []);
-    global.document.createElement = jest.fn(() => ({
-      classList: { add: jest.fn(), remove: jest.fn() },
+    global.document.querySelectorAll = vi.fn(() => []);
+    global.document.createElement = vi.fn(() => ({
+      classList: { add: vi.fn(), remove: vi.fn() },
       dataset: {},
-      addEventListener: jest.fn(),
-      appendChild: jest.fn(),
+      addEventListener: vi.fn(),
+      appendChild: vi.fn(),
       innerHTML: '',
       style: {},
     }));
 
     // Mock window.confirm
-    global.confirm = jest.fn(() => true);
-    global.alert = jest.fn();
+    global.confirm = vi.fn(() => true);
+    global.alert = vi.fn();
 
     // Mock localStorage
     const localStorageMock = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn(),
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
     };
     Object.defineProperty(global, 'localStorage', { value: localStorageMock, writable: true });
 
@@ -108,7 +108,7 @@ describe('Integration Tests', () => {
 
     // Mock AI Engine if needed
     game.aiEngine = {
-      makeMove: jest.fn(),
+      makeMove: vi.fn(),
     };
   });
 

@@ -1,7 +1,7 @@
-import { jest } from '@jest/globals';
+
 
 // Mock config
-jest.unstable_mockModule('../../js/config.js', () => ({
+vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: {
     PLAY: 'play',
@@ -30,7 +30,7 @@ describe('TutorUI Component', () => {
       phase: 'play',
       turn: 'white',
       tutorController: {
-        getSetupTemplates: jest.fn(() => [
+        getSetupTemplates: vi.fn(() => [
           {
             id: 'template1',
             name: 'Template 1',
@@ -39,8 +39,8 @@ describe('TutorUI Component', () => {
             cost: 10,
           },
         ]),
-        applySetupTemplate: jest.fn(),
-        getTutorHints: jest.fn(async () => [
+        applySetupTemplate: vi.fn(),
+        getTutorHints: vi.fn(async () => [
           {
             move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
             notation: 'a1',
@@ -57,7 +57,7 @@ describe('TutorUI Component', () => {
           },
         ]),
       },
-      getTutorHints: jest.fn(async () => [
+      getTutorHints: vi.fn(async () => [
         {
           move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
           notation: 'a1',
@@ -73,8 +73,8 @@ describe('TutorUI Component', () => {
           score: 100,
         },
       ]),
-      executeMove: jest.fn(),
-      analyzeMoveWithExplanation: jest.fn((_move, _score) => ({
+      executeMove: vi.fn(),
+      analyzeMoveWithExplanation: vi.fn((_move, _score) => ({
         category: 'excellent',
         qualityLabel: 'Top Move',
         tacticalExplanations: [],
@@ -82,19 +82,19 @@ describe('TutorUI Component', () => {
         warnings: [],
         questions: [],
       })),
-      getScoreDescription: jest.fn(_score => ({
+      getScoreDescription: vi.fn(_score => ({
         emoji: '🔥',
         label: 'Super',
         color: '#ff0000',
       })),
       arrowRenderer: {
-        clearArrows: jest.fn(),
-        highlightMoves: jest.fn(),
+        clearArrows: vi.fn(),
+        highlightMoves: vi.fn(),
       },
     };
 
-    window.confirm = jest.fn(() => true);
-    window.alert = jest.fn();
+    window.confirm = vi.fn(() => true);
+    window.alert = vi.fn();
     window.PIECE_SVGS = null;
   });
 
@@ -194,7 +194,7 @@ describe('TutorUI Component', () => {
 
     test('should alert in overlay mode if no hints available', async () => {
       document.body.innerHTML = '';
-      game.tutorController.getTutorHints = jest.fn(async () => []);
+      game.tutorController.getTutorHints = vi.fn(async () => []);
       await TutorUI.showTutorSuggestions(game);
       expect(window.alert).toHaveBeenCalledWith(
         'Keine Tipps verfügbar! Spiele erst ein paar Züge.'
@@ -242,7 +242,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should show "No suggestions" if hints empty in panel', async () => {
-      game.getTutorHints = jest.fn(async () => []);
+      game.getTutorHints = vi.fn(async () => []);
       await TutorUI.showTutorSuggestions(game);
 
       const container = document.getElementById('tutor-suggestions');
@@ -309,7 +309,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should render hints without questions', async () => {
-      game.getTutorHints = jest.fn(async () => [
+      game.getTutorHints = vi.fn(async () => [
         {
           move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
           notation: 'a1',

@@ -2,7 +2,7 @@
  * Tests for AI Engine
  */
 
-import { jest } from '@jest/globals';
+
 
 // Mock WasmBridge with basic material evaluation
 // Real WASM loading via wasmBridge's Node.js support
@@ -169,7 +169,7 @@ describe('AI Engine', () => {
 
     test('easy should prefer captures', async () => {
       // Mock random to ensure best move (capture) is picked from candidates
-      const mockRandom = jest.spyOn(global.Math, 'random').mockReturnValue(0);
+      const mockRandom = vi.spyOn(global.Math, 'random').mockReturnValue(0);
 
       board[4][4] = { type: 'r', color: 'white' };
       board[4][6] = { type: 'q', color: 'black' };

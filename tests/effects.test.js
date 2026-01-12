@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+
 import * as Effects from '../js/effects.js';
 
 describe('Effects System', () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="board-container"></div><div id="board-wrapper"></div>';
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('ParticleSystem spawn and update', () => {
@@ -35,7 +35,7 @@ describe('Effects System', () => {
     expect(el).not.toBeNull();
     expect(el.textContent).toBe('+10');
 
-    jest.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(2000);
     expect(document.querySelector('.floating-text')).toBeNull();
   });
 
@@ -59,7 +59,7 @@ describe('Effects System', () => {
   });
 
   test('triggerVibration', () => {
-    global.navigator.vibrate = jest.fn();
+    global.navigator.vibrate = vi.fn();
     Effects.triggerVibration('heavy');
     expect(global.navigator.vibrate).toHaveBeenCalledWith([100, 50, 100]);
 
@@ -75,7 +75,7 @@ describe('Effects System', () => {
     // Request animation frame is called
     expect(document.getElementById('board-wrapper').style.transition).toBe('none');
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
     // It should reset
   });
 });

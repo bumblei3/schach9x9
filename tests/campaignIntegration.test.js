@@ -1,41 +1,41 @@
-import { jest } from '@jest/globals';
+
 
 // Mock dependencies
 const mockUI = {
-  updateStatus: jest.fn(),
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  updateShopUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  initBoardUI: jest.fn(),
-  showCampaignVictoryModal: jest.fn(),
-  showShop: jest.fn(),
-  closeModal: jest.fn(),
-  updatePointsUI: jest.fn(),
+  updateStatus: vi.fn(),
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  updateShopUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  initBoardUI: vi.fn(),
+  showCampaignVictoryModal: vi.fn(),
+  showShop: vi.fn(),
+  closeModal: vi.fn(),
+  updatePointsUI: vi.fn(),
 };
 
-jest.unstable_mockModule('../js/ui.js', () => mockUI);
+vi.mock('../js/ui.js', () => mockUI);
 
 const mockSoundManager = {
-  init: jest.fn(),
-  playGameOver: jest.fn(),
-  playSuccess: jest.fn(),
+  init: vi.fn(),
+  playGameOver: vi.fn(),
+  playSuccess: vi.fn(),
 };
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: mockSoundManager,
 }));
 
-jest.unstable_mockModule('../js/tutorial.js', () => ({
+vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
     constructor() {}
   },
 }));
 
 // Mock other dependencies of GameController
-jest.unstable_mockModule('../js/gameEngine.js', () => ({
+vi.mock('../js/gameEngine.js', () => ({
   Game: class {
     constructor() {
       this.board = [];
@@ -54,11 +54,11 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
 const localStorageMock = (() => {
   let store = {};
   return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => {
+    getItem: vi.fn(key => store[key] || null),
+    setItem: vi.fn((key, value) => {
       store[key] = value.toString();
     }),
-    clear: jest.fn(() => {
+    clear: vi.fn(() => {
       store = {};
     }),
   };
@@ -74,7 +74,7 @@ describe('Campaign Integration', () => {
   let game;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     campaignManager.resetState();
 
@@ -92,13 +92,13 @@ describe('Campaign Integration', () => {
       capturedPieces: { white: [], black: [] },
       stats: { totalMoves: 0, promotions: 0 },
       isAI: true,
-      calculateMaterialAdvantage: jest.fn(() => 0),
+      calculateMaterialAdvantage: vi.fn(() => 0),
     };
 
     // Instantiate controller
     gameController = new GameController(game);
-    gameController.statisticsManager = { saveGame: jest.fn() };
-    gameController.timeManager = { startClock: jest.fn() };
+    gameController.statisticsManager = { saveGame: vi.fn() };
+    gameController.timeManager = { startClock: vi.fn() };
   });
 
   test('startCampaignLevel should initialize level_1 (fixed)', () => {

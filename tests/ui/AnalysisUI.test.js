@@ -1,18 +1,18 @@
-import { jest } from '@jest/globals';
+
 import { setupJSDOM, createMockGame } from '../test-utils.js';
 
 // Mock UI module
-jest.unstable_mockModule('../../js/ui.js', () => ({
-  showModal: jest.fn(),
-  closeModal: jest.fn(),
-  showToast: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  renderEvalGraph: jest.fn(),
+vi.mock('../../js/ui.js', () => ({
+  showModal: vi.fn(),
+  closeModal: vi.fn(),
+  showToast: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
 // Mock PostGameAnalyzer
-jest.unstable_mockModule('../../js/tutor/PostGameAnalyzer.js', () => ({
-  analyzeGame: jest.fn(() => ({
+vi.mock('../../js/tutor/PostGameAnalyzer.js', () => ({
+  analyzeGame: vi.fn(() => ({
     accuracy: 90,
     counts: {
       brilliant: 0,
@@ -26,7 +26,7 @@ jest.unstable_mockModule('../../js/tutor/PostGameAnalyzer.js', () => ({
       book: 0,
     },
   })),
-  classifyMove: jest.fn(() => 'best'),
+  classifyMove: vi.fn(() => 'best'),
   QUALITY_METADATA: {
     brilliant: { label: 'Brilliant', symbol: '!!', color: '#31c48d' },
     great: { label: 'Großartig', symbol: '!', color: '#31c48d' },
@@ -41,12 +41,12 @@ jest.unstable_mockModule('../../js/tutor/PostGameAnalyzer.js', () => ({
 }));
 
 // Mock logger
-jest.unstable_mockModule('../../js/logger.js', () => ({
+vi.mock('../../js/logger.js', () => ({
   logger: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
@@ -63,12 +63,12 @@ describe('AnalysisUI', () => {
     setupJSDOM();
 
     mockWorker = {
-      postMessage: jest.fn(),
+      postMessage: vi.fn(),
       onmessage: null,
-      addEventListener: jest.fn((type, handler) => {
+      addEventListener: vi.fn((type, handler) => {
         if (type === 'message') mockWorker.onmessage = handler;
       }),
-      removeEventListener: jest.fn(),
+      removeEventListener: vi.fn(),
     };
 
     game = createMockGame();
@@ -77,12 +77,12 @@ describe('AnalysisUI', () => {
     };
     game.gameController = {
       moveController: {
-        reconstructBoardAtMove: jest.fn(),
+        reconstructBoardAtMove: vi.fn(),
       },
     };
 
     analysisUI = new AnalysisUI({ game });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('showAnalysisPrompt should call UI.showModal', async () => {
@@ -109,7 +109,7 @@ describe('AnalysisUI', () => {
     ];
 
     // Mock undoMoveOnBoard to change board
-    jest.spyOn(analysisUI, 'undoMoveOnBoard').mockImplementation(board => {
+    vi.spyOn(analysisUI, 'undoMoveOnBoard').mockImplementation(board => {
       board[0][0] = 'initial';
     });
 

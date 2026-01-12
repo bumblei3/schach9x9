@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/config.js';
 
 // Setup JSDOM body
@@ -23,42 +23,42 @@ document.body.innerHTML = `
 `;
 
 // Mock dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  animateMove: jest.fn().mockResolvedValue(),
-  addCapturedPiece: jest.fn(),
-  showPromotionUI: jest.fn((game, r, c, color, moveRecord, callback) => {
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  animateMove: vi.fn().mockResolvedValue(),
+  addCapturedPiece: vi.fn(),
+  showPromotionUI: vi.fn((game, r, c, color, moveRecord, callback) => {
     if (game && game.board && game.board[r] && game.board[r][c]) {
       game.board[r][c].type = 'e';
     }
     callback();
   }),
-  showShop: jest.fn(),
-  renderEvalGraph: jest.fn(),
+  showShop: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playGameOver: jest.fn(),
-    playGameStart: jest.fn(),
-    init: jest.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playGameOver: vi.fn(),
+    playGameStart: vi.fn(),
+    init: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(() => 0),
-  findKing: jest.fn(() => ({ r: 0, c: 0 })),
-  getBestMove: jest.fn().mockResolvedValue(null),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(() => 0),
+  findKing: vi.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: vi.fn().mockResolvedValue(null),
 }));
 
 const { Game } = await import('../js/gameEngine.js');
@@ -71,7 +71,7 @@ describe('Controller Logic Deep Dive', () => {
   let moveController;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     game = new Game(15, 'classic');
     game.clockEnabled = true;
     game.whiteTime = 300; // 5 minutes in seconds
@@ -86,13 +86,13 @@ describe('Controller Logic Deep Dive', () => {
     game.gameStartTime = Date.now();
     game.lastMoveTime = Date.now();
 
-    jest.clearAllMocks();
-    global.alert = jest.fn(); // Mock alert for save/load
+    vi.clearAllMocks();
+    global.alert = vi.fn(); // Mock alert for save/load
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe('Clock Mechanics', () => {
@@ -101,8 +101,8 @@ describe('Controller Logic Deep Dive', () => {
       expect(game.whiteTime).toBe(300);
 
       const startNow = Date.now();
-      jest.spyOn(Date, 'now').mockReturnValue(startNow + 1000);
-      jest.advanceTimersByTime(1000); // Trigger the interval tick
+      vi.spyOn(Date, 'now').mockReturnValue(startNow + 1000);
+      vi.advanceTimersByTime(1000); // Trigger the interval tick
 
       // Delta is 1s, so whiteTime should be 299
       expect(game.whiteTime).toBeLessThan(300);
@@ -110,7 +110,7 @@ describe('Controller Logic Deep Dive', () => {
 
       // Advance to timeout
       Date.now.mockReturnValue(startNow + 301000);
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
 
       expect(game.whiteTime).toBe(0);
       expect(game.phase).toBe(PHASES.GAME_OVER);
@@ -123,8 +123,8 @@ describe('Controller Logic Deep Dive', () => {
       gameController.startClock();
 
       const now = Date.now();
-      jest.spyOn(Date, 'now').mockReturnValue(now + 1000);
-      jest.advanceTimersByTime(1000);
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000);
+      vi.advanceTimersByTime(1000);
 
       expect(game.whiteTime).toBeCloseTo(299, 0);
       expect(game.blackTime).toBe(300);
@@ -134,7 +134,7 @@ describe('Controller Logic Deep Dive', () => {
       game.lastMoveTime = Date.now(); // Update to now (now + 1000)
 
       Date.now.mockReturnValue(now + 2000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
 
       expect(game.whiteTime).toBeCloseTo(299, 0);
       expect(game.blackTime).toBeCloseTo(299, 0);
@@ -143,8 +143,8 @@ describe('Controller Logic Deep Dive', () => {
 
   describe('State Persistence (Save/Load)', () => {
     test('should save and load state correctly via localStorage', () => {
-      const spySet = jest.spyOn(Storage.prototype, 'setItem');
-      const spyGet = jest.spyOn(Storage.prototype, 'getItem');
+      const spySet = vi.spyOn(Storage.prototype, 'setItem');
+      const spyGet = vi.spyOn(Storage.prototype, 'getItem');
 
       game.points = 10;
       gameController.saveGame();

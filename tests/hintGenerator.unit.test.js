@@ -1,20 +1,21 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 // Mock UI
-jest.unstable_mockModule('../js/ui.js', () => ({
-  showTutorSuggestions: jest.fn(),
-  renderBoard: jest.fn(),
-  updateShopUI: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  showTutorSuggestions: vi.fn(),
+  renderBoard: vi.fn(),
+  updateShopUI: vi.fn(),
+  getPieceText: vi.fn(piece => piece ? piece.type : ''),
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  getBestMoveDetailed: jest.fn(),
-  extractPV: jest.fn(() => []),
-  evaluatePosition: jest.fn(() => 0),
-  isSquareAttacked: jest.fn(() => false),
-  see: jest.fn(() => 0),
+vi.mock('../js/aiEngine.js', () => ({
+  getBestMoveDetailed: vi.fn(),
+  extractPV: vi.fn(() => []),
+  evaluatePosition: vi.fn(() => 0),
+  isSquareAttacked: vi.fn(() => false),
+  see: vi.fn(() => 0),
 }));
 
 const aiEngine = await import('../js/aiEngine.js');
@@ -34,7 +35,7 @@ describe('HintGenerator - Unit Tests', () => {
   let mockTutorController;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     game = new Game(15, 'classic');
     game.board = Array(9)
@@ -43,13 +44,13 @@ describe('HintGenerator - Unit Tests', () => {
     game.bestMoves = [];
 
     mockTutorController = {
-      getPieceName: jest.fn(type => type),
-      getThreatenedPieces: jest.fn(() => []),
-      getDefendedPieces: jest.fn(() => []),
-      detectTacticalPatterns: jest.fn(() => []),
-      analyzeMoveWithExplanation: jest.fn(() => ({ title: 'Test' })),
-      getSetupTemplates: jest.fn(() => []),
-      debouncedGetTutorHints: jest.fn(),
+      getPieceName: vi.fn(type => type),
+      getThreatenedPieces: vi.fn(() => []),
+      getDefendedPieces: vi.fn(() => []),
+      detectTacticalPatterns: vi.fn(() => []),
+      analyzeMoveWithExplanation: vi.fn(() => ({ title: 'Test' })),
+      getSetupTemplates: vi.fn(() => []),
+      debouncedGetTutorHints: vi.fn(),
     };
   });
 
@@ -111,7 +112,7 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('getTutorHints should return empty if no legal moves', async () => {
     game.phase = PHASES.PLAY;
-    game.getAllLegalMoves = jest.fn(() => []);
+    game.getAllLegalMoves = vi.fn(() => []);
     expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
 

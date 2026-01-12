@@ -1,28 +1,30 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/config.js';
 
 // Mock UI and other dependencies
 global.document = {
-  getElementById: jest.fn(() => ({
+  getElementById: vi.fn(() => ({
     textContent: '',
-    appendChild: jest.fn(),
+    appendChild: vi.fn(),
     innerHTML: '',
     style: {},
-    classList: { add: jest.fn(), remove: jest.fn() },
+    classList: { add: vi.fn(), remove: vi.fn() },
   })),
   body: {
-    appendChild: jest.fn(),
+    appendChild: vi.fn(),
   },
 };
 
-const UI = {
-  showToast: jest.fn(),
-  showModal: jest.fn(),
-  renderBoard: jest.fn(),
-};
+vi.mock('../js/ui.js', () => ({
+  showToast: vi.fn(),
+  showModal: vi.fn(),
+  renderBoard: vi.fn(),
+  getPieceText: vi.fn(() => 'P'),
+  showMoveQuality: vi.fn(),
+  updateStatus: vi.fn(),
+}));
 
-jest.unstable_mockModule('../js/ui.js', () => UI);
-
+const UI = await import('../js/ui.js');
 const { TutorController } = await import('../js/tutorController.js');
 
 describe('TutorController Extra Coverage', () => {
@@ -40,19 +42,19 @@ describe('TutorController Extra Coverage', () => {
       lastEval: 0,
       stats: { accuracies: [] },
       bestMoves: [],
-      getAllLegalMoves: jest.fn(() => []),
-      getValidMoves: jest.fn(() => []),
-      isSquareUnderAttack: jest.fn(() => false),
-      isSquareAttacked: jest.fn(() => false), // Legacy support if needed
-      isInCheck: jest.fn(() => false),
-      isCheckmate: jest.fn(() => false),
-      isStalemate: jest.fn(() => false),
-      findKing: jest.fn(() => ({ r: 8, c: 4 })),
-      undoMove: jest.fn(),
-      log: jest.fn(),
+      getAllLegalMoves: vi.fn(() => []),
+      getValidMoves: vi.fn(() => []),
+      isSquareUnderAttack: vi.fn(() => false),
+      isSquareAttacked: vi.fn(() => false), // Legacy support if needed
+      isInCheck: vi.fn(() => false),
+      isCheckmate: vi.fn(() => false),
+      isStalemate: vi.fn(() => false),
+      findKing: vi.fn(() => ({ r: 8, c: 4 })),
+      undoMove: vi.fn(),
+      log: vi.fn(),
     };
     tutor = new TutorController(game);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handlePlayerMove', () => {
@@ -92,7 +94,7 @@ describe('TutorController Extra Coverage', () => {
   });
 
   describe('checkBlunder', () => {
-    test('should detect blunder for white (heavy eval drop)', () => {
+    test('should detect blunder for white (heavy eval drop)', async () => {
       game.lastEval = 100; // White is +1.0
       const moveRecord = {
         from: { r: 6, c: 4 },
@@ -104,15 +106,13 @@ describe('TutorController Extra Coverage', () => {
       game.board[6][4] = { type: 'p', color: 'white' };
 
       // Mock analysis results and internal calls
-      tutor.analyzeMoveWithExplanation = jest.fn(() => ({
+      tutor.analyzeMoveWithExplanation = vi.fn(() => ({
         title: 'Blunder',
         tacticalExplanations: [],
         warnings: [],
       }));
-      tutor.showBlunderWarning = jest.fn();
-
-      tutor.checkBlunder(moveRecord);
-
+      tutor.showBlunderWarning = vi.fn();
+      await tutor.checkBlunder(moveRecord);
       expect(tutor.showBlunderWarning).toHaveBeenCalled();
       expect(game.lastEval).toBe(-350);
     });
@@ -120,11 +120,13 @@ describe('TutorController Extra Coverage', () => {
     test('should not detect blunder for minor drop', () => {
       game.lastEval = 100;
       const moveRecord = {
+        from: { r: 6, c: 4 },
+        to: { r: 4, c: 4 },
         piece: { color: 'white' },
         evalScore: 50, // Drop of 0.5
       };
 
-      tutor.showBlunderWarning = jest.fn();
+      tutor.showBlunderWarning = vi.fn();
       tutor.checkBlunder(moveRecord);
 
       expect(tutor.showBlunderWarning).not.toHaveBeenCalled();
@@ -143,7 +145,7 @@ describe('TutorController Extra Coverage', () => {
       };
 
       // Mock getMoveNotation to avoid board lookup
-      tutor.getMoveNotation = jest.fn(() => 'e4');
+      tutor.getMoveNotation = vi.fn(() => 'e4');
 
       tutor.showBlunderWarning(analysis);
 

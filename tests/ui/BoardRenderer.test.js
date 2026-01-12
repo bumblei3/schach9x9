@@ -1,22 +1,22 @@
-import { jest } from '@jest/globals';
+
 
 // Mock config first
-jest.unstable_mockModule('../../js/config.js', () => ({
+vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: { PLAY: 'play' },
   PIECE_VALUES: { p: 100, k: 0, r: 500, n: 300, b: 300, q: 900 },
 }));
 
 // Mock dependencies
-jest.unstable_mockModule('../../js/effects.js', () => ({
-  particleSystem: { spawn: jest.fn() },
-  floatingTextManager: { show: jest.fn() },
-  shakeScreen: jest.fn(),
-  triggerVibration: jest.fn(),
-  confettiSystem: { spawn: jest.fn() },
+vi.mock('../../js/effects.js', () => ({
+  particleSystem: { spawn: vi.fn() },
+  floatingTextManager: { show: vi.fn() },
+  shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
+  confettiSystem: { spawn: vi.fn() },
 }));
 
-jest.unstable_mockModule('../../js/utils.js', () => ({
+vi.mock('../../js/utils.js', () => ({
   debounce: fn => fn,
 }));
 
@@ -45,14 +45,14 @@ describe('BoardRenderer Component', () => {
       turn: 'white',
       moveHistory: [],
       capturedPieces: { white: [], black: [] },
-      arrowRenderer: { highlightMove: jest.fn(), clearArrows: jest.fn() },
-      handleCellClick: jest.fn(),
-      getValidMoves: jest.fn(() => []),
-      isSquareUnderAttack: jest.fn(() => false),
+      arrowRenderer: { highlightMove: vi.fn(), clearArrows: vi.fn() },
+      handleCellClick: vi.fn(),
+      getValidMoves: vi.fn(() => []),
+      isSquareUnderAttack: vi.fn(() => false),
     };
 
     // Setup DOM mocks for interaction
-    document.elementFromPoint = jest.fn();
+    document.elementFromPoint = vi.fn();
   });
 
   test('should initialize and render board correctly', () => {
@@ -71,17 +71,17 @@ describe('BoardRenderer Component', () => {
   });
 
   test('should animate move', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const from = { r: 0, c: 0 };
     const to = { r: 1, c: 1 };
     const piece = { type: 'p', color: 'white' };
 
     BoardRenderer.animateMove(game, from, to, piece);
-    jest.runAllTimers();
+    vi.runAllTimers();
     // Since we can't easily check visual animation state in JSDOM without more complex setup,
     // we verify that no errors occurred and functions completed.
     expect(true).toBe(true);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should handle interaction events', () => {

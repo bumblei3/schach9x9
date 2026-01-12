@@ -1,19 +1,19 @@
-import { jest } from '@jest/globals';
+
 import { errorManager } from '../js/utils/ErrorManager.js';
 import { notificationUI } from '../js/ui/NotificationUI.js';
 import { logger } from '../js/logger.js';
 
 // Use spyOn for notificationUI
-jest.spyOn(notificationUI, 'show').mockImplementation(() => {});
+vi.spyOn(notificationUI, 'show').mockImplementation(() => {});
 
 // Spy on logger instead of mocking entire module to avoid ESM issues
-jest.spyOn(logger, 'error').mockImplementation(() => {});
-jest.spyOn(logger, 'warn').mockImplementation(() => {});
-jest.spyOn(logger, 'info').mockImplementation(() => {});
+vi.spyOn(logger, 'error').mockImplementation(() => {});
+vi.spyOn(logger, 'warn').mockImplementation(() => {});
+vi.spyOn(logger, 'info').mockImplementation(() => {});
 
 describe('ErrorManager', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     document.body.innerHTML = `
       <div id="error-overlay">
         <div class="content"></div>
@@ -74,7 +74,7 @@ describe('ErrorManager', () => {
   test('should use alert fallback if overlay is missing', () => {
     // Remove overlay
     document.body.innerHTML = '';
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
     const error = new Error('Critical No UI');
     errorManager.handleError(error, { critical: true });
@@ -100,7 +100,7 @@ describe('ErrorManager', () => {
     expect(logger.info).toHaveBeenCalledWith('ErrorManager initialized');
 
     // Test the handlers
-    const errorSpy = jest.spyOn(errorManager, 'handleError');
+    const errorSpy = vi.spyOn(errorManager, 'handleError');
 
     // Test onerror
     if (window.onerror) {

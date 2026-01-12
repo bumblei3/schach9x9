@@ -1,13 +1,13 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 // Mock UI
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  updateShopUI: jest.fn(),
-  showModal: jest.fn(),
-  closeModal: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  updateShopUI: vi.fn(),
+  showModal: vi.fn(),
+  closeModal: vi.fn(),
 }));
 
 const { ShopManager } = await import('../js/shop/ShopManager.js');
@@ -22,7 +22,7 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
     shopManager = new ShopManager(game);
 
     // Mock game log
-    game.log = jest.fn();
+    game.log = vi.fn();
 
     // Mock PIECE_SVGS globally if needed, though we don't call it directly in ShopManager logic usually
     global.window = {

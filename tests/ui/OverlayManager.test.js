@@ -2,11 +2,11 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
+
 
 // Mock BoardRenderer
-jest.unstable_mockModule('../../js/ui/BoardRenderer.js', () => ({
-  renderBoard: jest.fn(),
+vi.mock('../../js/ui/BoardRenderer.js', () => ({
+  renderBoard: vi.fn(),
 }));
 
 const OverlayManager = await import('../../js/ui/OverlayManager.js');
@@ -53,12 +53,12 @@ describe('OverlayManager', () => {
       },
     };
 
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('showModal / closeModal', () => {
@@ -72,7 +72,7 @@ describe('OverlayManager', () => {
     });
 
     test('showModal adds action buttons', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       OverlayManager.showModal('Title', 'Msg', [
         { text: 'OK', class: 'btn-primary', callback },
         { text: 'Cancel', class: 'btn-secondary' },
@@ -106,11 +106,11 @@ describe('OverlayManager', () => {
         board: Array(9)
           .fill(null)
           .map(() => Array(9).fill(null)),
-        log: jest.fn(),
+        log: vi.fn(),
       };
       game.board[0][0] = { type: 'p', color: 'white' };
 
-      const callback = jest.fn();
+      const callback = vi.fn();
       OverlayManager.showPromotionUI(game, 0, 0, 'white', {}, callback);
 
       const overlay = document.getElementById('promotion-overlay');
@@ -125,11 +125,11 @@ describe('OverlayManager', () => {
         board: Array(9)
           .fill(null)
           .map(() => Array(9).fill(null)),
-        log: jest.fn(),
+        log: vi.fn(),
       };
       game.board[0][0] = { type: 'p', color: 'white' };
       const moveRecord = {};
-      const callback = jest.fn();
+      const callback = vi.fn();
 
       OverlayManager.showPromotionUI(game, 0, 0, 'white', moveRecord, callback);
 
@@ -147,7 +147,7 @@ describe('OverlayManager', () => {
 
     test('returns early if overlay missing', () => {
       document.body.innerHTML = '';
-      OverlayManager.showPromotionUI({}, 0, 0, 'white', {}, jest.fn()); // Should not throw
+      OverlayManager.showPromotionUI({}, 0, 0, 'white', {}, vi.fn()); // Should not throw
     });
   });
 
@@ -212,11 +212,11 @@ describe('OverlayManager', () => {
       expect(toast).not.toBeNull();
 
       // Advance 3000ms for fade-out class
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
       expect(toast.classList.contains('fade-out')).toBe(true);
 
       // Advance 300ms for remove
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
       expect(container.querySelector('.toast')).toBeNull();
     });
   });

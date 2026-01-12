@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+
 import { setupJSDOM } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies (we want to test UI logic so we use the real UI but mock sounds/controllers if needed)
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playGameOver: jest.fn(),
-    playGameStart: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playGameOver: vi.fn(),
+    playGameStart: vi.fn(),
   },
 }));
 
@@ -22,7 +22,7 @@ describe('Visual DOM Snapshot Tests', () => {
   beforeEach(() => {
     setupJSDOM();
     game = new Game(15, 'setup');
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Initial setup phase snapshot', () => {

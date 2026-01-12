@@ -1,6 +1,6 @@
 import { getBestMoveDetailed } from '../js/aiEngine.js';
 import { logger } from '../js/logger.js';
-import { jest } from '@jest/globals';
+
 
 // Mock Worker class
 class MockWorker {
@@ -46,14 +46,14 @@ describe('AI Engine Worker Integration', () => {
     global.window = {}; // Mock window existence
 
     // Silence logs
-    jest.spyOn(logger, 'info').mockImplementation(() => {});
-    jest.spyOn(logger, 'debug').mockImplementation(() => {});
+    vi.spyOn(logger, 'info').mockImplementation(() => {});
+    vi.spyOn(logger, 'debug').mockImplementation(() => {});
   });
 
   afterAll(() => {
     global.Worker = originalWorker;
     global.window = originalWindow;
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {

@@ -1,11 +1,11 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  updateStatus: jest.fn(),
-  renderEvalGraph: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  updateStatus: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
 const UI = await import('../js/ui.js');
@@ -29,24 +29,24 @@ describe('AnalysisController', () => {
       selectedSquare: null,
       validMoves: [],
       halfMoveClock: 0,
-      log: jest.fn(),
+      log: vi.fn(),
       aiController: {
-        analyzePosition: jest.fn(),
+        analyzePosition: vi.fn(),
       },
       analysisMode: false,
     };
 
     gameController = {
       game: game,
-      stopClock: jest.fn(),
-      startClock: jest.fn(),
+      stopClock: vi.fn(),
+      startClock: vi.fn(),
     };
 
     analysisController = new AnalysisController(gameController);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Enter Analysis Mode', () => {
@@ -134,7 +134,7 @@ describe('AnalysisController', () => {
   describe('Navigation', () => {
     beforeEach(() => {
       game.moveController = {
-        reconstructBoardAtMove: jest.fn(),
+        reconstructBoardAtMove: vi.fn(),
       };
       game.analysisMode = true;
     });

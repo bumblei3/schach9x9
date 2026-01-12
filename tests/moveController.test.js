@@ -1,55 +1,55 @@
-import { jest } from '@jest/globals';
+
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import { setupJSDOM } from './test-utils.js';
 
 // Mock UI and SoundManager modules
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  showPromotionModal: jest.fn(),
-  showPromotionUI: jest.fn(),
-  showToast: jest.fn(),
-  animateMove: jest.fn().mockResolvedValue(),
-  animateCheck: jest.fn(),
-  animateCheckmate: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  showShop: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateClockUI: jest.fn(),
-  renderEvalGraph: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  showPromotionModal: vi.fn(),
+  showPromotionUI: vi.fn(),
+  showToast: vi.fn(),
+  animateMove: vi.fn().mockResolvedValue(),
+  animateCheck: vi.fn(),
+  animateCheckmate: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  showShop: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateClockUI: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playCheck: jest.fn(),
-    playCheckmate: jest.fn(),
-    playGameOver: jest.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playCheck: vi.fn(),
+    playCheckmate: vi.fn(),
+    playGameOver: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(() => 0),
-  findKing: jest.fn(() => ({ r: 0, c: 0 })),
-  getBestMove: jest.fn().mockResolvedValue(null),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(() => 0),
+  findKing: vi.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: vi.fn().mockResolvedValue(null),
 }));
 
 // DOM setup is handled in setupJSDOM
 
 // Mock localStorage
-Storage.prototype.getItem = jest.fn(() => null);
-Storage.prototype.setItem = jest.fn();
-Storage.prototype.removeItem = jest.fn();
-Storage.prototype.clear = jest.fn();
+Storage.prototype.getItem = vi.fn(() => null);
+Storage.prototype.setItem = vi.fn();
+Storage.prototype.removeItem = vi.fn();
+Storage.prototype.clear = vi.fn();
 
 // Mock alert
-global.alert = jest.fn();
+global.alert = vi.fn();
 
 // Import MoveController AFTER mocking
 const { MoveController } = await import('../js/moveController.js');
@@ -68,17 +68,17 @@ describe('MoveController', () => {
 
     moveController = new MoveController(game);
     game.moveController = moveController; // Link back
-    game.log = jest.fn(); // Mock log function
-    game.stopClock = jest.fn();
-    game.startClock = jest.fn();
-    game.updateBestMoves = jest.fn();
+    game.log = vi.fn(); // Mock log function
+    game.stopClock = vi.fn();
+    game.startClock = vi.fn();
+    game.updateBestMoves = vi.fn();
 
     // Place Kings to avoid "King captured" game over logic
     // Use corners to avoid conflict with test moves (usually in center/files 4)
     game.board[0][0] = { type: 'k', color: 'black' };
     game.board[8][8] = { type: 'k', color: 'white' };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should execute a simple move', async () => {
@@ -526,30 +526,30 @@ describe('MoveController', () => {
       // Verify mock works in test scope
       console.log('Test Verify:', localStorage.getItem('schach9x9_save_autosave'));
       // Explicitly mock getElementById for this test to avoid leakage issues
-      document.getElementById = jest.fn(id => {
-        if (id === 'ai-toggle') return { checked: false, addEventListener: jest.fn() };
-        if (id === 'difficulty-select') return { value: 'medium', addEventListener: jest.fn() };
+      document.getElementById = vi.fn(id => {
+        if (id === 'ai-toggle') return { checked: false, addEventListener: vi.fn() };
+        if (id === 'difficulty-select') return { value: 'medium', addEventListener: vi.fn() };
         if (id === 'draw-offer-overlay')
-          return { classList: { remove: jest.fn(), add: jest.fn() } };
+          return { classList: { remove: vi.fn(), add: vi.fn() } };
         if (id === 'move-history-panel')
-          return { classList: { remove: jest.fn(), add: jest.fn() } };
+          return { classList: { remove: vi.fn(), add: vi.fn() } };
         if (id === 'captured-pieces-panel')
-          return { classList: { remove: jest.fn(), add: jest.fn() } };
+          return { classList: { remove: vi.fn(), add: vi.fn() } };
         return {
-          classList: { remove: jest.fn(), add: jest.fn() },
+          classList: { remove: vi.fn(), add: vi.fn() },
           style: {},
           textContent: '',
           value: '',
           checked: false,
           innerHTML: '',
-          addEventListener: jest.fn(),
+          addEventListener: vi.fn(),
         };
       });
 
       // Mock UI updates that are called during load
       // UI.updateShopUI is already mocked globally
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       moveController.loadGame();
 
@@ -597,22 +597,22 @@ describe('MoveController', () => {
   describe('Replay Mode', () => {
     beforeEach(() => {
       // Mock replay-specific elements
-      document.getElementById = jest.fn(id => {
+      document.getElementById = vi.fn(id => {
         if (id === 'replay-status' || id === 'replay-exit' || id === 'undo-btn') {
           return {
-            classList: { remove: jest.fn(), add: jest.fn() },
+            classList: { remove: vi.fn(), add: vi.fn() },
             disabled: false,
             textContent: '',
           };
         }
         return {
-          classList: { remove: jest.fn(), add: jest.fn() },
+          classList: { remove: vi.fn(), add: vi.fn() },
           style: {},
           textContent: '',
           value: '',
           checked: false,
           disabled: false,
-          appendChild: jest.fn(),
+          appendChild: vi.fn(),
           scrollTop: 0,
           scrollHeight: 100,
           innerHTML: '',
@@ -676,21 +676,21 @@ describe('MoveController', () => {
   describe('Draw Detection', () => {
     beforeEach(() => {
       // Mock game-over overlay elements
-      document.getElementById = jest.fn(id => {
+      document.getElementById = vi.fn(id => {
         if (id === 'game-over-overlay' || id === 'winner-text') {
           return {
-            classList: { remove: jest.fn(), add: jest.fn() },
+            classList: { remove: vi.fn(), add: vi.fn() },
             textContent: '',
           };
         }
         return {
-          classList: { remove: jest.fn(), add: jest.fn() },
+          classList: { remove: vi.fn(), add: vi.fn() },
           style: {},
           textContent: '',
           value: '',
           checked: false,
           disabled: false,
-          appendChild: jest.fn(),
+          appendChild: vi.fn(),
           scrollTop: 0,
           scrollHeight: 100,
           innerHTML: '',
@@ -707,7 +707,7 @@ describe('MoveController', () => {
 
     test('should detect 3-fold repetition', () => {
       game.positionHistory = ['hash1', 'hash2', 'hash1', 'hash3', 'hash1'];
-      moveController.getBoardHash = jest.fn(() => 'hash1');
+      moveController.getBoardHash = vi.fn(() => 'hash1');
 
       const result = moveController.checkDraw();
       expect(result).toBe(true);
@@ -873,7 +873,7 @@ describe('MoveController', () => {
       const setItemSpy = Storage.prototype.setItem;
 
       // Mock document.body.setAttribute
-      document.body.setAttribute = jest.fn();
+      document.body.setAttribute = vi.fn();
 
       moveController.setTheme('dark-mode');
 
@@ -921,7 +921,7 @@ describe('MoveController', () => {
       game.stats = { playerMoves: 0, playerBestMoves: 0 };
 
       // Mock tutor move check
-      game.isTutorMove = jest.fn(() => true);
+      game.isTutorMove = vi.fn(() => true);
 
       moveController.handlePlayClick(5, 4);
 
@@ -933,7 +933,7 @@ describe('MoveController', () => {
   describe('executeMove Edge Cases', () => {
     test('should detect checkmate', async () => {
       game.board[6][4] = { type: 'p', color: 'white' };
-      game.isCheckmate = jest.fn(() => true);
+      game.isCheckmate = vi.fn(() => true);
 
       await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
 
@@ -944,8 +944,8 @@ describe('MoveController', () => {
 
     test('should detect stalemate', async () => {
       game.board[6][4] = { type: 'p', color: 'white' };
-      game.isCheckmate = jest.fn(() => false);
-      game.isStalemate = jest.fn(() => true);
+      game.isCheckmate = vi.fn(() => false);
+      game.isStalemate = vi.fn(() => true);
 
       await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
 
@@ -956,25 +956,25 @@ describe('MoveController', () => {
     });
 
     test('should trigger AI move if enabled', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       game.board[6][4] = { type: 'p', color: 'white' };
       game.isAI = true;
       game.turn = 'white'; // Start with white, executeMove switches to black, triggering AI
-      game.aiMove = jest.fn();
+      game.aiMove = vi.fn();
 
       await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(game.aiMove).toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 
   describe('Undo/Redo Complex Scenarios', () => {
     test('should undo and redo castling', async () => {
       // Mock animateMove to avoid async issues/delays
-      moveController.animateMove = jest.fn().mockResolvedValue();
+      moveController.animateMove = vi.fn().mockResolvedValue();
 
       // Setup castling situation
       game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
@@ -1010,7 +1010,7 @@ describe('MoveController', () => {
 
     test('should undo and redo en passant', async () => {
       // Mock animateMove
-      moveController.animateMove = jest.fn().mockResolvedValue();
+      moveController.animateMove = vi.fn().mockResolvedValue();
 
       // Setup en passant situation
       game.board[3][4] = { type: 'p', color: 'white' };
@@ -1084,7 +1084,7 @@ describe('MoveController', () => {
 
   describe('Game Over and Special States', () => {
     test('should handle checkmate', async () => {
-      game.isCheckmate = jest.fn(() => true);
+      game.isCheckmate = vi.fn(() => true);
       game.turn = 'white';
 
       game.board[6][4] = { type: 'p', color: 'white' };
@@ -1096,7 +1096,7 @@ describe('MoveController', () => {
     });
 
     test('should handle stalemate', async () => {
-      game.isStalemate = jest.fn(() => true);
+      game.isStalemate = vi.fn(() => true);
       game.turn = 'white';
 
       game.board[6][4] = { type: 'p', color: 'white' };

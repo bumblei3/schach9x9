@@ -1,21 +1,21 @@
-import { jest } from '@jest/globals';
+
 
 // Mock AudioContext
-global.window.AudioContext = jest.fn().mockImplementation(() => ({
-  createGain: jest.fn().mockReturnValue({
-    connect: jest.fn(),
+global.window.AudioContext = vi.fn().mockImplementation(() => ({
+  createGain: vi.fn().mockReturnValue({
+    connect: vi.fn(),
     gain: {
       value: 0,
-      linearRampToValueAtTime: jest.fn(),
-      setValueAtTime: jest.fn(),
-      exponentialRampToValueAtTime: jest.fn(),
+      linearRampToValueAtTime: vi.fn(),
+      setValueAtTime: vi.fn(),
+      exponentialRampToValueAtTime: vi.fn(),
     },
   }),
-  createOscillator: jest.fn().mockReturnValue({
-    connect: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-    frequency: { setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn() },
+  createOscillator: vi.fn().mockReturnValue({
+    connect: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+    frequency: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
     type: 'sine',
   }),
   currentTime: 0,
@@ -29,38 +29,38 @@ global.window.PIECE_SVGS = {
   black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', e: 'be' },
 };
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(() => Promise.resolve(0)),
-  findKing: jest.fn(() => ({ r: 0, c: 0 })), // Mock findKing
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(() => Promise.resolve(0)),
+  findKing: vi.fn(() => ({ r: 0, c: 0 })), // Mock findKing
 }));
 
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateStatus: jest.fn(),
-  showPromotionUI: jest.fn((g, r, c, col, mr, cb) => {
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateStatus: vi.fn(),
+  showPromotionUI: vi.fn((g, r, c, col, mr, cb) => {
     if (g.board[r][c]) {
       g.board[r][c].type = 'e';
     }
     if (cb) cb();
   }),
-  animateMove: jest.fn().mockResolvedValue(),
-  updateStatistics: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateClockUI: jest.fn(),
-  animateCheck: jest.fn(),
-  animateCheckmate: jest.fn(),
-  renderEvalGraph: jest.fn(),
+  animateMove: vi.fn().mockResolvedValue(),
+  updateStatistics: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateClockUI: vi.fn(),
+  animateCheck: vi.fn(),
+  animateCheckmate: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playCheck: jest.fn(),
-    playGameOver: jest.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playCheck: vi.fn(),
+    playGameOver: vi.fn(),
   },
 }));
 
@@ -96,16 +96,16 @@ describe('Angel Piece and Promotion', () => {
 
     game = new Game(15, 'classic');
     moveController = {
-      handleGameEnd: jest.fn(),
-      updateMoveHistory: jest.fn(),
-      updateStatus: jest.fn(),
-      updateUndoRedoButtons: jest.fn(),
+      handleGameEnd: vi.fn(),
+      updateMoveHistory: vi.fn(),
+      updateStatus: vi.fn(),
+      updateUndoRedoButtons: vi.fn(),
       redoStack: [],
       game: game,
     };
-    game.gameController = { saveGameToStatistics: jest.fn(), handleGameEnd: jest.fn() }; // Mock
-    game.log = jest.fn(); // Mock log
-    game.arrowRenderer = { clearArrows: jest.fn() }; // Mock arrow renderer
+    game.gameController = { saveGameToStatistics: vi.fn(), handleGameEnd: vi.fn() }; // Mock
+    game.log = vi.fn(); // Mock log
+    game.arrowRenderer = { clearArrows: vi.fn() }; // Mock arrow renderer
 
     // Setup board for testing
     game.board = Array(BOARD_SIZE)

@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { StorageManager } from '../js/storage.js';
 import { PHASES } from '../js/gameEngine.js';
 
@@ -6,14 +6,14 @@ import { PHASES } from '../js/gameEngine.js';
 const localStorageMock = (function () {
   let store = {};
   return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => {
+    getItem: vi.fn(key => store[key] || null),
+    setItem: vi.fn((key, value) => {
       store[key] = value.toString();
     }),
-    removeItem: jest.fn(key => {
+    removeItem: vi.fn(key => {
       delete store[key];
     }),
-    clear: jest.fn(() => {
+    clear: vi.fn(() => {
       store = {};
     }),
   };
@@ -28,7 +28,7 @@ describe('StorageManager', () => {
   beforeEach(() => {
     storageManager = new StorageManager();
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockGame = {
       mode: 'classic',

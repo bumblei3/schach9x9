@@ -1,29 +1,29 @@
 // sounds.test.js
 // Tests for the SoundManager class
-import { jest } from '@jest/globals';
+
 
 // Mock Web Audio API before importing SoundManager
 global.window = global.window || {};
 
 // Create a mock AudioContext
 const mockOscillator = {
-  connect: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
+  connect: vi.fn(),
+  start: vi.fn(),
+  stop: vi.fn(),
   type: 'sine',
   frequency: {
-    setValueAtTime: jest.fn(),
+    setValueAtTime: vi.fn(),
     value: 440,
-    exponentialRampToValueAtTime: jest.fn(),
-    linearRampToValueAtTime: jest.fn(),
+    exponentialRampToValueAtTime: vi.fn(),
+    linearRampToValueAtTime: vi.fn(),
   },
 };
 
 const mockGain = {
-  connect: jest.fn(),
+  connect: vi.fn(),
   gain: {
-    setValueAtTime: jest.fn(),
-    exponentialRampToValueAtTime: jest.fn(),
+    setValueAtTime: vi.fn(),
+    exponentialRampToValueAtTime: vi.fn(),
     value: 1,
   },
 };
@@ -59,7 +59,7 @@ describe('SoundManager', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('initial settings and persistence', () => {
@@ -73,8 +73,8 @@ describe('SoundManager', () => {
   });
 
   test('loadSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    const mockGetItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const mockGetItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('access');
     });
 
@@ -85,8 +85,8 @@ describe('SoundManager', () => {
   });
 
   test('saveSettings error handling', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    const mockSetItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const mockSetItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota');
     });
 

@@ -1,7 +1,7 @@
-import { jest } from '@jest/globals';
+
 
 // Mock PHASES and other constants
-jest.unstable_mockModule('../js/gameEngine.js', () => ({
+vi.mock('../js/gameEngine.js', () => ({
   PHASES: {
     PLAY: 'PLAY',
     ANALYSIS: 'ANALYSIS',
@@ -12,14 +12,14 @@ jest.unstable_mockModule('../js/gameEngine.js', () => ({
 }));
 
 // Mock UI
-jest.unstable_mockModule('../js/ui.js', () => ({
-  updateCapturedUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  renderBoard: jest.fn(),
-  showShop: jest.fn(),
-  updateShopUI: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  updateCapturedUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  renderBoard: vi.fn(),
+  showShop: vi.fn(),
+  updateShopUI: vi.fn(),
 }));
 
 const GameStateManager = await import('../js/move/GameStateManager.js');
@@ -32,11 +32,11 @@ describe('GameStateManager', () => {
   beforeAll(() => {
     Object.defineProperty(global, 'localStorage', {
       value: {
-        getItem: jest.fn(key => mockStore[key] || null),
-        setItem: jest.fn((key, value) => {
+        getItem: vi.fn(key => mockStore[key] || null),
+        setItem: vi.fn((key, value) => {
           mockStore[key] = value.toString();
         }),
-        clear: jest.fn(() => {
+        clear: vi.fn(() => {
           mockStore = {};
         }),
       },
@@ -45,7 +45,7 @@ describe('GameStateManager', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStore = {};
 
     // DOM mocks
@@ -67,26 +67,26 @@ describe('GameStateManager', () => {
       capturedPieces: { white: [], black: [] },
       positionHistory: [],
       stats: { totalMoves: 0 },
-      log: jest.fn(),
+      log: vi.fn(),
       clockEnabled: true,
-      startClock: jest.fn(),
-      stopClock: jest.fn(),
-      updateBestMoves: jest.fn(),
+      startClock: vi.fn(),
+      stopClock: vi.fn(),
+      updateBestMoves: vi.fn(),
       analysisMode: false,
     };
 
     moveController = {
       redoStack: [],
-      updateUndoRedoButtons: jest.fn(),
-      updateReplayUI: jest.fn(),
+      updateUndoRedoButtons: vi.fn(),
+      updateReplayUI: vi.fn(),
     };
 
-    global.confirm = jest.fn(() => true);
+    global.confirm = vi.fn(() => true);
 
     // Mock 3D board
     window.battleChess3D = {
       enabled: true,
-      updateFromGameState: jest.fn(),
+      updateFromGameState: vi.fn(),
     };
 
     // DOM mocks
@@ -272,7 +272,7 @@ describe('GameStateManager', () => {
       game.board[1][1] = { type: 'p', color: 'white' };
       game.analysisMode = true;
       game.continuousAnalysis = true;
-      game.gameController = { requestPositionAnalysis: jest.fn() };
+      game.gameController = { requestPositionAnalysis: vi.fn() };
 
       GameStateManager.undoMove(game, moveController);
       expect(game.gameController.requestPositionAnalysis).toHaveBeenCalled();
@@ -361,7 +361,7 @@ describe('GameStateManager', () => {
       game.points = 20;
       GameStateManager.saveGame(game);
 
-      const newGame = { ...game, log: jest.fn() };
+      const newGame = { ...game, log: vi.fn() };
       GameStateManager.loadGame(newGame);
       expect(newGame.points).toBe(20);
     });
@@ -412,7 +412,7 @@ describe('GameStateManager', () => {
           .map(() => Array(9).fill(null)),
       };
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(state));
-      game.updateBestMoves = jest.fn();
+      game.updateBestMoves = vi.fn();
 
       GameStateManager.loadGame(game);
       expect(document.getElementById('move-history-panel').classList.contains('hidden')).toBe(
@@ -428,7 +428,7 @@ describe('GameStateManager', () => {
     test('should handle load error', () => {
       localStorage.setItem('schach9x9_save_autosave', 'invalid json');
       // Silence console.error
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockImplementation(() => {});
       expect(GameStateManager.loadGame(game)).toBe(false);
       console.error.mockRestore();
     });

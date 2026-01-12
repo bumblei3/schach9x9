@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { MoveController } from '../js/moveController.js';
 import { PHASES } from '../js/config.js';
@@ -18,20 +18,20 @@ describe('MoveController - Enhanced Coverage Tests', () => {
     game.turn = 'white';
 
     // Mock game methods
-    game.stopClock = jest.fn();
-    game.startClock = jest.fn();
+    game.stopClock = vi.fn();
+    game.startClock = vi.fn();
 
     // Mock DOM elements
-    jest.spyOn(document, 'getElementById').mockImplementation(() => ({
+    vi.spyOn(document, 'getElementById').mockImplementation(() => ({
       classList: {
-        add: jest.fn(),
-        remove: jest.fn(),
+        add: vi.fn(),
+        remove: vi.fn(),
       },
       textContent: '',
       disabled: false,
     }));
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Replay Mode Edge Cases', () => {
@@ -174,7 +174,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
       game.clockRunning = true;
 
       // Mock setTimeout
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       // Simulate clock tick
       game.whiteTime = 0;
@@ -183,7 +183,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
       const isTimeout = game.whiteTime <= 0;
       expect(isTimeout).toBe(true);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('should apply time increment after move', () => {
@@ -200,7 +200,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
       game.clockRunning = true;
       game.whiteTime = 250;
 
-      moveController.stopClock = jest.fn(() => {
+      moveController.stopClock = vi.fn(() => {
         game.clockRunning = false;
       });
 

@@ -1,41 +1,41 @@
-import { jest } from '@jest/globals';
+
 
 // Mock the sub-modules
-jest.unstable_mockModule('../js/tutor/TacticsDetector.js', () => ({
-  getThreatenedPieces: jest.fn(),
-  detectTacticalPatterns: jest.fn(),
-  detectPins: jest.fn(),
-  detectDiscoveredAttacks: jest.fn(),
-  canPieceMove: jest.fn(),
-  detectThreatsAfterMove: jest.fn(),
-  countDefenders: jest.fn(),
-  countAttackers: jest.fn(),
-  getDefendedPieces: jest.fn(),
+vi.mock('../js/tutor/TacticsDetector.js', () => ({
+  getThreatenedPieces: vi.fn(),
+  detectTacticalPatterns: vi.fn(),
+  detectPins: vi.fn(),
+  detectDiscoveredAttacks: vi.fn(),
+  canPieceMove: vi.fn(),
+  detectThreatsAfterMove: vi.fn(),
+  countDefenders: vi.fn(),
+  countAttackers: vi.fn(),
+  getDefendedPieces: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/tutor/MoveAnalyzer.js', () => ({
-  getMoveNotation: jest.fn(() => 'e4'),
-  getPieceName: jest.fn(() => 'Bauer'),
-  analyzeStrategicValue: jest.fn(),
-  getScoreDescription: jest.fn(),
-  analyzeMoveWithExplanation: jest.fn(),
-  handlePlayerMove: jest.fn(),
-  checkBlunder: jest.fn(),
-  showBlunderWarning: jest.fn(),
+vi.mock('../js/tutor/MoveAnalyzer.js', () => ({
+  getMoveNotation: vi.fn(() => 'e4'),
+  getPieceName: vi.fn(() => 'Bauer'),
+  analyzeStrategicValue: vi.fn(),
+  getScoreDescription: vi.fn(),
+  analyzeMoveWithExplanation: vi.fn(),
+  handlePlayerMove: vi.fn(),
+  checkBlunder: vi.fn(),
+  showBlunderWarning: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/tutor/HintGenerator.js', () => ({
-  updateBestMoves: jest.fn(),
-  isTutorMove: jest.fn(),
-  getTutorHints: jest.fn(() => []),
-  showTutorSuggestions: jest.fn(),
-  getSetupTemplates: jest.fn(() => []),
-  applySetupTemplate: jest.fn(),
-  placePiece: jest.fn(),
+vi.mock('../js/tutor/HintGenerator.js', () => ({
+  updateBestMoves: vi.fn(),
+  isTutorMove: vi.fn(),
+  getTutorHints: vi.fn(() => []),
+  showTutorSuggestions: vi.fn(),
+  getSetupTemplates: vi.fn(() => []),
+  applySetupTemplate: vi.fn(),
+  placePiece: vi.fn(),
 }));
 
 // Mock gameEngine to avoid side effects
-jest.unstable_mockModule('../js/gameEngine.js', () => ({
+vi.mock('../js/gameEngine.js', () => ({
   Game: class {
     constructor() {
       this.board = Array(9)
@@ -61,7 +61,7 @@ describe('TutorController', () => {
   beforeEach(() => {
     game = new Game();
     tutorController = new TutorController(game);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should delegate updateBestMoves to HintGenerator', () => {

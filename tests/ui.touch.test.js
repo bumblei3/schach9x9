@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { initBoardUI, getPieceSymbol as _getPieceSymbol } from '../js/ui/BoardRenderer.js';
 import { PHASES } from '../js/config.js';
 
@@ -20,8 +20,8 @@ describe('BoardRenderer Touch Interactions', () => {
       board: Array(9)
         .fill(null)
         .map(() => Array(9).fill(null)),
-      handleCellClick: jest.fn(),
-      getValidMoves: jest.fn().mockReturnValue([]),
+      handleCellClick: vi.fn(),
+      getValidMoves: vi.fn().mockReturnValue([]),
       phase: PHASES.PLAY,
       isAI: false,
       turn: 'white',
@@ -38,7 +38,7 @@ describe('BoardRenderer Touch Interactions', () => {
     // Note: in JSDOM, document.elementFromPoint might not exist or be writable directly on document
     // We use defineProperty to force it.
     Object.defineProperty(document, 'elementFromPoint', {
-      value: jest.fn((x, y) => {
+      value: vi.fn((x, y) => {
         // Simple hit testing for our specific test coords
         if (x === 200 && y === 200) {
           // Return the cell at 5,4 if matched
@@ -52,7 +52,7 @@ describe('BoardRenderer Touch Interactions', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   function createTouch(target, identifier = 0, x = 0, y = 0) {

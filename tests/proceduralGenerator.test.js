@@ -1,14 +1,14 @@
-import { describe, expect, test, jest, beforeAll } from '@jest/globals';
+
 
 // Mock dependencies MUST be hoisted or defined before imports
-jest.unstable_mockModule('../js/config.js', () => ({
+vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
 }));
 
-jest.unstable_mockModule('../js/puzzleGenerator.js', () => ({
+vi.mock('../js/puzzleGenerator.js', () => ({
   PuzzleGenerator: {
-    findMateSequence: jest.fn(),
-    boardToString: jest.fn(() => 'mock_setup_string'),
+    findMateSequence: vi.fn(),
+    boardToString: vi.fn(() => 'mock_setup_string'),
   },
 }));
 

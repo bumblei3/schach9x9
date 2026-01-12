@@ -1,39 +1,39 @@
-import { jest } from '@jest/globals';
+
 import { setupJSDOM } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  initBoardUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  renderBoard: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  showModal: jest.fn(),
-  showPromotionUI: jest.fn(),
-  showToast: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  addMoveToHistory: jest.fn(),
-  highlightLastMove: jest.fn(),
-  clearHighlights: jest.fn(),
-  getSquareName: jest.fn((r, c) => `${String.fromCharCode(97 + c)}${9 - r}`),
-  showShop: jest.fn(),
-  animateMove: jest.fn(() => Promise.resolve()),
-  renderEvalGraph: jest.fn(),
-  animateCheck: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  initBoardUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  renderBoard: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  showModal: vi.fn(),
+  showPromotionUI: vi.fn(),
+  showToast: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  addMoveToHistory: vi.fn(),
+  highlightLastMove: vi.fn(),
+  clearHighlights: vi.fn(),
+  getSquareName: vi.fn((r, c) => `${String.fromCharCode(97 + c)}${9 - r}`),
+  showShop: vi.fn(),
+  animateMove: vi.fn(() => Promise.resolve()),
+  renderEvalGraph: vi.fn(),
+  animateCheck: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playGameOver: jest.fn(),
-    playGameStart: jest.fn(),
-    playPiecePlace: jest.fn(),
-    playCapture: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playGameOver: vi.fn(),
+    playGameStart: vi.fn(),
+    playPiecePlace: vi.fn(),
+    playCapture: vi.fn(),
   },
 }));
 
@@ -56,7 +56,7 @@ describe('Full-Game Integration Test', () => {
     // Initialize strategy
     gc.initGame(15, 'setup');
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Setup phase transitions and initial move', async () => {

@@ -1,46 +1,49 @@
-import { jest } from '@jest/globals';
+
 import { setupJSDOM, createMockGame } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
 // Mocks for dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  initBoardUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  renderBoard: jest.fn(),
-  showShop: jest.fn(),
-  showModal: jest.fn(),
-  showPromotionUI: jest.fn(),
-  showToast: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  initBoardUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  renderBoard: vi.fn(),
+  showShop: vi.fn(),
+  showModal: vi.fn(),
+  showPromotionUI: vi.fn(),
+  showToast: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  getPieceText: vi.fn(piece => piece ? piece.type : ''),
+  showMoveQuality: vi.fn(),
+  showTutorSuggestions: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playGameOver: jest.fn(),
-    playMove: jest.fn(),
-    playGameStart: jest.fn(),
-    playCapture: jest.fn(),
+    init: vi.fn(),
+    playGameOver: vi.fn(),
+    playMove: vi.fn(),
+    playGameStart: vi.fn(),
+    playCapture: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/storage.js', () => ({
-  storageManager: { saveGame: jest.fn(), loadGame: jest.fn(), loadStateIntoGame: jest.fn() },
+vi.mock('../js/storage.js', () => ({
+  storageManager: { saveGame: vi.fn(), loadGame: vi.fn(), loadStateIntoGame: vi.fn() },
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(),
-  see: jest.fn(() => 0),
-  isSquareAttacked: jest.fn(() => false),
-  findKing: jest.fn(() => ({ r: 0, c: 0 })),
-  isInCheck: jest.fn(() => false),
-  getAllLegalMoves: jest.fn(() => []),
-  getParamsForElo: jest.fn(() => ({ maxDepth: 4, elo: 2500 })),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(),
+  see: vi.fn(() => 0),
+  isSquareAttacked: vi.fn(() => false),
+  findKing: vi.fn(() => ({ r: 0, c: 0 })),
+  isInCheck: vi.fn(() => false),
+  getAllLegalMoves: vi.fn(() => []),
+  getParamsForElo: vi.fn(() => ({ maxDepth: 4, elo: 2500 })),
 }));
 
 // Use top-level await
@@ -60,7 +63,7 @@ describe('Controllers Coverage Expansion', () => {
     gc = new GameController(game);
     ac = new AIController(game);
     tc = new TutorController(game);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GameController', () => {
@@ -147,11 +150,13 @@ describe('Controllers Coverage Expansion', () => {
 
     test('analyzePosition should create worker and send message', () => {
       const mockWorker = {
-        postMessage: jest.fn(),
-        terminate: jest.fn(),
+        postMessage: vi.fn(),
+        terminate: vi.fn(),
       };
-      global.Worker = jest.fn(() => mockWorker);
-      global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve({}) }));
+      global.Worker = vi.fn().mockImplementation(function () {
+        return mockWorker;
+      });
+      global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve({}) }));
       game.analysisMode = true;
 
       ac.analyzePosition();
@@ -166,9 +171,9 @@ describe('Controllers Coverage Expansion', () => {
     test('aiMove should evaluate draw offer if pending', async () => {
       game.drawOffered = true;
       game.drawOfferedBy = 'white';
-      const spy = jest.spyOn(ac, 'aiEvaluateDrawOffer').mockImplementation(() => Promise.resolve());
-      jest.spyOn(ac, 'aiShouldResign').mockResolvedValue(false);
-      jest.spyOn(ac, 'aiShouldOfferDraw').mockResolvedValue(false);
+      const spy = vi.spyOn(ac, 'aiEvaluateDrawOffer').mockImplementation(() => Promise.resolve());
+      vi.spyOn(ac, 'aiShouldResign').mockResolvedValue(false);
+      vi.spyOn(ac, 'aiShouldOfferDraw').mockResolvedValue(false);
 
       await ac.aiMove();
       expect(spy).toHaveBeenCalled();

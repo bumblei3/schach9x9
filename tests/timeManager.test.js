@@ -2,7 +2,7 @@
  * Tests for TimeManager
  */
 
-import { jest } from '@jest/globals';
+
 import { TimeManager } from '../js/TimeManager.js';
 import { PHASES } from '../js/config.js';
 
@@ -12,7 +12,7 @@ describe('TimeManager', () => {
   let timeManager;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     mockGame = {
       phase: PHASES.PLAY,
@@ -26,14 +26,14 @@ describe('TimeManager', () => {
     };
 
     mockController = {
-      updateClockDisplay: jest.fn(),
-      saveGameToStatistics: jest.fn(),
+      updateClockDisplay: vi.fn(),
+      saveGameToStatistics: vi.fn(),
     };
 
     // Mock document elements
     global.document = {
-      getElementById: jest.fn(() => ({
-        classList: { add: jest.fn(), remove: jest.fn() },
+      getElementById: vi.fn(() => ({
+        classList: { add: vi.fn(), remove: vi.fn() },
         textContent: '',
         innerHTML: '',
       })),
@@ -44,7 +44,7 @@ describe('TimeManager', () => {
 
   afterEach(() => {
     timeManager.stopClock();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('constructor', () => {

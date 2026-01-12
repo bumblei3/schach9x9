@@ -2,7 +2,7 @@
  * Tests for ShopManager
  */
 
-import { jest } from '@jest/globals';
+
 import { ShopManager } from '../js/shop/ShopManager.js';
 import { BOARD_SIZE, PHASES } from '../js/config.js';
 
@@ -13,9 +13,9 @@ describe('ShopManager', () => {
   beforeEach(() => {
     // Mock document
     global.document = {
-      querySelectorAll: jest.fn(() => []),
-      querySelector: jest.fn(() => null),
-      getElementById: jest.fn(() => null),
+      querySelectorAll: vi.fn(() => []),
+      querySelector: vi.fn(() => null),
+      getElementById: vi.fn(() => null),
     };
 
     // Mock window
@@ -33,7 +33,7 @@ describe('ShopManager', () => {
       whiteCorridor: 3,
       blackCorridor: 3,
       selectedShopPiece: null,
-      log: jest.fn(),
+      log: vi.fn(),
     };
 
     // Place white king

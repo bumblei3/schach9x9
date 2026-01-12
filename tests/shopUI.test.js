@@ -1,18 +1,18 @@
-import { jest } from '@jest/globals';
+
 
 // Mock config
-jest.unstable_mockModule('../js/config.js', () => ({
+vi.mock('../js/config.js', () => ({
   PIECE_VALUES: { p: 100, n: 300, b: 300, r: 500, q: 900, k: 0, a: 800, c: 800, e: 1000 },
 }));
 
 // Mock BoardRenderer
-jest.unstable_mockModule('../js/ui/BoardRenderer.js', () => ({
+vi.mock('../js/ui/BoardRenderer.js', () => ({
   getPieceText: piece => `Piece(${piece.type}, ${piece.color})`,
 }));
 
 // Mock TutorUI
-jest.unstable_mockModule('../js/ui/TutorUI.js', () => ({
-  updateTutorRecommendations: jest.fn(),
+vi.mock('../js/ui/TutorUI.js', () => ({
+  updateTutorRecommendations: vi.fn(),
 }));
 
 const ShopUI = await import('../js/ui/ShopUI.js');
@@ -41,7 +41,7 @@ describe('ShopUI', () => {
 
     window.updateTutorRecommendations = updateTutorRecommendations;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('showShop toggles panel and body class', () => {

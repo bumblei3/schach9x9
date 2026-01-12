@@ -1,10 +1,10 @@
-import { jest } from '@jest/globals';
+
 import { BOARD_SIZE } from '../js/gameEngine.js';
 
 // Mock ProceduralGenerator BEFORE importing PuzzleManager
-jest.unstable_mockModule('../js/puzzle/ProceduralGenerator.js', () => ({
+vi.mock('../js/puzzle/ProceduralGenerator.js', () => ({
   ProceduralGenerator: {
-    generatePuzzle: jest.fn(() => ({
+    generatePuzzle: vi.fn(() => ({
       id: 'proc-mock-123',
       title: 'Mock Generated Puzzle',
       description: 'Mock description',

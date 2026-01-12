@@ -2,7 +2,7 @@
  * Enhanced Tests for Logger System
  */
 
-import { jest } from '@jest/globals';
+
 import { logger, LOG_LEVELS } from '../js/logger.js';
 
 describe('Logger Enhanced', () => {
@@ -11,7 +11,7 @@ describe('Logger Enhanced', () => {
   let originalEnabled;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     // Save original state
     originalLevel = logger.level;
     originalEnabled = logger.enabled;

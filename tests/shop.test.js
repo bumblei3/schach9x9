@@ -1,41 +1,37 @@
-import { jest } from '@jest/globals';
+/**
+ * @jest-environment jsdom
+ */
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 // Mock UI module
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  updateShopUI: jest.fn(),
-  updateStatus: jest.fn(),
-  renderEvalGraph: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  updateShopUI: vi.fn(),
+  updateStatus: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
 // Mock sounds module
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    playMove: jest.fn(),
-    init: jest.fn(),
+    playMove: vi.fn(),
+    init: vi.fn(),
   },
 }));
 
-// Mock DOM
-global.document = {
-  getElementById: jest.fn(() => ({
-    classList: { remove: jest.fn(), add: jest.fn() },
-    style: {},
-    textContent: '',
-    value: '',
-    checked: false,
-    disabled: false,
-    appendChild: jest.fn(),
-    scrollTop: 0,
-    scrollHeight: 100,
-    innerHTML: '',
-  })),
-  querySelectorAll: jest.fn(() => []),
-  querySelector: jest.fn(() => null),
-};
+// Mock AudioContext for JSDOM
+const mockAudioContext = vi.fn().mockImplementation(function () {
+  return {
+    createOscillator: vi.fn(),
+    createGain: vi.fn(),
+    destination: {},
+  };
+});
+vi.stubGlobal('AudioContext', mockAudioContext);
+vi.stubGlobal('webkitAudioContext', mockAudioContext);
 
 // Import after mocking
 const { GameController } = await import('../js/gameController.js');
@@ -48,13 +44,13 @@ describe('Shop System', () => {
     game = new Game(15, 'setup', false); // 15 points, setup mode, no AI
     gameController = new GameController(game);
     game.gameController = gameController;
-    game.log = jest.fn();
+    game.log = vi.fn();
 
     // Set up corridors for testing
     game.whiteCorridor = 0;
     game.blackCorridor = 0;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Point Deduction', () => {
@@ -233,13 +229,13 @@ describe('Shop System', () => {
       game.points = 15;
 
       // Mock querySelector to return a proper button element
-      const mockButton = { classList: { add: jest.fn(), remove: jest.fn() } };
-      document.querySelector = jest.fn(() => mockButton);
-      document.querySelectorAll = jest.fn(() => [
-        { classList: { remove: jest.fn() } },
-        { classList: { remove: jest.fn() } },
+      const mockButton = { classList: { add: vi.fn(), remove: vi.fn() } };
+      document.querySelector = vi.fn(() => mockButton);
+      document.querySelectorAll = vi.fn(() => [
+        { classList: { remove: vi.fn() } },
+        { classList: { remove: vi.fn() } },
       ]);
-      document.getElementById = jest.fn(() => ({
+      document.getElementById = vi.fn(() => ({
         innerHTML: '',
         style: {},
       }));

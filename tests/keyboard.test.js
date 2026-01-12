@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+
 import { KeyboardManager } from '../js/input/KeyboardManager.js';
 import { setupJSDOM } from './test-utils.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  showToast: jest.fn(),
-  closeModal: jest.fn(),
-  renderBoard: jest.fn(),
-  toggleShop: jest.fn(),
-  OverlayManager: { closeAll: jest.fn() },
+vi.mock('../js/ui.js', () => ({
+  showToast: vi.fn(),
+  closeModal: vi.fn(),
+  renderBoard: vi.fn(),
+  toggleShop: vi.fn(),
+  OverlayManager: { closeAll: vi.fn() },
 }));
 
 let UI;
@@ -28,16 +28,16 @@ describe('KeyboardManager', () => {
 
     // Mock App structure
     gameController = {
-      undoMove: jest.fn(),
-      redoMove: jest.fn(),
-      saveGame: jest.fn(),
-      handleEscape: jest.fn(),
-      handleCellClick: jest.fn(),
-      resetSelection: jest.fn(),
+      undoMove: vi.fn(),
+      redoMove: vi.fn(),
+      saveGame: vi.fn(),
+      handleEscape: vi.fn(),
+      handleCellClick: vi.fn(),
+      resetSelection: vi.fn(),
     };
 
     tutorController = {
-      showHint: jest.fn(),
+      showHint: vi.fn(),
     };
 
     app = {
@@ -45,7 +45,7 @@ describe('KeyboardManager', () => {
         gameController: gameController, // Circular ref simulation
         selectedSquare: null,
         validMoves: [],
-        deselectSquare: jest.fn(),
+        deselectSquare: vi.fn(),
       },
       gameController: gameController,
       tutorController: tutorController,
@@ -56,7 +56,7 @@ describe('KeyboardManager', () => {
 
   afterEach(() => {
     keyboardManager.dispose();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should trigger undo on Ctrl+Z', async () => {
@@ -142,7 +142,7 @@ describe('KeyboardManager', () => {
       key: 'u',
       ctrlKey: false,
       target: input,
-      preventDefault: jest.fn(),
+      preventDefault: vi.fn(),
     };
 
     keyboardManager.handleKeyDown(event);

@@ -1,46 +1,46 @@
-import { jest } from '@jest/globals';
+
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
 
 // Mock UI and SoundManager modules
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
-  showPromotionModal: jest.fn(),
-  showPromotionUI: jest.fn(),
-  animateMove: jest.fn().mockResolvedValue(),
-  animateCheck: jest.fn(),
-  animateCheckmate: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateClockUI: jest.fn(),
-  showShop: jest.fn(),
-  updateShopUI: jest.fn(),
-  renderEvalGraph: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
+  showPromotionModal: vi.fn(),
+  showPromotionUI: vi.fn(),
+  animateMove: vi.fn().mockResolvedValue(),
+  animateCheck: vi.fn(),
+  animateCheckmate: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateClockUI: vi.fn(),
+  showShop: vi.fn(),
+  updateShopUI: vi.fn(),
+  renderEvalGraph: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playCheck: jest.fn(),
-    playCheckmate: jest.fn(),
-    playGameOver: jest.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playCheck: vi.fn(),
+    playCheckmate: vi.fn(),
+    playGameOver: vi.fn(),
   },
 }));
 
 // Mock document functions used in MoveController
 global.document = {
-  getElementById: jest.fn(() => ({
-    classList: { remove: jest.fn(), add: jest.fn() },
+  getElementById: vi.fn(() => ({
+    classList: { remove: vi.fn(), add: vi.fn() },
     style: {},
     textContent: '',
     value: '',
     checked: false,
     disabled: false,
-    appendChild: jest.fn(),
+    appendChild: vi.fn(),
     scrollTop: 0,
     scrollHeight: 100,
     innerHTML: '',
@@ -49,14 +49,14 @@ global.document = {
 
 // Mock localStorage with proper jest functions
 global.localStorage = {
-  getItem: jest.fn(() => null),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(() => null),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 
 // Mock alert
-global.alert = jest.fn();
+global.alert = vi.fn();
 
 // Import MoveController AFTER mocking
 const { MoveController } = await import('../js/moveController.js');
@@ -72,12 +72,12 @@ describe('Bug Reproduction: Rook transforming into King', () => {
 
     moveController = new MoveController(game);
     game.moveController = moveController;
-    game.log = jest.fn();
-    game.stopClock = jest.fn();
-    game.startClock = jest.fn();
-    game.updateBestMoves = jest.fn();
+    game.log = vi.fn();
+    game.stopClock = vi.fn();
+    game.startClock = vi.fn();
+    game.updateBestMoves = vi.fn();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should correctly undo kingside castling without transforming rook', async () => {

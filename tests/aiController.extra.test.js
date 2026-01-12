@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/gameEngine.js';
 
 // Setup JSDOM body
@@ -19,29 +19,29 @@ class MockWorker {
   constructor() {
     this.onmessage = null;
   }
-  postMessage = jest.fn();
-  terminate = jest.fn();
+  postMessage = vi.fn();
+  terminate = vi.fn();
 }
-global.Worker = jest.fn().mockImplementation(() => new MockWorker());
+global.Worker = vi.fn().mockImplementation(() => new MockWorker());
 
 // Mock fetch
-global.fetch = jest.fn(() =>
+global.fetch = vi.fn(() =>
   Promise.resolve({ ok: true, json: () => Promise.resolve({ e2e4: ['e2e5'] }) })
 );
 
 // Mocks
-jest.unstable_mockModule('../js/ui.js', () => ({
-  updateStatus: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  renderBoard: jest.fn(),
-  showModal: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  updateStatus: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  renderBoard: vi.fn(),
+  showModal: vi.fn(),
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn().mockResolvedValue(0),
-  getBestMove: jest.fn(),
-  getParamsForElo: jest.fn(() => ({ maxDepth: 4, elo: 2500 })),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn().mockResolvedValue(0),
+  getBestMove: vi.fn(),
+  getParamsForElo: vi.fn(() => ({ maxDepth: 4, elo: 2500 })),
 }));
 
 const { AIController } = await import('../js/aiController.js');
@@ -65,29 +65,29 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
       drawOffered: false,
       drawOfferedBy: 'white',
       mode: 'pve',
-      placeKing: jest.fn(),
-      placeShopPiece: jest.fn(() => game.points--),
-      finishSetupPhase: jest.fn(),
-      resign: jest.fn(),
-      offerDraw: jest.fn(),
-      acceptDraw: jest.fn(),
-      declineDraw: jest.fn(),
-      executeMove: jest.fn(),
-      log: jest.fn(),
-      isInsufficientMaterial: jest.fn(() => false),
-      getBoardHash: jest.fn(() => 'hash'),
-      calculateMaterialAdvantage: jest.fn(() => 0),
-      renderBoard: jest.fn(),
-      showModal: jest.fn(),
+      placeKing: vi.fn(),
+      placeShopPiece: vi.fn(() => game.points--),
+      finishSetupPhase: vi.fn(),
+      resign: vi.fn(),
+      offerDraw: vi.fn(),
+      acceptDraw: vi.fn(),
+      declineDraw: vi.fn(),
+      executeMove: vi.fn(),
+      log: vi.fn(),
+      isInsufficientMaterial: vi.fn(() => false),
+      getBoardHash: vi.fn(() => 'hash'),
+      calculateMaterialAdvantage: vi.fn(() => 0),
+      renderBoard: vi.fn(),
+      showModal: vi.fn(),
       continuousAnalysis: false,
       analysisMode: false,
-      getAllLegalMoves: jest.fn(() => []),
-      arrowRenderer: { clearArrows: jest.fn(), drawArrow: jest.fn() },
+      getAllLegalMoves: vi.fn(() => []),
+      arrowRenderer: { clearArrows: vi.fn(), drawArrow: vi.fn() },
       halfMoveClock: 0,
-      findKing: jest.fn(() => ({ r: 1, c: 4 })),
+      findKing: vi.fn(() => ({ r: 1, c: 4 })),
     };
     controller = new AIController(game);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('aiMove - should resign based on material and score', async () => {

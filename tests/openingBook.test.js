@@ -1,9 +1,9 @@
 import { setOpeningBook, queryOpeningBook, OpeningBook } from '../js/ai/OpeningBook.js';
 import { logger } from '../js/logger.js';
-import { jest } from '@jest/globals';
+
 
 // Mock logger to avoid clutter
-jest.spyOn(logger, 'debug').mockImplementation(() => {});
+vi.spyOn(logger, 'debug').mockImplementation(() => {});
 
 describe('OpeningBook', () => {
   const mockBoard = Array(9)
@@ -104,16 +104,16 @@ describe('OpeningBook', () => {
 
     // Mock random to pick the first move (low weight)
     // total weight 100. < 10 picks first.
-    jest.spyOn(Math, 'random').mockReturnValue(0.05); // 0.05 * 100 = 5
+    vi.spyOn(Math, 'random').mockReturnValue(0.05); // 0.05 * 100 = 5
     const move1 = queryOpeningBook(board, 0);
     expect(move1).toEqual({ from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
 
     // Mock random to pick second
-    jest.spyOn(Math, 'random').mockReturnValue(0.5); // 0.5 * 100 = 50
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // 0.5 * 100 = 50
     const move2 = queryOpeningBook(board, 0);
     expect(move2).toEqual({ from: { r: 2, c: 2 }, to: { r: 3, c: 3 } });
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('OpeningBook Class', () => {

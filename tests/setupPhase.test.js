@@ -1,53 +1,58 @@
 import { Game, PHASES } from '../js/gameEngine.js';
 import { GameController } from '../js/gameController.js';
-import { jest } from '@jest/globals';
+
 
 // Mock UI and sounds
-jest.mock('../js/ui.js', () => ({
-  initBoardUI: jest.fn(),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  renderBoard: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  showShop: jest.fn(),
-  initClockUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
+vi.mock('../js/ui.js', () => ({
+  initBoardUI: vi.fn(),
+  updateStatus: vi.fn(),
+  updateShopUI: vi.fn(),
+  renderBoard: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  showShop: vi.fn(),
+  initClockUI: vi.fn(),
+  updateCapturedUI: vi.fn(),
 }));
 
-jest.mock('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playGameStart: jest.fn(),
-    playMove: jest.fn(),
+    init: vi.fn(),
+    playGameStart: vi.fn(),
+    playMove: vi.fn(),
   },
 }));
 
 // Mock Tutorial
-jest.mock('../js/tutorial.js', () => ({
-  Tutorial: jest.fn().mockImplementation(() => ({
-    init: jest.fn(),
-    show: jest.fn(),
-  })),
+vi.mock('../js/tutorial.js', () => ({
+  Tutorial: vi.fn().mockImplementation(function () {
+    return {
+      init: vi.fn(),
+      show: vi.fn(),
+    };
+  }),
 }));
 
 // Mock logger
-jest.mock('../js/logger.js', () => ({
+vi.mock('../js/logger.js', () => ({
   logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
 // Mock AudioContext for JSDOM
-global.AudioContext = jest.fn().mockImplementation(() => ({
-  createOscillator: jest.fn(),
-  createGain: jest.fn(),
-  destination: {},
-}));
-global.webkitAudioContext = global.AudioContext;
+const mockAudioContext = vi.fn().mockImplementation(function () {
+  return {
+    createOscillator: vi.fn(),
+    createGain: vi.fn(),
+    destination: {},
+  };
+});
+vi.stubGlobal('AudioContext', mockAudioContext);
+vi.stubGlobal('webkitAudioContext', mockAudioContext);
 
 describe('Setup Phase Integration', () => {
   let game;
@@ -74,7 +79,7 @@ describe('Setup Phase Integration', () => {
     game = new Game(20, 'setup'); // 20 points
     controller = new GameController(game);
     controller.initGame(20, 'setup');
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should initialize setup phase correctly', () => {

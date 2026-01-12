@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { AnalysisManager } from '../js/AnalysisManager.js';
 
 describe('AnalysisManager', () => {
@@ -12,13 +12,13 @@ describe('AnalysisManager', () => {
         .map(() => Array(9).fill(null)),
       turn: 'white',
       arrowRenderer: {
-        highlightMoves: jest.fn(),
-        clearArrows: jest.fn(),
+        highlightMoves: vi.fn(),
+        clearArrows: vi.fn(),
       },
-      getValidMoves: jest.fn(() => []),
-      getAllLegalMoves: jest.fn(() => []),
+      getValidMoves: vi.fn(() => []),
+      getAllLegalMoves: vi.fn(() => []),
       tutorController: {
-        getPieceName: jest.fn(type => type),
+        getPieceName: vi.fn(type => type),
       },
       bestMoves: [],
     };
@@ -131,7 +131,7 @@ describe('AnalysisManager', () => {
     ]);
 
     // Mock isInCheck for the fork detection
-    mockGame.isInCheck = jest.fn(color => color === 'black');
+    mockGame.isInCheck = vi.fn(color => color === 'black');
 
     analysisManager.showOpportunities = true;
     const arrows = analysisManager.getOpportunityArrows();
@@ -177,7 +177,7 @@ describe('AnalysisManager', () => {
       { from: { r: 0, c: 0 }, to: { r: 0, c: 4 } }, // Move that creates the pin
     ]);
 
-    mockGame.isInCheck = jest.fn(() => false);
+    mockGame.isInCheck = vi.fn(() => false);
 
     analysisManager.showOpportunities = true;
     const arrows = analysisManager.getOpportunityArrows();

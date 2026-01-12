@@ -1,7 +1,7 @@
-import { describe, expect, test, beforeEach, afterEach, jest } from '@jest/globals';
+
 
 // Mock dependencies
-jest.unstable_mockModule('../js/config.js', () => ({
+vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: {
     PLAY: 'play',
@@ -13,14 +13,14 @@ jest.unstable_mockModule('../js/config.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../js/utils.js', () => ({
+vi.mock('../js/utils.js', () => ({
   debounce: fn => fn, // No delay for tests
 }));
 
-jest.unstable_mockModule('../js/effects.js', () => ({
-  particleSystem: { spawn: jest.fn() },
-  floatingTextManager: { show: jest.fn() },
-  shakeScreen: jest.fn(),
+vi.mock('../js/effects.js', () => ({
+  particleSystem: { spawn: vi.fn() },
+  floatingTextManager: { show: vi.fn() },
+  shakeScreen: vi.fn(),
 }));
 
 const BoardRenderer = await import('../js/ui/BoardRenderer.js');
@@ -40,11 +40,11 @@ describe('BoardRenderer Full Coverage', () => {
 
     // Mock elementFromPoint (missing in JSDOM)
     if (!document.elementFromPoint) {
-      document.elementFromPoint = jest.fn();
+      document.elementFromPoint = vi.fn();
     } else {
       // If it exists (e.g. from previous tests), ensure it's a mock
-      if (!jest.isMockFunction(document.elementFromPoint)) {
-        document.elementFromPoint = jest.fn();
+      if (!vi.isMockFunction(document.elementFromPoint)) {
+        document.elementFromPoint = vi.fn();
       } else {
         document.elementFromPoint.mockReset();
       }
@@ -59,16 +59,16 @@ describe('BoardRenderer Full Coverage', () => {
         .map(() => Array(9).fill(null)),
       phase: 'play',
       turn: 'white',
-      handleCellClick: jest.fn(),
-      getValidMoves: jest.fn(() => []),
+      handleCellClick: vi.fn(),
+      getValidMoves: vi.fn(() => []),
       replayMode: false,
       isAI: false,
       isAnimating: false,
       selectedSquare: null,
       validMoves: [],
       // Mocks for interaction
-      isSquareUnderAttack: jest.fn(() => false),
-      isTutorMove: jest.fn(() => false),
+      isSquareUnderAttack: vi.fn(() => false),
+      isTutorMove: vi.fn(() => false),
     };
 
     // Initialize UI
@@ -76,9 +76,9 @@ describe('BoardRenderer Full Coverage', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     document.body.innerHTML = '';
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('getPieceSymbol returns correct SVG/HTML', () => {
@@ -123,23 +123,23 @@ describe('BoardRenderer Full Coverage', () => {
 
     const dragStartEvent = new Event('dragstart', { bubbles: true });
     const dt = {
-      setData: jest.fn(),
-      setDragImage: jest.fn(),
+      setData: vi.fn(),
+      setDragImage: vi.fn(),
       effectAllowed: '',
     };
     Object.defineProperty(dragStartEvent, 'dataTransfer', { value: dt });
 
     // Mock cloneNode
-    cell.cloneNode = jest.fn(() => document.createElement('div'));
+    cell.cloneNode = vi.fn(() => document.createElement('div'));
 
     cell.dispatchEvent(dragStartEvent);
 
     expect(dt.setData).toHaveBeenCalledWith('text/plain', '0,0');
     expect(cell.classList.contains('dragging')).toBe(true);
 
-    jest.useFakeTimers();
-    jest.runAllTimers();
-    jest.useRealTimers();
+    vi.useFakeTimers();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   test('Drag: Prevent invalid drag (wrong turn)', () => {
@@ -148,7 +148,7 @@ describe('BoardRenderer Full Coverage', () => {
 
     const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
     const event = new Event('dragstart', { bubbles: true });
-    Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
+    Object.defineProperty(event, 'preventDefault', { value: vi.fn() });
 
     cell.dispatchEvent(event);
     expect(event.preventDefault).toHaveBeenCalled();
@@ -158,7 +158,7 @@ describe('BoardRenderer Full Coverage', () => {
     game.replayMode = true;
     const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
     const event = new Event('dragstart', { bubbles: true });
-    const spy = jest.spyOn(event, 'preventDefault');
+    const spy = vi.spyOn(event, 'preventDefault');
     cell.dispatchEvent(event);
     expect(spy).toHaveBeenCalled();
   });
@@ -192,7 +192,7 @@ describe('BoardRenderer Full Coverage', () => {
     const touchEvent = new Event('touchstart', { bubbles: true });
     const touch = { clientX: 100, clientY: 100 };
     Object.defineProperty(touchEvent, 'touches', { value: [touch] });
-    Object.defineProperty(touchEvent, 'preventDefault', { value: jest.fn() });
+    Object.defineProperty(touchEvent, 'preventDefault', { value: vi.fn() });
 
     cell.dispatchEvent(touchEvent);
 
@@ -228,14 +228,14 @@ describe('BoardRenderer Full Coverage', () => {
     expect(cell00.classList.contains('last-move')).toBe(true);
 
     game.validMoves = [{ r: 2, c: 2 }];
-    game.isTutorMove = jest.fn(() => true);
+    game.isTutorMove = vi.fn(() => true);
     BoardRenderer.renderBoard(game);
     const cell22 = document.querySelector('.cell[data-r="2"][data-c="2"]');
     expect(cell22.classList.contains('valid-move')).toBe(true);
     expect(cell22.classList.contains('tutor-move')).toBe(true);
 
     game.board[0][0] = { type: 'p', color: 'white' };
-    game.isSquareUnderAttack = jest.fn(() => true);
+    game.isSquareUnderAttack = vi.fn(() => true);
     BoardRenderer.renderBoard(game);
     const cellThreat = document.querySelector('.cell[data-r="0"][data-c="0"]');
     expect(cellThreat.classList.contains('threatened')).toBe(true);
@@ -255,7 +255,7 @@ describe('BoardRenderer Full Coverage', () => {
   });
 
   test('animateMove moves piece and spawns particles', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const from = { r: 0, c: 0 };
     const to = { r: 1, c: 1 };
     const piece = { type: 'p', color: 'white' };
@@ -263,10 +263,10 @@ describe('BoardRenderer Full Coverage', () => {
     const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
     const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
 
-    jest
+    vi
       .spyOn(fromCell, 'getBoundingClientRect')
       .mockReturnValue({ left: 0, top: 0, width: 50, height: 50 });
-    jest
+    vi
       .spyOn(toCell, 'getBoundingClientRect')
       .mockReturnValue({ left: 100, top: 100, width: 50, height: 50 });
 
@@ -275,7 +275,7 @@ describe('BoardRenderer Full Coverage', () => {
     expect(game.isAnimating).toBe(true);
 
     // Execute animation end
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await promise;
 
@@ -336,7 +336,7 @@ describe('BoardRenderer Full Coverage', () => {
   });
 
   test('animateMove handles capture', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const from = { r: 0, c: 0 };
     const to = { r: 1, c: 1 };
     const piece = { type: 'p', color: 'white' };
@@ -345,16 +345,16 @@ describe('BoardRenderer Full Coverage', () => {
 
     const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
     const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
-    jest
+    vi
       .spyOn(fromCell, 'getBoundingClientRect')
       .mockReturnValue({ right: 0, top: 0, width: 50, height: 50 });
-    jest
+    vi
       .spyOn(toCell, 'getBoundingClientRect')
       .mockReturnValue({ left: 100, top: 100, width: 50, height: 50 });
 
     const promise = BoardRenderer.animateMove(game, from, to, piece);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     await promise;
 
     expect(particleSystem.spawn).toHaveBeenCalledWith(

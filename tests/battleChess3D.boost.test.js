@@ -1,109 +1,135 @@
-import { jest } from '@jest/globals';
+
 
 // Comprehensive Three.js Mock
 const mockThree = {
-  Scene: jest.fn().mockImplementation(() => ({
-    add: jest.fn(),
-    remove: jest.fn(),
-    traverse: jest.fn(cb =>
-      cb({ geometry: { dispose: jest.fn() }, material: { dispose: jest.fn() } })
-    ),
-    background: null,
-    children: [],
-  })),
-  PerspectiveCamera: jest.fn().mockImplementation(() => ({
-    position: { set: jest.fn() },
-    lookAt: jest.fn(),
-    aspect: 1,
-    updateProjectionMatrix: jest.fn(),
-  })),
-  WebGLRenderer: jest.fn().mockImplementation(() => ({
-    setSize: jest.fn(),
-    setPixelRatio: jest.fn(),
-    setClearColor: jest.fn(),
-    render: jest.fn(),
-    dispose: jest.fn(),
-    domElement: document.createElement('canvas'),
-    shadowMap: { enabled: false, type: null },
-  })),
-  Group: jest.fn().mockImplementation(() => ({
-    add: jest.fn(function (obj) {
-      this.children.push(obj);
-    }),
-    remove: jest.fn(function (obj) {
-      const index = this.children.indexOf(obj);
-      if (index > -1) this.children.splice(index, 1);
-    }),
-    position: { set: jest.fn() },
-    rotation: { x: 0, y: 0, z: 0, set: jest.fn() },
-    children: [],
-    userData: {},
-  })),
-  Raycaster: jest.fn().mockImplementation(() => ({
-    setFromCamera: jest.fn(),
-    intersectObjects: jest.fn(objs => {
-      // Simulate intersection with a piece/square if objs contains something
-      if (objs.length > 0) {
-        return [{ object: { userData: { row: 4, col: 4, type: 'square' } } }];
-      }
-      return [];
-    }),
-  })),
-  CanvasTexture: jest.fn(),
-  SpriteMaterial: jest.fn(),
-  Sprite: jest.fn().mockImplementation(() => ({
-    position: { set: jest.fn() },
-    scale: { set: jest.fn() },
-  })),
-  Vector3: jest.fn().mockImplementation(() => ({ x: 0, y: 0, z: 0 })),
-  BoxGeometry: jest.fn(),
-  SphereGeometry: jest.fn(),
-  RingGeometry: jest.fn(),
-  MeshStandardMaterial: jest.fn(),
-  MeshBasicMaterial: jest.fn(),
-  AmbientLight: jest.fn(),
-  DirectionalLight: jest.fn().mockImplementation(() => ({
-    position: { set: jest.fn() },
-    shadow: { camera: {}, mapSize: {} },
-  })),
-  Color: jest.fn(),
-  Mesh: jest.fn().mockImplementation(() => ({
-    position: { set: jest.fn() },
-    rotation: { x: 0, y: 0, z: 0, set: jest.fn() },
-    userData: {},
-    material: { color: { setHex: jest.fn() } },
-    add: jest.fn(),
-  })),
-  HemisphereLight: jest.fn().mockImplementation(() => ({
-    position: { set: jest.fn() },
-  })),
-  LatheGeometry: jest.fn(),
-  Vector2: jest.fn().mockImplementation((x, y) => ({ x, y })),
+  Scene: vi.fn().mockImplementation(function () {
+    return {
+      add: vi.fn(),
+      remove: vi.fn(),
+      traverse: vi.fn(cb =>
+        cb({ geometry: { dispose: vi.fn() }, material: { dispose: vi.fn() } })
+      ),
+      background: null,
+      children: [],
+    };
+  }),
+  PerspectiveCamera: vi.fn().mockImplementation(function () {
+    return {
+      position: { set: vi.fn() },
+      lookAt: vi.fn(),
+      aspect: 1,
+      updateProjectionMatrix: vi.fn(),
+    };
+  }),
+  WebGLRenderer: vi.fn().mockImplementation(function () {
+    return {
+      setSize: vi.fn(),
+      setPixelRatio: vi.fn(),
+      setClearColor: vi.fn(),
+      render: vi.fn(),
+      dispose: vi.fn(),
+      domElement: document.createElement('canvas'),
+      shadowMap: { enabled: false, type: null },
+    };
+  }),
+  Group: vi.fn().mockImplementation(function () {
+    return {
+      add: vi.fn(function (obj) {
+        this.children.push(obj);
+      }),
+      remove: vi.fn(function (obj) {
+        const index = this.children.indexOf(obj);
+        if (index > -1) this.children.splice(index, 1);
+      }),
+      position: { set: vi.fn() },
+      rotation: { x: 0, y: 0, z: 0, set: vi.fn() },
+      children: [],
+      userData: {},
+    };
+  }),
+  Raycaster: vi.fn().mockImplementation(function () {
+    return {
+      setFromCamera: vi.fn(),
+      intersectObjects: vi.fn(objs => {
+        // Simulate intersection with a piece/square if objs contains something
+        if (objs.length > 0) {
+          return [{ object: { userData: { row: 4, col: 4, type: 'square' } } }];
+        }
+        return [];
+      }),
+    };
+  }),
+  CanvasTexture: vi.fn(),
+  SpriteMaterial: vi.fn(),
+  Sprite: vi.fn().mockImplementation(function () {
+    return {
+      position: { set: vi.fn() },
+      scale: { set: vi.fn() },
+    };
+  }),
+  Vector3: vi.fn().mockImplementation(function () {
+    return { x: 0, y: 0, z: 0 };
+  }),
+  BoxGeometry: vi.fn(),
+  SphereGeometry: vi.fn(),
+  RingGeometry: vi.fn(),
+  MeshStandardMaterial: vi.fn(),
+  MeshBasicMaterial: vi.fn(),
+  AmbientLight: vi.fn(),
+  DirectionalLight: vi.fn().mockImplementation(function () {
+    return {
+      position: { set: vi.fn() },
+      shadow: { camera: {}, mapSize: {} },
+    };
+  }),
+  Color: vi.fn(),
+  Mesh: vi.fn().mockImplementation(function () {
+    return {
+      position: { set: vi.fn() },
+      rotation: { x: 0, y: 0, z: 0, set: vi.fn() },
+      userData: {},
+      material: { color: { setHex: vi.fn() } },
+      add: vi.fn(),
+    };
+  }),
+  HemisphereLight: vi.fn().mockImplementation(function () {
+    return {
+      position: { set: vi.fn() },
+    };
+  }),
+  LatheGeometry: vi.fn(),
+  Vector2: vi.fn().mockImplementation(function (x, y) {
+    return { x, y };
+  }),
   DoubleSide: 2,
   PCFSoftShadowMap: 1,
 };
 
-jest.unstable_mockModule('three', () => mockThree);
-jest.unstable_mockModule('three/examples/jsm/controls/OrbitControls.js', () => ({
-  OrbitControls: jest.fn().mockImplementation(() => ({
-    update: jest.fn(),
-    dispose: jest.fn(),
-    target: { set: jest.fn() },
-  })),
+vi.mock('three', () => mockThree);
+vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
+  OrbitControls: vi.fn().mockImplementation(function () {
+    return {
+      update: vi.fn(),
+      dispose: vi.fn(),
+      target: { set: vi.fn() },
+    };
+  }),
 }));
 
-jest.unstable_mockModule('../js/pieces3D.js', () => ({
-  createPiece3D: jest.fn(() => ({
-    position: { set: jest.fn() },
+vi.mock('../js/pieces3D.js', () => ({
+  createPiece3D: vi.fn(() => ({
+    position: { set: vi.fn() },
     userData: {},
   })),
   PIECE_COLORS: { white: 0xffffff, black: 0x000000 },
 }));
 
-jest.unstable_mockModule('../js/battleAnimations.js', () => ({
-  BattleAnimator: jest.fn().mockImplementation(() => ({
-    playBattle: jest.fn(() => Promise.resolve()),
-  })),
+vi.mock('../js/battleAnimations.js', () => ({
+  BattleAnimator: vi.fn().mockImplementation(function () {
+    return {
+      playBattle: vi.fn(() => Promise.resolve()),
+    };
+  }),
 }));
 
 import { setupJSDOM } from './test-utils.js';
@@ -122,7 +148,7 @@ describe('BattleChess3D Class', () => {
     Object.defineProperty(container, 'clientHeight', { value: 600, configurable: true });
 
     engine = new BattleChess3D(container);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should initialize correctly', async () => {
@@ -185,7 +211,7 @@ describe('BattleChess3D Class', () => {
     // Mock boardGroup on sceneManager, not engine
     engine.sceneManager.boardGroup = {
       children: [
-        { userData: { type: 'square', isLight: true }, material: { color: { setHex: jest.fn() } } },
+        { userData: { type: 'square', isLight: true }, material: { color: { setHex: vi.fn() } } },
       ],
     };
     engine.setTheme('blue');
@@ -208,7 +234,7 @@ describe('BattleChess3D Class', () => {
 
   test('should animateMove', async () => {
     await engine.init();
-    const piece = { position: { set: jest.fn(), x: 0, y: 0, z: 0 }, userData: {} };
+    const piece = { position: { set: vi.fn(), x: 0, y: 0, z: 0 }, userData: {} };
     // We need to inject into pieces map
     engine.pieceManager.pieces['0,0'] = piece;
 
@@ -226,7 +252,7 @@ describe('BattleChess3D Class', () => {
   test('should handle onClick', async () => {
     await engine.init();
     const mockEvent = { clientX: 100, clientY: 100 };
-    const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 
     // We need `sceneManager.camera` and proper setup because InputHandler uses Raycaster.
     // Mock Raycaster returns intersection.
@@ -273,28 +299,28 @@ describe('BattleChess3D Class', () => {
   // Additional coverage tests for setters
   test('should set camera', async () => {
     await engine.init();
-    const mockCamera = { position: { set: jest.fn() } };
+    const mockCamera = { position: { set: vi.fn() } };
     engine.camera = mockCamera;
     expect(engine.sceneManager.camera).toBe(mockCamera);
   });
 
   test('should set renderer', async () => {
     await engine.init();
-    const mockRenderer = { setSize: jest.fn() };
+    const mockRenderer = { setSize: vi.fn(), render: vi.fn() };
     engine.renderer = mockRenderer;
     expect(engine.sceneManager.renderer).toBe(mockRenderer);
   });
 
   test('should set controls', async () => {
     await engine.init();
-    const mockControls = { update: jest.fn() };
+    const mockControls = { update: vi.fn() };
     engine.controls = mockControls;
     expect(engine.sceneManager.controls).toBe(mockControls);
   });
 
   test('should set battleAnimator', async () => {
     await engine.init();
-    const mockAnimator = { playBattle: jest.fn() };
+    const mockAnimator = { playBattle: vi.fn() };
     engine.battleAnimator = mockAnimator;
     expect(engine.pieceManager.battleAnimator).toBe(mockAnimator);
   });

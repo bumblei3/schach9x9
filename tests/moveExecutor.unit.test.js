@@ -1,58 +1,58 @@
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(() => Promise.resolve(0)),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(() => Promise.resolve(0)),
 }));
 
 // --- MOCKS FOR I/O ONLY ---
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  animateMove: jest.fn(() => Promise.resolve()),
-  updateCapturedUI: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updatePuzzleStatus: jest.fn(),
-  updateStatus: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  updateClockUI: jest.fn(),
-  renderEvalGraph: jest.fn(),
-  animateCheckmate: jest.fn(),
-  animateCheck: jest.fn(),
-  showToast: jest.fn(),
-  showShop: jest.fn(),
-  showTutorSuggestions: jest.fn(),
-  showPromotionUI: jest.fn((g, r, c, col, mr, cb) => {
+vi.mock('../js/ui.js', () => ({
+  renderBoard: vi.fn(),
+  animateMove: vi.fn(() => Promise.resolve()),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
+  updatePuzzleStatus: vi.fn(),
+  updateStatus: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateClockUI: vi.fn(),
+  renderEvalGraph: vi.fn(),
+  animateCheckmate: vi.fn(),
+  animateCheck: vi.fn(),
+  showToast: vi.fn(),
+  showShop: vi.fn(),
+  showTutorSuggestions: vi.fn(),
+  showPromotionUI: vi.fn((g, r, c, col, mr, cb) => {
     if (g.board[r][c]) g.board[r][c].type = 'e';
     cb();
   }),
 }));
 
-jest.unstable_mockModule('../js/puzzleManager.js', () => ({
+vi.mock('../js/puzzleManager.js', () => ({
   puzzleManager: {
-    checkMove: jest.fn(),
-    getPuzzle: jest.fn(() => ({ solution: [] })),
+    checkMove: vi.fn(),
+    getPuzzle: vi.fn(() => ({ solution: [] })),
   },
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playError: jest.fn(),
-    playSuccess: jest.fn(),
-    playGameOver: jest.fn(),
-    playCheck: jest.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playError: vi.fn(),
+    playSuccess: vi.fn(),
+    playGameOver: vi.fn(),
+    playCheck: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/effects.js', () => ({
-  confettiSystem: { spawn: jest.fn() },
-  shakeScreen: jest.fn(),
-  triggerVibration: jest.fn(),
-  particleSystem: { spawn: jest.fn() },
-  floatingTextManager: { show: jest.fn() },
+vi.mock('../js/effects.js', () => ({
+  confettiSystem: { spawn: vi.fn() },
+  shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
+  particleSystem: { spawn: vi.fn() },
+  floatingTextManager: { show: vi.fn() },
 }));
 
 // Mock 3D globally
@@ -62,8 +62,8 @@ global.window = {
   innerHeight: 768,
 };
 global.document = {
-  getElementById: jest.fn(), // Will be overridden in beforeEach
-  createElement: jest.fn(() => ({
+  getElementById: vi.fn(), // Will be overridden in beforeEach
+  createElement: vi.fn(() => ({
     className: '',
     textContent: '',
   })),
@@ -82,19 +82,19 @@ describe('MoveExecutor Integration Tests', () => {
   let moveController;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Robust DOM Mock for all tests
     const mockElement = {
       textContent: '',
-      classList: { remove: jest.fn(), add: jest.fn() },
-      appendChild: jest.fn(),
+      classList: { remove: vi.fn(), add: vi.fn() },
+      appendChild: vi.fn(),
       scrollTop: 0,
       scrollHeight: 100,
       style: {},
     };
 
-    document.getElementById = jest.fn(id => {
+    document.getElementById = vi.fn(id => {
       if (id === 'winner-text') return mockElement;
       if (id === 'game-log') return mockElement;
       return mockElement;
@@ -114,8 +114,8 @@ describe('MoveExecutor Integration Tests', () => {
 
     moveController = {
       redoStack: [],
-      updateUndoRedoButtons: jest.fn(),
-      undoMove: jest.fn(), // We can keep this simple or link to GameStateManager
+      updateUndoRedoButtons: vi.fn(),
+      undoMove: vi.fn(), // We can keep this simple or link to GameStateManager
     };
   });
 
@@ -238,19 +238,19 @@ describe('MoveExecutor Integration Tests', () => {
 
     // We must preserve the 'game-log' behavior!
     const logMock = {
-      appendChild: jest.fn(),
+      appendChild: vi.fn(),
       scrollTop: 0,
       scrollHeight: 100,
     };
 
-    document.getElementById = jest.fn(id => {
+    document.getElementById = vi.fn(id => {
       if (id === 'winner-text') return winnerText;
       if (id === 'game-log') return logMock;
       // Fallback for everything else
       return {
         textContent: '',
-        classList: { remove: jest.fn(), add: jest.fn() },
-        appendChild: jest.fn(), // Safety net
+        classList: { remove: vi.fn(), add: vi.fn() },
+        appendChild: vi.fn(), // Safety net
         style: {},
       };
     });
@@ -273,9 +273,9 @@ describe('MoveExecutor Integration Tests', () => {
   test('3D Battle: Integration with window.battleChess3D', async () => {
     window.battleChess3D = {
       enabled: true,
-      playBattleSequence: jest.fn(() => Promise.resolve()),
-      removePiece: jest.fn(),
-      animateMove: jest.fn(),
+      playBattleSequence: vi.fn(() => Promise.resolve()),
+      removePiece: vi.fn(),
+      animateMove: vi.fn(),
     };
 
     game.board[6][0] = { type: 'r', color: 'white' };
@@ -285,17 +285,17 @@ describe('MoveExecutor Integration Tests', () => {
   });
 
   test('AI Move Trigger: Verified via timeout', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     game.isAI = true;
     game.turn = 'white'; // Will become black
-    game.aiMove = jest.fn();
+    game.aiMove = vi.fn();
 
     game.board[6][4] = { type: 'p', color: 'white' };
     await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
 
-    jest.advanceTimersByTime(1500);
+    vi.advanceTimersByTime(1500);
     expect(game.aiMove).toHaveBeenCalled();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('Puzzle Mode: Correct Move', async () => {
@@ -327,13 +327,13 @@ describe('MoveExecutor Integration Tests', () => {
 
     puzzleManager.checkMove.mockReturnValue('wrong');
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(UI.updatePuzzleStatus).toHaveBeenCalledWith('error', expect.any(String));
     expect(soundManager.playError).toHaveBeenCalled();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('Auto-save: Triggers saveGame after a move', async () => {
@@ -344,8 +344,8 @@ describe('MoveExecutor Integration Tests', () => {
     // Setup
     game.moveHistory = [1, 2, 3, 4]; // 4 moves already
     game.gameController = {
-      saveGame: jest.fn(),
-      saveGameToStatistics: jest.fn(),
+      saveGame: vi.fn(),
+      saveGameToStatistics: vi.fn(),
     };
     // Ensure no error thrown
     game.board[6][4] = { type: 'p', color: 'white' };

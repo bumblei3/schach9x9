@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 
 // Mock DOM
 document.body.innerHTML = `
@@ -16,9 +16,9 @@ document.body.innerHTML = `
 `;
 
 // Mock PostGameAnalyzer
-jest.unstable_mockModule('../../js/tutor/PostGameAnalyzer.js', () => ({
-  analyzeGame: jest.fn(),
-  classifyMove: jest.fn(),
+vi.mock('../../js/tutor/PostGameAnalyzer.js', () => ({
+  analyzeGame: vi.fn(),
+  classifyMove: vi.fn(),
   QUALITY_METADATA: {},
 }));
 

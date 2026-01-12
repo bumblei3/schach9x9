@@ -1,71 +1,77 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/utils.js', () => ({
-  debounce: jest.fn(fn => fn),
-  formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
-  deepCopy: jest.fn(obj => JSON.parse(JSON.stringify(obj))),
-  parseFEN: jest.fn(() => ({ board: [], turn: 'white' })),
+vi.mock('../js/utils.js', () => ({
+  debounce: vi.fn(fn => fn),
+  formatTime: vi.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
+  deepCopy: vi.fn(obj => JSON.parse(JSON.stringify(obj))),
+  parseFEN: vi.fn(() => ({ board: [], turn: 'white' })),
 }));
 
-jest.unstable_mockModule('../js/effects.js', () => ({
+vi.mock('../js/effects.js', () => ({
   particleSystem: {
-    spawn: jest.fn(),
+    spawn: vi.fn(),
   },
   floatingTextManager: {
-    show: jest.fn(),
+    show: vi.fn(),
   },
-  shakeScreen: jest.fn(),
-  triggerVibration: jest.fn(),
-  confettiSystem: { spawn: jest.fn() },
+  shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
+  confettiSystem: { spawn: vi.fn() },
 }));
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playGameOver: jest.fn(),
-    playSound: jest.fn(),
-    playCheck: jest.fn(),
-    playGameStart: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playGameOver: vi.fn(),
+    playSound: vi.fn(),
+    playCheck: vi.fn(),
+    playGameStart: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/storage.js', () => ({
+vi.mock('../js/storage.js', () => ({
   storageManager: {
-    loadGame: jest.fn(),
-    loadStateIntoGame: jest.fn(),
-    saveGame: jest.fn(),
-    hasSave: jest.fn(),
+    loadGame: vi.fn(),
+    loadStateIntoGame: vi.fn(),
+    saveGame: vi.fn(),
+    hasSave: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/statisticsManager.js', () => ({
-  StatisticsManager: jest.fn().mockImplementation(() => ({
-    saveGame: jest.fn(),
-    getStats: jest.fn(() => ({})),
-  })),
+vi.mock('../js/statisticsManager.js', () => ({
+  StatisticsManager: vi.fn().mockImplementation(function () {
+    return {
+      saveGame: vi.fn(),
+      getStats: vi.fn(() => ({})),
+    };
+  }),
 }));
 
-jest.unstable_mockModule('../js/tutorial.js', () => ({
-  Tutorial: jest.fn().mockImplementation(() => ({
-    init: jest.fn(),
-  })),
+vi.mock('../js/tutorial.js', () => ({
+  Tutorial: vi.fn().mockImplementation(function () {
+    return {
+      init: vi.fn(),
+    };
+  }),
 }));
 
-jest.unstable_mockModule('../js/arrows.js', () => ({
-  ArrowRenderer: jest.fn().mockImplementation(() => ({
-    clear: jest.fn(),
-  })),
+vi.mock('../js/arrows.js', () => ({
+  ArrowRenderer: vi.fn().mockImplementation(function () {
+    return {
+      clear: vi.fn(),
+    };
+  }),
 }));
 
-jest.unstable_mockModule('../js/puzzleManager.js', () => ({
+vi.mock('../js/puzzleManager.js', () => ({
   puzzleManager: {
-    init: jest.fn(),
-    loadPuzzle: jest.fn(),
-    nextPuzzle: jest.fn(),
+    init: vi.fn(),
+    loadPuzzle: vi.fn(),
+    nextPuzzle: vi.fn(),
   },
 }));
 
@@ -98,10 +104,10 @@ describe('Coverage Boost Tests', () => {
       isAI: false,
       isAnimating: false,
       replayMode: false,
-      log: jest.fn(),
-      getValidMoves: jest.fn(() => []),
-      calculateMaterialAdvantage: jest.fn(() => 0),
-      updateBestMoves: jest.fn(),
+      log: vi.fn(),
+      getValidMoves: vi.fn(() => []),
+      calculateMaterialAdvantage: vi.fn(() => 0),
+      updateBestMoves: vi.fn(),
       clockEnabled: true,
       gameStartTime: Date.now(),
       redoStack: [],
@@ -147,18 +153,18 @@ describe('Coverage Boost Tests', () => {
       black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', a: 'ba', c: 'bc', e: 'be' },
     };
 
-    global.confirm = jest.fn(() => true);
-    jest.clearAllMocks();
+    global.confirm = vi.fn(() => true);
+    vi.clearAllMocks();
   });
 
   describe('UI.updateTutorRecommendations', () => {
     test('should render templates in setup phase', () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.tutorController = {
-        getSetupTemplates: jest.fn(() => [
+        getSetupTemplates: vi.fn(() => [
           { id: 'balanced', name: 'Balanced', description: 'Desc', pieces: ['p', 'n'] },
         ]),
-        applySetupTemplate: jest.fn(),
+        applySetupTemplate: vi.fn(),
       };
 
       UI.updateTutorRecommendations(game);
@@ -204,7 +210,7 @@ describe('Coverage Boost Tests', () => {
 
   describe('UI Modals and Toasts', () => {
     test('showModal and closeModal should interact with DOM', () => {
-      const actions = [{ text: 'OK', callback: jest.fn() }];
+      const actions = [{ text: 'OK', callback: vi.fn() }];
       UI.showModal('Title', 'Message', actions);
 
       const modal = document.getElementById('generic-modal');
@@ -220,7 +226,7 @@ describe('Coverage Boost Tests', () => {
     });
 
     test('showToast should create temporary element', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       UI.showToast('Test Toast', 'success');
 
       const toast = document.querySelector('.toast');
@@ -228,9 +234,9 @@ describe('Coverage Boost Tests', () => {
       expect(toast.textContent).toContain('Test Toast');
       expect(toast.classList.contains('success')).toBe(true);
 
-      jest.advanceTimersByTime(3500); // 3000ms + 300ms fade
+      vi.advanceTimersByTime(3500); // 3000ms + 300ms fade
       expect(document.querySelector('.toast')).toBeNull();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 
@@ -353,9 +359,9 @@ describe('Coverage Boost Tests', () => {
     });
 
     test('Analysis mode jumps', () => {
-      game.moveController = { reconstructBoardAtMove: jest.fn() };
+      game.moveController = { reconstructBoardAtMove: vi.fn() };
       game.continuousAnalysis = true;
-      game.aiController = { analyzePosition: jest.fn() };
+      game.aiController = { analyzePosition: vi.fn() };
 
       controller.jumpToMove(5);
       expect(game.moveController.reconstructBoardAtMove).toHaveBeenCalledWith(5);
@@ -368,7 +374,7 @@ describe('Coverage Boost Tests', () => {
     test('toggleContinuousAnalysis', () => {
       game.continuousAnalysis = false;
       game.analysisMode = true;
-      game.aiController = { analyzePosition: jest.fn() };
+      game.aiController = { analyzePosition: vi.fn() };
 
       controller.toggleContinuousAnalysis();
       expect(game.continuousAnalysis).toBe(true);
@@ -435,11 +441,11 @@ describe('Coverage Boost Tests', () => {
         moves: 'e2e4',
         description: 'Solve it',
       };
-      puzzleManager.loadPuzzle = jest.fn(g => {
+      puzzleManager.loadPuzzle = vi.fn(g => {
         g.mode = 'puzzle';
         return mockPuzzle;
       });
-      puzzleManager.init = jest.fn();
+      puzzleManager.init = vi.fn();
 
       controller.startPuzzleMode(0);
       expect(game.mode).toBe('puzzle');
@@ -447,7 +453,7 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = jest.spyOn(controller, 'reloadPage').mockImplementation(() => {});
+      const reloadSpy = vi.spyOn(controller, 'reloadPage').mockImplementation(() => { });
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
+
 import { StatisticsManager } from '../js/statisticsManager.js';
 import { logger } from '../js/logger.js';
 
@@ -222,7 +222,7 @@ describe('StatisticsManager', () => {
     });
 
     test('should handle invalid import data', () => {
-      const errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
       const success = manager.importGames('invalid json');
       expect(success).toBe(false);
       expect(errorSpy).toHaveBeenCalled();

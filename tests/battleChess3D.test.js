@@ -3,7 +3,7 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
+
 
 // Simple test without mocking complex Three.js for now
 describe('BattleChess3D - Basic Tests', () => {
@@ -24,7 +24,7 @@ describe('BattleChess3D - Basic Tests', () => {
     if (container.parentNode) {
       document.body.removeChild(container);
     }
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Container Setup', () => {

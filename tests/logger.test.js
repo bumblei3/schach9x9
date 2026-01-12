@@ -1,19 +1,19 @@
-import { jest } from '@jest/globals';
+
 import { logger, LOG_LEVELS } from '../js/logger.js';
 
 // Mock console
 const originalConsole = global.console;
 global.console = {
   ...originalConsole,
-  log: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
+  log: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
 };
 
 describe('Logger', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger.setEnabled(true);
     logger.setLevel(LOG_LEVELS.DEBUG);
   });

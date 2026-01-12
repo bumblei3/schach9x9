@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
+
 import { moveToNotation, generatePGN } from '../js/utils/PGNGenerator.js';
 
 describe('PGNGenerator', () => {
@@ -293,7 +293,7 @@ describe('PGNGenerator', () => {
   describe('Clipboard and Download', () => {
     it('should call navigator.clipboard.writeText', async () => {
       const { copyPGNToClipboard } = await import('../js/utils/PGNGenerator.js');
-      const mockWriteText = jest.fn().mockResolvedValue(true);
+      const mockWriteText = vi.fn().mockResolvedValue(true);
       Object.assign(navigator, { clipboard: { writeText: mockWriteText } });
 
       const result = await copyPGNToClipboard('test pgn');
@@ -304,7 +304,7 @@ describe('PGNGenerator', () => {
     it('should return false on clipboard error', async () => {
       const { copyPGNToClipboard } = await import('../js/utils/PGNGenerator.js');
       Object.assign(navigator, {
-        clipboard: { writeText: jest.fn().mockRejectedValue(new Error('fail')) },
+        clipboard: { writeText: vi.fn().mockRejectedValue(new Error('fail')) },
       });
 
       const result = await copyPGNToClipboard('test pgn');
@@ -315,18 +315,18 @@ describe('PGNGenerator', () => {
       const { downloadPGN } = await import('../js/utils/PGNGenerator.js');
 
       // Mock URL.createObjectURL and revokeObjectURL
-      global.URL.createObjectURL = jest.fn().mockReturnValue('mock-url');
-      global.URL.revokeObjectURL = jest.fn();
+      global.URL.createObjectURL = vi.fn().mockReturnValue('mock-url');
+      global.URL.revokeObjectURL = vi.fn();
 
       // Mock document.createElement
       const mockAnchor = {
         href: '',
         download: '',
-        click: jest.fn(),
+        click: vi.fn(),
       };
-      jest.spyOn(document, 'createElement').mockReturnValue(mockAnchor);
-      jest.spyOn(document.body, 'appendChild').mockImplementation(() => {});
-      jest.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+      vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor);
+      vi.spyOn(document.body, 'appendChild').mockImplementation(() => {});
+      vi.spyOn(document.body, 'removeChild').mockImplementation(() => {});
 
       downloadPGN('test pgn', 'test.pgn');
 

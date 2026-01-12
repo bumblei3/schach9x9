@@ -2,16 +2,16 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
+
 import { KeyboardManager } from '../js/input/KeyboardManager.js';
 
 // Mock dynamic import for ui.js
-jest.unstable_mockModule('../js/ui.js', () => ({
-  showToast: jest.fn(),
-  closeModal: jest.fn(),
-  renderBoard: jest.fn(),
-  updateStatus: jest.fn(),
-  OverlayManager: { closeAll: jest.fn() },
+vi.mock('../js/ui.js', () => ({
+  showToast: vi.fn(),
+  closeModal: vi.fn(),
+  renderBoard: vi.fn(),
+  updateStatus: vi.fn(),
+  OverlayManager: { closeAll: vi.fn() },
 }));
 
 describe('KeyboardManager', () => {
@@ -22,19 +22,19 @@ describe('KeyboardManager', () => {
 
   beforeEach(() => {
     mockGameController = {
-      undoMove: jest.fn(),
-      redoMove: jest.fn(),
-      saveGame: jest.fn(),
-      resetSelection: jest.fn(),
+      undoMove: vi.fn(),
+      redoMove: vi.fn(),
+      saveGame: vi.fn(),
+      resetSelection: vi.fn(),
     };
     mockTutorController = {
-      showHint: jest.fn(),
+      showHint: vi.fn(),
     };
     app = {
       gameController: mockGameController,
       tutorController: mockTutorController,
       game: { selectedSquare: { r: 0, c: 0 }, validMoves: [] },
-      toggleFullscreen: jest.fn(),
+      toggleFullscreen: vi.fn(),
     };
 
     keyboardManager = new KeyboardManager(app);
@@ -42,18 +42,18 @@ describe('KeyboardManager', () => {
 
   afterEach(() => {
     keyboardManager.dispose();
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
   });
 
   it('should initialize and add event listener', () => {
-    const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
     new KeyboardManager(app);
     expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 
   it('should remove event listener on dispose', () => {
-    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
     keyboardManager.dispose();
     expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
@@ -61,7 +61,7 @@ describe('KeyboardManager', () => {
   it('should call undoMove on Ctrl+Z', async () => {
     const event = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true });
     Object.defineProperty(event, 'target', { value: document.body });
-    jest.spyOn(event, 'preventDefault');
+    vi.spyOn(event, 'preventDefault');
 
     await keyboardManager.handleKeyDown(event);
 
@@ -195,7 +195,7 @@ describe('KeyboardManager', () => {
 
   // Analysis Tools Tests
   it('should toggle threats on "t" key', async () => {
-    app.game.analysisManager = { toggleThreats: jest.fn(() => true) };
+    app.game.analysisManager = { toggleThreats: vi.fn(() => true) };
     const event = new KeyboardEvent('keydown', { key: 't' });
     Object.defineProperty(event, 'target', { value: document.body });
     await keyboardManager.handleKeyDown(event);
@@ -203,7 +203,7 @@ describe('KeyboardManager', () => {
   });
 
   it('should toggle opportunities on "o" key', async () => {
-    app.game.analysisManager = { toggleOpportunities: jest.fn(() => true) };
+    app.game.analysisManager = { toggleOpportunities: vi.fn(() => true) };
     const event = new KeyboardEvent('keydown', { key: 'o' });
     Object.defineProperty(event, 'target', { value: document.body });
     await keyboardManager.handleKeyDown(event);
@@ -211,7 +211,7 @@ describe('KeyboardManager', () => {
   });
 
   it('should toggle best move on "b" key', async () => {
-    app.game.analysisManager = { toggleBestMove: jest.fn(() => true) };
+    app.game.analysisManager = { toggleBestMove: vi.fn(() => true) };
     const event = new KeyboardEvent('keydown', { key: 'b' });
     Object.defineProperty(event, 'target', { value: document.body });
     await keyboardManager.handleKeyDown(event);
@@ -267,7 +267,7 @@ describe('KeyboardManager', () => {
   });
 
   it('should trigger emergency recovery on Ctrl+Shift+F12', async () => {
-    const recoverySpy = jest.spyOn(keyboardManager, 'performEmergencyRecovery');
+    const recoverySpy = vi.spyOn(keyboardManager, 'performEmergencyRecovery');
 
     const event = new KeyboardEvent('keydown', {
       key: 'f12',
@@ -275,7 +275,7 @@ describe('KeyboardManager', () => {
       shiftKey: true,
     });
     Object.defineProperty(event, 'target', { value: document.body });
-    jest.spyOn(event, 'preventDefault');
+    vi.spyOn(event, 'preventDefault');
 
     await keyboardManager.handleKeyDown(event);
 
@@ -306,7 +306,7 @@ describe('KeyboardManager', () => {
 
   it('should update threats button class when pressing "t"', async () => {
     document.body.innerHTML = '<button id="threats-btn"></button>';
-    app.game.analysisManager = { toggleThreats: jest.fn(() => true) };
+    app.game.analysisManager = { toggleThreats: vi.fn(() => true) };
 
     const event = new KeyboardEvent('keydown', { key: 't' });
     Object.defineProperty(event, 'target', { value: document.body });
@@ -318,7 +318,7 @@ describe('KeyboardManager', () => {
 
   it('should update opportunities button class when pressing "o"', async () => {
     document.body.innerHTML = '<button id="opportunities-btn"></button>';
-    app.game.analysisManager = { toggleOpportunities: jest.fn(() => true) };
+    app.game.analysisManager = { toggleOpportunities: vi.fn(() => true) };
 
     const event = new KeyboardEvent('keydown', { key: 'o' });
     Object.defineProperty(event, 'target', { value: document.body });
@@ -330,7 +330,7 @@ describe('KeyboardManager', () => {
 
   it('should update best-move button class when pressing "b"', async () => {
     document.body.innerHTML = '<button id="best-move-btn"></button>';
-    app.game.analysisManager = { toggleBestMove: jest.fn(() => true) };
+    app.game.analysisManager = { toggleBestMove: vi.fn(() => true) };
 
     const event = new KeyboardEvent('keydown', { key: 'b' });
     Object.defineProperty(event, 'target', { value: document.body });

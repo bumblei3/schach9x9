@@ -1,22 +1,22 @@
-import { jest } from '@jest/globals';
+
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../js/utils.js', () => ({
-  debounce: jest.fn(fn => fn),
-  formatTime: jest.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
+vi.mock('../js/utils.js', () => ({
+  debounce: vi.fn(fn => fn),
+  formatTime: vi.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
 }));
 
-jest.unstable_mockModule('../js/effects.js', () => ({
+vi.mock('../js/effects.js', () => ({
   particleSystem: {
-    spawn: jest.fn(),
+    spawn: vi.fn(),
   },
   floatingTextManager: {
-    show: jest.fn(),
+    show: vi.fn(),
   },
-  shakeScreen: jest.fn(),
-  triggerVibration: jest.fn(),
-  confettiSystem: { spawn: jest.fn() },
+  shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
+  confettiSystem: { spawn: vi.fn() },
 }));
 
 // Import UI module
@@ -46,18 +46,18 @@ describe('UI Module - Advanced Features', () => {
       replayPosition: -1,
       savedGameState: null,
       arrowRenderer: {
-        clearArrows: jest.fn(),
-        highlightMoves: jest.fn(),
+        clearArrows: vi.fn(),
+        highlightMoves: vi.fn(),
       },
       tutorController: {
-        getTutorHints: jest.fn(() => []),
-        getSetupTemplates: jest.fn(() => []),
-        applySetupTemplate: jest.fn(),
+        getTutorHints: vi.fn(() => []),
+        getSetupTemplates: vi.fn(() => []),
+        applySetupTemplate: vi.fn(),
       },
-      executeMove: jest.fn(),
-      calculateMaterialAdvantage: jest.fn(() => 5),
-      startClock: jest.fn(),
-      stopClock: jest.fn(),
+      executeMove: vi.fn(),
+      calculateMaterialAdvantage: vi.fn(() => 5),
+      startClock: vi.fn(),
+      stopClock: vi.fn(),
     };
 
     document.body.innerHTML = `
@@ -87,7 +87,7 @@ describe('UI Module - Advanced Features', () => {
             <div id="board-wrapper"><div id="board"></div></div>
         `;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('updateStatistics', () => {
@@ -178,7 +178,7 @@ describe('UI Module - Advanced Features', () => {
     });
 
     test('should apply template on click', async () => {
-      window.confirm = jest.fn(() => true);
+      window.confirm = vi.fn(() => true);
       game.phase = PHASES.SETUP_WHITE_PIECES;
       game.tutorController.getSetupTemplates.mockReturnValue([
         { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
@@ -194,7 +194,7 @@ describe('UI Module - Advanced Features', () => {
 
   describe('Tutor Suggestions - Gameplay Hints', () => {
     beforeEach(() => {
-      game.getTutorHints = jest.fn(() => [
+      game.getTutorHints = vi.fn(() => [
         {
           move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
           score: 150,

@@ -1,16 +1,16 @@
-import { jest } from '@jest/globals';
 
-jest.unstable_mockModule('../js/config.js', () => ({
+
+vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: { PLAY: 'play' },
 }));
-jest.unstable_mockModule('../js/effects.js', () => ({
-  particleSystem: { spawn: jest.fn() },
-  floatingTextManager: { show: jest.fn() },
-  shakeScreen: jest.fn(),
-  triggerVibration: jest.fn(),
+vi.mock('../js/effects.js', () => ({
+  particleSystem: { spawn: vi.fn() },
+  floatingTextManager: { show: vi.fn() },
+  shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
 }));
-jest.unstable_mockModule('../js/utils.js', () => ({
+vi.mock('../js/utils.js', () => ({
   debounce: fn => fn,
 }));
 

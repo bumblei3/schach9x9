@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { PuzzleMenu } from '../js/ui/PuzzleMenu.js';
 import { puzzleManager } from '../js/puzzleManager.js';
 
@@ -12,8 +12,8 @@ describe('PuzzleMenu Reproduction Test', () => {
     // Mock DOM elements
     mockOverlay = {
       classList: {
-        remove: jest.fn(),
-        add: jest.fn(),
+        remove: vi.fn(),
+        add: vi.fn(),
       },
       style: {
         display: '',
@@ -22,30 +22,30 @@ describe('PuzzleMenu Reproduction Test', () => {
 
     mockContainer = {
       innerHTML: '',
-      appendChild: jest.fn(),
+      appendChild: vi.fn(),
     };
 
     // Mock document.getElementById
-    document.getElementById = jest.fn(id => {
+    document.getElementById = vi.fn(id => {
       if (id === 'puzzle-menu-overlay') return mockOverlay;
       if (id === 'puzzle-menu-list') return mockContainer;
       return null;
     });
 
     // Mock document.createElement
-    document.createElement = jest.fn(() => ({
+    document.createElement = vi.fn(() => ({
       className: '',
       innerHTML: '',
       onclick: null,
       classList: {
-        add: jest.fn(),
-        remove: jest.fn(),
+        add: vi.fn(),
+        remove: vi.fn(),
       },
     }));
 
     mockGameController = {
-      loadPuzzle: jest.fn(),
-      startPuzzleMode: jest.fn(),
+      loadPuzzle: vi.fn(),
+      startPuzzleMode: vi.fn(),
     };
 
     puzzleMenu = new PuzzleMenu(mockGameController);

@@ -1,33 +1,37 @@
-import { jest } from '@jest/globals';
+
 
 // Mock audio
-global.AudioContext = jest.fn().mockImplementation(() => ({
-  createGain: jest.fn(() => ({
-    connect: jest.fn(),
-    gain: {
-      value: 0,
-      exponentialRampToValueAtTime: jest.fn(),
-      setValueAtTime: jest.fn(),
-    },
-  })),
-  createOscillator: jest.fn(() => ({
-    connect: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-    frequency: { setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn() },
-  })),
-  destination: {},
-}));
+const mockAudioContext = vi.fn().mockImplementation(function () {
+  return {
+    createGain: vi.fn(() => ({
+      connect: vi.fn(),
+      gain: {
+        value: 0,
+        exponentialRampToValueAtTime: vi.fn(),
+        setValueAtTime: vi.fn(),
+      },
+    })),
+    createOscillator: vi.fn(() => ({
+      connect: vi.fn(),
+      start: vi.fn(),
+      stop: vi.fn(),
+      frequency: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+    })),
+    destination: {},
+  };
+});
+
+vi.stubGlobal('AudioContext', mockAudioContext);
 
 // We need to use real modules mostly, but mock UI rendering effectively
-jest.unstable_mockModule('../../js/ui/BoardRenderer.js', () => ({
-  renderBoard: jest.fn(),
-  initBoardUI: jest.fn(),
-  animateMove: jest.fn((g, f, t, p, cb) => cb && cb()),
-  highlightLastMove: jest.fn(),
-  clearHighlights: jest.fn(),
-  getPieceSymbol: jest.fn(() => 'X'),
-  getPieceText: jest.fn(() => 'X'),
+vi.mock('../../js/ui/BoardRenderer.js', () => ({
+  renderBoard: vi.fn(),
+  initBoardUI: vi.fn(),
+  animateMove: vi.fn((g, f, t, p, cb) => cb && cb()),
+  highlightLastMove: vi.fn(),
+  clearHighlights: vi.fn(),
+  getPieceSymbol: vi.fn(() => 'X'),
+  getPieceText: vi.fn(() => 'X'),
 }));
 
 // Import what we need
@@ -74,9 +78,9 @@ describe('Gameplay Scenarios', () => {
     game.animateMove = (f, t, p) => moveController.animateMove(f, t, p);
 
     // Mock necessary controller dependencies if they aren't fully mocked yet
-    controller.shopManager = { updateShopUI: jest.fn() };
-    controller.statisticsManager = { updateStats: jest.fn(), recordGameStart: jest.fn() };
-    controller.timeManager = { startClock: jest.fn(), stopClock: jest.fn(), switchTurn: jest.fn() };
+    controller.shopManager = { updateShopUI: vi.fn() };
+    controller.statisticsManager = { updateStats: vi.fn(), recordGameStart: vi.fn() };
+    controller.timeManager = { startClock: vi.fn(), stopClock: vi.fn(), switchTurn: vi.fn() };
 
     // Disable search time limits for reliable testing
     game.aiMoveTime = 50;
@@ -94,7 +98,7 @@ describe('Gameplay Scenarios', () => {
     expect(game.turn).toBe('white');
 
     // 2. Mock valid moves response for the selected pawn
-    game.getValidMoves = jest.fn(() => [{ r: 5, c: 4 }]);
+    game.getValidMoves = vi.fn(() => [{ r: 5, c: 4 }]);
 
     // 3. Click destination
     await controller.handleCellClick(5, 4);

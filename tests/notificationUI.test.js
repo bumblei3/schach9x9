@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { NotificationUI } from '../js/ui/NotificationUI.js';
 
 describe('NotificationUI', () => {
@@ -7,11 +7,11 @@ describe('NotificationUI', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     notificationUI = new NotificationUI();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should create container if not exists', () => {
@@ -51,10 +51,10 @@ describe('NotificationUI', () => {
     expect(toast.textContent).toContain('Fehler');
 
     // Error duration is 5000
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
     expect(document.contains(toast)).toBe(true);
 
-    jest.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(2000);
     expect(toast.classList.contains('hiding')).toBe(true);
   });
 

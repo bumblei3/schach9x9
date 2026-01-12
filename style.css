@@ -30,6 +30,9 @@
 /* Debug: Enhanced Debug Console */
 @import './css/debug.css';
 
+/* Premium: Visual Polish & Effects */
+@import './css/premium.css';
+
 /* ===========================================
    LEGACY / ADDITIONAL STYLES
    (Styles not yet modularized)

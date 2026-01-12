@@ -1,41 +1,51 @@
-import { jest } from '@jest/globals';
+
 
 // Comprehensive Three.js Mock
 const mockThree = {
-  Group: jest.fn().mockImplementation(() => ({
-    add: jest.fn(),
-    remove: jest.fn(),
-    position: { set: jest.fn() },
-    rotation: { set: jest.fn() },
-    userData: {},
-    traverse: jest.fn(() => {
-      // No-op for now, or could simulate children
-    }),
-  })),
-  Mesh: jest.fn().mockImplementation(() => ({
-    castShadow: false,
-    receiveShadow: false,
-    position: { set: jest.fn() },
-    rotation: { set: jest.fn(), x: 0, y: 0, z: 0 },
-  })),
-  Vector2: jest.fn().mockImplementation((x, y) => ({ x, y })),
-  LatheGeometry: jest.fn(),
-  BoxGeometry: jest.fn(),
-  CylinderGeometry: jest.fn(),
-  SphereGeometry: jest.fn(),
-  ConeGeometry: jest.fn(),
-  TorusGeometry: jest.fn(),
-  MeshStandardMaterial: jest.fn().mockImplementation(params => params),
-  Color: jest.fn().mockImplementation(c => ({ hex: c })),
+  Group: vi.fn().mockImplementation(function () {
+    return {
+      add: vi.fn(),
+      remove: vi.fn(),
+      position: { set: vi.fn() },
+      rotation: { set: vi.fn() },
+      userData: {},
+      traverse: vi.fn(() => {
+        // No-op for now, or could simulate children
+      }),
+    };
+  }),
+  Mesh: vi.fn().mockImplementation(function () {
+    return {
+      castShadow: false,
+      receiveShadow: false,
+      position: { set: vi.fn() },
+      rotation: { set: vi.fn(), x: 0, y: 0, z: 0 },
+    };
+  }),
+  Vector2: vi.fn().mockImplementation(function (x, y) {
+    return { x, y };
+  }),
+  LatheGeometry: vi.fn(),
+  BoxGeometry: vi.fn(),
+  CylinderGeometry: vi.fn(),
+  SphereGeometry: vi.fn(),
+  ConeGeometry: vi.fn(),
+  TorusGeometry: vi.fn(),
+  MeshStandardMaterial: vi.fn().mockImplementation(function (params) {
+    return params || {};
+  }),
+  Color: vi.fn().mockImplementation(function (c) {
+    return { hex: c };
+  }),
 };
 
-jest.unstable_mockModule('three', () => mockThree);
+vi.mock('three', () => mockThree);
 
 const { createPiece3D, SKIN_PRESETS } = await import('../js/pieces3D.js');
 
 describe('pieces3D Module', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should create all standard piece types', () => {

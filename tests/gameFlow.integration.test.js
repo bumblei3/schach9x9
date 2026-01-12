@@ -2,54 +2,58 @@
  * @jest-environment jsdom
  */
 
-import { jest } from '@jest/globals';
+
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import { setupJSDOM } from './test-utils.js';
 
 // Mock UI dependencies
-jest.unstable_mockModule('../js/ui.js', () => ({
-  renderBoard: jest.fn(),
-  showModal: jest.fn((title, message, buttons) => {
-    // Only auto-click 'Fortfahren' or 'OK', not 'undo' actions in tests unless desired
-    const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.text === 'OK');
-    if (continueBtn && continueBtn.callback) continueBtn.callback();
-  }),
-  updateStatus: jest.fn(),
-  updateShopUI: jest.fn(),
-  showShop: jest.fn(),
-  updateStatistics: jest.fn(),
-  updateMoveHistoryUI: jest.fn(),
-  updateCapturedUI: jest.fn(),
-  updateClockUI: jest.fn(),
-  updateClockDisplay: jest.fn(),
-  showToast: jest.fn(),
-  renderEvalGraph: jest.fn(),
-  animateMove: jest.fn().mockResolvedValue(),
-  animateCheck: jest.fn(),
-  animateCheckmate: jest.fn(),
-  showPromotionUI: jest.fn(),
-  showPuzzleOverlay: jest.fn(),
-  updatePuzzleStatus: jest.fn(),
-}));
+vi.mock('../js/ui.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    renderBoard: vi.fn(),
+    showModal: vi.fn((title, message, buttons) => {
+      // Only auto-click 'Fortfahren' or 'OK', not 'undo' actions in tests unless desired
+      const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.text === 'OK');
+      if (continueBtn && continueBtn.callback) continueBtn.callback();
+    }),
+    updateStatus: vi.fn(),
+    updateShopUI: vi.fn(),
+    showShop: vi.fn(),
+    updateStatistics: vi.fn(),
+    updateMoveHistoryUI: vi.fn(),
+    updateCapturedUI: vi.fn(),
+    updateClockUI: vi.fn(),
+    updateClockDisplay: vi.fn(),
+    showToast: vi.fn(),
+    renderEvalGraph: vi.fn(),
+    animateMove: vi.fn().mockResolvedValue(),
+    animateCheck: vi.fn(),
+    animateCheckmate: vi.fn(),
+    showPromotionUI: vi.fn(),
+    showPuzzleOverlay: vi.fn(),
+    updatePuzzleStatus: vi.fn(),
+  };
+});
 
-jest.unstable_mockModule('../js/sounds.js', () => ({
+vi.mock('../js/sounds.js', () => ({
   soundManager: {
-    init: jest.fn(),
-    playMove: jest.fn(),
-    playCapture: jest.fn(),
-    playCheck: jest.fn(),
-    playGameStart: jest.fn(),
-    playGameOver: jest.fn(),
-    playSuccess: jest.fn(),
-    playError: jest.fn(),
+    init: vi.fn(),
+    playMove: vi.fn(),
+    playCapture: vi.fn(),
+    playCheck: vi.fn(),
+    playGameStart: vi.fn(),
+    playGameOver: vi.fn(),
+    playSuccess: vi.fn(),
+    playError: vi.fn(),
   },
 }));
 
-jest.unstable_mockModule('../js/aiEngine.js', () => ({
-  evaluatePosition: jest.fn(() => 0),
-  findKing: jest.fn(() => ({ r: 0, c: 0 })),
-  getBestMove: jest.fn().mockResolvedValue(null),
+vi.mock('../js/aiEngine.js', () => ({
+  evaluatePosition: vi.fn(() => 0),
+  findKing: vi.fn(() => ({ r: 0, c: 0 })),
+  getBestMove: vi.fn().mockResolvedValue(null),
 }));
 
 const { GameController } = await import('../js/gameController.js');
@@ -69,14 +73,14 @@ describe('Comprehensive Game Flow Integration Tests', () => {
     const localStorageMock = (() => {
       let store = {};
       return {
-        getItem: jest.fn(key => store[key] || null),
-        setItem: jest.fn((key, value) => {
+        getItem: vi.fn(key => store[key] || null),
+        setItem: vi.fn((key, value) => {
           store[key] = value.toString();
         }),
-        clear: jest.fn(() => {
+        clear: vi.fn(() => {
           store = {};
         }),
-        removeItem: jest.fn(key => {
+        removeItem: vi.fn(key => {
           delete store[key];
         }),
       };
@@ -95,12 +99,12 @@ describe('Comprehensive Game Flow Integration Tests', () => {
     // Link handlePlayClick as App does
     game.handlePlayClick = mc.handlePlayClick.bind(mc);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Auto-Save Trigger Integration', () => {
     test('should trigger save exactly every 5 moves', async () => {
-      const saveSpy = jest.spyOn(gc, 'saveGame');
+      const saveSpy = vi.spyOn(gc, 'saveGame');
 
       // Move 1
       await mc.executeMove({ r: 7, c: 4 }, { r: 6, c: 4 });
