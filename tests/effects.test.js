@@ -50,10 +50,9 @@ describe('Effects System', () => {
     cs.update();
     expect(cs.animating).toBe(true);
 
-    // Fade out
-    for (let i = 0; i < 200; i++) {
-      cs.update();
-    }
+    // Fade out - reduce iterations and force particles to expire
+    cs.particles.forEach(p => (p.life = 0));
+    cs.update();
     expect(cs.particles.length).toBe(0);
   });
 

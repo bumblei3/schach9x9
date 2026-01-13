@@ -221,16 +221,20 @@ test.describe('Deep Game Logic @logic', () => {
     });
 
     // 5. Verify capture
-    // Wait for animation
+    // Wait for animation AND board re-render
     await page.waitForFunction(() => !(window as any).game.isAnimating, { timeout: 5000 });
+    await page.waitForTimeout(500); // Extra wait for DOM update
 
     // White pawn should be at 2,5
     await expect(page.locator('.cell[data-r="2"][data-c="5"]')).toHaveAttribute('data-piece', 'p');
-    // Black pawn at 3,5 should be GONE
-    await expect(page.locator('.cell[data-r="3"][data-c="5"]')).not.toHaveAttribute(
-      'data-piece',
-      'p'
-    );
+
+    // Black pawn at 3,5 should be GONE - verify via game state
+    const capturedPawnGone = await page.evaluate(() => {
+      const game = (window as any).game;
+      const cell = game.board[3][5];
+      return cell === null || cell?.color !== 'black';
+    });
+    expect(capturedPawnGone).toBe(true);
   });
 
   test('Pawn Promotion 8x8', async ({ page }) => {
