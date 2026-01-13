@@ -145,7 +145,7 @@ export class App {
     // For now, removing the shopPanel hiding which broke Standard upgrades.
 
     if (mode !== 'standard8x8') {
-      if (toggle3DBtn) toggle3DBtn.style.display = 'flex';
+      if (toggle3DBtn) toggle3DBtn.classList.remove('hidden');
     }
 
     logger.info('App initialization complete');

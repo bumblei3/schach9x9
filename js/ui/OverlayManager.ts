@@ -47,7 +47,7 @@ export function showModal(
     actionsEl.appendChild(btn);
   });
 
-  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
 }
 
 /**
@@ -55,7 +55,7 @@ export function showModal(
  */
 export function closeModal(): void {
   const modal = document.getElementById('generic-modal');
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.add('hidden');
 }
 
 /**

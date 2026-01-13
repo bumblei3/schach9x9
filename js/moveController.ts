@@ -25,8 +25,6 @@ export class MoveController {
   public async handlePlayClick(r: number, c: number): Promise<void> {
     const clickedPiece = this.game.board[r][c];
     const isCurrentPlayersPiece = clickedPiece && clickedPiece.color === this.game.turn;
-
-    // 1. If clicking own piece, always select it
     if (isCurrentPlayersPiece) {
       this.game.selectedSquare = { r, c };
       this.game.validMoves = this.game.getValidMoves(r, c, clickedPiece);

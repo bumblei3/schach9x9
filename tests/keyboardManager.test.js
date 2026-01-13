@@ -290,7 +290,7 @@ describe('KeyboardManager', () => {
     app.game._forceFullRender = false;
 
     // Add spinner overlay
-    document.body.innerHTML = '<div id="spinner-overlay" style="display:block"></div>';
+    document.body.innerHTML = '<div id="spinner-overlay" class="visible"></div>';
 
     keyboardManager.performEmergencyRecovery();
 
@@ -300,7 +300,7 @@ describe('KeyboardManager', () => {
     expect(app.game._forceFullRender).toBe(true);
 
     const spinner = document.getElementById('spinner-overlay');
-    expect(spinner.style.display).toBe('none');
+    expect(spinner.classList.contains('hidden')).toBe(true);
   });
 
   it('should update threats button class when pressing "t"', async () => {

@@ -178,7 +178,9 @@ describe('DOMHandler', () => {
     pointsBtn.click();
 
     expect(app.init).toHaveBeenCalledWith(15, 'setup');
-    expect(document.getElementById('points-selection-overlay').style.display).toBe('none');
+    expect(document.getElementById('points-selection-overlay').classList.contains('hidden')).toBe(
+      true
+    );
   });
 
   test('should wire up finish setup button', () => {
@@ -227,7 +229,9 @@ describe('DOMHandler', () => {
   test('should handle campaign start', () => {
     const campaignBtn = document.getElementById('campaign-start-btn');
     campaignBtn.click();
-    expect(document.getElementById('points-selection-overlay').style.display).toBe('none');
+    expect(document.getElementById('points-selection-overlay').classList.contains('hidden')).toBe(
+      true
+    );
   });
 
   test('should handle menu actions', () => {
@@ -338,7 +342,7 @@ describe('DOMHandler', () => {
 
     // Verify 3D was enabled
     expect(app.battleChess3D.enabled).toBe(true);
-    expect(container3D.style.display).toBe('block');
+    expect(container3D.classList.contains('hidden')).toBe(false);
     expect(app.battleChess3D.init).toHaveBeenCalled();
   });
 
@@ -382,10 +386,10 @@ describe('DOMHandler', () => {
     const closeBtn = document.getElementById('close-help-btn');
 
     helpBtn.click();
-    expect(overlay.style.display).toBe('flex');
+    expect(overlay.classList.contains('hidden')).toBe(false);
 
     closeBtn.click();
-    expect(overlay.style.display).toBe('none');
+    expect(overlay.classList.contains('hidden')).toBe(true);
   });
 
   test('should handle PGN export "Keine Züge" case', () => {

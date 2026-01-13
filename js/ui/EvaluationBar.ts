@@ -95,7 +95,7 @@ export class EvaluationBar {
   public show(visible: boolean = true): void {
     const wrapper = document.getElementById('evaluation-bar-wrapper');
     if (wrapper) {
-      wrapper.style.display = visible ? 'flex' : 'none';
+      wrapper.classList.toggle('hidden', !visible);
     }
   }
 

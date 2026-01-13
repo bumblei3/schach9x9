@@ -520,6 +520,9 @@ export async function animateMove(
   to: Square,
   piece: Piece
 ): Promise<void> {
+  if (localStorage.getItem('disable_animations') === 'true') {
+    return Promise.resolve();
+  }
   game.isAnimating = true;
   return new Promise(resolve => {
     const fromCell = document.querySelector(`.cell[data-r="${from.r}"][data-c="${from.c}"]`);

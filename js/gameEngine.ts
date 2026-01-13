@@ -239,8 +239,8 @@ export class Game {
       this.board[size - 2][c] = { type: 'p', color: 'white', hasMoved: false };
     }
 
-    // Setup Pieces: R N B Q K Q B N R (9 pieces for 9x9)
-    const pieces: Piece['type'][] = ['r', 'n', 'b', 'q', 'k', 'q', 'b', 'n', 'r'];
+    // Setup Pieces: R N B A K C B N R (9 pieces for 9x9)
+    const pieces: Piece['type'][] = ['r', 'n', 'b', 'a', 'k', 'c', 'b', 'n', 'r'];
     for (let c = 0; c < size; c++) {
       this.board[0][c] = { type: pieces[c], color: 'black', hasMoved: false };
       this.board[size - 1][c] = { type: pieces[c], color: 'white', hasMoved: false };

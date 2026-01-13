@@ -28,7 +28,7 @@ vi.mock('../js/sounds.js', () => ({
 
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
-    constructor() { }
+    constructor() {}
   },
 }));
 
@@ -74,7 +74,7 @@ const MOCK_CAMPAIGN_LEVELS = [
     fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
     winCondition: { type: 'checkmate' },
     unlocks: ['level_2'],
-    goals: {}
+    goals: {},
   },
   {
     id: 'level_2',
@@ -85,7 +85,7 @@ const MOCK_CAMPAIGN_LEVELS = [
     fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
     winCondition: { type: 'checkmate' },
     unlocks: ['level_3'],
-    goals: {}
+    goals: {},
   },
   {
     id: 'level_3',
@@ -97,8 +97,8 @@ const MOCK_CAMPAIGN_LEVELS = [
     winCondition: { type: 'checkmate' },
     unlocks: [],
     reward: 'angel', // Custom property for test
-    goals: {}
-  }
+    goals: {},
+  },
 ];
 
 vi.mock('../js/campaign/campaignData.js', () => ({

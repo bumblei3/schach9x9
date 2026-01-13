@@ -191,7 +191,7 @@ export class AIController {
     }
 
     const spinner = document.getElementById('spinner-overlay');
-    if (spinner) spinner.style.display = 'flex';
+    if (spinner) spinner.classList.remove('hidden');
 
     // Initialize persistent worker pool if not exists
     if (!this.aiWorkers || this.aiWorkers.length === 0) {
@@ -236,7 +236,7 @@ export class AIController {
       const elapsed = Date.now() - this._aiMoveStartTime;
       logger.info(`[AI] Processing results after ${elapsed}ms`);
 
-      if (spinner) spinner.style.display = 'none';
+      if (spinner) spinner.classList.add('hidden');
 
       // Find best result
       const bestResult = workerResults.find(r => r && r.move);
@@ -287,7 +287,7 @@ export class AIController {
       if (!hasProcessed) {
         hasProcessed = true;
         logger.error('[AI] Worker timeout after 30 seconds! Making fallback move.');
-        if (spinner) spinner.style.display = 'none';
+        if (spinner) spinner.classList.add('hidden');
 
         // Make a random legal move as fallback
         const allMoves = this.game.getAllLegalMoves('black');

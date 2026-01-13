@@ -18,14 +18,12 @@ export class PuzzleMenu {
     this.renderPuzzleList();
     if (this.overlay) {
       this.overlay.classList.remove('hidden');
-      this.overlay.style.display = 'flex';
     }
   }
 
   hide(): void {
     if (this.overlay) {
       this.overlay.classList.add('hidden');
-      this.overlay.style.display = 'none';
     }
   }
 

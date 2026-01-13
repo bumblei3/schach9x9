@@ -55,7 +55,6 @@ describe('PuzzleMenu Reproduction Test', () => {
 
     // Verify overlay visibility logic
     expect(mockOverlay.classList.remove).toHaveBeenCalledWith('hidden');
-    expect(mockOverlay.style.display).toBe('flex');
 
     // Verify puzzle rendering
     const puzzles = puzzleManager.getPuzzles();
@@ -69,6 +68,5 @@ describe('PuzzleMenu Reproduction Test', () => {
   test('hide() should hide overlay', () => {
     puzzleMenu.hide();
     expect(mockOverlay.classList.add).toHaveBeenCalledWith('hidden');
-    expect(mockOverlay.style.display).toBe('none');
   });
 });

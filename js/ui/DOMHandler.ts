@@ -78,7 +78,7 @@ export class DOMHandler {
           const points = parseInt(pointsStr);
           const overlay = document.getElementById('points-selection-overlay');
           if (overlay) {
-            overlay.style.display = 'none';
+            overlay.classList.add('hidden');
             console.log('[DOMHandler] Overlay hidden');
           } else {
             console.error('[DOMHandler] Overlay not found!');
@@ -97,7 +97,7 @@ export class DOMHandler {
     if (standard8x8Btn) {
       standard8x8Btn.addEventListener('click', () => {
         const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.classList.add('hidden');
         this.app.init(0, 'standard8x8');
       });
     }
@@ -107,7 +107,7 @@ export class DOMHandler {
     if (upgrade8x8Btn) {
       upgrade8x8Btn.addEventListener('click', () => {
         const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.classList.add('hidden');
         this.app.init(5, 'standard8x8');
       });
     }
@@ -117,7 +117,7 @@ export class DOMHandler {
     if (classicBtn) {
       classicBtn.addEventListener('click', () => {
         const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.classList.add('hidden');
         this.app.init(0, 'classic');
       });
     }
@@ -127,7 +127,7 @@ export class DOMHandler {
     if (puzzleStartBtn) {
       puzzleStartBtn.addEventListener('click', () => {
         const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.classList.add('hidden');
         this.app.init(0, 'puzzle');
       });
     }
@@ -138,7 +138,7 @@ export class DOMHandler {
       this.campaignUI = new CampaignUI(this.app);
       campaignStartBtn.addEventListener('click', () => {
         const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.classList.add('hidden');
 
         const mainMenu = document.getElementById('main-menu');
         if (mainMenu) mainMenu.classList.remove('active');
@@ -287,7 +287,7 @@ export class DOMHandler {
           this.app.battleChess3D.enabled = !this.app.battleChess3D.enabled;
 
           if (this.app.battleChess3D.enabled) {
-            container3D.style.display = 'block';
+            container3D.classList.remove('hidden');
             void container3D.offsetWidth; // Force reflow
             container3D.classList.add('active');
             document.body.classList.add('mode-3d');
@@ -308,7 +308,7 @@ export class DOMHandler {
             toggle3D.classList.remove('active-3d');
             setTimeout(() => {
               if (!this.app.battleChess3D.enabled) {
-                container3D.style.display = 'none';
+                container3D.classList.add('hidden');
               }
             }, 500);
             boardWrapper.style.opacity = '1';
@@ -319,7 +319,7 @@ export class DOMHandler {
 
     // Handle initial overlay visibility
     const overlay = document.getElementById('points-selection-overlay');
-    if (overlay) overlay.style.display = 'flex';
+    if (overlay) overlay.classList.remove('hidden');
 
     this.initMenuHandlers();
     this.initAnalysisHandlers();
@@ -546,13 +546,11 @@ export class DOMHandler {
     if (helpBtn && helpOverlay) {
       helpBtn.addEventListener('click', () => {
         helpOverlay.classList.remove('hidden');
-        helpOverlay.style.display = 'flex';
         if (mainMenu) mainMenu.classList.remove('active');
       });
       if (closeHelpBtn) {
         closeHelpBtn.addEventListener('click', () => {
           helpOverlay.classList.add('hidden');
-          helpOverlay.style.display = 'none';
         });
       }
     }

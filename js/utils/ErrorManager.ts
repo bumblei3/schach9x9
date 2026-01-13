@@ -109,7 +109,7 @@ class ErrorManager {
       detailsBox.textContent = `${displayMsg}\n\n${error.stack || ''}`;
     }
 
-    errorOverlay.style.display = 'flex';
+    errorOverlay.classList.remove('hidden');
   }
 }
 

@@ -85,11 +85,11 @@ export class GameController {
     if (mainMenu) mainMenu.classList.remove('active');
 
     // Select Strategy
-    if (mode === 'setup') {
+    if (mode === 'setup' || mode === 'upgrade') {
       this.currentModeStrategy = new SetupModeStrategy();
     } else if (mode === 'classic') {
       this.currentModeStrategy = new ClassicModeStrategy();
-    } else if (mode === 'standard8x8') {
+    } else if (mode === 'standard8x8' || mode === 'upgrade8x8') {
       this.currentModeStrategy = new StandardModeStrategy();
     } else if (mode === 'campaign') {
       this.currentModeStrategy = new CampaignModeStrategy();

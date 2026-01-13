@@ -13,7 +13,7 @@ const { renderBoard } = await import('../../js/ui/BoardRenderer.js');
 describe('OverlayManager', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <div id="generic-modal" style="display: none;">
+      <div id="generic-modal" class="hidden">
         <div id="modal-title"></div>
         <div id="modal-message"></div>
         <div id="modal-actions"></div>
@@ -64,7 +64,7 @@ describe('OverlayManager', () => {
       OverlayManager.showModal('Test Title', 'Test Message');
 
       const modal = document.getElementById('generic-modal');
-      expect(modal.style.display).toBe('flex');
+      expect(modal.classList.contains('hidden')).toBe(false);
       expect(document.getElementById('modal-title').textContent).toBe('Test Title');
       expect(document.getElementById('modal-message').textContent).toBe('Test Message');
     });
@@ -83,13 +83,13 @@ describe('OverlayManager', () => {
       // Click button
       actions.children[0].click();
       expect(callback).toHaveBeenCalled();
-      expect(document.getElementById('generic-modal').style.display).toBe('none');
+      expect(document.getElementById('generic-modal').classList.contains('hidden')).toBe(true);
     });
 
     test('closeModal hides modal', () => {
       OverlayManager.showModal('Title', 'Msg');
       OverlayManager.closeModal();
-      expect(document.getElementById('generic-modal').style.display).toBe('none');
+      expect(document.getElementById('generic-modal').classList.contains('hidden')).toBe(true);
     });
 
     test('showModal returns early if elements missing', () => {

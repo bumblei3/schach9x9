@@ -160,7 +160,7 @@ export class KeyboardManager {
     game.isAnimating = false;
 
     const spinner = document.getElementById('spinner-overlay');
-    if (spinner) spinner.style.display = 'none';
+    if (spinner) spinner.classList.add('hidden');
 
     game.selectedSquare = null;
     game.validMoves = null;

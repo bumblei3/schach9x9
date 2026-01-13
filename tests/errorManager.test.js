@@ -27,8 +27,7 @@ describe('ErrorManager', () => {
 
     expect(logger.error).toHaveBeenCalled();
     const overlay = document.getElementById('error-overlay');
-    expect(overlay.style.display).toBe('flex');
-    expect(overlay.style.display).toBe('flex');
+    expect(overlay.classList.contains('hidden')).toBe(false);
     const details = document.getElementById('error-details-content');
     expect(details.textContent).toContain('Critical Failure');
   });

@@ -73,9 +73,13 @@ describe('EvaluationBar', () => {
   test('visible property should toggle display', () => {
     const evalBar = new EvaluationBar('test-container');
     evalBar.show(false);
-    expect(document.querySelector('.evaluation-bar-wrapper').style.display).toBe('none');
+    expect(document.querySelector('.evaluation-bar-wrapper').classList.contains('hidden')).toBe(
+      true
+    );
 
     evalBar.show(true);
-    expect(document.querySelector('.evaluation-bar-wrapper').style.display).toBe('flex');
+    expect(document.querySelector('.evaluation-bar-wrapper').classList.contains('hidden')).toBe(
+      false
+    );
   });
 });

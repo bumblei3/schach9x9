@@ -184,8 +184,14 @@ function runWorkerSearch(
     }, 5000); // 5s hard timeout limit
 
     workerPendingRequests.set(id, {
-      resolve: (val) => { clearTimeout(timeoutDesc); resolve(val as SearchResult); },
-      reject: (err) => { clearTimeout(timeoutDesc); reject(err); },
+      resolve: val => {
+        clearTimeout(timeoutDesc);
+        resolve(val as SearchResult);
+      },
+      reject: err => {
+        clearTimeout(timeoutDesc);
+        reject(err);
+      },
     });
     aiWorker!.postMessage({
       type: 'getBestMove', // Use standard protocol
@@ -450,18 +456,18 @@ export const PST: Record<string, number[]> = {
 export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves };
 
 // Stubbed TT functions
-export function storeTT(): void { }
-export function probeTT(): void { }
+export function storeTT(): void {}
+export function probeTT(): void {}
 export function getTTMove(): null {
   return null;
 }
-export function clearTT(): void { }
+export function clearTT(): void {}
 export function getTTSize(): number {
   return 0;
 }
-export function setTTMaxSize(): void { }
-export function testStoreTT(): void { }
-export function testProbeTT(): void { }
+export function setTTMaxSize(): void {}
+export function testStoreTT(): void {}
+export function testProbeTT(): void {}
 
 export let progressCallback: ((progress: any) => void) | null = null;
 export function setProgressCallback(cb: (progress: any) => void | null): void {

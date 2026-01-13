@@ -112,6 +112,6 @@ describe('8x8 Upgrade Mode', () => {
     controller.finishSetupPhase(); // To Black
     expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
     expect(game.points).toBe(15);
-    expect(game.log).toHaveBeenCalledWith('Weiß fertig. Schwarz rüstet auf.');
+    expect(game.log).toHaveBeenCalledWith('Weiß fertig. Schwarz: Truppen-Upgrades möglich.');
   });
 });

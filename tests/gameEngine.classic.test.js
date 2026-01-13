@@ -21,8 +21,8 @@ describe('Game Engine - Classic Mode', () => {
     }
   });
 
-  test('should setup pieces correctly (R N B Q K Q B N R)', () => {
-    const expectedPieces = ['r', 'n', 'b', 'q', 'k', 'q', 'b', 'n', 'r'];
+  test('should setup pieces correctly (R N B A K C B N R)', () => {
+    const expectedPieces = ['r', 'n', 'b', 'a', 'k', 'c', 'b', 'n', 'r'];
 
     for (let c = 0; c < BOARD_SIZE; c++) {
       // Black pieces at row 0

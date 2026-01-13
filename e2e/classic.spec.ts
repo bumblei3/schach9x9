@@ -1,47 +1,30 @@
 import { test, expect } from '@playwright/test';
+import { E2EHelper } from './helpers/E2EHelper.js';
 
 test.describe('Classic 9x9 Mode', () => {
+  let helper: E2EHelper;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.waitForFunction(() => (window as any).app !== undefined);
-    // Wait for main menu
-    await expect(page.locator('#main-menu')).toBeVisible();
+    helper = new E2EHelper(page);
+    await helper.goto();
   });
 
-  test('should start classic mode with correct board setup', async ({ page }) => {
-    // Click "Klassisch (9x9)" card
-    // Assuming there is a card for it or we might need to select it via console if UI isn't ready
-    // Based on index.html analysis earlier, there is a "Klassisch" card.
-
-    // Find card expecting to trigger classic start
-    // The "Klassisch (9x9)" card usually has text "Klassisch (9x9)"
-    const classicCard = page.locator('.gamemode-card').filter({ hasText: 'Klassisch 9x9' });
-    await expect(classicCard).toBeVisible();
-    await classicCard.click();
-
-    // Should transition to game board (Main Menu hidden)
-    const mainMenu = page.locator('#main-menu');
-    await expect(page.locator('body')).toHaveClass(/game-initialized/);
-    await expect(mainMenu).not.toHaveClass(/active/);
-    await expect(mainMenu).toHaveCSS('pointer-events', 'none');
+  test('should start with correct board setup', async ({ page: _page }) => {
+    await helper.startGame('classic');
 
     // Check if board is visible
-    await expect(page.locator('#board')).toBeVisible();
+    const board = _page.locator('[data-testid="board"]');
+    await expect(board).toBeVisible();
 
     // Check 9x9 grid
-    const cells = page.locator('.cell');
-    await expect(cells).toHaveCount(81); // 9x9
+    const cells = _page.locator('.cell');
+    await expect(cells).toHaveCount(81);
 
-    // Check specific pieces for 9x9 variant
-    // Row 0 (Black pieces): R N B Q K Q B N R
-    // 0,0 should be 'r' (black rook)
-    await expect(page.locator('.cell[data-r="0"][data-c="0"]')).toHaveAttribute('data-piece', 'r');
-    await expect(page.locator('.cell[data-r="0"][data-c="4"]')).toHaveAttribute('data-piece', 'k');
-
-    // Row 1 (Black pawns)
-    await expect(page.locator('.cell[data-r="1"][data-c="0"]')).toHaveAttribute('data-piece', 'p');
-
-    // Row 8 (White pieces)
-    await expect(page.locator('.cell[data-r="8"][data-c="4"]')).toHaveAttribute('data-piece', 'k');
+    // Verify key pieces from config: ['r', 'n', 'b', 'a', 'k', 'c', 'b', 'n', 'r']
+    await helper.expectPiece(8, 4, 'k', 'white');
+    await helper.expectPiece(8, 3, 'a', 'white');
+    await helper.expectPiece(8, 5, 'c', 'white');
+    await helper.expectPiece(8, 0, 'r', 'white');
+    await helper.expectPiece(0, 4, 'k', 'black');
   });
 });
