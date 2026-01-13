@@ -2,9 +2,9 @@
 vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: {
-    PLAY: 'play',
-    SETUP_WHITE_PIECES: 'setup_white',
-    SETUP_BLACK_PIECES: 'setup_black',
+    PLAY: 'PLAY',
+    SETUP_WHITE_PIECES: 'SETUP_WHITE_PIECES',
+    SETUP_BLACK_PIECES: 'SETUP_BLACK_PIECES',
   },
   PIECE_VALUES: { p: 100 },
 }));
@@ -25,7 +25,8 @@ describe('TutorUI Component', () => {
         `;
 
     game = {
-      phase: 'play',
+      initialPoints: 25,
+      phase: 'PLAY',
       turn: 'white',
       tutorController: {
         getSetupTemplates: vi.fn(() => [
@@ -104,14 +105,14 @@ describe('TutorUI Component', () => {
     });
 
     test('should hide tutor section if not in setup phase', () => {
-      game.phase = 'play';
+      game.phase = 'PLAY';
       TutorUI.updateTutorRecommendations(game);
       const section = document.getElementById('tutor-recommendations-section');
       expect(section.classList.contains('hidden')).toBe(true);
     });
 
     test('should show tutor section and initialize toggle in setup phase', () => {
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const section = document.getElementById('tutor-recommendations-section');
@@ -132,7 +133,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should render templates correctly for black pieces', () => {
-      game.phase = 'setup_black';
+      game.phase = 'SETUP_BLACK_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const container = document.getElementById('tutor-recommendations-container');
@@ -141,7 +142,7 @@ describe('TutorUI Component', () => {
 
     test('should render templates with PIECE_SVGS if available', () => {
       window.PIECE_SVGS = { white: { p: '<svg>pawn</svg>', n: '<svg>knight</svg>' } };
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const container = document.getElementById('tutor-recommendations-container');
@@ -150,7 +151,7 @@ describe('TutorUI Component', () => {
 
     test('should handle missing PIECE_SVGS keys', () => {
       window.PIECE_SVGS = { white: {} }; // Missing 'p' and 'n'
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const container = document.getElementById('tutor-recommendations-container');
@@ -158,7 +159,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should apply template directly on click', () => {
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const card = document.querySelector('.setup-template-card');
@@ -190,13 +191,12 @@ describe('TutorUI Component', () => {
       expect(window.alert).toHaveBeenCalledWith('Tutor nicht verfügbar!');
     });
 
-    test('should alert in overlay mode if no hints available', async () => {
+    test('should log in overlay mode if no hints available', async () => {
       document.body.innerHTML = '';
+      const consoleSpy = vi.spyOn(console, 'log');
       game.tutorController.getTutorHints = vi.fn(async () => []);
       await TutorUI.showTutorSuggestions(game);
-      expect(window.alert).toHaveBeenCalledWith(
-        'Keine Tipps verfügbar! Spiele erst ein paar Züge.'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('No hints available'));
     });
 
     test('should close overlay when close button clicked', async () => {
@@ -220,7 +220,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should render setup suggestions in panel during setup phase', async () => {
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       await TutorUI.showTutorSuggestions(game);
 
       const container = document.getElementById('tutor-suggestions');
@@ -229,7 +229,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should handle click on setup template in panel', async () => {
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       await TutorUI.showTutorSuggestions(game);
 
       const templateEl = document.querySelector('.setup-template');
@@ -295,7 +295,7 @@ describe('TutorUI Component', () => {
     });
 
     test('should handle mouse hover on setup template in panel', async () => {
-      game.phase = 'setup_white';
+      game.phase = 'SETUP_WHITE_PIECES';
       await TutorUI.showTutorSuggestions(game);
       const templateEl = document.querySelector('.setup-template');
 

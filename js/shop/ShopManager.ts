@@ -207,8 +207,15 @@ export class ShopManager {
       .filter(p => {
         if (!p) return false;
         // Check for specific unlock conditions
-        // Angel ('e') requires campaign unlock
+        // Angel ('e') requires campaign unlock in 'setup' mode
+        // But in 'upgrade' or 'upgrade8x8' modes, all pieces are available
         if (p.symbol === 'e') {
+          const mode = this.game.mode;
+          // In upgrade modes, Angel is always available
+          if (mode === 'upgrade' || mode === 'upgrade8x8') {
+            return true;
+          }
+          // In other modes (setup, campaign), require campaign unlock
           return (campaignManager as any).isRewardUnlocked('angel');
         }
         return true;

@@ -324,6 +324,34 @@ export class DOMHandler {
     this.initMenuHandlers();
     this.initAnalysisHandlers();
     this.initPuzzleHandlers();
+    this.initContinueButton();
+  }
+
+  private initContinueButton(): void {
+    const continueBtn = document.getElementById('main-menu-continue-btn');
+    if (!continueBtn) return;
+
+    // Check if an autosave exists
+    const hasSave = localStorage.getItem('schach9x9_save_autosave') !== null;
+    if (hasSave) {
+      continueBtn.classList.remove('hidden');
+    }
+
+    continueBtn.addEventListener('click', async () => {
+      const mainMenu = document.getElementById('main-menu');
+      if (mainMenu) mainMenu.classList.remove('active');
+
+      // If app is not initialized with a game controller, init it first
+      if (!this.app.gameController) {
+        // We don't know the mode yet, but loadGame will override it.
+        // Let's use 'classic' as a default bridge to get the controller.
+        await this.app.init(0, 'classic');
+      }
+
+      if (this.app.gameController) {
+        this.app.gameController.loadGame();
+      }
+    });
   }
 
   private initPuzzleHandlers(): void {

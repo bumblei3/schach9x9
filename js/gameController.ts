@@ -218,7 +218,9 @@ export class GameController {
 
       if (this.game.isAI) {
         setTimeout(() => {
-          if (this.game.aiSetupKing) this.game.aiSetupKing();
+          if (this.game.aiSetupKing) {
+            this.game.aiSetupKing();
+          }
         }, AI_DELAY_MS);
       }
     } else {
@@ -472,15 +474,8 @@ export class GameController {
     // Restore captured pieces display
     UI.updateCapturedUI(this.game);
 
-    // Restore move history panel
-    const moveHistoryPanel = document.getElementById('move-history-panel');
-    if (moveHistoryPanel) {
-      UI.updateMoveHistoryUI(this.game);
-
-      if (this.game.phase === (PHASES.PLAY as any)) {
-        moveHistoryPanel.classList.remove('hidden');
-      }
-    }
+    // Restore move history display
+    UI.updateMoveHistoryUI(this.game);
 
     // Restart clock if needed
     if (this.game.phase === (PHASES.PLAY as any) && this.game.clockEnabled) {
@@ -657,14 +652,25 @@ export class GameController {
 
     this.saveGameToStatistics(result, saveColorArg);
 
-    // Show analysis prompt after a short delay
+    // Show analysis prompt after a short delay (only if not campaign win)
     setTimeout(() => {
-      if (this.analysisUI) {
+      // Only show analysis if NOT in campaign mode (or at least not winning campaign step)
+      // Actually, disable for campaign entirely for now to avoid modal conflict
+      if (this.analysisUI && !this.game.campaignMode) {
         this.analysisUI.showAnalysisPrompt();
       }
     }, 2000);
 
+    console.log('[GameController] handleGameEnd check:', {
+      campaignMode: this.game.campaignMode,
+      result,
+      winnerColor,
+      playerColor: this.game.playerColor,
+      levelId: this.game.currentLevelId,
+    });
+
     if (this.game.campaignMode && result === 'win' && winnerColor === this.game.playerColor) {
+      console.log('[GameController] Triggering Campaign Victory');
       if (this.game.currentLevelId) {
         // Gather stats for star calculation
         const stats = {
@@ -721,9 +727,10 @@ export class GameController {
     if (!level) return;
 
     // Check custom win conditions
-    if (level.winCondition === 'capture_target') {
+    // Check custom win conditions
+    if (level.winCondition.type === 'capture_target') {
       // TODO: Implement capture logic check
-    } else if (level.winCondition === 'survival') {
+    } else if (level.winCondition.type === 'survival') {
       // TODO: Implement survival logic
     }
   }

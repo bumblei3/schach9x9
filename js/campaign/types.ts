@@ -5,8 +5,9 @@ export interface Level {
   title: string;
   description: string;
   opponentName: string;
-  opponentPersonality: 'balanced' | 'aggressive' | 'defensive' | 'positional';
+  opponentPersonality: 'balanced' | 'aggressive' | 'defensive' | 'positional' | 'expert';
   difficulty: 'beginner' | 'easy' | 'medium' | 'hard' | 'expert';
+  playerColor?: 'white' | 'black';
 
   // Setup Configuration
   setupType: 'fixed' | 'budget';
@@ -14,7 +15,10 @@ export interface Level {
   boardSetup?: Board; // Pre-filled board for fixed scenarios
 
   // Custom Rules
-  winCondition: 'checkmate' | 'survival' | 'capture_target';
+  winCondition: {
+    type: 'checkmate' | 'survival' | 'capture_target';
+    [key: string]: any;
+  };
   targetPiece?: { r: number; c: number }; // For capture_target
 
   // Rewards

@@ -155,8 +155,6 @@ export class KeyboardManager {
     const game = this.app.game as any;
     if (!game) return;
 
-    console.warn('[RECOVERY] Performing emergency game recovery...');
-
     const previousTurn = game.turn;
     game.turn = 'white';
     game.isAnimating = false;

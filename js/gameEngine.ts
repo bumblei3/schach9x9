@@ -139,7 +139,7 @@ export class Game {
     this.mode = mode;
 
     // Set board variant based on mode
-    if (mode === 'standard8x8') {
+    if (mode === 'standard8x8' || mode === 'upgrade8x8') {
       setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
     } else {
       setBoardVariant(BOARD_VARIANTS.SCHACH9X9);

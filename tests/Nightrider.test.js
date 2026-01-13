@@ -102,4 +102,63 @@ describe('Nightrider (j)', () => {
     // It should be able to capture the attacker at [0,0]
     expect(validMoves).toContainEqual({ r: 0, c: 0 });
   });
+
+  test('should respect board boundaries (9x9)', () => {
+    // Nightrider at [0,0]
+    mockGame.board[0][0] = { type: 'j', color: 'white' };
+
+    const moves = rulesEngine.getPseudoLegalMoves(0, 0, mockGame.board[0][0]);
+
+    // Valid jumps from [0,0]: [2,1], [4,2], [6,3], [8,4]
+    // And [1,2], [2,4], [3,6], [4,8]
+    expect(moves).toContainEqual({ r: 2, c: 1 });
+    expect(moves).toContainEqual({ r: 8, c: 4 });
+    expect(moves).toContainEqual({ r: 4, c: 8 });
+
+    // Should NOT contain any negative coordinates
+    moves.forEach(m => {
+      expect(m.r).toBeGreaterThanOrEqual(0);
+      expect(m.c).toBeGreaterThanOrEqual(0);
+      expect(m.r).toBeLessThan(9);
+      expect(m.c).toBeLessThan(9);
+    });
+  });
+
+  test('should respect board boundaries and size in 8x8 mode', async () => {
+    const { setBoardVariant, BOARD_VARIANTS } = await import('../js/config.js');
+
+    // Switch to 8x8
+    setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
+    try {
+      const game8x8 = {
+        board: Array(8)
+          .fill(null)
+          .map(() => Array(8).fill(null)),
+      };
+      const engine8x8 = new RulesEngine(game8x8);
+
+      // Nightrider at [0,0]
+      game8x8.board[0][0] = { type: 'j', color: 'white' };
+
+      const moves = engine8x8.getPseudoLegalMoves(0, 0, game8x8.board[0][0]);
+
+      // Valid jumps from [0,0] in 8x8:
+      // Direction [2,1]: [2,1], [4,2], [6,3] -> [8,4] is OFF BOARD in 8x8
+      expect(moves).toContainEqual({ r: 2, c: 1 });
+      expect(moves).toContainEqual({ r: 6, c: 3 });
+      expect(moves).not.toContainEqual({ r: 8, c: 4 });
+
+      // Direction [1,2]: [1,2], [2,4], [3,6] -> [4,8] is OFF BOARD in 8x8
+      expect(moves).toContainEqual({ r: 3, c: 6 });
+      expect(moves).not.toContainEqual({ r: 4, c: 8 });
+
+      moves.forEach(m => {
+        expect(m.r).toBeLessThan(8);
+        expect(m.c).toBeLessThan(8);
+      });
+    } finally {
+      // Reset to 9x9 for other tests
+      setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
+    }
+  });
 });

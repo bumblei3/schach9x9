@@ -10,7 +10,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     opponentPersonality: 'aggressive',
     difficulty: 'beginner',
     setupType: 'fixed',
-    winCondition: 'checkmate',
+    winCondition: { type: 'checkmate' },
     // Custom board setup will be generated in CampaignManager or passed here if we had a serializer
     // For now, we might rely on special logic in Game.init for 'fixed' levels or define a helper
   },
@@ -24,7 +24,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     difficulty: 'easy',
     setupType: 'budget',
     playerBudget: 15,
-    winCondition: 'checkmate',
+    winCondition: { type: 'checkmate' },
   },
   {
     id: 'level_3',
@@ -36,7 +36,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     difficulty: 'medium',
     setupType: 'budget',
     playerBudget: 20, // Slightly more points to experiment
-    winCondition: 'checkmate',
+    winCondition: { type: 'checkmate' },
     reward: 'angel',
   },
 ];

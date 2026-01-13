@@ -10,7 +10,7 @@ import { SetupModeStrategy } from './SetupMode.ts'; // Re-use setup logic if pos
 export class CampaignModeStrategy implements GameModeStrategy {
   private setupStrategy = new SetupModeStrategy(); // Delegate for 'budget' setup type
 
-  init(game: GameExtended, controller: GameController, initialPoints: number): void {
+  init(game: GameExtended, _controller: GameController, _initialPoints: number): void {
     // Campaign init is special, often called via startCampaignLevel
     // but if initGame is called with 'campaign' mode, we might be reloading or starting.
 
@@ -41,6 +41,9 @@ export class CampaignModeStrategy implements GameModeStrategy {
     if (level.opponentPersonality) {
       game.aiPersonality = level.opponentPersonality;
     }
+
+    // Set Player Color
+    game.playerColor = level.playerColor as any;
 
     // Handle Setup Type
     if (level.setupType === 'fixed') {

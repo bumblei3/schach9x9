@@ -730,6 +730,19 @@
       </div>
     </div>
 
+    <!-- Generic Modal (used by OverlayManager) -->
+    <div
+      id="generic-modal"
+      class="modal-overlay"
+      style="display: none; align-items: center; justify-content: center"
+    >
+      <div class="modal-content">
+        <h2 id="modal-title">Titel</h2>
+        <div id="modal-message">Nachricht</div>
+        <div id="modal-actions" class="modal-buttons"></div>
+      </div>
+    </div>
+
     <!-- Premium Main Menu -->
     <div id="main-menu" class="active">
       <div class="menu-container">
@@ -783,6 +796,13 @@
             <p class="section-subtitle">Wähle deinen Modus und beginne das Abenteuer.</p>
 
             <div class="gamemode-grid">
+              <!-- Continue Last Game (New) -->
+              <div class="gamemode-card hidden" id="main-menu-continue-btn">
+                <div class="card-icon">📂</div>
+                <div class="card-title">Fortsetzen</div>
+                <div class="card-desc">Setze dein zuletzt gespeichertes Spiel fort.</div>
+              </div>
+
               <!-- Campaign -->
               <div class="gamemode-card" id="campaign-start-btn">
                 <span class="card-tag tag-new">Neu</span>

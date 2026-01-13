@@ -13,13 +13,24 @@ const localStorageMock = (() => {
 })();
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
+// Mock data for testing
+const MOCK_LEVELS = [
+  { id: 'tutorial_1', reward: null }, // Matches default in CampaignManager
+  { id: 'level_2', reward: null },
+  { id: 'level_3', reward: 'angel' },
+];
+
+vi.mock('../js/campaign/campaignData.js', () => ({
+  CAMPAIGN_LEVELS: MOCK_LEVELS,
+}));
+
 // Mock dependencies
 vi.mock('../js/storage.js', () => ({
   storageManager: {},
 }));
 
 const { CampaignManager } = await import('../js/campaign/CampaignManager.js');
-const { CAMPAIGN_LEVELS } = await import('../js/campaign/levels.js');
+const { CAMPAIGN_LEVELS } = await import('../js/campaign/campaignData.js');
 
 describe('CampaignManager', () => {
   let manager;
@@ -35,13 +46,13 @@ describe('CampaignManager', () => {
     expect(levels.length).toBe(CAMPAIGN_LEVELS.length);
 
     // Level 1 should be unlocked by default
-    expect(manager.isLevelUnlocked('level_1')).toBe(true);
+    expect(manager.isLevelUnlocked('tutorial_1')).toBe(true);
     // Level 2 should be locked
     expect(manager.isLevelUnlocked('level_2')).toBe(false);
   });
 
   test('should complete level and unlock next', () => {
-    const level1 = 'level_1';
+    const level1 = 'tutorial_1'; // Was level_1
     const level2 = 'level_2';
 
     manager.completeLevel(level1);
@@ -70,11 +81,11 @@ describe('CampaignManager', () => {
   });
 
   test('should persist state to localStorage', () => {
-    manager.completeLevel('level_1');
+    manager.completeLevel('tutorial_1');
 
     // Create a new instance
     const newManager = new CampaignManager();
-    expect(newManager.isLevelCompleted('level_1')).toBe(true);
+    expect(newManager.isLevelCompleted('tutorial_1')).toBe(true);
     expect(newManager.isLevelUnlocked('level_2')).toBe(true);
   });
 

@@ -36,8 +36,8 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
   // Verify the move belongs to the current player and is not a self-capture
   const from = result.move.from;
   const to = result.move.to;
-  const piece = game.board[from.r][from.c];
-  const targetPiece = game.board[to.r][to.c];
+  const piece = game.board[from.r] ? game.board[from.r][from.c] : undefined;
+  const targetPiece = game.board[to.r] ? game.board[to.r][to.c] : undefined;
 
   if (!piece || piece.color !== turnColor) {
     return [];
@@ -110,7 +110,8 @@ export function updateBestMoves(game: any, tutorController: any): void {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function showTutorSuggestions(game: any): Promise<void> {
-  if (!game.bestMoves || game.bestMoves.length === 0) return;
+  const isSetup = game.phase && String(game.phase).startsWith('SETUP');
+  if (!isSetup && (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))) return;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (UI as any).showTutorSuggestions(game, game.bestMoves);
 }
@@ -156,8 +157,8 @@ function createTemplate(
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-        `(Pieces: ${pieces.join(', ')})`
+      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+      `(Pieces: ${pieces.join(', ')})`
     );
   }
 

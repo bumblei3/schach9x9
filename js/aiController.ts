@@ -84,7 +84,15 @@ export class AIController {
   }
 
   public aiSetupPieces(): void {
-    const corridor = this.game.blackCorridor;
+    // blackCorridor is just the colStart number, not an object
+    const colStart = this.game.blackCorridor;
+    if (colStart === null || colStart === undefined) {
+      return;
+    }
+
+    // Black corridor is at top (row 0-2)
+    const rowStart = 0;
+
     // Map piece names to their symbols
     const pieceSymbols: Record<string, string> = {
       QUEEN: 'q',
@@ -107,10 +115,10 @@ export class AIController {
       const symbol = pieceSymbols[choice];
       this.game.selectedShopPiece = symbol;
 
-      // Find empty spot
+      // Find empty spot in the 3x3 corridor
       const emptySpots: { r: number; c: number }[] = [];
-      for (let r = corridor.rowStart; r < corridor.rowStart + 3; r++) {
-        for (let c = corridor.colStart; c < corridor.colStart + 3; c++) {
+      for (let r = rowStart; r < rowStart + 3; r++) {
+        for (let c = colStart; c < colStart + 3; c++) {
           if (!this.game.board[r][c]) emptySpots.push({ r, c });
         }
       }
@@ -128,10 +136,10 @@ export class AIController {
         candidates.sort((a, b) => Math.abs(a.c - kingPos.c) - Math.abs(b.c - kingPos.c));
       } else if (symbol === 'r' || symbol === 'q') {
         // Rooks/Queens prefer back rank
-        candidates = emptySpots.filter(s => s.r === corridor.rowStart);
+        candidates = emptySpots.filter(s => s.r === rowStart);
       } else if (symbol === 'n' || symbol === 'b') {
         // Knights/Bishops prefer not to be on edges of valid area if possible
-        candidates = emptySpots.filter(s => s.r > corridor.rowStart);
+        candidates = emptySpots.filter(s => s.r > rowStart);
       }
 
       // Fallback if no specific candidates found
@@ -142,7 +150,6 @@ export class AIController {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
       this.game.placeShopPiece(spot.r, spot.c);
     }
-
     this.game.finishSetupPhase();
   }
 

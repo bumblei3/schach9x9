@@ -23,7 +23,7 @@ export class ClassicModeStrategy implements GameModeStrategy {
 
   async handleInteraction(
     game: GameExtended,
-    controller: GameController,
+    _controller: GameController,
     r: number,
     c: number
   ): Promise<boolean> {
@@ -36,7 +36,7 @@ export class ClassicModeStrategy implements GameModeStrategy {
     return false;
   }
 
-  onPhaseEnd(game: GameExtended, controller: GameController): void {
+  onPhaseEnd(_game: GameExtended, _controller: GameController): void {
     // Classic mode usually doesn't have explicit phase ends like setup,
     // but if we add features later, we can handle them here.
   }

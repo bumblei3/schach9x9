@@ -1,4 +1,4 @@
-import { CAMPAIGN_LEVELS } from './levels.js';
+import { CAMPAIGN_LEVELS } from './campaignData.js';
 import { CampaignState, Level } from './types.js';
 
 export class CampaignManager {
@@ -11,8 +11,8 @@ export class CampaignManager {
   private loadState(): CampaignState {
     if (typeof localStorage === 'undefined') {
       return {
-        currentLevelId: 'level_1',
-        unlockedLevels: ['level_1'],
+        currentLevelId: 'tutorial_1',
+        unlockedLevels: ['tutorial_1'],
         completedLevels: [],
         unlockedRewards: [],
       };
@@ -27,8 +27,8 @@ export class CampaignManager {
     }
     // Default state: Level 1 unlocked
     return {
-      currentLevelId: 'level_1',
-      unlockedLevels: ['level_1'],
+      currentLevelId: 'tutorial_1',
+      unlockedLevels: ['tutorial_1'],
       completedLevels: [],
       unlockedRewards: [],
     };
@@ -92,8 +92,8 @@ export class CampaignManager {
 
   public resetState(): void {
     this.state = {
-      currentLevelId: 'level_1',
-      unlockedLevels: ['level_1'],
+      currentLevelId: 'tutorial_1',
+      unlockedLevels: ['tutorial_1'],
       completedLevels: [],
       unlockedRewards: [],
     };

@@ -176,9 +176,16 @@ function runWorkerSearch(
 
   return new Promise((resolve, reject) => {
     const id = workerReqId++;
+    const timeoutDesc = setTimeout(() => {
+      if (workerPendingRequests.has(id)) {
+        workerPendingRequests.delete(id);
+        reject(new Error('AI Worker timed out'));
+      }
+    }, 5000); // 5s hard timeout limit
+
     workerPendingRequests.set(id, {
-      resolve: resolve as (value: unknown) => void,
-      reject,
+      resolve: (val) => { clearTimeout(timeoutDesc); resolve(val as SearchResult); },
+      reject: (err) => { clearTimeout(timeoutDesc); reject(err); },
     });
     aiWorker!.postMessage({
       type: 'getBestMove', // Use standard protocol
@@ -189,13 +196,22 @@ function runWorkerSearch(
 }
 
 function convertMoveToResult(
-  move: { from: number; to: number; promotion?: number } | null
+  move: { from: any; to: any; promotion?: any } | null
 ): MoveResult | null {
   if (!move) return null;
+
+  // If already converted (e.g. from worker result which was already processed)
+  if (typeof move.from === 'object' && move.from !== null && 'r' in move.from) {
+    return move as unknown as MoveResult;
+  }
+
   return {
     from: { r: indexToRow(move.from), c: indexToCol(move.from) },
     to: { r: indexToRow(move.to), c: indexToCol(move.to) },
-    promotion: move.promotion ? TYPE_INT_TO_STR[move.promotion & TYPE_MASK] : undefined,
+    promotion:
+      typeof move.promotion === 'number'
+        ? TYPE_INT_TO_STR[move.promotion & TYPE_MASK]
+        : move.promotion,
   };
 }
 
@@ -434,18 +450,18 @@ export const PST: Record<string, number[]> = {
 export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves };
 
 // Stubbed TT functions
-export function storeTT(): void {}
-export function probeTT(): void {}
+export function storeTT(): void { }
+export function probeTT(): void { }
 export function getTTMove(): null {
   return null;
 }
-export function clearTT(): void {}
+export function clearTT(): void { }
 export function getTTSize(): number {
   return 0;
 }
-export function setTTMaxSize(): void {}
-export function testStoreTT(): void {}
-export function testProbeTT(): void {}
+export function setTTMaxSize(): void { }
+export function testStoreTT(): void { }
+export function testProbeTT(): void { }
 
 export let progressCallback: ((progress: any) => void) | null = null;
 export function setProgressCallback(cb: (progress: any) => void | null): void {

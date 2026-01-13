@@ -21,7 +21,16 @@ export function showModal(
   const messageEl = document.getElementById('modal-message');
   const actionsEl = document.getElementById('modal-actions');
 
-  if (!modal || !titleEl || !messageEl || !actionsEl) return;
+  if (!modal || !titleEl || !messageEl || !actionsEl) {
+    console.log('[OverlayManager] Missing elements:', {
+      modal: !!modal,
+      titleEl: !!titleEl,
+      messageEl: !!messageEl,
+      actionsEl: !!actionsEl,
+    });
+    return;
+  }
+  console.log('[OverlayManager] Showing modal:', title);
 
   titleEl.textContent = title;
   messageEl.innerHTML = message;
@@ -62,7 +71,10 @@ export function showPromotionUI(
 ): void {
   const overlay = document.getElementById('promotion-overlay');
   const optionsContainer = document.getElementById('promotion-options');
-  if (!overlay || !optionsContainer) return;
+  if (!overlay || !optionsContainer) {
+    console.error('[OverlayManager] Error: Promotion overlay or options container not found!');
+    return;
+  }
 
   optionsContainer.innerHTML = '';
   const options = [
@@ -75,28 +87,39 @@ export function showPromotionUI(
     { type: 'n', name: 'Springer', cost: 3 },
   ];
 
-  options.forEach(opt => {
-    const btn = document.createElement('div');
-    btn.className = 'promotion-option';
-    btn.innerHTML = `
-      <div class="piece-svg">${(window as any).PIECE_SVGS[color][opt.type]}</div>
-      <div class="piece-name">${opt.name}</div>
-      <div class="piece-cost">${opt.cost} Pkt</div>
-    `;
-    btn.onclick = () => {
-      const piece = game.board[r][c];
-      if (piece) {
-        piece.type = opt.type as any;
-        if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
-        if (game.log) game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer befördert!`);
-        overlay.classList.add('hidden');
-        renderBoard(game);
-        if (callback) callback();
+  try {
+    options.forEach(opt => {
+      const btn = document.createElement('div');
+      btn.className = 'promotion-option';
+      btn.dataset.piece = opt.type;
+
+      const svgs = (window as any).PIECE_SVGS;
+      if (!svgs || !svgs[color] || !svgs[color][opt.type]) {
+        console.error(`[OverlayManager] Missing SVG for ${color} ${opt.type}`);
       }
-    };
-    optionsContainer.appendChild(btn);
-  });
-  overlay.classList.remove('hidden');
+
+      btn.innerHTML = `
+        <div class="piece-svg">${svgs ? svgs[color][opt.type] : '?'}</div>
+        <div class="piece-name">${opt.name}</div>
+        <div class="piece-cost">${opt.cost} Pkt</div>
+      `;
+      btn.onclick = () => {
+        const piece = game.board[r][c];
+        if (piece) {
+          piece.type = opt.type as any;
+          if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
+          if (game.log) game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer befördert!`);
+          overlay.classList.add('hidden');
+          renderBoard(game);
+          if (callback) callback();
+        }
+      };
+      optionsContainer.appendChild(btn);
+    });
+    overlay.classList.remove('hidden');
+  } catch (e) {
+    console.error('[OverlayManager] Error showing promotion UI:', e);
+  }
 }
 
 /**

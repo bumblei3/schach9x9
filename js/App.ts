@@ -59,11 +59,14 @@ export class App {
     const { UIEffects } = await import('./ui/ui_effects.js');
     const { KeyboardManager } = await import('./input/KeyboardManager.js');
     const BC3D_MODULE = await import('./battleChess3D.js');
+    await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = await import('./ui.js');
+    (window as any).UI = UI_MODULE;
 
     this.Game_Class = Game;
     this.game = new Game(initialPoints, mode as any);
     (window as any).game = this.game;
+    (window as any).app = this;
 
     // Initialize controllers
     this.gameController = new GameController(this.game);

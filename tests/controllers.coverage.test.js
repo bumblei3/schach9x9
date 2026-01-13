@@ -1,8 +1,8 @@
 import { setupJSDOM, createMockGame } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
-// Mocks for dependencies
-vi.mock('../js/ui.js', () => ({
+// Setup Mocks
+const UI_MOCK = {
   initBoardUI: vi.fn(),
   updateStatus: vi.fn(),
   updateShopUI: vi.fn(),
@@ -19,7 +19,10 @@ vi.mock('../js/ui.js', () => ({
   getPieceText: vi.fn(piece => (piece ? piece.type : '')),
   showMoveQuality: vi.fn(),
   showTutorSuggestions: vi.fn(),
-}));
+  closeModal: vi.fn(),
+};
+
+vi.mock('../js/ui.js', () => UI_MOCK);
 
 vi.mock('../js/sounds.js', () => ({
   soundManager: {
@@ -64,6 +67,21 @@ describe('Controllers Coverage Expansion', () => {
     ac = new AIController(game);
     tc = new TutorController(game);
     vi.clearAllMocks();
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({}),
+          text: () => Promise.resolve(''),
+        })
+      )
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe('GameController', () => {
@@ -148,32 +166,60 @@ describe('Controllers Coverage Expansion', () => {
       expect(await ac.aiShouldResign()).toBe(true);
     });
 
-    test('analyzePosition should create worker and send message', () => {
+    test('analyzePosition should create worker and send message', async () => {
       const mockWorker = {
         postMessage: vi.fn(),
         terminate: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
       };
-      global.Worker = vi.fn().mockImplementation(function () {
+
+      // Mock Worker as a constructor using a regular function
+      const WorkerMock = vi.fn().mockImplementation(function () {
         return mockWorker;
       });
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        })
+      vi.stubGlobal('Worker', WorkerMock);
+
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() =>
+          Promise.resolve(
+            new Response(JSON.stringify({}), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            })
+          )
+        )
       );
+
       game.analysisMode = true;
 
-      ac.analyzePosition();
+      await ac.analyzePosition();
 
-      expect(global.Worker).toHaveBeenCalled();
+      expect(WorkerMock).toHaveBeenCalled();
       expect(global.fetch).toHaveBeenCalled();
       expect(mockWorker.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'analyze' })
       );
+
+      vi.unstubAllGlobals();
     });
 
     test('aiMove should evaluate draw offer if pending', async () => {
+      // Mock Worker as a constructor using a regular function
+      const mockWorker = {
+        postMessage: vi.fn(),
+        terminate: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+      vi.stubGlobal(
+        'Worker',
+        vi.fn().mockImplementation(function () {
+          return mockWorker;
+        })
+      );
+
       game.drawOffered = true;
       game.drawOfferedBy = 'white';
       const spy = vi.spyOn(ac, 'aiEvaluateDrawOffer').mockImplementation(() => Promise.resolve());
@@ -182,6 +228,8 @@ describe('Controllers Coverage Expansion', () => {
 
       await ac.aiMove();
       expect(spy).toHaveBeenCalled();
+
+      vi.unstubAllGlobals();
     });
   });
 
@@ -198,7 +246,7 @@ describe('Controllers Coverage Expansion', () => {
 
       await tc.checkBlunder(moveRecord);
 
-      expect(UI.showModal).toHaveBeenCalledWith(
+      expect(UI_MOCK.showModal).toHaveBeenCalledWith(
         expect.stringContaining('Fehler'),
         expect.any(String),
         expect.any(Array)
@@ -246,6 +294,56 @@ describe('Controllers Coverage Expansion', () => {
 
       const strategy = tc.analyzeStrategicValue(move);
       expect(strategy.some(s => s.type === 'center_control')).toBe(true);
+    });
+  });
+
+  describe('Phase Transitions', () => {
+    test('finishSetupPhase should transition from WHITE_PIECES to WHITE_UPGRADES', () => {
+      game.mode = 'setup';
+      gc.initGame(25, 'setup'); // This sets up the Strategy
+      game.phase = PHASES.SETUP_WHITE_PIECES;
+      game.points = 0; // No warning modal
+
+      gc.finishSetupPhase();
+
+      expect(game.phase).toBe(PHASES.SETUP_WHITE_UPGRADES);
+    });
+
+    test('finishSetupPhase should transition from WHITE_UPGRADES to BLACK_PIECES in setup mode', () => {
+      game.mode = 'setup';
+      gc.initGame(15, 'setup');
+      game.phase = PHASES.SETUP_WHITE_UPGRADES;
+      game.points = 0;
+
+      gc.finishSetupPhase();
+
+      expect(game.phase).toBe(PHASES.SETUP_BLACK_PIECES);
+    });
+
+    test('finishSetupPhase should transition from WHITE_UPGRADES to BLACK_UPGRADES in upgrade mode', () => {
+      game.mode = 'upgrade';
+      gc.initGame(25, 'upgrade');
+      game.phase = PHASES.SETUP_WHITE_UPGRADES;
+      game.points = 0;
+
+      gc.finishSetupPhase();
+
+      expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
+    });
+
+    test('finishSetupPhase should show modal if points remains', () => {
+      game.mode = 'setup';
+      gc.initGame(25, 'setup');
+      game.phase = PHASES.SETUP_WHITE_PIECES;
+      game.points = 5;
+
+      gc.finishSetupPhase();
+
+      expect(UI_MOCK.showModal).toHaveBeenCalledWith(
+        expect.stringContaining('Punkte'),
+        expect.any(String),
+        expect.any(Array)
+      );
     });
   });
 });

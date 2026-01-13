@@ -102,10 +102,10 @@ describe('8x8 Upgrade Mode', () => {
     // Row 7 (index) should be White Pieces (index 0 to 7)
     expect(game.board[7][4].type).toBe('k'); // King column
 
-    // Row 8 should be undefined or empty in 9x9 array used for 8x8?
-    // Wait, typical 9x9 board array. setupStandard8x8Board uses indices 0-7.
-    // Row 8 should NOT have pieces.
-    expect(game.board[8][0]).toBeNull();
+    // Check 8x8 board size
+    expect(game.boardSize).toBe(8);
+    expect(game.board.length).toBe(8);
+    expect(game.board[0].length).toBe(8);
   });
 
   test('Transitions correctly using 15 points', () => {

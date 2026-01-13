@@ -30,10 +30,11 @@ export async function executeMove(
     moveController.updateUndoRedoButtons();
   }
 
-  // Clear tutor arrows when making a move
+  // Clear tutor arrows and stale hints when making a move
   if ((game as any).arrowRenderer) {
     (game as any).arrowRenderer.clearArrows();
   }
+  (game as any).bestMoves = [];
 
   const piece = game.board[from.r][from.c] as PieceWithMoved;
   if (!piece) return;
@@ -164,6 +165,7 @@ export async function executeMove(
         const isHuman = (game.isAI && piece.color === 'white') || !game.isAI;
 
         if (isHuman) {
+          console.log('[MoveExecutor] Triggering Promotion UI');
           // Pause and show promotion UI
           UI.showPromotionUI(game, to.r, to.c, piece.color, moveRecord, () => {
             // Update moveRecord validation

@@ -19,8 +19,7 @@ export function updateTutorRecommendations(game: Game): void {
   }
 
   const g = game as any;
-  const inSetupPhase =
-    g.phase === PHASES.SETUP_WHITE_PIECES || g.phase === PHASES.SETUP_BLACK_PIECES;
+  const inSetupPhase = g.phase && String(g.phase).startsWith('SETUP');
   const tutorSection = document.getElementById('tutor-recommendations-section');
 
   if (!inSetupPhase || !g.tutorController || !g.tutorController.getSetupTemplates) {
@@ -107,7 +106,8 @@ export async function showTutorSuggestions(
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');
 
-  const inSetup = g.phase === PHASES.SETUP_WHITE_PIECES || g.phase === PHASES.SETUP_BLACK_PIECES;
+  const currentPhase = String(g.phase || '');
+  const inSetup = currentPhase.startsWith('SETUP');
 
   if (!tutorPanel || !suggestionsEl) {
     if (
@@ -144,7 +144,8 @@ export async function showTutorSuggestions(
         body.innerHTML = '';
         body.className = 'templates-overlay-grid';
 
-        const color = g.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
+        const isWhite = currentPhase.includes('WHITE');
+        const color = isWhite ? 'white' : 'black';
         const svgs = (window as any).PIECE_SVGS || {};
 
         templates.forEach((template: any) => {
@@ -179,7 +180,8 @@ export async function showTutorSuggestions(
     } else {
       const hints = providedHints || (await g.tutorController.getTutorHints());
       if (!hints || hints.length === 0) {
-        alert('Keine Tipps verfügbar! Spiele erst ein paar Züge.');
+        // Instead of an alert, we could show a toast or just a log
+        console.log('[TutorUI] No hints available yet.');
         return;
       }
 

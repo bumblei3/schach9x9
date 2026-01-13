@@ -28,7 +28,7 @@ vi.mock('../js/sounds.js', () => ({
 
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
-    constructor() {}
+    constructor() { }
   },
 }));
 
@@ -62,6 +62,48 @@ const localStorageMock = (() => {
   };
 })();
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
+
+// Mock campaign data to ensure test stability and match IDs
+const MOCK_CAMPAIGN_LEVELS = [
+  {
+    id: 'level_1',
+    title: 'Aufstand', // Match expect string in test
+    setupType: 'fixed',
+    difficulty: 'easy',
+    playerColor: 'white',
+    fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
+    winCondition: { type: 'checkmate' },
+    unlocks: ['level_2'],
+    goals: {}
+  },
+  {
+    id: 'level_2',
+    title: 'Level 2',
+    setupType: 'fixed',
+    difficulty: 'medium',
+    playerColor: 'white',
+    fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
+    winCondition: { type: 'checkmate' },
+    unlocks: ['level_3'],
+    goals: {}
+  },
+  {
+    id: 'level_3',
+    title: 'Level 3',
+    setupType: 'fixed',
+    difficulty: 'hard',
+    playerColor: 'white',
+    fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
+    winCondition: { type: 'checkmate' },
+    unlocks: [],
+    reward: 'angel', // Custom property for test
+    goals: {}
+  }
+];
+
+vi.mock('../js/campaign/campaignData.js', () => ({
+  CAMPAIGN_LEVELS: MOCK_CAMPAIGN_LEVELS,
+}));
 
 // Import system under test
 const { GameController } = await import('../js/gameController.js');
