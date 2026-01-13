@@ -1,4 +1,3 @@
-
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
 
 // Mock UI and SoundManager modules

@@ -22,7 +22,8 @@ test.describe('Core Gameplay Loop', () => {
 
   test('should start a game and execute a move', async ({ page }) => {
     // 1. Select Hiring Mode (25 Points)
-    await page.click('.gamemode-card:has-text("Truppen anheuern")');
+    const hiringCard = page.locator('.gamemode-card', { hasText: 'Truppen anheuern (9x9)' });
+    await hiringCard.click();
 
     // 2. Wait for Board & Setup Mode
     await expect(page.locator('#board')).toBeVisible();

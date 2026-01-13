@@ -303,6 +303,9 @@ export class Tutorial {
     this.currentStepEl = document.getElementById('tutorial-current-step') as HTMLElement;
     this.totalStepsEl = document.getElementById('tutorial-total-steps') as HTMLElement;
 
+    // Clear existing steps to prevent duplication
+    this.stepsContainer.innerHTML = '';
+
     // Create step elements
     this.steps.forEach(step => {
       const stepEl = document.createElement('div');

@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 
-
 global.BOARD_SIZE = 9;
 
 // Dynamic import

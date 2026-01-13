@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-
 import { StatisticsManager } from '../js/statisticsManager.js';
 import { logger } from '../js/logger.js';
 

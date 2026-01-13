@@ -1,4 +1,3 @@
-
 import { PuzzleMenu } from '../js/ui/PuzzleMenu.js';
 import { puzzleManager } from '../js/puzzleManager.js';
 

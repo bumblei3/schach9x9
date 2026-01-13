@@ -146,6 +146,12 @@ export class AIController {
     this.game.finishSetupPhase();
   }
 
+  public aiSetupUpgrades(): void {
+    if (this.game.gameController && this.game.gameController.shopManager) {
+      this.game.gameController.shopManager.aiPerformUpgrades();
+    }
+  }
+
   public async aiMove(): Promise<void> {
     // Don't move in puzzle mode - player solves alone
     if (this.game.mode === 'puzzle') {
@@ -210,8 +216,8 @@ export class AIController {
       logger.debug(`[AI] Difficulty ${this.game.difficulty}: using depth ${depth}`);
     }
 
-    // Prepare board state for workers
-    const boardCopy = JSON.parse(JSON.stringify(this.game.board));
+    // Prepare board state for workers - Optimization: Use Int8Array instead of JSON cloning
+    const boardInt = aiEngine.convertBoardToInt(this.game.board);
     const lastMove = this.game.lastMove; // Needed for En Passant
 
     // Track results
@@ -340,7 +346,7 @@ export class AIController {
       worker.postMessage({
         type: 'getBestMove',
         data: {
-          board: boardCopy,
+          board: boardInt,
           color: 'black',
           depth: depth,
           difficulty: this.game.difficulty,
@@ -422,6 +428,11 @@ export class AIController {
         String.fromCharCode(97 + data.bestMove.from.c) + (BOARD_SIZE - data.bestMove.from.r);
       const to = String.fromCharCode(97 + data.bestMove.to.c) + (BOARD_SIZE - data.bestMove.to.r);
       bestMoveEl.textContent = `Bester Zug: ${from}-${to}`;
+
+      // Show engine arrow
+      if (UI.drawEngineArrow) {
+        UI.drawEngineArrow(data.bestMove.from, data.bestMove.to);
+      }
     }
 
     if (progressFill && data.maxDepth > 0) {
@@ -538,7 +549,7 @@ export class AIController {
 
     // Use worker 0 for analysis to avoid conflict with game search
     const worker = this.aiWorkers[0];
-    const boardCopy = JSON.parse(JSON.stringify(this.game.board));
+    const boardInt = aiEngine.convertBoardToInt(this.game.board);
 
     // Deep analysis depth
     const analysisDepth = this.game.analysisMode ? 12 : 8;
@@ -546,7 +557,7 @@ export class AIController {
     worker.postMessage({
       type: 'analyze',
       data: {
-        board: boardCopy,
+        board: boardInt,
         color: this.game.turn,
         depth: analysisDepth,
         topMovesCount: 3,

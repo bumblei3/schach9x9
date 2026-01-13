@@ -1,4 +1,3 @@
-
 import { PHASES } from '../js/gameEngine.js';
 
 // Setup JSDOM body
@@ -22,7 +21,9 @@ class MockWorker {
   postMessage = vi.fn();
   terminate = vi.fn();
 }
-global.Worker = vi.fn().mockImplementation(function () { return new MockWorker(); });
+global.Worker = vi.fn().mockImplementation(function () {
+  return new MockWorker();
+});
 
 // Mock fetch
 global.fetch = vi.fn(() =>

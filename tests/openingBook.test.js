@@ -1,7 +1,6 @@
 import { setOpeningBook, queryOpeningBook, OpeningBook } from '../js/ai/OpeningBook.js';
 import { logger } from '../js/logger.js';
 
-
 // Mock logger to avoid clutter
 vi.spyOn(logger, 'debug').mockImplementation(function () {});
 

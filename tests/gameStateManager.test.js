@@ -1,5 +1,3 @@
-
-
 // Mock PHASES and other constants
 vi.mock('../js/gameEngine.js', () => ({
   PHASES: {

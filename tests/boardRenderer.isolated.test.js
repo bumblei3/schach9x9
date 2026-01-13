@@ -1,5 +1,3 @@
-
-
 vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: { PLAY: 'play' },

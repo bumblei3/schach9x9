@@ -1,5 +1,3 @@
-
-
 // Mock PIECE_SVGS
 global.window.PIECE_SVGS = {
   white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },

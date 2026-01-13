@@ -12,11 +12,13 @@ import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
 import { AnalysisUI } from './AnalysisUI.js';
+import { Tutorial } from '../tutorial.js';
 
 export class DOMHandler {
   private app: any;
   private analysisUI: AnalysisUI;
   private campaignUI?: CampaignUI;
+  private tutorial?: Tutorial;
   private domInitialized: boolean = false;
 
   public get isInitialized(): boolean {
@@ -152,11 +154,10 @@ export class DOMHandler {
         const mainMenu = document.getElementById('main-menu');
         if (mainMenu) mainMenu.classList.remove('active');
 
-        if (this.gameController && this.gameController.startTutorial) {
-          this.gameController.startTutorial();
-        } else {
-          console.error('[DOMHandler] startTutorial not found on GameController');
+        if (!this.tutorial) {
+          this.tutorial = new Tutorial();
         }
+        this.tutorial.show();
       });
     }
 

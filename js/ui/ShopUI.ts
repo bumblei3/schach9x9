@@ -52,7 +52,18 @@ export function updateShopUI(game: any): void {
   });
 
   const finishBtn = document.getElementById('finish-setup-btn') as HTMLButtonElement | null;
-  if (finishBtn) finishBtn.disabled = false;
+  if (finishBtn) {
+    finishBtn.disabled = false;
+    // Show button during upgrade phases or piece placement
+    const phase = game.phase;
+    if (phase === 'setup_white_upgrades' || phase === 'setup_black_upgrades') {
+      finishBtn.textContent = 'Fertig';
+      finishBtn.classList.remove('hidden');
+    } else if (phase === 'setup_white_pieces' || phase === 'setup_black_pieces') {
+      finishBtn.textContent = 'Fertig'; // Or 'Start Game'
+      finishBtn.classList.remove('hidden');
+    }
+  }
 
   const statusDisplay = document.getElementById('selected-piece-display');
   if (statusDisplay) {

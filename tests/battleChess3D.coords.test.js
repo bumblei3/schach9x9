@@ -1,5 +1,3 @@
-
-
 import { BattleChess3D } from '../js/battleChess3D.js';
 
 // Mock THREE

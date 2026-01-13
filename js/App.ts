@@ -66,7 +66,9 @@ export class App {
     (window as any).game = this.game;
 
     // Initialize controllers
-    this.game.gameController = new GameController(this.game);
+    this.gameController = new GameController(this.game);
+    (window as any).gameController = this.gameController;
+
     this.game.moveController = new MoveController(this.game);
     this.game.aiController = new AIController(this.game);
 
@@ -134,9 +136,7 @@ export class App {
 
     // UI Adjustments for Game Modes
     const toggle3DBtn = document.getElementById('toggle-3d-btn');
-    const shopPanel = document.getElementById('shop-panel');
-
-    // UI Adjustments for Game Modes - DEPRECATED/MOVED TO STRATEGIES
+    // UI Adjustments for Game Modes
     // Strategies should handle initial UI state (shop, 3d button, etc)
     // We leave toggle3DBtn logic here or better, move it too?
     // For now, removing the shopPanel hiding which broke Standard upgrades.
@@ -357,6 +357,9 @@ export class App {
     };
     GP.aiSetupPieces = function () {
       return self.aiController.aiSetupPieces();
+    };
+    GP.aiSetupUpgrades = function () {
+      return self.aiController.aiSetupUpgrades();
     };
     GP.aiMove = function () {
       return self.aiController.aiMove();

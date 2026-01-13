@@ -5,170 +5,174 @@
 
 /* --- Dynamic Promotion Modal --- */
 .promotion-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    padding: 20px;
-    perspective: 1000px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  padding: 20px;
+  perspective: 1000px;
 }
 
 .promotion-option {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .promotion-option:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--accent-primary, #6366f1);
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent-primary, #6366f1);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.2),
+    0 0 15px rgba(99, 102, 241, 0.4);
 }
 
 /* Glow effect behind pieces */
 .promotion-option::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 60px;
-    height: 60px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, transparent 70%);
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.3s ease;
-    z-index: 0;
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.3s ease;
+  z-index: 0;
 }
 
 .promotion-option:hover::before {
-    transform: translate(-50%, -50%) scale(1.5);
+  transform: translate(-50%, -50%) scale(1.5);
 }
 
 .promotion-option .piece-svg {
-    width: 60px;
-    height: 60px;
-    position: relative;
-    z-index: 1;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+  width: 60px;
+  height: 60px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
 
 .promotion-option .piece-name {
-    margin-top: 10px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 600;
-    color: var(--text-main, #fff);
-    font-size: 0.9rem;
-    position: relative;
-    z-index: 1;
+  margin-top: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  color: var(--text-main, #fff);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
 }
 
 .promotion-option .piece-cost {
-    font-size: 0.75rem;
-    color: var(--text-muted, #94a3b8);
-    margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 4px;
 }
 
 /* Modal Styling Override for Promotion */
 #promotion-overlay .modal-content {
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    max-width: 600px;
-    width: 90%;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+  width: 90%;
 }
 
 #promotion-overlay h2 {
-    text-align: center;
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
 }
 
 /* --- Ghost Trails (Visual Effects) --- */
 .ghost-piece {
-    position: absolute;
-    pointer-events: none;
-    opacity: 0.4;
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    z-index: 5;
-    filter: sepia(100%) hue-rotate(190deg) saturate(300%) opacity(0.5);
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.4;
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+  z-index: 5;
+  filter: sepia(100%) hue-rotate(190deg) saturate(300%) opacity(0.5);
 }
 
 .ghost-piece.fade-out {
-    opacity: 0;
-    transform: scale(0.8);
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 /* --- King Flash Effect --- */
 @keyframes kingFlash {
-    0% {
-        box-shadow: inset 0 0 0 0 transparent;
-    }
+  0% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
 
-    20% {
-        box-shadow: inset 0 0 50px 20px rgba(239, 68, 68, 0.6);
-        background-color: rgba(239, 68, 68, 0.2);
-    }
+  20% {
+    box-shadow: inset 0 0 50px 20px rgba(239, 68, 68, 0.6);
+    background-color: rgba(239, 68, 68, 0.2);
+  }
 
-    100% {
-        box-shadow: inset 0 0 0 0 transparent;
-    }
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
 }
 
 .cell.king-check-flash {
-    animation: kingFlash 0.8s ease-out;
+  animation: kingFlash 0.8s ease-out;
 }
 
 @keyframes kingMateFlash {
-    0% {
-        box-shadow: inset 0 0 0 0 transparent;
-    }
+  0% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
 
-    50% {
-        box-shadow: inset 0 0 60px 30px rgba(255, 0, 0, 0.8);
-        background-color: rgba(255, 0, 0, 0.4);
-    }
+  50% {
+    box-shadow: inset 0 0 60px 30px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.4);
+  }
 
-    100% {
-        box-shadow: inset 0 0 60px 30px rgba(255, 0, 0, 0.8);
-        background-color: rgba(255, 0, 0, 0.4);
-    }
+  100% {
+    box-shadow: inset 0 0 60px 30px rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.4);
+  }
 }
 
 .cell.king-mate-flash {
-    animation: kingMateFlash 1.5s ease-in-out infinite alternate;
+  animation: kingMateFlash 1.5s ease-in-out infinite alternate;
 }
 
 /* --- AI Thinking Arrows --- */
 .ai-arrow {
-    position: absolute;
-    height: 4px;
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(255, 255, 255, 0));
-    transform-origin: left center;
-    pointer-events: none;
-    z-index: 15;
-    border-radius: 2px;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  position: absolute;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(255, 255, 255, 0));
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 15;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
 }
 
 .ai-arrow::after {
-    content: '';
-    position: absolute;
-    right: -8px;
-    top: -6px;
-    border-left: 10px solid rgba(99, 102, 241, 0.8);
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: -6px;
+  border-left: 10px solid rgba(99, 102, 241, 0.8);
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
 }

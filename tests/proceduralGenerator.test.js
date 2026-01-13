@@ -1,5 +1,3 @@
-
-
 // Mock dependencies MUST be hoisted or defined before imports
 vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,

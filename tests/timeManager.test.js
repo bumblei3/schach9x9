@@ -2,7 +2,6 @@
  * Tests for TimeManager
  */
 
-
 import { TimeManager } from '../js/TimeManager.js';
 import { PHASES } from '../js/config.js';
 

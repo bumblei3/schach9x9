@@ -11,10 +11,9 @@ use search::*;
 use eval::*;
 
 #[wasm_bindgen]
-pub fn get_best_move_wasm(board_json: &str, color_str: &str, depth: i8, personality_str: &str, elo: i32) -> String {
-    let board_vec: Vec<i8> = serde_json::from_str(board_json).unwrap_or_default();
+pub fn get_best_move_wasm(board_bytes: &[i8], color_str: &str, depth: i8, personality_str: &str, elo: i32) -> String {
     let mut board: Board = [0; 81];
-    for (i, &v) in board_vec.iter().enumerate().take(81) {
+    for (i, &v) in board_bytes.iter().enumerate().take(81) {
         board[i] = v;
     }
     

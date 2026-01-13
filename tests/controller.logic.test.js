@@ -1,4 +1,3 @@
-
 import { PHASES } from '../js/config.js';
 
 // Setup JSDOM body
@@ -43,6 +42,7 @@ vi.mock('../js/ui.js', () => ({
   }),
   showShop: vi.fn(),
   renderEvalGraph: vi.fn(),
+  flashSquare: vi.fn(),
 }));
 
 vi.mock('../js/sounds.js', () => ({

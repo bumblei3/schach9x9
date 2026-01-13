@@ -2,13 +2,12 @@
  * @jest-environment jsdom
  */
 
-
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import { setupJSDOM } from './test-utils.js';
 
 // Mock UI dependencies
-vi.mock('../js/ui.js', async (importOriginal) => {
+vi.mock('../js/ui.js', async importOriginal => {
   const actual = await importOriginal();
   return {
     ...actual,

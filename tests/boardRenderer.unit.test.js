@@ -1,5 +1,3 @@
-
-
 // Mock dependencies
 vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
@@ -263,12 +261,18 @@ describe('BoardRenderer Full Coverage', () => {
     const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
     const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
 
-    vi
-      .spyOn(fromCell, 'getBoundingClientRect')
-      .mockReturnValue({ left: 0, top: 0, width: 50, height: 50 });
-    vi
-      .spyOn(toCell, 'getBoundingClientRect')
-      .mockReturnValue({ left: 100, top: 100, width: 50, height: 50 });
+    vi.spyOn(fromCell, 'getBoundingClientRect').mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 50,
+      height: 50,
+    });
+    vi.spyOn(toCell, 'getBoundingClientRect').mockReturnValue({
+      left: 100,
+      top: 100,
+      width: 50,
+      height: 50,
+    });
 
     const promise = BoardRenderer.animateMove(game, from, to, piece);
 
@@ -345,12 +349,18 @@ describe('BoardRenderer Full Coverage', () => {
 
     const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
     const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
-    vi
-      .spyOn(fromCell, 'getBoundingClientRect')
-      .mockReturnValue({ right: 0, top: 0, width: 50, height: 50 });
-    vi
-      .spyOn(toCell, 'getBoundingClientRect')
-      .mockReturnValue({ left: 100, top: 100, width: 50, height: 50 });
+    vi.spyOn(fromCell, 'getBoundingClientRect').mockReturnValue({
+      right: 0,
+      top: 0,
+      width: 50,
+      height: 50,
+    });
+    vi.spyOn(toCell, 'getBoundingClientRect').mockReturnValue({
+      left: 100,
+      top: 100,
+      width: 50,
+      height: 50,
+    });
 
     const promise = BoardRenderer.animateMove(game, from, to, piece);
 

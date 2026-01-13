@@ -1,4 +1,3 @@
-
 import { setupJSDOM, createMockGame } from '../test-utils.js';
 
 // Mock UI module

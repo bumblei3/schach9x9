@@ -1,4 +1,3 @@
-
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
@@ -453,7 +452,7 @@ describe('Coverage Boost Tests', () => {
       controller.nextPuzzle();
       expect(puzzleManager.nextPuzzle).toHaveBeenCalled();
 
-      const reloadSpy = vi.spyOn(controller, 'reloadPage').mockImplementation(function () { });
+      const reloadSpy = vi.spyOn(controller, 'reloadPage').mockImplementation(function () {});
 
       controller.exitPuzzleMode();
       expect(reloadSpy).toHaveBeenCalled();

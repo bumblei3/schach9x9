@@ -2,7 +2,6 @@
  * Enhanced Tests for Logger System
  */
 
-
 import { logger, LOG_LEVELS } from '../js/logger.js';
 
 describe('Logger Enhanced', () => {

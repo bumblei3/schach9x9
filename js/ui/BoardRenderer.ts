@@ -565,6 +565,7 @@ export async function animateMove(
     const isCapture = targetPiece && targetPiece.color !== piece.color;
 
     // Animation Loop for Move Trail
+    let frames = 0;
     const trailInterval = setInterval(() => {
       const rect = clone.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -584,6 +585,12 @@ export async function animateMove(
         particleSystem.spawnTrail(centerX, centerY, color);
       } else {
         particleSystem.spawn(centerX, centerY, 'TRAIL', color);
+      }
+
+      // Premium Ghost Trail (Silhouettes)
+      frames++;
+      if (frames % 4 === 0) {
+        drawGhostTrail(rect, clone.innerHTML);
       }
     }, 20); // Faster interval for smoother trails
 
@@ -689,4 +696,89 @@ export function showMoveQuality(_game: any, move: any, category: string): void {
       shakeScreen(8, 400);
     }
   }
+}
+
+/**
+ * Draws a ghost trail silhouette
+ */
+export function drawGhostTrail(rect: DOMRect, pieceSymbol: string): void {
+  const ghost = document.createElement('div');
+  ghost.className = 'ghost-piece';
+  ghost.innerHTML = pieceSymbol;
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  ghost.style.width = rect.width + 'px';
+  ghost.style.height = rect.height + 'px';
+  ghost.style.display = 'flex';
+  ghost.style.justifyContent = 'center';
+  ghost.style.alignItems = 'center';
+  document.body.appendChild(ghost);
+
+  // Animate removal
+  setTimeout(() => {
+    ghost.classList.add('fade-out');
+    setTimeout(() => {
+      if (document.body.contains(ghost)) {
+        document.body.removeChild(ghost);
+      }
+    }, 500);
+  }, 50);
+}
+
+/**
+ * Flashes a square (e.g. for King check)
+ * @param r - Row
+ * @param c - Column
+ * @param type - Effect type
+ */
+export function flashSquare(r: number, c: number, type: 'check' | 'mate' | 'capture'): void {
+  const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+  if (!cell) return;
+
+  const className = type === 'mate' ? 'king-mate-flash' : 'king-check-flash';
+  cell.classList.add(className);
+
+  if (type !== 'mate') {
+    setTimeout(() => {
+      cell.classList.remove(className);
+    }, 1000);
+  }
+}
+
+/**
+ * Draws an engine arrow for visualization
+ * @param from - Start square
+ * @param to - End square
+ */
+export function drawEngineArrow(from: Square, to: Square): void {
+  const fromCell = document.querySelector(`.cell[data-r="${from.r}"][data-c="${from.c}"]`);
+  const toCell = document.querySelector(`.cell[data-r="${to.r}"][data-c="${to.c}"]`);
+  if (!fromCell || !toCell) return;
+
+  const fromRect = fromCell.getBoundingClientRect();
+  const toRect = toCell.getBoundingClientRect();
+
+  const startX = fromRect.left + fromRect.width / 2;
+  const startY = fromRect.top + fromRect.height / 2;
+  const endX = toRect.left + toRect.width / 2;
+  const endY = toRect.top + toRect.height / 2;
+
+  const dx = endX - startX;
+  const dy = endY - startY;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+  const arrow = document.createElement('div');
+  arrow.className = 'ai-arrow';
+  arrow.style.left = startX + 'px';
+  arrow.style.top = startY + 'px';
+  arrow.style.width = length + 'px';
+  arrow.style.transform = `rotate(${angle}deg)`;
+
+  document.body.appendChild(arrow);
+
+  setTimeout(() => {
+    arrow.style.opacity = '0';
+    setTimeout(() => arrow.remove(), 500);
+  }, 2000);
 }

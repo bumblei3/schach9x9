@@ -1,5 +1,3 @@
-
-
 vi.mock('../js/sounds.js', () => ({
   soundManager: {
     init: vi.fn(),

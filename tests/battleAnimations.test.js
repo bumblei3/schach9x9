@@ -1,5 +1,3 @@
-
-
 // Comprehensive Three.js Mock for Animations
 // Comprehensive Three.js Mock for Animations
 const mockThree = {

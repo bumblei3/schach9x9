@@ -1,4 +1,3 @@
-
 import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
 
 describe('MoveAnalyzer Unit Tests', () => {

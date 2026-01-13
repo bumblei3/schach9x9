@@ -1,4 +1,3 @@
-
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import { setupJSDOM } from './test-utils.js';
@@ -529,12 +528,9 @@ describe('MoveController', () => {
       document.getElementById = vi.fn(id => {
         if (id === 'ai-toggle') return { checked: false, addEventListener: vi.fn() };
         if (id === 'difficulty-select') return { value: 'medium', addEventListener: vi.fn() };
-        if (id === 'draw-offer-overlay')
-          return { classList: { remove: vi.fn(), add: vi.fn() } };
-        if (id === 'move-history-panel')
-          return { classList: { remove: vi.fn(), add: vi.fn() } };
-        if (id === 'captured-pieces-panel')
-          return { classList: { remove: vi.fn(), add: vi.fn() } };
+        if (id === 'draw-offer-overlay') return { classList: { remove: vi.fn(), add: vi.fn() } };
+        if (id === 'move-history-panel') return { classList: { remove: vi.fn(), add: vi.fn() } };
+        if (id === 'captured-pieces-panel') return { classList: { remove: vi.fn(), add: vi.fn() } };
         return {
           classList: { remove: vi.fn(), add: vi.fn() },
           style: {},

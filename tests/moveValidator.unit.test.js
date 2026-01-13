@@ -1,4 +1,3 @@
-
 import { Game } from '../js/gameEngine.js';
 import {
   isInsufficientMaterial,

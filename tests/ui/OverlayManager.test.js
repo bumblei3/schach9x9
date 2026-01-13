@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-
 // Mock BoardRenderer
 vi.mock('../../js/ui/BoardRenderer.js', () => ({
   renderBoard: vi.fn(),
@@ -132,9 +131,9 @@ describe('OverlayManager', () => {
 
       OverlayManager.showPromotionUI(game, 0, 0, 'white', moveRecord, callback);
 
-      // Click first option (e = Engel)
+      // Click second option (e = Engel)
       const options = document.getElementById('promotion-options');
-      options.children[0].click();
+      options.children[1].click();
 
       expect(game.board[0][0].type).toBe('e');
       expect(moveRecord.specialMove).toEqual({ type: 'promotion', promotedTo: 'e' });

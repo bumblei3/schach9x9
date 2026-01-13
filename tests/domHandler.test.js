@@ -1,5 +1,3 @@
-
-
 // Mock all internal dependencies of DOMHandler BEFORE importing it
 vi.mock('../js/ui.js', () => ({
   renderBoard: vi.fn(),

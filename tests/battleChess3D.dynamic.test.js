@@ -1,4 +1,3 @@
-
 import { BattleChess3D } from '../js/battleChess3D.js';
 import { setBoardVariant } from '../js/config.js';
 

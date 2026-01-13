@@ -1,7 +1,6 @@
 import { getBestMoveDetailed } from '../js/aiEngine.js';
 import { logger } from '../js/logger.js';
 
-
 // Mock Worker class
 class MockWorker {
   constructor(scriptUrl) {

@@ -1,5 +1,3 @@
-
-
 // Mock dependencies
 const mockUI = {
   updateStatus: vi.fn(),

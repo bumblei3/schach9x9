@@ -1,5 +1,3 @@
-
-
 // Mock audio
 const mockAudioContext = vi.fn().mockImplementation(function () {
   return {

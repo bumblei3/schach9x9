@@ -82,12 +82,11 @@ export async function getBestMoveWasm(
   if (!initialized) return null;
 
   try {
-    const boardJson = JSON.stringify(Array.from(boardIntArray));
     // @ts-ignore
     const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resultJson = (wasmModule.get_best_move_wasm as any)(
-      boardJson,
+      boardIntArray,
       turnColor,
       depth,
       personality,

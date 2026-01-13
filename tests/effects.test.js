@@ -1,4 +1,3 @@
-
 import * as Effects from '../js/effects.js';
 
 describe('Effects System', () => {

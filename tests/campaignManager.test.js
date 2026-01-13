@@ -1,5 +1,3 @@
-
-
 // Mock localStorage
 const localStorageMock = (() => {
   let store = {};

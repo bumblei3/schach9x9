@@ -1,4 +1,3 @@
-
 import * as TacticsDetector from '../js/tutor/TacticsDetector.js';
 import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
 

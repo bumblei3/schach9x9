@@ -1,4 +1,3 @@
-
 import { initBoardUI, getPieceSymbol as _getPieceSymbol } from '../js/ui/BoardRenderer.js';
 import { PHASES } from '../js/config.js';
 

@@ -1,4 +1,3 @@
-
 import { setupJSDOM } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 

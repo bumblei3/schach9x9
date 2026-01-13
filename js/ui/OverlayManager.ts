@@ -66,19 +66,23 @@ export function showPromotionUI(
 
   optionsContainer.innerHTML = '';
   const options = [
-    { type: 'e', symbol: 'E' },
-    { type: 'q', symbol: color === 'white' ? '♕' : '♛' },
-    { type: 'c', symbol: 'C' },
-    { type: 'a', symbol: 'A' },
-    { type: 'r', symbol: color === 'white' ? '♖' : '♜' },
-    { type: 'b', symbol: 'B' },
-    { type: 'n', symbol: 'N' },
+    { type: 'q', name: 'Dame', cost: 9 },
+    { type: 'e', name: 'Angel', cost: 12 },
+    { type: 'c', name: 'Kanzler', cost: 8 },
+    { type: 'a', name: 'Erzbischof', cost: 7 },
+    { type: 'r', name: 'Turm', cost: 5 },
+    { type: 'b', name: 'Läufer', cost: 3 },
+    { type: 'n', name: 'Springer', cost: 3 },
   ];
 
   options.forEach(opt => {
     const btn = document.createElement('div');
     btn.className = 'promotion-option';
-    btn.innerHTML = `<div class="piece-svg">${(window as any).PIECE_SVGS[color][opt.type]}</div>`;
+    btn.innerHTML = `
+      <div class="piece-svg">${(window as any).PIECE_SVGS[color][opt.type]}</div>
+      <div class="piece-name">${opt.name}</div>
+      <div class="piece-cost">${opt.cost} Pkt</div>
+    `;
     btn.onclick = () => {
       const piece = game.board[r][c];
       if (piece) {

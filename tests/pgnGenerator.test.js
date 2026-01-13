@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-
 import { moveToNotation, generatePGN } from '../js/utils/PGNGenerator.js';
 
 describe('PGNGenerator', () => {

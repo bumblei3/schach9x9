@@ -7,7 +7,11 @@ import { logger } from '../../logger.js';
 
 export class SetupModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
-    game.phase = PHASES.SETUP_WHITE_KING as any;
+    if (game.mode === 'upgrade' || game.mode === 'upgrade8x8') {
+      game.phase = PHASES.SETUP_WHITE_UPGRADES as any;
+    } else {
+      game.phase = PHASES.SETUP_WHITE_KING as any;
+    }
     game.points = initialPoints;
 
     // Initialize UI
@@ -71,18 +75,31 @@ export class SetupModeStrategy implements GameModeStrategy {
         game.log('Weiß: Truppen-Upgrades möglich.');
       } else if (game.phase === (PHASES.SETUP_WHITE_UPGRADES as any)) {
         // Setup Mode Transition
-        game.phase = PHASES.SETUP_BLACK_PIECES as any;
-        game.points = game.initialPoints;
-        game.selectedShopPiece = null;
-        controller.updateShopUI();
-        game.log('Weiß fertig. Schwarz kauft ein.');
+        if (game.mode === 'upgrade' || game.mode === 'upgrade8x8') {
+          game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
+          game.points = game.initialPoints;
+          // AI trigger
+          if (game.isAI) {
+            setTimeout(() => {
+              if ((game as any).aiSetupUpgrades) (game as any).aiSetupUpgrades();
+              controller.finishSetupPhase();
+            }, 1000);
+          }
+          game.log('Weiß fertig. Schwarz rüstet auf.');
+        } else {
+          game.phase = PHASES.SETUP_BLACK_PIECES as any;
+          game.points = game.initialPoints;
+          game.selectedShopPiece = null;
+          controller.updateShopUI();
+          game.log('Weiß fertig. Schwarz kauft ein.');
 
-        controller.autoSave();
+          controller.autoSave();
 
-        if (game.isAI) {
-          setTimeout(() => {
-            if (game.aiSetupPieces) game.aiSetupPieces();
-          }, AI_DELAY_MS);
+          if (game.isAI) {
+            setTimeout(() => {
+              if (game.aiSetupPieces) game.aiSetupPieces();
+            }, AI_DELAY_MS);
+          }
         }
       } else if (game.phase === (PHASES.SETUP_BLACK_PIECES as any)) {
         game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
@@ -91,8 +108,11 @@ export class SetupModeStrategy implements GameModeStrategy {
         game.log('Schwarz: Truppen-Upgrades möglich.');
 
         if (game.isAI) {
-          // AI Skip upgrades for now
-          setTimeout(() => controller.finishSetupPhase(), 500);
+          // AI Upgrades
+          setTimeout(() => {
+            if ((game as any).aiSetupUpgrades) (game as any).aiSetupUpgrades();
+            controller.finishSetupPhase();
+          }, 1000); // Give it a moment
         }
       } else if (game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)) {
         this.startGame(game, controller);

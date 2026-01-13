@@ -37,6 +37,13 @@ function isLikeNone(x) {
   return x === undefined || x === null;
 }
 
+function passArray8ToWasm0(arg, malloc) {
+  const ptr = malloc(arg.length * 1, 1) >>> 0;
+  getUint8ArrayMemory0().set(arg, ptr / 1);
+  WASM_VECTOR_LEN = arg.length;
+  return ptr;
+}
+
 function passStringToWasm0(arg, malloc, realloc) {
   if (realloc === undefined) {
     const buf = cachedTextEncoder.encode(arg);
@@ -106,18 +113,18 @@ if (!('encodeInto' in cachedTextEncoder)) {
 let WASM_VECTOR_LEN = 0;
 
 /**
- * @param {string} board_json
+ * @param {Int8Array} board_bytes
  * @param {string} color_str
  * @param {number} depth
  * @param {string} personality_str
  * @param {number} elo
  * @returns {string}
  */
-export function get_best_move_wasm(board_json, color_str, depth, personality_str, elo) {
+export function get_best_move_wasm(board_bytes, color_str, depth, personality_str, elo) {
   let deferred4_0;
   let deferred4_1;
   try {
-    const ptr0 = passStringToWasm0(board_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr0 = passArray8ToWasm0(board_bytes, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passStringToWasm0(color_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len1 = WASM_VECTOR_LEN;

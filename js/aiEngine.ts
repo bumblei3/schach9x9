@@ -111,7 +111,9 @@ const TYPE_INT_TO_STR: Record<number, string> = {
   [PIECE_ANGEL]: 'e',
 };
 
-export function convertBoardToInt(uiBoard: UiBoard): IntBoard {
+export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
+  if (uiBoard instanceof Int8Array) return uiBoard;
+
   const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
   const size = uiBoard.length;
 
@@ -121,7 +123,7 @@ export function convertBoardToInt(uiBoard: UiBoard): IntBoard {
       if (p) {
         const type = TYPE_MAP_TO_INT[p.type] || PIECE_NONE;
         const color = p.color === 'white' ? COLOR_WHITE : COLOR_BLACK;
-        board[r * 9 + c] = type | color;
+        board[r * 9 + c] = (type | color) as any;
       }
     }
   }

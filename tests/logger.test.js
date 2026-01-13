@@ -1,4 +1,3 @@
-
 import { logger, LOG_LEVELS } from '../js/logger.js';
 
 // Mock console

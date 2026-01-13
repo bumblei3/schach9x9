@@ -168,7 +168,7 @@ export class ShopManager {
         <button class="btn upgrade-btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
                 style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; text-align: left;"
                 ${!canAfford ? 'disabled' : ''}
-                onclick="window.gameController.shopManager.upgradePiece(${r}, ${c}, '${up.symbol}')">
+                onclick="window.game.gameController.shopManager.upgradePiece(${r}, ${c}, '${up.symbol}')">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 32px; height: 32px;">${(PIECE_SVGS as any)[piece.color][up.symbol]}</div>
             <div>
@@ -193,6 +193,7 @@ export class ShopManager {
    */
   private getAvailableUpgrades(type: string): any[] {
     const upgrades: Record<string, string[]> = {
+      p: ['n', 'b', 'r', 'j', 'a', 'c', 'q'], // Pawn upgrades
       q: ['e'], // Queen -> Angel
       r: ['c'], // Rook -> Chancellor
       b: ['a'], // Bishop -> Archbishop
@@ -213,6 +214,76 @@ export class ShopManager {
         return true;
       })
       .filter(Boolean);
+  }
+
+  /**
+   * Performs automatic upgrades for AI
+   */
+  aiPerformUpgrades(): void {
+    // Determine context. In 'setup' mode, corridor matters. In 'upgrade' mode, it doesn't.
+    // Also, we only upgrade existing pieces, so findPieces handles availability.
+
+    // 1. Upgrade Pawns to Knights/Bishops first (cheap efficiency)
+    let pawns = this.findPieces('p', 'black');
+
+    // While we have points, try to upgrade random pieces
+    let attempts = 0;
+    while (this.game.points > 0 && attempts < 20) {
+      attempts++;
+
+      // Strategy:
+      // 50% chance to upgrade a Pawn
+      // 50% chance to upgrade a Knight/Bishop/Rook
+      const coinFlip = Math.random() > 0.5;
+      let candidates: { r: number; c: number; type: string }[] = [];
+
+      if (coinFlip && pawns.length > 0) {
+        candidates = pawns;
+      } else {
+        candidates = [
+          ...this.findPieces('n', 'black'),
+          ...this.findPieces('b', 'black'),
+          ...this.findPieces('r', 'black'),
+        ];
+        if (candidates.length === 0) candidates = pawns;
+      }
+
+      if (candidates.length === 0) break;
+
+      const piece = candidates[Math.floor(Math.random() * candidates.length)];
+      const availableUpgrades = this.getAvailableUpgrades(piece.type);
+      const affordable = availableUpgrades.filter(u => {
+        const currentVal = PIECE_VALUES[piece.type] || 0;
+        const targetVal = PIECE_VALUES[u.symbol] || 0;
+        return targetVal - currentVal <= this.game.points;
+      });
+
+      if (affordable.length > 0) {
+        // Pick expensive upgrade if possible
+        affordable.sort((a, b) => b.points - a.points);
+        const choice = affordable[0]; // Greedily capture best upgrade
+
+        this.upgradePiece(piece.r, piece.c, choice.symbol);
+
+        // Refund list update not needed as we re-query or it just works on next iteration
+        pawns = this.findPieces('p', 'black'); // Refresh logic slightly inefficient but safe
+      }
+    }
+
+    // Finish phase handled by caller
+  }
+
+  private findPieces(type: string, color: string): { r: number; c: number; type: string }[] {
+    const pieces: { r: number; c: number; type: string }[] = [];
+    for (let r = 0; r < this.game.boardSize; r++) {
+      for (let c = 0; c < this.game.boardSize; c++) {
+        const p = this.game.board[r][c];
+        if (p && p.type === type && p.color === color) {
+          pieces.push({ r, c, type: p.type });
+        }
+      }
+    }
+    return pieces;
   }
 
   /**

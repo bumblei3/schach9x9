@@ -1,5 +1,3 @@
-
-
 describe('Game Engine Rules', () => {
   let Game, PHASES, BOARD_SIZE, createEmptyBoard;
   let game;

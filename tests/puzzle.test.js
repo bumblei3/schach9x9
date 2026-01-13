@@ -1,4 +1,3 @@
-
 import { BOARD_SIZE } from '../js/gameEngine.js';
 
 // Mock ProceduralGenerator BEFORE importing PuzzleManager

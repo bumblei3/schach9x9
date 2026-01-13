@@ -1,5 +1,3 @@
-
-
 // Mock config
 vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,

@@ -108,6 +108,12 @@ export class GameController {
       this.currentModeStrategy = new SetupModeStrategy();
     }
 
+    if (mode === 'upgrade') {
+      initialPoints = 25;
+    } else if (mode === 'upgrade8x8') {
+      initialPoints = 15;
+    }
+
     this.game.points = initialPoints;
     this.game.initialPoints = initialPoints;
 

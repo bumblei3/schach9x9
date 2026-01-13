@@ -1,4 +1,3 @@
-
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
@@ -33,7 +32,7 @@ vi.mock('../js/sounds.js', () => ({
 
 vi.mock('../js/AnalysisController.js', () => ({
   AnalysisController: class {
-    constructor(_gameController) { }
+    constructor(_gameController) {}
     enterAnalysisMode = vi.fn(() => true);
     exitAnalysisMode = vi.fn(() => true);
     requestPositionAnalysis = vi.fn();
@@ -45,12 +44,12 @@ vi.mock('../js/AnalysisController.js', () => ({
 
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
-    constructor() { }
-    initUI() { }
-    show() { }
-    hide() { }
-    nextStep() { }
-    prevStep() { }
+    constructor() {}
+    initUI() {}
+    show() {}
+    hide() {}
+    nextStep() {}
+    prevStep() {}
   },
 }));
 
@@ -145,12 +144,10 @@ describe('GameController', () => {
     vi.spyOn(document, 'querySelector').mockImplementation(() => ({
       classList: { add: vi.fn(), remove: vi.fn() },
     }));
-    vi
-      .spyOn(document, 'querySelectorAll')
-      .mockImplementation(() => [
-        { classList: { remove: vi.fn() } },
-        { classList: { remove: vi.fn() } },
-      ]);
+    vi.spyOn(document, 'querySelectorAll').mockImplementation(() => [
+      { classList: { remove: vi.fn() } },
+      { classList: { remove: vi.fn() } },
+    ]);
     vi.spyOn(document, 'createElement').mockImplementation(() => ({
       classList: { add: vi.fn() },
       dataset: {},
@@ -333,7 +330,7 @@ describe('GameController', () => {
   describe('Clock Management', () => {
     it('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_KING;
-      gameController.timeManager.clockInterval = setInterval(() => { }, 100);
+      gameController.timeManager.clockInterval = setInterval(() => {}, 100);
       gameController.tickClock(); // Delegates to timeManager
       expect(gameController.timeManager.clockInterval).toBeNull();
     });
@@ -414,7 +411,7 @@ describe('GameController', () => {
 
   describe('Campaign Level', () => {
     test('should handle invalid level ID gracefully', () => {
-      vi.spyOn(console, 'error').mockImplementation(function () { });
+      vi.spyOn(console, 'error').mockImplementation(function () {});
       gameController.startCampaignLevel('invalid-id');
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('Level not found'),

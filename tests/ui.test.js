@@ -1,4 +1,3 @@
-
 import { PHASES, BOARD_SIZE } from '../js/config.js';
 import { setupJSDOM, createMockGame } from './test-utils.js';
 

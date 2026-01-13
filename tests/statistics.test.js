@@ -1,5 +1,3 @@
-
-
 // Mock logger
 vi.mock('../js/logger.js', () => ({
   logger: {

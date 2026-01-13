@@ -1,4 +1,3 @@
-
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
@@ -7,7 +6,7 @@ vi.mock('../js/ui.js', () => ({
   showTutorSuggestions: vi.fn(),
   renderBoard: vi.fn(),
   updateShopUI: vi.fn(),
-  getPieceText: vi.fn(piece => piece ? piece.type : ''),
+  getPieceText: vi.fn(piece => (piece ? piece.type : '')),
 }));
 
 vi.mock('../js/aiEngine.js', () => ({

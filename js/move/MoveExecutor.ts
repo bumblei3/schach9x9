@@ -276,15 +276,14 @@ export async function completeMoveExecution(
     return;
   }
 
-  finishMove(game);
+  finishMove(game, moveRecord.to);
 }
 
 /**
  * Finalizes the move, switches turns, and checks for game over
- * @param {Game} game - The game instance
- * @param {MoveController} moveController - The move controller instance
+ * @param {Square} to - Optional destination square of the last move
  */
-export function finishMove(game: Game): void {
+export function finishMove(game: Game, lastTo?: Square): void {
   game.selectedSquare = null;
   game.validMoves = null;
 
@@ -308,6 +307,11 @@ export function finishMove(game: Game): void {
     game.phase = PHASES.GAME_OVER as any;
     const winner = !whiteKingExists ? 'Schwarz' : 'Weiß';
     game.log(`KÖNIG GESCHLAGEN! ${winner} gewinnt!`);
+
+    // Triple Flash Effect on capture (+ screen shake already in animateMove)
+    if (UI.flashSquare && lastTo) {
+      UI.flashSquare(lastTo.r, lastTo.c, 'mate');
+    }
 
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');

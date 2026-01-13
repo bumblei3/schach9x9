@@ -424,6 +424,10 @@
             <div class="shop-icon">♜</div>
             <div class="shop-cost">5</div>
           </button>
+          <button class="shop-item" data-piece="j" data-cost="6">
+            <div class="shop-icon">🦄</div>
+            <div class="shop-cost">6</div>
+          </button>
           <button class="shop-item" data-piece="a" data-cost="7">
             <div class="shop-icon">🏰</div>
             <div class="shop-cost">7</div>
@@ -801,27 +805,27 @@
                 </div>
               </div>
 
-              <!-- Truppen anheuern -->
+              <!-- Truppen anheuern aka Upgrade Mode 9x9 -->
               <div
                 class="gamemode-card"
                 onclick="window.app.init(25, 'setup'); document.getElementById('main-menu').classList.remove('active');"
               >
-                <span class="card-tag tag-hot">Hiring</span>
+                <span class="card-tag tag-hot">Neu</span>
                 <div class="card-icon">💰</div>
-                <div class="card-title">Truppen anheuern</div>
+                <div class="card-title">Truppen anheuern (9x9)</div>
                 <div class="card-desc">Stelle deine eigene 9x9 Armee mit 25 Punkten zusammen.</div>
               </div>
 
               <!-- 8x8 Upgrades -->
               <div
                 class="gamemode-card"
-                onclick="window.app.init(5, 'standard8x8'); document.getElementById('main-menu').classList.remove('active');"
+                onclick="window.app.init(15, 'upgrade8x8'); document.getElementById('main-menu').classList.remove('active');"
               >
                 <span class="card-tag tag-hot">Beliebt</span>
                 <div class="card-icon">💎</div>
                 <div class="card-title">8x8 + Upgrades</div>
                 <div class="card-desc">
-                  Starte mit 5 Punkten auf einem Standard-Brett und verbessere deine Armee.
+                  Starte mit 15 Punkten auf einem Standard-Brett und verbessere deine Armee.
                 </div>
               </div>
 
@@ -852,7 +856,7 @@
           <div id="view-learn" class="menu-view">
             <h2 class="section-title">Lernen & Regeln</h2>
             <div class="gamemode-grid">
-              <div class="gamemode-card" onclick="window.gameController.startTutorial()">
+              <div class="gamemode-card" id="start-tutorial-btn">
                 <div class="card-icon">🎓</div>
                 <div class="card-title">Interaktives Tutorial</div>
                 <div class="card-desc">

@@ -1,4 +1,3 @@
-
 import { debounce, deepCopy, coordToAlgebraic } from '../js/utils.js';
 
 describe('Utils', () => {

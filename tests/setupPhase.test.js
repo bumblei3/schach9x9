@@ -1,7 +1,6 @@
 import { Game, PHASES } from '../js/gameEngine.js';
 import { GameController } from '../js/gameController.js';
 
-
 // Mock UI and sounds
 vi.mock('../js/ui.js', () => ({
   initBoardUI: vi.fn(),

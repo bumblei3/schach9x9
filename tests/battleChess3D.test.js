@@ -3,7 +3,6 @@
  * @jest-environment jsdom
  */
 
-
 // Simple test without mocking complex Three.js for now
 describe('BattleChess3D - Basic Tests', () => {
   let container;

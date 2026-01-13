@@ -1,4 +1,3 @@
-
 import { NotificationUI } from '../js/ui/NotificationUI.js';
 
 describe('NotificationUI', () => {

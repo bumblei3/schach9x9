@@ -26,7 +26,14 @@ export type { Player, Square, Piece };
 
 export { BOARD_SIZE, PHASES, PIECE_VALUES, AI_DELAY_MS };
 
-export type GameMode = 'setup' | 'classic' | 'standard8x8' | 'puzzle' | 'campaign';
+export type GameMode =
+  | 'setup'
+  | 'classic'
+  | 'standard8x8'
+  | 'puzzle'
+  | 'campaign'
+  | 'upgrade'
+  | 'upgrade8x8';
 
 export interface PieceWithMoved extends Piece {
   hasMoved: boolean;
@@ -151,6 +158,16 @@ export class Game {
     } else if (this.mode === 'standard8x8') {
       this.setupStandard8x8Board();
       this.phase = initialPoints > 0 ? PHASES.SETUP_WHITE_UPGRADES : PHASES.PLAY;
+    } else if (this.mode === 'upgrade') {
+      this.points = 25;
+      this.initialPoints = 25;
+      this.phase = PHASES.SETUP_WHITE_UPGRADES;
+      this.setupClassicBoard();
+    } else if (this.mode === 'upgrade8x8') {
+      this.points = 15;
+      this.initialPoints = 15;
+      this.phase = PHASES.SETUP_WHITE_UPGRADES;
+      this.setupStandard8x8Board();
     } else {
       this.phase = PHASES.SETUP_WHITE_KING;
     }

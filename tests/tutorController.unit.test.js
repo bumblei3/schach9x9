@@ -1,5 +1,3 @@
-
-
 // Mock the sub-modules
 vi.mock('../js/tutor/TacticsDetector.js', () => ({
   getThreatenedPieces: vi.fn(),

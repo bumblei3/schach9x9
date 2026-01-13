@@ -1,4 +1,3 @@
-
 import { setupJSDOM, createMockGame } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
@@ -17,7 +16,7 @@ vi.mock('../js/ui.js', () => ({
   showToast: vi.fn(),
   updateCapturedUI: vi.fn(),
   updateMoveHistoryUI: vi.fn(),
-  getPieceText: vi.fn(piece => piece ? piece.type : ''),
+  getPieceText: vi.fn(piece => (piece ? piece.type : '')),
   showMoveQuality: vi.fn(),
   showTutorSuggestions: vi.fn(),
 }));
@@ -44,6 +43,7 @@ vi.mock('../js/aiEngine.js', () => ({
   isInCheck: vi.fn(() => false),
   getAllLegalMoves: vi.fn(() => []),
   getParamsForElo: vi.fn(() => ({ maxDepth: 4, elo: 2500 })),
+  convertBoardToInt: vi.fn(() => new Int8Array(64)),
 }));
 
 // Use top-level await
@@ -156,7 +156,12 @@ describe('Controllers Coverage Expansion', () => {
       global.Worker = vi.fn().mockImplementation(function () {
         return mockWorker;
       });
-      global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve({}) }));
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({}),
+        })
+      );
       game.analysisMode = true;
 
       ac.analyzePosition();

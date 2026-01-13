@@ -1,5 +1,3 @@
-
-
 // Comprehensive Three.js Mock
 const mockThree = {
   Group: vi.fn().mockImplementation(function () {

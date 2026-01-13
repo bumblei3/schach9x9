@@ -80,6 +80,8 @@ export const GAME_MODES = {
   CLASSIC: 'classic', // Fixed 9x9 setup
   STANDARD_8X8: 'standard8x8', // Standard 8x8 chess
   CAMPAIGN: 'campaign', // Story Mode
+  UPGRADE: 'upgrade', // Troop Upgrade Mode
+  UPGRADE_8X8: 'upgrade8x8', // 8x8 Upgrade Mode
 } as const;
 
 export type GameMode = (typeof GAME_MODES)[keyof typeof GAME_MODES];

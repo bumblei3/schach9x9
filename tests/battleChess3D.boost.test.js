@@ -1,14 +1,10 @@
-
-
 // Comprehensive Three.js Mock
 const mockThree = {
   Scene: vi.fn().mockImplementation(function () {
     return {
       add: vi.fn(),
       remove: vi.fn(),
-      traverse: vi.fn(cb =>
-        cb({ geometry: { dispose: vi.fn() }, material: { dispose: vi.fn() } })
-      ),
+      traverse: vi.fn(cb => cb({ geometry: { dispose: vi.fn() }, material: { dispose: vi.fn() } })),
       background: null,
       children: [],
     };

@@ -1,7 +1,6 @@
 // sounds.test.js
 // Tests for the SoundManager class
 
-
 // Mock Web Audio API before importing SoundManager
 global.window = global.window || {};
 

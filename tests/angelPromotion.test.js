@@ -1,5 +1,3 @@
-
-
 // Mock AudioContext
 global.window.AudioContext = vi.fn().mockImplementation(() => ({
   createGain: vi.fn().mockReturnValue({

@@ -1,4 +1,3 @@
-
 import { KeyboardManager } from '../js/input/KeyboardManager.js';
 import { setupJSDOM } from './test-utils.js';
 

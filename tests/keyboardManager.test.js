@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-
 import { KeyboardManager } from '../js/input/KeyboardManager.js';
 
 // Mock dynamic import for ui.js

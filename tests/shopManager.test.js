@@ -2,7 +2,6 @@
  * Tests for ShopManager
  */
 
-
 import { ShopManager } from '../js/shop/ShopManager.js';
 import { BOARD_SIZE, PHASES } from '../js/config.js';
 

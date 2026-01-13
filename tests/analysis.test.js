@@ -1,4 +1,3 @@
-
 import { AnalysisManager } from '../js/AnalysisManager.js';
 
 describe('AnalysisManager', () => {

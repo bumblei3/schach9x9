@@ -1,5 +1,3 @@
-
-
 // Mock DOM
 document.body.innerHTML = `
   <div id="evaluation-bar">

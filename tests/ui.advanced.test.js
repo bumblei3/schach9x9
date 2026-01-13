@@ -1,4 +1,3 @@
-
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
