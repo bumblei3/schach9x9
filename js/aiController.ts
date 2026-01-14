@@ -9,6 +9,7 @@ const PIECES: any = SHOP_PIECES;
 
 export const AI_PERSONALITIES: any = {
   balanced: {
+    id: 'BALANCED',
     name: 'Balanced',
     mobilityWeight: 1.0,
     safetyWeight: 1.0,
@@ -17,6 +18,7 @@ export const AI_PERSONALITIES: any = {
     attackWeight: 1.0,
   },
   aggressive: {
+    id: 'AGGRESSIVE',
     name: 'Aggressive',
     mobilityWeight: 1.2,
     safetyWeight: 0.8,
@@ -25,6 +27,7 @@ export const AI_PERSONALITIES: any = {
     attackWeight: 1.5,
   },
   defensive: {
+    id: 'DEFENSIVE',
     name: 'Defensive',
     mobilityWeight: 0.8,
     safetyWeight: 1.5,
@@ -33,12 +36,22 @@ export const AI_PERSONALITIES: any = {
     attackWeight: 0.7,
   },
   positional: {
+    id: 'POSITIONAL',
     name: 'Positional',
     mobilityWeight: 1.0,
     safetyWeight: 1.1,
     pawnStructureWeight: 1.5,
     centerControlWeight: 1.4,
     attackWeight: 0.9,
+  },
+  trapper: {
+    id: 'POSITIONAL', // Maps to positional for now, but with custom weights
+    name: 'Der Fallensteller',
+    mobilityWeight: 0.7,
+    safetyWeight: 1.3,
+    pawnStructureWeight: 1.1,
+    centerControlWeight: 0.9,
+    attackWeight: 1.6,
   },
 };
 
@@ -365,6 +378,8 @@ export class AIController {
           timeLimit = timeMap[this.game.difficulty] || 5000;
         }
 
+        const personalityConfig = AI_PERSONALITIES[this.game.aiPersonality || 'balanced'];
+
         // Send search request
         worker.postMessage({
           type: 'getBestMove',
@@ -372,9 +387,10 @@ export class AIController {
             board: boardInt,
             color: 'black',
             depth: depth,
+            personality: personalityConfig.id,
             difficulty: this.game.difficulty,
             moveNumber: Math.floor(this.game.moveHistory.length / 2),
-            config: AI_PERSONALITIES[this.game.aiPersonality || 'balanced'],
+            config: personalityConfig,
             lastMove: lastMove,
             timeLimit: timeLimit,
           },

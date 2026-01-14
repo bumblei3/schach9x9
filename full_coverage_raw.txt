@@ -1,0 +1,2198 @@
+
+> schach9x9@1.0.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv4.0.17 [39m[90m/home/tobber/.gemini/antigravity/scratch/schach[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | tests/boardRenderer.unit.test.js[2m > [22m[2mBoardRenderer Full Coverage[2m > [22m[2mInteraction: Click calls handleCellClick
+[22m[39m[BoardRenderer] Cell click: row=0, col=0, phase=play
+
+[90mstdout[2m | tests/controllers.coverage.test.js
+[22m[39m[INFO] 21:25:30.647 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould initialize correctly
+[22m[39m[INFO] 21:25:30.909 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould initialize correctly
+[22m[39m[INFO] 21:25:30.912 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould initialize correctly
+[22m[39m[INFO] 21:25:30.935 3D skin changed to: classic
+[INFO] 21:25:30.936 3D scene setup complete
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle init failure with zero dimensions
+[22m[39m[INFO] 21:25:31.141 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle init failure with zero dimensions
+[22m[39m[INFO] 21:25:31.142 Setting up 3D scene...
+[ERROR] 21:25:31.142 Container has zero dimensions!
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould boardToWorld correctly
+[22m[39m[INFO] 21:25:31.330 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould updateFromGameState
+[22m[39m[INFO] 21:25:31.432 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould updateFromGameState
+[22m[39m[INFO] 21:25:31.435 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould updateFromGameState
+[22m[39m[INFO] 21:25:31.467 3D skin changed to: classic
+[INFO] 21:25:31.467 3D scene setup complete
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould updateFromGameState
+[22m[39m[DEBUG] 21:25:31.468 [PieceManager3D] updateFromGameState started
+[DEBUG] 21:25:31.468 [PieceManager3D] Existing pieces cleared
+[INFO] 21:25:31.468 [PieceManager3D] Created 1 pieces in 0.25ms
+
+[90mstdout[2m | tests/moveController.test.js[2m > [22m[2mMoveController[2m > [22m[2mshould handle promotion
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould highlightMoves
+[22m[39m[INFO] 21:25:31.555 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould highlightMoves
+[22m[39m[INFO] 21:25:31.560 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould highlightMoves
+[22m[39m[INFO] 21:25:31.580 3D skin changed to: classic
+[INFO] 21:25:31.581 3D scene setup complete
+
+[90mstdout[2m | tests/moveController.test.js[2m > [22m[2mMoveController[2m > [22m[2mshould correctly undo promotion
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mtickClock should handle white timeout
+[22m[39m[INFO] 21:25:31.715 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mtickClock should handle white timeout
+[22m[39m[WARN] 21:25:31.727 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould toggle enabled state
+[22m[39m[INFO] 21:25:31.730 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould toggle enabled state
+[22m[39m[INFO] 21:25:31.734 Setting up 3D scene...
+[INFO] 21:25:31.808 3D mode enabled
+[INFO] 21:25:31.809 3D mode disabled
+[INFO] 21:25:31.809 3D skin changed to: classic
+[INFO] 21:25:31.809 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mtickClock should handle black timeout
+[22m[39m[INFO] 21:25:31.873 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mtickClock should handle black timeout
+[22m[39m[WARN] 21:25:31.881 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould dispose correctly
+[22m[39m[INFO] 21:25:31.948 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould dispose correctly
+[22m[39m[INFO] 21:25:31.951 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould dispose correctly
+[22m[39m[INFO] 21:25:31.974 3D skin changed to: classic
+[INFO] 21:25:31.976 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mresign should handle black resigning
+[22m[39m[INFO] 21:25:32.069 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mresign should handle black resigning
+[22m[39m[WARN] 21:25:32.070 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setTheme
+[22m[39m[INFO] 21:25:32.112 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setTheme
+[22m[39m[INFO] 21:25:32.116 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setTheme
+[22m[39m[INFO] 21:25:32.131 3D skin changed to: classic
+[INFO] 21:25:32.132 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mhandleCellClick should do nothing in GAME_OVER
+[22m[39m[INFO] 21:25:32.200 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mhandleCellClick should do nothing in GAME_OVER
+[22m[39m[GameController] handleCellClick called: row=0, col=0, phase=GAME_OVER
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setSkin
+[22m[39m[INFO] 21:25:32.253 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setSkin
+[22m[39m[INFO] 21:25:32.258 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setSkin
+[22m[39m[INFO] 21:25:32.270 3D skin changed to: classic
+[INFO] 21:25:32.270 3D scene setup complete
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould setSkin
+[22m[39m[INFO] 21:25:32.271 3D skin changed to: neon
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mofferDraw should handle human offer
+[22m[39m[INFO] 21:25:32.321 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould animateMove
+[22m[39m[INFO] 21:25:32.365 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould animateMove
+[22m[39m[INFO] 21:25:32.372 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould animateMove
+[22m[39m[INFO] 21:25:32.392 3D skin changed to: neon
+[INFO] 21:25:32.392 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2macceptDraw should end game
+[22m[39m[INFO] 21:25:32.441 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2macceptDraw should end game
+[22m[39m[WARN] 21:25:32.445 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle onClick
+[22m[39m[INFO] 21:25:32.510 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle onClick
+[22m[39m[INFO] 21:25:32.518 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle onClick
+[22m[39m[INFO] 21:25:32.534 3D skin changed to: neon
+[INFO] 21:25:32.535 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2msaveGame should call storageManager
+[22m[39m[INFO] 21:25:32.629 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mGameController[2m > [22m[2mloadGame should handle successful load
+[22m[39m[INFO] 21:25:32.706 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2maiEvaluateDrawOffer should accept if losing
+[22m[39m[INFO] 21:25:32.801 StatisticsManager initialized
+
+ [32m✓[39m tests/boardRenderer.unit.test.js [2m([22m[2m17 tests[22m[2m)[22m[33m 2409[2mms[22m[39m
+     [33m[2m✓[22m[39m renderBoard highlights [33m 896[2mms[22m[39m
+     [33m[2m✓[22m[39m renderBoard corridors in setup phase [33m 528[2mms[22m[39m
+     [33m[2m✓[22m[39m renderBoard highlights black corridor [33m 451[2mms[22m[39m
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle onWindowResize
+[22m[39m[INFO] 21:25:32.887 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle onWindowResize
+[22m[39m[INFO] 21:25:32.897 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould handle onWindowResize
+[22m[39m[INFO] 21:25:32.935 3D skin changed to: neon
+[INFO] 21:25:32.935 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2maiShouldOfferDraw should return true if slightly losing
+[22m[39m[INFO] 21:25:32.931 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould playBattleSequence
+[22m[39m[INFO] 21:25:33.098 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould playBattleSequence
+[22m[39m[INFO] 21:25:33.106 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould playBattleSequence
+[22m[39m[INFO] 21:25:33.122 3D skin changed to: neon
+[INFO] 21:25:33.123 3D scene setup complete
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould playBattleSequence
+[22m[39m[INFO] 21:25:33.123 Playing battle sequence: q vs p
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2maiShouldResign should return true if losing badly
+[22m[39m[INFO] 21:25:33.260 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set camera
+[22m[39m[INFO] 21:25:33.317 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set camera
+[22m[39m[INFO] 21:25:33.328 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set camera
+[22m[39m[INFO] 21:25:33.367 3D skin changed to: neon
+[INFO] 21:25:33.369 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2manalyzePosition should create worker and send message
+[22m[39m[INFO] 21:25:33.368 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2manalyzePosition should create worker and send message
+[22m[39m[DEBUG] 21:25:33.371 [AI] Initializing pool with 4 workers
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2manalyzePosition should create worker and send message
+[22m[39m[INFO] 21:25:33.384 [AIController] Opening book loaded successfully. Positions: 0
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set renderer
+[22m[39m[INFO] 21:25:33.455 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set renderer
+[22m[39m[INFO] 21:25:33.462 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set renderer
+[22m[39m[INFO] 21:25:33.479 3D skin changed to: neon
+[INFO] 21:25:33.479 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2maiMove should evaluate draw offer if pending
+[22m[39m[INFO] 21:25:33.500 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mAIController[2m > [22m[2maiMove should evaluate draw offer if pending
+[22m[39m[INFO] 21:25:33.505 [AI] Starting aiMove...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set controls
+[22m[39m[INFO] 21:25:33.587 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set controls
+[22m[39m[INFO] 21:25:33.594 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set controls
+[22m[39m[INFO] 21:25:33.604 3D skin changed to: neon
+[INFO] 21:25:33.604 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mTutorController[2m > [22m[2mcheckBlunder should trigger modal on large eval drop
+[22m[39m[INFO] 21:25:33.613 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set battleAnimator
+[22m[39m[INFO] 21:25:33.771 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set battleAnimator
+[22m[39m[INFO] 21:25:33.778 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set battleAnimator
+[22m[39m[INFO] 21:25:33.790 3D skin changed to: neon
+[INFO] 21:25:33.791 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mTutorController[2m > [22m[2mdetectTacticalPatterns should detect fork
+[22m[39m[INFO] 21:25:33.849 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set pieces
+[22m[39m[INFO] 21:25:33.860 [3D] BattleChess3D instance created (Modular)
+
+ [32m✓[39m tests/puzzleGenerator.test.js [2m([22m[2m3 tests[22m[2m)[22m[33m 3311[2mms[22m[39m
+     [33m[2m✓[22m[39m should find Mate in 2 [33m 3290[2mms[22m[39m
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set pieces
+[22m[39m[INFO] 21:25:33.867 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set pieces
+[22m[39m[INFO] 21:25:33.928 3D skin changed to: neon
+[INFO] 21:25:33.932 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mTutorController[2m > [22m[2mdetectPins should identify a pinned piece
+[22m[39m[INFO] 21:25:34.009 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set currentSkin
+[22m[39m[INFO] 21:25:34.052 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set currentSkin
+[22m[39m[INFO] 21:25:34.060 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set currentSkin
+[22m[39m[INFO] 21:25:34.077 3D skin changed to: neon
+[INFO] 21:25:34.080 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mTutorController[2m > [22m[2manalyzeStrategicValue should detect center control
+[22m[39m[INFO] 21:25:34.125 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set currentTheme
+[22m[39m[INFO] 21:25:34.191 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set currentTheme
+[22m[39m[INFO] 21:25:34.203 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould set currentTheme
+[22m[39m[INFO] 21:25:34.218 3D skin changed to: neon
+[INFO] 21:25:34.218 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should transition from WHITE_PIECES to WHITE_UPGRADES
+[22m[39m[INFO] 21:25:34.222 StatisticsManager initialized
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould toggle with existing scene (re-enable)
+[22m[39m[INFO] 21:25:34.348 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/moveController.test.js[2m > [22m[2mMoveController[2m > [22m[2mSave and Load Game[2m > [22m[2mshould successfully load a saved game
+[22m[39mTest Verify: {"board":[[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null]],"phase":"PLAY","turn":"black","points":{"white":10,"black":10},"moveHistory":[],"capturedPieces":{"white":[],"black":[]},"isAI":false,"difficulty":"medium"}
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould toggle with existing scene (re-enable)
+[22m[39m[INFO] 21:25:34.357 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould toggle with existing scene (re-enable)
+[22m[39m[INFO] 21:25:34.434 3D skin changed to: neon
+[INFO] 21:25:34.437 3D scene setup complete
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould toggle with existing scene (re-enable)
+[22m[39m[INFO] 21:25:34.438 3D mode disabled
+[INFO] 21:25:34.438 3D mode enabled
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould clear highlights
+[22m[39m[INFO] 21:25:34.568 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould clear highlights
+[22m[39m[INFO] 21:25:34.579 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould clear highlights
+[22m[39m[INFO] 21:25:34.595 3D skin changed to: neon
+[INFO] 21:25:34.595 3D scene setup complete
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should transition from WHITE_PIECES to WHITE_UPGRADES
+[22m[39m[INFO] 21:25:34.226 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:34.639 Game initialized with [33m25[39m points in mode: setup
+
+ [32m✓[39m tests/tutorial.test.js [2m([22m[2m28 tests[22m[2m)[22m[33m 3994[2mms[22m[39m
+       [33m[2m✓[22m[39m should initialize with first step [33m 371[2mms[22m[39m
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould add and remove pieces
+[22m[39m[INFO] 21:25:34.668 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould add and remove pieces
+[22m[39m[INFO] 21:25:34.677 Setting up 3D scene...
+
+[90mstdout[2m | tests/battleChess3D.boost.test.js[2m > [22m[2mBattleChess3D Class[2m > [22m[2mshould add and remove pieces
+[22m[39m[INFO] 21:25:34.698 3D skin changed to: neon
+[INFO] 21:25:34.699 3D scene setup complete
+
+ [32m✓[39m tests/battleChess3D.boost.test.js [2m([22m[2m23 tests[22m[2m)[22m[33m 4088[2mms[22m[39m
+     [33m[2m✓[22m[39m should initialize correctly [33m 327[2mms[22m[39m
+     [33m[2m✓[22m[39m should handle onWindowResize [33m 403[2mms[22m[39m
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should transition from WHITE_UPGRADES to BLACK_PIECES in setup mode
+[22m[39m[INFO] 21:25:34.794 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should transition from WHITE_UPGRADES to BLACK_PIECES in setup mode
+[22m[39m[INFO] 21:25:34.795 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:34.925 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should transition from WHITE_UPGRADES to BLACK_UPGRADES in upgrade mode
+[22m[39m[INFO] 21:25:35.046 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should transition from WHITE_UPGRADES to BLACK_UPGRADES in upgrade mode
+[22m[39m[INFO] 21:25:35.047 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:35.171 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mUI Modals and Toasts[2m > [22m[2mshowModal and closeModal should interact with DOM
+[22m[39m[OverlayManager] Showing modal: Title
+[OverlayManager] Modal visibility set to flex
+[OverlayManager] Modal closed
+[OverlayManager] Modal closed
+
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should show modal if points remains
+[22m[39m[INFO] 21:25:35.277 StatisticsManager initialized
+
+ [32m✓[39m tests/ui.test.js [2m([22m[2m10 tests[22m[2m)[22m[33m 4592[2mms[22m[39m
+       [33m[2m✓[22m[39m should initialize board with coordinate labels [33m 549[2mms[22m[39m
+       [33m[2m✓[22m[39m should highlight selectable corridors in setup phase [33m 1124[2mms[22m[39m
+       [33m[2m✓[22m[39m should highlight threatened pieces [33m 772[2mms[22m[39m
+       [33m[2m✓[22m[39m should show promotion UI and handle choice [33m 1170[2mms[22m[39m
+[90mstdout[2m | tests/controllers.coverage.test.js[2m > [22m[2mControllers Coverage Expansion[2m > [22m[2mPhase Transitions[2m > [22m[2mfinishSetupPhase should show modal if points remains
+[22m[39m[INFO] 21:25:35.278 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:35.485 Game initialized with [33m25[39m points in mode: setup
+
+ [32m✓[39m tests/controllers.coverage.test.js [2m([22m[2m21 tests[22m[2m)[22m[33m 4308[2mms[22m[39m
+       [33m[2m✓[22m[39m tickClock should handle white timeout [33m 538[2mms[22m[39m
+       [33m[2m✓[22m[39m aiShouldResign should return true if losing badly [33m 325[2mms[22m[39m
+       [33m[2m✓[22m[39m finishSetupPhase should transition from WHITE_PIECES to WHITE_UPGRADES [33m 513[2mms[22m[39m
+       [33m[2m✓[22m[39m finishSetupPhase should show modal if points remains [33m 321[2mms[22m[39m
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints[2m > [22m[2mshould return empty array when no legal moves
+[22m[39m[INFO] 21:25:35.895 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints[2m > [22m[2mshould return empty array when no legal moves
+[22m[39m[INFO] 21:25:35.937 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints[2m > [22m[2mshould return empty array when no legal moves
+[22m[39m[DEBUG] 21:25:35.940 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints[2m > [22m[2mshould return hints for positions with pieces
+[22m[39m[DEBUG] 21:25:36.254 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints[2m > [22m[2mshould include move notation in hints
+[22m[39m[DEBUG] 21:25:36.637 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mfinishSetupPhase should cycle through setup stages
+[22m[39m[INFO] 21:25:35.825 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:35.826 Game initialized with [33m15[39m points in mode: setup
+[DEBUG] 21:25:36.557 Removed all corridor highlighting for PLAY phase
+
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints[2m > [22m[2mshould prioritize capture moves
+[22m[39m[DEBUG] 21:25:36.806 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mGameController edge cases and additional features[2m > [22m[2mtickClock should handle timeout for white
+[22m[39m[WARN] 21:25:36.817 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints - Advanced Scenarios[2m > [22m[2mshould handle checkmate position
+[22m[39m[DEBUG] 21:25:36.859 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mGameController edge cases and additional features[2m > [22m[2mresign should end game
+[22m[39m[WARN] 21:25:36.889 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'black'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mGameController edge cases and additional features[2m > [22m[2mofferDraw, acceptDraw, declineDraw
+[22m[39m[WARN] 21:25:36.948 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mGameController edge cases and additional features[2m > [22m[2msaveGameToStatistics outcomes
+[22m[39m[INFO] 21:25:37.012 Game saved to statistics: win vs AI-Schwer
+[INFO] 21:25:37.013 Game saved to statistics: loss vs AI-Schwer
+
+[90mstdout[2m | tests/gameFlow.integration.test.js
+[22m[39m[INFO] 21:25:37.251 StatisticsManager initialized
+
+[90mstdout[2m | tests/coverage-boost.test.js[2m > [22m[2mCoverage Boost Tests[2m > [22m[2mGameController edge cases and additional features[2m > [22m[2minitGame should setup initial state
+[22m[39m[INFO] 21:25:37.496 SetupModeStrategy initialized with [33m20[39m points
+[INFO] 21:25:37.496 Game initialized with [33m20[39m points in mode: setup
+
+ [32m✓[39m tests/coverage-boost.test.js [2m([22m[2m20 tests[22m[2m)[22m[33m 2523[2mms[22m[39m
+     [33m[2m✓[22m[39m finishSetupPhase should cycle through setup stages [33m 1520[2mms[22m[39m
+       [33m[2m✓[22m[39m initGame should setup initial state [33m 336[2mms[22m[39m
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mAuto-Save Trigger Integration[2m > [22m[2mshould trigger save exactly every 5 moves
+[22m[39m[INFO] 21:25:37.723 StatisticsManager initialized
+
+ [32m✓[39m tests/ui/AnalysisUI.test.js [2m([22m[2m8 tests[22m[2m)[22m[33m 1327[2mms[22m[39m
+     [33m[2m✓[22m[39m showAnalysisPrompt should call UI.showModal [33m 394[2mms[22m[39m
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints - Advanced Scenarios[2m > [22m[2mshould limit hints to maximum of 3
+[22m[39m[DEBUG] 21:25:37.892 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+ [32m✓[39m tests/moveController.test.js [2m([22m[2m59 tests[22m[2m)[22m[33m 7224[2mms[22m[39m
+     [33m[2m✓[22m[39m should execute a simple move [33m 333[2mms[22m[39m
+ [32m✓[39m tests/snapshots.test.js [2m([22m[2m4 tests[22m[2m)[22m[33m 1696[2mms[22m[39m
+     [33m[2m✓[22m[39m Initial setup phase snapshot [33m 528[2mms[22m[39m
+     [33m[2m✓[22m[39m Play phase board snapshot [33m 906[2mms[22m[39m
+[90mstdout[2m | tests/tutorController.test.js[2m > [22m[2mTutorController[2m > [22m[2mgetTutorHints - Advanced Scenarios[2m > [22m[2mshould properly evaluate tactical moves
+[22m[39m[DEBUG] 21:25:38.061 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mAuto-Save Trigger Integration[2m > [22m[2mshould trigger save exactly every 5 moves
+[22m[39m[INFO] 21:25:38.089 [Storage] Game saved to schach9x9_save_autosave (3022 bytes)
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mAuto-Save Trigger Integration[2m > [22m[2mshould trigger save exactly every 5 moves
+[22m[39m[INFO] 21:25:38.272 [Storage] Game saved to schach9x9_save_autosave (3737 bytes)
+
+[90mstdout[2m | tests/tutorController.test.js
+[22m[39m[DEBUG] 21:25:38.390 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+ [32m✓[39m tests/tutorController.test.js [2m([22m[2m37 tests[22m[2m)[22m[33m 2192[2mms[22m[39m
+       [33m[2m✓[22m[39m should return hints for positions with pieces [33m 340[2mms[22m[39m
+       [33m[2m✓[22m[39m should include move notation in hints [33m 359[2mms[22m[39m
+       [33m[2m✓[22m[39m should limit hints to maximum of 3 [33m 1033[2mms[22m[39m
+[90mstdout[2m | Logger._log (/home/tobber/.gemini/antigravity/scratch/schach/js/logger.ts:82:13)
+[22m[39m[DEBUG] 21:25:38.415 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mSpecial Moves Integration[2m > [22m[2mshould handle castling and update state correctly
+[22m[39m[INFO] 21:25:38.429 StatisticsManager initialized
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mSpecial Moves Integration[2m > [22m[2mshould handle pawn promotion through UI flow
+[22m[39m[INFO] 21:25:38.565 StatisticsManager initialized
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mSpecial Moves Integration[2m > [22m[2mshould handle pawn promotion through UI flow
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mSpecial Moves Integration[2m > [22m[2mshould handle pawn promotion through UI flow
+[22m[39m[WARN] 21:25:38.605 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+ [32m✓[39m tests/keyboard.test.js [2m([22m[2m8 tests[22m[2m)[22m[33m 1424[2mms[22m[39m
+     [33m[2m✓[22m[39m should trigger undo on Ctrl+Z [33m 335[2mms[22m[39m
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mPuzzle Mode Lifecycle[2m > [22m[2mshould transition to puzzle mode and solve a simple puzzle
+[22m[39m[INFO] 21:25:38.790 StatisticsManager initialized
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mPuzzle Mode Lifecycle[2m > [22m[2mshould transition to puzzle mode and solve a simple puzzle
+[22m[39m[WARN] 21:25:38.964 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mSpecial Pieces Integration[2m > [22m[2mshould allow Chancellor (C) to move like Rook + Knight
+[22m[39m[INFO] 21:25:39.277 StatisticsManager initialized
+
+[90mstdout[2m | tests/gameFlow.integration.test.js[2m > [22m[2mComprehensive Game Flow Integration Tests[2m > [22m[2mSpecial Pieces Integration[2m > [22m[2mshould allow Archbishop (A) to move like Bishop + Knight
+[22m[39m[INFO] 21:25:39.485 StatisticsManager initialized
+
+ [32m✓[39m tests/gameFlow.integration.test.js [2m([22m[2m6 tests[22m[2m)[22m[33m 2205[2mms[22m[39m
+       [33m[2m✓[22m[39m should trigger save exactly every 5 moves [33m 933[2mms[22m[39m
+       [33m[2m✓[22m[39m should transition to puzzle mode and solve a simple puzzle [33m 356[2mms[22m[39m
+       [33m[2m✓[22m[39m should allow Chancellor (C) to move like Rook + Knight [33m 422[2mms[22m[39m
+[90mstdout[2m | tests/fullGame.test.js
+[22m[39m[INFO] 21:25:40.002 StatisticsManager initialized
+
+ [32m✓[39m tests/ui/BoardRenderer.test.js [2m([22m[2m4 tests[22m[2m)[22m[33m 1223[2mms[22m[39m
+     [33m[2m✓[22m[39m should initialize and render board correctly [33m 745[2mms[22m[39m
+     [33m[2m✓[22m[39m should handle interaction events [33m 439[2mms[22m[39m
+[90mstdout[2m | tests/fullGame.test.js[2m > [22m[2mFull-Game Integration Test[2m > [22m[2mSetup phase transitions and initial move
+[22m[39m[INFO] 21:25:40.669 StatisticsManager initialized
+[INFO] 21:25:40.672 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:40.969 Game initialized with [33m15[39m points in mode: setup
+
+ [32m✓[39m tests/tutorial.full.test.js [2m([22m[2m8 tests[22m[2m)[22m[33m 1671[2mms[22m[39m
+     [33m[2m✓[22m[39m should initialize with correct number of steps [33m 449[2mms[22m[39m
+     [33m[2m✓[22m[39m getMoveType should correctly identify move categories [33m 405[2mms[22m[39m
+[90mstdout[2m | tests/domHandler.test.js[2m > [22m[2mDOMHandler[2m > [22m[2mshould initialize and wire up points selection
+[22m[39m[DOMHandler] Clicked points button: HTMLButtonElement {
+  [32mSymbol(SameObject caches)[39m: [Object: null prototype] {
+    classList: DOMTokenList {},
+    dataset: DOMStringMap {}
+  }
+} Points: 15
+[DOMHandler] Overlay hidden
+
+[90mstdout[2m | tests/fullGame.test.js[2m > [22m[2mFull-Game Integration Test[2m > [22m[2mSetup phase transitions and initial move
+[22m[39m[GameController] handleCellClick called: row=8, col=4, phase=SETUP_WHITE_KING
+[SetupMode] Placing King
+[GameController] handleCellClick called: row=0, col=4, phase=SETUP_BLACK_KING
+[GameController] handleCellClick called: row=6, col=4, phase=SETUP_WHITE_PIECES
+[GameController] handleCellClick called: row=6, col=6, phase=SETUP_WHITE_PIECES
+[GameController] handleCellClick called: row=6, col=5, phase=SETUP_WHITE_PIECES
+[GameController] handleCellClick called: row=8, col=4, phase=PLAY
+[GameController] handleCellClick called: row=6, col=4, phase=PLAY
+[GameController] handleCellClick called: row=6, col=5, phase=PLAY
+[GameController] handleCellClick called: row=6, col=4, phase=PLAY
+[GameController] handleCellClick called: row=5, col=4, phase=PLAY
+
+[90mstdout[2m | tests/fullGame.test.js[2m > [22m[2mFull-Game Integration Test[2m > [22m[2mSetup phase transitions and initial move
+[22m[39m[INFO] 21:25:41.032 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/fullGame.test.js[2m > [22m[2mFull-Game Integration Test[2m > [22m[2mSetup phase transitions and initial move
+[22m[39m[INFO] 21:25:41.117 [WasmBridge] Wasm AI Engine initialized successfully.
+
+ [32m✓[39m tests/ui.advanced.test.js [2m([22m[2m10 tests[22m[2m)[22m[33m 1043[2mms[22m[39m
+[90mstdout[2m | tests/fullGame.test.js[2m > [22m[2mFull-Game Integration Test[2m > [22m[2mResignation flow in mid-game
+[22m[39m[INFO] 21:25:41.325 StatisticsManager initialized
+[INFO] 21:25:41.326 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:41.427 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/fullGame.test.js[2m > [22m[2mFull-Game Integration Test[2m > [22m[2mResignation flow in mid-game
+[22m[39m[WARN] 21:25:41.432 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'black'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+ [32m✓[39m tests/fullGame.test.js [2m([22m[2m2 tests[22m[2m)[22m[33m 1296[2mms[22m[39m
+     [33m[2m✓[22m[39m Setup phase transitions and initial move [33m 991[2mms[22m[39m
+[90mstdout[2m | tests/fuzz/fuzz.test.ts[2m > [22m[2mRules Engine Fuzz Test[2m > [22m[2mshould run 500 random moves without inconsistency
+[22m[39mStarting Fuzz Test: 500 iterations
+Fuzz Test complete: No inconsistencies found.
+
+ [32m✓[39m tests/fuzz/fuzz.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 1391[2mms[22m[39m
+     [33m[2m✓[22m[39m should run 500 random moves without inconsistency [33m 1388[2mms[22m[39m
+ [32m✓[39m tests/domHandler.test.js [2m([22m[2m32 tests[22m[2m)[22m[33m 915[2mms[22m[39m
+ [32m✓[39m tests/boardRenderer.isolated.test.js [2m([22m[2m1 test[22m[2m)[22m[33m 832[2mms[22m[39m
+     [33m[2m✓[22m[39m touch events find piece-svg [33m 826[2mms[22m[39m
+[90mstdout[2m | tests/scenarios/gameplay.test.js
+[22m[39m[INFO] 21:25:43.121 StatisticsManager initialized
+
+[90mstdout[2m | tests/ui/TutorUI.test.js[2m > [22m[2mTutorUI Component[2m > [22m[2mshowTutorSuggestions[2m > [22m[2mshould log in overlay mode if no hints available
+[22m[39m[TutorUI] No hints available yet.
+
+ [32m✓[39m tests/ui.settings.test.js [2m([22m[2m2 tests[22m[2m)[22m[33m 675[2mms[22m[39m
+     [33m[2m✓[22m[39m Skin selector should update skin and force render [33m 562[2mms[22m[39m
+[90mstdout[2m | tests/scenarios/gameplay.test.js[2m > [22m[2mGameplay Scenarios[2m > [22m[2mMock Game Sequence: Scholar Mate attempt
+[22m[39m[INFO] 21:25:43.244 StatisticsManager initialized
+[INFO] 21:25:43.252 ClassicModeStrategy initialized
+[INFO] 21:25:43.674 Game initialized with [33m10[39m points in mode: classic
+
+[90mstdout[2m | tests/scenarios/gameplay.test.js[2m > [22m[2mGameplay Scenarios[2m > [22m[2mMock Game Sequence: Scholar Mate attempt
+[22m[39m[GameController] handleCellClick called: row=7, col=4, phase=PLAY
+[GameController] handleCellClick called: row=5, col=4, phase=PLAY
+
+[90mstdout[2m | tests/scenarios/gameplay.test.js[2m > [22m[2mGameplay Scenarios[2m > [22m[2mMock Game Sequence: Scholar Mate attempt
+[22m[39m[INFO] 21:25:43.692 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/scenarios/gameplay.test.js[2m > [22m[2mGameplay Scenarios[2m > [22m[2mMock Game Sequence: Scholar Mate attempt
+[22m[39m[INFO] 21:25:43.706 [WasmBridge] Wasm AI Engine initialized successfully.
+
+ [32m✓[39m tests/tutor/TutorUI_coverage.test.js [2m([22m[2m7 tests[22m[2m)[22m[33m 449[2mms[22m[39m
+[90mstdout[2m | tests/shop/shopManager.test.ts[2m > [22m[2mShopManager[2m > [22m[2mupgradePiece()[2m > [22m[2mshould execute upgrade and deduct cost
+[22m[39m[ShopManager] performUpgrade called: { r: [33m6[39m, c: [33m4[39m, targetType: [32m'n'[39m }
+[ShopManager] Deducting points and updating piece type
+
+[90mstdout[2m | tests/shop/shopManager.test.ts[2m > [22m[2mShopManager[2m > [22m[2mupgradePiece()[2m > [22m[2mshould call 3D board remove/add if enabled
+[22m[39m[ShopManager] performUpgrade called: { r: [33m6[39m, c: [33m4[39m, targetType: [32m'n'[39m }
+[ShopManager] Deducting points and updating piece type
+
+[90mstdout[2m | tests/shop/shopManager.test.ts[2m > [22m[2mShopManager[2m > [22m[2mupgradePiece()[2m > [22m[2mshould fail if cannot afford cost
+[22m[39m[ShopManager] performUpgrade called: { r: [33m6[39m, c: [33m4[39m, targetType: [32m'e'[39m }
+
+[90mstderr[2m | tests/shop/shopManager.test.ts[2m > [22m[2mShopManager[2m > [22m[2mupgradePiece()[2m > [22m[2mshould fail if cannot afford cost
+[22m[39m[ShopManager] Not enough points: [33m1[39m < [33m11[39m
+
+[90mstdout[2m | tests/shop/shopManager.test.ts[2m > [22m[2mShopManager[2m > [22m[2maiPerformUpgrades()[2m > [22m[2mshould spend points on upgrades
+[22m[39m[ShopManager] performUpgrade called: { r: [33m0[39m, c: [33m4[39m, targetType: [32m'q'[39m }
+[ShopManager] Deducting points and updating piece type
+
+ [32m✓[39m tests/scenarios/gameplay.test.js [2m([22m[2m1 test[22m[2m)[22m[33m 510[2mms[22m[39m
+     [33m[2m✓[22m[39m Mock Game Sequence: Scholar Mate attempt [33m 506[2mms[22m[39m
+ [32m✓[39m tests/shop/shopManager.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 171[2mms[22m[39m
+ [32m✓[39m tests/ui/TutorUI.test.js [2m([22m[2m23 tests[22m[2m)[22m[33m 951[2mms[22m[39m
+ [32m✓[39m tests/effects.test.js [2m([22m[2m5 tests[22m[2m)[22m[33m 727[2mms[22m[39m
+     [33m[2m✓[22m[39m ParticleSystem spawn and update [33m 484[2mms[22m[39m
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2manalyzePosition - starts workers if needed
+[22m[39m[DEBUG] 21:25:43.984 [AI] Initializing pool with 4 workers
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2manalyzePosition - starts workers if needed
+[22m[39m[INFO] 21:25:43.994 [AIController] Opening book loaded successfully. Positions: 0
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles successful worker results
+[22m[39m[DEBUG] 21:25:44.046 [AI] Initializing pool with 4 workers
+[INFO] 21:25:44.047 [AI] Starting aiMove...
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles successful worker results
+[22m[39m[INFO] 21:25:44.047 [AIController] Opening book loaded successfully. Positions: 0
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles successful worker results
+[22m[39m[DEBUG] 21:25:44.054 [AI] Difficulty medium: using depth 3
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.055 [AI] Dispatching search to worker 0
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.056 [AI] Dispatching search to worker 1
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.057 [AI] Dispatching search to worker 2
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.057 [AI] Dispatching search to worker 3
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles successful worker results
+[22m[39m[DEBUG] MockWorker emit: message
+[DEBUG] MockWorker calling onmessage
+[DEBUG] MockWorker calling 1 listeners
+[DEBUG] AI worker 0 bestMove received
+[DEBUG] MockWorker removeEventListener: message
+[DEBUG] AI completedWorkers: 1
+[DEBUG] AI triggering processResultsWithTimeout
+[DEBUG] AI processResults started
+[INFO] 21:25:44.060 [AI] Processing results after 13ms
+[DEBUG] 21:25:44.061 [AI] Worker results: [ [32m'6,4->4,4'[39m ]
+[INFO] 21:25:44.067 [AI] Executing move: 6,4 -> 4,4
+[DEBUG] AI processResults calling resolve
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - fallback on timeout
+[22m[39m[INFO] 21:25:44.081 [AI] Starting aiMove...
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - fallback on timeout
+[22m[39m[DEBUG] 21:25:44.081 [AI] Initializing pool with 4 workers
+[DEBUG] 21:25:44.081 [AI] Difficulty medium: using depth 3
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.081 [AI] Dispatching search to worker 0
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.081 [AI] Dispatching search to worker 1
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.081 [AI] Dispatching search to worker 2
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.081 [AI] Dispatching search to worker 3
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - fallback on timeout
+[22m[39m[INFO] 21:25:44.081 [AIController] Opening book loaded successfully. Positions: 0
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - fallback on timeout
+[22m[39m[ERROR] 21:26:14.081 [AI] Worker timeout after 30 seconds! Making fallback move.
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - reloads workers on mode change
+[22m[39m[DEBUG] 21:25:44.093 [AI] Initializing pool with 4 workers
+[INFO] 21:25:44.093 [AI] Starting aiMove...
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - reloads workers on mode change
+[22m[39m[INFO] 21:25:44.093 [AIController] Opening book loaded successfully. Positions: 0
+[INFO] 21:25:44.093 [AI] Mode changed from standard to classic. Reloading workers.
+[DEBUG] 21:25:44.093 [AI] Initializing pool with 4 workers
+[DEBUG] 21:25:44.093 [AI] Classic mode: using depth 3 for faster play
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.093 [AI] Dispatching search to worker 0
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.093 [AI] Dispatching search to worker 1
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.093 [AI] Dispatching search to worker 2
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.093 [AI] Dispatching search to worker 3
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - reloads workers on mode change
+[22m[39m[INFO] 21:25:44.093 [AIController] Opening book loaded successfully. Positions: 0
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - reloads workers on mode change
+[22m[39m[ERROR] 21:26:14.093 [AI] Worker timeout after 30 seconds! Making fallback move.
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles worker error
+[22m[39m[DEBUG] 21:25:44.122 [AI] Initializing pool with 4 workers
+[INFO] 21:25:44.123 [AI] Starting aiMove...
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles worker error
+[22m[39m[INFO] 21:25:44.124 [AIController] Opening book loaded successfully. Positions: 0
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles worker error
+[22m[39m[DEBUG] 21:25:44.124 [AI] Difficulty medium: using depth 3
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.124 [AI] Dispatching search to worker 0
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.125 [AI] Dispatching search to worker 1
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.125 [AI] Dispatching search to worker 2
+[DEBUG] MockWorker addEventListener: message
+[DEBUG] 21:25:44.125 [AI] Dispatching search to worker 3
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2maiMove - handles worker error
+[22m[39m[ERROR] 21:25:44.138 [AI] Worker 0 error: Error: Test Worker Error
+    at [90m/home/tobber/.gemini/antigravity/scratch/schach/[39mtests/ai/AIController_coverage.test.ts:302:22
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:20
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2mAI Visuals and Analysis[2m > [22m[2mhandleWorkerMessage - processes analysis update
+[22m[39m[DEBUG] 21:25:44.231 [AI] Initializing pool with 4 workers
+[DEBUG] MockWorker emit: message
+[DEBUG] MockWorker calling onmessage
+
+[90mstdout[2m | tests/ai/AIController_coverage.test.ts[2m > [22m[2mAIController Coverage Boost[2m > [22m[2mAI Visuals and Analysis[2m > [22m[2mhandleWorkerMessage - processes analysis update
+[22m[39m[INFO] 21:25:44.237 [AIController] Opening book loaded successfully. Positions: 0
+
+ [32m✓[39m tests/ai/AIController_coverage.test.ts [2m([22m[2m22 tests[22m[2m)[22m[33m 327[2mms[22m[39m
+ [32m✓[39m tests/AnalysisController.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+[90mstdout[2m | tests/angelPromotion.test.js[2m > [22m[2mAngel Piece and Promotion[2m > [22m[2mPawn should automatically promote to Angel
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+ [32m✓[39m tests/ui/AnalysisUI.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 460[2mms[22m[39m
+[90mstdout[2m | tests/angelPromotion.test.js[2m > [22m[2mAngel Piece and Promotion[2m > [22m[2mAngel Performance and Move Generation[2m > [22m[2mMultiple promotions to Angel in same game
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+ [32m✓[39m tests/ui/GameStatusUI.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 295[2mms[22m[39m
+[90mstdout[2m | tests/ui/OverlayManager.test.js[2m > [22m[2mOverlayManager[2m > [22m[2mshowModal / closeModal[2m > [22m[2mshowModal displays modal with title and message
+[22m[39m[OverlayManager] Showing modal: Test Title
+[OverlayManager] Modal visibility set to flex
+
+[90mstdout[2m | tests/angelPromotion.test.js[2m > [22m[2mAngel Piece and Promotion[2m > [22m[2mAngel Performance and Move Generation[2m > [22m[2mMultiple promotions to Angel in same game
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+[90mstdout[2m | tests/ui/OverlayManager.test.js[2m > [22m[2mOverlayManager[2m > [22m[2mshowModal / closeModal[2m > [22m[2mshowModal adds action buttons
+[22m[39m[OverlayManager] Showing modal: Title
+[OverlayManager] Modal visibility set to flex
+[OverlayManager] Modal closed
+
+[90mstdout[2m | tests/ui/OverlayManager.test.js[2m > [22m[2mOverlayManager[2m > [22m[2mshowModal / closeModal[2m > [22m[2mcloseModal hides modal
+[22m[39m[OverlayManager] Showing modal: Title
+[OverlayManager] Modal visibility set to flex
+[OverlayManager] Modal closed
+
+[90mstdout[2m | tests/ui/OverlayManager.test.js[2m > [22m[2mOverlayManager[2m > [22m[2mshowModal / closeModal[2m > [22m[2mshowModal returns early if elements missing
+[22m[39m[OverlayManager] Missing elements: { modal: [33mfalse[39m, titleEl: [33mfalse[39m, messageEl: [33mfalse[39m, actionsEl: [33mfalse[39m }
+
+ [32m✓[39m tests/angelPromotion.test.js [2m([22m[2m21 tests[22m[2m)[22m[32m 253[2mms[22m[39m
+[90mstderr[2m | tests/ui/OverlayManager.test.js[2m > [22m[2mOverlayManager[2m > [22m[2mshowPromotionUI[2m > [22m[2mreturns early if overlay missing
+[22m[39m[OverlayManager] Error: Promotion overlay or options container not found!
+
+ [32m✓[39m tests/ui.touch.test.js [2m([22m[2m3 tests[22m[2m)[22m[33m 365[2mms[22m[39m
+ [32m✓[39m tests/ui/OverlayManager.test.js [2m([22m[2m15 tests[22m[2m)[22m[33m 338[2mms[22m[39m
+ [32m✓[39m tests/property.test.js [2m([22m[2m2 tests[22m[2m)[22m[33m 338[2mms[22m[39m
+[90mstdout[2m | tests/gameController.test.js
+[22m[39m[INFO] 21:25:47.449 StatisticsManager initialized
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mGeneral Logic and Statistics[2m > [22m[2mshould save game statistics on game over
+[22m[39m[INFO] 21:25:47.540 StatisticsManager initialized
+[INFO] 21:25:47.544 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.545 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mGeneral Logic and Statistics[2m > [22m[2mshould save game statistics on game over
+[22m[39m[DEBUG] 21:25:47.547 Game history saved to storage
+[INFO] 21:25:47.547 Game saved: win vs AI-Mittel (0 moves)
+[INFO] 21:25:47.547 Game saved to statistics: win vs AI-Mittel
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mGeneral Logic and Statistics[2m > [22m[2mshould skip statistics if gameStartTime not set
+[22m[39m[INFO] 21:25:47.553 StatisticsManager initialized
+[INFO] 21:25:47.564 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.564 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mGeneral Logic and Statistics[2m > [22m[2mshould skip statistics if gameStartTime not set
+[22m[39m[WARN] 21:25:47.565 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mGeneral Logic and Statistics[2m > [22m[2mshould handle corridor placement calculation
+[22m[39m[INFO] 21:25:47.568 StatisticsManager initialized
+[INFO] 21:25:47.575 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.575 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mKing Placement[2m > [22m[2mshould place white king in valid corridor
+[22m[39m[INFO] 21:25:47.581 StatisticsManager initialized
+[INFO] 21:25:47.583 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.583 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mKing Placement[2m > [22m[2mshould reject king placement outside corridor
+[22m[39m[INFO] 21:25:47.584 StatisticsManager initialized
+[INFO] 21:25:47.590 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.590 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mShop and Piece Management[2m > [22m[2mshould select piece if player has enough points
+[22m[39m[INFO] 21:25:47.592 StatisticsManager initialized
+[INFO] 21:25:47.596 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.596 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mShop and Piece Management[2m > [22m[2mshould refund points when removing piece from corridor
+[22m[39m[INFO] 21:25:47.601 StatisticsManager initialized
+[INFO] 21:25:47.604 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.604 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mShop and Piece Management[2m > [22m[2mshould clear selectedShopPiece after placing a piece
+[22m[39m[INFO] 21:25:47.607 StatisticsManager initialized
+[INFO] 21:25:47.609 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.609 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mShop and Piece Management[2m > [22m[2mshould reject piece selection without shop piece
+[22m[39m[INFO] 21:25:47.611 StatisticsManager initialized
+[INFO] 21:25:47.618 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.618 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCell Click Handling[2m > [22m[2mshould handle clicks during setup phases
+[22m[39m[INFO] 21:25:47.623 StatisticsManager initialized
+[INFO] 21:25:47.625 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.625 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCell Click Handling[2m > [22m[2mshould handle clicks during setup phases
+[22m[39m[GameController] handleCellClick called: row=7, col=4, phase=SETUP_WHITE_KING
+[SetupMode] Placing King
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCell Click Handling[2m > [22m[2mshould block clicks during animation
+[22m[39m[INFO] 21:25:47.629 StatisticsManager initialized
+[INFO] 21:25:47.635 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.635 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCell Click Handling[2m > [22m[2mshould block clicks during animation
+[22m[39m[GameController] handleCellClick called: row=4, col=4, phase=PLAY
+[GameController] Blocked: animating
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCell Click Handling[2m > [22m[2mshould block clicks in replay mode
+[22m[39m[INFO] 21:25:47.639 StatisticsManager initialized
+[INFO] 21:25:47.642 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.642 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCell Click Handling[2m > [22m[2mshould block clicks in replay mode
+[22m[39m[GameController] handleCellClick called: row=4, col=4, phase=PLAY
+[GameController] Blocked: replay mode
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should not select AI piece during strict setup
+[22m[39m[INFO] 21:25:47.642 StatisticsManager initialized
+[INFO] 21:25:47.648 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.648 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should not select AI piece during strict setup
+[22m[39m[GameController] handleCellClick called: row=0, col=0, phase=PLAY
+[GameController] Blocked: AI turn
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should select piece in PLAY phase
+[22m[39m[INFO] 21:25:47.652 StatisticsManager initialized
+[INFO] 21:25:47.654 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.654 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should select piece in PLAY phase
+[22m[39m[GameController] handleCellClick called: row=7, col=4, phase=PLAY
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should select piece in PLAY phase
+[22m[39m[GameController] handleCellClick called: row=4, col=4, phase=PLAY
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should execute move if valid
+[22m[39m[INFO] 21:25:47.660 StatisticsManager initialized
+[INFO] 21:25:47.667 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.667 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should execute move if valid
+[22m[39m[GameController] handleCellClick called: row=6, col=4, phase=PLAY
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should execute move if valid
+[22m[39m[GameController] handleCellClick called: row=5, col=4, phase=PLAY
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should place king in setup
+[22m[39m[INFO] 21:25:47.670 StatisticsManager initialized
+[INFO] 21:25:47.681 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.681 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAI and Game State[2m > [22m[2mhandleCellClick should place king in setup
+[22m[39m[GameController] handleCellClick called: row=8, col=4, phase=SETUP_WHITE_KING
+[SetupMode] Placing King
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mClock Management[2m > [22m[2mshould stop clock when not in PLAY phase
+[22m[39m[INFO] 21:25:47.684 StatisticsManager initialized
+[INFO] 21:25:47.689 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.689 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAnalysis Mode[2m > [22m[2mshould delegate enterAnalysisMode to AnalysisController
+[22m[39m[INFO] 21:25:47.697 StatisticsManager initialized
+[INFO] 21:25:47.704 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.704 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mAnalysis Mode[2m > [22m[2mshould delegate exitAnalysisMode to AnalysisController
+[22m[39m[INFO] 21:25:47.706 StatisticsManager initialized
+[INFO] 21:25:47.709 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.709 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mSave and Load[2m > [22m[2mshould handle corrupt save data
+[22m[39m[INFO] 21:25:47.710 StatisticsManager initialized
+[INFO] 21:25:47.714 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.715 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js
+[22m[39m[INFO] 21:25:47.716 StatisticsManager initialized
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mSave and Load[2m > [22m[2mshould handle corrupt save data
+[22m[39m[ERROR] 21:25:47.715 [Storage] Failed to parse save game: SyntaxError: Unexpected token 'i', "invalid" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at StorageManager.loadGame [90m(/home/tobber/.gemini/antigravity/scratch/schach/[39mjs/storage.ts:97:26[90m)[39m
+    at GameController.loadGame [90m(/home/tobber/.gemini/antigravity/scratch/schach/[39mjs/gameController.ts:461:30[90m)[39m
+    at [90m/home/tobber/.gemini/antigravity/scratch/schach/[39mtests/gameController.test.js:354:22
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mResignation[2m > [22m[2mshould allow resignation in PLAY phase
+[22m[39m[INFO] 21:25:47.741 StatisticsManager initialized
+[INFO] 21:25:47.746 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.747 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mResignation[2m > [22m[2mshould allow resignation in PLAY phase
+[22m[39m[WARN] 21:25:47.749 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'black'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mResignation[2m > [22m[2mshould prevent resignation in non-PLAY phase
+[22m[39m[INFO] 21:25:47.750 StatisticsManager initialized
+[INFO] 21:25:47.756 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.756 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mDraw Offers[2m > [22m[2mshould handle draw offer
+[22m[39m[INFO] 21:25:47.757 StatisticsManager initialized
+[INFO] 21:25:47.762 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.762 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mDraw Offers[2m > [22m[2mshould accept draw
+[22m[39m[INFO] 21:25:47.764 StatisticsManager initialized
+[INFO] 21:25:47.767 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.767 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mDraw Offers[2m > [22m[2mshould accept draw
+[22m[39m[WARN] 21:25:47.783 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mDraw Offers[2m > [22m[2mshould decline draw
+[22m[39m[INFO] 21:25:47.784 StatisticsManager initialized
+[INFO] 21:25:47.788 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.788 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/gameController.test.js[2m > [22m[2mGameController[2m > [22m[2mCampaign Level[2m > [22m[2mshould handle invalid level ID gracefully
+[22m[39m[INFO] 21:25:47.789 StatisticsManager initialized
+[INFO] 21:25:47.795 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.795 Game initialized with [33m15[39m points in mode: setup
+
+ [32m✓[39m tests/gameController.test.js [2m([22m[2m26 tests[22m[2m)[22m[32m 261[2mms[22m[39m
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mFull Game Setup Flow[2m > [22m[2mshould complete full setup: white king → black king → pieces → play
+[22m[39m[INFO] 21:25:47.816 StatisticsManager initialized
+[INFO] 21:25:47.818 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.846 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mFull Game Setup Flow[2m > [22m[2mshould complete full setup: white king → black king → pieces → play
+[22m[39m[INFO] 21:25:47.854 [Storage] Game saved to schach9x9_save_autosave (893 bytes)
+[DEBUG] 21:25:47.854 Auto-saved game
+[DEBUG] 21:25:47.854 Removed all corridor highlighting for PLAY phase
+[INFO] 21:25:47.855 [Storage] Game saved to schach9x9_save_autosave (960 bytes)
+[DEBUG] 21:25:47.855 Auto-saved game
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2minitGame Modes[2m > [22m[2mshould initialize upgrade mode correctly
+[22m[39m[INFO] 21:25:47.819 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:47.865 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mFull Game Setup Flow[2m > [22m[2mshould handle classic mode initialization
+[22m[39m[INFO] 21:25:47.859 StatisticsManager initialized
+[INFO] 21:25:47.860 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.871 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mFull Game Setup Flow[2m > [22m[2mshould handle classic mode initialization
+[22m[39m[INFO] 21:25:47.872 StatisticsManager initialized
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mSave/Load Round Trip[2m > [22m[2mshould save and load game state correctly
+[22m[39m[INFO] 21:25:47.876 StatisticsManager initialized
+[INFO] 21:25:47.878 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.883 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mSave/Load Round Trip[2m > [22m[2mshould save and load game state correctly
+[22m[39m[INFO] 21:25:47.883 StatisticsManager initialized
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mSave/Load Round Trip[2m > [22m[2mshould save and load game state correctly
+[22m[39m[INFO] 21:25:47.886 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2minitGame Modes[2m > [22m[2mshould initialize puzzle mode (legacy path)
+[22m[39m[INFO] 21:25:47.882 Game initialized with [33m0[39m points in mode: puzzle
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mhandleCellClick Blocks[2m > [22m[2mshould block click in replay mode
+[22m[39m[GameController] handleCellClick called: row=0, col=0, phase=PLAY
+[GameController] Blocked: replay mode
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mhandleCellClick Blocks[2m > [22m[2mshould block click during animation
+[22m[39m[GameController] handleCellClick called: row=0, col=0, phase=PLAY
+[GameController] Blocked: animating
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mSave/Load Round Trip[2m > [22m[2mshould save and load game state correctly
+[22m[39m[INFO] 21:25:47.894 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mhandleCellClick Blocks[2m > [22m[2mshould block click during AI turn
+[22m[39m[GameController] handleCellClick called: row=0, col=0, phase=PLAY
+[GameController] Blocked: AI turn
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mSave/Load Round Trip[2m > [22m[2mshould save and load game state correctly
+[22m[39m[INFO] 21:25:47.908 [Storage] Game saved to schach9x9_save_autosave (2452 bytes)
+[INFO] 21:25:47.913 StatisticsManager initialized
+[INFO] 21:25:47.914 [Storage] Game loaded from schach9x9_save_autosave
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mGame End & Statistics[2m > [22m[2mshould handle resign by current player
+[22m[39m[INFO] 21:25:47.922 Game saved to statistics: loss vs Human
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'black'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mMove Execution and Undo[2m > [22m[2mshould execute move → undo → redo correctly
+[22m[39m[INFO] 21:25:47.916 StatisticsManager initialized
+[INFO] 21:25:47.919 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.921 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mMove Execution and Undo[2m > [22m[2mshould execute move → undo → redo correctly
+[22m[39m[INFO] 21:25:47.922 StatisticsManager initialized
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mGame End & Statistics[2m > [22m[2mshould calculate playerResult correctly in saveGameToStatistics
+[22m[39m[INFO] 21:25:47.933 Game saved to statistics: loss vs Human
+[INFO] 21:25:47.934 Game saved to statistics: win vs Human
+
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mGame End & Statistics[2m > [22m[2mshould handle draw in handleGameEnd
+[22m[39m[INFO] 21:25:47.940 Game saved to statistics: draw vs Human
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'draw'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mGame End Scenarios[2m > [22m[2mshould handle resignation
+[22m[39m[INFO] 21:25:47.933 StatisticsManager initialized
+[INFO] 21:25:47.934 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.943 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mGame End Scenarios[2m > [22m[2mshould handle resignation
+[22m[39m[INFO] 21:25:47.943 StatisticsManager initialized
+[WARN] 21:25:47.945 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'black'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mGame End Scenarios[2m > [22m[2mshould handle draw offer and acceptance
+[22m[39m[INFO] 21:25:47.947 StatisticsManager initialized
+[INFO] 21:25:47.947 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.953 Game initialized with [33m15[39m points in mode: setup
+
+Not implemented: navigation to another Document
+[90mstdout[2m | tests/controllers/GameController_coverage.test.ts[2m > [22m[2mGameController Comprehensive Coverage[2m > [22m[2mGame End & Statistics[2m > [22m[2mshould handle campaign victory and callbacks
+[22m[39m[INFO] 21:25:47.952 Game saved to statistics: win vs Human
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_1'[39m
+}
+[GameController] Triggering Campaign Victory
+
+Not implemented: navigation to another Document
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mGame End Scenarios[2m > [22m[2mshould handle draw offer and acceptance
+[22m[39m[INFO] 21:25:47.954 StatisticsManager initialized
+[WARN] 21:25:47.955 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mTime Control Integration[2m > [22m[2mshould handle time running out
+[22m[39m[INFO] 21:25:47.990 StatisticsManager initialized
+[INFO] 21:25:47.991 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:47.994 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mTime Control Integration[2m > [22m[2mshould handle time running out
+[22m[39m[INFO] 21:25:47.996 StatisticsManager initialized
+[WARN] 21:25:47.997 Game start time not set, skipping statistics save
+
+ [32m✓[39m tests/arrows.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 150[2mms[22m[39m
+ [32m✓[39m tests/controllers/GameController_coverage.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 170[2mms[22m[39m
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mAI Integration[2m > [22m[2mshould handle AI game setup
+[22m[39m[INFO] 21:25:48.008 StatisticsManager initialized
+[INFO] 21:25:48.009 SetupModeStrategy initialized with [33m15[39m points
+[INFO] 21:25:48.014 Game initialized with [33m15[39m points in mode: setup
+
+[90mstdout[2m | tests/integration.test.js[2m > [22m[2mIntegration Tests[2m > [22m[2mAI Integration[2m > [22m[2mshould handle AI game setup
+[22m[39m[INFO] 21:25:48.014 StatisticsManager initialized
+
+ [32m✓[39m tests/integration.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 204[2mms[22m[39m
+ [32m✓[39m tests/app.features.test.js [2m([22m[2m20 tests[22m[2m)[22m[32m 150[2mms[22m[39m
+ [32m✓[39m tests/ui/DOMHandler_coverage.test.js [2m([22m[2m10 tests[22m[2m)[22m[32m 197[2mms[22m[39m
+ [32m✓[39m tests/moveController.enhanced.test.js [2m([22m[2m18 tests[22m[2m)[22m[32m 269[2mms[22m[39m
+ [32m✓[39m tests/aiWorker.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m tests/notificationUI.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 107[2mms[22m[39m
+ [32m✓[39m tests/gameStateManager.test.js [2m([22m[2m23 tests[22m[2m)[22m[32m 256[2mms[22m[39m
+ [32m✓[39m tests/evalBar.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 99[2mms[22m[39m
+ [32m✓[39m tests/ui/PuzzleMenu.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+ [32m✓[39m tests/moveValidator.unit.test.js [2m([22m[2m10 tests[22m[2m)[22m[32m 136[2mms[22m[39m
+ [32m✓[39m tests/setupPhase.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 146[2mms[22m[39m
+[90mstderr[2m | tests/keyboardManager.test.js[2m > [22m[2mKeyboardManager[2m > [22m[2mshould trigger emergency recovery on Ctrl+Shift+F12
+[22m[39m[RECOVERY] Previous turn: undefined, isAnimating was reset, spinner hidden
+
+[90mstderr[2m | tests/keyboardManager.test.js[2m > [22m[2mKeyboardManager[2m > [22m[2mshould perform emergency recovery correctly
+[22m[39m[RECOVERY] Previous turn: black, isAnimating was reset, spinner hidden
+
+[90mstdout[2m | tests/campaignIntegration.test.js
+[22m[39m[INFO] 21:25:51.175 StatisticsManager initialized
+
+ [32m✓[39m tests/keyboardManager.test.js [2m([22m[2m30 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mstartCampaignLevel should initialize level_1 (fixed)
+[22m[39m[INFO] 21:25:51.303 StatisticsManager initialized
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mstartCampaignLevel should initialize level_1 (fixed)
+[22m[39m[INFO] 21:25:51.306 Started Campaign Level: Aufstand
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mhandleGameEnd should complete level on victory
+[22m[39m[INFO] 21:25:51.338 StatisticsManager initialized
+
+[90mstderr[2m | tests/errorManager.test.js[2m > [22m[2mErrorManager[2m > [22m[2mshould handle critical errors by showing overlay
+[22m[39mFull Stack: Error: Critical Failure
+    at /home/tobber/.gemini/antigravity/scratch/schach/tests/errorManager.test.js:25:19
+    at file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/@vitest/runner/dist/index.js:1209:10)
+    at file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/@vitest/runner/dist/index.js:1653:37
+    at Traces.$ (file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)
+    at trace (file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+    at runTest (file:///home/tobber/.gemini/antigravity/scratch/schach/node_modules/@vitest/runner/dist/index.js:1653:12)
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mhandleGameEnd should complete level on victory
+[22m[39m[INFO] 21:25:51.339 Started Campaign Level: Aufstand
+[WARN] 21:25:51.340 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_1'[39m
+}
+[GameController] Triggering Campaign Victory
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mhandleGameEnd should unlock level_2 after level_1 win
+[22m[39m[INFO] 21:25:51.374 StatisticsManager initialized
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mhandleGameEnd should unlock level_2 after level_1 win
+[22m[39m[INFO] 21:25:51.377 Started Campaign Level: Aufstand
+[WARN] 21:25:51.377 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_1'[39m
+}
+[GameController] Triggering Campaign Victory
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mshould unlock level_3 after level_2 win and persistent rewards
+[22m[39m[INFO] 21:25:51.384 StatisticsManager initialized
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mshould unlock level_3 after level_2 win and persistent rewards
+[22m[39m[INFO] 21:25:51.387 Started Campaign Level: Aufstand
+[WARN] 21:25:51.387 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_1'[39m
+}
+[GameController] Triggering Campaign Victory
+[INFO] 21:25:51.391 Started Campaign Level: Level 2
+[WARN] 21:25:51.391 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_2'[39m
+}
+[GameController] Triggering Campaign Victory
+[INFO] 21:25:51.393 Started Campaign Level: Level 3
+[WARN] 21:25:51.393 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_3'[39m
+}
+[GameController] Triggering Campaign Victory
+[Campaign] Unlocked Reward: angel
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mresetState should clear all progress for testing isolation
+[22m[39m[INFO] 21:25:51.414 StatisticsManager initialized
+
+[90mstdout[2m | tests/campaignIntegration.test.js[2m > [22m[2mCampaign Integration[2m > [22m[2mresetState should clear all progress for testing isolation
+[22m[39m[INFO] 21:25:51.416 Started Campaign Level: Aufstand
+[WARN] 21:25:51.416 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [33mtrue[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [32m'white'[39m,
+  levelId: [32m'level_1'[39m
+}
+[GameController] Triggering Campaign Victory
+
+ [32m✓[39m tests/campaignIntegration.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 136[2mms[22m[39m
+ [32m✓[39m tests/errorManager.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 198[2mms[22m[39m
+ [32m✓[39m tests/modes/standardMode.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 191[2mms[22m[39m
+ [32m✓[39m tests/hintGenerator.unit.test.js [2m([22m[2m18 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Start Position Depth 4
+[22m[39m[INFO] 21:25:51.666 [WasmBridge] Initializing Wasm AI Engine...
+
+ [32m✓[39m tests/ui/TooltipManager.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 129[2mms[22m[39m
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Start Position Depth 4
+[22m[39m[INFO] 21:25:51.676 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Start Position Depth 4
+[22m[39m[DEBUG] 21:25:51.689 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Start Position Depth 4
+[22m[39m[Benchmark] Depth 4 took 0.02s
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Complex Midgame Depth 4
+[22m[39m[DEBUG] 21:25:51.761 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Complex Midgame Depth 4
+[22m[39m[Benchmark] Complex Midgame Depth 4 took 0.07s
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mConsistency: Score stability across depths
+[22m[39m[DEBUG] 21:25:51.766 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mConsistency: Score stability across depths
+[22m[39m[DEBUG] 21:25:51.770 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mConsistency: Score stability across depths
+[22m[39m[Stability] Eval: 350, D2: 350, D4: 350
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Depth 5 Search (Target < 5s)
+[22m[39m[DEBUG] 21:25:51.775 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/aiBenchmarks.test.ts[2m > [22m[2mAI Performance Benchmarks[2m > [22m[2mBenchmark: Depth 5 Search (Target < 5s)
+[22m[39m[Benchmark] Depth 5 took 0.00s
+
+ [32m✓[39m tests/ai/aiBenchmarks.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32m✓[39m tests/gameEngine.rules.test.js [2m([22m[2m16 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[INFO] 21:25:53.224 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[INFO] 21:25:53.336 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.343 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/statisticsManager.test.js
+[22m[39m[INFO] 21:25:53.367 StatisticsManager initialized
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.384 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.390 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.395 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.399 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.404 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mInitialization[2m > [22m[2mshould initialize with empty data
+[22m[39m[INFO] 21:25:53.414 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mInitialization[2m > [22m[2mshould load existing data from localStorage
+[22m[39m[INFO] 21:25:53.421 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mInitialization[2m > [22m[2mshould load existing data from localStorage
+[22m[39m[INFO] 21:25:53.422 Loaded 1 games from storage
+[INFO] 21:25:53.422 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2msaveGame[2m > [22m[2mshould save a game and update statistics
+[22m[39m[INFO] 21:25:53.423 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2msaveGame[2m > [22m[2mshould save a game and update statistics
+[22m[39m[DEBUG] 21:25:53.424 Game history saved to storage
+[INFO] 21:25:53.424 Game saved: win vs AI-Beginner (2 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2msaveGame[2m > [22m[2mshould calculate win rate correctly
+[22m[39m[INFO] 21:25:53.425 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2msaveGame[2m > [22m[2mshould calculate win rate correctly
+[22m[39m[DEBUG] 21:25:53.426 Game history saved to storage
+[INFO] 21:25:53.427 Game saved: win vs Unknown (0 moves)
+[DEBUG] 21:25:53.427 Game history saved to storage
+[INFO] 21:25:53.427 Game saved: loss vs Unknown (0 moves)
+[DEBUG] 21:25:53.427 Game history saved to storage
+[INFO] 21:25:53.427 Game saved: draw vs Unknown (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2msaveGame[2m > [22m[2mshould persist data to localStorage
+[22m[39m[INFO] 21:25:53.429 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2msaveGame[2m > [22m[2mshould persist data to localStorage
+[22m[39m[DEBUG] 21:25:53.429 Game history saved to storage
+[INFO] 21:25:53.429 Game saved: win vs Unknown (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould return all games by default
+[22m[39m[INFO] 21:25:53.430 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould return all games by default
+[22m[39m[DEBUG] 21:25:53.430 Game history saved to storage
+[INFO] 21:25:53.430 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.430 Game history saved to storage
+[INFO] 21:25:53.430 Game saved: loss vs AI-Hard (0 moves)
+[DEBUG] 21:25:53.431 Game history saved to storage
+[INFO] 21:25:53.431 Game saved: draw vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.431 Game history saved to storage
+[INFO] 21:25:53.431 Game saved: win vs AI-Hard (0 moves)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.410 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.419 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.428 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould filter by result
+[22m[39m[INFO] 21:25:53.432 StatisticsManager initialized
+
+[90mstdout[2m | tests/ai/AIController.test.js[2m > [22m[2mAI Integration: Self-Play[2m > [22m[2mSelf-Play: 10 Moves without crash
+[22m[39m[DEBUG] 21:25:53.434 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould filter by result
+[22m[39m[DEBUG] 21:25:53.433 Game history saved to storage
+[INFO] 21:25:53.433 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.433 Game history saved to storage
+[INFO] 21:25:53.433 Game saved: loss vs AI-Hard (0 moves)
+[DEBUG] 21:25:53.436 Game history saved to storage
+[INFO] 21:25:53.436 Game saved: draw vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.436 Game history saved to storage
+[INFO] 21:25:53.437 Game saved: win vs AI-Hard (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould filter by opponent
+[22m[39m[INFO] 21:25:53.437 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould filter by opponent
+[22m[39m[DEBUG] 21:25:53.438 Game history saved to storage
+[INFO] 21:25:53.438 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.438 Game history saved to storage
+[INFO] 21:25:53.438 Game saved: loss vs AI-Hard (0 moves)
+[DEBUG] 21:25:53.438 Game history saved to storage
+[INFO] 21:25:53.438 Game saved: draw vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.438 Game history saved to storage
+[INFO] 21:25:53.438 Game saved: win vs AI-Hard (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould limit results
+[22m[39m[INFO] 21:25:53.440 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould limit results
+[22m[39m[DEBUG] 21:25:53.440 Game history saved to storage
+[INFO] 21:25:53.440 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.440 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: loss vs AI-Hard (0 moves)
+[DEBUG] 21:25:53.441 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: draw vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.441 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: win vs AI-Hard (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould sort by date (newest first)
+[22m[39m[INFO] 21:25:53.441 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameHistory[2m > [22m[2mshould sort by date (newest first)
+[22m[39m[DEBUG] 21:25:53.441 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.441 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: loss vs AI-Hard (0 moves)
+[DEBUG] 21:25:53.441 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: draw vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.441 Game history saved to storage
+[INFO] 21:25:53.441 Game saved: win vs AI-Hard (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameById[2m > [22m[2mshould return game by ID
+[22m[39m[INFO] 21:25:53.442 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameById[2m > [22m[2mshould return game by ID
+[22m[39m[DEBUG] 21:25:53.442 Game history saved to storage
+[INFO] 21:25:53.442 Game saved: win vs Unknown (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetGameById[2m > [22m[2mshould return null for non-existent ID
+[22m[39m[INFO] 21:25:53.443 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mexportGames[2m > [22m[2mshould export games as JSON string
+[22m[39m[INFO] 21:25:53.443 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mexportGames[2m > [22m[2mshould export games as JSON string
+[22m[39m[DEBUG] 21:25:53.457 Game history saved to storage
+[INFO] 21:25:53.457 Game saved: win vs Unknown (0 moves)
+[DEBUG] 21:25:53.457 Game history saved to storage
+[INFO] 21:25:53.457 Game saved: loss vs Unknown (0 moves)
+[INFO] 21:25:53.457 Exported 2 games
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould import games (merge mode)
+[22m[39m[INFO] 21:25:53.458 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould import games (merge mode)
+[22m[39m[DEBUG] 21:25:53.459 Game history saved to storage
+[INFO] 21:25:53.459 Game saved: win vs Original (0 moves)
+[INFO] 21:25:53.459 Imported 1 new games (merged)
+[DEBUG] 21:25:53.459 Game history saved to storage
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould import games (replace mode)
+[22m[39m[INFO] 21:25:53.460 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould import games (replace mode)
+[22m[39m[DEBUG] 21:25:53.460 Game history saved to storage
+[INFO] 21:25:53.460 Game saved: win vs Unknown (0 moves)
+[INFO] 21:25:53.460 Imported 1 games (replaced)
+[DEBUG] 21:25:53.460 Game history saved to storage
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould handle invalid import data
+[22m[39m[INFO] 21:25:53.466 StatisticsManager initialized
+
+ [32m✓[39m tests/ai/AIController.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 237[2mms[22m[39m
+[90mstderr[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould handle invalid import data
+[22m[39mJSON Parse Error: SyntaxError: Unexpected token 'i', "invalid json" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at safeJSONParse [90m(/home/tobber/.gemini/antigravity/scratch/schach/[39mjs/utils.ts:44:17[90m)[39m
+    at StatisticsManager.importGames [90m(/home/tobber/.gemini/antigravity/scratch/schach/[39mjs/statisticsManager.ts:236:26[90m)[39m
+    at [90m/home/tobber/.gemini/antigravity/scratch/schach/[39mtests/statisticsManager.test.js:225:31
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould avoid duplicate IDs when merging
+[22m[39m[INFO] 21:25:53.496 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames[2m > [22m[2mshould avoid duplicate IDs when merging
+[22m[39m[DEBUG] 21:25:53.496 Game history saved to storage
+[INFO] 21:25:53.496 Game saved: win vs Unknown (0 moves)
+[INFO] 21:25:53.496 Imported 0 new games (merged)
+[DEBUG] 21:25:53.496 Game history saved to storage
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mclearHistory[2m > [22m[2mshould not clear without confirmation
+[22m[39m[INFO] 21:25:53.500 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mclearHistory[2m > [22m[2mshould not clear without confirmation
+[22m[39m[DEBUG] 21:25:53.501 Game history saved to storage
+[INFO] 21:25:53.501 Game saved: win vs Unknown (0 moves)
+[WARN] 21:25:53.501 clearHistory called without confirmation
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mclearHistory[2m > [22m[2mshould clear all history with confirmation
+[22m[39m[INFO] 21:25:53.501 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mclearHistory[2m > [22m[2mshould clear all history with confirmation
+[22m[39m[DEBUG] 21:25:53.501 Game history saved to storage
+[INFO] 21:25:53.501 Game saved: win vs Unknown (0 moves)
+[DEBUG] 21:25:53.501 Game history saved to storage
+[INFO] 21:25:53.501 Game saved: loss vs Unknown (0 moves)
+[DEBUG] 21:25:53.502 Game history saved to storage
+[INFO] 21:25:53.502 Game history cleared
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetRecentStats[2m > [22m[2mshould get stats for recent games
+[22m[39m[INFO] 21:25:53.502 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetRecentStats[2m > [22m[2mshould get stats for recent games
+[22m[39m[DEBUG] 21:25:53.502 Game history saved to storage
+[INFO] 21:25:53.502 Game saved: win vs Unknown (0 moves)
+[DEBUG] 21:25:53.502 Game history saved to storage
+[INFO] 21:25:53.502 Game saved: win vs Unknown (0 moves)
+[DEBUG] 21:25:53.502 Game history saved to storage
+[INFO] 21:25:53.502 Game saved: loss vs Unknown (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetStatsByOpponent[2m > [22m[2mshould group statistics by opponent
+[22m[39m[INFO] 21:25:53.503 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mgetStatsByOpponent[2m > [22m[2mshould group statistics by opponent
+[22m[39m[DEBUG] 21:25:53.503 Game history saved to storage
+[INFO] 21:25:53.507 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.507 Game history saved to storage
+[INFO] 21:25:53.507 Game saved: win vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.507 Game history saved to storage
+[INFO] 21:25:53.507 Game saved: loss vs AI-Easy (0 moves)
+[DEBUG] 21:25:53.509 Game history saved to storage
+[INFO] 21:25:53.509 Game saved: win vs AI-Hard (0 moves)
+[DEBUG] 21:25:53.509 Game history saved to storage
+[INFO] 21:25:53.509 Game saved: loss vs AI-Hard (0 moves)
+
+[90mstdout[2m | tests/statisticsManager.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mrecalculateStats[2m > [22m[2mshould recalculate statistics from game history
+[22m[39m[INFO] 21:25:53.513 StatisticsManager initialized
+
+[90mstdout[2m | tests/aiEngine.integration.test.js[2m > [22m[2mAIEngine Integration[2m > [22m[2mgetBestMove re-export functionality
+[22m[39m[INFO] 21:25:53.549 [WasmBridge] Initializing Wasm AI Engine...
+
+ [32m✓[39m tests/statisticsManager.test.js [2m([22m[2m22 tests[22m[2m)[22m[32m 113[2mms[22m[39m
+[90mstdout[2m | tests/aiEngine.integration.test.js[2m > [22m[2mAIEngine Integration[2m > [22m[2mgetBestMove re-export functionality
+[22m[39m[INFO] 21:25:53.573 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/aiEngine.integration.test.js[2m > [22m[2mAIEngine Integration[2m > [22m[2mgetBestMove re-export functionality
+[22m[39m[DEBUG] 21:25:53.584 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+ [32m✓[39m tests/tutor/MoveAnalyzer_coverage.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m tests/aiEngine.integration.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m tests/ui/3d/PieceManager3D.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m tests/battleChess3D.test.js [2m([22m[2m16 tests[22m[2m)[22m[32m 119[2mms[22m[39m
+[90mstderr[2m | tests/pgnGenerator.test.js[2m > [22m[2mPGNGenerator[2m > [22m[2mClipboard and Download[2m > [22m[2mshould return false on clipboard error
+[22m[39mFailed to copy PGN: Error: fail
+    at [90m/home/tobber/.gemini/antigravity/scratch/schach/[39mtests/pgnGenerator.test.js:306:59
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:20
+
+ [32m✓[39m tests/pgnGenerator.test.js [2m([22m[2m23 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+[90mstdout[2m | tests/ai.advanced.test.js[2m > [22m[2mAI Advanced Evaluation Tests[2m > [22m[2mBishop Pair: should reward having two bishops
+[22m[39m[INFO] 21:25:54.982 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/ai.advanced.test.js[2m > [22m[2mAI Advanced Evaluation Tests[2m > [22m[2mBishop Pair: should reward having two bishops
+[22m[39m[INFO] 21:25:54.995 [WasmBridge] Wasm AI Engine initialized successfully.
+
+ [32m✓[39m tests/ai.advanced.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+[90mstdout[2m | tests/repro_bug.test.js[2m > [22m[2mBug Reproduction: Rook transforming into King[2m > [22m[2mshould correctly undo kingside castling without transforming rook
+[22m[39m[INFO] 21:25:55.147 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/repro_bug.test.js[2m > [22m[2mBug Reproduction: Rook transforming into King[2m > [22m[2mshould correctly undo kingside castling without transforming rook
+[22m[39m[INFO] 21:25:55.170 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mevaluatePosition[2m > [22m[2mshould return tempo bonus for empty board
+[22m[39m[INFO] 21:25:55.171 [WasmBridge] Initializing Wasm AI Engine...
+
+ [32m✓[39m tests/shopUI.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 121[2mms[22m[39m
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mevaluatePosition[2m > [22m[2mshould return tempo bonus for empty board
+[22m[39m[INFO] 21:25:55.184 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mgetBestMove[2m > [22m[2mshould find a simple capture
+[22m[39m[DEBUG] 21:25:55.194 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mgetBestMove[2m > [22m[2mshould avoid immediate capture
+[22m[39m[DEBUG] 21:25:55.199 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mAdvanced AI Scenarios[2m > [22m[2mshould find Mate in 1
+[22m[39m[DEBUG] 21:25:55.205 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mAdvanced AI Scenarios[2m > [22m[2mshould avoid Stalemate when winning
+[22m[39m[DEBUG] 21:25:55.206 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mAdvanced AI Scenarios[2m > [22m[2mshould use Quiescence Search to see capture chains
+[22m[39m[DEBUG] 21:25:55.208 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/shop.test.js
+[22m[39m[INFO] 21:25:55.220 StatisticsManager initialized
+
+[90mstdout[2m | tests/aiEngine.test.js[2m > [22m[2mAI Engine[2m > [22m[2mDifficulty Levels and Randomized Behavior[2m > [22m[2measy should prefer captures
+[22m[39m[DEBUG] 21:25:55.222 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+ [32m✓[39m tests/repro_bug.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 60[2mms[22m[39m
+ [32m✓[39m tests/aiEngine.test.js [2m([22m[2m17 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+ [32m✓[39m tests/ui/AnalysisUI.unit.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPoint Deduction[2m > [22m[2mshould deduct correct points when placing a pawn
+[22m[39m[INFO] 21:25:55.358 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPoint Deduction[2m > [22m[2mshould deduct correct points when placing a queen
+[22m[39m[INFO] 21:25:55.373 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPoint Deduction[2m > [22m[2mshould deduct correct points for Angel piece
+[22m[39m[INFO] 21:25:55.375 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPoint Deduction[2m > [22m[2mshould NOT place piece if insufficient points
+[22m[39m[INFO] 21:25:55.376 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPoint Deduction[2m > [22m[2mshould allow multiple purchases with remaining points
+[22m[39m[INFO] 21:25:55.376 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPiece Placement Validation[2m > [22m[2mshould only allow placement in own corridor
+[22m[39m[INFO] 21:25:55.378 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPiece Placement Validation[2m > [22m[2mshould NOT allow placement on occupied square
+[22m[39m[INFO] 21:25:55.380 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPiece Placement Validation[2m > [22m[2mshould place piece for black during black setup phase
+[22m[39m[INFO] 21:25:55.381 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPiece Removal and Refund[2m > [22m[2mshould refund points when removing own piece
+[22m[39m[INFO] 21:25:55.382 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mPiece Removal and Refund[2m > [22m[2mshould NOT remove king piece
+[22m[39m[INFO] 21:25:55.383 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mAI Purchase Logic[2m > [22m[2mshould use correct piece symbols when purchasing
+[22m[39m[INFO] 21:25:55.387 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mAI Purchase Logic[2m > [22m[2mAI should stay within point budget
+[22m[39m[INFO] 21:25:55.388 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mSelection Logic[2m > [22m[2mshould not select piece if cost exceeds points
+[22m[39m[INFO] 21:25:55.389 StatisticsManager initialized
+
+[90mstdout[2m | tests/shop.test.js[2m > [22m[2mShop System[2m > [22m[2mSelection Logic[2m > [22m[2mshould select piece if cost is affordable
+[22m[39m[INFO] 21:25:55.391 StatisticsManager initialized
+
+ [32m✓[39m tests/shop.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+[90mstdout[2m | tests/modes/upgradeMode.test.js
+[22m[39m[INFO] 21:25:56.325 StatisticsManager initialized
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mInitial State should be correct
+[22m[39m[INFO] 21:25:56.382 StatisticsManager initialized
+[INFO] 21:25:56.385 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:56.391 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mWhite Player can upgrade pieces
+[22m[39m[INFO] 21:25:56.399 StatisticsManager initialized
+[INFO] 21:25:56.400 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:56.400 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mWhite Player can upgrade pieces
+[22m[39m[ShopManager] performUpgrade called: { r: [33m7[39m, c: [33m4[39m, targetType: [32m'n'[39m }
+[ShopManager] Deducting points and updating piece type
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mTransition to Black Setup works
+[22m[39m[INFO] 21:25:56.409 StatisticsManager initialized
+[INFO] 21:25:56.409 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:56.409 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mAI Upgrades triggering
+[22m[39m[INFO] 21:25:56.425 StatisticsManager initialized
+[INFO] 21:25:56.426 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:56.426 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mAI Upgrades triggering
+[22m[39m[ShopManager] performUpgrade called: { r: [33m1[39m, c: [33m5[39m, targetType: [32m'q'[39m }
+[ShopManager] Deducting points and updating piece type
+[ShopManager] performUpgrade called: { r: [33m0[39m, c: [33m1[39m, targetType: [32m'e'[39m }
+[ShopManager] Deducting points and updating piece type
+[ShopManager] performUpgrade called: { r: [33m0[39m, c: [33m8[39m, targetType: [32m'c'[39m }
+[ShopManager] Deducting points and updating piece type
+[ShopManager] performUpgrade called: { r: [33m0[39m, c: [33m6[39m, targetType: [32m'a'[39m }
+[ShopManager] Deducting points and updating piece type
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mPlay Phase transition
+[22m[39m[INFO] 21:25:56.442 StatisticsManager initialized
+[INFO] 21:25:56.442 SetupModeStrategy initialized with [33m25[39m points
+[INFO] 21:25:56.442 Game initialized with [33m25[39m points in mode: upgrade
+
+[90mstdout[2m | tests/modes/upgradeMode.test.js[2m > [22m[2mTroop Upgrade Mode[2m > [22m[2mPlay Phase transition
+[22m[39m[DEBUG] 21:25:56.467 Removed all corridor highlighting for PLAY phase
+[INFO] 21:25:56.473 [Storage] Game saved to schach9x9_save_autosave (2193 bytes)
+[DEBUG] 21:25:56.473 Auto-saved game
+
+ [32m✓[39m tests/modes/upgradeMode.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 100[2mms[22m[39m
+[90mstderr[2m | tests/statistics.test.js[2m > [22m[2mStatisticsManager[2m > [22m[2mimportGames should handle invalid JSON
+[22m[39mJSON Parse Error: SyntaxError: Unexpected token 'i', "invalid-json" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at safeJSONParse [90m(/home/tobber/.gemini/antigravity/scratch/schach/[39mjs/utils.ts:44:17[90m)[39m
+    at StatisticsManager.importGames [90m(/home/tobber/.gemini/antigravity/scratch/schach/[39mjs/statisticsManager.ts:236:26[90m)[39m
+    at [90m/home/tobber/.gemini/antigravity/scratch/schach/[39mtests/statistics.test.js:122:27
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///home/tobber/.gemini/antigravity/scratch/schach/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+ [32m✓[39m tests/statistics.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+[90mstdout[2m | tests/moveExecutor.unit.test.js[2m > [22m[2mMoveExecutor Integration Tests[2m > [22m[2mPromotion: Pawn promotes to Angel at row 0
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+ [32m✓[39m tests/ai/wasmBridge.coverage.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+[90mstdout[2m | tests/controller.logic.test.js
+[22m[39m[INFO] 21:25:57.214 StatisticsManager initialized
+
+ [32m✓[39m tests/moveExecutor.unit.test.js [2m([22m[2m13 tests[22m[2m)[22m[32m 85[2mms[22m[39m
+[90mstdout[2m | tests/battleChess3D.dynamic.test.js[2m > [22m[2mBattleChess3D Dynamic Board Size[2m > [22m[2mShould calculate 9x9 coordinates correctly
+[22m[39m[INFO] 21:25:57.301 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.dynamic.test.js[2m > [22m[2mBattleChess3D Dynamic Board Size[2m > [22m[2mShould calculate 9x9 coordinates correctly
+[22m[39m[INFO] 21:25:57.303 Setting up 3D scene...
+[ERROR] 21:25:57.304 Container has zero dimensions!
+
+[90mstdout[2m | tests/battleChess3D.dynamic.test.js[2m > [22m[2mBattleChess3D Dynamic Board Size[2m > [22m[2mShould calculate 8x8 coordinates correctly
+[22m[39m[INFO] 21:25:57.309 [3D] BattleChess3D instance created (Modular)
+
+ [32m✓[39m tests/battleChess3D.dynamic.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[INFO] 21:25:57.342 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mClock Mechanics[2m > [22m[2mshould decrement clock and timeout
+[22m[39m[INFO] 21:25:57.344 StatisticsManager initialized
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[INFO] 21:25:57.352 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.358 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mClock Mechanics[2m > [22m[2mshould decrement clock and timeout
+[22m[39m[WARN] 21:25:58.444 Game start time not set, skipping statistics save
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mClock Mechanics[2m > [22m[2mshould switch clocks on turn change
+[22m[39m[INFO] 21:25:57.359 StatisticsManager initialized
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.360 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.361 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.361 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.361 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.363 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.363 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.363 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.364 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.364 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.364 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.365 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.366 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.368 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.369 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.369 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.369 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.369 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.369 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.369 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.370 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.370 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.370 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.370 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should show evaluation noise
+[22m[39m[DEBUG] 21:25:57.370 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mState Persistence (Save/Load)[2m > [22m[2mshould save and load state correctly via localStorage
+[22m[39m[INFO] 21:25:57.367 StatisticsManager initialized
+
+[90mstdout[2m | tests/ai/EloScaling.test.js[2m > [22m[2mAI Elo Scaling & Noise[2m > [22m[2m800 Elo should occasionally blunder material
+[22m[39m[DEBUG] 21:25:57.379 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mState Persistence (Save/Load)[2m > [22m[2mshould save and load state correctly via localStorage
+[22m[39m[INFO] 21:25:57.367 [Storage] Game saved to schach9x9_save_autosave (2192 bytes)
+[INFO] 21:25:57.367 [Storage] Game loaded from schach9x9_save_autosave
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mMove Controller Logical Execution[2m > [22m[2mshould execute pawn promotion (automatic to Angel)
+[22m[39m[INFO] 21:25:57.388 StatisticsManager initialized
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mMove Controller Logical Execution[2m > [22m[2mshould execute pawn promotion (automatic to Angel)
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mMove Controller Logical Execution[2m > [22m[2mshould execute pawn promotion (automatic to Angel)
+[22m[39m[WARN] 21:25:57.388 Game start time not set, skipping statistics save
+[GameController] handleGameEnd check: {
+  campaignMode: [90mundefined[39m,
+  result: [32m'win'[39m,
+  winnerColor: [32m'white'[39m,
+  playerColor: [90mundefined[39m,
+  levelId: [90mundefined[39m
+}
+
+[90mstdout[2m | tests/controller.logic.test.js[2m > [22m[2mController Logic Deep Dive[2m > [22m[2mMove Controller Logical Execution[2m > [22m[2mshould execute queenside castling
+[22m[39m[INFO] 21:25:57.412 StatisticsManager initialized
+
+ [32m✓[39m tests/ai/EloScaling.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/controller.logic.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 84[2mms[22m[39m
+ [32m✓[39m tests/sounds.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+[90mstderr[2m | tests/pgnParser.test.js[2m > [22m[2mPGNParser[2m > [22m[2mreplayGame()[2m > [22m[2mshould handle invalid moves gracefully
+[22m[39mCould not parse move: Qxd8 for turn white
+
+ [32m✓[39m tests/pgnParser.test.js [2m([22m[2m19 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+[90mstdout[2m | tests/aiEngine.eval.test.js[2m > [22m[2mAIEngine Deep Evaluation[2m > [22m[2mTapered Evaluation: material balance (Midgame vs Endgame)
+[22m[39m[INFO] 21:25:58.670 [WasmBridge] Initializing Wasm AI Engine...
+
+ [32m✓[39m tests/gameEngine.additional.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+[90mstdout[2m | tests/aiEngine.eval.test.js[2m > [22m[2mAIEngine Deep Evaluation[2m > [22m[2mTapered Evaluation: material balance (Midgame vs Endgame)
+[22m[39m[INFO] 21:25:58.695 [WasmBridge] Wasm AI Engine initialized successfully.
+
+ [32m✓[39m tests/aiEngine.eval.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+[90mstdout[2m | tests/battleAnimations.test.js[2m > [22m[2mBattleAnimator Class[2m > [22m[2mshould playBattle sequence
+[22m[39m[INFO] 21:25:58.933 Battle: q vs p
+
+ [32m✓[39m tests/battleAnimations.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 101[2mms[22m[39m
+ [32m✓[39m tests/chess-pieces.test.js [2m([22m[2m16 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m tests/utils.comprehensive.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m tests/tutor.extra.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m tests/pieces3D.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/modes/campaignMode.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+[90mstdout[2m | tests/aiEngine.eval_boost.test.js[2m > [22m[2mAI Engine - Evaluation Boost[2m > [22m[2mKing Safety: King Zone Attacks
+[22m[39m[INFO] 21:26:00.505 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/aiEngine.eval_boost.test.js[2m > [22m[2mAI Engine - Evaluation Boost[2m > [22m[2mKing Safety: King Zone Attacks
+[22m[39m[INFO] 21:26:00.521 [WasmBridge] Wasm AI Engine initialized successfully.
+
+ [32m✓[39m tests/aiEngine.eval_boost.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m tests/proceduralGenerator.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m tests/utils.test.js [2m([22m[2m20 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+[90mstdout[2m | tests/aiEngine.extra.test.js[2m > [22m[2mAIEngine Extra Coverage[2m > [22m[2mevaluatePosition for various pieces
+[22m[39m[INFO] 21:26:00.780 [WasmBridge] Initializing Wasm AI Engine...
+
+ [32m✓[39m tests/aiEngine.extra.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+[90mstdout[2m | tests/aiPersonality.test.js[2m > [22m[2mAI Personality System[2m > [22m[2mevaluatePosition with personalities[2m > [22m[2mshould accept config parameter
+[22m[39m[INFO] 21:26:01.081 [WasmBridge] Initializing Wasm AI Engine...
+
+[90mstdout[2m | tests/aiPersonality.test.js[2m > [22m[2mAI Personality System[2m > [22m[2mevaluatePosition with personalities[2m > [22m[2mshould accept config parameter
+[22m[39m[INFO] 21:26:01.104 [WasmBridge] Wasm AI Engine initialized successfully.
+
+ [32m✓[39m tests/aiPersonality.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+[90mstdout[2m | tests/battleChess3D.coords.test.js[2m > [22m[2mBattleChess3D Debug Tests[2m > [22m[2mplayBattleSequence should convert board coords to world coords
+[22m[39m[INFO] 21:26:02.052 [3D] BattleChess3D instance created (Modular)
+
+[90mstdout[2m | tests/battleChess3D.coords.test.js[2m > [22m[2mBattleChess3D Debug Tests[2m > [22m[2mplayBattleSequence should convert board coords to world coords
+[22m[39m[INFO] 21:26:02.055 Playing battle sequence: p vs p
+
+ [32m✓[39m tests/battleChess3D.coords.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m tests/puzzle.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+[90mstdout[2m | tests/modes/upgrade8x8Mode.test.js
+[22m[39m[INFO] 21:26:02.249 StatisticsManager initialized
+
+[90mstdout[2m | tests/modes/upgrade8x8Mode.test.js[2m > [22m[2m8x8 Upgrade Mode[2m > [22m[2mInitial State should have 15 points and 8x8 setup
+[22m[39m[INFO] 21:26:02.362 StatisticsManager initialized
+[INFO] 21:26:02.363 StandardModeStrategy initialized with [33m15[39m points
+[INFO] 21:26:02.368 Game initialized with [33m15[39m points in mode: upgrade8x8
+
+[90mstdout[2m | tests/modes/upgrade8x8Mode.test.js[2m > [22m[2m8x8 Upgrade Mode[2m > [22m[2mTransitions correctly using 15 points
+[22m[39m[INFO] 21:26:02.376 StatisticsManager initialized
+[INFO] 21:26:02.377 StandardModeStrategy initialized with [33m15[39m points
+[INFO] 21:26:02.377 Game initialized with [33m15[39m points in mode: upgrade8x8
+
+[90mstdout[2m | tests/modes/upgrade8x8Mode.test.js[2m > [22m[2m8x8 Upgrade Mode[2m > [22m[2mTransitions correctly using 15 points
+[22m[39m[INFO] 21:26:02.378 [Storage] Game saved to schach9x9_save_autosave (1961 bytes)
+[DEBUG] 21:26:02.378 Auto-saved game
+
+ [32m✓[39m tests/logger.test.js [2m([22m[2m22 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m tests/analysis.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/modes/upgrade8x8Mode.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+[90mstdout[2m | tests/shop/ShopManager_coverage.test.ts[2m > [22m[2mShopManager Coverage[2m > [22m[2mAI Upgrades[2m > [22m[2mshould upgrade pieces if affordable
+[22m[39m[ShopManager] performUpgrade called: { r: [33m1[39m, c: [33m0[39m, targetType: [32m'q'[39m }
+[ShopManager] Deducting points and updating piece type
+
+ [32m✓[39m tests/shop/ShopManager_coverage.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m tests/tutor/TacticsDetector_coverage.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m tests/puzzleManager.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+[90mstdout[2m | tests/ai/aiEngine_coverage.test.ts[2m > [22m[2mAIEngine Coverage Boost[2m > [22m[2mgetBestMove - success path
+[22m[39m[INFO] 21:26:03.948 [AiEngine] AI Worker initialized
+
+[90mstdout[2m | tests/ai/aiEngine_coverage.test.ts[2m > [22m[2mAIEngine Coverage Boost[2m > [22m[2mgetBestMove - success path
+[22m[39m[DEBUG] 21:26:03.956 [AiEngine] Received worker message: type=bestMove id=0
+
+[90mstdout[2m | tests/ai/aiEngine_coverage.test.ts[2m > [22m[2mAIEngine Coverage Boost[2m > [22m[2mgetBestMove - success path
+[22m[39m[DEBUG] 21:26:03.957 [AiEngine] Using Wasm Worker Result
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mAGGRESSIVE personality should reward forward pieces more
+[22m[39m[INFO] 21:26:03.959 [WasmBridge] Initializing Wasm AI Engine...
+
+ [32m✓[39m tests/tutor/TacticsDetector.dynamic.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+[90mstdout[2m | tests/ai/aiEngine_coverage.test.ts[2m > [22m[2mAIEngine Coverage Boost[2m > [22m[2mgetBestMoveDetailed with Elo config
+[22m[39m[DEBUG] 21:26:03.964 [AiEngine] Received worker message: type=bestMove id=1
+
+[90mstdout[2m | tests/ai/aiEngine_coverage.test.ts[2m > [22m[2mAIEngine Coverage Boost[2m > [22m[2mgetBestMoveDetailed with Elo config
+[22m[39m[DEBUG] 21:26:03.964 [AiEngine] Using Wasm Worker Result
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mAGGRESSIVE personality should reward forward pieces more
+[22m[39m[INFO] 21:26:03.978 [WasmBridge] Wasm AI Engine initialized successfully.
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mAGGRESSIVE personality should reward forward pieces more
+[22m[39m[DEBUG] 21:26:03.981 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mAGGRESSIVE personality should reward forward pieces more
+[22m[39m[DEBUG] 21:26:03.982 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+ [32m✓[39m tests/ui/ui_orchestrator.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mSOLID personality should reward pawn structure more
+[22m[39m[DEBUG] 21:26:03.984 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mSOLID personality should reward pawn structure more
+[22m[39m[DEBUG] 21:26:03.985 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mSOLID personality should penalize exposed kings more
+[22m[39m[DEBUG] 21:26:03.985 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+[90mstdout[2m | tests/ai/EloPersonalities.test.js[2m > [22m[2mAI Elo Personalities[2m > [22m[2mSOLID personality should penalize exposed kings more
+[22m[39m[DEBUG] 21:26:03.985 [AiEngine] Using Wasm Engine Result (Main Thread)
+
+ [32m✓[39m tests/ai/aiEngine_coverage.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 60[2mms[22m[39m
+ [32m✓[39m tests/ai/EloPersonalities.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+[90mstdout[2m | tests/storage.test.js[2m > [22m[2mStorageManager[2m > [22m[2mshould save game state correctly
+[22m[39m[INFO] 21:26:04.060 [Storage] Game saved to schach9x9_save_test-slot (796 bytes)
+
+[90mstdout[2m | tests/storage.test.js[2m > [22m[2mStorageManager[2m > [22m[2mshould load game state correctly
+[22m[39m[INFO] 21:26:04.072 [Storage] Game saved to schach9x9_save_test-slot (796 bytes)
+[INFO] 21:26:04.072 [Storage] Game loaded from schach9x9_save_test-slot
+
+[90mstdout[2m | tests/storage.test.js[2m > [22m[2mStorageManager[2m > [22m[2mshould return null if no save exists
+[22m[39m[WARN] 21:26:04.076 [Storage] No save found for schach9x9_save_non-existent
+
+[90mstdout[2m | tests/storage.test.js[2m > [22m[2mStorageManager[2m > [22m[2mshould check if save exists
+[22m[39m[INFO] 21:26:04.077 [Storage] Game saved to schach9x9_save_test-slot (796 bytes)
+
+[90mstdout[2m | tests/storage.test.js[2m > [22m[2mStorageManager[2m > [22m[2mshould load state into game object
+[22m[39m[INFO] 21:26:04.077 [Storage] Game saved to schach9x9_save_test-slot (796 bytes)
+[INFO] 21:26:04.077 [Storage] Game loaded from schach9x9_save_test-slot
+
+[90mstdout[2m | tests/storage.test.js[2m > [22m[2mStorageManager[2m > [22m[2mshould handle autosave default slot
+[22m[39m[INFO] 21:26:04.100 [Storage] Game saved to schach9x9_save_autosave (796 bytes)
+
+ [32m✓[39m tests/storage.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [32m✓[39m tests/tutorImprovements.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+[90mstdout[2m | tests/shopManager.test.js[2m > [22m[2mShopManager[2m > [22m[2mperformUpgrade[2m > [22m[2mshould upgrade knight to nightrider and deduct correct points
+[22m[39m[ShopManager] performUpgrade called: { r: [33m7[39m, c: [33m4[39m, targetType: [32m'j'[39m }
+[ShopManager] Deducting points and updating piece type
+
+[90mstdout[2m | tests/shopManager.test.js[2m > [22m[2mShopManager[2m > [22m[2mperformUpgrade[2m > [22m[2mshould allow chain upgrade: Knight -> Nightrider -> Chancellor
+[22m[39m[ShopManager] performUpgrade called: { r: [33m7[39m, c: [33m4[39m, targetType: [32m'j'[39m }
+[ShopManager] Deducting points and updating piece type
+[ShopManager] performUpgrade called: { r: [33m7[39m, c: [33m4[39m, targetType: [32m'c'[39m }
+[ShopManager] Deducting points and updating piece type
+
+ [32m✓[39m tests/shopManager.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m tests/ai/MoveOrdering.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/logger.enhanced.test.js [2m([22m[2m17 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m tests/gameEngine.edge.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/debugConsole.test.js [2m([22m[2m18 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m tests/moveAnalyzer.test.js [2m([22m[2m22 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+[90mstdout[2m | tests/undo_redo_repro.test.js[2m > [22m[2mUndo/Redo System Reproduction Tests[2m > [22m[2mPromotion Undo/Redo Issue
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+[90mstdout[2m | tests/undo_redo_repro.test.js[2m > [22m[2mUndo/Redo System Reproduction Tests[2m > [22m[2mPromotion Undo/Redo Issue
+[22m[39m[MoveExecutor] Triggering Promotion UI
+
+ [32m✓[39m tests/undo_redo_repro.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+[90mstdout[2m | tests/aiController.extra.test.js[2m > [22m[2mAIController Ultimate Precision V5 - Updated[2m > [22m[2maiMove - should resign based on material and score
+[22m[39m[INFO] 21:26:07.225 [AI] Starting aiMove...
+
+ [32m✓[39m tests/aiController.extra.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/Nightrider.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m tests/tutorController.unit.test.js [2m([22m[2m12 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m tests/openingBook.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m tests/ai/SEE.unit.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/ai/wasmBridge.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m tests/timeManager.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m tests/ai/perft.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+[90mstdout[2m | tests/upgradeMode.unit.test.js[2m > [22m[2mTroop Upgrade Mode - Unit Tests[2m > [22m[2mshould upgrade piece and deduct points
+[22m[39m[ShopManager] performUpgrade called: { r: [33m7[39m, c: [33m4[39m, targetType: [32m'e'[39m }
+[ShopManager] Deducting points and updating piece type
+
+[90mstdout[2m | tests/upgradeMode.unit.test.js[2m > [22m[2mTroop Upgrade Mode - Unit Tests[2m > [22m[2mshould not upgrade if points are insufficient
+[22m[39m[ShopManager] performUpgrade called: { r: [33m7[39m, c: [33m4[39m, targetType: [32m'e'[39m }
+
+[90mstderr[2m | tests/upgradeMode.unit.test.js[2m > [22m[2mTroop Upgrade Mode - Unit Tests[2m > [22m[2mshould not upgrade if points are insufficient
+[22m[39m[ShopManager] Not enough points: [33m2[39m < [33m3[39m
+
+ [32m✓[39m tests/upgradeMode.unit.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m tests/swarm_and_ai_fix.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m tests/moveAnalyzer.unit.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m tests/aiEngine.structure.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/gameEngine.classic.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+[90mstdout[2m | tests/campaignManager.test.js[2m > [22m[2mCampaignManager[2m > [22m[2mshould unlock rewards upon completion
+[22m[39m[Campaign] Unlocked Reward: angel
+
+[90mstdout[2m | tests/campaignManager.test.js[2m > [22m[2mCampaignManager[2m > [22m[2misRewardUnlocked should work correctly
+[22m[39m[Campaign] Unlocked Reward: medal
+
+ [32m✓[39m tests/campaignManager.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m tests/ai/aiStrategy.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/ai/BoardDefinitions_coverage.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/gameEngine.pieces.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m tests/puzzle_repro.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m tests/postGameAnalysis.test.js [2m([22m[2m16 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+[90mstdout[2m | tests/statisticsManager.tutor.test.js
+[22m[39m[INFO] 21:26:11.093 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.tutor.test.js[2m > [22m[2mStatisticsManager - Tutor Points[2m > [22m[2mshould return 0 tutor points by default
+[22m[39m[INFO] 21:26:11.103 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.tutor.test.js[2m > [22m[2mStatisticsManager - Tutor Points[2m > [22m[2mshould save and load tutor points
+[22m[39m[INFO] 21:26:11.106 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.tutor.test.js[2m > [22m[2mStatisticsManager - Tutor Points[2m > [22m[2mshould save and load tutor points
+[22m[39m[DEBUG] 21:26:11.109 Game history saved to storage
+[DEBUG] 21:26:11.109 Tutor points saved: 150
+[INFO] 21:26:11.109 Loaded 0 games from storage
+[INFO] 21:26:11.109 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.tutor.test.js[2m > [22m[2mStatisticsManager - Tutor Points[2m > [22m[2mshould persist in default data structure
+[22m[39m[INFO] 21:26:11.110 StatisticsManager initialized
+
+[90mstdout[2m | tests/statisticsManager.tutor.test.js[2m > [22m[2mStatisticsManager - Tutor Points[2m > [22m[2mshould persist in default data structure
+[22m[39m[DEBUG] 21:26:11.110 Game history saved to storage
+[INFO] 21:26:11.110 Game history cleared
+
+ [32m✓[39m tests/statisticsManager.tutor.test.js [2m([22m[2m3 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/chess-pieces-coverage.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/BoardFactory.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/ai/OpeningDatabase.unit.test.js [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m135 passed[39m[22m[90m (135)[39m
+[2m      Tests [22m [1m[32m1377 passed[39m[22m[90m (1377)[39m
+[2m   Start at [22m 22:25:28
+[2m   Duration [22m 44.15s[2m (transform 5.32s, setup 2.77s, import 13.51s, tests 62.18s, environment 148.43s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   89.72 |    77.24 |   86.52 |   91.23 |                   
+ engine-wasm/pkg   |   47.84 |     31.5 |   22.91 |   48.54 |                   
+  engine_wasm.js   |   47.84 |     31.5 |   22.91 |   48.54 | ...34,344,351,360 
+ js                |   90.67 |    79.75 |   91.55 |    91.8 |                   
+  ...Controller.ts |   97.14 |    87.23 |     100 |   97.14 | 59,113            
+  ...sisManager.ts |   94.82 |    73.07 |   91.66 |   96.29 | 104-115           
+  RulesEngine.ts   |   99.56 |    95.97 |     100 |   99.52 | 342               
+  TimeManager.ts   |   90.74 |       80 |      90 |   90.38 | 47-52             
+  aiController.ts  |   89.96 |     73.3 |   95.45 |   91.63 | ...18,629,655-656 
+  aiEngine.ts      |   87.17 |    77.22 |   94.28 |   90.44 | ...89,304,316-326 
+  arrows.ts        |     100 |    81.25 |     100 |     100 | 120,162-166       
+  ...Animations.ts |   96.18 |       80 |   96.96 |   96.77 | 75-84,163         
+  battleChess3D.ts |   95.77 |      100 |   97.22 |   95.71 | 72,151-152        
+  chess-pieces.ts  |       0 |        0 |       0 |       0 |                   
+  config.ts        |   95.45 |       50 |   66.66 |   95.45 | 55                
+  effects.ts       |   80.12 |    69.49 |   73.68 |   81.41 | ...84-115,318-319 
+  ...Controller.ts |    85.3 |    69.58 |   76.92 |   86.62 | ...76-580,594,751 
+  gameEngine.ts    |   98.47 |    90.62 |   89.47 |   98.36 | 287,298           
+  logger.ts        |     100 |     62.5 |     100 |     100 | 43-66             
+  ...Controller.ts |    91.3 |    80.48 |   83.33 |   91.34 | ...18,155-163,320 
+  pieces3D.ts      |   86.66 |    77.77 |   86.66 |   86.66 | ...05-207,569-607 
+  ...eGenerator.ts |   94.82 |    82.14 |     100 |   94.54 | 118-120           
+  puzzleManager.ts |   88.05 |    78.94 |     100 |   88.88 | ...71,208-209,221 
+  sounds.ts        |   80.07 |    58.62 |    86.2 |   84.64 | ...74-388,446-452 
+  ...icsManager.ts |   97.24 |     90.9 |     100 |   96.93 | 81,106,240        
+  storage.ts       |   92.68 |       80 |     100 |      95 | 79-80             
+  ...Controller.ts |   96.77 |       50 |   96.42 |   96.77 | 180               
+  tutorial.ts      |   95.38 |       88 |   88.46 |   97.47 | 216-222,272       
+  ui.ts            |     100 |     87.5 |     100 |     100 | 38                
+  utils.ts         |     100 |      100 |     100 |     100 |                   
+ js/ai             |   92.92 |    86.59 |    92.3 |   95.43 |                   
+  ...efinitions.ts |     100 |      100 |     100 |     100 |                   
+  MoveGenerator.ts |   93.52 |    88.18 |   83.33 |    96.7 | ...93,605-612,642 
+  MoveOrdering.ts  |   98.14 |     90.9 |     100 |     100 | 62,72,110-111     
+  OpeningBook.ts   |   88.33 |    77.08 |     100 |   92.59 | 28,41,60,111      
+  ...ngDatabase.ts |     100 |      100 |     100 |     100 |                   
+  wasmBridge.ts    |   82.35 |    76.19 |   83.33 |   82.97 | ...12-113,127-137 
+ js/assets/pieces  |     100 |    66.66 |     100 |     100 |                   
+  classic.ts       |     100 |      100 |     100 |     100 |                   
+  frost.ts         |     100 |      100 |     100 |     100 |                   
+  index.ts         |     100 |    66.66 |     100 |     100 | 25,33             
+  infernale.ts     |     100 |      100 |     100 |     100 |                   
+  minimalist.ts    |     100 |      100 |     100 |     100 |                   
+  modern.ts        |     100 |      100 |     100 |     100 |                   
+  neon.ts          |     100 |      100 |     100 |     100 |                   
+  pixel.ts         |     100 |      100 |     100 |     100 |                   
+  wood.ts          |     100 |      100 |     100 |     100 |                   
+ js/campaign       |   92.47 |    82.75 |   85.71 |   92.94 |                   
+  BoardFactory.ts  |     100 |       90 |     100 |     100 | 114               
+  ...ignManager.ts |   82.05 |    78.94 |      80 |   83.33 | 13,25,90-97       
+  campaignData.ts  |     100 |      100 |     100 |     100 |                   
+ js/input          |     100 |    92.85 |     100 |     100 |                   
+  ...ardManager.ts |     100 |    92.85 |     100 |     100 | 73,85,97,131-135  
+ ...des/strategies |   92.48 |     81.2 |   70.37 |   94.52 |                   
+  CampaignMode.ts  |   97.56 |    88.23 |   83.33 |   97.56 | 57                
+  ClassicMode.ts   |   85.71 |       50 |      75 |   94.73 | 36                
+  SetupMode.ts     |   86.81 |     80.7 |      50 |   89.53 | ...00,113-114,159 
+  StandardMode.ts  |     100 |    84.37 |   85.71 |     100 | 61,97-111         
+ js/move           |   94.19 |    80.56 |   93.33 |   95.14 |                   
+  ...ateManager.ts |   97.47 |    83.57 |     100 |   98.32 | 106-109           
+  MoveExecutor.ts  |   91.96 |    77.88 |   88.88 |    92.2 | ...25,443,463,467 
+  MoveValidator.ts |   93.52 |    81.81 |   92.85 |   96.19 | 24,43,60,103      
+ js/puzzle         |   93.75 |    70.83 |     100 |     100 |                   
+  ...lGenerator.ts |   93.75 |    70.83 |     100 |     100 | 13-20,27-29,53    
+ js/shop           |   96.71 |     79.5 |   95.45 |   97.69 |                   
+  ShopManager.ts   |   96.71 |     79.5 |   95.45 |   97.69 | 85,308-309        
+ js/tutor          |   88.63 |    77.83 |   87.14 |   90.45 |                   
+  HintGenerator.ts |   92.45 |    86.14 |   94.73 |   96.06 | ...29-231,467,522 
+  MoveAnalyzer.ts  |   92.74 |    80.45 |   76.47 |   93.47 | ...19,323,505-508 
+  ...meAnalyzer.ts |     100 |      100 |     100 |     100 |                   
+  ...csDetector.ts |   83.43 |    69.34 |   85.18 |   85.26 | ...84,615,697-700 
+ js/ui             |   88.15 |    71.09 |   84.16 |      90 |                   
+  AnalysisUI.ts    |   98.46 |    78.31 |   95.83 |   99.19 | 95                
+  BoardRenderer.ts |   83.78 |    73.06 |   75.51 |   86.28 | ...19,761,765-805 
+  CampaignUI.ts    |       0 |        0 |       0 |       0 | 6-135             
+  DOMHandler.ts    |   89.11 |    67.76 |    85.5 |   91.17 | ...37-454,609,736 
+  EvaluationBar.ts |   88.09 |    72.72 |   85.71 |   94.87 | 41,103            
+  GameStatusUI.ts  |   93.03 |     77.6 |     100 |   94.69 | ...88-189,192,327 
+  ...ficationUI.ts |   93.33 |    65.38 |     100 |     100 | 12-21,40-41,79-98 
+  ...layManager.ts |   92.79 |    72.58 |   86.66 |   91.83 | 104,127,210-234   
+  PuzzleMenu.ts    |     100 |      100 |     100 |     100 |                   
+  ShopUI.ts        |   88.63 |    84.37 |     100 |      90 | 60-61,63-64       
+  ...tipManager.ts |   89.58 |       70 |     100 |    97.5 | 63                
+  TutorUI.ts       |   96.93 |    74.46 |   88.57 |   97.59 | 158,460,474-477   
+ js/ui/3d          |   90.95 |    68.24 |   95.23 |   95.71 |                   
+  ...tHandler3D.ts |   85.36 |    58.33 |     100 |   94.44 | 78-79             
+  ...eManager3D.ts |   90.18 |    67.18 |      95 |    95.1 | 45,78-86          
+  ...eManager3D.ts |   92.89 |    73.33 |   94.11 |   96.49 | ...78,111-112,309 
+ js/utils          |   98.94 |    89.84 |     100 |     100 |                   
+  ErrorManager.ts  |   94.59 |    71.42 |     100 |     100 | ...0,55,81,87-109 
+  PGNGenerator.ts  |     100 |       92 |     100 |     100 | 60,88-89,124      
+  PGNParser.ts     |     100 |       98 |     100 |     100 | 108               
+-------------------|---------|----------|---------|---------|-------------------

@@ -18,6 +18,7 @@ import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
+import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
@@ -700,7 +701,7 @@ export class GameController {
         const levelBefore = (campaignManager as any).getLevel(this.game.currentLevelId) as Level;
         const rewardsBefore = [...(campaignManager as any).state.unlockedRewards];
 
-        (campaignManager as any).completeLevel(this.game.currentLevelId, stats);
+        const starsEarned = (campaignManager as any).completeLevel(this.game.currentLevelId, stats);
 
         const rewardsAfter = (campaignManager as any).state.unlockedRewards;
         const newRewards = rewardsAfter.filter((r: string) => !rewardsBefore.includes(r));
@@ -717,23 +718,33 @@ export class GameController {
           );
         });
 
-        setTimeout(() => {
-          (UI as any).showCampaignVictoryModal(levelBefore.title, 3, [
-            {
-              text: 'Nächste Mission',
-              class: 'btn-primary',
-              callback: () => {
-                window.location.reload();
+        setTimeout(async () => {
+          // Perform Analysis
+          const analysisManager = new AnalysisManager(this.game);
+          const summary = await analysisManager.runPostGameAnalysis();
+          const advice = analysisManager.getMentorAdvice(summary);
+
+          (UI as any).showCampaignVictoryModal(
+            levelBefore.title,
+            starsEarned,
+            [
+              {
+                text: 'Nächste Mission',
+                class: 'btn-primary',
+                callback: () => {
+                  window.location.reload();
+                },
               },
-            },
-            {
-              text: 'Hauptmenü',
-              class: 'btn-secondary',
-              callback: () => {
-                window.location.reload();
+              {
+                text: 'Hauptmenü',
+                class: 'btn-secondary',
+                callback: () => {
+                  window.location.reload();
+                },
               },
-            },
-          ]);
+            ],
+            { accuracy: summary.whiteAccuracy, advice: advice }
+          );
         }, 1500);
       }
     }

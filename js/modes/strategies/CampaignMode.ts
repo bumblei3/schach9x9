@@ -35,7 +35,15 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     game.campaignMode = true;
     game.currentLevelId = levelId;
-    game.points = level.setupType === 'budget' ? level.playerBudget || 0 : 0;
+    let budget = level.setupType === 'budget' ? level.playerBudget || 0 : 0;
+
+    // Apply Perks
+    if (campaignManager.isPerkUnlocked('elite_garde')) {
+      budget += 10;
+      logger.info('[Campaign] Elite-Garde Perk applied: +10 Budget');
+    }
+
+    game.points = budget;
 
     // Set AI Personality based on level
     if (level.opponentPersonality) {
@@ -119,7 +127,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
     `;
 
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
     ]);
   }
 }

@@ -54,22 +54,10 @@ vi.mock('../js/effects.js', () => ({
   floatingTextManager: { show: vi.fn() },
 }));
 
-// Mock 3D globally
-global.window = {
-  battleChess3D: undefined,
-  innerWidth: 1024,
-  innerHeight: 768,
-};
-global.document = {
-  getElementById: vi.fn(), // Will be overridden in beforeEach
-  createElement: vi.fn(() => ({
-    className: '',
-    textContent: '',
-  })),
-  body: {
-    innerHTML: '',
-  },
-};
+// Global Window Mocks (Add minimal extensions if needed, but avoid overriding core DOM)
+if (typeof window !== 'undefined') {
+  window.battleChess3D = undefined;
+}
 
 const MoveExecutor = await import('../js/move/MoveExecutor.js');
 const { soundManager } = await import('../js/sounds.js');

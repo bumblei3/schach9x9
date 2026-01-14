@@ -28,9 +28,9 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'getBestMove': {
-        const { board, color, depth, config, _timeLimit } = data;
+        const { board, color, depth, config, personality, _timeLimit } = data;
         (logger as any).debug(
-          `[AI Worker] getBestMove started - color:${color} depth:${depth} timeLimit:${_timeLimit}ms`
+          `[AI Worker] getBestMove started - color:${color} depth:${depth} personality:${personality} timeLimit:${_timeLimit}ms`
         );
         // Setup progress callback
         setProgressCallback((progress: any) => {
@@ -40,7 +40,7 @@ self.onmessage = async function (e: MessageEvent) {
         try {
           const timeParams = {
             elo: config?.elo,
-            personality: config?.personality,
+            personality: personality || config?.personality,
             maxDepth: depth,
           };
           const bestMove = await getBestMoveDetailed(board, color, depth, timeParams);

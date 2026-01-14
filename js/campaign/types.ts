@@ -1,5 +1,19 @@
 import { Board } from '../types/game.js';
 
+export interface Perk {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  cost: number;
+}
+
+export interface CampaignGoal {
+  type: 'moves' | 'material' | 'promotion';
+  value: number;
+  description: string;
+}
+
 export interface Level {
   id: string;
   title: string;
@@ -22,13 +36,30 @@ export interface Level {
   };
   targetPiece?: { r: number; c: number }; // For capture_target
 
+  unlocks: string[];
+  goals: {
+    [stars: number]: CampaignGoal;
+  };
+
   // Rewards
   reward?: string;
+  goldReward: number;
+}
+
+export interface UnitXp {
+  xp: number;
+  level: number;
+  captures: number;
 }
 
 export interface CampaignState {
   currentLevelId: string;
   unlockedLevels: string[];
   completedLevels: string[];
-  unlockedRewards: string[];
+  unlockedRewards: string[]; // Legacy/Other rewards
+  gold: number;
+  unlockedPerks: string[];
+  levelStars: Record<string, number>; // levelId -> stars (1-3)
+  unitXp: Record<string, UnitXp>; // unit type (p, n, b, r, q) -> XP
+  championType: string | null; // e.g. 'n' for Knight
 }

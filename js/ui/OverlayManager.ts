@@ -205,8 +205,22 @@ export function showToast(message: string, type: string = 'neutral'): void {
 export async function showCampaignVictoryModal(
   title: string,
   stars: number,
-  actions: any[] = []
+  actions: any[] = [],
+  analysis?: { accuracy: number; advice: string }
 ): Promise<void> {
+  let analysisHtml = '';
+  if (analysis) {
+    analysisHtml = `
+            <div class="analysis-summary" style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid gold;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-muted);">Genauigkeit:</span>
+                    <span style="color: gold; font-weight: bold;">${analysis.accuracy}%</span>
+                </div>
+                <p style="margin: 0; font-style: italic; color: var(--text-muted); font-size: 0.9rem;">"${analysis.advice}"</p>
+            </div>
+        `;
+  }
+
   const content = `
         <div class="campaign-victory-content" style="text-align: center;">
             <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 0.5rem;">Mission erfüllt!</p>
@@ -222,6 +236,8 @@ export async function showCampaignVictoryModal(
             <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
                 <p style="margin: 0; color: var(--accent-success);">Hervorragende Leistung, Kommandant!</p>
             </div>
+
+            ${analysisHtml}
         </div>
     `;
 

@@ -67,6 +67,7 @@ vi.mock('../../js/campaign/CampaignManager.js', () => ({
       }
       return null;
     }),
+    isPerkUnlocked: vi.fn(() => false),
   },
 }));
 
@@ -147,7 +148,7 @@ describe('CampaignModeStrategy', () => {
 
   describe('startLevel()', () => {
     test('should handle level not found', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
       strategy.startLevel(mockGame, mockController, 'nonexistent');
 

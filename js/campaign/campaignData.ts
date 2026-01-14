@@ -1,78 +1,73 @@
-/**
- * Campaign Levels Configuration
- * Defines the scenarios for the single-player campaign.
- */
+import { Level, Perk } from './types.js';
 
-export interface CampaignGoal {
-  type: 'moves' | 'material' | 'promotion';
-  value: number;
-  description: string;
-}
-
-export interface CampaignLevel {
-  id: string;
-  title: string;
-  description: string;
-  opponentName: string;
-  opponentPersonality: 'balanced' | 'aggressive' | 'defensive' | 'positional' | 'expert';
-  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
-  setupType: 'fixed' | 'budget';
-  playerBudget?: number;
-  playerColor: 'white' | 'black';
-  fen: string;
-  winCondition: {
-    type: 'checkmate' | 'survival' | 'capture_target';
-  };
-  unlocks: string[];
-  goals: {
-    [stars: number]: CampaignGoal;
-  };
-}
-
-export const CAMPAIGN_LEVELS: CampaignLevel[] = [
+export const CAMPAIGN_LEVELS: Level[] = [
   {
-    id: 'tutorial_1',
-    title: 'Kapitel 1: Der Hinterhalt',
+    id: 'peasant_revolt',
+    title: 'Kapitel 1: Der Aufstand',
     description:
-      'Eine kleine Patrouille wurde überrascht. Besiege den gegnerischen Anführer mit deinen begrenzten Truppen.',
-    opponentName: 'Banditenführer',
+      'Eine Armee von Bauern marschiert auf. Dein König muss sich verteidigen. Lerne die Macht der Bauernstruktur.',
+    opponentName: 'Bauernführer Hans',
     opponentPersonality: 'aggressive',
     difficulty: 'easy',
     setupType: 'fixed',
     playerColor: 'white',
-    fen: '8/8/8/8/8/3k5/8/3P4/3K4 w - - 0 1',
+    fen: '9/2pppppp2/9/9/9/9/9/3QK4/9 w - - 0 1',
     winCondition: {
       type: 'checkmate',
     },
-    unlocks: ['skirmish_1'],
+    unlocks: ['bandit_ambush'],
     goals: {
-      2: { type: 'moves', value: 15, description: 'Win in under 15 moves' },
-      3: { type: 'moves', value: 10, description: 'Win in under 10 moves' },
+      2: { type: 'moves', value: 20, description: 'Sieg in unter 20 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
     },
+    goldReward: 20,
   },
   {
-    id: 'skirmish_1',
-    title: 'Kapitel 2: Die Brücke',
-    description: 'Halte die Brücke gegen den Ansturm. Du hast den Vorteil der Engel.',
-    opponentName: 'Hauptmann der Wache',
-    opponentPersonality: 'defensive',
-    difficulty: 'medium',
+    id: 'bandit_ambush',
+    title: 'Kapitel 2: Die Kavallerie',
+    description:
+      'Vier Springer bedrohen das Land. Ihre Unberechenbarkeit ist gefährlich. Nutze deine Läufer weise.',
+    opponentName: 'Ritter Kunibert',
+    opponentPersonality: 'aggressive',
+    difficulty: 'easy',
     setupType: 'fixed',
     playerColor: 'white',
-    fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    fen: '4k4/9/2p1p1p2/3p1p3/9/9/3NN4/3K4/9 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+    },
+    unlocks: ['skirmish_bridge'],
+    goals: {
+      2: { type: 'moves', value: 25, description: 'Sieg in unter 25 Zügen' },
+      3: { type: 'moves', value: 12, description: 'Sieg in unter 12 Zügen' },
+    },
+    goldReward: 30,
+  },
+  {
+    id: 'skirmish_bridge',
+    title: 'Kapitel 3: Der General',
+    description: 'Ein echter militärischer Test. Eine ausgeglichene Armee erwartet dich. Zeige, dass du bereit für die 9x9 Welt bist.',
+    opponentName: 'General Eisenfaust',
+    opponentPersonality: 'balanced',
+    difficulty: 'medium',
+    setupType: 'budget',
+    playerBudget: 15,
+    playerColor: 'white',
+    fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/9/4K4 w KQkq - 0 1',
     winCondition: {
       type: 'checkmate',
     },
     unlocks: ['boss_1'],
     goals: {
-      2: { type: 'moves', value: 40, description: 'Win in under 40 moves' },
-      3: { type: 'material', value: 10, description: 'Win with +10 material advantage' },
+      2: { type: 'moves', value: 40, description: 'Sieg in unter 40 Zügen' },
+      3: { type: 'material', value: 8, description: 'Gewinne mit +8 Materialvorteil' },
     },
+    goldReward: 40,
   },
   {
     id: 'boss_1',
-    title: 'Kapitel 3: Der Dunkle Turm',
-    description: 'Stürze den König in seiner Festung. Er ist schwer bewacht.',
+    title: 'Kapitel 4: Die Belagerung des dunklen Turms',
+    description: 'Der Turm des Tyrannen steht vor dir. Durchbrich die Verteidigung und stürze den Lord.',
     opponentName: 'Dunkler Lord',
     opponentPersonality: 'aggressive',
     difficulty: 'hard',
@@ -88,13 +83,13 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
       3: { type: 'promotion', value: 1, description: 'Befördere einen Bauern zum Engel' },
     },
     unlocks: ['knight_mission'],
+    goldReward: 60,
   },
   {
     id: 'knight_mission',
-    title: 'Kapitel 4: Der Aufstieg',
-    description:
-      'Deine Springer sind der Schlüssel zum Sieg. Nutze ihre Wendigkeit auf dem schmalen Pfad.',
-    opponentName: 'Ritterorden',
+    title: 'Kapitel 5: Der Ritt der Gerechten',
+    description: 'Deine Springer sind der Schlüssel zum Sieg. Nutze ihre Wendigkeit, um die feindliche Kavallerie zu umgehen.',
+    opponentName: 'General Eisenherz',
     opponentPersonality: 'balanced',
     difficulty: 'hard',
     setupType: 'fixed',
@@ -103,22 +98,22 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
     winCondition: {
       type: 'checkmate',
     },
-    unlocks: ['final_boss'],
+    unlocks: ['final_battle'],
     goals: {
       2: { type: 'moves', value: 20, description: 'Sieg in unter 20 Zügen' },
       3: { type: 'material', value: 3, description: 'Gewinne mit +3 Materialvorteil' },
     },
+    goldReward: 80,
   },
   {
-    id: 'final_boss',
-    title: 'Kapitel 5: Der finale Schlag',
-    description:
-      'Der dunkle Herrscher stellt sich dir entgegen. Verbessere deine Truppen und siegre!',
+    id: 'final_battle',
+    title: 'Kapitel 6: Der Kampf um den Eisernen Thron',
+    description: 'Der Imperator stellt sich dir im Thronsaal entgegen. Das Schicksal des Reiches liegt in deinen Händen!',
     opponentName: 'Der Imperator',
     opponentPersonality: 'expert',
     difficulty: 'expert',
     setupType: 'budget',
-    playerBudget: 35,
+    playerBudget: 40,
     playerColor: 'white',
     fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKBNR w KQkq - 0 1',
     winCondition: {
@@ -127,8 +122,9 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
     unlocks: ['endgame_rook'],
     goals: {
       2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
-      3: { type: 'promotion', value: 2, description: 'Zwei Bauern zum Engel befördern' },
+      3: { type: 'promotion', value: 1, description: 'Befördere einen Bauern zum Kanzler' },
     },
+    goldReward: 150,
   },
   {
     id: 'endgame_rook',
@@ -149,6 +145,7 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
       2: { type: 'moves', value: 20, description: 'Matt in unter 20 Zügen' },
       3: { type: 'moves', value: 15, description: 'Matt in unter 15 Zügen' },
     },
+    goldReward: 20,
   },
   {
     id: 'endgame_queen',
@@ -168,6 +165,7 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
       2: { type: 'moves', value: 12, description: 'Matt in unter 12 Zügen' },
       3: { type: 'moves', value: 8, description: 'Matt in unter 8 Zügen' },
     },
+    goldReward: 20,
   },
   {
     id: 'endgame_pawn',
@@ -188,6 +186,7 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
       2: { type: 'moves', value: 25, description: 'Gewinne in unter 25 Zügen' },
       3: { type: 'promotion', value: 1, description: 'Bauer zur Dame umwandeln' },
     },
+    goldReward: 30,
   },
   {
     id: 'endgame_bishops',
@@ -207,6 +206,7 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
       2: { type: 'moves', value: 30, description: 'Matt in unter 30 Zügen' },
       3: { type: 'moves', value: 20, description: 'Matt in unter 20 Zügen' },
     },
+    goldReward: 40,
   },
   {
     id: 'endgame_exchange',
@@ -227,5 +227,30 @@ export const CAMPAIGN_LEVELS: CampaignLevel[] = [
       2: { type: 'moves', value: 40, description: 'Gewinne in unter 40 Zügen' },
       3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
     },
+    goldReward: 50,
+  },
+];
+
+export const CAMPAIGN_PERKS: Perk[] = [
+  {
+    id: 'stabile_bauern',
+    name: 'Stabile Bauern',
+    description: 'Deine Bauern zählen doppelt für den Materialvorteil.',
+    icon: '🛡️',
+    cost: 150,
+  },
+  {
+    id: 'elite_garde',
+    name: 'Elite-Garde',
+    description: 'Starte Missionen mit +10 zusätzlichem Budget.',
+    icon: '🎖️',
+    cost: 250,
+  },
+  {
+    id: 'taktik_genie',
+    name: 'Taktik-Genie',
+    description: 'Schaltet kostenlose Profi-Tipps während der Mission frei.',
+    icon: '🧠',
+    cost: 200,
   },
 ];

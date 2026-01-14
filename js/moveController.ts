@@ -1,4 +1,5 @@
 import { PHASES, PIECE_VALUES, type Player } from './gameEngine.js';
+import { campaignManager } from './campaign/CampaignManager.js';
 import * as MoveValidator from './move/MoveValidator.js';
 import * as MoveExecutor from './move/MoveExecutor.js';
 import * as GameStateManager from './move/GameStateManager.js';
@@ -246,7 +247,24 @@ export class MoveController {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getMaterialValue(piece: any): number {
-    return PIECE_VALUES[piece.type] || 0;
+    let baseValue = PIECE_VALUES[piece.type] || 0;
+
+    // RPG Bonus in Campaign
+    if (this.game.mode === 'campaign' && piece.color === this.game.playerColor) {
+      const xp = campaignManager.getUnitXp(piece.type);
+      if (xp.level > 1) {
+        // +10% value per level above 1
+        baseValue *= (1 + (xp.level - 1) * 0.1);
+      }
+
+      // Champion bonus
+      const state = (campaignManager as any).state;
+      if (state.championType === piece.type) {
+        baseValue += 0.5; // Flat hero bonus
+      }
+    }
+
+    return baseValue;
   }
 
   /**

@@ -176,3 +176,62 @@
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
 }
+
+/* --- RPG / Campaign Unit Status --- */
+.cell.piece-veteran .piece-svg {
+  filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.6));
+}
+
+.cell.piece-veteran::after {
+  content: '★';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.65rem;
+  color: #10b981;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cell.piece-elite .piece-svg {
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8));
+}
+
+.cell.piece-elite::after {
+  content: '★★';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.65rem;
+  color: #8b5cf6;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cell.piece-champion .piece-svg {
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
+  animation: championGlow 2s infinite alternate !important;
+}
+
+@keyframes championGlow {
+  from {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+  }
+
+  to {
+    filter: drop-shadow(0 0 15px rgba(245, 158, 11, 1));
+  }
+}
+
+.cell.piece-champion::before {
+  content: '👑';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  z-index: 10;
+  pointer-events: none;
+}

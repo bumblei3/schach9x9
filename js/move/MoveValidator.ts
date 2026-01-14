@@ -1,6 +1,7 @@
 import { PHASES, PIECE_VALUES } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import type { Game } from '../gameEngine.js';
+import { campaignManager } from '../campaign/CampaignManager.js';
 
 /**
  * Checks if the game is a draw based on various rules
@@ -180,11 +181,21 @@ export function calculateMaterialAdvantage(game: Game): number {
   let blackMaterial = 0;
   const size = game.boardSize;
 
+  // Perk: Stabile Bauern
+  const stablePawnsActive =
+    (game as any).campaignMode && campaignManager.isPerkUnlocked('stabile_bauern');
+
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       const piece = game.board[r][c];
       if (piece) {
-        const value = (PIECE_VALUES as any)[piece.type] || 0;
+        let value = (PIECE_VALUES as any)[piece.type] || 0;
+
+        // Apply Perk: Double white pawn value
+        if (stablePawnsActive && piece.type === 'p' && piece.color === 'white') {
+          value *= 2;
+        }
+
         if (piece.color === 'white') {
           whiteMaterial += value;
         } else {

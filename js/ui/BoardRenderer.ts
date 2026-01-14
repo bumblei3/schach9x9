@@ -6,6 +6,7 @@ import { BOARD_SIZE, PHASES } from '../config.js';
 import { debounce } from '../utils.js';
 import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
 import type { Piece, Player, PieceType, Square } from '../types/game.js';
+import { campaignManager } from '../campaign/CampaignManager.js';
 
 // Define window extensions for piece SVGs and cache
 declare global {
@@ -441,7 +442,10 @@ export function renderBoard(game: any): void {
       'tutor-move',
       'threatened',
       'selectable-corridor',
-      'upgradable-piece'
+      'upgradable-piece',
+      'piece-veteran',
+      'piece-elite',
+      'piece-champion'
     );
   }
 
@@ -522,6 +526,16 @@ export function renderBoard(game: any): void {
         const opponent = p.color === 'white' ? 'black' : 'white';
         if (game.isSquareUnderAttack && game.isSquareUnderAttack(r, c, opponent))
           cell.classList.add('threatened');
+
+        // RPG Highlights: Veteran / Elite / Champion
+        if (game.mode === 'campaign' && p.color === game.playerColor) {
+          const xp = campaignManager.getUnitXp(p.type);
+          const state = (campaignManager as any).state;
+
+          if (xp.level >= 2) cell.classList.add('piece-veteran');
+          if (xp.level >= 3) cell.classList.add('piece-elite');
+          if (state.championType === p.type) cell.classList.add('piece-champion');
+        }
       }
     }
   }
@@ -596,7 +610,12 @@ export async function animateMove(
 
       // Special trail for elite pieces
       const isElite = ['j', 'a', 'c', 'e', 'q'].includes(piece.type);
-      const color = isElite
+
+      // RPG Hero Trail
+      const xp = (game as any).mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
+      const isChampion = (game as any).mode === 'campaign' && (campaignManager as any).state.championType === piece.type;
+
+      let color = isElite
         ? piece.color === 'white'
           ? '#60a5fa'
           : '#2563eb' // Blue for elite
@@ -604,7 +623,11 @@ export async function animateMove(
           ? '#e2e8f0'
           : '#475569'; // Default gray
 
-      if (isElite) {
+      if (isChampion) color = '#f59e0b'; // Golden trail for Champion
+      else if (xp.level >= 3) color = '#8b5cf6'; // Purple for Elite
+      else if (xp.level >= 2) color = '#10b981'; // Green for Veteran
+
+      if (isElite || isChampion || xp.level >= 2) {
         particleSystem.spawnTrail(centerX, centerY, color);
       } else {
         particleSystem.spawn(centerX, centerY, 'TRAIL', color);

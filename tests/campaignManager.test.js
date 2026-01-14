@@ -15,13 +15,17 @@ Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
 // Mock data for testing
 const MOCK_LEVELS = [
-  { id: 'tutorial_1', reward: null }, // Matches default in CampaignManager
+  { id: 'peasant_revolt', reward: null }, // Matches default in CampaignManager
   { id: 'level_2', reward: null },
   { id: 'level_3', reward: 'angel' },
 ];
 
 vi.mock('../js/campaign/campaignData.js', () => ({
   CAMPAIGN_LEVELS: MOCK_LEVELS,
+  CAMPAIGN_PERKS: [
+    { id: 'stabile_bauern', name: 'Stabile Bauern', cost: 150, icon: '🛡️' },
+    { id: 'elite_garde', name: 'Elite-Garde', cost: 250, icon: '⚔️' },
+  ],
 }));
 
 // Mock dependencies
@@ -46,13 +50,13 @@ describe('CampaignManager', () => {
     expect(levels.length).toBe(CAMPAIGN_LEVELS.length);
 
     // Level 1 should be unlocked by default
-    expect(manager.isLevelUnlocked('tutorial_1')).toBe(true);
+    expect(manager.isLevelUnlocked('peasant_revolt')).toBe(true);
     // Level 2 should be locked
     expect(manager.isLevelUnlocked('level_2')).toBe(false);
   });
 
   test('should complete level and unlock next', () => {
-    const level1 = 'tutorial_1'; // Was level_1
+    const level1 = 'peasant_revolt'; // Was level_1
     const level2 = 'level_2';
 
     manager.completeLevel(level1);
@@ -80,24 +84,151 @@ describe('CampaignManager', () => {
     expect(manager.isRewardUnlocked('angel')).toBe(true);
   });
 
-  test('should persist state to localStorage', () => {
-    manager.completeLevel('tutorial_1');
+  test('should award gold and stars upon completion', () => {
+    // Mock level with gold reward
+    const mockLevel = { id: 'peasant_revolt', goldReward: 20, goals: { 2: { type: 'moves', value: 20 }, 3: { type: 'moves', value: 10 } } };
+    vi.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
 
-    // Create a new instance
+    // Complete first level with 3 stars
+    manager.completeLevel('peasant_revolt', { moves: 5 });
+
+    expect(manager.getGold()).toBe(20);
+    expect(manager.getLevelStars('peasant_revolt')).toBe(3);
+  });
+
+  test('should award bonus gold for improving stars', () => {
+    const mockLevel = { id: 'peasant_revolt', goldReward: 20, goals: { 2: { type: 'moves', value: 20 }, 3: { type: 'moves', value: 10 } } };
+    vi.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
+
+    // Complete with 1 star first
+    manager.completeLevel('peasant_revolt', { moves: 30 });
+    const initialGold = manager.getGold(); // 20
+    expect(manager.getLevelStars('peasant_revolt')).toBe(1);
+
+    // Improve to 3 stars
+    manager.completeLevel('peasant_revolt', { moves: 5 });
+    expect(manager.getLevelStars('peasant_revolt')).toBe(3);
+    expect(manager.getGold()).toBe(initialGold + 40); // (3-1) * 20
+  });
+
+  test('should purchase perks correctly', () => {
+    // Manually give gold
+    manager.state.gold = 200;
+
+    // Purchase a perk (Mock perk)
+    const success = manager.buyPerk('stabile_bauern');
+    expect(success).toBe(true);
+    expect(manager.getGold()).toBe(50); // 200 - 150
+    expect(manager.isPerkUnlocked('stabile_bauern')).toBe(true);
+
+    // Fail to buy twice
+    const success2 = manager.buyPerk('stabile_bauern');
+    expect(success2).toBe(false);
+  });
+
+  test('should persist state to localStorage', () => {
+    manager.completeLevel('peasant_revolt');
+    manager.state.gold = 500;
+    manager.saveState();
+
     const newManager = new CampaignManager();
-    expect(newManager.isLevelCompleted('tutorial_1')).toBe(true);
-    expect(newManager.isLevelUnlocked('level_2')).toBe(true);
+    expect(newManager.isLevelCompleted('peasant_revolt')).toBe(true);
+    expect(newManager.getGold()).toBe(500);
   });
 
   test('isRewardUnlocked should work correctly', () => {
     expect(manager.isRewardUnlocked('some_reward')).toBe(false);
+    manager.state.unlockedRewards.push('some_reward');
+    expect(manager.isRewardUnlocked('some_reward')).toBe(true);
+  });
 
-    // Simulate completing a level with a reward
-    // We'll mock a level with a reward for testing
-    const mockLevel = { id: 'mock', reward: 'medal' };
-    vi.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
+  // --- RPG / Unit XP Tests ---
 
-    manager.completeLevel('mock');
-    expect(manager.isRewardUnlocked('medal')).toBe(true);
+  describe('Unit XP System', () => {
+    test('getUnitXp should return default XP object for new units', () => {
+      const xp = manager.getUnitXp('p');
+      expect(xp).toEqual({ xp: 0, level: 1, captures: 0 });
+    });
+
+    test('addUnitXp should increase XP and captures', () => {
+      manager.addUnitXp('n', 10);
+      const xp = manager.getUnitXp('n');
+      expect(xp.xp).toBe(10);
+      expect(xp.captures).toBe(1);
+      expect(xp.level).toBe(1);
+    });
+
+    test('addUnitXp should level up at 100 XP', () => {
+      manager.addUnitXp('r', 100);
+      const xp = manager.getUnitXp('r');
+      expect(xp.level).toBe(2);
+      expect(xp.xp).toBe(100);
+    });
+
+    test('addUnitXp should handle large XP gains', () => {
+      manager.addUnitXp('q', 250);
+      const xp = manager.getUnitXp('q');
+      expect(xp.level).toBe(2); // Only one level-up per call
+      expect(xp.xp).toBe(250);
+    });
+
+    test('addUnitXp should accumulate across multiple calls', () => {
+      manager.addUnitXp('b', 50);
+      manager.addUnitXp('b', 60);
+      const xp = manager.getUnitXp('b');
+      expect(xp.xp).toBe(110);
+      expect(xp.captures).toBe(2);
+      expect(xp.level).toBe(2);
+    });
+
+    test('addUnitXp should persist state', () => {
+      vi.clearAllMocks();
+      manager.addUnitXp('p', 75); // Use 'p' (pawn) - 'k' is not in unitXp
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        'schach_campaign_state',
+        expect.any(String)
+      );
+    });
+  });
+
+  describe('Champion System', () => {
+    test('setChampion should set the champion type', () => {
+      manager.setChampion('n');
+      expect(manager.state.championType).toBe('n');
+    });
+
+    test('setChampion should allow clearing the champion', () => {
+      manager.setChampion('r');
+      manager.setChampion(null);
+      expect(manager.state.championType).toBeNull();
+    });
+
+    test('setChampion should persist state', () => {
+      manager.setChampion('q');
+      expect(localStorage.setItem).toHaveBeenCalled();
+    });
+  });
+
+  describe('State Migration', () => {
+    test('loadState should migrate old saves without unitXp', () => {
+      // Simulate old save data
+      const oldState = {
+        currentLevelId: 'peasant_revolt',
+        unlockedLevels: ['peasant_revolt'],
+        completedLevels: [],
+        unlockedRewards: [],
+        gold: 100,
+        unlockedPerks: [],
+        levelStars: {}
+        // Missing: unitXp, championType
+      };
+      localStorage.getItem.mockReturnValueOnce(JSON.stringify(oldState));
+
+      const newManager = new CampaignManager();
+
+      expect(newManager.state.unitXp).toBeDefined();
+      expect(newManager.state.championType).toBeNull();
+      expect(newManager.getGold()).toBe(100); // Original data preserved
+    });
   });
 });

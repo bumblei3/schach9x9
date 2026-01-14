@@ -7,6 +7,8 @@ import * as MoveValidator from './MoveValidator.js';
 import { confettiSystem } from '../effects.js';
 import type { Square, PieceWithMoved, MoveHistoryEntry, Player } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
+import { notificationUI } from '../ui/NotificationUI.js';
+import { campaignManager } from '../campaign/CampaignManager.js';
 
 /**
  * Executes a move on the board
@@ -133,6 +135,19 @@ export async function executeMove(
     UI.updateCapturedUI(game);
   }
 
+  // Award XP in Campaign Mode
+  if ((game as any).campaignMode && piece.color === (game as any).playerColor && (targetPiece || moveRecord.isEnPassant)) {
+    const xpAmount = 10;
+    const oldLevel = campaignManager.getUnitXp(piece.type).level;
+    campaignManager.addUnitXp(piece.type, xpAmount);
+    const newLevel = campaignManager.getUnitXp(piece.type).level;
+
+    notificationUI.show(`+${xpAmount} XP für deinen ${piece.type === 'p' ? 'Bauern' : piece.type === 'n' ? 'Springer' : 'Krieger'}`, 'success', 'Erfahrung');
+    if (newLevel > oldLevel) {
+      notificationUI.show(`LEVEL UP! Dein ${piece.type} ist jetzt Stufe ${newLevel}!`, 'success', 'Aufstieg', 5000);
+    }
+  }
+
   // Update last move highlight
   game.lastMoveHighlight = {
     from: { r: from.r, c: from.c },
@@ -177,6 +192,11 @@ export async function executeMove(
               game.log(
                 `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${actualType} befördert!`
               );
+              // Award XP for promotion in Campaign
+              if ((game as any).campaignMode && piece.color === (game as any).playerColor) {
+                campaignManager.addUnitXp('p', 50);
+                notificationUI.show(`Beförderungs-Bonus: +50 XP für die Infanterie!`, 'success', 'Held');
+              }
             }
             completeMoveExecution(game, moveController, moveRecord);
           });
@@ -405,6 +425,12 @@ export function finishMove(game: Game, lastTo?: Square): void {
     if ((game as any).gameController) {
       const winningColor: Player = opponentColor === 'white' ? 'black' : 'white';
       (game as any).gameController.handleGameEnd('win', winningColor);
+
+      // Award Checkmate XP in Campaign
+      if ((game as any).campaignMode && winningColor === (game as any).playerColor) {
+        campaignManager.addUnitXp('k', 100); // King gets XP for victory leadership
+        notificationUI.show(`Mission erfüllt! Bonus: +100 XP für den König!`, 'success', 'Triumph');
+      }
     }
     return;
   } else if (game.isStalemate(opponentColor)) {
