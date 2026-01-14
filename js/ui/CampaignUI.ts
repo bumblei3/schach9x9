@@ -143,7 +143,8 @@ export class CampaignUI {
   updateGoldDisplay(): void {
     const goldValue = document.getElementById('campaign-gold-value');
     if (goldValue) {
-      goldValue.textContent = campaignManager.getGold().toString();
+      const gold = campaignManager.getGold() ?? 0;
+      goldValue.textContent = gold.toString();
     }
   }
 
