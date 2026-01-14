@@ -76,11 +76,9 @@ test.describe('Upgrade Modes @upgrade', () => {
     // The upgrade options appear in a modal, blocking the shop panel.
     // Robustly trigger upgrade via app logic to bypass UI interception/event issues in test env
     await page.evaluate(() => {
-      const game = (window as any).game;
-      // Upgrade 6,4 (Pawn) to Knight ('n')
-      // Using game.gameController directly if exposed, or through window.gameController
-      if (game && game.gameController && game.gameController.shopManager) {
-        game.gameController.shopManager.upgradePiece(6, 4, 'n');
+      const app = (window as any).app;
+      if (app && app.gameController && app.gameController.shopManager) {
+        app.gameController.shopManager.performUpgrade(6, 4, 'n');
       } else {
         throw new Error('Game controller or shop manager not found');
       }
@@ -114,7 +112,7 @@ test.describe('Upgrade Modes @upgrade', () => {
     await page.evaluate(() => {
       const { app } = window as any;
       if (app && app.gameController && app.gameController.shopManager) {
-        app.gameController.shopManager.upgradePiece(6, 5, 'j');
+        app.gameController.shopManager.performUpgrade(6, 5, 'j');
       }
     });
 
@@ -134,8 +132,9 @@ test.describe('Upgrade Modes @upgrade', () => {
     // 2. Check if Queen has upgrade options
     // In 8x8 standard, Queen is at row 7, col 3
     const result = await page.evaluate(() => {
+      const app = (window as any).app;
       const game = (window as any).game;
-      const shopManager = game?.gameController?.shopManager;
+      const shopManager = app?.gameController?.shopManager || game?.gameController?.shopManager;
       if (!shopManager) return { error: 'ShopManager not found' };
 
       // Get the piece at 7,3 (should be queen)
@@ -174,7 +173,7 @@ test.describe('Upgrade Modes @upgrade', () => {
       const { app } = window as any;
       if (app?.gameController?.shopManager) {
         // Upgrade a pawn to knight (cost: 2)
-        app.gameController.shopManager.upgradePiece(6, 4, 'n');
+        app.gameController.shopManager.performUpgrade(6, 4, 'n');
       }
     });
 

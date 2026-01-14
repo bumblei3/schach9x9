@@ -1,4 +1,4 @@
-import { PHASES, BOARD_SIZE, type Game } from '../gameEngine.js';
+import { PHASES, type Game } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import { soundManager } from '../sounds.js';
 import { puzzleManager } from '../puzzleManager.js';
@@ -53,7 +53,7 @@ export async function executeMove(
   // Handle Castling
   if (piece.type === 'k' && Math.abs(to.c - from.c) === 2) {
     const isKingside = to.c > from.c;
-    const rookCol = isKingside ? BOARD_SIZE - 1 : 0;
+    const rookCol = isKingside ? game.boardSize - 1 : 0;
     const rookTargetCol = isKingside ? to.c - 1 : to.c + 1;
     const rook = game.board[from.r][rookCol] as PieceWithMoved;
 
@@ -149,7 +149,7 @@ export async function executeMove(
 
   // Promotion check
   if (piece.type === 'p') {
-    const promotionRow = piece.color === 'white' ? 0 : BOARD_SIZE - 1;
+    const promotionRow = piece.color === 'white' ? 0 : game.boardSize - 1;
     if (to.r === promotionRow) {
       if (promotionType) {
         // Use provided promotion type (AI, Undo/Redo, or after selection)

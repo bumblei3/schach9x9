@@ -75,6 +75,7 @@ describe('AIController Coverage Boost', () => {
       halfMoveClock: 0,
       mode: 'standard',
       lastMove: null,
+      boardSize: 9,
       resign: vi.fn(),
       offerDraw: vi.fn(),
       acceptDraw: vi.fn(),
@@ -105,6 +106,7 @@ describe('AIController Coverage Boost', () => {
         `;
 
     controller = new AIController(mockGame);
+    controller.game.boardSize = 9; // Double ensure for the test instance
   });
 
   test('aiEvaluateDrawOffer - accept insufficient material', async () => {

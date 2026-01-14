@@ -1,4 +1,4 @@
-import { PHASES, BOARD_SIZE } from './gameEngine.js';
+import { PHASES } from './gameEngine.js';
 import { SHOP_PIECES } from './config.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
@@ -267,8 +267,9 @@ export class AIController {
           if (bestMoveEl) {
             const pvText = bestResult.pv
               .map((m: any) => {
-                const from = String.fromCharCode(97 + m.from.c) + (BOARD_SIZE - m.from.r);
-                const to = String.fromCharCode(97 + m.to.c) + (BOARD_SIZE - m.to.r);
+                const size = this.game.boardSize;
+                const from = String.fromCharCode(97 + m.from.c) + (size - m.from.r);
+                const to = String.fromCharCode(97 + m.to.c) + (size - m.to.r);
                 return `${from}${to}`;
               })
               .join(' ');
@@ -431,9 +432,9 @@ export class AIController {
     }
 
     if (bestMoveEl && data.bestMove) {
-      const from =
-        String.fromCharCode(97 + data.bestMove.from.c) + (BOARD_SIZE - data.bestMove.from.r);
-      const to = String.fromCharCode(97 + data.bestMove.to.c) + (BOARD_SIZE - data.bestMove.to.r);
+      const size = this.game.boardSize;
+      const from = String.fromCharCode(97 + data.bestMove.from.c) + (size - data.bestMove.from.r);
+      const to = String.fromCharCode(97 + data.bestMove.to.c) + (size - data.bestMove.to.r);
       bestMoveEl.textContent = `Bester Zug: ${from}-${to}`;
 
       // Show engine arrow
@@ -620,10 +621,11 @@ export class AIController {
 
   public getAlgebraicNotation(move: any): string {
     if (!move || !move.from || !move.to) return '??';
+    const size = this.game.boardSize;
     const fromFile = String.fromCharCode(97 + move.from.c);
-    const fromRank = BOARD_SIZE - move.from.r;
+    const fromRank = size - move.from.r;
     const toFile = String.fromCharCode(97 + move.to.c);
-    const toRank = BOARD_SIZE - move.to.r;
+    const toRank = size - move.to.r;
     return `${fromFile}${fromRank}-${toFile}${toRank}`;
   }
 }

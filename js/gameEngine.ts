@@ -334,8 +334,9 @@ export class Game {
    */
   getBoardHash(): string {
     let hash = '';
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    const size = this.boardSize;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const piece = this.board[r][c];
         hash += piece ? `${piece.color[0]}${piece.type}` : '..';
       }
@@ -375,7 +376,8 @@ export class Game {
  * Erstellt ein leeres 9x9-Schachbrett
  */
 export function createEmptyBoard(): (Piece | null)[][] {
-  return Array(BOARD_SIZE)
+  const size = getCurrentBoardSize();
+  return Array(size)
     .fill(null)
-    .map(() => Array(BOARD_SIZE).fill(null));
+    .map(() => Array(size).fill(null));
 }

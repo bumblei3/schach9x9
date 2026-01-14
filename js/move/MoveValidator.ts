@@ -1,4 +1,4 @@
-import { PHASES, BOARD_SIZE, PIECE_VALUES } from '../gameEngine.js';
+import { PHASES, PIECE_VALUES } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import type { Game } from '../gameEngine.js';
 
@@ -72,8 +72,9 @@ export function checkDraw(game: Game): boolean {
  */
 export function isInsufficientMaterial(game: Game): boolean {
   const pieces = [];
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  const size = game.boardSize;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       if (game.board[r][c]) {
         pieces.push(game.board[r][c]);
       }
@@ -113,8 +114,8 @@ export function isInsufficientMaterial(game: Game): boolean {
     let whiteBishopSquare = null;
     let blackBishopSquare = null;
 
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const piece = game.board[r][c];
         if (piece && piece.type === 'b') {
           if (piece.color === 'white') whiteBishopSquare = { r, c };
@@ -133,8 +134,9 @@ export function isInsufficientMaterial(game: Game): boolean {
   const allNonKings = pieces.filter(p => p && p.type !== 'k');
   if (allNonKings.length > 0 && allNonKings.every(p => p && p.type === 'b')) {
     const bishopSquareColors = new Set();
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    const size = game.boardSize;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const piece = game.board[r][c];
         if (piece && piece.type === 'b') {
           bishopSquareColors.add((r + c) % 2);
@@ -176,9 +178,10 @@ export function getBoardHash(game: Game): string {
 export function calculateMaterialAdvantage(game: Game): number {
   let whiteMaterial = 0;
   let blackMaterial = 0;
+  const size = game.boardSize;
 
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const piece = game.board[r][c];
       if (piece) {
         const value = (PIECE_VALUES as any)[piece.type] || 0;

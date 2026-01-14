@@ -2,7 +2,6 @@
  * RulesEngine.ts
  * Handles move validation, check detection, and game end conditions.
  */
-import { BOARD_SIZE } from './config.js';
 import type { Player, Square, Piece } from './types/game.js';
 
 export interface GameWithBoard {
@@ -111,8 +110,9 @@ export class RulesEngine {
       let castlingRookFrom: Square | null = null;
       let castlingRookTo: Square | null = null;
       if (piece.type === 'k' && Math.abs(move.c - c) === 2) {
+        const size = this.board.length;
         const isKingside = move.c > c;
-        const rookCol = isKingside ? BOARD_SIZE - 1 : 0;
+        const rookCol = isKingside ? size - 1 : 0;
         const rookTargetCol = isKingside ? move.c - 1 : move.c + 1;
         castlingRook = this.board[r][rookCol];
         castlingRookFrom = { r: r, c: rookCol };
@@ -150,8 +150,8 @@ export class RulesEngine {
   getPseudoLegalMoves(r: number, c: number, piece: Piece): Square[] {
     const moves: Square[] = [];
 
-    const isInside = (r: number, c: number): boolean =>
-      r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
+    const size = this.board.length;
+    const isInside = (r: number, c: number): boolean => r >= 0 && r < size && c >= 0 && c < size;
     const isFriend = (r: number, c: number): boolean =>
       this.board[r][c] !== null && this.board[r][c]!.color === piece.color;
     const isEnemy = (r: number, c: number): boolean =>
@@ -296,15 +296,16 @@ export class RulesEngine {
   private addCastlingMoves(moves: Square[], r: number, c: number, piece: Piece): void {
     const opponentColor: Player = piece.color === 'white' ? 'black' : 'white';
 
+    const size = this.board.length;
     // Kingside
-    const rookRight = this.board[r][BOARD_SIZE - 1];
+    const rookRight = this.board[r][size - 1];
     if (
       rookRight &&
       rookRight.type === 'r' &&
       !(rookRight as Piece & { hasMoved?: boolean }).hasMoved
     ) {
       let clear = true;
-      for (let i = c + 1; i < BOARD_SIZE - 1; i++) {
+      for (let i = c + 1; i < size - 1; i++) {
         if (this.board[r][i]) {
           clear = false;
           break;
@@ -344,8 +345,8 @@ export class RulesEngine {
   }
 
   isSquareUnderAttack(r: number, c: number, attackerColor: Player): boolean {
-    const isInside = (r: number, c: number): boolean =>
-      r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
+    const size = this.board.length;
+    const isInside = (r: number, c: number): boolean => r >= 0 && r < size && c >= 0 && c < size;
 
     // Pawn attacks
     const pawnDir = attackerColor === 'white' ? 1 : -1;
@@ -434,8 +435,9 @@ export class RulesEngine {
    * Find the position of the king for a given color
    */
   findKing(color: Player): Square | null {
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    const size = this.board.length;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const piece = this.board[r][c];
         if (piece && piece.color === color && piece.type === 'k') {
           return { r, c };
@@ -460,8 +462,9 @@ export class RulesEngine {
 
   getAllLegalMoves(color: Player): MoveInfo[] {
     const moves: MoveInfo[] = [];
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    const size = this.board.length;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const piece = this.board[r][c];
         if (piece && piece.color === color) {
           const valid = this.getValidMoves(r, c, piece);

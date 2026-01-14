@@ -131,27 +131,37 @@ export class Tutorial {
   public createUpgradeDemo(): string {
     return `
       <p>Im <strong>Upgrade-Modus</strong> kannst du deine Figuren verbessern, indem du Punkte investierst.</p>
-      <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px;">
+      <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin: 15px 0;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px;">
           <div style="text-align: center;">
-            <div style="width: 50px; height: 50px; margin: 0 auto;">${PIECE_SVGS.white.r}</div>
-            <p>Turm (5)</p>
+            <div style="width: 40px; height: 40px; margin: 0 auto;">${PIECE_SVGS.white.r}</div>
+            <p style="font-size: 0.8em;">Turm (5)</p>
           </div>
-          <div style="font-size: 20px; color: #4ecca3;">➔</div>
+          <div style="font-size: 16px; color: #4ecca3;">➔</div>
           <div style="text-align: center;">
-            <div style="width: 50px; height: 50px; margin: 0 auto; filter: drop-shadow(0 0 5px #4ecca3);">${PIECE_SVGS.white.c}</div>
-            <p style="color: #4ecca3;">Kanzler (9)</p>
+            <div style="width: 40px; height: 40px; margin: 0 auto;">${PIECE_SVGS.white.c}</div>
+            <p style="font-size: 0.8em; color: #4ecca3;">Kanzler (8)</p>
+          </div>
+          <div style="width: 20px;"></div>
+          <div style="text-align: center;">
+            <div style="width: 40px; height: 40px; margin: 0 auto;">${PIECE_SVGS.white.n}</div>
+            <p style="font-size: 0.8em;">Springer (3)</p>
+          </div>
+          <div style="font-size: 16px; color: #4ecca3;">➔</div>
+          <div style="text-align: center;">
+            <div style="width: 40px; height: 40px; margin: 0 auto;">${PIECE_SVGS.white.j}</div>
+            <p style="font-size: 0.8em; color: #4ecca3;">Nachtr. (6)</p>
           </div>
         </div>
-        <p><strong>Kosten: 4 Punkte</strong> (9 - 5)</p>
+        <p style="text-align: center; font-size: 0.9em;"><strong>Kosten = Differenz der Figurowerte</strong></p>
       </div>
       <p><strong>So funktioniert's:</strong></p>
-      <ol style="text-align: left; margin-top: 10px;">
-        <li>Achte auf grün leuchtende Figuren</li>
-        <li>Klicke eine Figur an</li>
-        <li>Wähle das gewünschte Upgrade</li>
+      <ol style="text-align: left; margin-top: 5px; font-size: 0.95em;">
+        <li>Starte ein Spiel im <strong>Upgrade-Modus</strong></li>
+        <li>Klicke eine leuchtende Figur in der Setup-Phase an</li>
+        <li>Wähle dein Upgrade (z.B. Springer zu Nachtreiter für 3 Pkt)</li>
       </ol>
-      <p><em>Pro-Tipp: Starte ein "8x8 mit Upgrades" Spiel, um es auszuprobieren!</em></p>
+      <p style="font-size: 0.9em; margin-top: 5px;"><em>Tipp: Der Engel ist das ultimative Upgrade für die Dame!</em></p>
     `;
   }
 
@@ -329,42 +339,53 @@ export class Tutorial {
   public createShopDemo(): string {
     return `
       <p>Du hast <strong>15 Punkte</strong> zum Kaufen von Figuren:</p>
-      <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin: 20px 0;">
-        <table style="width: 100%; color: #e0e0e0; border-collapse: collapse;">
+      <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin: 15px 0;">
+        <table style="width: 100%; color: #e0e0e0; border-collapse: collapse; font-size: 0.9em;">
           <tr style="border-bottom: 1px solid #333;">
-            <th style="text-align: left; padding: 10px; color: #4ecca3;">Figur</th>
-            <th style="text-align: right; padding: 10px; color: #4ecca3;">Kosten</th>
+            <th style="text-align: left; padding: 5px; color: #4ecca3;">Figur</th>
+            <th style="text-align: right; padding: 5px; color: #4ecca3;">Kosten</th>
           </tr>
           <tr>
-            <td style="padding: 8px;">♟ Bauer</td>
-            <td style="text-align: right; padding: 8px; color: #4ecca3;"><strong>1 Punkt</strong></td>
+            <td style="padding: 4px;">♟ Bauer</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>1</strong></td>
           </tr>
           <tr style="background: rgba(255,255,255,0.03);">
-            <td style="padding: 8px;">♞ Springer / ♝ Läufer</td>
-            <td style="text-align: right; padding: 8px; color: #4ecca3;"><strong>3 Punkte</strong></td>
+            <td style="padding: 4px;">♞ Springer / ♝ Läufer</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>3</strong></td>
           </tr>
           <tr>
-            <td style="padding: 8px;">♜ Turm</td>
-            <td style="text-align: right; padding: 8px; color: #4ecca3;"><strong>5 Punkte</strong></td>
+            <td style="padding: 4px;">♜ Turm</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>5</strong></td>
           </tr>
           <tr style="background: rgba(255,255,255,0.03);">
-            <td style="padding: 8px;">🅰 Erzbischof</td>
-            <td style="text-align: right; padding: 8px; color: #f39c12;"><strong>7 Punkte</strong></td>
+            <td style="padding: 4px;">🐎 Nachtreiter</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>6</strong></td>
           </tr>
           <tr>
-            <td style="padding: 8px;">♛ Dame / 🅲 Kanzler</td>
-            <td style="text-align: right; padding: 8px; color: #e74c3c;"><strong>9 Punkte</strong></td>
+            <td style="padding: 4px;">🏰 Erzbischof</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>7</strong></td>
+          </tr>
+          <tr style="background: rgba(255,255,255,0.03);">
+            <td style="padding: 4px;">⚖️ Kanzler</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>8</strong></td>
+          </tr>
+          <tr>
+            <td style="padding: 4px;">♛ Dame</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>9</strong></td>
+          </tr>
+          <tr style="background: rgba(255,255,255,0.03);">
+            <td style="padding: 4px;">🕊️ Engel</td>
+            <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>12</strong></td>
           </tr>
         </table>
       </div>
-      <p><strong>Strategie-Tipp:</strong> Der Erzbischof ist sehr mächtig und kostet nur 7 Punkte - eine ausgezeichnete Wahl!</p>
-      <p><strong>Beispiel-Setups:</strong></p>
-      <ul style="margin-top: 10px;">
-        <li>1 Erzbischof (7) + 1 Turm (5) + 1 Springer (3) = 15 Punkte</li>
-        <li>1 Dame (9) + 1 Turm (5) + 1 Bauer (1) = 15 Punkte</li>
-        <li>3 Türme (15) für maximale Kontrolle</li>
+      <p style="font-size: 0.9em;"><strong>Beispiel-Setups (15 Pkt):</strong></p>
+      <ul style="margin-top: 5px; font-size: 0.85em;">
+        <li>1 Erzbischof (7) + 1 Nachtreiter (6) + 2 Bauern (2)</li>
+        <li>1 Kanzler (8) + 1 Turm (5) + 1 Läufer (3) ... warte, das sind 16!</li>
+        <li>1 Engel (12) + 1 Springer (3) = Maximale Power</li>
       </ul>
-      <p style="text-align: center; margin-top: 30px; font-size: 1.3em; color: #4ecca3;">
+      <p style="text-align: center; margin-top: 15px; font-size: 1.1em; color: #4ecca3;">
         <strong>Viel Erfolg! ♟️</strong>
       </p>
     `;
