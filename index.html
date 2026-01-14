@@ -41,8 +41,8 @@
       <!-- Toast Notifications Container -->
       <div id="toast-container"></div>
 
-      <!-- Spinner Overlay (unchanged) -->
-      <div id="spinner-overlay">
+      <!-- Spinner Overlay -->
+      <div id="spinner-overlay" class="modal-overlay hidden">
         <div class="ai-thinking-panel">
           <div class="spinner"></div>
           <div style="margin-top: 16px; font-size: 1.2em; font-weight: 600">KI denkt nach...</div>
@@ -57,29 +57,12 @@
         </div>
       </div>
 
-      <!-- Error Overlay (New Structure) -->
-      <div
-        id="error-overlay"
-        class="hidden"
-        style="
-          position: fixed;
-          z-index: 9999;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0, 0, 0, 0.85);
-          backdrop-filter: blur(8px);
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <!-- Content injected by ErrorManager -->
+      <!-- Error Overlay -->
+      <div id="error-overlay" class="modal-overlay hidden">
         <div class="critical-error-content">
-          <!-- Fallback content if JS fails completely -->
           <h2>Ein Fehler ist aufgetreten</h2>
           <div id="error-message"></div>
-          <button onclick="location.reload()">Neustarten</button>
+          <button class="btn-primary" onclick="location.reload()">Neustarten</button>
         </div>
       </div>
     </div>
@@ -757,11 +740,7 @@
         </div>
 
         <!-- Generic Modal (used by OverlayManager) -->
-        <div
-          id="generic-modal"
-          class="modal-overlay"
-          style="display: none; align-items: center; justify-content: center"
-        >
+        <div id="generic-modal" class="modal-overlay hidden">
           <div class="modal-content">
             <h2 id="modal-title">Titel</h2>
             <div id="modal-message">Nachricht</div>
@@ -1035,48 +1014,6 @@
         <div id="controls-wrapper" class="hidden"></div>
         <div id="quick-actions" class="hidden"></div>
         <div id="info-tabs-container" class="hidden"></div>
-
-        <!-- Generic Modal Overlay -->
-        <div
-          id="generic-modal"
-          style="
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-          "
-        >
-          <div
-            class="modal-content"
-            style="
-              background: var(--bg-panel);
-              border: 1px solid var(--accent-primary);
-              border-radius: 12px;
-              padding: 24px;
-              max-width: 400px;
-              width: 90%;
-              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            "
-          >
-            <h3 id="modal-title" style="margin-top: 0; color: var(--accent-primary)">Titel</h3>
-            <p id="modal-message" style="margin: 16px 0; color: var(--text-main); line-height: 1.5">
-              Nachricht
-            </p>
-            <div
-              id="modal-actions"
-              style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px"
-            >
-              <!-- Buttons will be injected here -->
-            </div>
-          </div>
-        </div>
       </div>
 
       <script type="module" src="js/debug.ts"></script>

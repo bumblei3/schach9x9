@@ -156,13 +156,13 @@ describe('ShopManager', () => {
     });
   });
 
-  describe('upgradePiece', () => {
+  describe('performUpgrade', () => {
     test('should upgrade knight to nightrider and deduct correct points', () => {
       // Knight (3) -> Nightrider (6) costs 3 points
       mockGame.board[7][4] = { type: 'n', color: 'white' };
       mockGame.points = 10;
 
-      shopManager.upgradePiece(7, 4, 'j');
+      shopManager.performUpgrade(7, 4, 'j');
 
       expect(mockGame.board[7][4].type).toBe('j');
       expect(mockGame.points).toBe(7); // 10 - 3
@@ -174,12 +174,12 @@ describe('ShopManager', () => {
       mockGame.points = 10;
 
       // Step 1: Knight -> Nightrider (Costs 3)
-      shopManager.upgradePiece(7, 4, 'j');
+      shopManager.performUpgrade(7, 4, 'j');
       expect(mockGame.board[7][4].type).toBe('j');
       expect(mockGame.points).toBe(7); // 10 - 3
 
       // Step 2: Nightrider -> Chancellor (Costs 2: 8-6)
-      shopManager.upgradePiece(7, 4, 'c');
+      shopManager.performUpgrade(7, 4, 'c');
       expect(mockGame.board[7][4].type).toBe('c');
       expect(mockGame.points).toBe(5); // 7 - 2
     });

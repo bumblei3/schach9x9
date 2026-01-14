@@ -302,6 +302,22 @@ export class GameController {
     UI.updateShopUI(this.game);
   }
 
+  undoMove(): void {
+    if (this.moveExecutor && this.moveExecutor.undoMove) {
+      this.moveExecutor.undoMove();
+    } else if ((this.game as any).undoMove) {
+      (this.game as any).undoMove();
+    }
+  }
+
+  redoMove(): void {
+    if (this.moveExecutor && this.moveExecutor.redoMove) {
+      this.moveExecutor.redoMove();
+    } else if ((this.game as any).redoMove) {
+      (this.game as any).redoMove();
+    }
+  }
+
   resign(color?: Player): void {
     if (this.game.phase !== (PHASES.PLAY as any)) {
       return;

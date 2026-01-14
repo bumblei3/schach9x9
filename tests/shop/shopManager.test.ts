@@ -197,7 +197,7 @@ describe('ShopManager', () => {
       mockGame.board[6][4] = { type: 'p', color: 'white' }; // Pawn value 1
       mockGame.points = 10;
 
-      shopManager.upgradePiece(6, 4, 'n'); // Knight value 3, cost = 3-1 = 2
+      shopManager.performUpgrade(6, 4, 'n'); // Knight value 3, cost = 3-1 = 2
 
       expect(mockGame.board[6][4].type).toBe('n');
       expect(mockGame.points).toBe(8); // 10 - 2
@@ -213,7 +213,7 @@ describe('ShopManager', () => {
         addPiece: vi.fn(),
       };
       mockGame.board[6][4] = { type: 'p', color: 'white' };
-      shopManager.upgradePiece(6, 4, 'n');
+      shopManager.performUpgrade(6, 4, 'n');
       expect((window as any).battleChess3D.removePiece).toHaveBeenCalledWith(6, 4);
       expect((window as any).battleChess3D.addPiece).toHaveBeenCalledWith('n', 'white', 6, 4);
       delete (window as any).battleChess3D;
@@ -223,7 +223,7 @@ describe('ShopManager', () => {
       mockGame.board[6][4] = { type: 'p', color: 'white' }; // 1
       mockGame.points = 1;
 
-      shopManager.upgradePiece(6, 4, 'e'); // Angel value 12, cost 11
+      shopManager.performUpgrade(6, 4, 'e'); // Angel value 12, cost 11
 
       expect(mockGame.board[6][4].type).toBe('p');
       expect(mockGame.points).toBe(1);

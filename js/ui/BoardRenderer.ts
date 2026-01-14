@@ -379,6 +379,8 @@ export function renderBoard(game: any): void {
   const cellsToRender: Square[] = [];
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
+      // Defensive check: ensure board row exists
+      if (!game.board || !game.board[r]) continue;
       const currentPiece = game.board[r][c];
       const prev = game._previousBoardState[r] ? game._previousBoardState[r][c] : null;
       const changed =

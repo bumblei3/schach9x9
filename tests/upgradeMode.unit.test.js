@@ -57,7 +57,7 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
     game.points = 10;
 
     // Upgrade Queen (9) -> Angel (12) cost = 3
-    shopManager.upgradePiece(7, 4, 'e');
+    shopManager.performUpgrade(7, 4, 'e');
 
     expect(game.board[7][4].type).toBe('e');
     expect(game.points).toBe(7); // 10 - 3
@@ -69,7 +69,7 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
     game.board[7][4] = { type: 'q', color: 'white', hasMoved: false };
     game.points = 2; // Only 2 points, need 3 for Angel
 
-    shopManager.upgradePiece(7, 4, 'e');
+    shopManager.performUpgrade(7, 4, 'e');
 
     expect(game.board[7][4].type).toBe('q'); // Still Queen
     expect(game.points).toBe(2);

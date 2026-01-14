@@ -63,11 +63,11 @@ describe('AIEngine Coverage Boost', () => {
   });
 
   test('getParamsForElo coverage', () => {
-    expect(aiEngine.getParamsForElo(800).maxDepth).toBe(3);
-    expect(aiEngine.getParamsForElo(1200).maxDepth).toBe(4);
-    expect(aiEngine.getParamsForElo(1600).maxDepth).toBe(5);
-    expect(aiEngine.getParamsForElo(2000).maxDepth).toBe(6);
-    expect(aiEngine.getParamsForElo(2400).maxDepth).toBe(8);
+    expect(aiEngine.getParamsForElo(800).maxDepth).toBe(2);
+    expect(aiEngine.getParamsForElo(1200).maxDepth).toBe(3);
+    expect(aiEngine.getParamsForElo(1600).maxDepth).toBe(3);
+    expect(aiEngine.getParamsForElo(2000).maxDepth).toBe(4);
+    expect(aiEngine.getParamsForElo(2400).maxDepth).toBe(4);
   });
 
   test('getBestMove - success path', async () => {

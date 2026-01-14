@@ -144,6 +144,9 @@ export class ShopManager {
   /**
    * Shows upgrade options for a specific piece.
    */
+  /**
+   * Shows upgrade options for a specific piece.
+   */
   showUpgradeOptions(r: number, c: number): void {
     const piece = this.game.board[r][c];
     if (!piece) return;
@@ -155,6 +158,7 @@ export class ShopManager {
     }
 
     const modalTitle = `Upgrade für ${Object.values(SHOP_PIECES).find(p => p.symbol === piece.type)?.name || piece.type}`;
+
     let content =
       '<div class="upgrade-options" style="display: flex; flex-direction: column; gap: 1rem;">';
 
@@ -168,7 +172,7 @@ export class ShopManager {
         <button class="btn upgrade-btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
                 style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; text-align: left;"
                 ${!canAfford ? 'disabled' : ''}
-                onclick="window.game.gameController.shopManager.upgradePiece(${r}, ${c}, '${up.symbol}')">
+                onclick="console.log('UPGRADE CLICK detected: r=${r}, c=${c}, type=${up.symbol}'); if(window.app && window.app.gameController) { window.app.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else if(window.gameController) { window.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else { console.error('Neither window.app.gameController nor window.gameController found!'); }">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 32px; height: 32px;">${(PIECE_SVGS as any)[piece.color][up.symbol]}</div>
             <div>
@@ -180,7 +184,6 @@ export class ShopManager {
         </button>
       `;
     });
-
     content += '</div>';
 
     (UI as any).showModal(modalTitle, content, [
@@ -270,7 +273,7 @@ export class ShopManager {
         affordable.sort((a, b) => b.points - a.points);
         const choice = affordable[0]; // Greedily capture best upgrade
 
-        this.upgradePiece(piece.r, piece.c, choice.symbol);
+        this.performUpgrade(piece.r, piece.c, choice.symbol);
 
         // Refund list update not needed as we re-query or it just works on next iteration
         pawns = this.findPieces('p', 'black'); // Refresh logic slightly inefficient but safe
@@ -294,17 +297,22 @@ export class ShopManager {
   }
 
   /**
-   * Upgrades a piece on the board.
+   * Performs the actual upgrade logic.
    */
-  upgradePiece(r: number, c: number, targetType: string): void {
+  performUpgrade(r: number, c: number, targetType: string): void {
+    console.log('[ShopManager] performUpgrade called:', { r, c, targetType });
     const piece = this.game.board[r][c];
-    if (!piece) return;
+    if (!piece) {
+      console.warn('[ShopManager] No piece found at', r, c);
+      return;
+    }
 
     const currentVal = PIECE_VALUES[piece.type] || 0;
     const targetVal = PIECE_VALUES[targetType] || 0;
     const cost = targetVal - currentVal;
 
     if (this.game.points >= cost) {
+      console.log('[ShopManager] Deducting points and updating piece type');
       this.game.points -= cost;
       piece.type = targetType as any;
 
@@ -322,6 +330,8 @@ export class ShopManager {
         (window as any).battleChess3D.removePiece(r, c);
         (window as any).battleChess3D.addPiece(targetType, piece.color, r, c);
       }
+    } else {
+      console.warn('[ShopManager] Not enough points:', this.game.points, '<', cost);
     }
   }
 }

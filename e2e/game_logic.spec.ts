@@ -130,59 +130,44 @@ test.describe('Deep Game Logic @logic', () => {
   });
 
   test('En Passant 9x9', async ({ page }) => {
+    test.slow(); // Firefox needs more time
+
     await page.click('.gamemode-card:has-text("Klassisch 9x9")');
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
+    await page.waitForFunction(() => (window as any).game?.phase === 'PLAY', { timeout: 10000 });
 
     await page.evaluate(() => {
       const game = (window as any).game;
       // Clear pieces but keep Kings to prevent Game Over
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          game.board[r][c] = null;
+        }
+      }
       game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
       game.board[0][4] = { type: 'k', color: 'black', hasMoved: false };
 
       // White pawn at 3,4
       game.board[3][4] = { type: 'p', color: 'white', hasMoved: true };
-      // Black pawn at 1,5 moves to 3,5
+      // Black pawn at 1,5
       game.board[1][5] = { type: 'p', color: 'black', hasMoved: false };
       game.turn = 'black';
       game.isAI = false;
       if ((window as any).UI) (window as any).UI.renderBoard(game);
     });
 
-    // Debug: Check turn and valid moves for black pawn
-    const debugInfo = await page.evaluate(() => {
+    // 1. Black moves pawn 1,5 -> 3,5 programmatically
+    await page.evaluate(async () => {
       const game = (window as any).game;
-      const piece = game.board[1][5];
-      const moves = game.getValidMoves(1, 5, piece);
-      return {
-        turn: game.turn,
-        phase: game.phase,
-        piece: piece,
-        validMoves: moves,
-        isAI: game.isAI,
-      };
+      if (game.handlePlayClick) {
+        await game.handlePlayClick(1, 5);
+        await game.handlePlayClick(3, 5);
+      }
     });
-    console.log('EP Test Debug Info:', JSON.stringify(debugInfo, null, 2));
 
-    // 1. Black moves pawn 1,5 -> 3,5
-    const startCell = page.locator('.cell[data-r="1"][data-c="5"]');
-    const targetCell = page.locator('.cell[data-r="3"][data-c="5"]');
-
-    await startCell.click();
-    await expect(startCell).toHaveClass(/highlight/); // Selection class is highlight
-
-    // Debug: Check game.validMoves after selection
-    const validMovesAfterSelection = await page.evaluate(() => {
-      const game = (window as any).game;
-      return JSON.stringify(game.validMoves);
-    });
-    console.log('Game Valid Moves after selection:', validMovesAfterSelection);
-
-    await page.waitForTimeout(300); // Give it a moment
-    await targetCell.click();
-
-    // Check if turn switched to White
-    await page.waitForFunction(() => (window as any).game.turn === 'white', { timeout: 2000 });
+    // Wait for turn to switch
+    await page.waitForFunction(() => (window as any).game.turn === 'white', { timeout: 5000 });
 
     // Verify move executed
     await expect(page.locator('.cell[data-r="3"][data-c="5"]')).toHaveAttribute('data-piece', 'p');

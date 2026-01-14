@@ -48,6 +48,8 @@ export function showModal(
   });
 
   modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  console.log('[OverlayManager] Modal visibility set to flex');
 }
 
 /**
@@ -55,7 +57,11 @@ export function showModal(
  */
 export function closeModal(): void {
   const modal = document.getElementById('generic-modal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    console.log('[OverlayManager] Modal closed');
+  }
 }
 
 /**

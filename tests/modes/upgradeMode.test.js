@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { PHASES, PIECE_VALUES } from '../../js/config.js';
+import { PHASES } from '../../js/config.js';
 
 // Mock dependencies
 vi.mock('../../js/ui.js', () => ({
@@ -75,29 +75,29 @@ import { Game } from '../../js/gameEngine.js';
 // We need to mock TimeManager, Tutorial, etc?
 vi.mock('../../js/TimeManager.js', () => ({
   TimeManager: class {
-    constructor() {}
-    setTimeControl() {}
-    updateClockVisibility() {}
-    startClock() {}
-    stopClock() {}
+    constructor() { }
+    setTimeControl() { }
+    updateClockVisibility() { }
+    startClock() { }
+    stopClock() { }
   },
 }));
-vi.mock('../../js/tutorial.js', () => ({ Tutorial: class {} }));
+vi.mock('../../js/tutorial.js', () => ({ Tutorial: class { } }));
 vi.mock('../../js/AnalysisController.js', () => ({
   AnalysisController: class {
-    constructor() {}
-    enterAnalysisMode() {}
-    exitAnalysisMode() {}
+    constructor() { }
+    enterAnalysisMode() { }
+    exitAnalysisMode() { }
   },
 }));
 vi.mock('../../js/ui/AnalysisUI.js', () => ({
   AnalysisUI: class {
-    constructor() {}
+    constructor() { }
   },
 }));
 vi.mock('../../js/ui/PuzzleMenu.js', () => ({
   PuzzleMenu: class {
-    constructor() {}
+    constructor() { }
   },
 }));
 
@@ -139,7 +139,7 @@ describe('Troop Upgrade Mode', () => {
     // Pawn(1) -> Knight(3). Cost: 2.
 
     // Directly call upgradePiece on ShopManager to bypass UI modal selection logic which is hard to mock
-    controller.shopManager.upgradePiece(r, c, 'n');
+    controller.shopManager.performUpgrade(r, c, 'n');
 
     expect(game.board[r][c].type).toBe('n');
     expect(game.points).toBe(25 - 2); // 23
@@ -170,8 +170,6 @@ describe('Troop Upgrade Mode', () => {
     // Black started with 25 points. Should have spent some.
     expect(game.points).toBeLessThan(25);
 
-    // Check if some pawn was upgraded
-    let upgraded = false;
     // Black pawns are usually rows 2 or 3 depending on setup
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
@@ -179,7 +177,6 @@ describe('Troop Upgrade Mode', () => {
         if (p && p.color === 'black' && p.type !== 'p' && p.type !== 'k') {
           // Check if it WAS a pawn before?
           // Classic setup: Row 2 are pawns.
-          if (r === 2) upgraded = true;
         }
       }
     }

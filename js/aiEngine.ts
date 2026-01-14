@@ -227,12 +227,13 @@ function convertMoveToResult(
  * Maps Elo rating to search parameters
  */
 export function getParamsForElo(elo: number): EloParams {
-  let depth = 4;
-  if (elo < 1000) depth = 3;
-  else if (elo < 1400) depth = 4;
-  else if (elo < 1800) depth = 5;
-  else if (elo < 2200) depth = 6;
-  else depth = 8;
+  // Reduced depths to prevent worker timeouts (was 3-8, now 2-4)
+  let depth = 3;
+  if (elo < 1000) depth = 2;
+  else if (elo < 1400) depth = 3;
+  else if (elo < 1800) depth = 3;
+  else if (elo < 2200) depth = 4;
+  else depth = 4;
 
   return {
     maxDepth: depth,

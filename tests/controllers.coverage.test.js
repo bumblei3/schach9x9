@@ -54,7 +54,6 @@ const { GameController } = await import('../js/gameController.js');
 const { AIController } = await import('../js/aiController.js');
 const { TutorController } = await import('../js/tutorController.js');
 const { storageManager } = await import('../js/storage.js');
-const UI = await import('../js/ui.js');
 const { evaluatePosition } = await import('../js/aiEngine.js');
 
 describe('Controllers Coverage Expansion', () => {

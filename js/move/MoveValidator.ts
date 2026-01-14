@@ -153,9 +153,12 @@ export function isInsufficientMaterial(game: Game): boolean {
  * @returns {string} The board hash
  */
 export function getBoardHash(game: Game): string {
+  if (!game.board) return '';
   let hash = '';
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  const size = game.boardSize || BOARD_SIZE;
+  for (let r = 0; r < size; r++) {
+    if (!game.board[r]) continue;
+    for (let c = 0; c < size; c++) {
       const piece = game.board[r][c];
       if (piece) {
         hash += `${piece.color[0]}${piece.type}${r}${c};`;

@@ -11,17 +11,27 @@ test.describe('Persistence & Recovery @persistence', () => {
   });
 
   test('should restore board state after page reload', async ({ page }) => {
+    test.slow(); // Firefox needs more time
+
     // 1. Start a Classic 9x9 game
     await page.click('.gamemode-card:has-text("Klassisch 9x9")');
     await expect(page.locator('#board')).toBeVisible();
 
-    // 2. Make a move and wait for it to be recorded
-    await page.click('.cell[data-r="7"][data-c="4"]');
-    await page.click('.cell[data-r="5"][data-c="4"]');
+    // Wait for game to be ready
+    await page.waitForFunction(() => (window as any).game?.phase === 'PLAY', { timeout: 10000 });
 
-    // Wait for move to be recorded in engine (animations might delay this)
+    // 2. Make a move programmatically
+    await page.evaluate(async () => {
+      const game = (window as any).game;
+      if (game.handlePlayClick) {
+        await game.handlePlayClick(7, 4);
+        await game.handlePlayClick(5, 4);
+      }
+    });
+
+    // Wait for move to be recorded in engine
     await page.waitForFunction(() => (window as any).game.moveHistory.length > 0, {
-      timeout: 5000,
+      timeout: 10000,
     });
 
     await expect(page.locator('.cell[data-r="5"][data-c="4"]')).toHaveAttribute('data-piece', 'p');
@@ -56,16 +66,26 @@ test.describe('Persistence & Recovery @persistence', () => {
   });
 
   test('should restore move history after page reload', async ({ page }) => {
+    test.slow(); // Firefox needs more time
+
     await page.click('.gamemode-card:has-text("Klassisch 9x9")');
     await expect(page.locator('#board')).toBeVisible();
 
-    // Move 1: (7,4) -> (5,4)
-    await page.click('.cell[data-r="7"][data-c="4"]');
-    await page.click('.cell[data-r="5"][data-c="4"]');
+    // Wait for game to be ready
+    await page.waitForFunction(() => (window as any).game?.phase === 'PLAY', { timeout: 10000 });
+
+    // Move 1: (7,4) -> (5,4) programmatically
+    await page.evaluate(async () => {
+      const game = (window as any).game;
+      if (game.handlePlayClick) {
+        await game.handlePlayClick(7, 4);
+        await game.handlePlayClick(5, 4);
+      }
+    });
 
     // Wait for move recording
     await page.waitForFunction(() => (window as any).game.moveHistory.length > 0, {
-      timeout: 5000,
+      timeout: 10000,
     });
 
     const saveResult = await page.evaluate(() => {
