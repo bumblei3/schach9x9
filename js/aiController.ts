@@ -68,6 +68,16 @@ export class AIController {
 
   public toggleAnalysisMode(): boolean {
     this.analysisActive = !this.analysisActive;
+
+    if (this.game.evaluationBar) {
+      this.game.evaluationBar.show(this.analysisActive);
+    }
+
+    if (this.game.analysisManager) {
+      this.game.analysisManager.showBestMove = this.analysisActive;
+      this.game.analysisManager.updateArrows();
+    }
+
     if (this.analysisActive) {
       this.analyzePosition();
     }
@@ -232,137 +242,143 @@ export class AIController {
     let completedWorkers = 0;
     const numWorkers = this.aiWorkers.length;
 
-    const processResults = () => {
-      const elapsed = Date.now() - this._aiMoveStartTime;
-      logger.info(`[AI] Processing results after ${elapsed}ms`);
+    return new Promise<void>(resolve => {
+      const processResults = () => {
+        console.log('[DEBUG] AI processResults started');
+        const elapsed = Date.now() - this._aiMoveStartTime;
+        logger.info(`[AI] Processing results after ${elapsed}ms`);
 
-      if (spinner) spinner.classList.add('hidden');
-
-      // Find best result
-      const bestResult = workerResults.find(r => r && r.move);
-      logger.debug(
-        '[AI] Worker results:',
-        workerResults.map(r =>
-          r && r.move
-            ? `${r.move.from?.r},${r.move.from?.c}->${r.move.to?.r},${r.move.to?.c}`
-            : 'null'
-        )
-      );
-
-      if (bestResult && bestResult.move) {
-        logger.info(
-          `[AI] Executing move: ${bestResult.move.from.r},${bestResult.move.from.c} -> ${bestResult.move.to.r},${bestResult.move.to.c}${bestResult.move.promotion ? ` (Promote to ${bestResult.move.promotion})` : ''}`
-        );
-        this.game.executeMove(
-          bestResult.move.from,
-          bestResult.move.to,
-          false,
-          bestResult.move.promotion
-        );
-        if (this.game.renderBoard) this.game.renderBoard();
-
-        // Display AI Thinking (PV)
-        if (bestResult.pv && bestResult.pv.length > 0) {
-          const bestMoveEl = document.getElementById('ai-best-move');
-          if (bestMoveEl) {
-            const pvText = bestResult.pv
-              .map((m: any) => {
-                const size = this.game.boardSize;
-                const from = String.fromCharCode(97 + m.from.c) + (size - m.from.r);
-                const to = String.fromCharCode(97 + m.to.c) + (size - m.to.r);
-                return `${from}${to}`;
-              })
-              .join(' ');
-            bestMoveEl.textContent = `KI Plan: ${pvText}`;
-          }
-        }
-      } else {
-        logger.warn('[AI] No valid move found in worker results!');
-        this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
-      }
-    };
-
-    // Add timeout to prevent game from freezing if workers hang
-    let hasProcessed = false;
-    const timeoutId = setTimeout(() => {
-      if (!hasProcessed) {
-        hasProcessed = true;
-        logger.error('[AI] Worker timeout after 30 seconds! Making fallback move.');
         if (spinner) spinner.classList.add('hidden');
 
-        // Make a random legal move as fallback
-        const allMoves = this.game.getAllLegalMoves('black');
-        if (allMoves.length > 0) {
-          const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
-          this.game.executeMove(randomMove.from, randomMove.to);
+        // Find best result
+        const bestResult = workerResults.find(r => r && r.move);
+        logger.debug(
+          '[AI] Worker results:',
+          workerResults.map(r =>
+            r && r.move
+              ? `${r.move.from?.r},${r.move.from?.c}->${r.move.to?.r},${r.move.to?.c}`
+              : 'null'
+          )
+        );
+
+        if (bestResult && bestResult.move) {
+          logger.info(
+            `[AI] Executing move: ${bestResult.move.from.r},${bestResult.move.from.c} -> ${bestResult.move.to.r},${bestResult.move.to.c}${bestResult.move.promotion ? ` (Promote to ${bestResult.move.promotion})` : ''}`
+          );
+          this.game.executeMove(
+            bestResult.move.from,
+            bestResult.move.to,
+            false,
+            bestResult.move.promotion
+          );
+          if (this.game.renderBoard) this.game.renderBoard();
+
+          // Display AI Thinking (PV)
+          if (bestResult.pv && bestResult.pv.length > 0) {
+            const bestMoveEl = document.getElementById('ai-best-move');
+            if (bestMoveEl) {
+              const pvText = bestResult.pv
+                .map((m: any) => {
+                  const size = this.game.boardSize;
+                  const from = String.fromCharCode(97 + m.from.c) + (size - m.from.r);
+                  const to = String.fromCharCode(97 + m.to.c) + (size - m.to.r);
+                  return `${from}${to}`;
+                })
+                .join(' ');
+              bestMoveEl.textContent = `KI Plan: ${pvText}`;
+            }
+          }
         } else {
+          logger.warn('[AI] No valid move found in worker results!');
           this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
         }
-      }
-    }, 30000); // 30 second timeout
+        console.log('[DEBUG] AI processResults calling resolve');
+        resolve();
+      };
 
-    const processResultsWithTimeout = () => {
-      if (hasProcessed) return;
-      hasProcessed = true;
-      clearTimeout(timeoutId);
-      processResults();
-    };
+      // Add timeout to prevent game from freezing if workers hang
+      let hasProcessed = false;
+      const timeoutId = setTimeout(() => {
+        if (!hasProcessed) {
+          hasProcessed = true;
+          logger.error('[AI] Worker timeout after 30 seconds! Making fallback move.');
+          if (spinner) spinner.classList.add('hidden');
 
-    // Dispatch tasks to persistent workers
-    this.aiWorkers.forEach((worker, i) => {
-      // Reset worker listeners for this move
-      worker.onmessage = e => {
-        const { type, data } = e.data;
-
-        if (type === 'progress') {
-          if (i === 0) this.updateAIProgress(data);
-        } else if (type === 'bestMove') {
-          workerResults[i] = data;
-          completedWorkers++;
-          if (completedWorkers === 1) processResultsWithTimeout();
-        } else if (type === 'analysis') {
-          if (this.analysisUI) {
-            this.analysisUI.update(data);
+          // Make a random legal move as fallback
+          const allMoves = this.game.getAllLegalMoves('black');
+          if (allMoves.length > 0) {
+            const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+            this.game.executeMove(randomMove.from, randomMove.to);
+          } else {
+            this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
           }
+          resolve();
         }
+      }, 30000); // 30 second timeout
+
+      const processResultsWithTimeout = () => {
+        if (hasProcessed) return;
+        hasProcessed = true;
+        clearTimeout(timeoutId);
+        processResults();
       };
 
-      worker.onerror = err => {
-        logger.error(`[AI] Worker ${i} error:`, err);
-        completedWorkers++;
-        if (completedWorkers === numWorkers) processResultsWithTimeout();
-      };
-
-      logger.debug(`[AI] Dispatching search to worker ${i}`);
-
-      // Calculate Time Limit based on difficulty
-      let timeLimit = 5000;
-      if (this.game.mode === 'standard8x8' || this.game.mode === 'classic') {
-        timeLimit = 8000;
-      } else {
-        const timeMap: Record<string, number> = {
-          beginner: 2000,
-          easy: 3000,
-          medium: 4000,
-          hard: 5000,
-          expert: 8000,
+      // Dispatch tasks to persistent workers
+      this.aiWorkers.forEach((worker, i) => {
+        // Use one-time message handler for the move search
+        const moveHandler = (e: MessageEvent) => {
+          const { type, data } = e.data;
+          if (type === 'bestMove') {
+            console.log(`[DEBUG] AI worker ${i} bestMove received`);
+            worker.removeEventListener('message', moveHandler);
+            workerResults[i] = data;
+            completedWorkers++;
+            console.log(`[DEBUG] AI completedWorkers: ${completedWorkers}`);
+            if (completedWorkers === 1) {
+              console.log('[DEBUG] AI triggering processResultsWithTimeout');
+              processResultsWithTimeout();
+            }
+          }
         };
-        timeLimit = timeMap[this.game.difficulty] || 5000;
-      }
+        worker.addEventListener('message', moveHandler);
 
-      // Send search request
-      worker.postMessage({
-        type: 'getBestMove',
-        data: {
-          board: boardInt,
-          color: 'black',
-          depth: depth,
-          difficulty: this.game.difficulty,
-          moveNumber: Math.floor(this.game.moveHistory.length / 2),
-          config: AI_PERSONALITIES[this.game.aiPersonality || 'balanced'],
-          lastMove: lastMove,
-          timeLimit: timeLimit,
-        },
+        worker.onerror = err => {
+          logger.error(`[AI] Worker ${i} error:`, err);
+          completedWorkers++;
+          if (completedWorkers === numWorkers) processResultsWithTimeout();
+        };
+
+        logger.debug(`[AI] Dispatching search to worker ${i}`);
+
+        // Calculate Time Limit based on difficulty
+        let timeLimit = 5000;
+        if (this.game.mode === 'standard8x8' || this.game.mode === 'classic') {
+          timeLimit = 8000;
+        } else {
+          const timeMap: Record<string, number> = {
+            beginner: 2000,
+            easy: 3000,
+            medium: 4000,
+            hard: 5000,
+            expert: 8000,
+          };
+          timeLimit = timeMap[this.game.difficulty] || 5000;
+        }
+
+        // Send search request
+        worker.postMessage({
+          type: 'getBestMove',
+          data: {
+            board: boardInt,
+            color: 'black',
+            depth: depth,
+            difficulty: this.game.difficulty,
+            moveNumber: Math.floor(this.game.moveHistory.length / 2),
+            config: AI_PERSONALITIES[this.game.aiPersonality || 'balanced'],
+            lastMove: lastMove,
+            timeLimit: timeLimit,
+          },
+        });
       });
     });
   }
@@ -395,11 +411,73 @@ export class AIController {
       });
 
     for (let i = 0; i < numWorkers; i++) {
-      const worker = new Worker(new URL('./ai/aiWorker.js', import.meta.url), { type: 'module' });
+      let worker: Worker;
+      try {
+        /*
+         * Note: In Vitest environment, import.meta.url might be problematic.
+         * The test mocks global.Worker, so we expect this to succeed if URL resolution works.
+         */
+        const workerUrl = new URL('./ai/aiWorker.ts', import.meta.url);
+        worker = new Worker(workerUrl, { type: 'module' });
+      } catch (err) {
+        logger.error(
+          `[AIController] Failed to create worker ${i}. import.meta.url=${import.meta.url}`,
+          err
+        );
+        throw err;
+      }
       this.aiWorkers.push(worker);
+
+      // Dedicated message handler per worker
+      worker.onmessage = e => this.handleWorkerMessage(e, i);
+
       if (this.openingBookData) {
         worker.postMessage({ type: 'loadBook', data: { book: this.openingBookData } });
       }
+    }
+  }
+
+  /**
+   * Central worker message dispatcher
+   */
+  private handleWorkerMessage(e: MessageEvent, workerIndex: number): void {
+    const { type, data } = e.data;
+
+    if (type === 'progress') {
+      if (workerIndex === 0) this.updateAIProgress(data);
+    } else if (type === 'bestMove') {
+      // Handled by specific promises in aiMove, but we can store it here too
+      this.game.lastBestMove = data;
+    } else if (type === 'analysis') {
+      this.handleAnalysisResult(data);
+    }
+  }
+
+  /**
+   * Processes live engine analysis results
+   */
+  private handleAnalysisResult(data: any): void {
+    if (this.analysisUI) {
+      this.analysisUI.update(data);
+    }
+
+    // Update global game state for best move arrows
+    if (data.topMoves && data.topMoves.length > 0) {
+      this.game.bestMoves = data.topMoves.map((m: any) => ({
+        move: m.move,
+        score: m.score,
+        notation: m.notation,
+      }));
+
+      // Automatically trigger arrow update if analysis manager is present
+      if (this.game.analysisManager) {
+        this.game.analysisManager.updateArrows();
+      }
+    }
+
+    // Also update eval bar outside the panel
+    if (this.game.evaluationBar) {
+      this.game.evaluationBar.update(data.score);
     }
   }
 

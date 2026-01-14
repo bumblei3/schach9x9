@@ -176,18 +176,18 @@ export class App {
   }
 
   private registerServiceWorker(): void {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('./service-worker.js')
-          .then(registration => {
-            logger.info('ServiceWorker registration successful:', registration.scope);
-          })
-          .catch(err => {
-            logger.error('ServiceWorker registration failed:', err);
-          });
-      });
-    }
+    // if ('serviceWorker' in navigator) {
+    //   window.addEventListener('load', () => {
+    //     navigator.serviceWorker
+    //       .register('./service-worker.js')
+    //       .then(registration => {
+    //         logger.info('ServiceWorker registration successful:', registration.scope);
+    //       })
+    //       .catch(err => {
+    //         logger.error('ServiceWorker registration failed:', err);
+    //       });
+    //   });
+    // }
   }
 
   private applyDelegates(): void {

@@ -13,6 +13,7 @@ export interface Level {
   setupType: 'fixed' | 'budget';
   playerBudget?: number; // Core budget (normally 15 or 5)
   boardSetup?: Board; // Pre-filled board for fixed scenarios
+  fen?: string;
 
   // Custom Rules
   winCondition: {

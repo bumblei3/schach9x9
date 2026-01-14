@@ -4,8 +4,31 @@ describe('AnalysisManager', () => {
   let mockGame;
   let analysisManager;
 
-  beforeEach(() => {
+  // Mock Dependencies
+  vi.mock('../js/tutor/TacticsDetector.js', () => ({
+    getThreatenedPieces: vi.fn(),
+    countDefenders: vi.fn(),
+    detectTacticalPatterns: vi.fn(),
+  }));
+
+  vi.mock('../js/aiEngine.js', () => ({
+    see: vi.fn(),
+  }));
+
+  beforeEach(async () => {
+    // Reset mocks
+    const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
+    const aiEngine = await import('../js/aiEngine.js');
+    vi.clearAllMocks();
+
+    // Default implementations
+    TacticsDetector.getThreatenedPieces.mockReturnValue([]);
+    TacticsDetector.countDefenders.mockReturnValue(0);
+    TacticsDetector.detectTacticalPatterns.mockReturnValue([]);
+    aiEngine.see.mockReturnValue(0);
+
     mockGame = {
+      boardSize: 9,
       board: Array(9)
         .fill(null)
         .map(() => Array(9).fill(null)),
@@ -38,27 +61,27 @@ describe('AnalysisManager', () => {
     expect(analysisManager.showBestMove).toBe(true);
   });
 
-  test('should generate threat arrows correctly', () => {
-    // Put a white queen and a black rook attacking it
-    mockGame.board[4][4] = { type: 'q', color: 'white' };
-    mockGame.board[0][4] = { type: 'r', color: 'black' };
+  test('should generate threat arrows correctly', async () => {
+    const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
+    const aiEngine = await import('../js/aiEngine.js');
+
+    // Simulate Black Rook at (0,4) threatening White Queen at (4,4)
+    mockGame.board[0][4] = { type: 'r', color: 'black' }; // Add attacker to board
+
+    TacticsDetector.getThreatenedPieces.mockReturnValue([
+      { piece: { type: 'q', color: 'white' }, pos: { r: 4, c: 4 } },
+    ]);
+    TacticsDetector.countDefenders.mockReturnValue(0); // Undefended
+    aiEngine.see.mockReturnValue(5); // Positive exchange
+
     mockGame.turn = 'white';
-
-    // Mock black rook moves: it can go to (4,4) to capture the queen
-    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
-      if (r === 0 && c === 4 && piece.type === 'r') {
-        return [{ r: 4, c: 4 }];
-      }
-      return [];
-    });
-
     analysisManager.showThreats = true;
     const arrows = analysisManager.getThreatArrows();
 
     expect(arrows.length).toBeGreaterThan(0);
     expect(arrows[0]).toMatchObject({
       fromR: 0,
-      fromC: 4,
+      fromC: 4, // Logic infers attacker from board, so we need to ensure board has attacker
       toR: 4,
       toC: 4,
       colorKey: 'red',
@@ -84,99 +107,60 @@ describe('AnalysisManager', () => {
     });
   });
 
-  test('should only show serious threats', () => {
-    // White knight defended by pawn
-    mockGame.board[7][7] = { type: 'n', color: 'white' };
-    mockGame.board[8][6] = { type: 'p', color: 'white' };
-    mockGame.board[0][7] = { type: 'r', color: 'black' };
+  test('should only show serious threats', async () => {
+    const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
+    const aiEngine = await import('../js/aiEngine.js');
 
-    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
-      if (r === 0 && c === 7 && piece.type === 'r') return [{ r: 7, c: 7 }];
-      if (r === 8 && c === 6 && piece.type === 'p') return [{ r: 7, c: 7 }];
-      return [];
-    });
+    // Setup: Attacker exists on board
+    mockGame.board[0][7] = { type: 'r', color: 'black' };
+    mockGame.turn = 'white';
+
+    // Case 1: Defended and low SEE -> Not serious
+    TacticsDetector.getThreatenedPieces.mockReturnValue([
+      { piece: { type: 'n', color: 'white' }, pos: { r: 7, c: 7 } },
+    ]);
+    TacticsDetector.countDefenders.mockReturnValue(1); // Defended
+    aiEngine.see.mockReturnValue(-2); // Bad trade
 
     analysisManager.showThreats = true;
     let arrows = analysisManager.getThreatArrows();
-
-    // Since it's defended and it's a rook (5) vs knight (3), it might NOT be serious
-    // depending on the logic. In our refined logic: defenders > 0 AND opponentValue (5) >= myValue (3) -> NOT serious.
     expect(arrows.length).toBe(0);
 
-    // Now move the pawn away (undefended)
-    mockGame.board[8][6] = null;
+    // Case 2: Undefended (or High SEE) -> Serious
+    TacticsDetector.countDefenders.mockReturnValue(0); // Undefended
+    aiEngine.see.mockReturnValue(3); // Free knight
+
     arrows = analysisManager.getThreatArrows();
     expect(arrows.length).toBe(1);
   });
-  test('should generate opportunity arrows for high severity patterns (fork)', () => {
-    // Setup a fork: White knight at (7,6) moves to (5,5) to attack Black King at (3,4) and Black Queen at (4,7)
-    mockGame.board[7][6] = { type: 'n', color: 'white' };
-    mockGame.board[3][4] = { type: 'k', color: 'black' };
-    mockGame.board[4][7] = { type: 'q', color: 'black' };
-    mockGame.turn = 'white';
+  test('should generate opportunity arrows for high severity patterns (fork)', async () => {
+    const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
 
-    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
-      if (r === 5 && c === 5 && piece.type === 'n') {
-        return [
-          { r: 3, c: 4 },
-          { r: 4, c: 7 },
-        ];
-      }
-      return [];
-    });
+    // Simulate finding a Fork
+    mockGame.getAllLegalMoves.mockReturnValue([{ from: { r: 7, c: 6 }, to: { r: 5, c: 5 } }]);
 
-    mockGame.getAllLegalMoves.mockReturnValue([
-      { from: { r: 7, c: 6 }, to: { r: 5, c: 5 } }, // Move that creates the fork
-    ]);
-
-    // Mock isInCheck for the fork detection
-    mockGame.isInCheck = vi.fn(color => color === 'black');
+    TacticsDetector.detectTacticalPatterns.mockReturnValue([{ type: 'fork', severity: 'high' }]);
 
     analysisManager.showOpportunities = true;
     const arrows = analysisManager.getOpportunityArrows();
 
-    // Note: Opportunities are found by checking legal moves.
-    // If the move leads to a position with high severity patterns, it should be an arrow.
     expect(arrows.length).toBeGreaterThan(0);
     expect(arrows[0]).toMatchObject({
       fromR: 7,
-      fromC: 6, // from mockMove
+      fromC: 6,
       toR: 5,
       toC: 5,
       colorKey: 'orange',
     });
   });
 
-  test('should generate opportunity arrows for high severity patterns (pin)', () => {
-    // Setup a pin: White Rook moves from (0,0) to (0,4) to pin Black Knight at (4,4) against Black King at (8,4)
-    mockGame.board[0][0] = { type: 'r', color: 'white' };
-    mockGame.board[4][4] = { type: 'n', color: 'black' };
-    mockGame.board[8][4] = { type: 'k', color: 'black' };
-    mockGame.turn = 'white';
+  test('should generate opportunity arrows for high severity patterns (pin)', async () => {
+    const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
 
-    mockGame.getValidMoves.mockImplementation(function (r, c, piece) {
-      // White rook at (0,4) attacks along the 4th column
-      if (r === 0 && c === 4 && piece.type === 'r') {
-        return [
-          { r: 4, c: 4 },
-          { r: 5, c: 4 },
-          { r: 6, c: 4 },
-          { r: 7, c: 4 },
-          { r: 8, c: 4 },
-        ];
-      }
-      // For the initial detection, the rook at (0,0) must find move to (0,4)
-      if (r === 0 && c === 0 && piece.type === 'r') {
-        return [{ r: 0, c: 4 }];
-      }
-      return [];
-    });
+    // Simulate finding a Pin
+    mockGame.getAllLegalMoves.mockReturnValue([{ from: { r: 0, c: 0 }, to: { r: 0, c: 4 } }]);
 
-    mockGame.getAllLegalMoves.mockReturnValue([
-      { from: { r: 0, c: 0 }, to: { r: 0, c: 4 } }, // Move that creates the pin
-    ]);
-
-    mockGame.isInCheck = vi.fn(() => false);
+    TacticsDetector.detectTacticalPatterns.mockReturnValue([{ type: 'pin', severity: 'high' }]);
 
     analysisManager.showOpportunities = true;
     const arrows = analysisManager.getOpportunityArrows();

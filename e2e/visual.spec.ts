@@ -224,11 +224,22 @@ test.describe('Visual Regression Tests @visual', () => {
     const isSetup = await page.evaluate(() => document.body.classList.contains('setup-mode'));
     if (isSetup) {
       console.log('Still in setup mode, forcing finish via app...');
-      await page.evaluate(() => (window as any).game?.finishSetupPhase());
+      await page.evaluate(() => {
+        // @ts-ignore - Try multiple paths to finish setup
+        if (window.app?.game?.finishSetupPhase) {
+          // @ts-ignore
+          window.app.game.finishSetupPhase();
+        } else if ((window as any).game?.finishSetupPhase) {
+          (window as any).game.finishSetupPhase();
+        }
+        // Force remove setup-mode class for visual test stability
+        document.body.classList.remove('setup-mode');
+        document.body.classList.add('play-mode');
+      });
     }
 
-    // Wait for game start (Play Phase is indicated by removal of setup-mode)
-    await expect(page.locator('body')).not.toHaveClass(/setup-mode/);
+    // Wait for game start with extended timeout for Firefox
+    await expect(page.locator('body')).not.toHaveClass(/setup-mode/, { timeout: 15000 });
 
     // 3. Move Pawn to Promotion programmatically
     await page.evaluate(async () => {

@@ -47,10 +47,12 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     // Handle Setup Type
     if (level.setupType === 'fixed') {
-      if (level.id === 'level_1') {
-        game.board = BoardFactory.createLevel1Board() as any;
-      } else if (level.id === 'level_2') {
-        game.board = BoardFactory.createLevel2Board() as any;
+      if (level.fen) {
+        game.board = BoardFactory.fromFEN(level.fen) as any;
+        // Important: Update board size if level uses different dimensions (e.g. 8x8 vs 9x9)
+        if (game.board.length !== game.boardSize) {
+          game.boardSize = game.board.length;
+        }
       } else {
         game.board = BoardFactory.createEmptyBoard() as any; // Fallback
       }

@@ -122,7 +122,7 @@ describe('Chess Pieces', () => {
     test('should return all available skins', () => {
       const skins = chessPieces.getAvailableSkins();
 
-      expect(skins).toHaveLength(7);
+      expect(skins).toHaveLength(8);
       expect(skins).toEqual([
         { id: 'classic', name: 'Klassisch' },
         { id: 'modern', name: 'Modern' },
@@ -131,6 +131,7 @@ describe('Chess Pieces', () => {
         { id: 'wood', name: 'Holz' },
         { id: 'neon', name: 'Neon' },
         { id: 'minimalist', name: 'Minimalistisch' },
+        { id: 'frost', name: 'Frost' },
       ]);
     });
   });

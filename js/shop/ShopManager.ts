@@ -202,6 +202,8 @@ export class ShopManager {
       b: ['a'], // Bishop -> Archbishop
       n: ['a', 'c', 'e', 'j'], // Knight -> Archbishop, Chancellor, Angel or Nightrider
       j: ['a', 'c', 'e'], // Nightrider -> Archbishop, Chancellor or Angel
+      c: ['e'], // Chancellor -> Angel
+      a: ['e'], // Archbishop -> Angel
     };
 
     const symbols = upgrades[type] || [];

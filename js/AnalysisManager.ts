@@ -1,4 +1,3 @@
-import { BOARD_SIZE } from './config.js';
 import * as TacticsDetector from './tutor/TacticsDetector.js';
 import * as aiEngine from './aiEngine.js';
 import type { Player, Piece } from './types/game.js';
@@ -58,8 +57,9 @@ export class AnalysisManager {
     const arrows: any[] = [];
     const opponentColor: Player = this.game.turn === 'white' ? 'black' : 'white';
 
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
+    const size = this.game.boardSize;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const piece = this.game.board[r][c] as Piece | null;
         if (piece && piece.color === opponentColor) {
           const threatened = (TacticsDetector as any).getThreatenedPieces(

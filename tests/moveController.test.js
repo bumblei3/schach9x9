@@ -1061,11 +1061,13 @@ describe('MoveController', () => {
 
     test('should handle corrupt save data', () => {
       Storage.prototype.getItem.mockReturnValue('invalid-json');
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const success = moveController.loadGame();
 
       expect(success).toBe(false);
       expect(game.log).toHaveBeenCalledWith(expect.stringContaining('Fehler'));
+      errorSpy.mockRestore();
     });
 
     test('should handle missing save data', () => {

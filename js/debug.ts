@@ -4,6 +4,7 @@
  */
 
 import { logger } from './logger.js';
+import { campaignManager } from './campaign/CampaignManager.js';
 
 export class DebugConsole {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -184,6 +185,14 @@ export class DebugConsole {
               <button onclick="window.debugConsole.toggleAnalysis()">🔍 Analyse</button>
             </div>
           </div>
+          <div class="debug-section">
+            <h4>🏆 Kampagne</h4>
+            <div class="debug-buttons">
+              <button onclick="window.debugConsole.unlockAllLevels()">🔓 Alle freischalten</button>
+              <button onclick="window.debugConsole.completeCurrentLevel()">✅ Level beenden</button>
+              <button onclick="window.debugConsole.resetCampaign()">❌ Reset</button>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -207,6 +216,29 @@ export class DebugConsole {
     });
 
     this.setupErrorLogging();
+
+    // Create visible floating toggle button
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = '🛠️';
+    toggleBtn.title = 'Open Debug Console';
+    toggleBtn.style.position = 'fixed';
+    toggleBtn.style.bottom = '10px';
+    toggleBtn.style.right = '10px';
+    toggleBtn.style.zIndex = '10000';
+    toggleBtn.style.fontSize = '24px';
+    toggleBtn.style.padding = '8px 12px';
+    toggleBtn.style.borderRadius = '50%';
+    toggleBtn.style.border = '2px solid rgba(99, 102, 241, 0.5)';
+    toggleBtn.style.background = 'rgba(15, 23, 42, 0.9)';
+    toggleBtn.style.cursor = 'pointer';
+    toggleBtn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    toggleBtn.style.transition = 'transform 0.2s';
+
+    toggleBtn.onmouseover = () => (toggleBtn.style.transform = 'scale(1.1)');
+    toggleBtn.onmouseout = () => (toggleBtn.style.transform = 'scale(1)');
+
+    toggleBtn.onclick = () => this.toggle();
+    document.body.appendChild(toggleBtn);
   }
 
   public initKeyboardShortcut(): void {
@@ -528,6 +560,27 @@ export class DebugConsole {
     }
   }
 
+  public unlockAllLevels(): void {
+    campaignManager.unlockAll();
+    this.log('🔓 Alle Kampagnen-Level freigeschaltet! Reloading...', 'success');
+    setTimeout(() => location.reload(), 1000);
+  }
+
+  public completeCurrentLevel(): void {
+    const currentId = campaignManager.getCurrentLevelId();
+    if (currentId) {
+      campaignManager.completeLevel(currentId);
+      this.log(`✅ Level ${currentId} als abgeschlossen markiert.`, 'success');
+    } else {
+      this.log('⚠️ Kein aktives Level gefunden.', 'warn');
+    }
+  }
+
+  public resetCampaign(): void {
+    campaignManager.resetState();
+    this.log('❌ Kampagnen-Fortschritt zurückgesetzt.', 'info');
+  }
+
   public setupErrorLogging(): void {
     const originalError = console.error;
     console.error = (...args) => {
@@ -541,16 +594,23 @@ export class DebugConsole {
   }
 }
 
-// Auto-initialize
+// Auto-initialize with retry
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
+    const tryInit = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((window as any).game) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).debugConsole = new DebugConsole((window as any).game);
-        console.log('🛠️ Enhanced Debug Console ready. Press Ctrl+D to toggle.');
+        if (!(window as any).debugConsole) {
+          (window as any).debugConsole = new DebugConsole((window as any).game);
+          console.log(
+            '🛠️ Enhanced Debug Console ready. Press Ctrl+D or click the floating button.'
+          );
+        }
+      } else {
+        setTimeout(tryInit, 500); // Retry if game not yet ready
       }
-    }, 500);
+    };
+    tryInit();
   });
 }

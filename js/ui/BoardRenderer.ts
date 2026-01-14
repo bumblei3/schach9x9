@@ -365,6 +365,24 @@ export function initBoardUI(game: any): void {
 export function renderBoard(game: any): void {
   const size = getBoardSize(game);
 
+  // Apply skin class
+  const boardEl = document.getElementById('board');
+  if (boardEl) {
+    const currentSkin = localStorage.getItem('chess_skin');
+    if (currentSkin === 'infernale') {
+      boardEl.classList.add('skin-infernale');
+      boardEl.classList.remove('skin-frost');
+    } else if (currentSkin === 'frost') {
+      boardEl.classList.add('skin-frost');
+      boardEl.classList.remove('skin-infernale', 'skin-neon');
+    } else if (currentSkin === 'neon') {
+      boardEl.classList.add('skin-neon');
+      boardEl.classList.remove('skin-infernale', 'skin-frost');
+    } else {
+      boardEl.classList.remove('skin-infernale', 'skin-frost', 'skin-neon');
+    }
+  }
+
   if (!game._previousBoardState) {
     game._previousBoardState = Array(size)
       .fill(null)

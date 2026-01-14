@@ -28,6 +28,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
     <link rel="stylesheet" href="css/notifications.css">
     <link rel="stylesheet" href="css/menu.css">
     <link rel="stylesheet" href="css/tutorial.css">
+    <link rel="stylesheet" href="css/skins.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&amp;display=swap" rel="stylesheet">
 
     <!-- Import Map for Three.js (using jsDelivr CDN for better reliability) -->
@@ -44,6 +45,29 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
   
     <!-- Hidden H1 for Accessibility -->
     <h1 class="hidden">Schach 9x9</h1>
+
+    <!-- Global SVG Assets (Hidden) -->
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden" aria-hidden="true">
+      <defs>
+        <!-- Neon White Glow -->
+        <filter id="filter-neon-glow-white">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"></feGaussianBlur>
+          <feMerge>
+            <feMergeNode in="coloredBlur"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+        <!-- Neon Black Glow -->
+        <filter id="filter-neon-glow-black">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"></feGaussianBlur>
+          <feMerge>
+            <feMergeNode in="coloredBlur"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
+
     <!-- TOP LAYER: System-level notifications, errors, and loading -->
     <div id="top-layer">
       <!-- Toast Notifications Container -->
@@ -132,13 +156,6 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
 
           <!-- Chess Board -->
           <div id="board-container">
-            <!-- Vertical Evaluation Bar -->
-            <div id="evaluation-bar" class="evaluation-bar hidden">
-              <div id="eval-fill"></div>
-              <div id="eval-text">0.0</div>
-              <div id="eval-marker"></div>
-            </div>
-
             <!-- 3D Battle Chess Container -->
             <div id="battle-chess-3d-container"></div>
 
@@ -221,6 +238,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
               <option value="wood">Holz</option>
               <option value="neon">Neon</option>
               <option value="minimalist">Minimalistisch</option>
+              <option value="frost">Frost</option>
             </select>
             <button id="info-toggle-btn" class="action-icon-btn" title="Info / Log">
               <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
@@ -774,6 +792,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                         <option value="wood">Holz</option>
                         <option value="neon">Neon</option>
                         <option value="minimalist">Minimalistisch</option>
+                        <option value="frost">Frost</option>
                       </select>
                     </div>
                   </div>

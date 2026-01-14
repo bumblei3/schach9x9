@@ -79,4 +79,48 @@ export class BoardFactory {
 
     return board;
   }
+
+  static fromFEN(fen: string): Board {
+    const parts = fen.split(' ');
+    // Handle simplified FENs or full FENs (just take the board part)
+    const ranks = parts[0].split('/');
+    const size = ranks.length;
+
+    // Create board based on FEN rows (autodetect size)
+    // Default to 9x9 if something is weird, but usually FEN dictates it.
+    // If the FEN implies an 8x8 (8 rows), this creates an 8x8.
+    // Note: The game engine needs to know the board size too!
+    // Game.boardSize should probably be updated if we load a weird sized board.
+
+    const maxCol = ranks.reduce((max, row) => {
+      let w = 0;
+      for (const char of row) {
+        if (!isNaN(parseInt(char))) w += parseInt(char);
+        else w++;
+      }
+      return Math.max(max, w);
+    }, 0);
+
+    const board = this.createEmptyBoard(size, maxCol);
+
+    for (let r = 0; r < size; r++) {
+      let c = 0;
+      const rowStr = ranks[r];
+      for (let i = 0; i < rowStr.length; i++) {
+        const char = rowStr[i];
+        if (!isNaN(parseInt(char))) {
+          c += parseInt(char);
+        } else {
+          const color = char === char.toUpperCase() ? 'white' : 'black';
+          board[r][c] = {
+            type: char.toLowerCase() as any,
+            color: color,
+            hasMoved: false,
+          };
+          c++;
+        }
+      }
+    }
+    return board;
+  }
 }

@@ -38,6 +38,7 @@ vi.mock('../../js/campaign/CampaignManager.js', () => ({
           opponentPersonality: 'CAUTIOUS',
           playerColor: 'white',
           winCondition: 'checkmate',
+          fen: '8/8/8/8/8/8/8/8/8 w - - 0 1',
         };
       }
       if (levelId === 'level_2') {
@@ -49,6 +50,7 @@ vi.mock('../../js/campaign/CampaignManager.js', () => ({
           opponentPersonality: 'AGGRESSIVE',
           playerColor: 'black',
           winCondition: 'checkmate',
+          fen: '8/8/8/8/8/8/8/8/8 b - - 0 1',
         };
       }
       if (levelId === 'level_budget') {
@@ -71,12 +73,7 @@ vi.mock('../../js/campaign/CampaignManager.js', () => ({
 // Mock BoardFactory
 vi.mock('../../js/campaign/BoardFactory.js', () => ({
   BoardFactory: {
-    createLevel1Board: vi.fn(() =>
-      Array(9)
-        .fill(null)
-        .map(() => Array(9).fill(null))
-    ),
-    createLevel2Board: vi.fn(() =>
+    fromFEN: vi.fn(() =>
       Array(9)
         .fill(null)
         .map(() => Array(9).fill(null))
@@ -168,7 +165,7 @@ describe('CampaignModeStrategy', () => {
       expect(mockGame.aiPersonality).toBe('CAUTIOUS');
       expect(mockGame.playerColor).toBe('white');
       expect(mockGame.phase).toBe(PHASES.PLAY);
-      expect(BoardFactory.createLevel1Board).toHaveBeenCalled();
+      expect(BoardFactory.fromFEN).toHaveBeenCalled();
       expect(mockController.startClock).toHaveBeenCalled();
     });
 
@@ -181,7 +178,7 @@ describe('CampaignModeStrategy', () => {
       expect(mockGame.currentLevelId).toBe('level_2');
       expect(mockGame.aiPersonality).toBe('AGGRESSIVE');
       expect(mockGame.playerColor).toBe('black');
-      expect(BoardFactory.createLevel2Board).toHaveBeenCalled();
+      expect(BoardFactory.fromFEN).toHaveBeenCalled();
     });
 
     test('should setup budget level with setup phase', () => {

@@ -47,7 +47,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
       const wasmBuffer = await fs.readFile(wasmPath);
       // @ts-ignore
       const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
-      await wasmModule.default(wasmBuffer);
+      await wasmModule.default({ module_or_path: wasmBuffer });
     } else {
       // Standard wasm-bindgen init for browser (Vite/PWA)
       // @ts-ignore

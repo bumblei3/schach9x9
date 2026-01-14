@@ -1,0 +1,86 @@
+/* Infernal Skin Effects */
+
+.skin-infernale .piece-svg {
+  animation: burn 1.5s infinite alternate ease-in-out;
+  filter: drop-shadow(0 0 2px #ff4500);
+}
+
+@keyframes burn {
+  0% {
+    filter: drop-shadow(0 0 2px #ff4500) drop-shadow(0 0 3px #ff8c00);
+    transform: scale(1);
+  }
+
+  50% {
+    filter: drop-shadow(0 -1px 3px #ff0000) drop-shadow(0 -2px 5px #ffcc00);
+    transform: scale(1.02) translateY(-1px);
+  }
+
+  100% {
+    filter: drop-shadow(0 -2px 4px #ff4500) drop-shadow(0 -3px 6px #ffa500);
+    transform: scale(1.01) translateY(-0.5px);
+  }
+}
+
+/* Optional: Particle effect via pseudo-element if needed,
+   but drop-shadow filter is often cleaner for performance */
+
+/* Frost Skin Effects */
+.skin-frost .piece-svg {
+  animation: freeze 3s infinite alternate ease-in-out;
+  filter: drop-shadow(0 0 3px #00e5ff);
+}
+
+@keyframes freeze {
+  0% {
+    filter: drop-shadow(0 0 2px #00e5ff) brightness(1.1);
+    transform: scale(1);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 5px #00bcd4) brightness(1.3);
+    transform: scale(1.01) translateY(1px);
+  }
+
+  100% {
+    filter: drop-shadow(0 0 3px #00e5ff) brightness(1.1);
+    transform: scale(1);
+  }
+}
+
+/* Cyberpunk / Neon Skin Effects */
+.skin-neon .piece-svg {
+  animation: neon-flicker 4s infinite alternate;
+}
+
+/* White Pieces (Neon Green/Cyan) */
+/* Note: The SVGs themselves have a 'fill' color, but we can enhance the glow relative to their content or force it */
+.skin-neon .piece-white .piece-svg {
+  filter: drop-shadow(0 0 5px #00ff88) drop-shadow(0 0 10px #00ffff);
+}
+
+/* Black Pieces (Neon Pink/Purple) */
+.skin-neon .piece-black .piece-svg {
+  filter: drop-shadow(0 0 5px #ff00ff) drop-shadow(0 0 10px #ff0088);
+}
+
+@keyframes neon-flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px currentColor) drop-shadow(0 0 10px currentColor);
+  }
+
+  20%,
+  24%,
+  55% {
+    opacity: 0.8;
+    filter: none;
+  }
+}

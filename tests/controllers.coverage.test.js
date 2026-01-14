@@ -221,7 +221,9 @@ describe('Controllers Coverage Expansion', () => {
 
       game.drawOffered = true;
       game.drawOfferedBy = 'white';
-      const spy = vi.spyOn(ac, 'aiEvaluateDrawOffer').mockImplementation(() => Promise.resolve());
+      const spy = vi.spyOn(ac, 'aiEvaluateDrawOffer').mockImplementation(async () => {
+        game.phase = PHASES.GAME_OVER;
+      });
       vi.spyOn(ac, 'aiShouldResign').mockResolvedValue(false);
       vi.spyOn(ac, 'aiShouldOfferDraw').mockResolvedValue(false);
 

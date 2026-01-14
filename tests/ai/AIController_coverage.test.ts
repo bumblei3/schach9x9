@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { AIController } from '../../js/aiController.js';
 import { PHASES } from '../../js/gameEngine.js';
+import * as UI from '../../js/ui.js';
 
 // Mock UI.js
 vi.mock('../../js/ui.js', () => ({
@@ -10,6 +11,7 @@ vi.mock('../../js/ui.js', () => ({
   updateMoveHistoryUI: vi.fn(),
   renderEvalGraph: vi.fn(),
   drawEngineArrow: vi.fn(),
+  renderBoard: vi.fn(),
 }));
 
 // Mock aiEngine.js
@@ -24,6 +26,8 @@ vi.mock('../../js/aiEngine.js', () => ({
 // Mock Worker
 class MockWorker {
   _onmessage: ((e: any) => void) | null = null;
+  _listeners: Record<string, ((e: any) => void)[]> = {};
+
   set onmessage(handler: any) {
     this._onmessage = handler;
   }
@@ -32,8 +36,34 @@ class MockWorker {
   }
   postMessage = vi.fn();
   terminate = vi.fn();
-  addEventListener = vi.fn();
-  removeEventListener = vi.fn();
+
+  addEventListener(type: string, handler: any) {
+    console.log(`[DEBUG] MockWorker addEventListener: ${type}`);
+    if (!this._listeners[type]) this._listeners[type] = [];
+    this._listeners[type].push(handler);
+  }
+
+  removeEventListener(type: string, handler: any) {
+    console.log(`[DEBUG] MockWorker removeEventListener: ${type}`);
+    if (!this._listeners[type]) return;
+    this._listeners[type] = this._listeners[type].filter(h => h !== handler);
+  }
+
+  // Helper to trigger messages in test
+  emit(type: string, data: any) {
+    console.log(`[DEBUG] MockWorker emit: ${type}`);
+    const event = { data };
+    if (type === 'message') {
+      if (this.onmessage) {
+        console.log('[DEBUG] MockWorker calling onmessage');
+        this.onmessage(event);
+      }
+      if (this._listeners['message']) {
+        console.log(`[DEBUG] MockWorker calling ${this._listeners['message'].length} listeners`);
+        this._listeners['message'].forEach(h => h(event));
+      }
+    }
+  }
 }
 
 // @ts-ignore
@@ -89,6 +119,11 @@ describe('AIController Coverage Boost', () => {
       findKing: vi.fn().mockReturnValue({ r: 0, c: 4 }),
       getAllLegalMoves: vi.fn().mockReturnValue([]),
       renderBoard: vi.fn(),
+      placeKing: vi.fn(),
+      placeShopPiece: vi.fn().mockImplementation(() => {
+        mockGame.points -= 5; // Simulate spending points
+      }),
+      finishSetupPhase: vi.fn(),
     };
 
     // Setup DOM
@@ -173,19 +208,17 @@ describe('AIController Coverage Boost', () => {
     // Start aiMove
     const movePromise = controller.aiMove();
 
-    // Wait for workers to be initialized and onmessage assigned
-    while (!worker.onmessage) {
-      await new Promise(r => setTimeout(r, 0));
+    // Wait for search to be dispatched (listener attached and postMessage called)
+    while (worker.postMessage.mock.calls.length === 0) {
+      await new Promise(r => setTimeout(r, 10));
     }
 
     // Simulate worker response
-    worker.onmessage({
+    worker.emit('message', {
+      type: 'bestMove',
       data: {
-        type: 'bestMove',
-        data: {
-          move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
-          pv: [{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 } }],
-        },
+        move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
+        pv: [{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 } }],
       },
     });
 
@@ -195,25 +228,25 @@ describe('AIController Coverage Boost', () => {
 
   test('aiMove - fallback on timeout', async () => {
     vi.useFakeTimers();
+
+    // Provide legal moves for fallback
     mockGame.getAllLegalMoves.mockReturnValue([{ from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }]);
 
-    // Start move.
+    // Start move - this will initialize workers and wait for response
     const movePromise = controller.aiMove();
 
-    // Flush microtasks to reach evaluations
-    for (let i = 0; i < 30; i++) await Promise.resolve();
+    // Allow initial async setup to complete
+    await vi.advanceTimersByTimeAsync(100);
 
-    // Advance time past 30s
-    vi.advanceTimersByTime(31000);
+    // Advance time past the 30s timeout threshold
+    await vi.advanceTimersByTimeAsync(31000);
 
-    // Run any pending timers.
-    vi.runAllTimers();
-
-    // Final flush.
-    for (let i = 0; i < 10; i++) await Promise.resolve();
-
+    // Wait for the promise to resolve
     await movePromise;
+
+    // Verify that executeMove was called (either with worker result or fallback)
     expect(mockGame.executeMove).toHaveBeenCalled();
+
     vi.useRealTimers();
   });
 
@@ -224,12 +257,112 @@ describe('AIController Coverage Boost', () => {
   });
 
   test('toggleAnalysisMode - toggles active state', () => {
+    const analyzeSpy = vi.spyOn(controller, 'analyzePosition').mockImplementation(() => {});
     expect(controller.toggleAnalysisMode()).toBe(true);
+    expect(analyzeSpy).toHaveBeenCalled();
     expect(controller.toggleAnalysisMode()).toBe(false);
   });
 
   test('updateAnalysisStats - formats nodes correctly', () => {
     controller.updateAnalysisStats({ depth: 5, maxDepth: 10, nodes: 1000000 });
     expect(document.getElementById('analysis-engine-info')?.textContent).toContain('Tiefe: 5/10');
+  });
+
+  describe('AI Setup Phase', () => {
+    test('aiSetupKing - places king in correct row and valid column', () => {
+      // Mock Math.random to pick a specific column index (e.g., index 1 -> col 3)
+      const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5); // Index 1 from [0, 3, 6] -> 3
+
+      controller.aiSetupKing();
+
+      // Expect row 1, randomCol + 1 = 3 + 1 = 4
+      expect(mockGame.placeKing).toHaveBeenCalledWith(1, 4, 'black');
+      expect(UI.renderBoard).toHaveBeenCalled();
+
+      randomSpy.mockRestore();
+    });
+
+    test('aiSetupPieces - halts if points run out', () => {
+      // Setup initial state
+      mockGame.blackCorridor = 3;
+      mockGame.points = 0; // No points
+      mockGame.shopManager = { aiPerformUpgrades: vi.fn() };
+
+      controller.aiSetupPieces();
+
+      // Should finish setup immediately without placing pieces
+      expect(mockGame.placeShopPiece).not.toHaveBeenCalled();
+      expect(mockGame.finishSetupPhase).toHaveBeenCalled();
+    });
+
+    test('aiSetupPieces - places pieces when affordable', () => {
+      mockGame.blackCorridor = 0;
+      mockGame.points = 100; // Enough for pieces
+      mockGame.board[0][0] = null; // Ensure empty spot
+      // Mock findKing to help heuristic
+      mockGame.findKing.mockReturnValue({ r: 1, c: 1 });
+
+      // Mock random to ensure we pick a piece and valid spot
+      // We'll rely on the loop running at least once.
+      // To prevent infinite loop in test if logic fails, we trust the greedy logic breaks when points allow.
+      // We can inspect calls.
+
+      controller.aiSetupPieces();
+
+      expect(mockGame.selectedShopPiece).toBeDefined();
+      expect(mockGame.placeShopPiece).toHaveBeenCalled();
+      expect(mockGame.finishSetupPhase).toHaveBeenCalled();
+    });
+
+    test('aiSetupUpgrades - delegates to shopManager', () => {
+      const upgradeSpy = vi.fn();
+      mockGame.gameController = {
+        shopManager: {
+          aiPerformUpgrades: upgradeSpy,
+        },
+      };
+      controller.aiSetupUpgrades();
+      expect(upgradeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('AI Visuals and Analysis', () => {
+    test('highlightMove - adds classes and draws arrow', () => {
+      const move = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
+
+      controller.highlightMove(move);
+
+      const fromCell = document.querySelector('.cell[data-r="6"][data-c="4"]');
+      const toCell = document.querySelector('.cell[data-r="4"][data-c="4"]');
+
+      expect(fromCell?.classList.contains('analysis-from')).toBe(true);
+      expect(toCell?.classList.contains('analysis-to')).toBe(true);
+      expect(mockGame.arrowRenderer.drawArrow).toHaveBeenCalled();
+    });
+
+    test('highlightMove - ignores invalid move', () => {
+      controller.highlightMove(null);
+      expect(mockGame.arrowRenderer.drawArrow).not.toHaveBeenCalled();
+    });
+
+    test('handleWorkerMessage - processes analysis update', () => {
+      controller.initWorkerPool();
+      const worker = controller.aiWorkers[0] as any;
+
+      controller.setAnalysisUI({ update: vi.fn() });
+
+      // Trigger analysis message
+      worker.emit('message', {
+        type: 'analysis',
+        data: {
+          score: 150,
+          topMoves: [{ move: {}, score: 150, notation: 'e2e4' }],
+        },
+      });
+
+      // Verify
+      expect(controller.analysisUI?.update).toHaveBeenCalled();
+      expect(mockGame.bestMoves).toHaveLength(1);
+    });
   });
 });

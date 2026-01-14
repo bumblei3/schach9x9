@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    pool: 'threads', // Use threads instead of forks to avoid worker crash issues
     setupFiles: ['./tests/vitest.setup.ts'],
     include: ['tests/**/*.{test,unit.test,integration.test}.{js,ts}'],
     exclude: [

@@ -472,6 +472,32 @@ export class DOMHandler {
             }
           }
         }
+      } else {
+        const activeElement = document.activeElement;
+        const isInput =
+          activeElement &&
+          (activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.getAttribute('contenteditable') === 'true');
+        if (isInput) return;
+
+        const key = e.key.toLowerCase();
+        if (key === 'a') {
+          const btn = document.getElementById('toggle-analysis-btn');
+          if (btn) btn.click();
+        } else if (key === 'h') {
+          const btn = document.getElementById('hint-btn');
+          if (btn) btn.click();
+        } else if (key === 'b') {
+          const btn = document.getElementById('best-move-btn');
+          if (btn) btn.click();
+        } else if (key === 't') {
+          const btn = document.getElementById('threats-btn');
+          if (btn) btn.click();
+        } else if (key === 'o') {
+          const btn = document.getElementById('opportunities-btn');
+          if (btn) btn.click();
+        }
       }
     });
 

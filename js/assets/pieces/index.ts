@@ -6,6 +6,8 @@ import { wood } from './wood.ts';
 import { neon } from './neon.ts';
 import { minimalist } from './minimalist.ts';
 
+import { frost } from './frost.ts';
+
 export const PIECE_SETS: Record<string, any> = {
   classic,
   modern,
@@ -14,6 +16,7 @@ export const PIECE_SETS: Record<string, any> = {
   wood,
   neon,
   minimalist,
+  frost,
 };
 
 let currentSkin = 'classic';
@@ -44,5 +47,6 @@ export function getAvailableSkins(): { id: string; name: string }[] {
     { id: 'wood', name: 'Holz' },
     { id: 'neon', name: 'Neon' },
     { id: 'minimalist', name: 'Minimalistisch' },
+    { id: 'frost', name: 'Frost' },
   ];
 }

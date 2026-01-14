@@ -669,6 +669,7 @@ export class GameController {
     this.saveGameToStatistics(result, saveColorArg);
 
     // Show analysis prompt after a short delay (only if not campaign win)
+    /* 
     setTimeout(() => {
       // Only show analysis if NOT in campaign mode (or at least not winning campaign step)
       // Actually, disable for campaign entirely for now to avoid modal conflict
@@ -676,6 +677,7 @@ export class GameController {
         this.analysisUI.showAnalysisPrompt();
       }
     }, 2000);
+    */
 
     console.log('[GameController] handleGameEnd check:', {
       campaignMode: this.game.campaignMode,

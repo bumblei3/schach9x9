@@ -90,6 +90,13 @@ export class CampaignManager {
     return this.state.currentLevelId;
   }
 
+  public unlockAll(): void {
+    const allIds = CAMPAIGN_LEVELS.map(l => l.id);
+    // Merge unique IDs
+    this.state.unlockedLevels = [...new Set([...this.state.unlockedLevels, ...allIds])];
+    this.saveState();
+  }
+
   public resetState(): void {
     this.state = {
       currentLevelId: 'tutorial_1',
