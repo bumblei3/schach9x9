@@ -55,11 +55,11 @@ export function updateShopUI(game: any): void {
   if (finishBtn) {
     finishBtn.disabled = false;
     // Show button during upgrade phases or piece placement
-    const phase = game.phase;
-    if (phase === 'setup_white_upgrades' || phase === 'setup_black_upgrades') {
+    const phase = String(game.phase);
+    if (phase === 'SETUP_WHITE_UPGRADES' || phase === 'SETUP_BLACK_UPGRADES') {
       finishBtn.textContent = 'Fertig';
       finishBtn.classList.remove('hidden');
-    } else if (phase === 'setup_white_pieces' || phase === 'setup_black_pieces') {
+    } else if (phase === 'SETUP_WHITE_PIECES' || phase === 'SETUP_BLACK_PIECES') {
       finishBtn.textContent = 'Fertig'; // Or 'Start Game'
       finishBtn.classList.remove('hidden');
     }

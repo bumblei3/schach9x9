@@ -407,7 +407,9 @@ export class AIController {
     this.currentBookMode = this.game.mode;
 
     const bookFile =
-      this.game.mode === 'standard8x8' ? 'opening-book-8x8.json' : 'opening-book.json';
+      this.game.mode === 'standard8x8' || this.game.mode === 'upgrade8x8'
+        ? 'opening-book-8x8.json'
+        : 'opening-book.json';
 
     // Load opening book once
     fetch(bookFile)
