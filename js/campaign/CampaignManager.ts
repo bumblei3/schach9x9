@@ -51,6 +51,9 @@ export class CampaignManager {
         if (parsed.championType === undefined) {
           parsed.championType = null;
         }
+        if (!parsed.levelStars) {
+          parsed.levelStars = {};
+        }
         return parsed;
       } catch (e) {
         console.error('Failed to parse campaign state', e);
