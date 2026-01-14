@@ -181,7 +181,7 @@ function runWorkerSearch(
         workerPendingRequests.delete(id);
         reject(new Error('AI Worker timed out'));
       }
-    }, 5000); // 5s hard timeout limit
+    }, 30000); // 30s timeout limit
 
     workerPendingRequests.set(id, {
       resolve: val => {

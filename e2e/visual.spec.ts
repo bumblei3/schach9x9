@@ -119,7 +119,13 @@ test.describe('Visual Regression Tests @visual', () => {
       scale: 'css', // Ensures dimensions match the baseline
     });
   });
-  test.skip('Pawn Promotion Modal', async ({ page }) => {
+  test('Pawn Promotion Modal', async ({ page }) => {
+    // Force 2D mode and disable animations for stability
+    await page.addInitScript(() => {
+      localStorage.setItem('disable_animations', 'true');
+      localStorage.setItem('settings_3d_mode', 'false');
+    });
+
     // 1. Enter Hire Mode (Standard 9x9)
     await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
     const mainMenu = page.locator('#main-menu');
@@ -135,11 +141,17 @@ test.describe('Visual Regression Tests @visual', () => {
       if (window.app && window.app.game) {
         // @ts-ignore
         window.app.game.isAI = false;
+        // @ts-ignore
+        // Ensure 3D is disabled in runtime if possible
+        if (window.app.boardRenderer && window.app.boardRenderer.battleChess3D) {
+          // @ts-ignore
+          window.app.boardRenderer.battleChess3D.enabled = false;
+        }
       }
     });
 
     // Place Black King (required)
-    // Wait for auto-transition to Black King setup? 
+    // Wait for auto-transition to Black King setup?
     // Usually happens immediately after White King.
     // Let's click e9 (Row 0)
     await page.locator('.cell[data-r="0"][data-c="4"]').click();
@@ -181,14 +193,15 @@ test.describe('Visual Regression Tests @visual', () => {
         // @ts-ignore
         window.app.game.isAI = false;
         // @ts-ignore
-        window.app.game.turn = 8; // Force Turn White
-
+        window.app.game.turn = 'white'; // Force Turn White (String, not int)
 
         // Manually place White Pawn at (1,0) for promotion test
         // (1,0) is outside valid setup zone, so we must inject it
-        // row 1, col 0 -> index 9. White Pawn = 8 | 1 = 9.
+        // game.board is 2D array of objects in the main App
         // @ts-ignore
-        window.app.game.board[9] = 9;
+        if (!window.app.game.board[1]) window.app.game.board[1] = [];
+        // @ts-ignore
+        window.app.game.board[1][0] = { type: 'p', color: 'white', hasMoved: true };
 
         // @ts-ignore
         window.app.gameController.updateShopUI();
@@ -221,6 +234,8 @@ test.describe('Visual Regression Tests @visual', () => {
     await expect(modal).not.toHaveClass(/hidden/);
 
     // 5. Screenshot
+    // Wait for any CSS transitions (even if animations disabled, opacity/display might have delays)
+    await page.waitForTimeout(500);
     await expect(modal).toHaveScreenshot('promotion-modal.png', {
       maxDiffPixelRatio: 0.1,
     });

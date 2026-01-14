@@ -34,6 +34,8 @@
   </head>
 
   <body>
+    <!-- Hidden H1 for Accessibility -->
+    <h1 class="hidden">Schach 9x9</h1>
     <!-- TOP LAYER: System-level notifications, errors, and loading -->
     <div id="top-layer">
       <!-- Toast Notifications Container -->
@@ -130,7 +132,7 @@
         </header>
 
         <!-- Main Game Area -->
-        <main class="game-area">
+        <div class="game-area" role="main">
           <!-- Opponent Info / Clock -->
           <div class="player-info opponent">
             <div class="player-details">
@@ -324,7 +326,12 @@
                 <line x1="12" y1="22.08" x2="12" y2="12" />
               </svg>
             </button>
-            <select id="skin-selector" class="skin-selector" title="Figuren-Skin auswählen">
+            <select
+              id="skin-selector"
+              class="skin-selector"
+              title="Figuren-Skin auswählen"
+              aria-label="Figuren-Skin auswählen"
+            >
               <option value="classic">Klassisch</option>
               <option value="modern">Modern</option>
               <option value="pixel">Pixel</option>
@@ -363,7 +370,7 @@
               </svg>
             </button>
           </div>
-        </main>
+        </div>
 
         <!-- PANEL LAYER: Contextual side/top panels -->
         <div id="panel-layer">

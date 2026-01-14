@@ -254,7 +254,7 @@ function generateSlidingMoves(
 
   for (const offset of offsets) {
     let to = from;
-    for (; ;) {
+    for (;;) {
       to += offset;
       // dist++;
 
@@ -462,7 +462,7 @@ function checkRayAttacks(
 
   for (const offset of ranges) {
     let curr = square;
-    for (; ;) {
+    for (;;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 
@@ -673,7 +673,7 @@ function findRayLVA(
 
   for (const offset of offsets) {
     let curr = square;
-    for (; ;) {
+    for (;;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 

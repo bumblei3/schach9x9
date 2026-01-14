@@ -56,13 +56,13 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.220 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.
 
-| Modul             | Coverage (Lines) | Beschreibung                                         |
-| ----------------- | ---------------- | ---------------------------------------------------- |
-| **Global**        | **> 88%**        | Gesamtheitliche Codeabdeckung.                       |
-| **AI Engine**     | > 90%            | Validierung von Suchalgorithmen und Bewertung.       |
-| **3D Engine**     | > 95%            | PieceManager3D und SceneManager3D Abdeckung.         |
-| **Logic & Rules** | > 99%            | Spielregeln, Move-Validation und Game-State.         |
-| **UI Components** | > 95%            | AnalysisUI, ShopManager und PuzzleMenu Abdeckung.    |
+| Modul             | Coverage (Lines) | Beschreibung                                      |
+| ----------------- | ---------------- | ------------------------------------------------- |
+| **Global**        | **> 88%**        | Gesamtheitliche Codeabdeckung.                    |
+| **AI Engine**     | > 90%            | Validierung von Suchalgorithmen und Bewertung.    |
+| **3D Engine**     | > 95%            | PieceManager3D und SceneManager3D Abdeckung.      |
+| **Logic & Rules** | > 99%            | Spielregeln, Move-Validation und Game-State.      |
+| **UI Components** | > 95%            | AnalysisUI, ShopManager und PuzzleMenu Abdeckung. |
 
 ## 📁 Projektstruktur
 

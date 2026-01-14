@@ -42,6 +42,7 @@
     "vitest": "^4.0.17"
   },
   "dependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "three": "^0.160.1"
   }
 }
