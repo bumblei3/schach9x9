@@ -1,5 +1,6 @@
-import { CAMPAIGN_LEVELS, CAMPAIGN_PERKS } from './campaignData.js';
-import { CampaignState, Level, Perk, UnitXp } from './types.js';
+import { CAMPAIGN_LEVELS } from './campaignData.js';
+import { CampaignState, Level, UnitXp } from './types.js';
+import { UNIT_TALENT_TREES } from './talents.js';
 
 export class CampaignManager {
   private state: CampaignState;
@@ -28,6 +29,7 @@ export class CampaignManager {
           c: { xp: 0, level: 1, captures: 0 },
           e: { xp: 0, level: 1, captures: 0 },
         },
+        unlockedTalentIds: [],
         championType: null,
       };
     }
@@ -57,6 +59,12 @@ export class CampaignManager {
         if (parsed.gold === undefined) {
           parsed.gold = 0;
         }
+        if (!parsed.unlockedPerks) {
+          parsed.unlockedPerks = [];
+        }
+        if (!parsed.unlockedTalentIds) {
+          parsed.unlockedTalentIds = [];
+        }
         return parsed;
       } catch (e) {
         console.error('Failed to parse campaign state', e);
@@ -81,13 +89,15 @@ export class CampaignManager {
         c: { xp: 0, level: 1, captures: 0 },
         e: { xp: 0, level: 1, captures: 0 },
       },
+      unlockedTalentIds: [],
       championType: null,
     };
   }
 
-  private saveState(): void {
+  saveGame(): void {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('schach_campaign_state', JSON.stringify(this.state));
+      window.dispatchEvent(new Event('campaign-update'));
     }
   }
 
@@ -99,7 +109,14 @@ export class CampaignManager {
     return CAMPAIGN_LEVELS;
   }
 
-  public isLevelUnlocked(levelId: string): boolean {
+  unlockLevel(levelId: string): void {
+    if (!this.state.unlockedLevels.includes(levelId)) {
+      this.state.unlockedLevels.push(levelId);
+      this.saveGame();
+    }
+  }
+
+  isLevelUnlocked(levelId: string): boolean {
     return this.state.unlockedLevels.includes(levelId);
   }
 
@@ -111,54 +128,52 @@ export class CampaignManager {
     return this.state.unlockedRewards.includes(rewardId);
   }
 
-  public getGold(): number {
+  getGold(): number {
     return this.state.gold;
+  }
+
+  addGold(amount: number): void {
+    this.state.gold += amount;
+    this.saveGame();
+  }
+
+  spendGold(amount: number): boolean {
+    if (this.state.gold >= amount) {
+      this.state.gold -= amount;
+      this.saveGame();
+      return true;
+    }
+    return false;
   }
 
   public getUnlockedPerks(): string[] {
     return this.state.unlockedPerks;
   }
 
-  public isPerkUnlocked(perkId: string): boolean {
-    return this.state.unlockedPerks.includes(perkId);
+  isPerkUnlocked(perkId: string): boolean {
+    return this.state.unlockedPerks && this.state.unlockedPerks.includes(perkId);
   }
 
-  public buyPerk(perkId: string): boolean {
-    const perk = CAMPAIGN_PERKS.find((p: Perk) => p.id === perkId);
-    if (!perk) return false;
-
-    if (this.state.gold >= perk.cost && !this.state.unlockedPerks.includes(perkId)) {
-      this.state.gold -= perk.cost;
+  unlockPerk(perkId: string): void {
+    if (!this.isPerkUnlocked(perkId)) {
       this.state.unlockedPerks.push(perkId);
-      this.saveState();
-      return true;
+      this.saveGame();
     }
-    return false;
   }
 
-  public setChampion(type: string | null): void {
-    this.state.championType = type;
-    this.saveState();
+  setChampion(unitType: string | null): void {
+    this.state.championType = unitType;
+    this.saveGame();
   }
 
-  public addUnitXp(type: string, amount: number): void {
-    const xpEntry = this.state.unitXp[type];
-    if (!xpEntry) return;
-
-    xpEntry.xp += amount;
-    xpEntry.captures += 1;
-
-    // Check for level up
-    const nextLevelXp = xpEntry.level * 100; // Simplified: 100, 200, 300...
-    if (xpEntry.xp >= nextLevelXp) {
-      xpEntry.level += 1;
-    }
-    this.saveState();
+  getChampion(): string | null {
+    return this.state.championType;
   }
 
-  public getUnitXp(type: string): UnitXp {
+  // XP System
+  public getUnitXp(unitType: string): UnitXp {
     return (
-      this.state.unitXp[type] || {
+      this.state.unitXp[unitType] || {
         xp: 0,
         level: 1,
         captures: 0,
@@ -166,29 +181,54 @@ export class CampaignManager {
     );
   }
 
+  addUnitXp(unitType: string, amount: number, captures: number = 0): boolean {
+    const unitStats = this.getUnitXp(unitType);
+    let leveledUp = false;
+
+    unitStats.xp += amount;
+    if (captures > 0) {
+      unitStats.captures = (unitStats.captures || 0) + captures;
+    }
+
+    // Level Logik: 1 -> 2 (100XP), 2 -> 3 (300XP), etc.
+    // Simple cap at Level 3 for now, or higher for Talents
+    const xpThresholds = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500]; // Bis Level 10
+
+    const nextLevel = unitStats.level + 1;
+    if (
+      xpThresholds[nextLevel - 1] !== undefined &&
+      unitStats.xp >= xpThresholds[nextLevel - 1]
+    ) {
+      unitStats.level = nextLevel;
+      leveledUp = true;
+    }
+
+    this.state.unitXp[unitType] = unitStats;
+    this.saveGame();
+
+    return leveledUp;
+  }
+
+  incrementUnitCaptures(unitType: string): void {
+    const unitStats = this.getUnitXp(unitType);
+    unitStats.captures++;
+    this.state.unitXp[unitType] = unitStats;
+    this.saveGame();
+  }
+
   public getLevelStars(levelId: string): number {
     return this.state.levelStars[levelId] || 0;
   }
 
-  public completeLevel(levelId: string, stats?: any): number {
+  completeLevel(levelId: string, stars: number = 0): void {
     if (!this.state.completedLevels.includes(levelId)) {
       this.state.completedLevels.push(levelId);
     }
 
     const level = this.getLevel(levelId);
-    if (!level) return 0;
+    if (!level) return;
 
-    // Calculate Stars
-    let stars = 1; // Base star for winning
-    if (stats && level.goals) {
-      if (this.checkGoal(level.goals[2], stats)) {
-        stars = 2;
-      }
-      if (stars === 2 && this.checkGoal(level.goals[3], stats)) {
-        stars = 3;
-      }
-    }
-
+    // Update stars if higher
     const currentStars = this.state.levelStars[levelId] || 0;
     if (stars > currentStars) {
       this.state.levelStars[levelId] = stars;
@@ -216,24 +256,7 @@ export class CampaignManager {
         this.state.unlockedLevels.push(nextLevel.id);
         this.state.currentLevelId = nextLevel.id;
       }
-    }
-
-    this.saveState();
-    return stars;
-  }
-
-  private checkGoal(goal: any, stats: any): boolean {
-    if (!goal || !stats) return false;
-    switch (goal.type) {
-      case 'moves':
-        // stats.moves is full moves
-        return stats.moves <= goal.value;
-      case 'material':
-        return stats.materialDiff >= goal.value;
-      case 'promotion':
-        return stats.promotedCount >= goal.value;
-      default:
-        return false;
+      this.saveGame();
     }
   }
 
@@ -245,7 +268,33 @@ export class CampaignManager {
     const allIds = CAMPAIGN_LEVELS.map(l => l.id);
     // Merge unique IDs
     this.state.unlockedLevels = [...new Set([...this.state.unlockedLevels, ...allIds])];
-    this.saveState();
+    this.saveGame();
+  }
+
+
+
+  // Talent System
+  isTalentUnlocked(talentId: string): boolean {
+    return this.state.unlockedTalentIds && this.state.unlockedTalentIds.includes(talentId);
+  }
+
+  unlockTalent(unitType: string, talentId: string, cost: number): boolean {
+    // Validate existence
+    const tree = UNIT_TALENT_TREES[unitType];
+    if (!tree) return false;
+    const talent = tree.talents.find(t => t.id === talentId);
+    if (!talent) return false;
+
+    if (this.isTalentUnlocked(talentId)) return true; // Already unlocked
+
+    // Check cost
+    if (this.state.gold < cost) return false;
+
+    this.state.gold -= cost;
+    if (!this.state.unlockedTalentIds) this.state.unlockedTalentIds = [];
+    this.state.unlockedTalentIds.push(talentId);
+    this.saveGame();
+    return true;
   }
 
   public resetState(): void {
@@ -267,9 +316,10 @@ export class CampaignManager {
         c: { xp: 0, level: 1, captures: 0 },
         e: { xp: 0, level: 1, captures: 0 },
       },
+      unlockedTalentIds: [],
       championType: null,
     };
-    this.saveState();
+    this.saveGame();
   }
 }
 

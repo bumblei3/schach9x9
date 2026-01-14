@@ -106,6 +106,7 @@ describe('DOMHandler', () => {
         exitAnalysisMode: vi.fn(),
         toggleContinuousAnalysis: vi.fn(),
         finishSetupPhase: vi.fn(),
+        requestHint: vi.fn(),
       },
     };
 
@@ -202,7 +203,7 @@ describe('DOMHandler', () => {
 
   test('should wire up tutor hint button', () => {
     document.getElementById('hint-btn').click();
-    expect(app.game.tutorController.showHint).toHaveBeenCalled();
+    expect(app.gameController.requestHint).toHaveBeenCalled();
   });
 
   test('should handle menu toggle', () => {

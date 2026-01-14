@@ -276,13 +276,16 @@ export class CampaignUI {
   }
 
   buyPerk(perk: any): void {
-    const success = campaignManager.buyPerk(perk.id);
-    if (success) {
+    if (campaignManager.isPerkUnlocked(perk.id)) return;
+
+    // Attempt purchase
+    if (campaignManager.spendGold(perk.cost)) {
+      campaignManager.unlockPerk(perk.id);
       this.updateGoldDisplay();
       this.renderPerks();
       showToast(`${perk.name} erfolgreich gekauft!`, 'success');
     } else {
-      showToast(`Kauf fehlgeschlagen!`, 'error');
+      showToast(`Nicht genug Gold!`, 'error');
     }
   }
 
@@ -332,11 +335,14 @@ export class CampaignUI {
            <span>nächstes Level: ${nextLevelXp}</span>
         </div>
 
-        <div style="margin-top: auto; padding-top: 1rem;">
+        <div style="margin-top: auto; padding-top: 1rem; display: flex; flex-direction: column; gap: 8px;">
            <button class="champion-btn btn-secondary" 
                    style="width: 100%; font-size: 0.8rem; border-color: ${isChampion ? '#f59e0b' : 'rgba(255,255,255,0.1)'}; color: ${isChampion ? '#f59e0b' : 'inherit'};"
                    ${isChampion ? 'disabled' : ''}>
              ${isChampion ? 'DEIN CHAMPION' : 'ALS CHAMPION WÄHLEN'}
+           </button>
+           <button class="talents-btn btn-secondary" style="width: 100%; font-size: 0.8rem; border-color: rgba(78, 205, 196, 0.3); color: #4ecdc4;">
+             🔮 TALENTBAUM
            </button>
         </div>
       `;
@@ -349,6 +355,13 @@ export class CampaignUI {
           showToast(`${names[type]} ist jetzt dein Champion!`, 'success');
         });
       }
+
+      const talentsBtn = card.querySelector('.talents-btn');
+      talentsBtn?.addEventListener('click', () => {
+        import('./TalentTreeUI.js').then(module => {
+          module.talentTreeUI.show(type);
+        });
+      });
 
       grid.appendChild(card);
     });

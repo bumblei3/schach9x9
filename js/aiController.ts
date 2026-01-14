@@ -456,6 +456,89 @@ export class AIController {
   }
 
   /**
+   * Calculates the best move for the current player without executing it.
+   * Used for the Interactive Tutor hint system.
+   */
+  public async getHint(depth: number = 4): Promise<{ move: any; explanation: string } | null> {
+    if (this.game.phase === PHASES.GAME_OVER) return null;
+
+    // Initialize pool if needed
+    if (!this.aiWorkers || this.aiWorkers.length === 0) {
+      this.initWorkerPool();
+    }
+
+    const boardInt = aiEngine.convertBoardToInt(this.game.board);
+    const lastMove = this.game.lastMove;
+    const workerResults: any[] = [];
+    let completedWorkers = 0;
+    const numWorkers = this.aiWorkers.length;
+
+    return new Promise(resolve => {
+      const processResults = () => {
+        const bestResult = workerResults.find(r => r && r.move);
+        if (bestResult && bestResult.move) {
+          // Generate simple explanation based on score/action
+          let explanation = 'Ein solider Zug.';
+          if (bestResult.score > 300) explanation = 'Gewinnt deutlich Material.';
+          else if (bestResult.score > 100) explanation = 'Verschafft einen Vorteil.';
+          else if (bestResult.move.capture) explanation = 'Schlägt eine gegnerische Figur.';
+          else if (bestResult.move.promotion) explanation = 'Holt eine neue Figur.';
+          else explanation = 'Verbessert die Position.';
+
+          resolve({ move: bestResult.move, explanation });
+        } else {
+          resolve(null);
+        }
+      };
+
+      // Set timeout
+      const timeoutId = setTimeout(() => {
+        logger.warn('[AI] Hint generation timed out');
+        processResults();
+      }, 5000);
+
+      const workerHandler = (e: MessageEvent) => {
+        const { type, id, bestMove, score, pv } = e.data;
+        if (type === 'bestMove') {
+          workerResults[id] = { move: bestMove, score, pv };
+          completedWorkers++;
+          if (completedWorkers >= numWorkers) {
+            clearTimeout(timeoutId);
+            processResults();
+          }
+        }
+      };
+
+      // Dispatch to workers
+      // Use different personalities for broader search, or just Normal/Balanced
+      const personalities = ['AGGRESSIVE', 'DEFENSIVE', 'POSITIONAL', 'NORMAL'];
+
+      this.aiWorkers.forEach((w, i) => {
+        // Temporarily override onmessage for this hint request
+        // Note: This is a bit risky if AI is also moving. Hints should only be requested on player turn.
+        w.onmessage = workerHandler;
+
+        const p = personalities[i % personalities.length] || 'NORMAL';
+        const color = this.game.turn === 'white' ? 0 : 1;
+
+        w.postMessage({
+          type: 'search',
+          data: {
+            board: boardInt,
+            color,
+            depth,
+            alpha: -Infinity,
+            beta: Infinity,
+            lastMove,
+            personality: p,
+            id: i
+          },
+        });
+      });
+    });
+  }
+
+  /**
    * Central worker message dispatcher
    */
   private handleWorkerMessage(e: MessageEvent, workerIndex: number): void {

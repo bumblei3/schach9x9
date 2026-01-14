@@ -25,7 +25,6 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
     game.board,
     turnColor,
     6,
-    'expert',
     {
       maxTime: 1500, // Limit search time to 1.5s for responsiveness
     }
@@ -161,8 +160,8 @@ function createTemplate(
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-        `(Pieces: ${pieces.join(', ')})`
+      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+      `(Pieces: ${pieces.join(', ')})`
     );
   }
 

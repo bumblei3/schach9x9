@@ -66,7 +66,7 @@ export class TutorController {
 
         if (confirm(`Möchtest du 10 Gold für einen Taktik-Tipp ausgeben?`)) {
           (campaignManager as any).state.gold -= cost;
-          (campaignManager as any).saveState();
+          (campaignManager as any).saveGame();
           showToast(`-10 Gold für Taktik-Tipp`, 'neutral');
         } else {
           return;

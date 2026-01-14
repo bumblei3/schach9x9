@@ -208,8 +208,11 @@ export class DOMHandler {
     const hintBtn = document.getElementById('hint-btn');
     if (hintBtn) {
       hintBtn.addEventListener('click', () => {
-        if (this.game && this.game.tutorController) {
-          this.game.tutorController.showHint();
+        if (this.gameController && this.gameController.requestHint) {
+          this.gameController.requestHint();
+        } else {
+          // Fallback if gameController isn't ready or doesn't have the method
+          console.warn('[DOMHandler] requestHint not available on gameController');
         }
       });
     }

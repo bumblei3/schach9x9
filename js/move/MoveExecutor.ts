@@ -126,6 +126,16 @@ export async function executeMove(
     const capturerColor = piece.color;
     game.capturedPieces[capturerColor].push(targetPiece);
     UI.updateCapturedUI(game);
+
+    // Talent: Scavenger (Pawn)
+    // Erhalte 1-2 Gold beim Schlagen von Figuren.
+    if ((game as any).campaignMode && piece.color === (game as any).playerColor && piece.type === 'p') {
+      if (campaignManager.isTalentUnlocked('p_scavenger')) {
+        const bonus = Math.floor(Math.random() * 2) + 1; // 1-2 Gold
+        campaignManager.addGold(bonus);
+        notificationUI.show(`Plünderer: +${bonus} Gold gefunden!`, 'success', 'Talent');
+      }
+    }
   } else if (
     (moveRecord as any).specialMove &&
     (moveRecord as any).specialMove.type === 'enPassant'
@@ -137,7 +147,13 @@ export async function executeMove(
 
   // Award XP in Campaign Mode
   if ((game as any).campaignMode && piece.color === (game as any).playerColor && (targetPiece || moveRecord.isEnPassant)) {
-    const xpAmount = 10;
+    let xpAmount = 10;
+
+    // Talent: Veteran (Pawn) - +20% XP
+    if (piece.type === 'p' && campaignManager.isTalentUnlocked('p_veteran')) {
+      xpAmount += 2;
+    }
+
     const oldLevel = campaignManager.getUnitXp(piece.type).level;
     campaignManager.addUnitXp(piece.type, xpAmount);
     const newLevel = campaignManager.getUnitXp(piece.type).level;

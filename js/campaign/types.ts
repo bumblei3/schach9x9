@@ -61,5 +61,6 @@ export interface CampaignState {
   unlockedPerks: string[];
   levelStars: Record<string, number>; // levelId -> stars (1-3)
   unitXp: Record<string, UnitXp>; // unit type (p, n, b, r, q) -> XP
+  unlockedTalentIds: string[];
   championType: string | null; // e.g. 'n' for Knight
 }

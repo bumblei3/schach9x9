@@ -78,6 +78,28 @@ self.onmessage = async function (e: MessageEvent) {
         break;
       }
 
+      case 'search': {
+        const { board, color, depth, personality } = data;
+        // setProgressCallback((progress: any) => {
+        //   (self as any).postMessage({ type: 'progress', id, data: progress });
+        // });
+
+        try {
+          const timeParams = {
+            personality,
+            maxDepth: depth,
+          };
+          const result = await getBestMoveDetailed(board, color, depth, timeParams);
+          // Send back as 'bestMove' to match what AIController.getHint expects
+          // result contains { bestMove, score, pv, ... }
+          (self as any).postMessage({ type: 'bestMove', id, ...result });
+        } catch (error) {
+          (logger as any).error('[AI Worker] search failed:', error);
+          (self as any).postMessage({ type: 'bestMove', id, bestMove: null });
+        }
+        break;
+      }
+
       default: {
         // Compatible with old protocol just in case? 'SEARCH'
         if (type === 'SEARCH') {

@@ -48,6 +48,7 @@ export interface GameExtended extends Game {
   currentPuzzle?: any;
   calculateMaterialAdvantage: (color: Player) => number;
   gameController?: any;
+  aiController?: any;
 }
 
 export class GameController {
@@ -597,6 +598,51 @@ export class GameController {
 
   toggleContinuousAnalysis(): void {
     this.analysisController.toggleContinuousAnalysis();
+  }
+
+  async requestHint(): Promise<void> {
+    if (this.game.phase !== PHASES.PLAY || this.game.turn !== this.game.playerColor) {
+      notificationUI.show('Tipps sind nur verfügbar, wenn du am Zug bist.', 'info');
+      return;
+    }
+
+    if (!this.game.isAI) {
+      // Initialize AI controller if playing hotseat
+      if (!this.game.aiController) {
+        // Dynamic import to avoid circular dependency issues if any
+        // But Game should have it. If not, we can't hint.
+        notificationUI.show('Tipps sind in diesem Modus nicht verfügbar.', 'warning');
+        return;
+      }
+    }
+
+    notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
+
+    // We assume game.aiController is available
+    if ((this.game as any).aiController) {
+      // Use lower depth for hints to be fast
+      const result = await (this.game as any).aiController.getHint(4);
+
+      if (result) {
+        const { move, explanation } = result;
+        const from = move.from;
+        const to = move.to;
+
+        // Visualize hint
+        if (this.game.arrowRenderer) {
+          this.game.arrowRenderer.clearArrows();
+          this.game.arrowRenderer.addArrow(
+            { r: from.r, c: from.c },
+            { r: to.r, c: to.c },
+            '#facc15' // Yellow/Gold for hint
+          );
+        }
+
+        notificationUI.show(`Tipp: ${explanation}`, 'success', 'Tutor', 5000);
+      } else {
+        notificationUI.show('Der Tutor konnte keinen klaren Rat finden.', 'info');
+      }
+    }
   }
 
   /**
