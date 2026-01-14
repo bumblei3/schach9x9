@@ -83,7 +83,7 @@ function areMovesEqual(m1: any, m2: any): boolean {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function orderMoves(
-  board: number[],
+  board: number[] | Int8Array,
   moves: any[],
   ttMove: any,
   killers: any,

@@ -119,4 +119,110 @@ test.describe('Visual Regression Tests @visual', () => {
       scale: 'css', // Ensures dimensions match the baseline
     });
   });
+  test.skip('Pawn Promotion Modal', async ({ page }) => {
+    // 1. Enter Hire Mode (Standard 9x9)
+    await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    const mainMenu = page.locator('#main-menu');
+    await expect(mainMenu).not.toHaveClass(/active/);
+
+    // 2. Setup Board for Promotion
+    // Place White King (required)
+    await page.locator('.cell[data-r="8"][data-c="4"]').click(); // e1 (Row 8)
+
+    // Force Opponent to Human to allow manual placement of Black King
+    await page.evaluate(() => {
+      // @ts-ignore
+      if (window.app && window.app.game) {
+        // @ts-ignore
+        window.app.game.isAI = false;
+      }
+    });
+
+    // Place Black King (required)
+    // Wait for auto-transition to Black King setup? 
+    // Usually happens immediately after White King.
+    // Let's click e9 (Row 0)
+    await page.locator('.cell[data-r="0"][data-c="4"]').click();
+
+    // Ensure state is correct and Shop is shown (robustness)
+    await page.evaluate(() => {
+      // @ts-ignore
+      if (window.app.game.phase !== 'SETUP_WHITE_PIECES') {
+        console.warn('Phase mismatch, forcing SETUP_WHITE_PIECES');
+        // @ts-ignore
+        window.app.game.phase = 'SETUP_WHITE_PIECES';
+      }
+      // @ts-ignore
+      window.app.gameController.showShop(true);
+    });
+
+    // Wait for Shop (White Pieces setup)
+    const shop = page.locator('#shop-panel');
+    await expect(shop).toBeVisible();
+
+    // Place White Pawn on Row 1, Col 0 (Close to promotion at Row 0)
+    // Buy a Pawn first
+    const pawnCard = shop.locator('.shop-item[data-piece="p"]');
+    await pawnCard.click();
+
+    // Place it on Row 1, Col 0 (a8?)
+    // Note: White promotes at Row 0.
+    await page.locator('.cell[data-r="1"][data-c="0"]').click();
+
+    // Force points to 0 AND advance phase to skip remaining setup steps
+    await page.evaluate(() => {
+      console.log('%c[Test] Forcing game state skip...', 'color:magenta');
+      // @ts-ignore
+      if (window.app && window.app.game) {
+        // @ts-ignore
+        window.app.game.points = 0;
+        // @ts-ignore
+        window.app.game.phase = 'SETUP_BLACK_UPGRADES';
+        // @ts-ignore
+        window.app.game.isAI = false;
+        // @ts-ignore
+        window.app.game.turn = 8; // Force Turn White
+
+
+        // Manually place White Pawn at (1,0) for promotion test
+        // (1,0) is outside valid setup zone, so we must inject it
+        // row 1, col 0 -> index 9. White Pawn = 8 | 1 = 9.
+        // @ts-ignore
+        window.app.game.board[9] = 9;
+
+        // @ts-ignore
+        window.app.gameController.updateShopUI();
+      }
+    });
+
+    // Finish Setup
+    await page.click('#finish-setup-btn');
+
+    // Fallback: If modal appears despite point hack, click "Fortfahren"
+    const modalBtn = page.locator('.modal-content .btn-primary:has-text("Fortfahren")');
+    if (await modalBtn.isVisible()) {
+      console.log('Modal appeared, clicking confirm...');
+      await modalBtn.click();
+    }
+
+    // Wait for game start (Play Phase is indicated by removal of setup-mode)
+    await expect(page.locator('body')).not.toHaveClass(/setup-mode/);
+
+    // 3. Move Pawn to Promotion (Row 1 -> Row 0)
+    // Click Pawn at 1,0
+    await page.locator('.cell[data-r="1"][data-c="0"]').click();
+
+    // Click Target at 0,0
+    await page.locator('.cell[data-r="0"][data-c="0"]').click();
+
+    // 4. Wait for Promotion Modal
+    const modal = page.locator('#promotion-overlay');
+    await expect(modal).toBeVisible();
+    await expect(modal).not.toHaveClass(/hidden/);
+
+    // 5. Screenshot
+    await expect(modal).toHaveScreenshot('promotion-modal.png', {
+      maxDiffPixelRatio: 0.1,
+    });
+  });
 });

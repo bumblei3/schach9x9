@@ -13,6 +13,13 @@ describe('PuzzleManager', () => {
   let manager;
 
   beforeEach(() => {
+    vi.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue({
+      id: 'proc-mock',
+      title: 'Mock Puzzle',
+      setupStr: '..'.repeat(81) + 'w',
+      solution: [],
+    });
+
     game = {
       phase: 'PLAY',
       turn: 'white',

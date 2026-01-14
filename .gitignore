@@ -17,6 +17,9 @@ Thumbs.db
 
 # Test coverage
 coverage/
+coverage_*.txt
+coverage_full.txt
+coverage_output.txt
 
 # Build output
 dist/

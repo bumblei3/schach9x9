@@ -1,4 +1,4 @@
-import { getAllLegalMoves, makeMove, undoMove } from '../../js/ai/MoveGenerator.js';
+import { getAllLegalMoves, makeMove, undoMove, isInCheck } from '../../js/ai/MoveGenerator.js';
 import {
   SQUARE_COUNT,
   PIECE_NONE,
@@ -13,6 +13,7 @@ import {
   PIECE_ARCHBISHOP,
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
+  TYPE_MASK,
 } from '../../js/ai/BoardDefinitions.js';
 
 /**
@@ -67,6 +68,16 @@ export function runRulesFuzzTest(iterations: number = 1000) {
   for (let i = 0; i < iterations; i++) {
     const moves = getAllLegalMoves(board, currentTurn);
 
+    // Invariant: King Capture check
+    // For now, let's verify that none of the generated moves target a King.
+    for (const m of moves) {
+      const targetPiece = board[m.to];
+      if ((targetPiece & TYPE_MASK) === PIECE_KING) {
+        console.error(`CRITICAL: Generated move captures King!`, m);
+        throw new Error('King capture generated!');
+      }
+    }
+
     if (moves.length === 0 || i % 50 === 0) {
       resetBoard();
       currentTurn = 'white';
@@ -80,6 +91,17 @@ export function runRulesFuzzTest(iterations: number = 1000) {
 
     // Execute move
     const undo = makeMove(board, move);
+
+    // Invariant: Self-Check check
+    // After making a move, I should NOT be in check (if the move was truly legal)
+    // Note: isInCheck checks if 'color' is in check.
+    // We just moved 'currentTurn'.
+    const colorCode = currentTurn === 'white' ? COLOR_WHITE : COLOR_BLACK;
+    if (isInCheck(board, colorCode)) {
+      console.error(`CRITICAL: Move left player in check!`, move);
+      undoMove(board, undo); // Restore state for debugging context if needed
+      throw new Error('Move left player in check!');
+    }
 
     // Undo move
     undoMove(board, undo);

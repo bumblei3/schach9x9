@@ -77,6 +77,9 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): any[] 
   const myKingPos = findKing(board, color);
 
   for (const move of moves) {
+    // 2.1. Rule: Cannot capture King
+    if ((board[move.to] & TYPE_MASK) === PIECE_KING) continue;
+
     // Simulate move
     const undo = makeMove(board, move);
 
@@ -251,7 +254,7 @@ function generateSlidingMoves(
 
   for (const offset of offsets) {
     let to = from;
-    for (;;) {
+    for (; ;) {
       to += offset;
       // dist++;
 
@@ -459,7 +462,7 @@ function checkRayAttacks(
 
   for (const offset of ranges) {
     let curr = square;
-    for (;;) {
+    for (; ;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 
@@ -670,7 +673,7 @@ function findRayLVA(
 
   for (const offset of offsets) {
     let curr = square;
-    for (;;) {
+    for (; ;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
 

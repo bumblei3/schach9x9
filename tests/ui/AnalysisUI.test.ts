@@ -7,11 +7,24 @@ import { AnalysisUI } from '../../js/ui/AnalysisUI.js';
 
 // Mock PostGameAnalyzer
 vi.mock('../../js/tutor/PostGameAnalyzer.js', () => ({
-    analyzeGame: vi.fn().mockResolvedValue({
-        blunders: [],
-        mistakes: [],
+    analyzeGame: vi.fn().mockImplementation((_history, _color) => ({
         accuracy: 85,
-    }),
+        counts: { great: 2, good: 5, blunder: 1 },
+    })),
+    QUALITY_METADATA: {
+        great: { label: 'Brillant', color: 'blue' },
+        good: { label: 'Gut', color: 'green' },
+        blunder: { label: 'Patzer', color: 'red' },
+    },
+    classifyMove: vi.fn().mockReturnValue('good'),
+}));
+
+// Mock UI.js
+vi.mock('../../js/ui.js', () => ({
+    showModal: vi.fn(),
+    closeModal: vi.fn(),
+    updateMoveHistoryUI: vi.fn(),
+    renderEvalGraph: vi.fn(),
 }));
 
 describe('AnalysisUI', () => {
@@ -104,6 +117,18 @@ describe('AnalysisUI', () => {
             expect(fillHeight).toBeLessThanOrEqual(100);
         });
 
+        test('togglePanel() should toggle visibility and return new state', () => {
+            const initialState = analysisUI.panel?.classList.contains('hidden');
+            const newState = analysisUI.togglePanel();
+            expect(newState).toBe(!initialState);
+            expect(analysisUI.panel?.classList.contains('hidden')).toBe(!initialState);
+        });
+
+        test('togglePanel() should return false if panel is missing', () => {
+            analysisUI.panel = null as any;
+            expect(analysisUI.togglePanel()).toBe(false);
+        });
+
         test('should show bar when updating', () => {
             analysisUI.bar?.classList.add('hidden');
 
@@ -159,35 +184,194 @@ describe('AnalysisUI', () => {
         });
     });
 
-    describe('togglePanel()', () => {
-        test('should show hidden panel', () => {
-            analysisUI.panel?.classList.add('hidden');
+    describe('undoMoveOnBoard()', () => {
+        const createBoard = () => Array(9).fill(null).map(() => Array(9).fill(null));
 
-            const result = analysisUI.togglePanel();
-
-            // togglePanel returns !isHidden (state BEFORE toggle)
-            // If was hidden (isHidden=true), returns !true = false
-            expect(result).toBe(false);
-            expect(analysisUI.panel?.classList.contains('hidden')).toBe(false);
+        test('should undo a standard move', () => {
+            const board = createBoard();
+            board[0][0] = { type: 'k', color: 'white' }; // Place piece at destination
+            const move = {
+                from: { r: 1, c: 0 },
+                to: { r: 0, c: 0 },
+                piece: { type: 'k', color: 'white', hasMoved: false },
+                captured: null
+            };
+            analysisUI.undoMoveOnBoard(board as any, move);
+            expect(board[1][0]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+            expect(board[0][0]).toBeNull();
         });
 
-        test('should hide visible panel', () => {
-            analysisUI.panel?.classList.remove('hidden');
-
-            const result = analysisUI.togglePanel();
-
-            // togglePanel returns !isHidden (state BEFORE toggle)  
-            // If was visible (isHidden=false), returns !false = true
-            expect(result).toBe(true);
-            expect(analysisUI.panel?.classList.contains('hidden')).toBe(true);
+        test('should undo capture', () => {
+            const board = createBoard();
+            board[0][0] = { type: 'k', color: 'white' }; // Piece that moved
+            const move = {
+                from: { r: 1, c: 0 },
+                to: { r: 0, c: 0 },
+                piece: { type: 'k', color: 'white' },
+                captured: { type: 'q', color: 'black' }
+            };
+            analysisUI.undoMoveOnBoard(board as any, move);
+            expect(board[1][0]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+            expect(board[0][0]).toEqual({ type: 'q', color: 'black', hasMoved: true });
         });
 
-        test('should return false if panel is null', () => {
-            analysisUI.panel = null;
+        test('should undo en passant', () => {
+            const board = createBoard();
+            board[2][0] = { type: 'p', color: 'white' };
+            const move = {
+                from: { r: 1, c: 0 },
+                to: { r: 0, c: 1 },
+                piece: { type: 'p', color: 'white' },
+                specialMove: {
+                    type: 'enPassant',
+                    capturedPawnPos: { r: 0, c: 0 },
+                    capturedPawn: { type: 'p', color: 'black' }
+                }
+            };
+            analysisUI.undoMoveOnBoard(board as any, move);
+            expect(board[0][0]).toEqual({ type: 'p', color: 'black', hasMoved: true });
+            expect(board[0][1]).toBeNull();
+        });
 
-            const result = analysisUI.togglePanel();
+        test('should undo castling', () => {
+            const board = createBoard();
+            const move = {
+                from: { r: 7, c: 4 },
+                to: { r: 7, c: 6 },
+                piece: { type: 'k', color: 'white' },
+                specialMove: {
+                    type: 'castling',
+                    rookFrom: { r: 7, c: 7 },
+                    rookTo: { r: 7, c: 5 },
+                    rookHadMoved: false
+                }
+            };
+            board[7][5] = { type: 'r', color: 'white', hasMoved: true };
+            analysisUI.undoMoveOnBoard(board as any, move);
+            expect(board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+            expect(board[7][7]).toEqual({ type: 'r', color: 'white', hasMoved: false });
+            expect(board[7][5]).toBeNull();
+            expect(board[7][6]).toBeNull();
+        });
+    });
 
-            expect(result).toBe(false);
+    describe('collectBoardStates()', () => {
+        test('should return history of board states', () => {
+            mockApp.game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+            mockApp.game.moveHistory = [
+                {
+                    from: { r: 1, c: 0 },
+                    to: { r: 0, c: 0 },
+                    piece: { type: 'k', color: 'white' },
+                    captured: null
+                }
+            ];
+            const states = analysisUI.collectBoardStates();
+            expect(states.length).toBe(2);
+            // First state should be initial (before first move)
+            // Second state should be current
+            expect(states[0][1][0]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+        });
+    });
+
+    describe('showAnalysisPrompt()', () => {
+        test('should show confirmation modal', async () => {
+            const { showModal } = await import('../../js/ui.js');
+            analysisUI.showAnalysisPrompt();
+            await new Promise(r => setTimeout(r, 0));
+            expect(showModal).toHaveBeenCalledWith('Partie analysieren?', expect.any(String), expect.any(Array));
+
+            // Trigger callback on "Analysieren" button (index 1)
+            const buttons = (showModal as any).mock.calls[0][2];
+            const startSpy = vi.spyOn(analysisUI, 'startFullAnalysis').mockResolvedValue(undefined);
+            buttons[1].callback();
+            expect(startSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('showSummaryModal()', () => {
+        test('should show modal with analysis results', async () => {
+            const { showModal } = await import('../../js/ui.js');
+            const whiteStats = { accuracy: 90, counts: { great: 1 } };
+            const blackStats = { accuracy: 70, counts: { blunder: 2 } };
+
+            analysisUI.showSummaryModal(whiteStats, blackStats);
+
+            await new Promise(r => setTimeout(r, 0));
+
+            expect(showModal).toHaveBeenCalledWith(
+                'Analyse abgeschlossen',
+                expect.stringContaining('accuracy-high'),
+                expect.any(Array)
+            );
+        });
+
+        test('should invoke jumpToMove(0) on callback', async () => {
+            const { showModal } = await import('../../js/ui.js');
+            const jumpToMove = vi.fn();
+            (analysisUI.game as any).gameController = { jumpToMove };
+
+            analysisUI.showSummaryModal({ accuracy: 0, counts: {} }, { accuracy: 0, counts: {} });
+            await new Promise(r => setTimeout(r, 0));
+
+            const buttons = (showModal as any).mock.calls[0][2];
+            const primaryButton = buttons.find((b: any) => b.class === 'btn-primary');
+            primaryButton.callback();
+
+            expect(jumpToMove).toHaveBeenCalledWith(0);
+        });
+    });
+
+    describe('renderStatCounts()', () => {
+        test('should return HTML for statistics', () => {
+            const counts = { great: 2, good: 0 };
+            const html = analysisUI.renderStatCounts(counts);
+            expect(html).toContain('Brillant');
+            expect(html).toContain('2');
+            expect(html).not.toContain('Gut');
+        });
+    });
+
+    describe('startFullAnalysis()', () => {
+        test('should run full game analysis using workers', async () => {
+            const { showModal, closeModal } = await import('../../js/ui.js');
+
+            const mockWorker = {
+                addEventListener: vi.fn((_type, handler) => {
+                    setTimeout(() => handler({
+                        data: {
+                            type: 'analysis',
+                            data: { score: 100, topMoves: [{ score: 120 }] }
+                        }
+                    }), 0);
+                }),
+                removeEventListener: vi.fn(),
+                postMessage: vi.fn(),
+            };
+
+            (analysisUI.game as any).aiController = {
+                aiWorkers: [mockWorker]
+            };
+            mockApp.game.moveHistory = [
+                { from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, piece: { type: 'p', color: 'white' }, captured: null }
+            ];
+            // Ensure board is large enough and fully populated with nulls
+            mockApp.game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+            mockApp.game.board[4][4] = { type: 'p', color: 'white', hasMoved: true }; // Piece is currently at target
+            mockApp.game.board[6][4] = null; // Original position is now empty
+
+            await analysisUI.startFullAnalysis();
+            await new Promise(r => setTimeout(r, 50));
+
+            expect(mockWorker.postMessage).toHaveBeenCalled();
+            expect(showModal).toHaveBeenCalledWith('Analyse abgeschlossen', expect.any(String), expect.any(Array));
+            expect(closeModal).toHaveBeenCalled();
+        });
+
+        test('should return early if history is empty', async () => {
+            mockApp.game.moveHistory = [];
+            await analysisUI.startFullAnalysis();
+            expect(analysisUI.isAnalyzing).toBe(false);
         });
     });
 });
