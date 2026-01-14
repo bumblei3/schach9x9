@@ -32,7 +32,7 @@ export class Tutorial {
           <p>In diesem Tutorial lernst du:</p>
           <ul>
             <li>🏰 Das 9x9 Brett und Korridor-System</li>
-            <li>⚔️ Die speziellen Figuren: Erzbischof und Kanzler</li>
+            <li>⚔️ Die speziellen Figuren: Erzbischof, Kanzler, Nachtreiter und Engel</li>
             <li>💰 Das Punkte-Shop-System</li>
             <li>♟️ Grundlegende Spielregeln</li>
           </ul>
@@ -47,6 +47,14 @@ export class Tutorial {
         content: this.createChancellorDemo(),
       },
       {
+        title: '🐎 Der Nachtreiter',
+        content: this.createNightriderDemo(),
+      },
+      {
+        title: '😇 Der Engel',
+        content: this.createAngelDemo(),
+      },
+      {
         title: '🗺️ Das Korridor-System',
         content: this.createCorridorDemo(),
       },
@@ -59,6 +67,35 @@ export class Tutorial {
         content: this.createUpgradeDemo(),
       },
     ];
+  }
+
+  public createNightriderDemo(): string {
+    return `
+      <p>Der <strong>Nachtreiter</strong> ist ein "gleitender" Springer. Er kann mehrere Springer-Sprünge in einer Linie ausführen.</p>
+      <div class="piece-demo">
+        <div class="piece-svg" style="width: 80px; height: 80px;">${PIECE_SVGS.white.j}</div>
+        <p style="margin: 10px 0; font-size: 1.1em;"><strong>Nachtreiter (6 Punkte)</strong></p>
+        ${this.createMoveGrid('nightrider', 7)}
+        <p style="margin-top: 15px; font-size: 0.9em; color: #4ecca3;">
+          🔵 = Mehrfache Springer-Sprünge in einer Linie
+        </p>
+      </div>
+    `;
+  }
+
+  public createAngelDemo(): string {
+    return `
+      <p>Der <strong>Engel</strong> ist die mächtigste Figur. Er kombiniert die Bewegungen von <strong>Dame</strong> und <strong>Springer</strong>.</p>
+      <div class="piece-demo">
+        <div class="piece-svg" style="width: 80px; height: 80px;">${PIECE_SVGS.white.e}</div>
+        <p style="margin: 10px 0; font-size: 1.1em;"><strong>Engel (12 Punkte)</strong></p>
+        ${this.createMoveGrid('angel')}
+        <p style="margin-top: 15px; font-size: 0.9em; color: #4ecca3;">
+          🟢 = Dame (Gerade & Diagonal)<br>
+          🔵 = Springer-Bewegung (L-förmig)
+        </p>
+      </div>
+    `;
   }
 
   public createArchbishopDemo(): string {
@@ -118,22 +155,31 @@ export class Tutorial {
     `;
   }
 
-  public createMoveGrid(piece: string): string {
-    // Create 5x5 demo grid
-    const moves = this.getPieceMoves(piece);
-    let html = '<div class="piece-demo-grid">';
-    for (let r = 0; r < 5; r++) {
-      for (let c = 0; c < 5; c++) {
-        const isCenter = r === 2 && c === 2;
+  public createMoveGrid(piece: string, size: number = 5): string {
+    // Create size x size demo grid
+    const moves = this.getPieceMoves(piece, size);
+    const center = Math.floor(size / 2);
+    let html = `<div class="piece-demo-grid" style="grid-template-columns: repeat(${size}, 1fr); width: ${
+      size * 50
+    }px; height: ${size * 50}px;">`;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        const isCenter = r === center && c === center;
         const isHighlight = moves.some(m => m.r === r && m.c === c);
-        const moveType = isHighlight ? this.getMoveType(piece, r, c) : null;
+        const moveType = isHighlight ? this.getMoveType(piece, r, c, size) : null;
         const cellClass = `demo-cell ${(r + c) % 2 === 0 ? 'light' : 'dark'} ${
           isCenter ? 'piece-position' : isHighlight ? `highlight ${moveType}` : ''
         }`;
         html += `<div class="${cellClass}">`;
         if (isCenter) {
+          const symbolMap: any = {
+            archbishop: 'a',
+            chancellor: 'c',
+            nightrider: 'j',
+            angel: 'e',
+          };
           html += `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${
-            (PIECE_SVGS.white as any)[piece === 'archbishop' ? 'a' : 'c']
+            (PIECE_SVGS.white as any)[symbolMap[piece]]
           }</div>`;
         } else if (isHighlight) {
           html += `<div class="move-indicator ${moveType}"></div>`;
@@ -145,77 +191,107 @@ export class Tutorial {
     return html;
   }
 
-  public getMoveType(piece: string, r: number, c: number): string {
-    const center = 2;
+  public getMoveType(piece: string, r: number, c: number, size: number = 5): string {
+    const center = Math.floor(size / 2);
     const dr = Math.abs(r - center);
     const dc = Math.abs(c - center);
 
-    // Knight move (L-shape)
+    // Knight move (L-shape) or Nightrider move
     if ((dr === 2 && dc === 1) || (dr === 1 && dc === 2)) {
       return 'knight-move';
     }
 
-    if (piece === 'archbishop') {
-      // Bishop move (diagonal)
-      if (dr === dc && dr > 0) {
-        return 'bishop-move';
+    // Extended Nightrider moves
+    if (piece === 'nightrider') {
+      if (
+        (dr === 4 && dc === 2) ||
+        (dr === 2 && dc === 4) ||
+        (dr === 6 && dc === 3) ||
+        (dr === 3 && dc === 6)
+      ) {
+        return 'knight-move';
       }
-    } else {
-      // Rook move (straight)
-      if ((dr === 0 && dc > 0) || (dc === 0 && dr > 0)) {
-        return 'rook-move';
-      }
+    }
+
+    if (piece === 'archbishop' || piece === 'angel') {
+      if (dr === dc && dr > 0) return 'bishop-move';
+    }
+
+    if (piece === 'chancellor' || piece === 'angel') {
+      if ((dr === 0 && dc > 0) || (dc === 0 && dr > 0)) return 'rook-move';
     }
 
     return '';
   }
 
-  public getPieceMoves(piece: string): { r: number; c: number }[] {
-    if (piece === 'archbishop') {
-      // Bishop + Knight moves from center (2,2)
-      return [
-        // Bishop diagonals
-        { r: 0, c: 0 },
-        { r: 1, c: 1 },
-        { r: 3, c: 3 },
-        { r: 4, c: 4 },
-        { r: 0, c: 4 },
-        { r: 1, c: 3 },
-        { r: 3, c: 1 },
-        { r: 4, c: 0 },
-        // Knight moves
-        { r: 0, c: 1 },
-        { r: 0, c: 3 },
-        { r: 1, c: 0 },
-        { r: 1, c: 4 },
-        { r: 3, c: 0 },
-        { r: 3, c: 4 },
-        { r: 4, c: 1 },
-        { r: 4, c: 3 },
-      ];
-    } else {
-      // Rook + Knight moves from center (2,2)
-      return [
-        // Rook straight lines
-        { r: 0, c: 2 },
+  public getPieceMoves(piece: string, size: number = 5): { r: number; c: number }[] {
+    const moves: { r: number; c: number }[] = [];
+    const center = Math.floor(size / 2);
+
+    const isKnight =
+      piece === 'archbishop' ||
+      piece === 'chancellor' ||
+      piece === 'angel' ||
+      piece === 'nightrider';
+    const isBishop = piece === 'archbishop' || piece === 'angel';
+    const isRook = piece === 'chancellor' || piece === 'angel';
+
+    if (isKnight) {
+      const knightOffsets = [
+        { r: -2, c: -1 },
+        { r: -2, c: 1 },
+        { r: -1, c: -2 },
+        { r: -1, c: 2 },
+        { r: 1, c: -2 },
         { r: 1, c: 2 },
-        { r: 3, c: 2 },
-        { r: 4, c: 2 },
-        { r: 2, c: 0 },
+        { r: 2, c: -1 },
         { r: 2, c: 1 },
-        { r: 2, c: 3 },
-        { r: 2, c: 4 },
-        // Knight moves
-        { r: 0, c: 1 },
-        { r: 0, c: 3 },
-        { r: 1, c: 0 },
-        { r: 1, c: 4 },
-        { r: 3, c: 0 },
-        { r: 3, c: 4 },
-        { r: 4, c: 1 },
-        { r: 4, c: 3 },
       ];
+      knightOffsets.forEach(off => {
+        let nr = center + off.r;
+        let nc = center + off.c;
+        if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+          moves.push({ r: nr, c: nc });
+
+          if (piece === 'nightrider') {
+            // Continue in same direction
+            while (true) {
+              nr += off.r;
+              nc += off.c;
+              if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+                moves.push({ r: nr, c: nc });
+              } else {
+                break;
+              }
+            }
+          }
+        }
+      });
     }
+
+    if (isBishop) {
+      for (let i = 1; i < size; i++) {
+        if (center - i >= 0 && center - i < size && center - i >= 0 && center - i < size)
+          moves.push({ r: center - i, c: center - i });
+        if (center - i >= 0 && center - i < size && center + i >= 0 && center + i < size)
+          moves.push({ r: center - i, c: center + i });
+        if (center + i >= 0 && center + i < size && center - i >= 0 && center - i < size)
+          moves.push({ r: center + i, c: center - i });
+        if (center + i >= 0 && center + i < size && center + i >= 0 && center + i < size)
+          moves.push({ r: center + i, c: center + i });
+      }
+    }
+
+    if (isRook) {
+      for (let i = 0; i < size; i++) {
+        if (i !== center) {
+          moves.push({ r: center, c: i });
+          moves.push({ r: i, c: center });
+        }
+      }
+    }
+
+    return moves;
   }
 
   public createCorridorDemo(): string {

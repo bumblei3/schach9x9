@@ -75,29 +75,29 @@ import { Game } from '../../js/gameEngine.js';
 // We need to mock TimeManager, Tutorial, etc?
 vi.mock('../../js/TimeManager.js', () => ({
   TimeManager: class {
-    constructor() { }
-    setTimeControl() { }
-    updateClockVisibility() { }
-    startClock() { }
-    stopClock() { }
+    constructor() {}
+    setTimeControl() {}
+    updateClockVisibility() {}
+    startClock() {}
+    stopClock() {}
   },
 }));
-vi.mock('../../js/tutorial.js', () => ({ Tutorial: class { } }));
+vi.mock('../../js/tutorial.js', () => ({ Tutorial: class {} }));
 vi.mock('../../js/AnalysisController.js', () => ({
   AnalysisController: class {
-    constructor() { }
-    enterAnalysisMode() { }
-    exitAnalysisMode() { }
+    constructor() {}
+    enterAnalysisMode() {}
+    exitAnalysisMode() {}
   },
 }));
 vi.mock('../../js/ui/AnalysisUI.js', () => ({
   AnalysisUI: class {
-    constructor() { }
+    constructor() {}
   },
 }));
 vi.mock('../../js/ui/PuzzleMenu.js', () => ({
   PuzzleMenu: class {
-    constructor() { }
+    constructor() {}
   },
 }));
 

@@ -253,10 +253,9 @@ describe('Tutorial', () => {
       expect(moves.length).toBeGreaterThan(0);
     });
 
-    test('should return default moves (Chancellor) for unknown piece type', () => {
+    test('should return empty moves for unknown piece type', () => {
       const moves = tutorial.getPieceMoves('x');
-      // Implementation defaults to Chancellor moves
-      expect(moves.length).toBeGreaterThan(0);
+      expect(moves.length).toBe(0);
     });
   });
 });
