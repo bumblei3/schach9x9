@@ -213,7 +213,7 @@ describe('SoundManager', () => {
 
       // Frost capture uses 3 oscillators for shattering effect
       expect(createOscSpy).toHaveBeenCalledTimes(3);
-      const osc = createOscSpy.mock.results[0].value;
+      // const osc = createOscSpy.mock.results[0].value;
       // Frequency should be around 2000+
       // Since it's randomized, we just check call existence, or range if possible.
       // But simply checking call count is good enough to prove specific path was taken.
