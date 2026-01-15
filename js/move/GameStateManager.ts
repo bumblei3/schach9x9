@@ -322,8 +322,10 @@ export function loadGame(game: Game): boolean {
 
     const aiToggle = document.getElementById('ai-toggle') as HTMLInputElement;
     if (aiToggle) aiToggle.checked = game.isAI;
-    const diffSelect = document.getElementById('difficulty-select') as HTMLSelectElement;
-    if (diffSelect) diffSelect.value = game.difficulty;
+    const diffSelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
+    diffSelects.forEach(select => {
+      select.value = game.difficulty;
+    });
 
     UI.renderBoard(game);
     UI.updateStatus(game);

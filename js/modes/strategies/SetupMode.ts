@@ -75,6 +75,14 @@ export class SetupModeStrategy implements GameModeStrategy {
         game.log('Weiß: Truppen-Upgrades möglich.');
       } else if (game.phase === (PHASES.SETUP_WHITE_UPGRADES as any)) {
         // Setup Mode Transition
+        if (game.campaignMode) {
+          // In Campaign budget levels, Black setup is already in FEN.
+          // Finish White and start the game!
+          this.startGame(game, controller);
+          game.log('Weiß fertig. Die Schlacht beginnt!');
+          return;
+        }
+
         if (game.mode === 'upgrade' || game.mode === 'upgrade8x8') {
           game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
           game.points = game.initialPoints;

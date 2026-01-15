@@ -204,6 +204,16 @@ export class GameController {
       return;
     }
 
+    // Remove existing king of this color
+    for (let row = 0; row < this.game.boardSize; row++) {
+      for (let col = 0; col < this.game.boardSize; col++) {
+        const p = this.game.board[row][col];
+        if (p && p.type === 'k' && p.color === color) {
+          this.game.board[row][col] = null;
+        }
+      }
+    }
+
     const colBlock = Math.floor(c / 3);
     const colStart = colBlock * 3;
 
@@ -213,17 +223,27 @@ export class GameController {
     this.game.board[kingR][kingC] = { type: 'k', color: color, hasMoved: false } as any;
 
     if (color === 'white') {
-      this.game.whiteCorridor = colStart; // In Game class it was number | null
-      this.game.phase = PHASES.SETUP_BLACK_KING as any;
-      this.game.log('Weißer König platziert. Schwarz ist dran.');
-      UI.updateStatus(this.game);
+      this.game.whiteCorridor = colStart;
 
-      if (this.game.isAI) {
-        setTimeout(() => {
-          if (this.game.aiSetupKing) {
-            this.game.aiSetupKing();
-          }
-        }, AI_DELAY_MS);
+      if (this.game.campaignMode) {
+        // In Campaign, Black (AI) setup is usually predefined in FEN.
+        // Skip AI King placement and go straight to player piece buying.
+        this.game.phase = PHASES.SETUP_WHITE_PIECES as any;
+        this.game.points = this.game.initialPoints;
+        this.game.log('König platziert. Bitte stell deine Truppen auf.');
+        this.showShop(true);
+      } else {
+        this.game.phase = PHASES.SETUP_BLACK_KING as any;
+        this.game.log('Weißer König platziert. Schwarz ist dran.');
+        UI.updateStatus(this.game);
+
+        if (this.game.isAI) {
+          setTimeout(() => {
+            if (this.game.aiSetupKing) {
+              this.game.aiSetupKing();
+            }
+          }, AI_DELAY_MS);
+        }
       }
     } else {
       this.game.blackCorridor = colStart;
@@ -495,6 +515,23 @@ export class GameController {
     // Restore move history display
     UI.updateMoveHistoryUI(this.game);
 
+    // Sync UI elements (Difficulty, AI Toggle, Panels)
+    const aiToggle = document.getElementById('ai-toggle') as HTMLInputElement;
+    if (aiToggle) aiToggle.checked = this.game.isAI;
+
+    const diffSelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
+    diffSelects.forEach(select => {
+      select.value = this.game.difficulty;
+    });
+
+    // Ensure panels are visible in PLAY phase
+    if (this.game.phase === (PHASES.PLAY as any)) {
+      const historyPanel = document.getElementById('move-history-panel');
+      const capturedPanel = document.getElementById('captured-pieces-panel');
+      if (historyPanel) historyPanel.classList.remove('hidden');
+      if (capturedPanel) capturedPanel.classList.remove('hidden');
+    }
+
     // Restart clock if needed
     if (this.game.phase === (PHASES.PLAY as any) && this.game.clockEnabled) {
       this.startClock();
@@ -734,7 +771,14 @@ export class GameController {
       levelId: this.game.currentLevelId,
     });
 
-    if (this.game.campaignMode && result === 'win' && winnerColor === this.game.playerColor) {
+    const level = this.game.currentLevelId
+      ? (campaignManager as any).getLevel(this.game.currentLevelId)
+      : null;
+    const isCheckmateWin = result === 'win' && winnerColor === this.game.playerColor;
+    const isDrawVictory =
+      result === 'draw' && level && level.winCondition && level.winCondition.drawCountsAsWin;
+
+    if (this.game.campaignMode && (isCheckmateWin || isDrawVictory)) {
       console.log('[GameController] Triggering Campaign Victory');
       if (this.game.currentLevelId) {
         // Gather stats for star calculation
@@ -744,7 +788,7 @@ export class GameController {
           promotedCount: this.game.stats.promotions || 0,
         };
 
-        const levelBefore = (campaignManager as any).getLevel(this.game.currentLevelId) as Level;
+        const levelBefore = level as Level;
         const rewardsBefore = [...(campaignManager as any).state.unlockedRewards];
 
         const starsEarned = (campaignManager as any).completeLevel(this.game.currentLevelId, stats);

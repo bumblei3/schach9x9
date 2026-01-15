@@ -254,7 +254,7 @@ export class MoveController {
       const xp = campaignManager.getUnitXp(piece.type);
       if (xp.level > 1) {
         // +10% value per level above 1
-        baseValue *= (1 + (xp.level - 1) * 0.1);
+        baseValue *= 1 + (xp.level - 1) * 0.1;
       }
 
       // Champion bonus

@@ -252,6 +252,49 @@ export class DOMHandler {
       });
     }
 
+    // AI Difficulty Selector (handles both in-game menu and main menu)
+    const difficultySelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
+    difficultySelects.forEach(select => {
+      select.addEventListener('change', e => {
+        const target = e.target as HTMLSelectElement;
+        const value = target.value;
+        if (this.game) {
+          this.game.difficulty = value;
+          console.log('[DOMHandler] AI Difficulty changed to:', value);
+        }
+        // Sync other difficulty selects
+        difficultySelects.forEach(s => {
+          if (s !== target) s.value = value;
+        });
+      });
+    });
+
+    // Time Control Selector
+    const timeControlSelect = document.getElementById(
+      'time-control-select'
+    ) as HTMLSelectElement | null;
+    if (timeControlSelect) {
+      timeControlSelect.addEventListener('change', e => {
+        const target = e.target as HTMLSelectElement;
+        if (this.gameController) {
+          this.gameController.setTimeControl(target.value);
+        }
+      });
+    }
+
+    // Tutor Mode Selector
+    const tutorModeSelect = document.getElementById(
+      'tutor-mode-select'
+    ) as HTMLSelectElement | null;
+    if (tutorModeSelect) {
+      tutorModeSelect.addEventListener('change', e => {
+        const target = e.target as HTMLSelectElement;
+        if (this.game) {
+          this.game.tutorMode = target.value;
+        }
+      });
+    }
+
     // Finish Setup Button
     const finishSetupBtn = document.getElementById('finish-setup-btn');
     if (finishSetupBtn) {

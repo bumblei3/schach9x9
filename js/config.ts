@@ -174,6 +174,18 @@ export type AIDifficulty = (typeof AI_DIFFICULTIES)[keyof typeof AI_DIFFICULTIES
 export const DEFAULT_DIFFICULTY: AIDifficulty = AI_DIFFICULTIES.MEDIUM;
 
 /**
+ * Global search depth configuration for AI and Tutor
+ */
+export const AI_DEPTH_CONFIG = {
+  [AI_DIFFICULTIES.BEGINNER]: 2,
+  [AI_DIFFICULTIES.EASY]: 3,
+  [AI_DIFFICULTIES.MEDIUM]: 4,
+  [AI_DIFFICULTIES.HARD]: 5,
+  [AI_DIFFICULTIES.EXPERT]: 6,
+  // Note: Tutor depth is now dynamic (AI depth + 2)
+} as const;
+
+/**
  * Timing constants for game flow
  */
 export const AI_DELAY_MS = 1000; // Delay before AI makes a move

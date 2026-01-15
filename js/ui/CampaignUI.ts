@@ -200,7 +200,9 @@ export class CampaignUI {
       }
 
       const statusIcon = isCompleted ? '✅' : isUnlocked ? '⚔️' : '🔒';
-      const starRating = isCompleted ? `<div class="level-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>` : '';
+      const starRating = isCompleted
+        ? `<div class="level-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>`
+        : '';
 
       btn.innerHTML = `
         <div class="level-status-badge" style="
@@ -253,14 +255,16 @@ export class CampaignUI {
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-main); line-height: 1.2;">${perk.name}</div>
         <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">${perk.description}</div>
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-          ${isUnlocked
-          ? '<span style="color: #ffd700; font-weight: bold;">AKTIVIERT</span>'
-          : `<span style="color: #ffd700; font-weight: bold;">💰 ${perk.cost}</span>`
-        }
-          ${!isUnlocked
-          ? `<button class="buy-perk-btn btn-primary" data-id="${perk.id}" ${canAfford ? '' : 'disabled'} style="padding: 5px 15px; font-size: 0.8rem;">Kaufen</button>`
-          : ''
-        }
+          ${
+            isUnlocked
+              ? '<span style="color: #ffd700; font-weight: bold;">AKTIVIERT</span>'
+              : `<span style="color: #ffd700; font-weight: bold;">💰 ${perk.cost}</span>`
+          }
+          ${
+            !isUnlocked
+              ? `<button class="buy-perk-btn btn-primary" data-id="${perk.id}" ${canAfford ? '' : 'disabled'} style="padding: 5px 15px; font-size: 0.8rem;">Kaufen</button>`
+              : ''
+          }
         </div>
       `;
 
@@ -295,7 +299,14 @@ export class CampaignUI {
     grid.innerHTML = '';
 
     const unitTypes = ['p', 'n', 'b', 'r', 'q', 'k'];
-    const names: any = { p: 'Infanterie (Bauer)', n: 'Kavallerie (Springer)', b: 'Priester (Läufer)', r: 'Burgwache (Turm)', q: 'General (Dame)', k: 'König (Anführer)' };
+    const names: any = {
+      p: 'Infanterie (Bauer)',
+      n: 'Kavallerie (Springer)',
+      b: 'Priester (Läufer)',
+      r: 'Burgwache (Turm)',
+      q: 'General (Dame)',
+      k: 'König (Anführer)',
+    };
     const icons: any = { p: '🛡️', n: '🐎', b: '✨', r: '🏰', q: '👑', k: '🔱' };
 
     const state = (campaignManager as any).state;

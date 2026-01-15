@@ -156,6 +156,7 @@ function initAiWorker(): void {
 
         if (type === 'SEARCH_ERROR') reject(error);
         else if (type === 'bestMove') resolve(data);
+        else if (type === 'topMoves') resolve(data);
         else resolve(payload);
       } else {
         logger.warn(`[AiEngine] Received worker message with unknown id: ${id}`);
@@ -164,6 +165,18 @@ function initAiWorker(): void {
     logger.info('[AiEngine] AI Worker initialized');
   } catch (err) {
     logger.error('[AiEngine] Failed to init AI Worker', err);
+  }
+}
+
+export function terminateAiWorker(): void {
+  if (aiWorker) {
+    aiWorker.terminate();
+    aiWorker = null;
+    workerPendingRequests.forEach(({ reject }) => {
+      reject(new Error('AI Worker terminated (request cancelled)'));
+    });
+    workerPendingRequests.clear();
+    logger.info('[AiEngine] AI Worker terminated');
   }
 }
 
@@ -200,6 +213,50 @@ function runWorkerSearch(
       type: 'getBestMove', // Use standard protocol
       id,
       data: { board, color: turnColor, depth, config: { personality, elo } }, // map payload to data
+    });
+  });
+}
+
+function runWorkerTopMoves(
+  board: IntBoard,
+  color: Player,
+  count: number,
+  depth: number,
+  maxTimeMs: number
+): Promise<SearchResult[]> {
+  // If a request is already pending, terminate and restart to "cancel" the old search
+  if (workerPendingRequests.size > 0) {
+    logger.debug('[AiEngine] Terminating worker to cancel pending search');
+    terminateAiWorker();
+  }
+
+  if (!aiWorker) initAiWorker();
+  if (!aiWorker) throw new Error('Worker not available');
+
+  return new Promise((resolve, reject) => {
+    const id = workerReqId++;
+    const timeoutDesc = setTimeout(() => {
+      if (workerPendingRequests.has(id)) {
+        workerPendingRequests.delete(id);
+        reject(new Error('AI Worker TOP_MOVES timed out'));
+      }
+    }, 15000); // 15s is plenty for optimized topMoves
+
+    workerPendingRequests.set(id, {
+      resolve: val => {
+        clearTimeout(timeoutDesc);
+        resolve(val as SearchResult[]);
+      },
+      reject: err => {
+        clearTimeout(timeoutDesc);
+        reject(err);
+      },
+    });
+
+    aiWorker!.postMessage({
+      type: 'getTopMoves',
+      id,
+      data: { board, color, count, depth, maxTimeMs },
     });
   });
 }
@@ -262,9 +319,27 @@ export async function getBestMoveDetailed(
   uiBoard: UiBoard,
   turnColor: Player,
   maxDepth: number = 4,
-  timeParams: TimeParams = {}
+  timeParams: TimeParams = {},
+  moveNumber?: number
 ): Promise<SearchResult | null> {
   const board = convertBoardToInt(uiBoard);
+
+  // --- Step 1: Check Opening Book ---
+  if (moveNumber !== undefined && moveNumber < 15) {
+    const bookMove = queryOpeningBook(uiBoard, moveNumber);
+    if (bookMove) {
+      logger.info(
+        `[AiEngine] Opening Book Move Found: ${bookMove.from.r},${bookMove.from.c} -> ${bookMove.to.r},${bookMove.to.c}`
+      );
+      return {
+        move: bookMove,
+        score: 0,
+        depth: 0,
+        nodes: 0,
+      };
+    }
+  }
+
   let config = timeParams;
   if (timeParams.elo) {
     const eloParams = getParamsForElo(timeParams.elo);
@@ -293,9 +368,15 @@ export async function getBestMoveDetailed(
     }
   }
 
-  // Fallback or Node.js environment
-  // WASM is disabled, so we use the JS engine
-  // const wasmResult = await (getBestMoveWasm as any)(board, turnColor, maxDepth, personality, elo);
+  // Fallback or Node.js environment - Try WASM first
+  try {
+    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
+    if (wasmResult) {
+      return wasmResult;
+    }
+  } catch (err) {
+    logger.debug('[AiEngine] WASM fallback failed, using JS');
+  }
 
   logger.debug('[AiEngine] Using JS Fallback Search');
   // Run JS Search
@@ -303,7 +384,7 @@ export async function getBestMoveDetailed(
   if (jsResult) {
     return {
       score: jsResult.score,
-      move: convertMoveToResult(jsResult.move)
+      move: convertMoveToResult(jsResult.move),
     };
   }
 
@@ -371,7 +452,8 @@ async function runJsSearch(
 
     // Check timeout every 2000 nodes
     if (nodes % 2000 === 0) {
-      if (performance.now() - start > 5000) { // Hard 5s timeout
+      if (performance.now() - start > 5000) {
+        // Hard 5s timeout
         return { score: evaluate(b, c), bestMove: null };
       }
       // Yield to main thread (optional, complex in sync logic)
@@ -381,8 +463,7 @@ async function runJsSearch(
       return { score: evaluate(b, c), bestMove: null };
     }
 
-
-    const currentMovingColor = maximizingPlayer ? c : (c ^ COLOR_MASK);
+    const currentMovingColor = maximizingPlayer ? c : c ^ COLOR_MASK;
     // Wait, genLegalInt takes (board, turnColor: string)
     const activeColorStr = currentMovingColor === COLOR_WHITE ? 'white' : 'black';
 
@@ -391,7 +472,8 @@ async function runJsSearch(
     if (legalMoves.length === 0) {
       if (checkInt(b, currentMovingColor)) {
         // Checkmate: return score from perspective of root color 'c'
-        const score = (currentMovingColor === c) ? (-MATE_SCORE + (depth - d)) : (MATE_SCORE - (depth - d));
+        const score =
+          currentMovingColor === c ? -MATE_SCORE + (depth - d) : MATE_SCORE - (depth - d);
         return { score, bestMove: null };
       }
       // Stalemate
@@ -462,7 +544,7 @@ async function runJsSearch(
   return {
     move: result.bestMove,
     score: result.score,
-    nodes
+    nodes,
   };
 }
 
@@ -475,9 +557,42 @@ export async function getTopMoves(
   turnColor: Player,
   count: number = 3,
   searchDepth: number = 2,
-  maxTimeMs: number = 5000
+  maxTimeMs: number = 5000,
+  moveNumber?: number
 ): Promise<SearchResult[]> {
   const board = convertBoardToInt(uiBoard);
+
+  // --- Step 1: Check Opening Book ---
+  let bookMoves: SearchResult[] = [];
+  if (moveNumber !== undefined && moveNumber < 15) {
+    // Note: OpeningBook.ts getMove returns a single weighted random move,
+    // though the book might have multiple. Currently we just take one if available.
+    const bookMove = queryOpeningBook(uiBoard, moveNumber);
+    if (bookMove) {
+      bookMoves.push({
+        move: bookMove,
+        score: 50, // High enough to be at top but not "winning"
+        depth: 0,
+        nodes: 0,
+      });
+      // If we found a book move, we reduce the count we search for
+      count = Math.max(1, count - 1);
+    }
+  }
+
+  // Use Worker if available (Browser)
+  if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
+    try {
+      return await runWorkerTopMoves(board, turnColor, count, searchDepth, maxTimeMs);
+    } catch (err: any) {
+      if (err?.message?.includes('request cancelled')) {
+        logger.debug('[AiEngine] Worker getTopMoves cancelled (new request)');
+      } else {
+        logger.error('[AiEngine] Worker getTopMoves failed, falling back', err);
+      }
+    }
+  }
+
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const startTime = performance.now();
 
@@ -496,7 +611,7 @@ export async function getTopMoves(
         const val = PIECE_VALUES[type] || 0;
         const row = Math.floor(i / 9);
         const col = i % 9;
-        const centerBonus = (4 - Math.abs(row - 4)) + (4 - Math.abs(col - 4));
+        const centerBonus = 4 - Math.abs(row - 4) + (4 - Math.abs(col - 4));
         if (pColor === color) score += val + centerBonus * 5;
         else score -= val + centerBonus * 5;
       }
@@ -519,15 +634,21 @@ export async function getTopMoves(
 
   // Step 2: Use WASM for the top candidates
   const moveScores: { move: any; score: number }[] = [];
+  const loopDepth = Math.max(2, searchDepth - 3);
 
   for (const candidate of topCandidates) {
-    if (performance.now() - startTime > maxTimeMs) break;
+    if (performance.now() - startTime > maxTimeMs) {
+      logger.debug(
+        `[AiEngine] getTopMoves timeout reached after ${performance.now() - startTime}ms`
+      );
+      break;
+    }
 
     const undo = makeMoveInt(board, candidate.move);
 
     // Get opponent's best response using WASM
     const opponentColor = turnColor === 'white' ? 'black' : 'white';
-    const wasmResult = await getBestMoveWasm(board, opponentColor, searchDepth, 'NORMAL', 2500);
+    const wasmResult = await getBestMoveWasm(board, opponentColor, loopDepth, 'NORMAL', 2500);
 
     let score: number;
     if (wasmResult && typeof wasmResult.score === 'number') {
@@ -546,11 +667,14 @@ export async function getTopMoves(
   // Take top N
   const topMoves = moveScores.slice(0, count);
 
-  return topMoves.map((ms) => ({
+  const results = topMoves.map(ms => ({
     move: convertMoveToResult(ms.move),
     score: ms.score,
     nodes: 0,
   }));
+
+  // Merge with book moves if any
+  return [...bookMoves, ...results].slice(0, count + bookMoves.length);
 }
 
 export async function evaluatePosition(
@@ -709,18 +833,18 @@ export const PST: Record<string, number[]> = {
 export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves };
 
 // Stubbed TT functions
-export function storeTT(): void { }
-export function probeTT(): void { }
+export function storeTT(): void {}
+export function probeTT(): void {}
 export function getTTMove(): null {
   return null;
 }
-export function clearTT(): void { }
+export function clearTT(): void {}
 export function getTTSize(): number {
   return 0;
 }
-export function setTTMaxSize(): void { }
-export function testStoreTT(): void { }
-export function testProbeTT(): void { }
+export function setTTMaxSize(): void {}
+export function testStoreTT(): void {}
+export function testProbeTT(): void {}
 
 export let progressCallback: ((progress: any) => void) | null = null;
 export function setProgressCallback(cb: (progress: any) => void | null): void {

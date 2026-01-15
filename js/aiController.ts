@@ -1,5 +1,5 @@
 import { PHASES } from './gameEngine.js';
-import { SHOP_PIECES } from './config.js';
+import { SHOP_PIECES, AI_DEPTH_CONFIG, AI_DIFFICULTIES } from './config.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
 import * as aiEngine from './aiEngine.js';
@@ -231,23 +231,24 @@ export class AIController {
       this.initWorkerPool();
     }
 
-    // Difficulty to depth mapping
-    const depthMap: Record<string, number> = {
-      beginner: 1,
-      easy: 2,
-      medium: 3,
-      hard: 4,
-      expert: 5,
-    };
+    // Use centralized depth mapping
+    let depth =
+      (AI_DEPTH_CONFIG[this.game.difficulty as keyof typeof AI_DEPTH_CONFIG] as number) || 3;
 
-    let depth: number;
-    if (this.game.mode === 'classic') {
-      depth = 3;
-      logger.debug(`[AI] Classic mode: using depth ${depth} for faster play`);
-    } else {
-      depth = depthMap[this.game.difficulty] || 3;
-      logger.debug(`[AI] Difficulty ${this.game.difficulty}: using depth ${depth}`);
+    // Add "human-like" inaccuracies for lower difficulties
+    const inaccuracyRoll = Math.random();
+    const isBeginner = this.game.difficulty === AI_DIFFICULTIES.BEGINNER;
+    const isEasy = this.game.difficulty === AI_DIFFICULTIES.EASY;
+
+    if (isBeginner && inaccuracyRoll < 0.15) {
+      depth = 1; // Drop to very shallow search
+      logger.info('[AI] Beginner Blunder Triggered: Reducing depth to 1');
+    } else if (isEasy && inaccuracyRoll < 0.1) {
+      depth = 2; // Slight inaccuracy
+      logger.info('[AI] Easy Mistake Triggered: Reducing depth to 2');
     }
+
+    logger.debug(`[AI] Difficulty ${this.game.difficulty}: using depth ${depth}`);
 
     // Prepare board state for workers - Optimization: Use Int8Array instead of JSON cloning
     const boardInt = aiEngine.convertBoardToInt(this.game.board);
@@ -521,7 +522,7 @@ export class AIController {
             beta: Infinity,
             lastMove,
             personality: p,
-            id: i
+            id: i,
           },
         });
       });
@@ -693,6 +694,12 @@ export class AIController {
 
   public async aiShouldResign(): Promise<boolean> {
     const aiColor = 'black';
+
+    // Never resign in Campaign mode - bosses fight to the end!
+    if (this.game.campaignMode) {
+      return false;
+    }
+
     const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
 
     // Resign if position is hopeless (score <= -1500 means AI is losing badly)

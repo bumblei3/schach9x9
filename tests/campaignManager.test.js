@@ -86,7 +86,11 @@ describe('CampaignManager', () => {
 
   test('should award gold and stars upon completion', () => {
     // Mock level with gold reward
-    const mockLevel = { id: 'peasant_revolt', goldReward: 20, goals: { 2: { type: 'moves', value: 20 }, 3: { type: 'moves', value: 10 } } };
+    const mockLevel = {
+      id: 'peasant_revolt',
+      goldReward: 20,
+      goals: { 2: { type: 'moves', value: 20 }, 3: { type: 'moves', value: 10 } },
+    };
     vi.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
 
     // Complete first level with 3 stars (passing 3 directly)
@@ -97,7 +101,11 @@ describe('CampaignManager', () => {
   });
 
   test('should award bonus gold for improving stars', () => {
-    const mockLevel = { id: 'peasant_revolt', goldReward: 20, goals: { 2: { type: 'moves', value: 20 }, 3: { type: 'moves', value: 10 } } };
+    const mockLevel = {
+      id: 'peasant_revolt',
+      goldReward: 20,
+      goals: { 2: { type: 'moves', value: 20 }, 3: { type: 'moves', value: 10 } },
+    };
     vi.spyOn(manager, 'getLevel').mockReturnValue(mockLevel);
 
     // Complete with 1 star first
@@ -127,10 +135,10 @@ describe('CampaignManager', () => {
 
     // Fail to buy twice (checking logic if we were wrapping it, but here we just check spendGold again or unlocked status)
     const success2 = manager.spendGold(cost);
-    // This just spends gold again if we have it. 
+    // This just spends gold again if we have it.
     // But if we want to check if we can unlock again?
-    // The test intent was "should NOT buy twice". 
-    // Manager.unlockPerk checks if unlocked. 
+    // The test intent was "should NOT buy twice".
+    // Manager.unlockPerk checks if unlocked.
     // Manager.spendGold just spends.
     // So the test logic needs to be adapted or simplified.
     // Let's just check that we can't unlock it if we don't have gold?
@@ -232,7 +240,7 @@ describe('CampaignManager', () => {
         unlockedRewards: [],
         gold: 100,
         unlockedPerks: [],
-        levelStars: {}
+        levelStars: {},
         // Missing: unitXp, championType
       };
       localStorage.getItem.mockReturnValueOnce(JSON.stringify(oldState));

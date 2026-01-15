@@ -195,10 +195,7 @@ export class CampaignManager {
     const xpThresholds = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500]; // Bis Level 10
 
     const nextLevel = unitStats.level + 1;
-    if (
-      xpThresholds[nextLevel - 1] !== undefined &&
-      unitStats.xp >= xpThresholds[nextLevel - 1]
-    ) {
+    if (xpThresholds[nextLevel - 1] !== undefined && unitStats.xp >= xpThresholds[nextLevel - 1]) {
       unitStats.level = nextLevel;
       leveledUp = true;
     }
@@ -220,13 +217,20 @@ export class CampaignManager {
     return this.state.levelStars[levelId] || 0;
   }
 
-  completeLevel(levelId: string, stars: number = 0): void {
+  completeLevel(levelId: string, starsOrStats: number | any = 0): number {
     if (!this.state.completedLevels.includes(levelId)) {
       this.state.completedLevels.push(levelId);
     }
 
     const level = this.getLevel(levelId);
-    if (!level) return;
+    if (!level) return 0;
+
+    let stars = 0;
+    if (typeof starsOrStats === 'number') {
+      stars = starsOrStats;
+    } else {
+      stars = this.calculateStars(level, starsOrStats);
+    }
 
     // Update stars if higher
     const currentStars = this.state.levelStars[levelId] || 0;
@@ -256,7 +260,38 @@ export class CampaignManager {
         this.state.unlockedLevels.push(nextLevel.id);
         this.state.currentLevelId = nextLevel.id;
       }
-      this.saveGame();
+    }
+    this.saveGame();
+    return stars;
+  }
+
+  private calculateStars(level: Level, stats: any): number {
+    let stars = 1; // Base star for completing the mission
+
+    if (level.goals) {
+      // Check 2nd star
+      if (level.goals[2] && this.checkGoal(level.goals[2], stats)) {
+        stars = 2;
+        // Check 3rd star only if 2nd is achieved
+        if (level.goals[3] && this.checkGoal(level.goals[3], stats)) {
+          stars = 3;
+        }
+      }
+    }
+
+    return stars;
+  }
+
+  private checkGoal(goal: any, stats: any): boolean {
+    switch (goal.type) {
+      case 'moves':
+        return stats.moves <= goal.value;
+      case 'material':
+        return stats.materialDiff >= goal.value;
+      case 'promotion':
+        return stats.promotedCount >= goal.value;
+      default:
+        return false;
     }
   }
 
@@ -270,8 +305,6 @@ export class CampaignManager {
     this.state.unlockedLevels = [...new Set([...this.state.unlockedLevels, ...allIds])];
     this.saveGame();
   }
-
-
 
   // Talent System
   isTalentUnlocked(talentId: string): boolean {

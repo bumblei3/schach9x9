@@ -129,7 +129,11 @@ export async function executeMove(
 
     // Talent: Scavenger (Pawn)
     // Erhalte 1-2 Gold beim Schlagen von Figuren.
-    if ((game as any).campaignMode && piece.color === (game as any).playerColor && piece.type === 'p') {
+    if (
+      (game as any).campaignMode &&
+      piece.color === (game as any).playerColor &&
+      piece.type === 'p'
+    ) {
       if (campaignManager.isTalentUnlocked('p_scavenger')) {
         const bonus = Math.floor(Math.random() * 2) + 1; // 1-2 Gold
         campaignManager.addGold(bonus);
@@ -146,7 +150,11 @@ export async function executeMove(
   }
 
   // Award XP in Campaign Mode
-  if ((game as any).campaignMode && piece.color === (game as any).playerColor && (targetPiece || moveRecord.isEnPassant)) {
+  if (
+    (game as any).campaignMode &&
+    piece.color === (game as any).playerColor &&
+    (targetPiece || moveRecord.isEnPassant)
+  ) {
     let xpAmount = 10;
 
     // Talent: Veteran (Pawn) - +20% XP
@@ -158,9 +166,18 @@ export async function executeMove(
     campaignManager.addUnitXp(piece.type, xpAmount);
     const newLevel = campaignManager.getUnitXp(piece.type).level;
 
-    notificationUI.show(`+${xpAmount} XP für deinen ${piece.type === 'p' ? 'Bauern' : piece.type === 'n' ? 'Springer' : 'Krieger'}`, 'success', 'Erfahrung');
+    notificationUI.show(
+      `+${xpAmount} XP für deinen ${piece.type === 'p' ? 'Bauern' : piece.type === 'n' ? 'Springer' : 'Krieger'}`,
+      'success',
+      'Erfahrung'
+    );
     if (newLevel > oldLevel) {
-      notificationUI.show(`LEVEL UP! Dein ${piece.type} ist jetzt Stufe ${newLevel}!`, 'success', 'Aufstieg', 5000);
+      notificationUI.show(
+        `LEVEL UP! Dein ${piece.type} ist jetzt Stufe ${newLevel}!`,
+        'success',
+        'Aufstieg',
+        5000
+      );
     }
   }
 
@@ -211,7 +228,11 @@ export async function executeMove(
               // Award XP for promotion in Campaign
               if ((game as any).campaignMode && piece.color === (game as any).playerColor) {
                 campaignManager.addUnitXp('p', 50);
-                notificationUI.show(`Beförderungs-Bonus: +50 XP für die Infanterie!`, 'success', 'Held');
+                notificationUI.show(
+                  `Beförderungs-Bonus: +50 XP für die Infanterie!`,
+                  'success',
+                  'Held'
+                );
               }
             }
             completeMoveExecution(game, moveController, moveRecord);

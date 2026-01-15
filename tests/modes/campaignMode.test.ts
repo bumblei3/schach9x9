@@ -13,6 +13,7 @@ vi.mock('../../js/ui.js', () => ({
   renderBoard: vi.fn(),
   showModal: vi.fn(),
   updateStatistics: vi.fn(),
+  initBoardUI: vi.fn(),
 }));
 
 // Mock logger
@@ -148,7 +149,7 @@ describe('CampaignModeStrategy', () => {
 
   describe('startLevel()', () => {
     test('should handle level not found', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       strategy.startLevel(mockGame, mockController, 'nonexistent');
 

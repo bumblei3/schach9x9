@@ -277,7 +277,7 @@ describe('AIController Coverage Boost', () => {
 
     try {
       await movePromise;
-    } catch (e) { }
+    } catch (e) {}
 
     expect(termSpy).toHaveBeenCalled();
     expect(initSpy).toHaveBeenCalledTimes(1);
@@ -290,7 +290,7 @@ describe('AIController Coverage Boost', () => {
     const worker = controller.aiWorkers[0] as any;
 
     // Fire and forget, catch potential rejection
-    controller.aiMove().catch(() => { });
+    controller.aiMove().catch(() => {});
 
     // Wait for listener
     while (worker.postMessage.mock.calls.length === 0) {
@@ -315,7 +315,7 @@ describe('AIController Coverage Boost', () => {
   });
 
   test('toggleAnalysisMode - toggles active state', () => {
-    const analyzeSpy = vi.spyOn(controller, 'analyzePosition').mockImplementation(() => { });
+    const analyzeSpy = vi.spyOn(controller, 'analyzePosition').mockImplementation(() => {});
     expect(controller.toggleAnalysisMode()).toBe(true);
     expect(analyzeSpy).toHaveBeenCalled();
     expect(controller.toggleAnalysisMode()).toBe(false);

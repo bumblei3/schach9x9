@@ -1,4 +1,5 @@
 import { PHASES, BOARD_SIZE } from '../gameEngine.js';
+import { AI_DEPTH_CONFIG } from '../config.js';
 import * as UI from '../ui.js';
 import * as MoveAnalyzer from './MoveAnalyzer.js';
 import * as aiEngine from '../aiEngine.js';
@@ -8,6 +9,13 @@ import * as aiEngine from '../aiEngine.js';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getTutorHints(game: any, tutorController: any): Promise<any[]> {
+  const turnColor = game.turn;
+
+  // Signal that the tutor is thinking
+  if ((UI as any).setTutorLoading) {
+    (UI as any).setTutorLoading(true);
+  }
+
   if (game.phase !== PHASES.PLAY) {
     return [];
   }
@@ -17,61 +25,72 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
     return []; // Don't give hints for AI
   }
 
-  // Use the high-performance engine to get top 3 moves
-  const turnColor = game.turn;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const topMoves: any[] = await (aiEngine as any).getTopMoves(
-    game.board,
-    turnColor,
-    3, // Get top 3 moves
-    6, // Search depth
-    1500 // Max time in ms
-  );
+  try {
+    // Calculate dynamic depth: AI depth + 2
+    const aiDepth =
+      (AI_DEPTH_CONFIG[game.difficulty as keyof typeof AI_DEPTH_CONFIG] as number) || 4;
+    const tutorDepth = aiDepth + 2;
+    const moveNumber = Math.floor(game.moveHistory.length / 2);
 
-  if (!topMoves || topMoves.length === 0) return [];
-
-  // Filter out invalid moves
-  const validMoves = topMoves.filter((result: any) => {
-    if (!result || !result.move) return false;
-
-    const from = result.move.from;
-    const to = result.move.to;
-    const piece = game.board[from.r] ? game.board[from.r][from.c] : undefined;
-    const targetPiece = game.board[to.r] ? game.board[to.r][to.c] : undefined;
-
-    // Verify the move belongs to the current player and is not a self-capture
-    if (!piece || piece.color !== turnColor) return false;
-    if (targetPiece && targetPiece.color === turnColor) return false;
-
-    return true;
-  });
-
-  // Convert engine moves to hints with explanations
-  return Promise.all(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    validMoves.map(async (hint: any, index: number) => {
+    const topMoves: any[] = await (aiEngine as any).getTopMoves(
+      game.board,
+      turnColor,
+      3, // Get top 3 moves
+      tutorDepth, // Search depth (AI + 2)
+      2500, // Max time in ms (increased for depth)
+      moveNumber // Pass move number for opening book query
+    );
+
+    if (!topMoves || topMoves.length === 0) return [];
+
+    // Filter out invalid moves
+    const validMoves = topMoves.filter((result: any) => {
+      if (!result || !result.move) return false;
+
+      const from = result.move.from;
+      const to = result.move.to;
+      const piece = game.board[from.r] ? game.board[from.r][from.c] : undefined;
+      const targetPiece = game.board[to.r] ? game.board[to.r][to.c] : undefined;
+
+      // Verify the move belongs to the current player and is not a self-capture
+      if (!piece || piece.color !== turnColor) return false;
+      if (targetPiece && targetPiece.color === turnColor) return false;
+
+      return true;
+    });
+
+    // Convert engine moves to hints with explanations
+    return Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const analysis = await (MoveAnalyzer as any).analyzeMoveWithExplanation.call(
-        tutorController,
-        game,
-        hint.move,
-        hint.score,
-        validMoves[0].score
-      );
-
-      // Extract PV from engine result
-      const pv = hint.pv || [];
-
-      return {
-        move: hint.move,
-        score: hint.score,
+      validMoves.map(async (hint: any, index: number) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        notation: (MoveAnalyzer as any).getMoveNotation(game, hint.move),
-        analysis,
-        pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
-      };
-    })
-  );
+        const analysis = await (MoveAnalyzer as any).analyzeMoveWithExplanation.call(
+          tutorController,
+          game,
+          hint.move,
+          hint.score,
+          validMoves[0].score
+        );
+
+        // Extract PV from engine result
+        const pv = hint.pv || [];
+
+        return {
+          move: hint.move,
+          score: hint.score,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          notation: (MoveAnalyzer as any).getMoveNotation(game, hint.move),
+          analysis,
+          pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
+        };
+      })
+    );
+  } finally {
+    if ((UI as any).setTutorLoading) {
+      (UI as any).setTutorLoading(false);
+    }
+  }
 }
 
 /**
@@ -96,6 +115,11 @@ export function isTutorMove(game: any, from: any, to: any): boolean {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function updateBestMoves(game: any, tutorController: any): void {
   if (game.phase !== PHASES.PLAY) return;
+
+  // Immediately show "Thinking" UI when a new position needs analysis
+  if ((UI as any).setTutorLoading) {
+    (UI as any).setTutorLoading(true);
+  }
 
   // Debounced part
   tutorController.debouncedGetTutorHints();
@@ -157,8 +181,8 @@ function createTemplate(
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-      `(Pieces: ${pieces.join(', ')})`
+        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+        `(Pieces: ${pieces.join(', ')})`
     );
   }
 

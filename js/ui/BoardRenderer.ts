@@ -612,8 +612,11 @@ export async function animateMove(
       const isElite = ['j', 'a', 'c', 'e', 'q'].includes(piece.type);
 
       // RPG Hero Trail
-      const xp = (game as any).mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
-      const isChampion = (game as any).mode === 'campaign' && (campaignManager as any).state.championType === piece.type;
+      const xp =
+        (game as any).mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
+      const isChampion =
+        (game as any).mode === 'campaign' &&
+        (campaignManager as any).state.championType === piece.type;
 
       let color = isElite
         ? piece.color === 'white'
@@ -623,8 +626,10 @@ export async function animateMove(
           ? '#e2e8f0'
           : '#475569'; // Default gray
 
-      if (isChampion) color = '#f59e0b'; // Golden trail for Champion
-      else if (xp.level >= 3) color = '#8b5cf6'; // Purple for Elite
+      if (isChampion)
+        color = '#f59e0b'; // Golden trail for Champion
+      else if (xp.level >= 3)
+        color = '#8b5cf6'; // Purple for Elite
       else if (xp.level >= 2) color = '#10b981'; // Green for Veteran
 
       if (isElite || isChampion || xp.level >= 2) {

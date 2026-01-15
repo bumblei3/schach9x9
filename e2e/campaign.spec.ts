@@ -54,7 +54,7 @@ test.describe('Campaign Mode', () => {
 
     await page.evaluate(() => {
       const game = (window as any).game;
-      if (!game) throw new Error("Game not found");
+      if (!game) throw new Error('Game not found');
       const controller = (window as any).gameController;
 
       // Force conditions for win processing

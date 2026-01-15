@@ -6,6 +6,7 @@
 import { logger } from '../logger.js';
 import {
   getBestMoveDetailed,
+  getTopMoves,
   analyzePosition,
   evaluatePosition,
   setOpeningBook,
@@ -28,10 +29,8 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'getBestMove': {
-        const { board, color, depth, config, personality, _timeLimit } = data;
-        (logger as any).debug(
-          `[AI Worker] getBestMove started - color:${color} depth:${depth} personality:${personality} timeLimit:${_timeLimit}ms`
-        );
+        const { board, color, depth, config, personality, moveNumber } = data;
+
         // Setup progress callback
         setProgressCallback((progress: any) => {
           (self as any).postMessage({ type: 'progress', id, data: progress });
@@ -43,10 +42,8 @@ self.onmessage = async function (e: MessageEvent) {
             personality: personality || config?.personality,
             maxDepth: depth,
           };
-          const bestMove = await getBestMoveDetailed(board, color, depth, timeParams);
-
-          // Simple logic without explicit debug logs for now, assuming fix is standardization
-          (self as any).postMessage({ type: 'bestMove', id, data: bestMove });
+          const result = await getBestMoveDetailed(board, color, depth, timeParams, moveNumber);
+          (self as any).postMessage({ type: 'bestMove', id, data: result });
         } catch (error) {
           (logger as any).error('[AI Worker] getBestMove failed:', error);
           (self as any).postMessage({ type: 'bestMove', id, data: null });
@@ -58,6 +55,18 @@ self.onmessage = async function (e: MessageEvent) {
         const { board: evalBoard, forColor } = data;
         const score = await evaluatePosition(evalBoard, forColor);
         (self as any).postMessage({ type: 'positionScore', id, data: score });
+        break;
+      }
+
+      case 'getTopMoves': {
+        const { board, color, count, depth, maxTimeMs, moveNumber } = data;
+        try {
+          const topMoves = await getTopMoves(board, color, count, depth, maxTimeMs, moveNumber);
+          (self as any).postMessage({ type: 'topMoves', id, data: topMoves });
+        } catch (error) {
+          (logger as any).error('[AI Worker] getTopMoves failed:', error);
+          (self as any).postMessage({ type: 'topMoves', id, data: [] });
+        }
         break;
       }
 

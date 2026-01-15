@@ -1,28 +1,27 @@
-
 import { UNIT_TALENT_TREES } from '../campaign/talents.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { showModal, showToast } from './OverlayManager.js';
 
 export class TalentTreeUI {
-    private currentUnitType: string = 'p';
+  private currentUnitType: string = 'p';
 
-    public show(unitType?: string): void {
-        if (unitType) this.currentUnitType = unitType;
-        const content = this.renderContent();
+  public show(unitType?: string): void {
+    if (unitType) this.currentUnitType = unitType;
+    const content = this.renderContent();
 
-        showModal('Einheiten & Talente', content, [
-            { text: 'Schließen', class: 'btn-secondary', callback: () => { } }
-        ]);
+    showModal('Einheiten & Talente', content, [
+      { text: 'Schließen', class: 'btn-secondary', callback: () => {} },
+    ]);
 
-        setTimeout(() => {
-            this.renderTabs();
-            this.renderTree();
-        }, 0);
-    }
+    setTimeout(() => {
+      this.renderTabs();
+      this.renderTree();
+    }, 0);
+  }
 
-    private renderContent(): string {
-        // Custom width for talent tree
-        const style = `<style>
+  private renderContent(): string {
+    // Custom width for talent tree
+    const style = `<style>
       .talent-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
       .talent-tab { padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
       .talent-tab.active { background: var(--accent-primary); border-color: var(--accent-highlight); box-shadow: 0 0 10px rgba(78, 205, 196, 0.3); }
@@ -49,7 +48,7 @@ export class TalentTreeUI {
       .talent-action { margin-left: auto; }
     </style>`;
 
-        return `
+    return `
       ${style}
       <div id="talent-ui-root">
         <div class="talent-tabs" id="talent-tabs"></div>
@@ -65,123 +64,128 @@ export class TalentTreeUI {
         </div>
       </div>
     `;
-    }
+  }
 
-    private renderTabs(): void {
-        const container = document.getElementById('talent-tabs');
-        if (!container) return;
+  private renderTabs(): void {
+    const container = document.getElementById('talent-tabs');
+    if (!container) return;
 
-        const units = [
-            { id: 'p', icon: '♟️', name: 'Bauer' },
-            { id: 'n', icon: '♞', name: 'Springer' },
-            { id: 'b', icon: '♝', name: 'Läufer' },
-            { id: 'r', icon: '♜', name: 'Turm' },
-            { id: 'q', icon: '♛', name: 'Dame' },
-            { id: 'k', icon: '♚', name: 'König' }
-            // Special units can be added later
-        ];
+    const units = [
+      { id: 'p', icon: '♟️', name: 'Bauer' },
+      { id: 'n', icon: '♞', name: 'Springer' },
+      { id: 'b', icon: '♝', name: 'Läufer' },
+      { id: 'r', icon: '♜', name: 'Turm' },
+      { id: 'q', icon: '♛', name: 'Dame' },
+      { id: 'k', icon: '♚', name: 'König' },
+      // Special units can be added later
+    ];
 
-        container.innerHTML = units.map(u => `
+    container.innerHTML = units
+      .map(
+        u => `
         <div class="talent-tab ${this.currentUnitType === u.id ? 'active' : ''}" data-unit="${u.id}">
             <span>${u.icon}</span>
             <span>${u.name}</span>
         </div>
-    `).join('');
+    `
+      )
+      .join('');
 
-        container.querySelectorAll('.talent-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const unit = (e.currentTarget as HTMLElement).dataset.unit;
-                if (unit) {
-                    this.currentUnitType = unit;
-                    this.renderTabs(); // re-render to update active class
-                    this.renderTree();
-                }
-            });
-        });
+    container.querySelectorAll('.talent-tab').forEach(tab => {
+      tab.addEventListener('click', e => {
+        const unit = (e.currentTarget as HTMLElement).dataset.unit;
+        if (unit) {
+          this.currentUnitType = unit;
+          this.renderTabs(); // re-render to update active class
+          this.renderTree();
+        }
+      });
+    });
+  }
+
+  private renderTree(): void {
+    const container = document.getElementById('talent-tree-view');
+    const goldDisplay = document.getElementById('talent-gold');
+    const unitTitle = document.getElementById('unit-title');
+
+    if (!container) return;
+    if (goldDisplay) goldDisplay.textContent = campaignManager.getGold().toString();
+
+    const tree = UNIT_TALENT_TREES[this.currentUnitType];
+    const unitXp = campaignManager.getUnitXp(this.currentUnitType);
+
+    if (unitTitle) unitTitle.textContent = `Talente: Level ${unitXp.level}`;
+
+    if (!tree || tree.talents.length === 0) {
+      container.innerHTML =
+        '<div style="margin: auto; color: #888;">Keine Talente verfügbar für diese Einheit.</div>';
+      return;
     }
 
-    private renderTree(): void {
-        const container = document.getElementById('talent-tree-view');
-        const goldDisplay = document.getElementById('talent-gold');
-        const unitTitle = document.getElementById('unit-title');
+    // Group by tier
+    const tiers = [1, 2, 3];
+    let html = '';
 
-        if (!container) return;
-        if (goldDisplay) goldDisplay.textContent = campaignManager.getGold().toString();
+    tiers.forEach(tier => {
+      const talents = tree.talents.filter(t => t.tier === tier);
+      if (talents.length > 0) {
+        html += `<div class="talent-tier" data-label="Tier ${tier}" style="margin-bottom: 40px; display: flex; gap: 40px; justify-content: center;">`;
+        talents.forEach(t => {
+          const isUnlocked = campaignManager.isTalentUnlocked(t.id);
+          // Available if not unlocked, previous tier reqs met (simplified: just level req)
+          // And we could check specific parent dependency if we wanted a real tree connected structure.
+          // For now: Level Requirement is the main gate.
+          const isLevelMet = unitXp.level >= t.reqLevel;
+          const isAvailable = !isUnlocked && isLevelMet;
+          let statusClass = 'locked';
+          if (isUnlocked) statusClass = 'unlocked';
+          else if (isAvailable) statusClass = 'available';
 
-        const tree = UNIT_TALENT_TREES[this.currentUnitType];
-        const unitXp = campaignManager.getUnitXp(this.currentUnitType);
-
-        if (unitTitle) unitTitle.textContent = `Talente: Level ${unitXp.level}`;
-
-        if (!tree || tree.talents.length === 0) {
-            container.innerHTML = '<div style="margin: auto; color: #888;">Keine Talente verfügbar für diese Einheit.</div>';
-            return;
-        }
-
-        // Group by tier
-        const tiers = [1, 2, 3];
-        let html = '';
-
-        tiers.forEach(tier => {
-            const talents = tree.talents.filter(t => t.tier === tier);
-            if (talents.length > 0) {
-                html += `<div class="talent-tier" data-label="Tier ${tier}" style="margin-bottom: 40px; display: flex; gap: 40px; justify-content: center;">`;
-                talents.forEach(t => {
-                    const isUnlocked = campaignManager.isTalentUnlocked(t.id);
-                    // Available if not unlocked, previous tier reqs met (simplified: just level req)
-                    // And we could check specific parent dependency if we wanted a real tree connected structure.
-                    // For now: Level Requirement is the main gate.
-                    const isLevelMet = unitXp.level >= t.reqLevel;
-                    const isAvailable = !isUnlocked && isLevelMet;
-                    let statusClass = 'locked';
-                    if (isUnlocked) statusClass = 'unlocked';
-                    else if (isAvailable) statusClass = 'available';
-
-                    html += `
+          html += `
                     <div class="talent-node ${statusClass}" data-id="${t.id}">
                         <div class="talent-icon">${t.icon}</div>
                         ${isUnlocked ? '<div style="position: absolute; bottom: -5px; right: -5px; font-size: 10px;">✅</div>' : ''}
                     </div>
                 `;
-                });
-                html += `</div>`;
-            }
         });
+        html += `</div>`;
+      }
+    });
 
-        container.innerHTML = html;
+    container.innerHTML = html;
 
-        // Attach listeners
-        container.querySelectorAll('.talent-node').forEach(node => {
-            node.addEventListener('click', (e) => {
-                const id = (e.currentTarget as HTMLElement).dataset.id;
-                if (id) this.selectTalent(id);
-            });
-        });
+    // Attach listeners
+    container.querySelectorAll('.talent-node').forEach(node => {
+      node.addEventListener('click', e => {
+        const id = (e.currentTarget as HTMLElement).dataset.id;
+        if (id) this.selectTalent(id);
+      });
+    });
+  }
+
+  private selectTalent(talentId: string): void {
+    const tree = UNIT_TALENT_TREES[this.currentUnitType];
+    const talent = tree.talents.find(t => t.id === talentId);
+    const infoPanel = document.getElementById('talent-info');
+
+    if (!talent || !infoPanel) return;
+
+    const isUnlocked = campaignManager.isTalentUnlocked(talentId);
+    const unitXp = campaignManager.getUnitXp(this.currentUnitType);
+    const canAfford = campaignManager.getGold() >= talent.cost;
+    const levelMet = unitXp.level >= talent.reqLevel;
+
+    let actionButton = '';
+    if (isUnlocked) {
+      actionButton = '<span style="color: #ffd700; font-weight: bold;">Bereits erlernt</span>';
+    } else if (!levelMet) {
+      actionButton = `<span style="color: #666;">Benötigt Level ${talent.reqLevel}</span>`;
+    } else {
+      const btnClass = canAfford ? 'btn-primary' : 'btn-secondary disabled';
+      actionButton = `<button class="${btnClass} buy-talent-btn" ${!canAfford ? 'disabled' : ''}>Lernen (${talent.cost} Gold)</button>`;
     }
 
-    private selectTalent(talentId: string): void {
-        const tree = UNIT_TALENT_TREES[this.currentUnitType];
-        const talent = tree.talents.find(t => t.id === talentId);
-        const infoPanel = document.getElementById('talent-info');
-
-        if (!talent || !infoPanel) return;
-
-        const isUnlocked = campaignManager.isTalentUnlocked(talentId);
-        const unitXp = campaignManager.getUnitXp(this.currentUnitType);
-        const canAfford = campaignManager.getGold() >= talent.cost;
-        const levelMet = unitXp.level >= talent.reqLevel;
-
-        let actionButton = '';
-        if (isUnlocked) {
-            actionButton = '<span style="color: #ffd700; font-weight: bold;">Bereits erlernt</span>';
-        } else if (!levelMet) {
-            actionButton = `<span style="color: #666;">Benötigt Level ${talent.reqLevel}</span>`;
-        } else {
-            const btnClass = canAfford ? 'btn-primary' : 'btn-secondary disabled';
-            actionButton = `<button class="${btnClass} buy-talent-btn" ${!canAfford ? 'disabled' : ''}>Lernen (${talent.cost} Gold)</button>`;
-        }
-
-        infoPanel.innerHTML = `
+    infoPanel.innerHTML = `
         <div style="display: flex; gap: 15px; align-items: start;">
             <div style="font-size: 2rem; background: #222; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">${talent.icon}</div>
             <div style="flex: 1;">
@@ -195,19 +199,19 @@ export class TalentTreeUI {
         </div>
     `;
 
-        const buyBtn = infoPanel.querySelector('.buy-talent-btn');
-        if (buyBtn && !buyBtn.hasAttribute('disabled')) {
-            buyBtn.addEventListener('click', () => {
-                if (campaignManager.unlockTalent(this.currentUnitType, talent.id, talent.cost)) {
-                    showToast(`${talent.name} erlernt!`, 'success');
-                    this.renderTree(); // refresh status
-                    this.selectTalent(talent.id); // refresh logic
-                } else {
-                    showToast('Nicht genug Gold!', 'error');
-                }
-            });
+    const buyBtn = infoPanel.querySelector('.buy-talent-btn');
+    if (buyBtn && !buyBtn.hasAttribute('disabled')) {
+      buyBtn.addEventListener('click', () => {
+        if (campaignManager.unlockTalent(this.currentUnitType, talent.id, talent.cost)) {
+          showToast(`${talent.name} erlernt!`, 'success');
+          this.renderTree(); // refresh status
+          this.selectTalent(talent.id); // refresh logic
+        } else {
+          showToast('Nicht genug Gold!', 'error');
         }
+      });
     }
+  }
 }
 
 export const talentTreeUI = new TalentTreeUI();

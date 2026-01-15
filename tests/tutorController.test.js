@@ -24,6 +24,7 @@ vi.mock('../js/ui.js', () => ({
     return symbols[piece.type] || '?';
   }),
   renderEvalGraph: vi.fn(),
+  setTutorLoading: vi.fn(),
 }));
 
 // Mock sounds module
@@ -40,24 +41,24 @@ vi.mock('../js/aiEngine.js', () => ({
       promotion: undefined,
     },
     score: 100,
-    notation: 'e3' // simplified
+    notation: 'e3', // simplified
   }),
   getTopMoves: vi.fn().mockResolvedValue([
     {
       move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 }, promotion: undefined },
       score: 100,
-      nodes: 0
+      nodes: 0,
     },
     {
       move: { from: { r: 6, c: 5 }, to: { r: 5, c: 5 }, promotion: undefined },
       score: 80,
-      nodes: 0
+      nodes: 0,
     },
     {
       move: { from: { r: 6, c: 6 }, to: { r: 5, c: 6 }, promotion: undefined },
       score: 60,
-      nodes: 0
-    }
+      nodes: 0,
+    },
   ]),
   evaluatePosition: vi.fn().mockResolvedValue(50),
   convertBoardToInt: vi.fn(),
@@ -167,8 +168,8 @@ describe('TutorController', () => {
           move: { from: { r: 5, c: 4 }, to: { r: 4, c: 5 }, promotion: undefined },
           score: 200,
           notation: 'exf5',
-          nodes: 100
-        }
+          nodes: 100,
+        },
       ]);
 
       const hints = await tutorController.getTutorHints();
@@ -556,8 +557,8 @@ describe('TutorController', () => {
           move: { from: { r: 4, c: 4 }, to: { r: 3, c: 5 }, promotion: undefined },
           score: 900,
           notation: 'exd5',
-          nodes: 100
-        }
+          nodes: 100,
+        },
       ]);
 
       const hints = await tutorController.getTutorHints();

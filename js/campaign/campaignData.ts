@@ -11,7 +11,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     difficulty: 'easy',
     setupType: 'fixed',
     playerColor: 'white',
-    fen: '9/2pppppp2/9/9/9/9/9/3QK4/9 w - - 0 1',
+    fen: '4k4/1ppppppp1/9/9/9/9/9/2PPPP3/3QK4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
     },
@@ -32,34 +32,36 @@ export const CAMPAIGN_LEVELS: Level[] = [
     difficulty: 'easy',
     setupType: 'fixed',
     playerColor: 'white',
-    fen: '4k4/9/2p1p1p2/3p1p3/9/9/3NN4/3K4/9 w - - 0 1',
+    fen: '4k4/ppppppppp/9/1nnnn4/9/9/9/RRBBQBBRR/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['skirmish_bridge'],
     goals: {
       2: { type: 'moves', value: 25, description: 'Sieg in unter 25 Zügen' },
-      3: { type: 'moves', value: 12, description: 'Sieg in unter 12 Zügen' },
+      3: { type: 'moves', value: 16, description: 'Sieg in unter 16 Zügen' },
     },
     goldReward: 30,
   },
   {
     id: 'skirmish_bridge',
     title: 'Kapitel 3: Der General',
-    description: 'Ein echter militärischer Test. Eine ausgeglichene Armee erwartet dich. Zeige, dass du bereit für die 9x9 Welt bist.',
+    description:
+      'Ein echter militärischer Test. Eine ausgeglichene Armee erwartet dich. Zeige, dass du bereit für die 9x9 Welt bist.',
     opponentName: 'General Eisenfaust',
     opponentPersonality: 'balanced',
     difficulty: 'medium',
-    setupType: 'budget',
-    playerBudget: 15,
+    setupType: 'fixed',
     playerColor: 'white',
-    fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/9/4K4 w KQkq - 0 1',
+    fen: 'rnbqkcbjr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKEACR w KQkq - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['boss_1'],
     goals: {
-      2: { type: 'moves', value: 40, description: 'Sieg in unter 40 Zügen' },
+      2: { type: 'moves', value: 50, description: 'Sieg in unter 50 Zügen' },
       3: { type: 'material', value: 8, description: 'Gewinne mit +8 Materialvorteil' },
     },
     goldReward: 40,
@@ -67,14 +69,15 @@ export const CAMPAIGN_LEVELS: Level[] = [
   {
     id: 'boss_1',
     title: 'Kapitel 4: Die Belagerung des dunklen Turms',
-    description: 'Der Turm des Tyrannen steht vor dir. Durchbrich die Verteidigung und stürze den Lord.',
+    description:
+      'Der Turm des Tyrannen steht vor dir. Durchbrich die Verteidigung und stürze den Lord.',
     opponentName: 'Dunkler Lord',
     opponentPersonality: 'aggressive',
     difficulty: 'hard',
     setupType: 'budget',
-    playerBudget: 25,
+    playerBudget: 30,
     playerColor: 'white',
-    fen: '9/9/9/3ppp3/3pkp3/3ppp3/9/9/RNBQKBNR w KQkq - 0 1',
+    fen: '9/9/9/3ppp3/3pkp3/3ppp3/9/9/9 w - - 0 1',
     winCondition: {
       type: 'checkmate',
     },
@@ -88,15 +91,17 @@ export const CAMPAIGN_LEVELS: Level[] = [
   {
     id: 'knight_mission',
     title: 'Kapitel 5: Der Ritt der Gerechten',
-    description: 'Deine Springer sind der Schlüssel zum Sieg. Nutze ihre Wendigkeit, um die feindliche Kavallerie zu umgehen.',
+    description:
+      'Deine Springer sind der Schlüssel zum Sieg. Nutze ihre Wendigkeit, um die feindliche Kavallerie zu umgehen.',
     opponentName: 'General Eisenherz',
     opponentPersonality: 'balanced',
     difficulty: 'hard',
     setupType: 'fixed',
     playerColor: 'white',
-    fen: '4k4/9/9/9/3nN3/9/9/9/4K4 w - - 0 1',
+    fen: '4k4/9/9/9/2p1n1p2/3pNp3/3n1N3/9/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['final_battle'],
     goals: {
@@ -108,14 +113,15 @@ export const CAMPAIGN_LEVELS: Level[] = [
   {
     id: 'final_battle',
     title: 'Kapitel 6: Der Kampf um den Eisernen Thron',
-    description: 'Der Imperator stellt sich dir im Thronsaal entgegen. Das Schicksal des Reiches liegt in deinen Händen!',
+    description:
+      'Der Imperator stellt sich dir im Thronsaal entgegen. Das Schicksal des Reiches liegt in deinen Händen!',
     opponentName: 'Der Imperator',
     opponentPersonality: 'expert',
     difficulty: 'expert',
     setupType: 'budget',
-    playerBudget: 40,
+    playerBudget: 50,
     playerColor: 'white',
-    fen: 'rnbqkbnr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    fen: 'rnbakcbnr/ppppppppp/9/9/9/9/9/9/9 w KQkq - 0 1',
     winCondition: {
       type: 'checkmate',
     },

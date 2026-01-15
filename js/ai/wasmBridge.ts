@@ -72,9 +72,8 @@ export async function getBestMoveWasm(
 
   try {
     // Convert to Int8Array if needed
-    const boardBytes = boardIntArray instanceof Int8Array
-      ? boardIntArray
-      : new Int8Array(boardIntArray);
+    const boardBytes =
+      boardIntArray instanceof Int8Array ? boardIntArray : new Int8Array(boardIntArray);
 
     const resultJson = wasmModule.get_best_move_wasm(
       boardBytes,
@@ -94,11 +93,13 @@ export async function getBestMoveWasm(
 
     // Convert move format from WASM to JS
     return {
-      move: move ? {
-        from: { r: Math.floor(move.from / 9), c: move.from % 9 },
-        to: { r: Math.floor(move.to / 9), c: move.to % 9 },
-        promotion: move.promotion ? mapIntToPiece(move.promotion) : undefined,
-      } : null,
+      move: move
+        ? {
+            from: { r: Math.floor(move.from / 9), c: move.from % 9 },
+            to: { r: Math.floor(move.to / 9), c: move.to % 9 },
+            promotion: move.promotion ? mapIntToPiece(move.promotion) : undefined,
+          }
+        : null,
       score,
       nodes,
     };

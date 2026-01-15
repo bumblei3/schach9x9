@@ -7,6 +7,26 @@ import { updateShopUI } from './ShopUI.js';
 import type { Game } from '../gameEngine.js';
 
 /**
+ * Zeigt oder verbirgt einen Lade-Status für den Tutor.
+ */
+export function setTutorLoading(loading: boolean): void {
+  const suggestionsEl = document.getElementById('tutor-suggestions');
+  if (!suggestionsEl) return;
+
+  if (loading) {
+    suggestionsEl.innerHTML = `
+      <div class="tutor-thinking-container" style="padding: 2rem; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <div class="tutor-thinking-icon" style="font-size: 2.5rem; animation: pulse 1.5s infinite;">🤖</div>
+        <div style="font-weight: bold; color: var(--accent-primary);">KI-Tutor denkt nach...</div>
+        <div style="font-size: 0.8rem; opacity: 0.7;">Analysiere hunderte Spielverläufe für den optimalen Tipp.</div>
+      </div>
+    `;
+    const panel = document.getElementById('tutor-panel');
+    if (panel) panel.classList.remove('hidden');
+  }
+}
+
+/**
  * Aktualisiert die Tutor-Empfehlungen für die Aufstellungsphase.
  * @param game - Die Game-Instanz
  */

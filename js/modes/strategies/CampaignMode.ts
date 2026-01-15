@@ -44,6 +44,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
 
     game.points = budget;
+    game.initialPoints = budget;
 
     // Set AI Personality based on level
     if (level.opponentPersonality) {
@@ -54,17 +55,16 @@ export class CampaignModeStrategy implements GameModeStrategy {
     game.playerColor = level.playerColor as any;
 
     // Handle Setup Type
-    if (level.setupType === 'fixed') {
-      if (level.fen) {
-        game.board = BoardFactory.fromFEN(level.fen) as any;
-        // Important: Update board size if level uses different dimensions (e.g. 8x8 vs 9x9)
-        if (game.board.length !== game.boardSize) {
-          game.boardSize = game.board.length;
-        }
-      } else {
-        game.board = BoardFactory.createEmptyBoard() as any; // Fallback
+    if (level.fen) {
+      game.board = BoardFactory.fromFEN(level.fen) as any;
+      if (game.board.length !== game.boardSize) {
+        game.boardSize = game.board.length;
       }
+    } else {
+      game.board = BoardFactory.createEmptyBoard() as any;
+    }
 
+    if (level.setupType === 'fixed') {
       game.phase = PHASES.PLAY as any;
       controller.startClock();
     } else {
@@ -74,6 +74,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
 
     // UI Updates
+    UI.initBoardUI(game);
     UI.updateStatus(game);
     UI.renderBoard(game);
 
@@ -125,7 +126,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
           </h4>
           <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
             <li style="display: flex; align-items: center; gap: 10px;">
-              <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>${level.winCondition === 'checkmate' ? 'Setze den Gegner Matt' : 'Besiege den Gegner'}</span>
+              <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>${level.winCondition.type === 'checkmate' ? 'Setze den Gegner Matt' : 'Besiege den Gegner'}</span>
             </li>
           </ul>
         </div>
@@ -133,7 +134,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
     `;
 
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => { } },
+      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
     ]);
   }
 }

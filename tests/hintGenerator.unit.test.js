@@ -7,6 +7,7 @@ vi.mock('../js/ui.js', () => ({
   renderBoard: vi.fn(),
   updateShopUI: vi.fn(),
   getPieceText: vi.fn(piece => (piece ? piece.type : '')),
+  setTutorLoading: vi.fn(),
 }));
 
 vi.mock('../js/aiEngine.js', () => ({
@@ -67,12 +68,14 @@ describe('HintGenerator - Unit Tests', () => {
 
     // Mock AI engine result
     const bestMove = { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } };
-    aiEngine.getTopMoves.mockReturnValue([{
-      move: bestMove,
-      score: 50,
-      notation: 'e4',
-      nodes: 100
-    }]);
+    aiEngine.getTopMoves.mockReturnValue([
+      {
+        move: bestMove,
+        score: 50,
+        notation: 'e4',
+        nodes: 100,
+      },
+    ]);
 
     game.board[7][4] = { type: 'p', color: 'white' };
 
@@ -83,10 +86,12 @@ describe('HintGenerator - Unit Tests', () => {
   test('getTutorHints should filter out pieces of wrong color or missing', async () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'black' }; // Wrong color
-    aiEngine.getTopMoves.mockReturnValue([{
-      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
-      score: 50,
-    }]);
+    aiEngine.getTopMoves.mockReturnValue([
+      {
+        move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+        score: 50,
+      },
+    ]);
 
     expect(await getTutorHints(game, mockTutorController)).toEqual([]);
 
@@ -98,10 +103,12 @@ describe('HintGenerator - Unit Tests', () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'white' };
     game.board[5][4] = { type: 'p', color: 'white' }; // Same color
-    aiEngine.getTopMoves.mockReturnValue([{
-      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
-      score: 50,
-    }]);
+    aiEngine.getTopMoves.mockReturnValue([
+      {
+        move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+        score: 50,
+      },
+    ]);
 
     expect(await getTutorHints(game, mockTutorController)).toEqual([]);
   });
@@ -120,10 +127,12 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('getTutorHints should skip invalid candidates', async () => {
     game.phase = PHASES.PLAY;
-    aiEngine.getTopMoves.mockReturnValue([{
-      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
-      score: 50,
-    }]);
+    aiEngine.getTopMoves.mockReturnValue([
+      {
+        move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+        score: 50,
+      },
+    ]);
     game.board[7][4] = null; // No piece at 'from' effectively makes it invalid in getTutorHints logic
     // Actually, getTutorHints filters pieces of wrong color/missing BEFORE calling engine in some tests,
     // but here we call the engine first in the new logic.

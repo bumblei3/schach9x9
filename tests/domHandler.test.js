@@ -94,6 +94,8 @@ describe('DOMHandler', () => {
         personality: 'balanced',
         analysisMode: false,
         continuousAnalysis: false,
+        tutorMode: 'standard',
+        difficulty: 'medium',
       },
 
       gameController: {
@@ -107,11 +109,16 @@ describe('DOMHandler', () => {
         toggleContinuousAnalysis: vi.fn(),
         finishSetupPhase: vi.fn(),
         requestHint: vi.fn(),
+        setTimeControl: vi.fn(),
       },
     };
 
     // Create full required DOM elements
     document.body.innerHTML = `
+            <select id="time-control-select">
+                <option value="blitz5">Blitz 5+3</option>
+                <option value="rapid10">Rapid 10+0</option>
+            </select>
             <div id="points-selection-overlay"></div>
             <button class="points-btn" data-points="15"></button>
             <button id="standard-8x8-btn"></button>
@@ -168,10 +175,44 @@ describe('DOMHandler', () => {
                 <option value="balanced">Balanced</option>
                 <option value="aggressive">Aggressive</option>
             </select>
+            <select id="difficulty-select">
+                <option value="medium">Medium</option>
+                <option value="expert">Expert</option>
+            </select>
+            <select id="difficulty-select">
+                <option value="medium">Medium</option>
+                <option value="expert">Expert</option>
+            </select>
+            <select id="tutor-mode-select">
+                <option value="standard">Standard</option>
+                <option value="guess_the_move">Guess</option>
+            </select>
         `;
 
     domHandler = new DOMHandler(app);
     domHandler.init();
+  });
+
+  test('should handle difficulty selection and synchronization', () => {
+    const selects = document.querySelectorAll('#difficulty-select');
+    const firstSelect = selects[0];
+    const secondSelect = selects[1];
+
+    firstSelect.value = 'expert';
+    firstSelect.dispatchEvent(new Event('change'));
+
+    expect(app.game.difficulty).toBe('expert');
+    expect(secondSelect.value).toBe('expert');
+  });
+
+  test('should handle time control selection', () => {
+    const select = document.querySelector('#time-control-select');
+    expect(select).not.toBeNull();
+    if (select) {
+      select.value = 'rapid10';
+      select.dispatchEvent(new Event('change'));
+      expect(app.gameController.setTimeControl).toHaveBeenCalledWith('rapid10');
+    }
   });
 
   test('should initialize and wire up points selection', () => {
