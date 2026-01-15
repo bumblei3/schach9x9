@@ -30,3 +30,17 @@ describe('Mission 2 Remis Victory', () => {
     expect(stars).toBe(3);
   });
 });
+
+describe('Mission 1 Remis Victory', () => {
+  const MISSION_1_ID = 'peasant_revolt';
+
+  beforeEach(() => {
+    campaignManager.resetState();
+  });
+
+  test('Mission 1 should have drawCountsAsWin flag', () => {
+    const level = campaignManager.getLevel(MISSION_1_ID);
+    expect(level).toBeDefined();
+    expect(level?.winCondition.drawCountsAsWin).toBe(true);
+  });
+});

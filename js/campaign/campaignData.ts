@@ -14,6 +14,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '4k4/1ppppppp1/9/9/9/9/9/2PPPP3/3QK4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['bandit_ambush'],
     goals: {
@@ -80,6 +81,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '9/9/9/3ppp3/3pkp3/3ppp3/9/9/9 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     goals: {
       2: { type: 'moves', value: 50, description: 'Sieg in unter 50 Zügen' },
@@ -124,6 +126,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: 'rnbakcbnr/ppppppppp/9/9/9/9/9/9/9 w KQkq - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['endgame_rook'],
     goals: {
@@ -145,6 +148,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '9/9/9/9/4k4/9/9/4R4/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['endgame_queen'],
     goals: {
@@ -165,6 +169,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '9/9/9/4k4/9/9/9/4Q4/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['endgame_pawn'],
     goals: {
@@ -186,6 +191,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '9/9/9/9/4k4/9/4P4/9/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['endgame_bishops'],
     goals: {
@@ -206,6 +212,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '9/9/9/9/4k4/9/9/3B1B3/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: ['endgame_exchange'],
     goals: {
@@ -227,6 +234,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
     fen: '9/9/9/4k4/9/4b4/9/4R4/4K4 w - - 0 1',
     winCondition: {
       type: 'checkmate',
+      drawCountsAsWin: true,
     },
     unlocks: [],
     goals: {
