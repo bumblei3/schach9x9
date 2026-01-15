@@ -259,4 +259,51 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
       expect(game.isStalemate('black')).toBe(true);
     });
   });
+
+  describe('Advanced Piece Dynamics & Tutor Filtering', () => {
+    it('Angel (Queen + Knight) should respect blocked squares for both move types', () => {
+      const game = new Game(15, 'cross');
+      // Angel at (3,3)
+      // Knight jump to (1,2) is BLOCKED. (1,4) is PLAYABLE.
+      // Sliding (diagonal) to (1,1) is BLOCKED. (1,5) is PLAYABLE.
+      game.board[3][3] = { type: 'e', color: 'white', hasMoved: true };
+
+      const moves = game.rulesEngine.getValidMoves(3, 3, game.board[3][3]!);
+
+      // Check Knight jumps
+      const knightTo1_2 = moves.find(m => m.r === 1 && m.c === 2);
+      const knightTo1_4 = moves.find(m => m.r === 1 && m.c === 4);
+      expect(knightTo1_2).toBeUndefined();
+      expect(knightTo1_4).toBeDefined();
+
+      // Check Sliding (Diagonal)
+      const bishopTo1_1 = moves.find(m => m.r === 1 && m.c === 1);
+      const bishopTo1_5 = moves.find(m => m.r === 1 && m.c === 5);
+      expect(bishopTo1_1).toBeUndefined();
+      expect(bishopTo1_5).toBeDefined();
+    });
+
+    it('Nightrider sliding knight jumps should be blocked by blocked squares', () => {
+      const game = new Game(15, 'cross');
+      // Nightrider at (3,6)
+      // (1,7) is the first step in a ray. (1,7) is BLOCKED in row 1, col 7.
+      // The entire ray (3,6) -> (1,7) -> (-1,8) should be cut off.
+      game.board[3][6] = { type: 'j', color: 'white', hasMoved: true };
+
+      const moves = game.rulesEngine.getValidMoves(3, 6, game.board[3][6]!);
+      const to1_7 = moves.find(m => m.r === 1 && m.c === 7);
+      expect(to1_7).toBeUndefined();
+    });
+
+    it('Tutor should NOT recommend moves landing on blocked squares', async () => {
+      const game = new Game(15, 'cross');
+      const moves = game.getAllLegalMoves('white');
+      moves.forEach(m => {
+        const isBlocked = isBlockedCell(m.to.r, m.to.c, 'cross');
+        if (isBlocked) {
+          throw new Error(`Tutor-accessible move targets blocked square: ${m.to.r},${m.to.c}`);
+        }
+      });
+    });
+  });
 });

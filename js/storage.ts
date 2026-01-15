@@ -6,11 +6,13 @@
 
 import { logger } from './logger.js';
 import type { Player, Piece, Square } from './types/game.js';
-import type { Phase, AIDifficulty } from './config.js';
+import type { Phase, AIDifficulty, BoardShape } from './config.js';
+import { setCurrentBoardShape } from './config.js';
 
 export interface SavedGameState {
   timestamp: number;
   mode: string;
+  boardShape?: BoardShape;
   difficulty: AIDifficulty;
   isAI: boolean;
   savedAt: string;
@@ -28,6 +30,7 @@ export interface SavedGameState {
 
 export interface GameLike {
   mode: string;
+  boardShape?: BoardShape;
   difficulty: AIDifficulty;
   isAI: boolean;
   board: (Piece | null)[][];
@@ -55,6 +58,7 @@ export class StorageManager {
       const gameState: SavedGameState = {
         timestamp: Date.now(),
         mode: game.mode,
+        boardShape: game.boardShape,
         difficulty: game.difficulty,
         isAI: game.isAI,
         savedAt: new Date().toISOString(),
@@ -118,6 +122,9 @@ export class StorageManager {
 
     // Restore basic types
     game.mode = state.mode;
+    game.boardShape = state.boardShape || 'standard';
+    setCurrentBoardShape(game.boardShape);
+
     game.difficulty = state.difficulty;
     game.isAI = state.isAI;
     game.turn = state.turn;

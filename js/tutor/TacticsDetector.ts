@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from '../gameEngine.js';
 import * as aiEngine from '../aiEngine.js';
+import { isBlockedCell } from '../config.js';
 
 /**
  * Detects tactical patterns for a given move
@@ -217,6 +218,7 @@ export function detectSkewers(game: any, analyzer: any, pos: any, attackerColor:
     let c = move.c + dc;
 
     while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+      if (isBlockedCell(r, c, game.boardShape)) break;
       const behindPiece = game.board[r][c];
       if (behindPiece) {
         if (behindPiece.color === opponentColor) {
@@ -368,7 +370,8 @@ function canPieceAttackSquare(game: any, piece: any, from: any, to: any): boolea
   let r = from.r + signDr;
   let c = from.c + signDc;
   while (r !== to.r || c !== to.c) {
-    if (game.board[r][c]) return false; // Blocked
+    if (isBlockedCell(r, c, game.boardShape)) return false; // Path blocked by boundary
+    if (game.board[r][c]) return false; // Blocked by piece
     r += signDr;
     c += signDc;
   }
@@ -433,6 +436,7 @@ export function detectPins(game: any, analyzer: any, pos: any, attackerColor: st
     let c = move.c + dc;
 
     while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+      if (isBlockedCell(r, c, game.boardShape)) break;
       const behindPiece = game.board[r][c];
       if (behindPiece) {
         if (behindPiece.color === opponentColor && behindPiece.type === 'k') {
@@ -496,6 +500,7 @@ export function detectDiscoveredAttacks(
       let foundFrom = false;
 
       while (checkR >= 0 && checkR < BOARD_SIZE && checkC >= 0 && checkC < BOARD_SIZE) {
+        if (isBlockedCell(checkR, checkC, game.boardShape)) break;
         if (checkR === from.r && checkC === from.c) {
           foundFrom = true;
           checkR += dr;
@@ -743,6 +748,7 @@ export function detectBattery(game: any, analyzer: any, pos: any, color: string)
       let r = pos.r + d[0];
       let c = pos.c + d[1];
       while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+        if (isBlockedCell(r, c, game.boardShape)) break;
         const p = game.board[r][c];
         if (p) {
           if (p.color === color && types.includes(p.type)) {
