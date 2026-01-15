@@ -134,7 +134,7 @@ describe('CampaignManager', () => {
     expect(manager.isPerkUnlocked('stabile_bauern')).toBe(true);
 
     // Fail to buy twice (checking logic if we were wrapping it, but here we just check spendGold again or unlocked status)
-    const success2 = manager.spendGold(cost);
+    manager.spendGold(cost); // success2 was unused
     // This just spends gold again if we have it.
     // But if we want to check if we can unlock again?
     // The test intent was "should NOT buy twice".
