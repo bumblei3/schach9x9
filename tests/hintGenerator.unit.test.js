@@ -153,6 +153,20 @@ describe('HintGenerator - Unit Tests', () => {
     game.initialPoints = 25;
     expect(getSetupTemplates(game)[0].cost).toBe(25);
 
+    // 30 points (Boss 1)
+    game.initialPoints = 30;
+    const t30 = getSetupTemplates(game);
+    expect(t30.length).toBeGreaterThan(0);
+    expect(t30[0].id).toBe('dark_tower_30');
+    expect(t30[0].cost).toBe(30);
+
+    // 50 points (Boss 2)
+    game.initialPoints = 50;
+    const t50 = getSetupTemplates(game);
+    expect(t50.length).toBeGreaterThan(0);
+    expect(t50[0].id).toBe('imperator_50');
+    expect(t50[0].cost).toBe(50);
+
     game.initialPoints = 11;
     // Dynamic generator should match exactly 11 points
     expect(getSetupTemplates(game)[0].cost).toBe(11);

@@ -509,9 +509,77 @@ export function getSetupTemplates(game: any): any[] {
     ];
   }
 
-  // Templates for 15 points (Standard) or Fallback
-  // If points don't match exactly 12, 15, 18, 20, 25, we generate dynamic ones or default to 15 if close.
-  // Dynamic generation for arbitrary points:
+  // Templates for 30+ points (Boss 1 Tier)
+  // Covers 30 (Base) and 40 (with Perk)
+  if (points >= 30 && points < 50) {
+    return [
+      createTemplate(
+        {
+          id: 'dark_tower_30',
+          name: '🏰 Dunkler Turm',
+          description: 'Massive Verteidigung mit Engel und Türmen.',
+          pieces: ['e', 'r', 'r', 'c'], // 12+5+5+8 = 30
+        },
+        30
+      ),
+      createTemplate(
+        {
+          id: 'royal_court_30',
+          name: '👑 Hofstaat',
+          description: 'Dame, Kanzler und Erzbischof vereint.',
+          pieces: ['q', 'c', 'a', 'n', 'n'], // 9+8+7+3+3 = 30
+        },
+        30
+      ),
+      createTemplate(
+        {
+          id: 'divine_30',
+          name: '✨ Die Auserwählten',
+          description: 'Zwei Engel führen die Schlacht an.',
+          pieces: ['e', 'e', 'n', 'n'], // 12+12+3+3 = 30
+          isRecommended: true,
+        },
+        30
+      ),
+    ];
+  }
+
+  // Templates for 50+ points (Final Boss Tier)
+  // Covers 50 (Base) and 60 (with Perk)
+  if (points >= 50) {
+    return [
+      createTemplate(
+        {
+          id: 'imperator_50',
+          name: '⚔️ Imperiale Legion',
+          description: 'Eine Armee aus Engeln und Kanzlern.',
+          pieces: ['e', 'e', 'c', 'c', 'r', 'r'], // 12+12+8+8+5+5 = 50
+        },
+        50
+      ),
+      createTemplate(
+        {
+          id: 'queens_wrath_50',
+          name: '👸 Rache der Königin',
+          description: 'Vier Damen dominieren das Brett.',
+          pieces: ['q', 'q', 'q', 'q', 'e', 'p', 'p'], // 9*4=36 + 12 + 1 + 1 = 50
+        },
+        50
+      ),
+      createTemplate(
+        {
+          id: 'ultimate_50',
+          name: '🌟 Ultimative Macht',
+          description: 'Eine ausgewogene, vernichtende Streitmacht.',
+          pieces: ['e', 'q', 'c', 'a', 'r', 'r', 'n', 'p'], // 12+9+8+7+5+5+3+1 = 50
+          isRecommended: true,
+        },
+        50
+      ),
+    ];
+  }
+
+  // Standard Fallback / Dynamic Generation
   if (![12, 15, 18, 20, 25].includes(points)) {
     // Generate a simple dynamic template
     const dynamicPieces: string[] = [];
