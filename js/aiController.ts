@@ -4,6 +4,9 @@ import { logger } from './logger.js';
 import * as UI from './ui.js';
 import * as aiEngine from './aiEngine.js';
 
+// @ts-ignore
+import AIWorker from './ai/aiWorker.ts?worker';
+
 // Piece values for shop
 const PIECES: any = SHOP_PIECES;
 
@@ -429,25 +432,12 @@ export class AIController {
       });
 
     for (let i = 0; i < numWorkers; i++) {
-      let worker: Worker;
-      try {
-        /*
-         * Note: In Vitest environment, import.meta.url might be problematic.
-         * The test mocks global.Worker, so we expect this to succeed if URL resolution works.
-         */
-        const workerUrl = new URL('./ai/aiWorker.ts', import.meta.url);
-        worker = new Worker(workerUrl, { type: 'module' });
-      } catch (err) {
-        logger.error(
-          `[AIController] Failed to create worker ${i}. import.meta.url=${import.meta.url}`,
-          err
-        );
-        throw err;
-      }
+      // @ts-ignore - Vite worker import
+      const worker = new AIWorker();
       this.aiWorkers.push(worker);
 
       // Dedicated message handler per worker
-      worker.onmessage = e => this.handleWorkerMessage(e, i);
+      worker.onmessage = (e: MessageEvent) => this.handleWorkerMessage(e, i);
 
       if (this.openingBookData) {
         worker.postMessage({ type: 'loadBook', data: { book: this.openingBookData } });
