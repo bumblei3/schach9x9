@@ -66,11 +66,30 @@ export function updateShopUI(game: any): void {
   }
 
   const statusDisplay = document.getElementById('selected-piece-display');
-  if (statusDisplay) {
-    if (game.selectedShopPiece) {
-      statusDisplay.textContent = `Platziere: ${getPieceText({ type: game.selectedShopPiece, color: game.turn })} (${PIECE_VALUES[game.selectedShopPiece as keyof typeof PIECE_VALUES]} Pkt)`;
-    } else {
-      statusDisplay.textContent = 'Wähle eine Figur zum Kaufen';
+  const shopGrid = document.getElementById('shop-buttons');
+  const tutorSection = document.getElementById('tutor-recommendations-section');
+  const shopHeader = document.querySelector('#shop-panel .shop-header h2');
+  const phase = String(game.phase);
+  const isUpgradePhase =
+    phase === 'SETUP_WHITE_UPGRADES' || phase === 'SETUP_BLACK_UPGRADES';
+
+  if (isUpgradePhase) {
+    if (shopHeader) shopHeader.textContent = 'Truppen verbessern';
+    if (shopGrid) shopGrid.classList.add('hidden');
+    if (tutorSection) tutorSection.classList.add('hidden');
+    if (statusDisplay)
+      statusDisplay.textContent = 'Klicke auf Figuren auf dem Brett zum Verbessern';
+  } else {
+    if (shopHeader) shopHeader.textContent = 'Truppen anheuern';
+    if (shopGrid) shopGrid.classList.remove('hidden');
+    if (tutorSection) tutorSection.classList.remove('hidden');
+
+    if (statusDisplay) {
+      if (game.selectedShopPiece) {
+        statusDisplay.textContent = `Platziere: ${getPieceText({ type: game.selectedShopPiece, color: game.turn })} (${PIECE_VALUES[game.selectedShopPiece as keyof typeof PIECE_VALUES]} Pkt)`;
+      } else {
+        statusDisplay.textContent = 'Wähle eine Figur zum Kaufen';
+      }
     }
   }
 

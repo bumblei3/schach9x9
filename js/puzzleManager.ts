@@ -65,8 +65,15 @@ export class PuzzleManager {
         title: 'Puzzle 4: Damenmatt',
         description: 'Setze matt mit der Dame.',
         difficulty: 'Einfach',
-        setupStr: 'bk' + '..'.repeat(8) + 'wq' + '..'.repeat(9) + 'wk' + '..'.repeat(81 - 20) + 'w',
-        solution: [{ from: { r: 1, c: 0 }, to: { r: 0, c: 0 } }],
+        setupStr:
+          'bk' +
+          '..'.repeat(13) +
+          'wq' +
+          '..'.repeat(4) +
+          'wk' +
+          '..'.repeat(81 - 20) +
+          'w',
+        solution: [{ from: { r: 1, c: 5 }, to: { r: 1, c: 1 } }],
       },
       {
         id: 'double-rook-mate',

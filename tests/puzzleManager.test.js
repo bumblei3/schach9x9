@@ -153,6 +153,25 @@ describe('PuzzleManager', () => {
       genSpy.mockRestore();
     });
   });
+
+  describe('Specific Puzzles', () => {
+    test('Puzzle 4 should have valid setup and solution', () => {
+      const p4Index = manager.puzzles.findIndex(p => p.id === 'mate-in-1-queen-001');
+      expect(p4Index).not.toBe(-1);
+
+      manager.loadPuzzle(game, p4Index);
+
+      // Verify Setup: BK(0,0), WK(2,1), WQ(1,5)
+      expect(game.board[0][0]).toEqual(expect.objectContaining({ type: 'k', color: 'black' }));
+      expect(game.board[2][1]).toEqual(expect.objectContaining({ type: 'k', color: 'white' }));
+      expect(game.board[1][5]).toEqual(expect.objectContaining({ type: 'q', color: 'white' }));
+
+      // Verify Solution
+      const sol = manager.getPuzzle('mate-in-1-queen-001').solution[0];
+      const result = manager.checkMove(game, sol);
+      expect(result).toBe('solved');
+    });
+  });
 });
 
 describe('PuzzleGenerator', () => {

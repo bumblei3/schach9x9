@@ -180,6 +180,10 @@ export class AIController {
   }
 
   public aiSetupUpgrades(): void {
+    if (this.game.mode === 'upgrade') {
+      logger.info('[AI] Skipping upgrades in Classic 9x9 Upgrade mode.');
+      return;
+    }
     if (this.game.gameController && this.game.gameController.shopManager) {
       this.game.gameController.shopManager.aiPerformUpgrades();
     }
@@ -240,9 +244,17 @@ export class AIController {
     const isBeginner = this.game.difficulty === AI_DIFFICULTIES.BEGINNER;
     const isEasy = this.game.difficulty === AI_DIFFICULTIES.EASY;
 
-    if (isBeginner && inaccuracyRoll < 0.15) {
-      depth = 1; // Drop to very shallow search
-      logger.info('[AI] Beginner Blunder Triggered: Reducing depth to 1');
+    if (isBeginner && inaccuracyRoll < 0.25) {
+      // 25% chance to make a completely random move (Blunder)
+      logger.info('[AI] Beginner Blunder Triggered: Making random move');
+      const allMoves = this.game.getAllLegalMoves('black');
+      if (allMoves.length > 0) {
+        const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+        this.game.executeMove(randomMove.from, randomMove.to, false, randomMove.promotion);
+        if (this.game.renderBoard) this.game.renderBoard();
+        if (spinner) spinner.classList.add('hidden');
+        return;
+      }
     } else if (isEasy && inaccuracyRoll < 0.1) {
       depth = 2; // Slight inaccuracy
       logger.info('[AI] Easy Mistake Triggered: Reducing depth to 2');
@@ -701,7 +713,21 @@ export class AIController {
     }
 
     const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
+    const materialAdvantage = this.game.calculateMaterialAdvantage();
 
+    // In "Classic 9x9 + Upgrades" (mode='upgrade'), player starts with extra points (15).
+    // So AI is naturally behind in material. We must be much more resilient.
+    if (this.game.mode === 'upgrade') {
+      // Only resign if truly hopeless (score <= -3000, approx 3 queens down)
+      // And ignore pure material difference because player bought upgrades
+      if (score <= -3000) {
+        this.game.log('KI gibt auf (aussichtslose Position im Upgrade-Modus).');
+        return true;
+      }
+      return false;
+    }
+
+    // Normal Modes Resignation Logic
     // Resign if position is hopeless (score <= -1500 means AI is losing badly)
     if (score <= -1500) {
       this.game.log('KI gibt auf (aussichtslose Position).');
@@ -709,7 +735,6 @@ export class AIController {
     }
 
     // Resign if we're down massive material (more than 15 points)
-    const materialAdvantage = this.game.calculateMaterialAdvantage();
     // materialAdvantage is white - black, so if it's > 15, white is way ahead
     if (materialAdvantage > 15) {
       this.game.log('KI gibt auf (massiver Materialverlust).');

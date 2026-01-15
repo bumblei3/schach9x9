@@ -171,17 +171,17 @@ export const AI_DIFFICULTIES = {
 
 export type AIDifficulty = (typeof AI_DIFFICULTIES)[keyof typeof AI_DIFFICULTIES];
 
-export const DEFAULT_DIFFICULTY: AIDifficulty = AI_DIFFICULTIES.MEDIUM;
+export const DEFAULT_DIFFICULTY: AIDifficulty = AI_DIFFICULTIES.BEGINNER;
 
 /**
  * Global search depth configuration for AI and Tutor
  */
 export const AI_DEPTH_CONFIG = {
-  [AI_DIFFICULTIES.BEGINNER]: 2,
-  [AI_DIFFICULTIES.EASY]: 3,
-  [AI_DIFFICULTIES.MEDIUM]: 4,
-  [AI_DIFFICULTIES.HARD]: 5,
-  [AI_DIFFICULTIES.EXPERT]: 6,
+  [AI_DIFFICULTIES.BEGINNER]: 1,
+  [AI_DIFFICULTIES.EASY]: 2,
+  [AI_DIFFICULTIES.MEDIUM]: 3,
+  [AI_DIFFICULTIES.HARD]: 4,
+  [AI_DIFFICULTIES.EXPERT]: 5,
   // Note: Tutor depth is now dynamic (AI depth + 2)
 } as const;
 

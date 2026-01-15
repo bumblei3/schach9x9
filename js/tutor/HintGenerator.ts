@@ -26,10 +26,10 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
   }
 
   try {
-    // Calculate dynamic depth: AI depth + 2
+    // Calculate dynamic depth: AI depth + 2, but always at least 6 for strong hints
     const aiDepth =
       (AI_DEPTH_CONFIG[game.difficulty as keyof typeof AI_DEPTH_CONFIG] as number) || 4;
-    const tutorDepth = aiDepth + 2;
+    const tutorDepth = Math.max(6, aiDepth + 2); // Minimum depth 6 for smart tutor
     const moveNumber = Math.floor(game.moveHistory.length / 2);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,8 +37,8 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
       game.board,
       turnColor,
       3, // Get top 3 moves
-      tutorDepth, // Search depth (AI + 2)
-      2500, // Max time in ms (increased for depth)
+      tutorDepth, // Search depth (min 6)
+      5000, // Increased time for deeper search (was 2500)
       moveNumber // Pass move number for opening book query
     );
 
@@ -76,12 +76,21 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
         // Extract PV from engine result
         const pv = hint.pv || [];
 
+        // Extract high-severity tactical patterns for prominent display
+        const tacticsHighlight = (analysis.tacticalPatterns || [])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((p: any) => p.severity === 'high')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((p: any) => p.explanation)
+          .slice(0, 2); // Max 2 highlights
+
         return {
           move: hint.move,
           score: hint.score,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           notation: (MoveAnalyzer as any).getMoveNotation(game, hint.move),
           analysis,
+          tacticsHighlight, // NEW: Prominent tactics display
           pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
         };
       })
