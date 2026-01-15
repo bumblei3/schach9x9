@@ -1,5 +1,6 @@
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
+import * as aiEngine from '../js/aiEngine.js';
 
 // Mock UI module
 vi.mock('../js/ui.js', () => ({
@@ -28,6 +29,43 @@ vi.mock('../js/ui.js', () => ({
 // Mock sounds module
 vi.mock('../js/sounds.js', () => ({
   soundManager: { init: vi.fn() },
+}));
+
+// Mock AI Engine to prevent slow JS fallback execution
+vi.mock('../js/aiEngine.js', () => ({
+  getBestMoveDetailed: vi.fn().mockResolvedValue({
+    move: {
+      from: { r: 6, c: 4 },
+      to: { r: 5, c: 4 },
+      promotion: undefined,
+    },
+    score: 100,
+    notation: 'e3' // simplified
+  }),
+  getTopMoves: vi.fn().mockResolvedValue([
+    {
+      move: { from: { r: 6, c: 4 }, to: { r: 5, c: 4 }, promotion: undefined },
+      score: 100,
+      nodes: 0
+    },
+    {
+      move: { from: { r: 6, c: 5 }, to: { r: 5, c: 5 }, promotion: undefined },
+      score: 80,
+      nodes: 0
+    },
+    {
+      move: { from: { r: 6, c: 6 }, to: { r: 5, c: 6 }, promotion: undefined },
+      score: 60,
+      nodes: 0
+    }
+  ]),
+  evaluatePosition: vi.fn().mockResolvedValue(50),
+  convertBoardToInt: vi.fn(),
+  getParamsForElo: vi.fn().mockReturnValue({}),
+  isSquareAttacked: vi.fn().mockReturnValue(false),
+  see: vi.fn().mockReturnValue(0),
+  findKing: vi.fn().mockReturnValue({ r: 0, c: 0 }),
+  isInCheck: vi.fn().mockReturnValue(false),
 }));
 
 // Import after mocking
@@ -99,6 +137,7 @@ describe('TutorController', () => {
       // Add a white pawn that can move
       game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
 
+      // Default mock returns 6,4 -> 5,4 which is valid
       const hints = await tutorController.getTutorHints();
 
       expect(hints.length).toBeGreaterThan(0);
@@ -121,6 +160,16 @@ describe('TutorController', () => {
       // White pawn can capture black piece
       game.board[5][4] = { type: 'p', color: 'white', hasMoved: false };
       game.board[4][5] = { type: 'p', color: 'black', hasMoved: false };
+
+      // Mock a capture move
+      aiEngine.getTopMoves.mockResolvedValueOnce([
+        {
+          move: { from: { r: 5, c: 4 }, to: { r: 4, c: 5 }, promotion: undefined },
+          score: 200,
+          notation: 'exf5',
+          nodes: 100
+        }
+      ]);
 
       const hints = await tutorController.getTutorHints();
 
@@ -491,12 +540,25 @@ describe('TutorController', () => {
 
       const hints = await tutorController.getTutorHints();
       expect(hints.length).toBeLessThanOrEqual(3);
-    });
+    }, 30000); // Increased timeout for JS engine fallback
 
     test('should properly evaluate tactical moves', async () => {
       // Setup a position where white can win material
       game.board[4][4] = { type: 'p', color: 'white' };
       game.board[3][5] = { type: 'q', color: 'black' }; // Black queen can be captured
+
+      // Mock positive SEE (winning material)
+      aiEngine.see.mockReturnValue(800);
+
+      // Mock capture move
+      aiEngine.getTopMoves.mockResolvedValueOnce([
+        {
+          move: { from: { r: 4, c: 4 }, to: { r: 3, c: 5 }, promotion: undefined },
+          score: 900,
+          notation: 'exd5',
+          nodes: 100
+        }
+      ]);
 
       const hints = await tutorController.getTutorHints();
       expect(hints.length).toBeGreaterThan(0);

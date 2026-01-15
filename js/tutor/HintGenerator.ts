@@ -17,49 +17,46 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
     return []; // Don't give hints for AI
   }
 
-  // Use the high-performance engine to get best moves
-  // We search at a moderate depth (6) for high-quality hints
+  // Use the high-performance engine to get top 3 moves
   const turnColor = game.turn;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = await (aiEngine as any).getBestMoveDetailed(
+  const topMoves: any[] = await (aiEngine as any).getTopMoves(
     game.board,
     turnColor,
-    6,
-    {
-      maxTime: 1500, // Limit search time to 1.5s for responsiveness
-    }
+    3, // Get top 3 moves
+    6, // Search depth
+    1500 // Max time in ms
   );
 
-  if (!result || !result.move) return [];
+  if (!topMoves || topMoves.length === 0) return [];
 
-  // Verify the move belongs to the current player and is not a self-capture
-  const from = result.move.from;
-  const to = result.move.to;
-  const piece = game.board[from.r] ? game.board[from.r][from.c] : undefined;
-  const targetPiece = game.board[to.r] ? game.board[to.r][to.c] : undefined;
+  // Filter out invalid moves
+  const validMoves = topMoves.filter((result: any) => {
+    if (!result || !result.move) return false;
 
-  if (!piece || piece.color !== turnColor) {
-    return [];
-  }
+    const from = result.move.from;
+    const to = result.move.to;
+    const piece = game.board[from.r] ? game.board[from.r][from.c] : undefined;
+    const targetPiece = game.board[to.r] ? game.board[to.r][to.c] : undefined;
 
-  if (targetPiece && targetPiece.color === turnColor) {
-    return [];
-  }
+    // Verify the move belongs to the current player and is not a self-capture
+    if (!piece || piece.color !== turnColor) return false;
+    if (targetPiece && targetPiece.color === turnColor) return false;
 
-  // Currently our search returns 1 best move. Wrap it in array for compatibility with UI.
-  const bestMoves = [result];
+    return true;
+  });
 
   // Convert engine moves to hints with explanations
   return Promise.all(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bestMoves.map(async (hint: any, index: number) => {
+    validMoves.map(async (hint: any, index: number) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const analysis = await (MoveAnalyzer as any).analyzeMoveWithExplanation.call(
         tutorController,
         game,
         hint.move,
         hint.score,
-        bestMoves[0].score
+        validMoves[0].score
       );
 
       // Extract PV from engine result

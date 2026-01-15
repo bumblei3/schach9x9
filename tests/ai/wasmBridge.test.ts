@@ -24,7 +24,7 @@ vi.mock('../../js/logger.js', () => ({
 vi.mock('../../engine-wasm/pkg/engine_wasm.js', () => ({
   default: vi.fn().mockResolvedValue(undefined),
   get_best_move_wasm: vi.fn(() =>
-    JSON.stringify([{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, promotion: null }, 50, 1000])
+    JSON.stringify([{ from: 54, to: 36, promotion: null }, 50, 1000])
   ),
 }));
 
@@ -63,7 +63,7 @@ describe('wasmBridge', () => {
 
       const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
       expect(wasmModule.get_best_move_wasm).toHaveBeenCalledWith(
-        board,
+        expect.any(Int8Array),
         'white',
         6,
         'AGGRESSIVE',

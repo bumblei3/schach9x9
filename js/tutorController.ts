@@ -52,27 +52,8 @@ export class TutorController {
   }
 
   public async showHint(): Promise<void> {
-    // Campaign Mode Perk Check
-    if (this.game.campaignMode) {
-      const { campaignManager } = await import('./campaign/CampaignManager.js');
-      const { showToast } = await import('./ui/OverlayManager.js');
-
-      if (!campaignManager.isPerkUnlocked('taktik_genie')) {
-        const cost = 10;
-        if (campaignManager.getGold() < cost) {
-          showToast(`Nicht genug Gold für einen Tipp! (Benötigt: ${cost} Gold)`, 'error');
-          return;
-        }
-
-        if (confirm(`Möchtest du 10 Gold für einen Taktik-Tipp ausgeben?`)) {
-          (campaignManager as any).state.gold -= cost;
-          (campaignManager as any).saveGame();
-          showToast(`-10 Gold für Taktik-Tipp`, 'neutral');
-        } else {
-          return;
-        }
-      }
-    }
+    // Campaign Mode Perk Check - Hints are now free in Campaign (User Request)
+    // Legacy: Previously required 'taktik_genie' perk or 10 Gold.
 
     // Force calculation if no hints available
     if (!this.game.bestMoves || this.game.bestMoves.length === 0) {

@@ -17,7 +17,7 @@ const PIECE_VALUES: [i32; 16] = {
     v
 };
 
-pub fn order_moves(board: &Board, moves: &mut [Move], tt_move: Option<Move>) {
+pub fn order_moves(board: &Board, moves: &mut [Move], tt_move: Option<Move>, killer_moves: &[[Option<Move>; 2]; 64], history: &[i32; 81*81], ply: usize) {
     let mut scored_moves: Vec<(Move, i32)> = moves.iter().map(|&m| {
         let mut score = 0;
 
@@ -33,6 +33,18 @@ pub fn order_moves(board: &Board, moves: &mut [Move], tt_move: Option<Move>) {
                 let victim_val = PIECE_VALUES[(target & TYPE_MASK) as usize];
                 let attacker_val = PIECE_VALUES[(board[m.from] & TYPE_MASK) as usize];
                 score = WINNING_CAPTURE_SCORE + victim_val * 10 - attacker_val;
+            } else {
+                // Non-capture: Check Killer Moves
+                if ply < 64 {
+                    if killer_moves[ply][0] == Some(m) {
+                        score = 900000;
+                    } else if killer_moves[ply][1] == Some(m) {
+                        score = 800000;
+                    } else {
+                        // History Heuristic
+                         score = history[m.from * 81 + m.to];
+                    }
+                }
             }
         }
 

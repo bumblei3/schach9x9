@@ -215,9 +215,43 @@ pub fn evaluate_position(board: &Board, turn_color: i8, config: &EvalConfig) -> 
         // Collect stats
         if piece_type == PIECE_PAWN {
             if is_white { pawn_cols_white[c] += 1; } else { pawn_cols_black[c] += 1; }
-        }
-        if piece_type == PIECE_KING {
+        } else if piece_type == PIECE_KING {
             if is_white { white_king_idx = i as i32; } else { black_king_idx = i as i32; }
+        } else {
+            // Mobility
+            let mut mob = 0;
+            match piece_type {
+                PIECE_KNIGHT => {
+                    // Knight mobility is simpler (just check targets)
+                    // Simplified: just check number of empty/enemy targets
+                    // Proper implementation requires `generate_stepping_moves` logic or similar
+                }
+                PIECE_BISHOP => { mob = count_mobility(board, i, &[-10, -8, 8, 10], color); }
+                PIECE_ROOK => { mob = count_mobility(board, i, &[-9, 9, -1, 1], color); }
+                PIECE_QUEEN => {
+                     mob = count_mobility(board, i, &[-10, -8, 8, 10], color) 
+                         + count_mobility(board, i, &[-9, 9, -1, 1], color);
+                }
+                PIECE_ARCHBISHOP => {
+                    // Bishop + Knight
+                     mob = count_mobility(board, i, &[-10, -8, 8, 10], color);
+                }
+                PIECE_CHANCELLOR => {
+                     // Rook + Knight
+                     mob = count_mobility(board, i, &[-9, 9, -1, 1], color);
+                }
+                 PIECE_ANGEL => {
+                     // Queen + Knight
+                     mob = count_mobility(board, i, &[-10, -8, 8, 10], color) 
+                         + count_mobility(board, i, &[-9, 9, -1, 1], color);
+                }
+                _ => {}
+            }
+            
+            // Weight mobility: 2-5 points per move?
+            // Let's be conservative: 2 points per square
+            mg_score += mob * 2 * side_mult;
+            eg_score += mob * 3 * side_mult;
         }
     }
 
@@ -310,4 +344,42 @@ pub fn evaluate_position(board: &Board, turn_color: i8, config: &EvalConfig) -> 
 
     let perspective = if turn_color == COLOR_WHITE { 1 } else { -1 };
     total * perspective
+}
+
+fn count_mobility(board: &Board, square: usize, offsets: &[i32], color: i8) -> i32 {
+    let mut count = 0;
+    let r = index_to_row(square) as i32;
+    let c = index_to_col(square) as i32;
+    
+    for &offset in offsets {
+        let mut curr = square as i32;
+        loop {
+            curr += offset;
+            if !is_valid_square(curr) { break; }
+            
+            let cr = index_to_row(curr as usize) as i32;
+            let cc = index_to_col(curr as usize) as i32;
+            
+            // Wrap checks using previous square logic
+            if offset == 1 || offset == -1 { if cr != r { break; } }
+            else if offset == 9 || offset == -9 { if cc != c { break; } }
+            else {
+                 let prev = curr - offset;
+                 let pr = index_to_row(prev as usize) as i32;
+                 let pc = index_to_col(prev as usize) as i32;
+                 if (cr - pr).abs() != 1 || (cc - pc).abs() != 1 { break; }
+            }
+
+            let p = board[curr as usize];
+            if p == PIECE_NONE {
+                count += 1;
+            } else {
+                if (p & COLOR_MASK) != color {
+                    count += 1;
+                }
+                break;
+            }
+        }
+    }
+    count
 }

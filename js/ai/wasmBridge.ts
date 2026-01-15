@@ -4,66 +4,53 @@
 
 import { logger } from '../logger.js';
 
-let wasmInitialized = false;
-let initializing = false;
+// Dynamic import for WASM module
+let wasmModule: typeof import('../../engine-wasm/pkg/engine_wasm.js') | null = null;
+let initPromise: Promise<boolean> | null = null;
 let nodesEvaluated = 0;
 
 /**
  * Ensures the Wasm module is initialized.
  */
 export async function ensureWasmInitialized(): Promise<boolean> {
-  if (wasmInitialized) return true;
-  if (initializing) {
-    // Wait for current initialization
-    while (initializing) {
-      await new Promise(resolve => setTimeout(resolve, 10));
+  if (wasmModule) return true;
+
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    try {
+      // Dynamic import of WASM module
+      const module = await import('../../engine-wasm/pkg/engine_wasm.js');
+
+      // Check if we're in Node.js
+      const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
+
+      if (isNode) {
+        // In Node.js, we need to pass the WASM file buffer
+        const fs = await import('fs');
+        const path = await import('path');
+        const url = await import('url');
+
+        const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+        const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
+        const wasmBuffer = fs.readFileSync(wasmPath);
+
+        await module.default(wasmBuffer);
+      } else {
+        // In browser, default init works
+        await module.default();
+      }
+
+      wasmModule = module;
+      logger.info('[WasmBridge] WASM engine initialized successfully');
+      return true;
+    } catch (err) {
+      logger.error('[WasmBridge] Failed to initialize WASM engine:', err);
+      return false;
     }
-    return wasmInitialized;
-  }
+  })();
 
-  initializing = true;
-  try {
-    logger.info('[WasmBridge] Initializing Wasm AI Engine...');
-
-    // Check if we are in Node.js (for tests) to use filesystem instead of fetch
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-      // @ts-ignore
-      // Use non-static strings to fully hide from Vite's preload/analysis
-      const fsName = ['node', 'fs/promises'].join(':');
-      const pathName = ['node', 'path'].join(':');
-      const urlName = ['node', 'url'].join(':');
-
-      // @ts-ignore
-      const fs = await import(/* @vite-ignore */ fsName);
-      // @ts-ignore
-      const path = await import(/* @vite-ignore */ pathName);
-      // @ts-ignore
-      const url = await import(/* @vite-ignore */ urlName);
-
-      const __filename = url.fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
-      const wasmPath = path.resolve(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
-
-      const wasmBuffer = await fs.readFile(wasmPath);
-      // @ts-ignore
-      const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
-      await wasmModule.default({ module_or_path: wasmBuffer });
-    } else {
-      // Standard wasm-bindgen init for browser (Vite/PWA)
-      // @ts-ignore
-      const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
-      await wasmModule.default();
-    }
-
-    wasmInitialized = true;
-    logger.info('[WasmBridge] Wasm AI Engine initialized successfully.');
-  } catch (error) {
-    logger.error('[WasmBridge] Failed to initialize Wasm AI Engine:', error);
-    wasmInitialized = false;
-  } finally {
-    initializing = false;
-  }
-  return wasmInitialized;
+  return initPromise;
 }
 
 /**
@@ -79,37 +66,44 @@ export async function getBestMoveWasm(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any | null> {
   const initialized = await ensureWasmInitialized();
-  if (!initialized) return null;
+  if (!initialized || !wasmModule) {
+    return null;
+  }
 
   try {
-    // @ts-ignore
-    const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const resultJson = (wasmModule.get_best_move_wasm as any)(
-      boardIntArray,
+    // Convert to Int8Array if needed
+    const boardBytes = boardIntArray instanceof Int8Array
+      ? boardIntArray
+      : new Int8Array(boardIntArray);
+
+    const resultJson = wasmModule.get_best_move_wasm(
+      boardBytes,
       turnColor,
       depth,
       personality,
       elo
     );
-    const [bestMove, score, nodes] = JSON.parse(resultJson);
 
+    const [move, score, nodes] = JSON.parse(resultJson);
     nodesEvaluated = nodes || 0;
 
-    if (!bestMove) return { move: null, score };
+    // At depth 0 (eval-only), move will be null
+    if (!move && depth > 0) {
+      return null;
+    }
 
-    // Convert Wasm move format to engine format
+    // Convert move format from WASM to JS
     return {
-      move: {
-        from: bestMove.from,
-        to: bestMove.to,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        promotion: bestMove.promotion ? mapIntToPiece(bestMove.promotion) : undefined,
-      },
+      move: move ? {
+        from: { r: Math.floor(move.from / 9), c: move.from % 9 },
+        to: { r: Math.floor(move.to / 9), c: move.to % 9 },
+        promotion: move.promotion ? mapIntToPiece(move.promotion) : undefined,
+      } : null,
       score,
+      nodes,
     };
-  } catch (error) {
-    logger.error('[WasmBridge] getBestMoveWasm call failed:', error);
+  } catch (err) {
+    logger.error('[WasmBridge] WASM search failed:', err);
     return null;
   }
 }
@@ -136,3 +130,6 @@ function mapIntToPiece(val: number): string {
   };
   return map[val] || 'q';
 }
+
+// Keep export for compatibility
+export { mapIntToPiece };

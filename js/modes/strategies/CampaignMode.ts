@@ -80,6 +80,12 @@ export class CampaignModeStrategy implements GameModeStrategy {
     logger.info(`Started Campaign Level: ${level.title}`);
 
     this.showIntroModal(level);
+
+    // Update Opponent Name in UI
+    const opponentNameEl = document.getElementById('opponent-name');
+    if (opponentNameEl && level.opponentName) {
+      opponentNameEl.textContent = level.opponentName;
+    }
   }
 
   async handleInteraction(
