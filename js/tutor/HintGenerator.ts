@@ -181,8 +181,8 @@ function createTemplate(
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-        `(Pieces: ${pieces.join(', ')})`
+      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+      `(Pieces: ${pieces.join(', ')})`
     );
   }
 
@@ -432,7 +432,118 @@ export function getSetupTemplates(game: any): any[] {
     ];
   }
 
-  // Default: 15 points
+  // Templates for 20 points
+  if (points === 20) {
+    return [
+      createTemplate(
+        {
+          id: 'balanced_20',
+          name: '⚖️ Ausgewogen',
+          description: 'Solid structure with heavy and light pieces.',
+          pieces: ['r', 'r', 'b', 'n', 'p', 'p', 'p', 'p'],
+        },
+        20
+      ),
+      createTemplate(
+        {
+          id: 'royal_20',
+          name: '👑 Royal',
+          description: 'Focused on high value pieces.',
+          pieces: ['q', 'a', 'p', 'p', 'p', 'p'],
+        },
+        20
+      ),
+      createTemplate(
+        {
+          id: 'swarm_20',
+          name: '🐝 Swarm',
+          description: 'Control the board with many pieces.',
+          pieces: ['n', 'n', 'b', 'b', 'r', 'p', 'p', 'p'],
+          isRecommended: true,
+        },
+        20
+      ),
+    ];
+  }
+
+  // Templates for 25 points
+  if (points === 25) {
+    return [
+      createTemplate(
+        {
+          id: 'power_25',
+          name: '⚡ Powerhouse',
+          description: 'Dame, Kanzler und Erzbischof - maximale Feuerkraft.',
+          pieces: ['q', 'c', 'a', 'p'],
+        },
+        25
+      ),
+      createTemplate(
+        {
+          id: 'wall_25',
+          name: '🧱 Die Mauer',
+          description: 'Defensivwerk mit Kanzler und Türmen.',
+          pieces: ['c', 'r', 'r', 'b', 'p', 'p', 'p', 'p'],
+        },
+        25
+      ),
+      createTemplate(
+        {
+          id: 'balanced_25',
+          name: '⚖️ Großmeister',
+          description: 'Klassische, flexible Aufstellung für jede Situation.',
+          pieces: ['q', 'r', 'r', 'n', 'n'],
+          isRecommended: true,
+        },
+        25
+      ),
+      createTemplate(
+        {
+          id: 'legendary_25',
+          name: '🌟 Legenden',
+          description: 'Engel und Kanzler führen die Armee an.',
+          pieces: ['e', 'c', 'n', 'p', 'p'],
+        },
+        25
+      ),
+    ];
+  }
+
+  // Templates for 15 points (Standard) or Fallback
+  // If points don't match exactly 12, 15, 18, 20, 25, we generate dynamic ones or default to 15 if close.
+  // Dynamic generation for arbitrary points:
+  if (![12, 15, 18, 20, 25].includes(points)) {
+    // Generate a simple dynamic template
+    const dynamicPieces: string[] = [];
+    let remaining = points;
+    // Greedy approach for a balanced army: 1 Heavy, some Mediums, some Pawns
+    // Priority: Queen/Chancellor/Archbishop -> Rooks -> Minors -> Pawns
+
+    // Max 8 pieces (9 slots - 1 King)
+    const MAX_PIECES = 8;
+
+    // Try to get a 'Queen-like' piece if rich
+    if (remaining >= 9 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('q'); remaining -= 9; }
+    else if (remaining >= 8 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('c'); remaining -= 8; }
+
+    // Fill with Rooks/Minors
+    while (remaining >= 5 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('r'); remaining -= 5; }
+    while (remaining >= 3 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('n'); remaining -= 3; }
+    while (remaining > 0 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('p'); remaining -= 1; }
+
+    // Return just one generated template along with standard 15s if applicable
+    return [
+      createTemplate({
+        id: `custom_${points}`,
+        name: `🛠️ Maßgeschneidert (${points} Pkt)`,
+        description: 'Automatisch generierte Aufstellung für dein Budget.',
+        pieces: dynamicPieces,
+        isRecommended: true
+      }, points - remaining)
+    ];
+  }
+
+  // Default 15 points
   return [
     createTemplate(
       {

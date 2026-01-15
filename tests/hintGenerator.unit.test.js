@@ -143,10 +143,25 @@ describe('HintGenerator - Unit Tests', () => {
   test('should return setup templates for different budgets', () => {
     game.initialPoints = 12;
     expect(getSetupTemplates(game)[0].cost).toBe(12);
+
     game.initialPoints = 18;
     expect(getSetupTemplates(game)[0].cost).toBe(18);
+
+    game.initialPoints = 20;
+    expect(getSetupTemplates(game)[0].cost).toBe(20);
+
+    game.initialPoints = 25;
+    expect(getSetupTemplates(game)[0].cost).toBe(25);
+
     game.initialPoints = 11;
-    expect(getSetupTemplates(game)[0].cost).toBe(15);
+    // Dynamic generator should match exactly 11 points
+    expect(getSetupTemplates(game)[0].cost).toBe(11);
+
+    game.initialPoints = 500;
+    // Should respect MAX_PIECES limit (8)
+    const bigBudgetTemplates = getSetupTemplates(game);
+    expect(bigBudgetTemplates[0].pieces.length).toBeLessThanOrEqual(8);
+    // Cost should be >= some reasonable amount but < 500 likely, or exactly what fit.
   });
 
   test('showTutorSuggestions should return early if no bestMoves', async () => {

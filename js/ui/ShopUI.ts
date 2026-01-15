@@ -74,9 +74,15 @@ export function updateShopUI(game: any): void {
     }
   }
 
-  if ((window as any).updateTutorRecommendations) {
+  // Check if UI module is available globally (from App.ts)
+  const globalUI = (window as any).UI;
+  if (globalUI && globalUI.updateTutorRecommendations) {
+    globalUI.updateTutorRecommendations(game);
+  } else if ((window as any).updateTutorRecommendations) {
+    // Legacy fallback
     (window as any).updateTutorRecommendations(game);
   } else {
+    // Dynamic import fallback
     import('./TutorUI.js').then((module: any) => {
       if (module.updateTutorRecommendations) module.updateTutorRecommendations(game);
     });
