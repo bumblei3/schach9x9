@@ -49,6 +49,76 @@ export function getCurrentBoardSize(): number {
 }
 
 /**
+ * Board Shape Types
+ */
+export const BOARD_SHAPES = {
+  STANDARD: 'standard',
+  CROSS: 'cross',
+} as const;
+
+export type BoardShape = (typeof BOARD_SHAPES)[keyof typeof BOARD_SHAPES];
+
+/**
+ * Blocked squares for cross-shaped board (corners)
+ * On a 9x9 board, the cross shape blocks the 3x3 corners
+ *
+ * Visual:
+ *   ⬛ ⬛ ⬛ ✅ ✅ ✅ ⬛ ⬛ ⬛   (row 0)
+ *   ⬛ ⬛ ⬛ ✅ ✅ ✅ ⬛ ⬛ ⬛   (row 1)
+ *   ⬛ ⬛ ⬛ ✅ ✅ ✅ ⬛ ⬛ ⬛   (row 2)
+ *   ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅   (row 3)
+ *   ...
+ */
+const CROSS_BLOCKED_INDICES: number[] = [
+  // Top-left corner (rows 0-2, cols 0-2)
+  0, 1, 2, 9, 10, 11, 18, 19, 20,
+  // Top-right corner (rows 0-2, cols 6-8)
+  6, 7, 8, 15, 16, 17, 24, 25, 26,
+  // Bottom-left corner (rows 6-8, cols 0-2)
+  54, 55, 56, 63, 64, 65, 72, 73, 74,
+  // Bottom-right corner (rows 6-8, cols 6-8)
+  60, 61, 62, 69, 70, 71, 78, 79, 80,
+];
+
+export const CROSS_BLOCKED_SQUARES: Set<number> = new Set(CROSS_BLOCKED_INDICES);
+
+/**
+ * Check if a square index is blocked for current board shape
+ * @param index - Square index (0-80 for 9x9)
+ * @param shape - Board shape
+ */
+export function isBlockedSquare(index: number, shape: BoardShape = 'standard'): boolean {
+  if (shape === BOARD_SHAPES.CROSS) {
+    return CROSS_BLOCKED_SQUARES.has(index);
+  }
+  return false;
+}
+
+/**
+ * Check if row/col is blocked for current board shape
+ */
+export function isBlockedCell(r: number, c: number, shape: BoardShape = 'standard'): boolean {
+  if (shape === BOARD_SHAPES.CROSS) {
+    const index = r * 9 + c;
+    return CROSS_BLOCKED_SQUARES.has(index);
+  }
+  return false;
+}
+
+/**
+ * Global board shape for AI access
+ */
+let currentBoardShape: BoardShape = BOARD_SHAPES.STANDARD;
+
+export function getCurrentBoardShape(): BoardShape {
+  return currentBoardShape;
+}
+
+export function setCurrentBoardShape(shape: BoardShape): void {
+  currentBoardShape = shape;
+}
+
+/**
  * Get current board variant
  */
 export function getCurrentBoardVariant(): BoardVariant {

@@ -4,6 +4,7 @@
  */
 
 import { logger } from '../logger.js';
+import { setCurrentBoardShape, type BoardShape } from '../config.js';
 import {
   getBestMoveDetailed,
   getTopMoves,
@@ -25,6 +26,15 @@ self.onmessage = async function (e: MessageEvent) {
         }
         setOpeningBook(data.book);
         (logger as any).info('[AI Worker] Opening book loaded:', data.book.metadata);
+        break;
+      }
+
+      case 'setBoardShape': {
+        const shape = data?.shape as BoardShape;
+        if (shape) {
+          setCurrentBoardShape(shape);
+          (logger as any).debug('[AI Worker] Board shape set to:', shape);
+        }
         break;
       }
 

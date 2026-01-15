@@ -25,17 +25,15 @@ describe('TutorUI Coverage', () => {
     mockGame = {
       phase: 'PLAY',
       tutorController: {
-        getSetupTemplates: vi
-          .fn()
-          .mockReturnValue([
-            {
-              id: 'defensive',
-              name: 'Defensive Festung',
-              pieces: ['r', 'k', 'r'],
-              isRecommended: true,
-              description: 'Stabil',
-            },
-          ]),
+        getSetupTemplates: vi.fn().mockReturnValue([
+          {
+            id: 'defensive',
+            name: 'Defensive Festung',
+            pieces: ['r', 'k', 'r'],
+            isRecommended: true,
+            description: 'Stabil',
+          },
+        ]),
         getTutorHints: vi.fn().mockResolvedValue([]),
         applySetupTemplate: vi.fn(),
       },

@@ -252,11 +252,15 @@ export async function showTutorSuggestions(
               ${hint.analysis.category.toUpperCase()}
             </span>
           </div>
-          ${(hint.tacticsHighlight && hint.tacticsHighlight.length > 0) ? `
+          ${
+            hint.tacticsHighlight && hint.tacticsHighlight.length > 0
+              ? `
           <div style="background: linear-gradient(90deg, #a855f711, transparent); border-left: 3px solid #a855f7; padding: 6px 10px; margin-bottom: 8px; border-radius: 4px;">
             ${hint.tacticsHighlight.map((t: string) => `<div style="color: #e879f9; font-weight: 600;">${t}</div>`).join('')}
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           <div style="font-size: 0.9em; color: ${badgeColor}; margin-bottom: 4px;">${hint.analysis.qualityLabel}</div>
           <div style="font-size: 0.9em; color: #ccc;">
             ${(hint.analysis.tacticalExplanations || []).map((e: string) => `<div>${e}</div>`).join('')}

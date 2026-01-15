@@ -127,6 +127,11 @@ export class App {
     // Initialize GameController logic
     this.game.gameController.initGame(initialPoints, mode);
 
+    // Broadcast boardShape to AI workers for cross-shaped board filtering
+    if (this.game.boardShape && this.aiController) {
+      this.aiController.setBoardShapeForWorkers(this.game.boardShape);
+    }
+
     // Initialize 3D Battle Chess mode
     try {
       this.init3D();

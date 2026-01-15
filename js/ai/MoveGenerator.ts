@@ -10,6 +10,7 @@ import {
   PIECE_ARCHBISHOP,
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
+  PIECE_NIGHTRIDER,
   COLOR_WHITE,
   COLOR_BLACK,
   TYPE_MASK,
@@ -17,6 +18,7 @@ import {
   indexToRow,
   indexToCol,
 } from './BoardDefinitions.js';
+import { isBlockedSquare, getCurrentBoardShape, type BoardShape } from '../config.js';
 
 export type BoardStorage = number[] | Int8Array;
 
@@ -95,7 +97,32 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): any[] 
     undoMove(board, undo);
   }
 
+  // Filter out blocked squares for cross-shaped board
+  const boardShape = getCurrentBoardShape();
+  if (boardShape && boardShape !== 'standard') {
+    return legalMoves.filter(move => !isBlockedSquare(move.to, boardShape));
+  }
+
   return legalMoves;
+}
+
+/**
+ * Get all legal moves with blocked square filtering for cross-shaped board
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getAllLegalMovesFiltered(
+  board: BoardStorage,
+  turnColor: string,
+  boardShape?: BoardShape
+): any[] {
+  const moves = getAllLegalMoves(board, turnColor);
+
+  // Filter out blocked squares for cross-shaped board
+  if (boardShape && boardShape !== 'standard') {
+    return moves.filter(move => !isBlockedSquare(move.to, boardShape));
+  }
+
+  return moves;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -212,6 +239,10 @@ function generatePieceMoves(
   ) {
     generateSlidingMoves(board, from, ROOK_OFFSETS, color, moves);
   }
+
+  if (type === PIECE_NIGHTRIDER) {
+    generateSlidingMoves(board, from, KNIGHT_OFFSETS, color, moves);
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -235,6 +266,11 @@ function generateSteppingMoves(
     if (Math.abs(toR - r) > 2 || Math.abs(toC - c) > 2) continue; // Knights jump max 2
 
     const target = board[to];
+
+    // Check if target square is blocked for current board shape
+    const shape = getCurrentBoardShape();
+    if (shape !== 'standard' && isBlockedSquare(to, shape)) continue;
+
     if (target === PIECE_NONE || (target & COLOR_MASK) !== color) {
       moves.push({ from, to });
     }
@@ -283,22 +319,37 @@ function generateSlidingMoves(
         if (toC !== c) break;
       }
       // DIAGONAL: Row and Col must both change by 1.
-      if (Math.abs(offset) !== 1 && Math.abs(offset) !== 9) {
-        // Check if we stepped 1 row and 1 col
+      else if (Math.abs(offset) === 8 || Math.abs(offset) === 10) {
         const prev = to - offset;
         const prevR = indexToRow(prev);
         const prevC = indexToCol(prev);
         if (Math.abs(toR - prevR) !== 1 || Math.abs(toC - prevC) !== 1) break;
       }
+      // KNIGHT: (Nightrider only) Must change 2 rows/1 col or 1 row/2 cols
+      else if (KNIGHT_OFFSETS.includes(offset)) {
+        const prev = to - offset;
+        const prevR = indexToRow(prev);
+        const prevC = indexToCol(prev);
+        const dr = Math.abs(toR - prevR);
+        const dc = Math.abs(toC - prevC);
+        if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
+      }
 
       const target = board[to];
+
+      // Check if square is blocked for current board shape
+      const shape = getCurrentBoardShape();
+      if (shape !== 'standard' && isBlockedSquare(to, shape)) {
+        break; // Ray is blocked by a blocked square
+      }
+
       if (target === PIECE_NONE) {
         moves.push({ from: from, to: to });
       } else {
         if ((target & COLOR_MASK) !== color) {
           moves.push({ from: from, to: to }); // Capture
         }
-        break; // Blocked
+        break; // Blocked by a piece
       }
     }
   }
@@ -366,6 +417,10 @@ export function isSquareAttacked(
   for (const offset of pawnStartOffsets) {
     const from = square + offset;
     if (isValidSquare(from)) {
+      // Check if square is blocked for current board shape
+      const shape = getCurrentBoardShape();
+      if (shape !== 'standard' && isBlockedSquare(from, shape)) continue;
+
       // Check wrap
       // Attack comes from adjacent column
       if (Math.abs(indexToCol(square) - indexToCol(from)) === 1) {
@@ -386,6 +441,10 @@ export function isSquareAttacked(
       const fr = indexToRow(from);
       const fc = indexToCol(from);
       if (Math.abs(r - fr) > 2 || Math.abs(c - fc) > 2) continue;
+
+      // Check if square is blocked for current board shape
+      const shape = getCurrentBoardShape();
+      if (shape !== 'standard' && isBlockedSquare(from, shape)) continue;
 
       const piece = board[from];
       if (piece !== PIECE_NONE && (piece & COLOR_MASK) === attackerColor) {
@@ -408,6 +467,10 @@ export function isSquareAttacked(
     if (isValidSquare(from)) {
       // Check wrap (distance 1)
       if (Math.abs(indexToCol(square) - indexToCol(from)) > 1) continue;
+
+      // Check if square is blocked for current board shape
+      const shape = getCurrentBoardShape();
+      if (shape !== 'standard' && isBlockedSquare(from, shape)) continue;
 
       const piece = board[from];
       if (
@@ -444,6 +507,10 @@ export function isSquareAttacked(
   )
     return true;
 
+  // 5. Nightrider Sliding Knight Attacks
+  if (checkRayAttacks(board, square, KNIGHT_OFFSETS, attackerColor, [PIECE_NIGHTRIDER]))
+    return true;
+
   return false;
 }
 
@@ -472,10 +539,23 @@ function checkRayAttacks(
       const pr = indexToRow(curr - offset);
       const pc = indexToCol(curr - offset);
 
-      // Should be continuous (dist 1)
-      if (Math.abs(cr - pr) > 1 || Math.abs(cc - pc) > 1) break;
+      // Should be continuous (dist 1) for non-knight offsets
+      if (KNIGHT_OFFSETS.includes(offset)) {
+        const dr = Math.abs(cr - pr);
+        const dc = Math.abs(cc - pc);
+        if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
+      } else {
+        if (Math.abs(cr - pr) > 1 || Math.abs(cc - pc) > 1) break;
+      }
 
       const piece = board[curr];
+
+      // Check if square is blocked for current board shape
+      const shape = getCurrentBoardShape();
+      if (shape !== 'standard' && isBlockedSquare(curr, shape)) {
+        break; // Attack is blocked by a blocked square
+      }
+
       if (piece !== PIECE_NONE) {
         if ((piece & COLOR_MASK) === attackerColor) {
           const type = piece & TYPE_MASK;
@@ -518,6 +598,7 @@ export function see(board: BoardStorage, move: any): number {
     [PIECE_ARCHBISHOP]: 600,
     [PIECE_CHANCELLOR]: 700,
     [PIECE_ANGEL]: 1000,
+    [PIECE_NIGHTRIDER]: 600,
   };
 
   const target = board[move.to];

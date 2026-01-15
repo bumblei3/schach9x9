@@ -3,10 +3,12 @@
  * Handles move validation, check detection, and game end conditions.
  */
 import type { Player, Square, Piece } from './types/game.js';
+import { isBlockedCell } from './config.js';
 
 export interface GameWithBoard {
   board: (Piece | null)[][];
   lastMove?: LastMoveInfo | null;
+  boardShape?: string;
 }
 
 export interface LastMoveInfo {
@@ -151,7 +153,8 @@ export class RulesEngine {
     const moves: Square[] = [];
 
     const size = this.board.length;
-    const isInside = (r: number, c: number): boolean => r >= 0 && r < size && c >= 0 && c < size;
+    const isInside = (r: number, c: number): boolean =>
+      r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape as any);
     const isFriend = (r: number, c: number): boolean =>
       this.board[r][c] !== null && this.board[r][c]!.color === piece.color;
     const isEnemy = (r: number, c: number): boolean =>
@@ -346,7 +349,8 @@ export class RulesEngine {
 
   isSquareUnderAttack(r: number, c: number, attackerColor: Player): boolean {
     const size = this.board.length;
-    const isInside = (r: number, c: number): boolean => r >= 0 && r < size && c >= 0 && c < size;
+    const isInside = (r: number, c: number): boolean =>
+      r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape as any);
 
     // Pawn attacks
     const pawnDir = attackerColor === 'white' ? 1 : -1;

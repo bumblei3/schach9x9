@@ -188,6 +188,27 @@ body.mode-3d #board-wrapper {
   color: var(--bg-board-light);
 }
 
+/* Blocked squares for cross-shaped board */
+.cell.blocked-square {
+  background: repeating-linear-gradient(
+    45deg,
+    #1a1a2e,
+    #1a1a2e 10px,
+    #0f0f1a 10px,
+    #0f0f1a 20px
+  ) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.cell.blocked-square::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
 .cell.border-right {
   border-right: 4px solid var(--grid-line-color);
 }

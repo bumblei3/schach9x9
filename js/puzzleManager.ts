@@ -66,13 +66,7 @@ export class PuzzleManager {
         description: 'Setze matt mit der Dame.',
         difficulty: 'Einfach',
         setupStr:
-          'bk' +
-          '..'.repeat(13) +
-          'wq' +
-          '..'.repeat(4) +
-          'wk' +
-          '..'.repeat(81 - 20) +
-          'w',
+          'bk' + '..'.repeat(13) + 'wq' + '..'.repeat(4) + 'wk' + '..'.repeat(81 - 20) + 'w',
         solution: [{ from: { r: 1, c: 5 }, to: { r: 1, c: 1 } }],
       },
       {

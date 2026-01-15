@@ -2,7 +2,7 @@
  * Modul für das Rendern des Schachbretts.
  * @module BoardRenderer
  */
-import { BOARD_SIZE, PHASES } from '../config.js';
+import { BOARD_SIZE, PHASES, isBlockedCell } from '../config.js';
 import { debounce } from '../utils.js';
 import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
 import type { Piece, Player, PieceType, Square } from '../types/game.js';
@@ -114,7 +114,15 @@ export function initBoardUI(game: any): void {
       }
       cell.dataset.r = r.toString();
       cell.dataset.c = c.toString();
+
+      // Mark blocked squares for cross-shaped board
+      if (game.boardShape && isBlockedCell(r, c, game.boardShape)) {
+        cell.classList.add('blocked-square');
+        cell.style.pointerEvents = 'none';
+      }
+
       cell.addEventListener('click', () => {
+        if (game.boardShape && isBlockedCell(r, c, game.boardShape)) return;
         console.log('[BoardRenderer] Cell click: row=%d, col=%d, phase=%s', r, c, game.phase);
         game.handleCellClick(r, c);
       });

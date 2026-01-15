@@ -190,8 +190,8 @@ function createTemplate(
   if (calculatedCost !== expectedCost) {
     console.warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
-      `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-      `(Pieces: ${pieces.join(', ')})`
+        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+        `(Pieces: ${pieces.join(', ')})`
     );
   }
 
@@ -600,23 +600,40 @@ export function getSetupTemplates(game: any): any[] {
     const MAX_PIECES = 8;
 
     // Try to get a 'Queen-like' piece if rich
-    if (remaining >= 9 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('q'); remaining -= 9; }
-    else if (remaining >= 8 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('c'); remaining -= 8; }
+    if (remaining >= 9 && dynamicPieces.length < MAX_PIECES) {
+      dynamicPieces.push('q');
+      remaining -= 9;
+    } else if (remaining >= 8 && dynamicPieces.length < MAX_PIECES) {
+      dynamicPieces.push('c');
+      remaining -= 8;
+    }
 
     // Fill with Rooks/Minors
-    while (remaining >= 5 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('r'); remaining -= 5; }
-    while (remaining >= 3 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('n'); remaining -= 3; }
-    while (remaining > 0 && dynamicPieces.length < MAX_PIECES) { dynamicPieces.push('p'); remaining -= 1; }
+    while (remaining >= 5 && dynamicPieces.length < MAX_PIECES) {
+      dynamicPieces.push('r');
+      remaining -= 5;
+    }
+    while (remaining >= 3 && dynamicPieces.length < MAX_PIECES) {
+      dynamicPieces.push('n');
+      remaining -= 3;
+    }
+    while (remaining > 0 && dynamicPieces.length < MAX_PIECES) {
+      dynamicPieces.push('p');
+      remaining -= 1;
+    }
 
     // Return just one generated template along with standard 15s if applicable
     return [
-      createTemplate({
-        id: `custom_${points}`,
-        name: `🛠️ Maßgeschneidert (${points} Pkt)`,
-        description: 'Automatisch generierte Aufstellung für dein Budget.',
-        pieces: dynamicPieces,
-        isRecommended: true
-      }, points - remaining)
+      createTemplate(
+        {
+          id: `custom_${points}`,
+          name: `🛠️ Maßgeschneidert (${points} Pkt)`,
+          description: 'Automatisch generierte Aufstellung für dein Budget.',
+          pieces: dynamicPieces,
+          isRecommended: true,
+        },
+        points - remaining
+      ),
     ];
   }
 

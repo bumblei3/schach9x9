@@ -12,6 +12,7 @@ export const PIECE_KING = 6;
 export const PIECE_ARCHBISHOP = 7;
 export const PIECE_CHANCELLOR = 8;
 export const PIECE_ANGEL = 9;
+export const PIECE_NIGHTRIDER = 10;
 
 // Colors
 export const COLOR_WHITE = 16; // 0001 0000
@@ -30,6 +31,7 @@ export const WHITE_KING = COLOR_WHITE | PIECE_KING;
 export const WHITE_ARCHBISHOP = COLOR_WHITE | PIECE_ARCHBISHOP;
 export const WHITE_CHANCELLOR = COLOR_WHITE | PIECE_CHANCELLOR;
 export const WHITE_ANGEL = COLOR_WHITE | PIECE_ANGEL;
+export const WHITE_NIGHTRIDER = COLOR_WHITE | PIECE_NIGHTRIDER;
 
 export const BLACK_PAWN = COLOR_BLACK | PIECE_PAWN;
 export const BLACK_KNIGHT = COLOR_BLACK | PIECE_KNIGHT;
@@ -40,6 +42,7 @@ export const BLACK_KING = COLOR_BLACK | PIECE_KING;
 export const BLACK_ARCHBISHOP = COLOR_BLACK | PIECE_ARCHBISHOP;
 export const BLACK_CHANCELLOR = COLOR_BLACK | PIECE_CHANCELLOR;
 export const BLACK_ANGEL = COLOR_BLACK | PIECE_ANGEL;
+export const BLACK_NIGHTRIDER = COLOR_BLACK | PIECE_NIGHTRIDER;
 
 // Helper Functions
 export function getPieceType(piece: number): number {
@@ -83,6 +86,7 @@ const TYPE_CHARS: Record<number, string> = {
   [PIECE_ARCHBISHOP]: 'a',
   [PIECE_CHANCELLOR]: 'c',
   [PIECE_ANGEL]: 'e',
+  [PIECE_NIGHTRIDER]: 'j',
 };
 
 export function pieceToString(piece: number): string {

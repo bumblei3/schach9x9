@@ -70,8 +70,7 @@ export function updateShopUI(game: any): void {
   const tutorSection = document.getElementById('tutor-recommendations-section');
   const shopHeader = document.querySelector('#shop-panel .shop-header h2');
   const phase = String(game.phase);
-  const isUpgradePhase =
-    phase === 'SETUP_WHITE_UPGRADES' || phase === 'SETUP_BLACK_UPGRADES';
+  const isUpgradePhase = phase === 'SETUP_WHITE_UPGRADES' || phase === 'SETUP_BLACK_UPGRADES';
 
   if (isUpgradePhase) {
     if (shopHeader) shopHeader.textContent = 'Truppen verbessern';

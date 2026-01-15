@@ -15,6 +15,10 @@ import {
   setBoardVariant,
   BOARD_VARIANTS,
   getCurrentBoardSize,
+  BOARD_SHAPES,
+  isBlockedCell,
+  setCurrentBoardShape,
+  type BoardShape,
   type TimeControl,
   type AIDifficulty,
   type Phase,
@@ -33,7 +37,8 @@ export type GameMode =
   | 'puzzle'
   | 'campaign'
   | 'upgrade'
-  | 'upgrade8x8';
+  | 'upgrade8x8'
+  | 'cross';
 
 export interface PieceWithMoved extends Piece {
   hasMoved: boolean;
@@ -92,6 +97,7 @@ export interface AnalysisVariation {
 export class Game {
   mode: GameMode;
   boardSize: number;
+  boardShape: BoardShape;
   board: (PieceWithMoved | null)[][];
   phase: Phase;
   turn: Player;
@@ -147,6 +153,8 @@ export class Game {
 
     // Store board size as instance property
     this.boardSize = getCurrentBoardSize();
+    this.boardShape = BOARD_SHAPES.STANDARD; // Default, may be overridden below
+    setCurrentBoardShape(this.boardShape); // Sync to global for AI access
 
     this.board = Array(this.boardSize)
       .fill(null)
@@ -168,6 +176,11 @@ export class Game {
       this.initialPoints = 15;
       this.phase = PHASES.SETUP_WHITE_UPGRADES;
       this.setupStandard8x8Board();
+    } else if (this.mode === 'cross') {
+      // Cross-shaped board mode with setup phase
+      this.phase = PHASES.SETUP_WHITE_KING;
+      this.boardShape = BOARD_SHAPES.CROSS;
+      setCurrentBoardShape(this.boardShape); // Sync to global for AI access
     } else {
       this.phase = PHASES.SETUP_WHITE_KING;
     }
@@ -280,7 +293,12 @@ export class Game {
    * Returns all LEGAL moves (handling check)
    */
   getValidMoves(r: number, c: number, piece: Piece): Square[] {
-    return this.rulesEngine.getValidMoves(r, c, piece);
+    const moves = this.rulesEngine.getValidMoves(r, c, piece);
+    // Filter out blocked squares for cross-shaped board
+    if (this.boardShape && this.boardShape !== BOARD_SHAPES.STANDARD) {
+      return moves.filter(move => !isBlockedCell(move.r, move.c, this.boardShape));
+    }
+    return moves;
   }
 
   getPseudoLegalMoves(r: number, c: number, piece: Piece): Square[] {
@@ -307,7 +325,11 @@ export class Game {
   }
 
   getAllLegalMoves(color: Player): { from: Square; to: Square }[] {
-    return this.rulesEngine.getAllLegalMoves(color);
+    const moves = this.rulesEngine.getAllLegalMoves(color);
+    if (this.boardShape && this.boardShape !== BOARD_SHAPES.STANDARD) {
+      return moves.filter(move => !isBlockedCell(move.to.r, move.to.c, this.boardShape));
+    }
+    return moves;
   }
 
   isStalemate(color: Player): boolean {
@@ -353,9 +375,31 @@ export class Game {
     const captured = this.board[to.r][to.c];
 
     if (piece) {
+      // Handle En Passant
+      if (
+        piece.type === 'p' &&
+        from.c !== to.c &&
+        !captured &&
+        this.lastMove &&
+        this.lastMove.isDoublePawnPush &&
+        this.lastMove.to.c === to.c
+      ) {
+        // Remove the captured pawn
+        const capturedPawnRow = from.r;
+        this.board[capturedPawnRow][to.c] = null;
+      }
+
       this.board[to.r][to.c] = piece;
       this.board[from.r][from.c] = null;
       (piece as PieceWithMoved).hasMoved = true;
+
+      // Track last move for En Passant
+      this.lastMove = {
+        from: { r: from.r, c: from.c },
+        to: { r: to.r, c: to.c },
+        piece: piece,
+        isDoublePawnPush: piece.type === 'p' && Math.abs(to.r - from.r) === 2,
+      };
     }
 
     const undoInfo = {

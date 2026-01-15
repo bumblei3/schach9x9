@@ -1,5 +1,5 @@
 import { PHASES } from './gameEngine.js';
-import { SHOP_PIECES, AI_DEPTH_CONFIG, AI_DIFFICULTIES } from './config.js';
+import { SHOP_PIECES, AI_DEPTH_CONFIG, AI_DIFFICULTIES, isBlockedCell } from './config.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
 import * as aiEngine from './aiEngine.js';
@@ -82,6 +82,20 @@ export class AIController {
     this.analysisUI = analysisUI;
   }
 
+  /**
+   * Broadcast boardShape to all AI workers
+   */
+  public setBoardShapeForWorkers(shape: string): void {
+    // Also send to main worker
+    if (this.aiWorker) {
+      this.aiWorker.postMessage({ type: 'setBoardShape', data: { shape } });
+    }
+    // Send to pool workers
+    this.aiWorkers.forEach(w => {
+      w.postMessage({ type: 'setBoardShape', data: { shape } });
+    });
+  }
+
   public toggleAnalysisMode(): boolean {
     this.analysisActive = !this.analysisActive;
 
@@ -102,7 +116,13 @@ export class AIController {
 
   public aiSetupKing(): void {
     // Choose random corridor (0, 3, 6)
-    const cols = [0, 3, 6];
+    let cols = [0, 3, 6];
+
+    // For cross-shaped board, only center corridor (3) is valid
+    if (this.game.boardShape && this.game.boardShape !== 'standard') {
+      cols = [3]; // Only center column in cross mode
+    }
+
     const randomCol = cols[Math.floor(Math.random() * cols.length)];
     // Black King goes to row 0-2 (top), specifically row 1, col randomCol+1
     this.game.placeKing(1, randomCol + 1, 'black');
@@ -142,11 +162,16 @@ export class AIController {
       this.game.selectedShopPiece = symbol;
 
       // Find empty spot in the 3x3 corridor
-      const emptySpots: { r: number; c: number }[] = [];
+      let emptySpots: { r: number; c: number }[] = [];
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {
           if (!this.game.board[r][c]) emptySpots.push({ r, c });
         }
+      }
+
+      // Filter out blocked squares for cross-shaped board
+      if (this.game.boardShape && this.game.boardShape !== 'standard') {
+        emptySpots = emptySpots.filter(s => !isBlockedCell(s.r, s.c, this.game.boardShape));
       }
 
       if (emptySpots.length === 0) break;
@@ -451,6 +476,11 @@ export class AIController {
 
       // Dedicated message handler per worker
       worker.onmessage = (e: MessageEvent) => this.handleWorkerMessage(e, i);
+
+      // Send boardShape to worker immediately after creation
+      if (this.game.boardShape) {
+        worker.postMessage({ type: 'setBoardShape', data: { shape: this.game.boardShape } });
+      }
 
       if (this.openingBookData) {
         worker.postMessage({ type: 'loadBook', data: { book: this.openingBookData } });

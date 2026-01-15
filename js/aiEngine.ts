@@ -47,6 +47,7 @@ import {
   coordsToIndex,
   COLOR_MASK,
 } from './ai/BoardDefinitions.js';
+import { getCurrentBoardShape } from './config.js';
 
 import type { Player, Square, Piece } from './types/game.js';
 
@@ -350,8 +351,11 @@ export async function getBestMoveDetailed(
   const personality = config.personality || 'NORMAL';
   const elo = config.elo || 2500;
 
-  // Use Worker if available (Browser)
-  if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
+  const boardShape = getCurrentBoardShape();
+
+  // Use Worker if available (Browser) - ONLY for standard board shape
+  // WASM doesn't support custom board shapes yet
+  if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
     try {
       const result = await runWorkerSearch(board, turnColor, maxDepth, personality, elo);
       if (result && result.move) {
@@ -368,14 +372,16 @@ export async function getBestMoveDetailed(
     }
   }
 
-  // Fallback or Node.js environment - Try WASM first
-  try {
-    const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
-    if (wasmResult) {
-      return wasmResult;
+  // Fallback or Node.js environment - Try WASM first (only for standard board)
+  if (boardShape === 'standard') {
+    try {
+      const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
+      if (wasmResult) {
+        return wasmResult;
+      }
+    } catch (err) {
+      logger.debug('[AiEngine] WASM fallback failed, using JS');
     }
-  } catch (err) {
-    logger.debug('[AiEngine] WASM fallback failed, using JS');
   }
 
   logger.debug('[AiEngine] Using JS Fallback Search');
@@ -580,8 +586,10 @@ export async function getTopMoves(
     }
   }
 
-  // Use Worker if available (Browser)
-  if (typeof Worker !== 'undefined' && typeof window !== 'undefined') {
+  const boardShape = getCurrentBoardShape();
+
+  // Use Worker if available (Browser) - ONLY for standard board shape
+  if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
     try {
       return await runWorkerTopMoves(board, turnColor, count, searchDepth, maxTimeMs);
     } catch (err: any) {
