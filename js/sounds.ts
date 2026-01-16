@@ -64,136 +64,197 @@ class SoundManager {
     return localStorage.getItem('chess_skin') || 'classic';
   }
 
-  public playMove(): void {
+  // Helper: Calculate stereo pan value (-1 to 1) based on board column (0-8 for 9x9)
+  private getPanValue(col: number = 4): number {
+    // 9 columns: 0 (left) to 8 (right). Center is 4.
+    // Map 0..8 to -0.8..0.8 to avoid extreme hard panning
+    const normalized = (col - 4) / 4;
+    return Math.max(-0.8, Math.min(0.8, normalized));
+  }
+
+  public playMove(_fromCol: number = 4, toCol: number = 4): void {
     if (!this.enabled) return;
     this.init();
     if (!this.audioContext) return;
 
     const skin = this.getCurrentSkin();
+    // Use target column for panning final sound
+    const pan = this.getPanValue(toCol);
 
     switch (skin) {
       case 'infernale':
-        this.playInfernaleMove();
+        this.playInfernaleMove(pan);
         break;
       case 'frost':
-        this.playFrostMove();
+        this.playFrostMove(pan);
         break;
       case 'neon':
-        this.playNeonMove();
+        this.playNeonMove(pan);
         break;
       default:
-        this.playClassicMove();
+        this.playClassicMove(pan);
         break;
     }
   }
 
-  public playCapture(): void {
+  public playCapture(toCol: number = 4): void {
     if (!this.enabled) return;
     this.init();
     if (!this.audioContext) return;
 
     const skin = this.getCurrentSkin();
+    const pan = this.getPanValue(toCol);
 
     switch (skin) {
       case 'infernale':
-        this.playInfernaleCapture();
+        this.playInfernaleCapture(pan);
         break;
       case 'frost':
-        this.playFrostCapture();
+        this.playFrostCapture(pan);
         break;
       case 'neon':
-        this.playNeonCapture();
+        this.playNeonCapture(pan);
         break;
       default:
-        this.playClassicCapture();
+        this.playClassicCapture(pan);
         break;
     }
   }
 
   // --- Classic Sounds ---
 
-  private playClassicMove(): void {
+  private playClassicMove(pan: number): void {
     const ctx = this.audioContext!;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    // Improved "Wood/Plastic" Click
+    // Use a Triangle wave for more body, filtered to sound duller
+    osc.type = 'triangle';
 
-    // Short, pleasant click sound
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.05);
+    // Variance: +/- 20Hz pitch, +/- 0.05s duration
+    const variance = (Math.random() - 0.5) * 40;
+    const baseFreq = 300;
 
-    gain.gain.setValueAtTime(this.volume, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+    osc.frequency.setValueAtTime(baseFreq + variance, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.1);
 
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.05);
-  }
-
-  private playClassicCapture(): void {
-    const ctx = this.audioContext!;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    // More aggressive sound for captures
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(600, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
-
-    gain.gain.setValueAtTime(this.volume * 0.8, ctx.currentTime);
+    // Envelope: Sharp attack, short decay
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(this.volume, ctx.currentTime + 0.005);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+    if (panner) {
+      panner.pan.value = pan;
+      osc.connect(gain);
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+    }
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.1);
   }
 
-  // --- Infernale Sounds (Heavy, Metallic, Deep) ---
-
-  private playInfernaleMove(): void {
+  private playClassicCapture(pan: number): void {
     const ctx = this.audioContext!;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    // Sharper "Snap"
+    osc.type = 'square';
+    // Variance
+    const variance = (Math.random() - 0.5) * 50;
 
-    // Deep "Thud"
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(120, ctx.currentTime);
+    osc.frequency.setValueAtTime(150 + variance, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
 
-    gain.gain.setValueAtTime(this.volume, ctx.currentTime);
+    gain.gain.setValueAtTime(this.volume * 0.8, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+
+    if (panner) {
+      panner.pan.value = pan;
+      osc.connect(gain);
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+    }
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.15);
   }
 
-  private playInfernaleCapture(): void {
+  // --- Infernale Sounds (Heavy, Metallic, Deep) ---
+
+  private playInfernaleMove(pan: number): void {
+    const ctx = this.audioContext!;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(100 + Math.random() * 20, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+
+    gain.gain.setValueAtTime(this.volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+    if (panner) {
+      panner.pan.value = pan;
+      osc.connect(gain);
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+    }
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  }
+
+  private playInfernaleCapture(pan: number): void {
     const ctx = this.audioContext!;
     const osc = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    osc.connect(gain);
-    osc2.connect(gain);
-    gain.connect(ctx.destination);
-
-    // Explosion-like
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(100, ctx.currentTime);
+    osc.frequency.setValueAtTime(80, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.3);
 
     osc2.type = 'square';
-    osc2.frequency.setValueAtTime(150, ctx.currentTime);
+    osc2.frequency.setValueAtTime(120, ctx.currentTime);
     osc2.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.3);
 
     gain.gain.setValueAtTime(this.volume * 0.8, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+    // Filter for explosion effect
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(3000, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.25);
+
+    osc.connect(filter);
+    osc2.connect(filter);
+
+    if (panner) {
+      panner.pan.value = pan;
+      filter.connect(gain);
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+    }
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.3);
@@ -203,90 +264,120 @@ class SoundManager {
 
   // --- Frost Sounds (Glassy, High-Pitched) ---
 
-  private playFrostMove(): void {
+  private playFrostMove(pan: number): void {
     const ctx = this.audioContext!;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    // Glass "Ting"
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(1800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1800, ctx.currentTime + 0.05); // Constant tone briefly
+    // Slight detune for "icy" feel
+    const freq = 1800 + Math.random() * 100;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq - 100, ctx.currentTime + 0.1);
 
     gain.gain.setValueAtTime(this.volume * 0.5, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+    if (panner) {
+      panner.pan.value = pan;
+      osc.connect(gain);
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+    }
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.1);
   }
 
-  private playFrostCapture(): void {
+  private playFrostCapture(pan: number): void {
     const ctx = this.audioContext!;
     const gain = ctx.createGain();
-    gain.connect(ctx.destination);
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    // Shattering effect (multiple high frequencies)
-    const freqs = [2000, 2500, 3200];
+    // Connect gain to panner if available
+    if (panner) {
+      panner.pan.value = pan;
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      gain.connect(ctx.destination);
+    }
+
+    // Shattering effect
+    const freqs = [2000, 2500, 3200, 4100];
     freqs.forEach(f => {
       const osc = ctx.createOscillator();
-      osc.frequency.value = f + (Math.random() * 200 - 100);
+      // Variance
+      osc.frequency.value = f + (Math.random() * 300 - 150);
       osc.connect(gain);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.1 + Math.random() * 0.1);
     });
 
-    gain.gain.setValueAtTime(this.volume * 0.6, ctx.currentTime);
+    gain.gain.setValueAtTime(this.volume * 0.4, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
   }
 
   // --- Neon Sounds (Digital, Sci-Fi) ---
 
-  private playNeonMove(): void {
+  private playNeonMove(pan: number): void {
     const ctx = this.audioContext!;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    // Sci-Fi "Swish"
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(400, ctx.currentTime);
-    osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.1);
+    osc.frequency.linearRampToValueAtTime(800 + Math.random() * 100, ctx.currentTime + 0.1);
 
-    // Low pass filter for "wub" effect
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1000, ctx.currentTime);
-    osc.disconnect();
+    filter.frequency.setValueAtTime(800, ctx.currentTime);
+
     osc.connect(filter);
     filter.connect(gain);
 
     gain.gain.setValueAtTime(this.volume * 0.4, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
 
+    if (panner) {
+      panner.pan.value = pan;
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      gain.connect(ctx.destination);
+    }
+
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.1);
   }
 
-  private playNeonCapture(): void {
+  private playNeonCapture(pan: number): void {
     const ctx = this.audioContext!;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    // "Zap"
     osc.type = 'square';
-    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc.frequency.setValueAtTime(1200 + Math.random() * 200, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
 
     gain.gain.setValueAtTime(this.volume * 0.5, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+
+    if (panner) {
+      panner.pan.value = pan;
+      osc.connect(gain);
+      gain.connect(panner);
+      panner.connect(ctx.destination);
+    } else {
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+    }
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.15);

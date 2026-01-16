@@ -117,8 +117,17 @@ export function generatePGN(game: Game, options: any = {}): string {
   else if (g.winner === 'draw') result = '1/2-1/2';
   headers.push(`[Result "${result}"]`);
 
-  // Custom variant header
-  headers.push('[Variant "9x9"]');
+  // Variant and FEN for non-standard boards
+  if (game.boardShape === 'cross') {
+    headers.push('[Variant "Cross"]');
+    // Cross mode has 15 total rows/cols logically but 9x9 in the data array.
+    // However, the initial state is fixed. We should provide a Setup/FEN header
+    // so readers know it's not a standard start.
+    headers.push('[SetUp "1"]');
+    headers.push('[FEN "3pp3/3pp3/3pp3/pppppppp/pppkpppb/pppppppp/3pp3/3pp3/3pp3 w - - 0 1"]'); // Simplified or specific to state
+  } else {
+    headers.push('[Variant "9x9"]');
+  }
 
   // Move text
   const moves = game.moveHistory || [];

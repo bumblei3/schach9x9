@@ -6,6 +6,7 @@ const mockAudioContext = vi.fn().mockImplementation(function () {
       gain: {
         value: 0,
         exponentialRampToValueAtTime: vi.fn(),
+        linearRampToValueAtTime: vi.fn(),
         setValueAtTime: vi.fn(),
       },
     })),
@@ -13,7 +14,11 @@ const mockAudioContext = vi.fn().mockImplementation(function () {
       connect: vi.fn(),
       start: vi.fn(),
       stop: vi.fn(),
-      frequency: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+      frequency: {
+        setValueAtTime: vi.fn(),
+        exponentialRampToValueAtTime: vi.fn(),
+        linearRampToValueAtTime: vi.fn(),
+      },
     })),
     destination: {},
   };

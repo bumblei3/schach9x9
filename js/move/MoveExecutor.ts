@@ -115,10 +115,10 @@ export async function executeMove(
 
   // Sound effects
   if (targetPiece || moveRecord.isEnPassant) {
-    soundManager.playCapture();
+    soundManager.playCapture(to.c);
     game.stats.captures++;
   } else {
-    soundManager.playMove();
+    soundManager.playMove(from.c, to.c);
   }
 
   // Update captured pieces
@@ -208,7 +208,7 @@ export async function executeMove(
         game.log(
           `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${promotionType} befördert!`
         );
-        soundManager.playMove();
+        soundManager.playMove(from.c, to.c);
       } else {
         const isHuman = (game.isAI && piece.color === 'white') || !game.isAI;
 
@@ -247,7 +247,7 @@ export async function executeMove(
           game.log(
             `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`
           );
-          soundManager.playMove();
+          soundManager.playMove(from.c, to.c);
         }
       }
     }
