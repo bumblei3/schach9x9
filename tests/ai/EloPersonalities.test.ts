@@ -1,7 +1,8 @@
+import { describe, expect, test, beforeEach } from 'vitest';
 import { getBestMoveDetailed } from '../../js/aiEngine.js';
 
 describe('AI Elo Personalities', () => {
-  let uiBoard;
+  let uiBoard: any[][];
 
   beforeEach(() => {
     uiBoard = Array(9)
@@ -9,7 +10,7 @@ describe('AI Elo Personalities', () => {
       .map(() => Array(9).fill(null));
   });
 
-  const setPiece = (r, c, type, color) => {
+  const setPiece = (r: number, c: number, type: string, color: string) => {
     uiBoard[r][c] = { type, color };
   };
 
@@ -20,15 +21,15 @@ describe('AI Elo Personalities', () => {
     setPiece(8, 4, 'k', 'white');
 
     // Run at depth 1 to get static-like evaluation guidance
-    const normalRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', {
+    const normalRes = await getBestMoveDetailed(uiBoard as any, 'white', 1, {
       personality: 'NORMAL',
     });
-    const aggressiveRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', {
+    const aggressiveRes = await getBestMoveDetailed(uiBoard as any, 'white', 1, {
       personality: 'AGGRESSIVE',
     });
 
     // AGGRESSIVE score should be higher (attack weight)
-    expect(aggressiveRes.score).toBeGreaterThanOrEqual(normalRes.score);
+    expect(aggressiveRes!.score).toBeGreaterThanOrEqual(normalRes!.score);
   });
 
   test('SOLID personality should reward pawn structure more', async () => {
@@ -38,14 +39,14 @@ describe('AI Elo Personalities', () => {
     setPiece(8, 4, 'k', 'white');
     setPiece(0, 4, 'k', 'black');
 
-    const normalRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', {
+    const normalRes = await getBestMoveDetailed(uiBoard as any, 'white', 1, {
       personality: 'NORMAL',
     });
-    const solidRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', {
+    const solidRes = await getBestMoveDetailed(uiBoard as any, 'white', 1, {
       personality: 'SOLID',
     });
 
-    expect(solidRes.score).toBeGreaterThanOrEqual(normalRes.score);
+    expect(solidRes!.score).toBeGreaterThanOrEqual(normalRes!.score);
   });
 
   test('SOLID personality should penalize exposed kings more', async () => {
@@ -55,10 +56,10 @@ describe('AI Elo Personalities', () => {
     setPiece(0, 4, 'k', 'black');
     setPiece(1, 4, 'p', 'black');
 
-    const normalRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', {
+    const normalRes = await getBestMoveDetailed(uiBoard as any, 'white', 1, {
       personality: 'NORMAL',
     });
-    const solidRes = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert', {
+    const solidRes = await getBestMoveDetailed(uiBoard as any, 'white', 1, {
       personality: 'SOLID',
     });
 
@@ -68,6 +69,6 @@ describe('AI Elo Personalities', () => {
     // Normal score: -ShelterPenalty.
     // Solid score: -ShelterPenalty * 1.4.
     // So Solid Score should be LOWER (more negative).
-    expect(solidRes.score).toBeLessThanOrEqual(normalRes.score);
+    expect(solidRes!.score).toBeLessThanOrEqual(normalRes!.score);
   });
 });

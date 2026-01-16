@@ -1,3 +1,4 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
@@ -5,8 +6,8 @@ import { PHASES } from '../js/config.js';
 vi.mock('../js/ui.js', () => ({
   initBoardUI: vi.fn(),
   renderBoard: vi.fn(),
-  showModal: vi.fn((title, message, buttons) => {
-    const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.class === 'btn-primary');
+  showModal: vi.fn((_title, _message, buttons) => {
+    const continueBtn = buttons.find((b: any) => b.text === 'Fortfahren' || b.class === 'btn-primary');
     if (continueBtn && continueBtn.callback) {
       continueBtn.callback();
     }
@@ -21,7 +22,7 @@ vi.mock('../js/ui.js', () => ({
   showShop: vi.fn(),
   showPromotionUI: vi.fn(),
   showToast: vi.fn(),
-  animateMove: vi.fn().mockResolvedValue(),
+  animateMove: vi.fn().mockResolvedValue(undefined),
   animateCheck: vi.fn(),
   addMoveToHistory: vi.fn(),
   renderEvalGraph: vi.fn(),
@@ -39,17 +40,17 @@ vi.mock('../js/sounds.js', () => ({
   },
 }));
 
-const { GameController } = await import('../js/gameController.js');
-const { MoveController } = await import('../js/moveController.js');
+import { GameController } from '../js/gameController.js';
+import { MoveController } from '../js/moveController.js';
 
 describe('Integration Tests', () => {
-  let game;
-  let gameController;
-  let moveController;
+  let game: any;
+  let gameController: GameController;
+  let moveController: MoveController;
 
   beforeEach(() => {
     // Mock DOM elements
-    global.document.getElementById = vi.fn(() => ({
+    (global as any).document.getElementById = vi.fn(() => ({
       textContent: '',
       innerHTML: '',
       classList: { add: vi.fn(), remove: vi.fn() },
@@ -63,7 +64,7 @@ describe('Integration Tests', () => {
       addEventListener: vi.fn(),
     }));
 
-    global.document.querySelector = vi.fn(() => ({
+    (global as any).document.querySelector = vi.fn(() => ({
       classList: { add: vi.fn(), remove: vi.fn() },
       innerHTML: '',
       parentElement: {
@@ -71,8 +72,8 @@ describe('Integration Tests', () => {
       },
     }));
 
-    global.document.querySelectorAll = vi.fn(() => []);
-    global.document.createElement = vi.fn(() => ({
+    (global as any).document.querySelectorAll = vi.fn(() => []);
+    (global as any).document.createElement = vi.fn(() => ({
       classList: { add: vi.fn(), remove: vi.fn() },
       dataset: {},
       addEventListener: vi.fn(),
@@ -82,8 +83,8 @@ describe('Integration Tests', () => {
     }));
 
     // Mock window.confirm
-    global.confirm = vi.fn(() => true);
-    global.alert = vi.fn();
+    (global as any).confirm = vi.fn(() => true);
+    (global as any).alert = vi.fn();
 
     // Mock localStorage
     const localStorageMock = {
@@ -146,7 +147,7 @@ describe('Integration Tests', () => {
       gameController.finishSetupPhase();
       expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
 
-      // Skip black upgrades (AI might do this automatically but we'll call it for consistency if needed)
+      // Skip black upgrades
       gameController.finishSetupPhase();
 
       // Should now be in PLAY phase
@@ -162,9 +163,6 @@ describe('Integration Tests', () => {
       game.gameController = gameController;
       game.moveController = moveController;
 
-      // Classic mode should skip setup and go straight to PLAY
-      // Note: Game constructor sets phase to PLAY for classic,
-      // but GameController constructor handles initialization logic
       expect(game.phase).toBe(PHASES.PLAY);
       expect(game.board[8][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
       expect(game.board[0][4]).toEqual({ type: 'k', color: 'black', hasMoved: false });
@@ -193,7 +191,7 @@ describe('Integration Tests', () => {
       );
 
       // Get saved data
-      const savedData = localStorage.setItem.mock.calls[0][1];
+      const savedData = (localStorage.setItem as any).mock.calls[0][1];
       const parsedData = JSON.parse(savedData);
 
       // Verify save structure
@@ -202,20 +200,17 @@ describe('Integration Tests', () => {
       expect(parsedData).toHaveProperty('phase');
 
       // Create new game and load
-      const newGame = new Game(15, 'classic');
+      const newGame = new Game(15, 'classic') as any;
       const newGameController = new GameController(newGame);
       const newMoveController = new MoveController(newGame);
       newGame.gameController = newGameController;
       newGame.moveController = newMoveController;
 
-      localStorage.getItem.mockReturnValue(savedData);
+      (localStorage.getItem as any).mockReturnValue(savedData);
       newGameController.loadGame();
 
       // Verify loaded state matches
       expect(newGame.turn).toBe(game.turn);
-      // Note: moveHistory might be handled differently in save/load depending on implementation
-      // gameController.saveGame saves 'history' property, moveController uses 'moveHistory'
-      // Let's check if board state is restored
       expect(newGame.board[6][4]).toEqual(expect.objectContaining({ type: 'p', color: 'white' }));
     });
   });
@@ -244,7 +239,7 @@ describe('Integration Tests', () => {
       expect(game.board[6][4]).toBeNull();
 
       // Redo move
-      await moveController.redoMove();
+      await (moveController as any).redoMove();
       expect(game.moveHistory).toHaveLength(1);
       expect(game.board[6][4].type).toBe('p');
     });
@@ -260,8 +255,6 @@ describe('Integration Tests', () => {
       gameController.resign('white');
 
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      // Resignation doesn't set game.winner property directly in Game object usually,
-      // but updates UI and logs. We check phase.
     });
 
     test('should handle draw offer and acceptance', () => {
@@ -308,8 +301,6 @@ describe('Integration Tests', () => {
       // White (human) places king
       gameController.placeKing(7, 4, 'white');
 
-      // AI setup is async (setTimeout), so we need to wait or use fake timers
-      // But placeKing sets phase to SETUP_BLACK_KING immediately
       expect(game.phase).toBe(PHASES.SETUP_BLACK_KING);
     });
   });
