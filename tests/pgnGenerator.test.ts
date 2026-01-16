@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { moveToNotation, generatePGN } from '../js/utils/PGNGenerator.js';
 
 describe('PGNGenerator', () => {
@@ -16,7 +17,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toContain('e');
     });
 
@@ -30,9 +31,9 @@ describe('PGNGenerator', () => {
       const board = Array(9)
         .fill(null)
         .map(() => Array(9).fill(null));
-      board[5][5] = { type: 'p', color: 'black' };
+      board[5][5] = { type: 'p', color: 'black' } as any;
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toContain('x');
     });
 
@@ -46,7 +47,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^N/); // Knight starts with N
     });
 
@@ -60,7 +61,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^K/); // King starts with K
     });
 
@@ -74,7 +75,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^Q/); // Queen starts with Q
     });
 
@@ -88,7 +89,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^R/); // Rook starts with R
     });
 
@@ -102,7 +103,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^B/); // Bishop starts with B
     });
 
@@ -116,7 +117,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^A/); // Archbishop starts with A
     });
 
@@ -130,7 +131,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toMatch(/^C/); // Chancellor starts with C
     });
 
@@ -145,7 +146,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toBe('O-O');
     });
 
@@ -160,7 +161,7 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toBe('O-O-O');
     });
 
@@ -175,14 +176,14 @@ describe('PGNGenerator', () => {
         .fill(null)
         .map(() => Array(9).fill(null));
 
-      const notation = moveToNotation(move, board);
+      const notation = moveToNotation(move, board as any);
       expect(notation).toContain('=E'); // Promotes to Angel (E)
     });
 
     it('should handle invalid moves', () => {
       expect(moveToNotation(null)).toBe('??');
-      expect(moveToNotation({})).toBe('??');
-      expect(moveToNotation({ from: {} })).toBe('??');
+      expect(moveToNotation({} as any)).toBe('??');
+      expect(moveToNotation({ from: {} } as any)).toBe('??');
     });
   });
 
@@ -197,7 +198,7 @@ describe('PGNGenerator', () => {
           .map(() => Array(9).fill(null)),
       };
 
-      const pgn = generatePGN(mockGame);
+      const pgn = generatePGN(mockGame as any);
 
       expect(pgn).toContain('[Event "Schach 9x9 Game"]');
       expect(pgn).toContain('[Site "Local"]');
@@ -227,7 +228,7 @@ describe('PGNGenerator', () => {
           .map(() => Array(9).fill(null)),
       };
 
-      const pgn = generatePGN(mockGame);
+      const pgn = generatePGN(mockGame as any);
 
       expect(pgn).toContain('1.');
     });
@@ -242,7 +243,7 @@ describe('PGNGenerator', () => {
           .map(() => Array(9).fill(null)),
       };
 
-      const pgn = generatePGN(mockGame);
+      const pgn = generatePGN(mockGame as any);
 
       // Should still have headers
       expect(pgn).toContain('[Event');
@@ -260,7 +261,7 @@ describe('PGNGenerator', () => {
           .map(() => Array(9).fill(null)),
       };
 
-      const pgn = generatePGN(mockGame);
+      const pgn = generatePGN(mockGame as any);
 
       expect(pgn).toContain('[Date');
     });
@@ -269,41 +270,79 @@ describe('PGNGenerator', () => {
   describe('generatePGN with winners', () => {
     it('should handle white winner', () => {
       const game = { moveHistory: [], winner: 'white' };
-      const pgn = generatePGN(game);
+      const pgn = generatePGN(game as any);
       expect(pgn).toContain('[Result "1-0"]');
       expect(pgn).toContain('1-0');
     });
 
     it('should handle black winner', () => {
       const game = { moveHistory: [], winner: 'black' };
-      const pgn = generatePGN(game);
+      const pgn = generatePGN(game as any);
       expect(pgn).toContain('[Result "0-1"]');
       expect(pgn).toContain('0-1');
     });
 
     it('should handle draw', () => {
       const game = { moveHistory: [], winner: 'draw' };
-      const pgn = generatePGN(game);
+      const pgn = generatePGN(game as any);
       expect(pgn).toContain('[Result "1/2-1/2"]');
       expect(pgn).toContain('1/2-1/2');
     });
   });
 
   describe('Clipboard and Download', () => {
+    let originalURL: any;
+    let originalCreateElement: any;
+    let originalAppendChild: any;
+    let originalRemoveChild: any;
+
+    beforeEach(() => {
+      originalURL = global.URL;
+      originalCreateElement = document.createElement;
+      originalAppendChild = document.body.appendChild;
+      originalRemoveChild = document.body.removeChild;
+    });
+
+    afterEach(() => {
+      global.URL = originalURL;
+      document.createElement = originalCreateElement;
+      document.body.appendChild = originalAppendChild;
+      document.body.removeChild = originalRemoveChild;
+      vi.restoreAllMocks();
+    });
+
     it('should call navigator.clipboard.writeText', async () => {
       const { copyPGNToClipboard } = await import('../js/utils/PGNGenerator.js');
       const mockWriteText = vi.fn().mockResolvedValue(true);
-      Object.assign(navigator, { clipboard: { writeText: mockWriteText } });
+
+      // Safe navigator assignment for test env
+      const originalClipboard = navigator.clipboard;
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: mockWriteText },
+        writable: true,
+        configurable: true,
+      });
 
       const result = await copyPGNToClipboard('test pgn');
       expect(mockWriteText).toHaveBeenCalledWith('test pgn');
       expect(result).toBe(true);
+
+      // Cleanup
+      if (originalClipboard) {
+        Object.defineProperty(navigator, 'clipboard', { value: originalClipboard });
+      } else {
+        // @ts-ignore
+        delete navigator.clipboard;
+      }
     });
 
     it('should return false on clipboard error', async () => {
       const { copyPGNToClipboard } = await import('../js/utils/PGNGenerator.js');
-      Object.assign(navigator, {
-        clipboard: { writeText: vi.fn().mockRejectedValue(new Error('fail')) },
+
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: vi.fn().mockRejectedValue(new Error('fail')) },
+        writable: true,
+        configurable: true,
       });
 
       const result = await copyPGNToClipboard('test pgn');
@@ -314,8 +353,13 @@ describe('PGNGenerator', () => {
       const { downloadPGN } = await import('../js/utils/PGNGenerator.js');
 
       // Mock URL.createObjectURL and revokeObjectURL
-      global.URL.createObjectURL = vi.fn().mockReturnValue('mock-url');
-      global.URL.revokeObjectURL = vi.fn();
+      const mockCreateObjectURL = vi.fn().mockReturnValue('mock-url');
+      const mockRevokeObjectURL = vi.fn();
+
+      global.URL = {
+        createObjectURL: mockCreateObjectURL,
+        revokeObjectURL: mockRevokeObjectURL,
+      } as any;
 
       // Mock document.createElement
       const mockAnchor = {
@@ -323,9 +367,14 @@ describe('PGNGenerator', () => {
         download: '',
         click: vi.fn(),
       };
-      vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor);
-      vi.spyOn(document.body, 'appendChild').mockImplementation(function () {});
-      vi.spyOn(document.body, 'removeChild').mockImplementation(function () {});
+
+      document.createElement = vi.fn((tagName: string) => {
+        if (tagName === 'a') return mockAnchor as any;
+        return originalCreateElement(tagName);
+      });
+
+      document.body.appendChild = vi.fn();
+      document.body.removeChild = vi.fn();
 
       downloadPGN('test pgn', 'test.pgn');
 

@@ -1,4 +1,6 @@
 // Mock the sub-modules
+import { describe, expect, test, beforeEach, vi } from 'vitest';
+
 vi.mock('../js/tutor/TacticsDetector.js', () => ({
   getThreatenedPieces: vi.fn(),
   detectTacticalPatterns: vi.fn(),
@@ -35,6 +37,7 @@ vi.mock('../js/tutor/HintGenerator.js', () => ({
 // Mock gameEngine to avoid side effects
 vi.mock('../js/gameEngine.js', () => ({
   Game: class {
+    board: any[][];
     constructor() {
       this.board = Array(9)
         .fill(null)
@@ -44,20 +47,19 @@ vi.mock('../js/gameEngine.js', () => ({
   PHASES: { PLAY: 'play' },
 }));
 
-// Dynamic imports are required for mocked modules in ESM
-const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
-const MoveAnalyzer = await import('../js/tutor/MoveAnalyzer.js');
-const HintGenerator = await import('../js/tutor/HintGenerator.js');
-await import('../js/utils.js');
-const { TutorController } = await import('../js/tutorController.js');
-const { Game } = await import('../js/gameEngine.js');
+import * as TacticsDetector from '../js/tutor/TacticsDetector.js';
+import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
+import * as HintGenerator from '../js/tutor/HintGenerator.js';
+import '../js/utils.js';
+import { TutorController } from '../js/tutorController.js';
+import { Game } from '../js/gameEngine.js';
 
 describe('TutorController', () => {
-  let game;
-  let tutorController;
+  let game: any;
+  let tutorController: TutorController;
 
   beforeEach(() => {
-    game = new Game();
+    game = new Game(15, 'classic');
     tutorController = new TutorController(game);
     vi.clearAllMocks();
   });
@@ -78,7 +80,7 @@ describe('TutorController', () => {
   });
 
   test('should delegate getMoveNotation to MoveAnalyzer', () => {
-    const notation = tutorController.getMoveNotation({ from: 'a2', to: 'a4' });
+    const notation = tutorController.getMoveNotation({ from: 'a2', to: 'a4' } as any);
     expect(notation).toBe('e4');
     expect(MoveAnalyzer.getMoveNotation).toHaveBeenCalledWith(game, { from: 'a2', to: 'a4' });
   });
@@ -98,18 +100,18 @@ describe('TutorController', () => {
     tutorController.getThreatenedPieces({ r: 0, c: 0 }, 'white');
     expect(TacticsDetector.getThreatenedPieces).toHaveBeenCalled();
 
-    tutorController.detectTacticalPatterns({});
+    tutorController.detectTacticalPatterns({} as any);
     expect(TacticsDetector.detectTacticalPatterns).toHaveBeenCalled();
 
-    tutorController.detectPins({}, 'white');
+    tutorController.detectPins({} as any, 'white');
     expect(TacticsDetector.detectPins).toHaveBeenCalled();
   });
 
   test('should delegate move analysis to MoveAnalyzer', () => {
-    tutorController.analyzeStrategicValue({});
+    tutorController.analyzeStrategicValue({} as any);
     expect(MoveAnalyzer.analyzeStrategicValue).toHaveBeenCalled();
 
-    tutorController.analyzeMoveWithExplanation({}, 0, 0);
+    tutorController.analyzeMoveWithExplanation({} as any, 0, 0);
     expect(MoveAnalyzer.analyzeMoveWithExplanation).toHaveBeenCalled();
   });
 
@@ -132,21 +134,21 @@ describe('TutorController', () => {
     tutorController.handlePlayerMove({ r: 6, c: 4 }, { r: 4, c: 4 });
     expect(MoveAnalyzer.handlePlayerMove).toHaveBeenCalled();
 
-    tutorController.checkBlunder({});
+    tutorController.checkBlunder({} as any);
     expect(MoveAnalyzer.checkBlunder).toHaveBeenCalled();
 
-    tutorController.showBlunderWarning({});
+    tutorController.showBlunderWarning({} as any, () => { });
     expect(MoveAnalyzer.showBlunderWarning).toHaveBeenCalled();
   });
 
   test('should delegate remaining analyzer and detector methods', () => {
-    tutorController.detectDiscoveredAttacks({}, {}, 'white');
+    tutorController.detectDiscoveredAttacks({} as any, {} as any, 'white');
     expect(TacticsDetector.detectDiscoveredAttacks).toHaveBeenCalled();
 
     tutorController.canPieceMove('p', 1, 0);
     expect(TacticsDetector.canPieceMove).toHaveBeenCalledWith('p', 1, 0);
 
-    tutorController.detectThreatsAfterMove({});
+    tutorController.detectThreatsAfterMove({} as any);
     expect(TacticsDetector.detectThreatsAfterMove).toHaveBeenCalled();
 
     tutorController.countDefenders(0, 0, 'white');
@@ -155,7 +157,7 @@ describe('TutorController', () => {
     tutorController.countAttackers(0, 0, 'black');
     expect(TacticsDetector.countAttackers).toHaveBeenCalled();
 
-    tutorController.getDefendedPieces({}, 'white');
+    tutorController.getDefendedPieces({} as any, 'white');
     expect(TacticsDetector.getDefendedPieces).toHaveBeenCalled();
 
     tutorController.getScoreDescription(100);

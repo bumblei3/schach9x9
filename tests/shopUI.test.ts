@@ -1,11 +1,13 @@
 // Mock config
+import { describe, expect, test, beforeEach, vi } from 'vitest';
+
 vi.mock('../js/config.js', () => ({
   PIECE_VALUES: { p: 100, n: 300, b: 300, r: 500, q: 900, k: 0, a: 800, c: 800, e: 1000 },
 }));
 
 // Mock BoardRenderer
 vi.mock('../js/ui/BoardRenderer.js', () => ({
-  getPieceText: piece => `Piece(${piece.type}, ${piece.color})`,
+  getPieceText: (piece: any) => `Piece(${piece.type}, ${piece.color})`,
 }));
 
 // Mock TutorUI
@@ -13,11 +15,11 @@ vi.mock('../js/ui/TutorUI.js', () => ({
   updateTutorRecommendations: vi.fn(),
 }));
 
-const ShopUI = await import('../js/ui/ShopUI.js');
-const { updateTutorRecommendations } = await import('../js/ui/TutorUI.js');
+import * as ShopUI from '../js/ui/ShopUI.js';
+import { updateTutorRecommendations } from '../js/ui/TutorUI.js';
 
 describe('ShopUI', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -42,26 +44,26 @@ describe('ShopUI', () => {
       phase: 'SETUP_WHITE_PIECES', // Default phase
     };
 
-    window.updateTutorRecommendations = updateTutorRecommendations;
+    (window as any).updateTutorRecommendations = updateTutorRecommendations;
 
     vi.clearAllMocks();
   });
 
   test('showShop toggles panel and body class', () => {
     ShopUI.showShop(game, true);
-    expect(document.getElementById('shop-panel').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('shop-panel')?.classList.contains('hidden')).toBe(false);
     expect(document.body.classList.contains('setup-mode')).toBe(true);
 
     ShopUI.showShop(game, false);
-    expect(document.getElementById('shop-panel').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('shop-panel')?.classList.contains('hidden')).toBe(true);
     expect(document.body.classList.contains('setup-mode')).toBe(false);
   });
 
   test('updateShopUI updates displays and item states', () => {
     ShopUI.updateShopUI(game);
 
-    expect(document.getElementById('points-display').textContent).toBe('200');
-    expect(document.getElementById('tutor-points-display').textContent).toBe('50');
+    expect(document.getElementById('points-display')?.textContent).toBe('200');
+    expect(document.getElementById('tutor-points-display')?.textContent).toBe('50');
 
     const items = document.querySelectorAll('.shop-item');
     expect(items[0].classList.contains('disabled')).toBe(false); // cost 100 < 200
@@ -73,13 +75,13 @@ describe('ShopUI', () => {
   test('updateShopUI reflects selected piece', () => {
     game.selectedShopPiece = 'p';
     ShopUI.updateShopUI(game);
-    expect(document.getElementById('selected-piece-display').textContent).toContain(
+    expect(document.getElementById('selected-piece-display')?.textContent).toContain(
       'Piece(p, white)'
     );
 
     game.selectedShopPiece = null;
     ShopUI.updateShopUI(game);
-    expect(document.getElementById('selected-piece-display').textContent).toBe(
+    expect(document.getElementById('selected-piece-display')?.textContent).toBe(
       'Wähle eine Figur zum Kaufen'
     );
   });
@@ -93,15 +95,15 @@ describe('ShopUI', () => {
     const tutor = document.getElementById('tutor-recommendations-section');
     const status = document.getElementById('selected-piece-display');
 
-    expect(header.textContent).toBe('Truppen verbessern');
-    expect(shopBtn.classList.contains('hidden')).toBe(true);
-    expect(tutor.classList.contains('hidden')).toBe(true);
-    expect(status.textContent).toContain('Klicke auf Figuren');
+    expect(header?.textContent).toBe('Truppen verbessern');
+    expect(shopBtn?.classList.contains('hidden')).toBe(true);
+    expect(tutor?.classList.contains('hidden')).toBe(true);
+    expect(status?.textContent).toContain('Klicke auf Figuren');
 
     // Revert to normal
     game.phase = 'SETUP_WHITE_PIECES';
     ShopUI.updateShopUI(game);
-    expect(header.textContent).toBe('Truppen anheuern');
-    expect(shopBtn.classList.contains('hidden')).toBe(false);
+    expect(header?.textContent).toBe('Truppen anheuern');
+    expect(shopBtn?.classList.contains('hidden')).toBe(false);
   });
 });

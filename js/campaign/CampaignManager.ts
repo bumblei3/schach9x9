@@ -302,7 +302,7 @@ export class CampaignManager {
   public unlockAll(): void {
     const allIds = CAMPAIGN_LEVELS.map(l => l.id);
     // Merge unique IDs
-    this.state.unlockedLevels = [...new Set([...this.state.unlockedLevels, ...allIds])];
+    this.state.unlockedLevels = Array.from(new Set([...this.state.unlockedLevels, ...allIds]));
     this.saveGame();
   }
 

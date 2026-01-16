@@ -2,12 +2,13 @@
  * Tests for ShopManager
  */
 
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { ShopManager } from '../js/shop/ShopManager.js';
 import { BOARD_SIZE, PHASES } from '../js/config.js';
 
 describe('ShopManager', () => {
-  let mockGame;
-  let shopManager;
+  let mockGame: any;
+  let shopManager: ShopManager;
 
   beforeEach(() => {
     // Mock document
@@ -15,12 +16,12 @@ describe('ShopManager', () => {
       querySelectorAll: vi.fn(() => []),
       querySelector: vi.fn(() => null),
       getElementById: vi.fn(() => null),
-    };
+    } as any;
 
     // Mock window
     global.window = {
       battleChess3D: null,
-    };
+    } as any;
 
     mockGame = {
       board: Array(BOARD_SIZE)
@@ -35,8 +36,8 @@ describe('ShopManager', () => {
       log: vi.fn(),
     };
 
-    // Place white king
-    mockGame.board[8][4] = { type: 'k', color: 'white' };
+    // Place white king with hasMoved property
+    mockGame.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
 
     shopManager = new ShopManager(mockGame);
   });
@@ -65,7 +66,7 @@ describe('ShopManager', () => {
     });
 
     test('should do nothing for null pieceType', () => {
-      shopManager.selectShopPiece(null);
+      shopManager.selectShopPiece(null as any);
 
       expect(mockGame.selectedShopPiece).toBeNull();
     });
@@ -89,7 +90,7 @@ describe('ShopManager', () => {
     test('should not place on occupied cell', () => {
       mockGame.points = 10;
       mockGame.selectedShopPiece = 'r';
-      mockGame.board[7][4] = { type: 'p', color: 'white' };
+      mockGame.board[7][4] = { type: 'p', color: 'white', hasMoved: false };
 
       shopManager.placeShopPiece(7, 4);
 
@@ -108,7 +109,7 @@ describe('ShopManager', () => {
 
     test('should call handleSellPiece when no piece selected', () => {
       mockGame.selectedShopPiece = null;
-      mockGame.board[7][4] = { type: 'p', color: 'white' };
+      mockGame.board[7][4] = { type: 'p', color: 'white', hasMoved: false };
       mockGame.points = 5;
 
       shopManager.placeShopPiece(7, 4);
@@ -121,7 +122,7 @@ describe('ShopManager', () => {
 
   describe('handleSellPiece', () => {
     test('should refund points when removing own piece', () => {
-      mockGame.board[7][4] = { type: 'r', color: 'white' };
+      mockGame.board[7][4] = { type: 'r', color: 'white', hasMoved: false };
       mockGame.points = 5;
 
       shopManager.handleSellPiece(7, 4);
@@ -131,7 +132,7 @@ describe('ShopManager', () => {
     });
 
     test('should not remove king', () => {
-      mockGame.board[8][4] = { type: 'k', color: 'white' };
+      mockGame.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
       const originalPoints = mockGame.points;
 
       shopManager.handleSellPiece(8, 4);
@@ -143,15 +144,15 @@ describe('ShopManager', () => {
 
   describe('getAvailableUpgrades', () => {
     test('should NOT include Angel if reward is locked', () => {
-      // Accessing private method for test, no 'as any' needed in JS
-      const upgrades = shopManager.getAvailableUpgrades('q');
-      const hasAngel = upgrades.some(u => u.symbol === 'e');
+      // Accessing private/protected method via any cast
+      const upgrades = (shopManager as any).getAvailableUpgrades('q');
+      const hasAngel = upgrades.some((u: any) => u.symbol === 'e');
       expect(hasAngel).toBe(false);
     });
 
     test('should include Knight upgrades correctly', () => {
-      const upgrades = shopManager.getAvailableUpgrades('n');
-      const hasNightrider = upgrades.some(u => u.symbol === 'j');
+      const upgrades = (shopManager as any).getAvailableUpgrades('n');
+      const hasNightrider = upgrades.some((u: any) => u.symbol === 'j');
       expect(hasNightrider).toBe(true);
     });
   });
@@ -159,7 +160,7 @@ describe('ShopManager', () => {
   describe('performUpgrade', () => {
     test('should upgrade knight to nightrider and deduct correct points', () => {
       // Knight (3) -> Nightrider (6) costs 3 points
-      mockGame.board[7][4] = { type: 'n', color: 'white' };
+      mockGame.board[7][4] = { type: 'n', color: 'white', hasMoved: false };
       mockGame.points = 10;
 
       shopManager.performUpgrade(7, 4, 'j');
@@ -170,7 +171,7 @@ describe('ShopManager', () => {
 
     test('should allow chain upgrade: Knight -> Nightrider -> Chancellor', () => {
       // Knight (3) -> Nightrider (6) -> Chancellor (8)
-      mockGame.board[7][4] = { type: 'n', color: 'white' };
+      mockGame.board[7][4] = { type: 'n', color: 'white', hasMoved: false };
       mockGame.points = 10;
 
       // Step 1: Knight -> Nightrider (Costs 3)

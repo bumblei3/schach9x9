@@ -1,8 +1,9 @@
+import { describe, expect, beforeEach, it } from 'vitest';
 import { PGNParser } from '../js/utils/PGNParser.js';
 import { Game } from '../js/gameEngine.js';
 
 describe('PGNParser', () => {
-  let parser;
+  let parser: PGNParser;
 
   beforeEach(() => {
     parser = new PGNParser();
@@ -100,9 +101,9 @@ describe('PGNParser', () => {
       expect(history.length).toBe(1);
       expect(history[0].san).toBe('e4');
       expect(history[0].move).toBeDefined();
-      expect(history[0].move.from.r).toBe(7);
-      expect(history[0].move.from.c).toBe(4);
-      expect(history[0].move.to.r).toBe(5);
+      expect(history[0].move!.from.r).toBe(7);
+      expect(history[0].move!.from.c).toBe(4);
+      expect(history[0].move!.to.r).toBe(5);
       expect(game.turn).toBe('black');
     });
 
@@ -130,8 +131,12 @@ describe('PGNParser', () => {
         m => m.from.c === 4 && m.from.r === 7 && m.to.r === 5 && m.to.c === 4
       );
 
-      const notation = parser.generateNotationForCheck(e4Move, game, legalMoves);
-      expect(notation).toBe('e4');
+      if (e4Move) {
+        const notation = parser.generateNotationForCheck(e4Move, game, legalMoves);
+        expect(notation).toBe('e4');
+      } else {
+        throw new Error("e4 move not found");
+      }
     });
 
     it('should generate piece notation', () => {
@@ -152,79 +157,86 @@ describe('PGNParser', () => {
 
     it('should handle empty square', () => {
       const game = new Game(15, 'classic');
-      const fakeMove = { from: { r: 4, c: 4 }, to: { r: 3, c: 3 } };
+      const fakeMove = { from: { r: 4, c: 4 }, to: { r: 3, c: 3 } } as any;
       const notation = parser.generateNotationForCheck(fakeMove, game, []);
       expect(notation).toBe('');
     });
 
     it('should generate castling notation', () => {
       const game = new Game(15, 'classic');
+      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
       // King at 8,4
-      const castleShort = { from: { r: 8, c: 4 }, to: { r: 8, c: 6 } };
-      game.board[8][4] = { type: 'k', color: 'white' };
+      game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
+
+      const castleShort = { from: { r: 8, c: 4 }, to: { r: 8, c: 6 } } as any;
       const notationShort = parser.generateNotationForCheck(castleShort, game, []);
       expect(notationShort).toBe('O-O');
 
-      const castleLong = { from: { r: 8, c: 4 }, to: { r: 8, c: 2 } };
+      const castleLong = { from: { r: 8, c: 4 }, to: { r: 8, c: 2 } } as any;
       const notationLong = parser.generateNotationForCheck(castleLong, game, []);
       expect(notationLong).toBe('O-O-O');
 
-      game.board[5][5] = { type: 'k', color: 'white' };
+      game.board[5][5] = { type: 'k', color: 'white', hasMoved: false };
       game.board[4][5] = null;
-      const kingMove = { from: { r: 5, c: 5 }, to: { r: 4, c: 5 } };
+      const kingMove = { from: { r: 5, c: 5 }, to: { r: 4, c: 5 } } as any;
       const notationKing = parser.generateNotationForCheck(kingMove, game, []);
       expect(notationKing).toBe('Kf5'); // r4 is rank 5, c5 is f
     });
 
     it('should generate pawn capture notation', () => {
       const game = new Game(15, 'classic');
-      game.board[4][4] = { type: 'p', color: 'white' };
-      game.board[3][5] = { type: 'p', color: 'black' };
-      const move = { from: { r: 4, c: 4 }, to: { r: 3, c: 5 } };
+      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board[4][4] = { type: 'p', color: 'white', hasMoved: false };
+      game.board[3][5] = { type: 'p', color: 'black', hasMoved: false };
+      const move = { from: { r: 4, c: 4 }, to: { r: 3, c: 5 } } as any;
       const notation = parser.generateNotationForCheck(move, game, []);
       expect(notation).toBe('exf6');
     });
 
     it('should handle piece disambiguation (column)', () => {
       const game = new Game(15, 'classic');
-      game.board[7][1] = { type: 'n', color: 'white' }; // Nb1
-      game.board[7][6] = { type: 'n', color: 'white' }; // Ng1
-      const move = { from: { r: 7, c: 1 }, to: { r: 5, c: 2 } };
-      const allMoves = [move, { from: { r: 7, c: 6 }, to: { r: 5, c: 2 } }];
+      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board[7][1] = { type: 'n', color: 'white', hasMoved: false }; // Nb1
+      game.board[7][6] = { type: 'n', color: 'white', hasMoved: false }; // Ng1
+      const move = { from: { r: 7, c: 1 }, to: { r: 5, c: 2 } } as any;
+      const allMoves = [move, { from: { r: 7, c: 6 }, to: { r: 5, c: 2 } }] as any;
       const notation = parser.generateNotationForCheck(move, game, allMoves);
       expect(notation).toBe('Nbc4');
     });
 
     it('should handle piece disambiguation (row)', () => {
       const game = new Game(15, 'classic');
-      game.board[3][3] = { type: 'r', color: 'white' };
-      game.board[5][3] = { type: 'r', color: 'white' };
-      const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 3 } };
-      const allMoves = [move, { from: { r: 5, c: 3 }, to: { r: 4, c: 3 } }];
+      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board[3][3] = { type: 'r', color: 'white', hasMoved: true };
+      game.board[5][3] = { type: 'r', color: 'white', hasMoved: true };
+      const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 3 } } as any;
+      const allMoves = [move, { from: { r: 5, c: 3 }, to: { r: 4, c: 3 } }] as any;
       const notation = parser.generateNotationForCheck(move, game, allMoves);
       expect(notation).toBe('R6d5');
     });
 
     it('should handle piece disambiguation (both)', () => {
       const game = new Game(15, 'classic');
-      game.board[3][3] = { type: 'q', color: 'white' };
-      game.board[3][5] = { type: 'q', color: 'white' };
-      game.board[5][3] = { type: 'q', color: 'white' };
-      const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } };
+      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board[3][3] = { type: 'q', color: 'white', hasMoved: false };
+      game.board[3][5] = { type: 'q', color: 'white', hasMoved: false };
+      game.board[5][3] = { type: 'q', color: 'white', hasMoved: false };
+      const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } } as any;
       const allMoves = [
         move,
         { from: { r: 3, c: 5 }, to: { r: 4, c: 4 } },
         { from: { r: 5, c: 3 }, to: { r: 4, c: 4 } },
-      ];
+      ] as any;
       const notation = parser.generateNotationForCheck(move, game, allMoves);
       expect(notation).toBe('Qd6e5');
     });
 
     it('should generate piece capture notation', () => {
       const game = new Game(15, 'classic');
-      game.board[3][3] = { type: 'r', color: 'white' };
-      game.board[3][5] = { type: 'p', color: 'black' };
-      const move = { from: { r: 3, c: 3 }, to: { r: 3, c: 5 } };
+      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board[3][3] = { type: 'r', color: 'white', hasMoved: true };
+      game.board[3][5] = { type: 'p', color: 'black', hasMoved: true };
+      const move = { from: { r: 3, c: 3 }, to: { r: 3, c: 5 } } as any;
       const notation = parser.generateNotationForCheck(move, game, []);
       expect(notation).toBe('Rxf6');
     });

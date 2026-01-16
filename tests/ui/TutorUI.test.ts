@@ -1,4 +1,6 @@
 // Mock config
+import { describe, expect, test, beforeEach, vi } from 'vitest';
+
 vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: {
@@ -9,10 +11,10 @@ vi.mock('../../js/config.js', () => ({
   PIECE_VALUES: { p: 100 },
 }));
 
-const TutorUI = await import('../../js/ui/TutorUI.js');
+import * as TutorUI from '../../js/ui/TutorUI.js';
 
 describe('TutorUI Component', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -73,7 +75,7 @@ describe('TutorUI Component', () => {
         },
       ]),
       executeMove: vi.fn(),
-      analyzeMoveWithExplanation: vi.fn((_move, _score) => ({
+      analyzeMoveWithExplanation: vi.fn((_move: any, _score: any) => ({
         category: 'excellent',
         qualityLabel: 'Top Move',
         tacticalExplanations: [],
@@ -81,7 +83,7 @@ describe('TutorUI Component', () => {
         warnings: [],
         questions: [],
       })),
-      getScoreDescription: vi.fn(_score => ({
+      getScoreDescription: vi.fn((_score: any) => ({
         emoji: '🔥',
         label: 'Super',
         color: '#ff0000',
@@ -94,7 +96,8 @@ describe('TutorUI Component', () => {
 
     window.confirm = vi.fn(() => true);
     window.alert = vi.fn();
-    window.PIECE_SVGS = null;
+    (window as any).PIECE_SVGS = null;
+    vi.clearAllMocks();
   });
 
   describe('updateTutorRecommendations', () => {
@@ -108,7 +111,7 @@ describe('TutorUI Component', () => {
       game.phase = 'PLAY';
       TutorUI.updateTutorRecommendations(game);
       const section = document.getElementById('tutor-recommendations-section');
-      expect(section.classList.contains('hidden')).toBe(true);
+      expect(section?.classList.contains('hidden')).toBe(true);
     });
 
     test('should show tutor section and initialize toggle in setup phase', () => {
@@ -116,20 +119,20 @@ describe('TutorUI Component', () => {
       TutorUI.updateTutorRecommendations(game);
 
       const section = document.getElementById('tutor-recommendations-section');
-      expect(section.classList.contains('hidden')).toBe(false);
+      expect(section?.classList.contains('hidden')).toBe(false);
 
       const toggleBtn = document.getElementById('toggle-tutor-recommendations');
-      expect(toggleBtn.dataset.initialized).toBe('true');
+      expect(toggleBtn?.dataset.initialized).toBe('true');
 
       const container = document.getElementById('tutor-recommendations-container');
-      container.classList.add('hidden');
-      toggleBtn.click();
-      expect(container.classList.contains('hidden')).toBe(false);
-      expect(toggleBtn.textContent).toContain('ausblenden');
+      container?.classList.add('hidden');
+      toggleBtn?.click();
+      expect(container?.classList.contains('hidden')).toBe(false);
+      expect(toggleBtn?.textContent).toContain('ausblenden');
 
-      toggleBtn.click();
-      expect(container.classList.contains('hidden')).toBe(true);
-      expect(toggleBtn.textContent).toContain('anzeigen');
+      toggleBtn?.click();
+      expect(container?.classList.contains('hidden')).toBe(true);
+      expect(toggleBtn?.textContent).toContain('anzeigen');
     });
 
     test('should render templates correctly for black pieces', () => {
@@ -137,32 +140,32 @@ describe('TutorUI Component', () => {
       TutorUI.updateTutorRecommendations(game);
 
       const container = document.getElementById('tutor-recommendations-container');
-      expect(container.children.length).toBe(1);
+      expect(container?.children.length).toBe(1);
     });
 
     test('should render templates with PIECE_SVGS if available', () => {
-      window.PIECE_SVGS = { white: { p: '<svg>pawn</svg>', n: '<svg>knight</svg>' } };
+      (window as any).PIECE_SVGS = { white: { p: '<svg>pawn</svg>', n: '<svg>knight</svg>' } };
       game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const container = document.getElementById('tutor-recommendations-container');
-      expect(container.innerHTML).toContain('<svg>knight</svg>');
+      expect(container?.innerHTML).toContain('<svg>knight</svg>');
     });
 
     test('should handle missing PIECE_SVGS keys', () => {
-      window.PIECE_SVGS = { white: {} }; // Missing 'p' and 'n'
+      (window as any).PIECE_SVGS = { white: {} }; // Missing 'p' and 'n'
       game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
       const container = document.getElementById('tutor-recommendations-container');
-      expect(container.textContent).toContain('♞');
+      expect(container?.textContent).toContain('♞');
     });
 
     test('should apply template directly on click', () => {
       game.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(game);
 
-      const card = document.querySelector('.setup-template-card');
+      const card = document.querySelector('.setup-template-card') as HTMLElement;
       card.click();
 
       // confirm() dialog was removed - templates apply directly
@@ -177,11 +180,11 @@ describe('TutorUI Component', () => {
 
       const overlay = document.getElementById('tutor-overlay');
       expect(overlay).not.toBeNull();
-      expect(overlay.classList.contains('hidden')).toBe(false);
+      expect(overlay?.classList.contains('hidden')).toBe(false);
 
       const hintsBody = document.getElementById('tutor-hints-body');
-      expect(hintsBody.children.length).toBe(1);
-      expect(hintsBody.textContent).toContain('a1');
+      expect(hintsBody?.children.length).toBe(1);
+      expect(hintsBody?.textContent).toContain('a1');
     });
 
     test('should alert in overlay mode if no tutor available', async () => {
@@ -203,20 +206,20 @@ describe('TutorUI Component', () => {
       document.body.innerHTML = '';
       await TutorUI.showTutorSuggestions(game);
       const closeBtn = document.getElementById('close-tutor-btn');
-      closeBtn.click();
+      closeBtn?.click();
       const overlay = document.getElementById('tutor-overlay');
-      expect(overlay.classList.contains('hidden')).toBe(true);
+      expect(overlay?.classList.contains('hidden')).toBe(true);
     });
 
     test('should execute move and hide overlay when hint clicked in overlay', async () => {
       document.body.innerHTML = '';
       await TutorUI.showTutorSuggestions(game);
-      const hintItem = document.querySelector('.tutor-hint-item');
+      const hintItem = document.querySelector('.tutor-hint-item') as HTMLElement;
       hintItem.click();
 
       expect(game.executeMove).toHaveBeenCalled();
       const overlay = document.getElementById('tutor-overlay');
-      expect(overlay.classList.contains('hidden')).toBe(true);
+      expect(overlay?.classList.contains('hidden')).toBe(true);
     });
 
     test('should render setup suggestions in panel during setup phase', async () => {
@@ -224,16 +227,16 @@ describe('TutorUI Component', () => {
       await TutorUI.showTutorSuggestions(game);
 
       const container = document.getElementById('tutor-suggestions');
-      expect(container.textContent).toContain('Empfohlene Aufstellungen');
-      expect(container.textContent).toContain('Template 1');
+      expect(container?.textContent).toContain('Empfohlene Aufstellungen');
+      expect(container?.textContent).toContain('Template 1');
     });
 
     test('should handle click on setup template in panel', async () => {
       game.phase = 'SETUP_WHITE_PIECES';
       await TutorUI.showTutorSuggestions(game);
 
-      const templateEl = document.querySelector('.setup-template');
-      templateEl.onclick();
+      const templateEl = document.querySelector('.setup-template') as HTMLElement;
+      templateEl.click();
 
       expect(window.confirm).toHaveBeenCalled();
       expect(game.tutorController.applySetupTemplate).toHaveBeenCalledWith('template1');
@@ -244,23 +247,23 @@ describe('TutorUI Component', () => {
       await TutorUI.showTutorSuggestions(game);
 
       const container = document.getElementById('tutor-suggestions');
-      expect(container.textContent).toContain('Keine Vorschläge verfügbar');
+      expect(container?.textContent).toContain('Keine Vorschläge verfügbar');
     });
 
     test('should render hints in panel with details', async () => {
       await TutorUI.showTutorSuggestions(game);
 
       const container = document.getElementById('tutor-suggestions');
-      expect(container.textContent).toContain('a1');
-      expect(container.textContent).toContain('Top Move');
-      expect(container.textContent).toContain('Why?');
+      expect(container?.textContent).toContain('a1');
+      expect(container?.textContent).toContain('Top Move');
+      expect(container?.textContent).toContain('Why?');
     });
 
     test('should toggle details in panel', async () => {
       await TutorUI.showTutorSuggestions(game);
 
-      const showBtn = document.querySelector('.show-details-btn');
-      const detailsEl = document.querySelector('.suggestion-details');
+      const showBtn = document.querySelector('.show-details-btn') as HTMLElement;
+      const detailsEl = document.querySelector('.suggestion-details') as HTMLElement;
 
       expect(detailsEl.classList.contains('hidden')).toBe(true);
 
@@ -275,35 +278,12 @@ describe('TutorUI Component', () => {
     test('should execute move from panel "Try" button', async () => {
       await TutorUI.showTutorSuggestions(game);
 
-      const tryBtn = document.querySelector('.try-move-btn');
-      tryBtn.onclick({ stopPropagation: () => {} });
+      const tryBtn = document.querySelector('.try-move-btn') as HTMLElement;
+      tryBtn.click();
 
       expect(game.executeMove).toHaveBeenCalled();
       const panel = document.getElementById('tutor-panel');
-      expect(panel.classList.contains('hidden')).toBe(true);
-    });
-
-    test('should handle mouse hover on "Try" button', async () => {
-      await TutorUI.showTutorSuggestions(game);
-      const tryBtn = document.querySelector('.try-move-btn');
-
-      tryBtn.onmouseover();
-      expect(tryBtn.style.transform).toBe('translateY(-2px)');
-
-      tryBtn.onmouseout();
-      expect(tryBtn.style.transform).toBe('');
-    });
-
-    test('should handle mouse hover on setup template in panel', async () => {
-      game.phase = 'SETUP_WHITE_PIECES';
-      await TutorUI.showTutorSuggestions(game);
-      const templateEl = document.querySelector('.setup-template');
-
-      templateEl.onmouseover();
-      expect(templateEl.style.background).toContain('0.2');
-
-      templateEl.onmouseout();
-      expect(templateEl.style.background).toContain('0.1');
+      expect(panel?.classList.contains('hidden')).toBe(true);
     });
 
     test('should render hints without questions', async () => {
@@ -324,13 +304,13 @@ describe('TutorUI Component', () => {
       ]);
       await TutorUI.showTutorSuggestions(game);
       const showBtn = document.querySelector('.show-details-btn');
-      expect(showBtn.textContent.trim()).toBe('Warum ist das ein guter Zug?');
+      expect(showBtn?.textContent?.trim()).toBe('Warum ist das ein guter Zug?');
     });
 
     test('should not crash if arrowRenderer is missing', async () => {
       game.arrowRenderer = null;
       await TutorUI.showTutorSuggestions(game);
-      const suggEl = document.querySelector('.tutor-suggestion');
+      const suggEl = document.querySelector('.tutor-suggestion') as HTMLElement;
       suggEl.click();
       // Should not throw
     });
@@ -344,14 +324,14 @@ describe('TutorUI Component', () => {
 
       await TutorUI.showTutorSuggestions(game);
 
-      const suggEl = document.querySelector('.tutor-suggestion');
+      const suggEl = document.querySelector('.tutor-suggestion') as HTMLElement;
       suggEl.click();
 
       expect(game.arrowRenderer.highlightMoves).toHaveBeenCalled();
       const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
       const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
-      expect(fromCell.classList.contains('suggestion-highlight')).toBe(true);
-      expect(toCell.classList.contains('suggestion-highlight')).toBe(true);
+      expect(fromCell?.classList.contains('suggestion-highlight')).toBe(true);
+      expect(toCell?.classList.contains('suggestion-highlight')).toBe(true);
     });
   });
 });

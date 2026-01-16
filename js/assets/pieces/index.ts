@@ -1,12 +1,12 @@
-import { classic } from './classic.ts';
-import { modern } from './modern.ts';
-import { pixel } from './pixel.ts';
-import { infernale } from './infernale.ts';
-import { wood } from './wood.ts';
-import { neon } from './neon.ts';
-import { minimalist } from './minimalist.ts';
+import { classic } from './classic';
+import { modern } from './modern';
+import { pixel } from './pixel';
+import { infernale } from './infernale';
+import { wood } from './wood';
+import { neon } from './neon';
+import { minimalist } from './minimalist';
 
-import { frost } from './frost.ts';
+import { frost } from './frost';
 
 export const PIECE_SETS: Record<string, any> = {
   classic,
