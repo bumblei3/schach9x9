@@ -1,3 +1,4 @@
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 import { debounce, deepCopy, coordToAlgebraic } from '../js/utils.js';
 
 describe('Utils', () => {
@@ -80,7 +81,7 @@ describe('Utils', () => {
     test('should preserve context when calling debounced function', () => {
       const obj = {
         value: 42,
-        method: vi.fn(function () {
+        method: vi.fn(function (this: any) {
           return this.value;
         }),
       };
@@ -113,11 +114,11 @@ describe('Utils', () => {
 
     test('should deep copy arrays', () => {
       const arr = [1, 2, [3, 4]];
-      const copy = deepCopy(arr);
+      const copy = deepCopy(arr) as any[];
 
-      copy[2][0] = 10;
-      expect(arr[2][0]).toBe(3);
-      expect(copy[2][0]).toBe(10);
+      (copy[2] as any)[0] = 10;
+      expect((arr[2] as any)[0]).toBe(3);
+      expect((copy[2] as any)[0]).toBe(10);
     });
 
     test('should handle null and undefined values', () => {
@@ -147,7 +148,7 @@ describe('Utils', () => {
 
     test('should handle empty objects and arrays', () => {
       const emptyObj = {};
-      const emptyArr = [];
+      const emptyArr: any[] = [];
 
       expect(deepCopy(emptyObj)).toEqual({});
       expect(deepCopy(emptyArr)).toEqual([]);

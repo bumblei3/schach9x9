@@ -1,3 +1,5 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
+
 // Mock config
 vi.mock('../../js/config.js', () => ({
   BOARD_SIZE: 9,
@@ -18,11 +20,10 @@ vi.mock('../../js/ui/BoardRenderer.js', () => ({
   renderBoard: vi.fn(),
 }));
 
-const GameStatusUI = await import('../../js/ui/GameStatusUI.js');
-// renderBoard import removed as it was unused
+import * as GameStatusUI from '../../js/ui/GameStatusUI.js';
 
 describe('GameStatusUI Component', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -91,7 +92,7 @@ describe('GameStatusUI Component', () => {
     phases.forEach(({ phase, expected }) => {
       game.phase = phase;
       GameStatusUI.updateStatus(game);
-      expect(document.getElementById('status-display').textContent).toContain(expected);
+      expect(document.getElementById('status-display')!.textContent).toContain(expected);
     });
   });
 
@@ -119,12 +120,8 @@ describe('GameStatusUI Component', () => {
     ];
 
     GameStatusUI.updateMoveHistoryUI(game);
-    const historyEl = document.getElementById('move-history');
+    const historyEl = document.getElementById('move-history')!;
     expect(historyEl.children.length).toBe(4);
-    // Pawn move from r1 to r3 (Rank 9-3=6) -> e6
-    // Note: If original test expected e8, it meant r1 is rank8?
-    // Chess 9x9 layout. r0 is top (Black), r8 is bottom (White).
-    // r3 is closer to top. 9-3=6. So e6 is correct.
     expect(historyEl.children[0].textContent).toContain('1. e6');
     expect(historyEl.children[1].textContent).toContain('Nx');
     expect(historyEl.children[2].textContent).toContain('O-O');
@@ -135,15 +132,13 @@ describe('GameStatusUI Component', () => {
     game.capturedPieces.white = [{ type: 'p', color: 'black' }]; // White captured Black Pawn
     game.capturedPieces.black = [{ type: 'q', color: 'white' }]; // Black captured White Queen
 
-    // Simulate board state: Black +800 advantage.
-    // White P (100) vs Black Q (900). Diff -800.
     game.board[0][0] = { type: 'p', color: 'white' };
     game.board[0][1] = { type: 'q', color: 'black' };
 
     GameStatusUI.updateCapturedUI(game);
 
-    const whiteContainer = document.getElementById('captured-white');
-    const blackContainer = document.getElementById('captured-black');
+    const whiteContainer = document.getElementById('captured-white')!;
+    const blackContainer = document.getElementById('captured-black')!;
 
     expect(whiteContainer.children.length).toBe(1); // One captured pawn
     expect(blackContainer.children.length).toBe(2); // One captured queen + adv display
@@ -158,10 +153,10 @@ describe('GameStatusUI Component', () => {
 
     GameStatusUI.updateStatistics(game);
 
-    expect(document.getElementById('stat-moves').textContent).toBe('10');
-    expect(document.getElementById('stat-accuracy').textContent).toBe('95%');
-    expect(document.getElementById('stat-material').textContent).toBe('+500');
-    expect(document.getElementById('stat-elo').textContent).toBe('1000');
+    expect(document.getElementById('stat-moves')!.textContent).toBe('10');
+    expect(document.getElementById('stat-accuracy')!.textContent).toBe('95%');
+    expect(document.getElementById('stat-material')!.textContent).toBe('+500');
+    expect(document.getElementById('stat-elo')!.textContent).toBe('1000');
   });
 
   test('should update clock UI highlighting', () => {
@@ -170,21 +165,21 @@ describe('GameStatusUI Component', () => {
 
     GameStatusUI.updateClockUI(game);
 
-    expect(document.getElementById('clock-white').classList.contains('active')).toBe(true);
-    expect(document.getElementById('clock-white').classList.contains('low-time')).toBe(true);
-    expect(document.getElementById('clock-black').classList.contains('active')).toBe(false);
+    expect(document.getElementById('clock-white')!.classList.contains('active')).toBe(true);
+    expect(document.getElementById('clock-white')!.classList.contains('low-time')).toBe(true);
+    expect(document.getElementById('clock-black')!.classList.contains('active')).toBe(false);
   });
 
   test('should handle replay mode transitions', () => {
     game.moveHistory = [{}];
     GameStatusUI.enterReplayMode(game);
     expect(game.replayMode).toBe(true);
-    expect(document.getElementById('replay-control').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('replay-control')!.classList.contains('hidden')).toBe(false);
     expect(game.stopClock).toHaveBeenCalled();
 
     GameStatusUI.exitReplayMode(game);
     expect(game.replayMode).toBe(false);
-    expect(document.getElementById('replay-control').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('replay-control')!.classList.contains('hidden')).toBe(true);
     expect(game.startClock).toHaveBeenCalled();
   });
 
@@ -192,25 +187,14 @@ describe('GameStatusUI Component', () => {
     game.moveHistory = [{ evalScore: 100 }, { evalScore: 200 }, { evalScore: -50 }];
 
     GameStatusUI.renderEvalGraph(game);
-    const svg = document.getElementById('eval-graph');
+    const svg = document.getElementById('eval-graph')!;
     expect(svg.innerHTML).toContain('class="eval-line"');
 
-    // Test clicking a point
-    const point = svg.querySelector('.eval-point'); // First point
+    const point = svg.querySelector('.eval-point') as any; // First point
     expect(point).toBeDefined();
 
-    // Configure jumpToMove
     game.gameController.jumpToMove = vi.fn();
 
-    // Manually trigger the event on the SVG listener to avoid JSDOM bubbling issues
-    // We simulate what the event listener receives
-
-    // But we can dispatch the event on the point and hope JSDOM bubbles it.
-    // If bubbling fails, we can try to find the listener.
-    // But JSDOM bubbling works usually.
-    // The issue is likely 'closest'.
-
-    // Workaround: Mock closest on the element instance we found
     point.closest = vi.fn(selector => {
       return selector === '.eval-point' ? point : null;
     });
@@ -218,14 +202,13 @@ describe('GameStatusUI Component', () => {
     const clickEvent = new MouseEvent('click', { bubbles: true });
     point.dispatchEvent(clickEvent);
 
-    // First point is start (index -1), so jumpToStart should be called
     expect(game.gameController.jumpToStart).toHaveBeenCalled();
   });
 
   test('should handle empty move history gracefully', () => {
     GameStatusUI.updateMoveHistoryUI(game);
-    const historyEl = document.getElementById('move-history');
+    const historyEl = document.getElementById('move-history')!;
     expect(historyEl.children.length).toBe(0);
-    expect(document.getElementById('undo-btn').disabled).toBe(true);
+    expect((document.getElementById('undo-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 });

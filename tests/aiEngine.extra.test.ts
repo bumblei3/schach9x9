@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import * as AIEngine from '../js/aiEngine.js';
 
 describe('AIEngine Extra Coverage', () => {
@@ -6,15 +7,15 @@ describe('AIEngine Extra Coverage', () => {
       .fill(null)
       .map(() => Array(9).fill(null));
     // Archbishop at center
-    board[4][4] = { type: 'a', color: 'white' };
+    board[4][4] = { type: 'a', color: 'white' } as any;
     // Place king so moves are legal
-    board[8][0] = { type: 'k', color: 'white' };
+    board[8][0] = { type: 'k', color: 'white' } as any;
 
     // Place some enemies and friends at knight jump distances
-    board[2][3] = { type: 'p', color: 'black' }; // Enemy
-    board[2][5] = { type: 'p', color: 'white' }; // Friend
+    board[2][3] = { type: 'p', color: 'black' } as any; // Enemy
+    board[2][5] = { type: 'p', color: 'white' } as any; // Friend
 
-    const moves = AIEngine.getAllLegalMoves(board, 'white');
+    const moves = AIEngine.getAllLegalMoves(board as any, 'white');
     const toPositions = moves.map(m => `${m.to.r},${m.to.c}`);
 
     expect(toPositions).toContain('2,3'); // Knight jump capture
@@ -26,9 +27,9 @@ describe('AIEngine Extra Coverage', () => {
     const board = Array(9)
       .fill(null)
       .map(() => Array(9).fill(null));
-    board[6][0] = { type: 'p', color: 'white', hasMoved: false };
-    board[8][4] = { type: 'k', color: 'white' };
-    const moves = AIEngine.getAllLegalMoves(board, 'white');
+    board[6][0] = { type: 'p', color: 'white', hasMoved: false } as any;
+    board[8][4] = { type: 'k', color: 'white' } as any;
+    const moves = AIEngine.getAllLegalMoves(board as any, 'white');
     const toPositions = moves.map(m => `${m.to.r},${m.to.c}`);
     expect(toPositions).toContain('4,0'); // Double jump
   });
@@ -37,9 +38,9 @@ describe('AIEngine Extra Coverage', () => {
     const board = Array(9)
       .fill(null)
       .map(() => Array(9).fill(null));
-    board[4][4] = { type: 'e', color: 'white' };
-    board[8][4] = { type: 'k', color: 'white' };
-    const moves = AIEngine.getAllLegalMoves(board, 'white');
+    board[4][4] = { type: 'e', color: 'white' } as any;
+    board[8][4] = { type: 'k', color: 'white' } as any;
+    const moves = AIEngine.getAllLegalMoves(board as any, 'white');
     const toPositions = moves.map(m => `${m.to.r},${m.to.c}`);
     // Diagonals (Bishop-like)
     expect(toPositions).toContain('0,0');
@@ -53,9 +54,9 @@ describe('AIEngine Extra Coverage', () => {
     const board = Array(9)
       .fill(null)
       .map(() => Array(9).fill(null));
-    board[4][4] = { type: 'q', color: 'white' };
-    board[0][0] = { type: 'r', color: 'black' };
-    const score = AIEngine.evaluatePosition(board, 'white');
+    board[4][4] = { type: 'q', color: 'white' } as any;
+    board[0][0] = { type: 'r', color: 'black' } as any;
+    const score = AIEngine.evaluatePosition(board as any, 'white');
     expect(score).toBeDefined();
   });
 });

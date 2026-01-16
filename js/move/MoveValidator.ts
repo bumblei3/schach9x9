@@ -158,7 +158,7 @@ export function isInsufficientMaterial(game: Game): boolean {
 export function getBoardHash(game: Game): string {
   if (!game.board) return '';
   let hash = '';
-  const size = game.boardSize || BOARD_SIZE;
+  const size = game.boardSize || 9;
   for (let r = 0; r < size; r++) {
     if (!game.board[r]) continue;
     for (let c = 0; c < size; c++) {

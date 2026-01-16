@@ -1,12 +1,9 @@
-/**
- * @jest-environment jsdom
- */
-
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { StatisticsManager } from '../js/statisticsManager.js';
 import { logger } from '../js/logger.js';
 
 describe('StatisticsManager', () => {
-  let manager;
+  let manager: StatisticsManager;
 
   beforeEach(() => {
     localStorage.clear();
@@ -46,7 +43,7 @@ describe('StatisticsManager', () => {
         moveHistory: ['e2-e4', 'e7-e5'],
         duration: 30000,
         finalPosition: 'test-position',
-      });
+      } as any);
 
       const stats = manager.getStatistics();
       expect(stats.totalGames).toBe(1);
@@ -60,9 +57,9 @@ describe('StatisticsManager', () => {
     });
 
     test('should calculate win rate correctly', () => {
-      manager.saveGame({ result: 'win' });
-      manager.saveGame({ result: 'loss' });
-      manager.saveGame({ result: 'draw' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' });
+      manager.saveGame({ result: 'loss', playerColor: 'white', opponent: 'AI' });
+      manager.saveGame({ result: 'draw', playerColor: 'white', opponent: 'AI' });
 
       const stats = manager.getStatistics();
       expect(stats.totalGames).toBe(3);
@@ -73,9 +70,9 @@ describe('StatisticsManager', () => {
     });
 
     test('should persist data to localStorage', () => {
-      manager.saveGame({ result: 'win' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' });
 
-      const stored = JSON.parse(localStorage.getItem('chess9x9-game-history'));
+      const stored = JSON.parse(localStorage.getItem('chess9x9-game-history')!);
       expect(stored.games.length).toBe(1);
       expect(stored.stats.totalGames).toBe(1);
     });
@@ -83,10 +80,10 @@ describe('StatisticsManager', () => {
 
   describe('getGameHistory', () => {
     beforeEach(() => {
-      manager.saveGame({ result: 'win', opponent: 'AI-Easy' });
-      manager.saveGame({ result: 'loss', opponent: 'AI-Hard' });
-      manager.saveGame({ result: 'draw', opponent: 'AI-Easy' });
-      manager.saveGame({ result: 'win', opponent: 'AI-Hard' });
+      manager.saveGame({ result: 'win', opponent: 'AI-Easy', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'loss', opponent: 'AI-Hard', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'draw', opponent: 'AI-Easy', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'win', opponent: 'AI-Hard', playerColor: 'white' } as any);
     });
 
     test('should return all games by default', () => {
@@ -103,7 +100,7 @@ describe('StatisticsManager', () => {
     test('should filter by opponent', () => {
       const easyGames = manager.getGameHistory({ opponent: 'Easy' });
       expect(easyGames.length).toBe(2);
-      expect(easyGames.every(g => g.opponent.includes('Easy'))).toBe(true);
+      expect(easyGames.every(g => g.opponent!.includes('Easy'))).toBe(true);
     });
 
     test('should limit results', () => {
@@ -114,20 +111,22 @@ describe('StatisticsManager', () => {
     test('should sort by date (newest first)', () => {
       const games = manager.getGameHistory();
       for (let i = 1; i < games.length; i++) {
-        expect(new Date(games[i - 1].date) >= new Date(games[i].date)).toBe(true);
+        expect(new Date(games[i - 1].date).getTime() >= new Date(games[i].date).getTime()).toBe(
+          true
+        );
       }
     });
   });
 
   describe('getGameById', () => {
     test('should return game by ID', () => {
-      manager.saveGame({ result: 'win' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any);
       const games = manager.getGameHistory();
       const gameId = games[0].id;
 
-      const foundGame = manager.getGameById(gameId);
+      const foundGame = manager.getGameById(gameId!);
       expect(foundGame).toBeTruthy();
-      expect(foundGame.id).toBe(gameId);
+      expect(foundGame!.id).toBe(gameId);
     });
 
     test('should return null for non-existent ID', () => {
@@ -138,8 +137,8 @@ describe('StatisticsManager', () => {
 
   describe('exportGames', () => {
     test('should export games as JSON string', () => {
-      manager.saveGame({ result: 'win' });
-      manager.saveGame({ result: 'loss' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any);
+      manager.saveGame({ result: 'loss', playerColor: 'white', opponent: 'AI' } as any);
 
       const exported = manager.exportGames();
       const parsed = JSON.parse(exported);
@@ -153,7 +152,7 @@ describe('StatisticsManager', () => {
 
   describe('importGames', () => {
     test('should import games (merge mode)', () => {
-      manager.saveGame({ result: 'win', opponent: 'Original' });
+      manager.saveGame({ result: 'win', opponent: 'Original', playerColor: 'white' } as any);
 
       const importData = {
         version: '1.0',
@@ -189,7 +188,7 @@ describe('StatisticsManager', () => {
     });
 
     test('should import games (replace mode)', () => {
-      manager.saveGame({ result: 'win' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any);
 
       const importData = {
         version: '1.0',
@@ -229,7 +228,7 @@ describe('StatisticsManager', () => {
     });
 
     test('should avoid duplicate IDs when merging', () => {
-      manager.saveGame({ result: 'win' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any);
       const games = manager.getGameHistory();
       const existingId = games[0].id;
 
@@ -262,7 +261,7 @@ describe('StatisticsManager', () => {
 
   describe('clearHistory', () => {
     test('should not clear without confirmation', () => {
-      manager.saveGame({ result: 'win' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any);
       manager.clearHistory(false);
 
       const stats = manager.getStatistics();
@@ -270,8 +269,8 @@ describe('StatisticsManager', () => {
     });
 
     test('should clear all history with confirmation', () => {
-      manager.saveGame({ result: 'win' });
-      manager.saveGame({ result: 'loss' });
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any);
+      manager.saveGame({ result: 'loss', playerColor: 'white', opponent: 'AI' } as any);
 
       manager.clearHistory(true);
 
@@ -292,11 +291,11 @@ describe('StatisticsManager', () => {
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 40);
 
-      manager.saveGame({ result: 'win' }); // Recent
-      manager.data.games[0].date = oldDate.toISOString(); // Make it old
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any); // Recent
+      (manager as any).data.games[0].date = oldDate.toISOString(); // Make it old
 
-      manager.saveGame({ result: 'win' }); // Recent
-      manager.saveGame({ result: 'loss' }); // Recent
+      manager.saveGame({ result: 'win', playerColor: 'white', opponent: 'AI' } as any); // Recent
+      manager.saveGame({ result: 'loss', playerColor: 'white', opponent: 'AI' } as any); // Recent
 
       const stats = manager.getRecentStats(30);
       expect(stats.totalGames).toBe(2); // Only recent ones
@@ -307,11 +306,11 @@ describe('StatisticsManager', () => {
 
   describe('getStatsByOpponent', () => {
     test('should group statistics by opponent', () => {
-      manager.saveGame({ result: 'win', opponent: 'AI-Easy' });
-      manager.saveGame({ result: 'win', opponent: 'AI-Easy' });
-      manager.saveGame({ result: 'loss', opponent: 'AI-Easy' });
-      manager.saveGame({ result: 'win', opponent: 'AI-Hard' });
-      manager.saveGame({ result: 'loss', opponent: 'AI-Hard' });
+      manager.saveGame({ result: 'win', opponent: 'AI-Easy', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'win', opponent: 'AI-Easy', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'loss', opponent: 'AI-Easy', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'win', opponent: 'AI-Hard', playerColor: 'white' } as any);
+      manager.saveGame({ result: 'loss', opponent: 'AI-Hard', playerColor: 'white' } as any);
 
       const byOpponent = manager.getStatsByOpponent();
 
@@ -330,21 +329,21 @@ describe('StatisticsManager', () => {
   describe('recalculateStats', () => {
     test('should recalculate statistics from game history', () => {
       // Manually add games and mess up stats
-      manager.data.games = [
+      (manager as any).data.games = [
         { result: 'win' },
         { result: 'win' },
         { result: 'loss' },
         { result: 'draw' },
       ];
-      manager.data.stats = { totalGames: 0, wins: 0, losses: 0, draws: 0, winRate: 0 };
+      (manager as any).data.stats = { totalGames: 0, wins: 0, losses: 0, draws: 0, winRate: 0 };
 
       manager.recalculateStats();
 
-      expect(manager.data.stats.totalGames).toBe(4);
-      expect(manager.data.stats.wins).toBe(2);
-      expect(manager.data.stats.losses).toBe(1);
-      expect(manager.data.stats.draws).toBe(1);
-      expect(manager.data.stats.winRate).toBe(0.5);
+      expect((manager as any).data.stats.totalGames).toBe(4);
+      expect((manager as any).data.stats.wins).toBe(2);
+      expect((manager as any).data.stats.losses).toBe(1);
+      expect((manager as any).data.stats.draws).toBe(1);
+      expect((manager as any).data.stats.winRate).toBe(0.5);
     });
   });
 });

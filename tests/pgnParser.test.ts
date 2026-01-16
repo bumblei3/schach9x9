@@ -135,7 +135,7 @@ describe('PGNParser', () => {
         const notation = parser.generateNotationForCheck(e4Move, game, legalMoves);
         expect(notation).toBe('e4');
       } else {
-        throw new Error("e4 move not found");
+        throw new Error('e4 move not found');
       }
     });
 
@@ -164,7 +164,9 @@ describe('PGNParser', () => {
 
     it('should generate castling notation', () => {
       const game = new Game(15, 'classic');
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)) as any;
       // King at 8,4
       game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
 
@@ -185,7 +187,9 @@ describe('PGNParser', () => {
 
     it('should generate pawn capture notation', () => {
       const game = new Game(15, 'classic');
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)) as any;
       game.board[4][4] = { type: 'p', color: 'white', hasMoved: false };
       game.board[3][5] = { type: 'p', color: 'black', hasMoved: false };
       const move = { from: { r: 4, c: 4 }, to: { r: 3, c: 5 } } as any;
@@ -195,7 +199,9 @@ describe('PGNParser', () => {
 
     it('should handle piece disambiguation (column)', () => {
       const game = new Game(15, 'classic');
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)) as any;
       game.board[7][1] = { type: 'n', color: 'white', hasMoved: false }; // Nb1
       game.board[7][6] = { type: 'n', color: 'white', hasMoved: false }; // Ng1
       const move = { from: { r: 7, c: 1 }, to: { r: 5, c: 2 } } as any;
@@ -206,7 +212,9 @@ describe('PGNParser', () => {
 
     it('should handle piece disambiguation (row)', () => {
       const game = new Game(15, 'classic');
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)) as any;
       game.board[3][3] = { type: 'r', color: 'white', hasMoved: true };
       game.board[5][3] = { type: 'r', color: 'white', hasMoved: true };
       const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 3 } } as any;
@@ -217,7 +225,9 @@ describe('PGNParser', () => {
 
     it('should handle piece disambiguation (both)', () => {
       const game = new Game(15, 'classic');
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)) as any;
       game.board[3][3] = { type: 'q', color: 'white', hasMoved: false };
       game.board[3][5] = { type: 'q', color: 'white', hasMoved: false };
       game.board[5][3] = { type: 'q', color: 'white', hasMoved: false };
@@ -233,7 +243,9 @@ describe('PGNParser', () => {
 
     it('should generate piece capture notation', () => {
       const game = new Game(15, 'classic');
-      game.board = Array(9).fill(null).map(() => Array(9).fill(null)) as any;
+      game.board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)) as any;
       game.board[3][3] = { type: 'r', color: 'white', hasMoved: true };
       game.board[3][5] = { type: 'p', color: 'black', hasMoved: true };
       const move = { from: { r: 3, c: 3 }, to: { r: 3, c: 5 } } as any;

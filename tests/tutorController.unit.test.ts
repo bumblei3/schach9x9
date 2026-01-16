@@ -137,7 +137,7 @@ describe('TutorController', () => {
     tutorController.checkBlunder({} as any);
     expect(MoveAnalyzer.checkBlunder).toHaveBeenCalled();
 
-    tutorController.showBlunderWarning({} as any, () => { });
+    tutorController.showBlunderWarning({} as any, () => {});
     expect(MoveAnalyzer.showBlunderWarning).toHaveBeenCalled();
   });
 

@@ -1,5 +1,8 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { Game } from '../../js/gameEngine.js';
 import { PHASES } from '../../js/config.js';
+import * as MoveExecutor from '../../js/move/MoveExecutor.js';
+import { getBestMove } from '../../js/aiEngine.js';
 
 // --- MOCKS ---
 vi.mock('../../js/ui.js', () => ({
@@ -41,20 +44,15 @@ vi.mock('../../js/puzzleManager.js', () => ({
   puzzleManager: { active: false, checkMove: vi.fn() },
 }));
 
-const _UI = await import('../../js/ui.js');
-const { soundManager: _soundManager } = await import('../../js/sounds.js');
-const MoveExecutor = await import('../../js/move/MoveExecutor.js');
-const { getBestMove } = await import('../../js/aiEngine.js');
-
 describe('AI Integration: Self-Play', () => {
-  let game;
-  let moveController;
+  let game: Game;
+  let moveController: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Mock DOM
-    document.getElementById = vi.fn(_id => {
+    document.getElementById = vi.fn((_id: string) => {
       return {
         appendChild: vi.fn(),
         removeChild: vi.fn(),
@@ -69,15 +67,16 @@ describe('AI Integration: Self-Play', () => {
         scrollTop: 0,
         scrollHeight: 0,
         addEventListener: vi.fn(),
-      };
+      } as any;
     });
     document.body.innerHTML = '<div id="game-container"></div>';
 
     // Setup Game
     game = new Game(15, 'classic');
+
     // game.init() does not exist in gameEngine.js Game class
     // but MoveExecutor expects game.gameController to exist for saving
-    game.gameController = {
+    (game as any).gameController = {
       saveGame: vi.fn(),
       updateStatus: vi.fn(),
       checkGameState: vi.fn(),
@@ -91,11 +90,10 @@ describe('AI Integration: Self-Play', () => {
     };
 
     // Disable window interaction
-    global.window.battleChess3D = { enabled: false };
+    (global as any).window.battleChess3D = { enabled: false };
   });
 
   test('Self-Play: 10 Moves without crash', async () => {
-    // Setup simple board (Pieces already set by init)
     // Ensure phase is PLAY
     game.phase = PHASES.PLAY;
 

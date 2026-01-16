@@ -31,7 +31,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
         const path = await import('path');
         const url = await import('url');
 
-        const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+        const __dirname = path.dirname((url as any).fileURLToPath(import.meta.url));
         const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
         const wasmBuffer = fs.readFileSync(wasmPath);
 

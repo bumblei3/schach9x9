@@ -1,3 +1,4 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { logger, LOG_LEVELS } from '../js/logger.js';
 
 // Mock console
@@ -8,7 +9,7 @@ global.console = {
   warn: vi.fn(),
   error: vi.fn(),
   debug: vi.fn(),
-};
+} as any;
 
 describe('Logger', () => {
   beforeEach(() => {
@@ -21,35 +22,35 @@ describe('Logger', () => {
     test('should log info messages', () => {
       logger.info('Test info message');
       expect(console.log).toHaveBeenCalled();
-      const call = console.log.mock.calls[0][0];
+      const call = (console.log as any).mock.calls[0][0];
       expect(call).toContain('[INFO]');
     });
 
     test('should log debug messages', () => {
       logger.debug('Test debug message');
       expect(console.log).toHaveBeenCalled();
-      const call = console.log.mock.calls[0][0];
+      const call = (console.log as any).mock.calls[0][0];
       expect(call).toContain('[DEBUG]');
     });
 
     test('should log warning messages', () => {
       logger.warn('Test warning');
       expect(console.log).toHaveBeenCalled();
-      const call = console.log.mock.calls[0][0];
+      const call = (console.log as any).mock.calls[0][0];
       expect(call).toContain('[WARN]');
     });
 
     test('should log error messages', () => {
       logger.error('Test error');
       expect(console.log).toHaveBeenCalled();
-      const call = console.log.mock.calls[0][0];
+      const call = (console.log as any).mock.calls[0][0];
       expect(call).toContain('[ERROR]');
     });
 
     test('should pass multiple arguments to log methods', () => {
       logger.info('Message', { key: 'value' }, 123);
       expect(console.log).toHaveBeenCalled();
-      const calls = console.log.mock.calls[0];
+      const calls = (console.log as any).mock.calls[0];
       expect(calls.length).toBeGreaterThan(2); // style + message + args
     });
   });
@@ -62,7 +63,7 @@ describe('Logger', () => {
 
       // Only one call should be made (the error)
       expect(console.log).toHaveBeenCalledTimes(1);
-      const call = console.log.mock.calls[0][0];
+      const call = (console.log as any).mock.calls[0][0];
       expect(call).toContain('[ERROR]');
     });
 
@@ -134,7 +135,7 @@ describe('Logger', () => {
       const contextLogger = logger.context('TestModule');
       contextLogger.info('Test from context');
       expect(console.log).toHaveBeenCalled();
-      const call = console.log.mock.calls[0];
+      const call = (console.log as any).mock.calls[0];
       expect(call[2]).toBe('[TestModule]');
     });
 
@@ -142,23 +143,23 @@ describe('Logger', () => {
       const contextLogger = logger.context('AI');
 
       contextLogger.debug('Debug msg');
-      expect(console.log.mock.calls[0][2]).toBe('[AI]');
+      expect((console.log as any).mock.calls[0][2]).toBe('[AI]');
 
       contextLogger.info('Info msg');
-      expect(console.log.mock.calls[1][2]).toBe('[AI]');
+      expect((console.log as any).mock.calls[1][2]).toBe('[AI]');
 
       contextLogger.warn('Warn msg');
-      expect(console.log.mock.calls[2][2]).toBe('[AI]');
+      expect((console.log as any).mock.calls[2][2]).toBe('[AI]');
 
       contextLogger.error('Error msg');
-      expect(console.log.mock.calls[3][2]).toBe('[AI]');
+      expect((console.log as any).mock.calls[3][2]).toBe('[AI]');
     });
 
     test('should pass additional arguments through context logger', () => {
       const contextLogger = logger.context('Game');
       contextLogger.info('Message', { data: 'value' }, 456);
 
-      const calls = console.log.mock.calls[0];
+      const calls = (console.log as any).mock.calls[0];
       expect(calls[2]).toBe('[Game]');
       expect(calls[3]).toBe('Message');
       expect(calls[4]).toEqual({ data: 'value' });
@@ -189,7 +190,7 @@ describe('Logger', () => {
   describe('timestamp formatting', () => {
     test('should format timestamps correctly', () => {
       logger.info('Test with timestamp');
-      const call = console.log.mock.calls[0][0];
+      const call = (console.log as any).mock.calls[0][0];
       expect(call).toMatch(/\d{2}:\d{2}:\d{2}\.\d{3}/); // HH:MM:SS.mmm format
     });
 
@@ -200,7 +201,7 @@ describe('Logger', () => {
       logger.error('Error');
 
       for (let i = 0; i < 4; i++) {
-        const call = console.log.mock.calls[i][0];
+        const call = (console.log as any).mock.calls[i][0];
         expect(call).toMatch(/\d{2}:\d{2}:\d{2}\.\d{3}/);
       }
     });
@@ -208,11 +209,9 @@ describe('Logger', () => {
 
   describe('localStorage integration', () => {
     test('should handle missing localStorage gracefully', () => {
-      // Logger is already initialized, so we test that it doesn't crash
       logger.setLevel(LOG_LEVELS.INFO);
       logger.setEnabled(true);
 
-      // Should still work even if localStorage is not available
       logger.info('Test message');
       expect(console.log).toHaveBeenCalled();
     });
@@ -220,18 +219,14 @@ describe('Logger', () => {
     test('should persist log level setting', () => {
       if (typeof localStorage !== 'undefined') {
         logger.setLevel(LOG_LEVELS.WARN);
-        // In a real scenario, localStorage would persist this
-        // We're just testing the method doesn't crash
-        expect(logger.level).toBe(LOG_LEVELS.WARN);
+        expect((logger as any).level).toBe(LOG_LEVELS.WARN);
       }
     });
 
     test('should persist enabled setting', () => {
       if (typeof localStorage !== 'undefined') {
         logger.setEnabled(false);
-        // In a real scenario, localStorage would persist this
-        // We're just testing the method doesn't crash
-        expect(logger.enabled).toBe(false);
+        expect((logger as any).enabled).toBe(false);
       }
     });
   });

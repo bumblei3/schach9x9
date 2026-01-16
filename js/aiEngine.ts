@@ -147,7 +147,7 @@ function initAiWorker(): void {
   if (aiWorker || typeof Worker === 'undefined') return;
 
   try {
-    aiWorker = new Worker(new URL('./ai/aiWorker.ts', import.meta.url), { type: 'module' });
+    aiWorker = new Worker(new URL('./ai/aiWorker.ts', import.meta.url).href, { type: 'module' });
     aiWorker.onmessage = (e: MessageEvent) => {
       const { type, id, data, payload, error } = e.data;
       logger.debug(`[AiEngine] Received worker message: type=${type} id=${id}`);
