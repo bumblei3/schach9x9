@@ -1,43 +1,72 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from 'fs';
+import * as path from 'path';
+import { vi } from 'vitest';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Remove conflicting global declaration and rely on existing types if possible,
+// or strictly match the expected type if we must declare it.
+// The error indicated PIECE_SVGS is already declared with a specific type including 'j'.
+// We will simply populate the window object matching that expectation without redeclaring the interface strictly if not needed,
+// or we can just cast it to any to avoid the specific strict shape check if local compilation is the goal.
+// However, best to match the shape.
 
 /**
  * Sets up a standard JSDOM environment for Schach 9x9 tests.
  */
-export function setupJSDOM() {
-  const htmlPath = path.resolve(__dirname, '../index.html');
+export function setupJSDOM(): void {
+  // Use process.cwd() to locate index.html generic to the project root
+  const htmlPath = path.resolve(process.cwd(), 'index.html');
   const htmlContent = fs.readFileSync(htmlPath, 'utf8');
   document.body.innerHTML = htmlContent;
 
-  global.window.PIECE_SVGS = {
-    white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
-    black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
+  // Add 'j' (Jester) to match the expected Record<..., string> type
+  (window as any).PIECE_SVGS = {
+    white: {
+      p: 'wp',
+      r: 'wr',
+      n: 'wn',
+      b: 'wb',
+      q: 'wq',
+      k: 'wk',
+      e: 'we',
+      a: 'wa',
+      c: 'wc',
+      j: 'wj',
+    },
+    black: {
+      p: 'bp',
+      r: 'br',
+      n: 'bn',
+      b: 'bb',
+      q: 'bq',
+      k: 'bk',
+      e: 'be',
+      a: 'ba',
+      c: 'bc',
+      j: 'bj',
+    },
   };
-  global.window._svgCache = {};
+  (window as any)._svgCache = {};
 
   // Mock HTMLCanvasElement.prototype.getContext to prevent 3D test failures
-  HTMLCanvasElement.prototype.getContext = () => ({
-    fillStyle: '',
-    fillRect: vi.fn(),
-    font: '',
-    textAlign: '',
-    textBaseline: '',
-    strokeStyle: '',
-    lineWidth: 0,
-    strokeText: vi.fn(),
-    fillText: vi.fn(),
-    measureText: vi.fn(() => ({ width: 0 })),
-  });
+  HTMLCanvasElement.prototype.getContext = (_contextId: string) =>
+    ({
+      fillStyle: '',
+      fillRect: vi.fn(),
+      font: '',
+      textAlign: '',
+      textBaseline: '',
+      strokeStyle: '',
+      lineWidth: 0,
+      strokeText: vi.fn(),
+      fillText: vi.fn(),
+      measureText: vi.fn(() => ({ width: 0 })),
+    }) as any;
 }
 
 /**
  * Creates a mock game object with common methods and properties.
  */
-export function createMockGame(overrides = {}) {
+export function createMockGame(overrides: Record<string, any> = {}) {
   const PHASES = {
     PLAY: 'play',
     SETUP_WHITE_KING: 'setup_white_king',
@@ -107,10 +136,10 @@ export function mockThreeJS() {
 
 /**
  * Creates a simple seeded pseudo-random number generator.
- * @param {number} seed
- * @returns {Array<Function>} A random function and a reset function
+ * @param seed
+ * @returns A random function and a reset function
  */
-export function createPRNG(seed = 12345) {
+export function createPRNG(seed: number = 12345) {
   let currentSeed = seed;
   const random = () => {
     currentSeed = (currentSeed * 9301 + 49297) % 233280;
@@ -122,18 +151,24 @@ export function createPRNG(seed = 12345) {
   return { random, reset };
 }
 
+interface Piece {
+  type: string;
+  color: string;
+  hasMoved?: boolean;
+}
+
 /**
  * Generates a random board state for testing.
- * @param {number} whitePieceCount - Number of non-king white pieces.
- * @param {number} blackPieceCount - Number of non-king black pieces.
- * @param {Function} randomFunc - Optional PRNG function.
+ * @param whitePieceCount - Number of non-king white pieces.
+ * @param blackPieceCount - Number of non-king black pieces.
+ * @param randomFunc - Optional PRNG function.
  */
 export function generateRandomBoard(
-  whitePieceCount = 5,
-  blackPieceCount = 5,
-  randomFunc = Math.random
-) {
-  const board = Array(9)
+  whitePieceCount: number = 5,
+  blackPieceCount: number = 5,
+  randomFunc: () => number = Math.random
+): (Piece | null)[][] {
+  const board: (Piece | null)[][] = Array(9)
     .fill(null)
     .map(() => Array(9).fill(null));
   const BOARD_SIZE = 9;
@@ -143,10 +178,10 @@ export function generateRandomBoard(
     c: Math.floor(randomFunc() * BOARD_SIZE),
   });
 
-  const isOccupied = (r, c) => board[r][c] !== null;
+  const isOccupied = (r: number, c: number) => board[r][c] !== null;
 
   // Place Kings
-  let wkr, wkc, bkr, bkc;
+  let wkr: number, wkc: number, bkr: number, bkc: number;
   do {
     ({ r: wkr, c: wkc } = getRandomCoord());
   } while (isOccupied(wkr, wkc));
@@ -159,9 +194,9 @@ export function generateRandomBoard(
 
   const pieceTypes = ['p', 'n', 'b', 'r', 'q', 'a', 'c', 'e'];
 
-  const placeRandomPieces = (count, color) => {
+  const placeRandomPieces = (count: number, color: string) => {
     for (let i = 0; i < count; i++) {
-      let r, c;
+      let r: number, c: number;
       do {
         ({ r, c } = getRandomCoord());
       } while (isOccupied(r, c));

@@ -1,7 +1,8 @@
+import { describe, expect, test, beforeEach } from 'vitest';
 import { Game, BOARD_SIZE, PHASES } from '../js/gameEngine.js';
 
 describe('Game Engine - Classic Mode', () => {
-  let game;
+  let game: Game;
 
   beforeEach(() => {
     game = new Game(15, 'classic');

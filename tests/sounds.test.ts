@@ -1,6 +1,6 @@
 // tests/sounds.test.ts
 // Tests for the SoundManager class
-import { describe, it, expect, vi, beforeEach, test, type MockInstance } from 'vitest';
+import { describe, expect, vi, beforeEach, test, type MockInstance } from 'vitest';
 import { SoundManager } from '../js/sounds';
 
 // Mock Web Audio API before importing SoundManager

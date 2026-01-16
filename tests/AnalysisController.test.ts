@@ -1,4 +1,9 @@
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 import { PHASES } from '../js/config.js';
+// Change to proper imports if possible, or keep dynamic if needed.
+// Given previous issues, standard import is safer if modules are aligned.
+import { AnalysisController } from '../js/AnalysisController.js';
+import * as UI from '../js/ui.js';
 
 // Mock dependencies
 vi.mock('../js/ui.js', () => ({
@@ -7,13 +12,33 @@ vi.mock('../js/ui.js', () => ({
   renderEvalGraph: vi.fn(),
 }));
 
-const UI = await import('../js/ui.js');
-const { AnalysisController } = await import('../js/AnalysisController.js');
+interface MockGame {
+  phase: string;
+  turn: string;
+  board: any[][];
+  moveHistory: any[];
+  redoStack: any[];
+  positionHistory: string[];
+  selectedSquare: any;
+  validMoves: any[];
+  halfMoveClock: number;
+  log: any;
+  aiController?: {
+    analyzePosition: any;
+  };
+  analysisMode: boolean;
+  analysisBasePosition?: any;
+  continuousAnalysis?: boolean;
+  moveController?: any;
+  replayPosition?: number;
+  clockEnabled?: boolean;
+  [key: string]: any;
+}
 
 describe('AnalysisController', () => {
-  let game;
-  let gameController;
-  let analysisController;
+  let game: MockGame;
+  let gameController: any;
+  let analysisController: AnalysisController;
 
   beforeEach(() => {
     game = {
@@ -113,7 +138,7 @@ describe('AnalysisController', () => {
     test('should trigger analysis if continuous mode is enabled', () => {
       game.continuousAnalysis = true;
       analysisController.enterAnalysisMode();
-      expect(game.aiController.analyzePosition).toHaveBeenCalled();
+      expect(game.aiController!.analyzePosition).toHaveBeenCalled();
     });
 
     test('should toggle continuous analysis', () => {
@@ -123,7 +148,7 @@ describe('AnalysisController', () => {
       analysisController.toggleContinuousAnalysis();
 
       expect(game.continuousAnalysis).toBe(true);
-      expect(game.aiController.analyzePosition).toHaveBeenCalled();
+      expect(game.aiController!.analyzePosition).toHaveBeenCalled();
 
       analysisController.toggleContinuousAnalysis();
       expect(game.continuousAnalysis).toBe(false);
@@ -140,14 +165,14 @@ describe('AnalysisController', () => {
 
     test('should jump to specific move', () => {
       analysisController.jumpToMove(5);
-      expect(game.moveController.reconstructBoardAtMove).toHaveBeenCalledWith(5);
+      expect(game.moveController!.reconstructBoardAtMove).toHaveBeenCalledWith(5);
       expect(game.replayPosition).toBe(5);
       expect(UI.renderBoard).toHaveBeenCalled();
     });
 
     test('should jump to start', () => {
       analysisController.jumpToStart();
-      expect(game.moveController.reconstructBoardAtMove).toHaveBeenCalledWith(0);
+      expect(game.moveController!.reconstructBoardAtMove).toHaveBeenCalledWith(0);
       expect(game.replayPosition).toBe(-1);
       expect(UI.renderBoard).toHaveBeenCalled();
     });
@@ -155,7 +180,7 @@ describe('AnalysisController', () => {
     test('should trigger analysis after jump if continuous analysis is on', () => {
       game.continuousAnalysis = true;
       analysisController.jumpToMove(3);
-      expect(game.aiController.analyzePosition).toHaveBeenCalled();
+      expect(game.aiController!.analyzePosition).toHaveBeenCalled();
     });
 
     test('should not crash if moveController is missing', () => {
@@ -168,6 +193,8 @@ describe('AnalysisController', () => {
   describe('AI and Clock Integration', () => {
     test('should request analysis safely', () => {
       game.aiController = undefined;
+      // Cast to any to access private method if needed or public wrapper
+      // requestPositionAnalysis is public on AnalysisController
       expect(() => analysisController.requestPositionAnalysis()).not.toThrow();
     });
 

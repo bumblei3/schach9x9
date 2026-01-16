@@ -1,15 +1,33 @@
-// Mock PHASES and other constants
+import { describe, expect, test, beforeEach, beforeAll, vi } from 'vitest';
+import { Game } from '../js/gameEngine.js';
+import * as UI from '../js/ui.js';
+// Dynamic import or direct import? Let's try direct first, if it fails we mock.
+// GameStateManager is likely a default export or named export.
+// Importing directly to avoid top-level await issues in some envs
+import * as GameStateManager from '../js/move/GameStateManager.js';
+
+// Mock values
+const PHASES = {
+  PLAY: 'PLAY',
+  ANALYSIS: 'ANALYSIS',
+  SETUP_WHITE_PIECES: 'SETUP_WHITE_PIECES',
+  SETUP_BLACK_PIECES: 'SETUP_BLACK_PIECES',
+  GAME_OVER: 'GAME_OVER',
+};
+
+// Mock dependencies
 vi.mock('../js/gameEngine.js', () => ({
+  Game: class {},
   PHASES: {
     PLAY: 'PLAY',
     ANALYSIS: 'ANALYSIS',
     SETUP_WHITE_PIECES: 'SETUP_WHITE_PIECES',
     SETUP_BLACK_PIECES: 'SETUP_BLACK_PIECES',
+    GAME_OVER: 'GAME_OVER',
   },
   BOARD_SIZE: 9,
 }));
 
-// Mock UI
 vi.mock('../js/ui.js', () => ({
   updateCapturedUI: vi.fn(),
   updateStatus: vi.fn(),
@@ -20,12 +38,14 @@ vi.mock('../js/ui.js', () => ({
   updateShopUI: vi.fn(),
 }));
 
-const GameStateManager = await import('../js/move/GameStateManager.js');
-const UI = await import('../js/ui.js');
+interface TestGame extends Partial<Game> {
+  [key: string]: any;
+}
 
 describe('GameStateManager', () => {
-  let game, moveController;
-  let mockStore = {};
+  let game: TestGame;
+  let moveController: any;
+  let mockStore: Record<string, string> = {};
 
   beforeAll(() => {
     Object.defineProperty(global, 'localStorage', {
@@ -33,6 +53,9 @@ describe('GameStateManager', () => {
         getItem: vi.fn(key => mockStore[key] || null),
         setItem: vi.fn((key, value) => {
           mockStore[key] = value.toString();
+        }),
+        removeItem: vi.fn(key => {
+          delete mockStore[key];
         }),
         clear: vi.fn(() => {
           mockStore = {};
@@ -53,10 +76,15 @@ describe('GameStateManager', () => {
             <div id="move-history-panel" class="hidden"></div>
             <div id="captured-pieces-panel" class="hidden"></div>
             <div id="tutor-recommendations-section" class="hidden"></div>
+            <div id="undo-btn"></div>
+            <div id="replay-status" class="hidden"></div>
+            <div id="replay-exit" class="hidden"></div>
+            <div id="ai-toggle"></div>
+             <div id="difficulty-select"></div>
         `;
 
     game = {
-      phase: 'PLAY',
+      phase: PHASES.PLAY,
       turn: 'white',
       moveHistory: [],
       board: Array(9)
@@ -71,7 +99,7 @@ describe('GameStateManager', () => {
       stopClock: vi.fn(),
       updateBestMoves: vi.fn(),
       analysisMode: false,
-    };
+    } as any as TestGame;
 
     moveController = {
       redoStack: [],
@@ -79,32 +107,19 @@ describe('GameStateManager', () => {
       updateReplayUI: vi.fn(),
     };
 
-    global.confirm = vi.fn(() => true);
+    (global as any).confirm = vi.fn(() => true);
 
     // Mock 3D board
-    window.battleChess3D = {
+    (window as any).battleChess3D = {
       enabled: true,
       updateFromGameState: vi.fn(),
     };
-
-    // DOM mocks
-    document.body.innerHTML = `
-      <div id="undo-btn"></div>
-      <div id="replay-status" class="hidden"></div>
-      <div id="replay-exit" class="hidden"></div>
-      <div id="draw-offer-overlay" class="hidden"></div>
-      <div id="draw-offer-message"></div>
-      <div id="move-history-panel" class="hidden"></div>
-      <div id="captured-pieces-panel" class="hidden"></div>
-      <div id="ai-toggle"></div>
-      <div id="difficulty-select"></div>
-    `;
   });
 
   describe('undoMove', () => {
     test('should return early if no history', () => {
-      GameStateManager.undoMove(game, moveController);
-      expect(game.moveHistory.length).toBe(0);
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.moveHistory!.length).toBe(0);
     });
 
     test('should undo a simple move', () => {
@@ -116,13 +131,13 @@ describe('GameStateManager', () => {
           capturedPiece: null,
           positionHistoryLength: 0,
           halfMoveClock: 0,
-        },
+        } as any,
       ];
-      game.board[6][4] = { type: 'p', color: 'white', hasMoved: true };
+      game.board![6][4] = { type: 'p', color: 'white', hasMoved: true } as any;
 
-      GameStateManager.undoMove(game, moveController);
-      expect(game.board[8][4].type).toBe('p');
-      expect(game.board[6][4]).toBeNull();
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.board![8][4]!.type).toBe('p');
+      expect(game.board![6][4]).toBeNull();
     });
 
     test('should restore captured piece', () => {
@@ -134,13 +149,13 @@ describe('GameStateManager', () => {
           captured: { type: 'p', color: 'black' },
           positionHistoryLength: 0,
           halfMoveClock: 0,
-        },
+        } as any,
       ];
-      game.board[6][4] = { type: 'p', color: 'white', hasMoved: true };
-      game.capturedPieces.white = [{ type: 'p', color: 'black' }];
+      game.board![6][4] = { type: 'p', color: 'white', hasMoved: true } as any;
+      game.capturedPieces!.white = [{ type: 'p', color: 'black' } as any];
 
-      GameStateManager.undoMove(game, moveController);
-      expect(game.board[6][4].color).toBe('black');
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.board![6][4]!.color).toBe('black');
       expect(UI.updateCapturedUI).toHaveBeenCalled();
     });
 
@@ -157,13 +172,13 @@ describe('GameStateManager', () => {
           },
           positionHistoryLength: 0,
           halfMoveClock: 0,
-        },
+        } as any,
       ];
-      game.board[2][5] = { type: 'p', color: 'white' };
-      game.capturedPieces.white = [{ type: 'p', color: 'black' }];
+      game.board![2][5] = { type: 'p', color: 'white' } as any;
+      game.capturedPieces!.white = [{ type: 'p', color: 'black' } as any];
 
-      GameStateManager.undoMove(game, moveController);
-      expect(game.board[3][5].color).toBe('black');
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.board![3][5]!.color).toBe('black');
     });
 
     test('should undo castling', () => {
@@ -180,15 +195,15 @@ describe('GameStateManager', () => {
           },
           positionHistoryLength: 0,
           halfMoveClock: 0,
-        },
+        } as any,
       ];
-      game.board[8][6] = { type: 'k', color: 'white', hasMoved: true };
-      game.board[8][5] = { type: 'r', color: 'white', hasMoved: true };
+      game.board![8][6] = { type: 'k', color: 'white', hasMoved: true } as any;
+      game.board![8][5] = { type: 'r', color: 'white', hasMoved: true } as any;
 
-      GameStateManager.undoMove(game, moveController);
-      expect(game.board[8][4].type).toBe('k');
-      expect(game.board[8][8].type).toBe('r');
-      expect(game.board[8][8].hasMoved).toBe(false);
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.board![8][4]!.type).toBe('k');
+      expect(game.board![8][8]!.type).toBe('r');
+      expect(game.board![8][8]!.hasMoved).toBe(false);
     });
 
     test('should undo castling with rookType', () => {
@@ -206,12 +221,12 @@ describe('GameStateManager', () => {
           },
           positionHistoryLength: 0,
           halfMoveClock: 0,
-        },
+        } as any,
       ];
-      game.board[8][6] = { type: 'k', color: 'white', hasMoved: true };
-      game.board[8][5] = { type: 'r', color: 'white', hasMoved: true };
-      GameStateManager.undoMove(game, moveController);
-      expect(game.board[8][8].type).toBe('c');
+      game.board![8][6] = { type: 'k', color: 'white', hasMoved: true } as any;
+      game.board![8][5] = { type: 'r', color: 'white', hasMoved: true } as any;
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.board![8][8]!.type).toBe('c');
     });
 
     test('should pop position history until length match', () => {
@@ -221,12 +236,12 @@ describe('GameStateManager', () => {
           to: { r: 1, c: 1 },
           piece: { type: 'p', color: 'white' },
           positionHistoryLength: 1,
-        },
+        } as any,
       ];
       game.positionHistory = ['h1', 'h2', 'h3'];
-      game.board[1][1] = { type: 'p', color: 'white' };
-      GameStateManager.undoMove(game, moveController);
-      expect(game.positionHistory.length).toBe(1);
+      game.board![1][1] = { type: 'p', color: 'white' } as any;
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.positionHistory!.length).toBe(1);
     });
 
     test('should handle empty history for highlight', () => {
@@ -236,25 +251,25 @@ describe('GameStateManager', () => {
           to: { r: 6, c: 4 },
           piece: { type: 'p', color: 'white' },
           positionHistoryLength: 0,
-        },
+        } as any,
       ];
-      game.board[6][4] = { type: 'p', color: 'white' };
-      GameStateManager.undoMove(game, moveController);
+      game.board![6][4] = { type: 'p', color: 'white' } as any;
+      GameStateManager.undoMove(game as Game, moveController);
       expect(game.lastMoveHighlight).toBeNull();
     });
 
     test('should set lastMoveHighlight after undo if history remains', () => {
       game.moveHistory = [
-        { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, piece: { type: 'p' } },
+        { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, piece: { type: 'p' } } as any,
         {
           from: { r: 8, c: 4 },
           to: { r: 6, c: 4 },
           piece: { type: 'p' },
           positionHistoryLength: 0,
-        },
+        } as any,
       ];
-      game.board[6][4] = { type: 'p', color: 'white' };
-      GameStateManager.undoMove(game, moveController);
+      game.board![6][4] = { type: 'p', color: 'white' } as any;
+      GameStateManager.undoMove(game as Game, moveController);
       expect(game.lastMoveHighlight).toEqual({ from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
     });
 
@@ -265,25 +280,27 @@ describe('GameStateManager', () => {
           to: { r: 1, c: 1 },
           piece: { type: 'p', color: 'white' },
           positionHistoryLength: 0,
-        },
+        } as any,
       ];
-      game.board[1][1] = { type: 'p', color: 'white' };
+      game.board![1][1] = { type: 'p', color: 'white' } as any;
       game.analysisMode = true;
       game.continuousAnalysis = true;
-      game.gameController = { requestPositionAnalysis: vi.fn() };
+      game.gameController = { requestPositionAnalysis: vi.fn() } as any;
 
-      GameStateManager.undoMove(game, moveController);
-      expect(game.gameController.requestPositionAnalysis).toHaveBeenCalled();
+      GameStateManager.undoMove(game as Game, moveController);
+      expect(game.gameController!.requestPositionAnalysis).toHaveBeenCalled();
     });
   });
 
   describe('Replay Mode', () => {
     test('should manage replay mode lifecycle', () => {
-      game.moveHistory = [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, piece: { type: 'p' } }];
-      GameStateManager.enterReplayMode(game, moveController);
+      game.moveHistory = [
+        { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, piece: { type: 'p' } } as any,
+      ];
+      GameStateManager.enterReplayMode(game as Game, moveController);
       expect(game.replayMode).toBe(true);
 
-      GameStateManager.exitReplayMode(game);
+      GameStateManager.exitReplayMode(game as Game);
       expect(game.replayMode).toBe(false);
       expect(game.startClock).toHaveBeenCalled();
     });
@@ -294,10 +311,10 @@ describe('GameStateManager', () => {
         to: { r: 0, c: 0 },
         piece: { type: 'p', color: 'white', hasMoved: true },
         specialMove: { type: 'promotion' },
-      };
-      game.board[0][0] = { type: 'q', color: 'white' };
-      GameStateManager.undoMoveForReplay(game, move);
-      expect(game.board[1][0].type).toBe('p');
+      } as any;
+      game.board![0][0] = { type: 'q', color: 'white' } as any;
+      GameStateManager.undoMoveForReplay(game as Game, move);
+      expect(game.board![1][0]!.type).toBe('p');
     });
 
     test('should undo castling for replay', () => {
@@ -310,11 +327,11 @@ describe('GameStateManager', () => {
           rookFrom: { r: 8, c: 8 },
           rookTo: { r: 8, c: 5 },
         },
-      };
-      game.board[8][6] = { type: 'k', color: 'white' };
-      game.board[8][5] = { type: 'r', color: 'white' };
-      GameStateManager.undoMoveForReplay(game, move);
-      expect(game.board[8][8].type).toBe('r');
+      } as any;
+      game.board![8][6] = { type: 'k', color: 'white' } as any;
+      game.board![8][5] = { type: 'r', color: 'white' } as any;
+      GameStateManager.undoMoveForReplay(game as Game, move);
+      expect(game.board![8][8]!.type).toBe('r');
     });
 
     test('should undo en passant for replay', () => {
@@ -327,10 +344,10 @@ describe('GameStateManager', () => {
           capturedPawnPos: { r: 3, c: 5 },
           capturedPawn: { color: 'black' },
         },
-      };
-      game.board[2][5] = { type: 'p', color: 'white' };
-      GameStateManager.undoMoveForReplay(game, move);
-      expect(game.board[3][5].type).toBe('p');
+      } as any;
+      game.board![2][5] = { type: 'p', color: 'white' } as any;
+      GameStateManager.undoMoveForReplay(game as Game, move);
+      expect(game.board![3][5]!.type).toBe('p');
     });
 
     test('reconstructBoardAtMove with savedGameState', () => {
@@ -340,16 +357,18 @@ describe('GameStateManager', () => {
           .map(() => Array(9).fill(null)),
       };
       game.moveHistory = [
-        { from: { r: 0, c: 0 }, to: { r: 1, c: 0 }, piece: { type: 'p' } },
-        { from: { r: 1, c: 0 }, to: { r: 2, c: 0 }, piece: { type: 'p' } },
+        { from: { r: 0, c: 0 }, to: { r: 1, c: 0 }, piece: { type: 'p' } } as any,
+        { from: { r: 1, c: 0 }, to: { r: 2, c: 0 }, piece: { type: 'p' } } as any,
       ];
-      GameStateManager.reconstructBoardAtMove(game, 0);
-      expect(game.lastMoveHighlight.from.r).toBe(0);
+      GameStateManager.reconstructBoardAtMove(game as Game, 0);
+      expect(game.lastMoveHighlight!.from.r).toBe(0);
     });
 
     test('reconstructBoardAtMove with negative index', () => {
-      game.moveHistory = [{ from: { r: 0, c: 0 }, to: { r: 1, c: 0 }, piece: { type: 'p' } }];
-      GameStateManager.reconstructBoardAtMove(game, -1);
+      game.moveHistory = [
+        { from: { r: 0, c: 0 }, to: { r: 1, c: 0 }, piece: { type: 'p' } } as any,
+      ];
+      GameStateManager.reconstructBoardAtMove(game as Game, -1);
       expect(game.lastMoveHighlight).toBeNull();
     });
   });
@@ -357,10 +376,10 @@ describe('GameStateManager', () => {
   describe('Save/Load', () => {
     test('should save and load', () => {
       game.points = 20;
-      GameStateManager.saveGame(game);
+      GameStateManager.saveGame(game as Game);
 
       const newGame = { ...game, log: vi.fn() };
-      GameStateManager.loadGame(newGame);
+      GameStateManager.loadGame(newGame as Game);
       expect(newGame.points).toBe(20);
     });
 
@@ -375,12 +394,12 @@ describe('GameStateManager', () => {
       };
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(state));
 
-      GameStateManager.loadGame(game);
+      GameStateManager.loadGame(game as Game);
       expect(game.drawOffered).toBe(true);
-      expect(document.getElementById('draw-offer-overlay').classList.contains('hidden')).toBe(
+      expect(document.getElementById('draw-offer-overlay')!.classList.contains('hidden')).toBe(
         false
       );
-      expect(document.getElementById('draw-offer-message').textContent).toContain(
+      expect(document.getElementById('draw-offer-message')!.textContent).toContain(
         'Schwarz bietet Remis an'
       );
     });
@@ -396,8 +415,8 @@ describe('GameStateManager', () => {
       };
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(state));
 
-      GameStateManager.loadGame(game);
-      expect(document.getElementById('draw-offer-message').textContent).toContain(
+      GameStateManager.loadGame(game as Game);
+      expect(document.getElementById('draw-offer-message')!.textContent).toContain(
         'Weiß bietet Remis an'
       );
     });
@@ -412,23 +431,23 @@ describe('GameStateManager', () => {
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(state));
       game.updateBestMoves = vi.fn();
 
-      GameStateManager.loadGame(game);
-      expect(document.getElementById('move-history-panel').classList.contains('hidden')).toBe(
+      GameStateManager.loadGame(game as Game);
+      expect(document.getElementById('move-history-panel')!.classList.contains('hidden')).toBe(
         false
       );
       expect(game.updateBestMoves).toHaveBeenCalled();
     });
 
     test('should return false if no save found', () => {
-      expect(GameStateManager.loadGame(game)).toBe(false);
+      expect(GameStateManager.loadGame(game as Game)).toBe(false);
     });
 
     test('should handle load error', () => {
       localStorage.setItem('schach9x9_save_autosave', 'invalid json');
       // Silence console.error
-      vi.spyOn(console, 'error').mockImplementation(function () {});
-      expect(GameStateManager.loadGame(game)).toBe(false);
-      console.error.mockRestore();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
+      expect(GameStateManager.loadGame(game as Game)).toBe(false);
+      consoleSpy.mockRestore();
     });
 
     test('should handle load in setup phase', () => {
@@ -440,7 +459,7 @@ describe('GameStateManager', () => {
       };
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(state));
 
-      GameStateManager.loadGame(game);
+      GameStateManager.loadGame(game as Game);
       expect(UI.showShop).toHaveBeenCalledWith(game, true);
     });
   });
