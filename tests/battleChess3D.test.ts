@@ -1,11 +1,12 @@
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
+
 /**
  * Tests for 3D Battle Chess Mode
- * @jest-environment jsdom
  */
 
 // Simple test without mocking complex Three.js for now
 describe('BattleChess3D - Basic Tests', () => {
-  let container;
+  let container: HTMLDivElement;
 
   beforeEach(() => {
     container = document.createElement('div');
@@ -15,7 +16,7 @@ describe('BattleChess3D - Basic Tests', () => {
     document.body.appendChild(container);
 
     // Mock window.battleChess3D
-    global.window = global.window || {};
+    (global as any).window = (global as any).window || {};
   });
 
   afterEach(() => {
@@ -40,7 +41,7 @@ describe('BattleChess3D - Basic Tests', () => {
   describe('Board Coordinate Conversion', () => {
     test('should convert board coordinates to 3D world position', () => {
       // This is the logic from battleChess3D.boardToWorld
-      const boardToWorld = (row, col) => {
+      const boardToWorld = (row: number, col: number) => {
         const squareSize = 1.0;
         const x = (col - 4) * squareSize;
         const z = (row - 4) * squareSize;
@@ -66,7 +67,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
       const btn = document.getElementById('toggle-3d-btn');
       expect(btn).toBeDefined();
-      expect(btn.tagName).toBe('BUTTON');
+      expect(btn!.tagName).toBe('BUTTON');
 
       document.body.removeChild(toggleBtn);
     });
@@ -88,7 +89,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
   describe('Game State Synchronization Logic', () => {
     test('should create piece map key correctly', () => {
-      const createKey = (row, col) => `${row},${col}`;
+      const createKey = (row: number, col: number) => `${row},${col}`;
 
       expect(createKey(0, 0)).toBe('0,0');
       expect(createKey(8, 8)).toBe('8,8');
@@ -96,14 +97,14 @@ describe('BattleChess3D - Basic Tests', () => {
     });
 
     test('should update board state from game', () => {
-      const mockBoard = Array(9)
+      const mockBoard: (any | null)[][] = Array(9)
         .fill(null)
         .map(() => Array(9).fill(null));
       mockBoard[6][0] = { type: 'r', color: 'white' };
       mockBoard[6][8] = { type: 'r', color: 'white' };
       mockBoard[7][4] = { type: 'k', color: 'white' };
 
-      const pieces = new Map();
+      const pieces = new Map<string, any>();
 
       // Simulate updateFromGameState logic
       for (let row = 0; row < 9; row++) {
@@ -124,7 +125,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
   describe('Move Animation Logic', () => {
     test('should update piece position after move', () => {
-      const pieces = new Map();
+      const pieces = new Map<string, any>();
       pieces.set('6,4', { type: 'p', color: 'white', position: { x: 0, y: 0, z: 2 } });
 
       // Simulate move
@@ -140,7 +141,7 @@ describe('BattleChess3D - Basic Tests', () => {
     });
 
     test('should handle captured piece', () => {
-      const pieces = new Map();
+      const pieces = new Map<string, any>();
       pieces.set('6,4', { type: 'p', color: 'white' });
       pieces.set('5,4', { type: 'p', color: 'black' });
 
@@ -195,7 +196,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
   describe('Battle Animation Trigger', () => {
     test('should determine if move is a capture', () => {
-      const isCaptureMove = (targetPiece, specialMove) => {
+      const isCaptureMove = (targetPiece: any, specialMove: any) => {
         return targetPiece || (specialMove && specialMove.type === 'enPassant');
       };
 
@@ -208,7 +209,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
   describe('Highlight Management', () => {
     test('should track highlight markers', () => {
-      const highlights = [];
+      const highlights: any[] = [];
 
       // Add highlights
       highlights.push({ row: 5, col: 4 });
@@ -225,7 +226,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
   describe('Window Resize Handling', () => {
     test('should calculate new aspect ratio on resize', () => {
-      const calculateAspect = (width, height) => width / height;
+      const calculateAspect = (width: number, height: number) => width / height;
 
       expect(calculateAspect(800, 800)).toBe(1);
       expect(calculateAspect(1600, 800)).toBe(2);
@@ -235,7 +236,7 @@ describe('BattleChess3D - Basic Tests', () => {
 
   describe('Cleanup Logic', () => {
     test('should clear pieces map on cleanup', () => {
-      const pieces = new Map();
+      const pieces = new Map<string, any>();
       pieces.set('1,1', { type: 'p' });
       pieces.set('2,2', { type: 'n' });
 

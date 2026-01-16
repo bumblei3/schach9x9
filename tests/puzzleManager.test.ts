@@ -1,16 +1,12 @@
-/**
- * Tests for Puzzle Manager
- */
-
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { PuzzleManager, puzzleManager as _puzzleManager } from '../js/puzzleManager.js';
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
 import { ProceduralGenerator } from '../js/puzzle/ProceduralGenerator.js';
-
 import { BOARD_SIZE } from '../js/config.js';
 
 describe('PuzzleManager', () => {
-  let game;
-  let manager;
+  let game: any;
+  let manager: PuzzleManager;
 
   beforeEach(() => {
     vi.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue({
@@ -18,7 +14,7 @@ describe('PuzzleManager', () => {
       title: 'Mock Puzzle',
       setupStr: '..'.repeat(81) + 'w',
       solution: [],
-    });
+    } as any);
 
     game = {
       phase: 'PLAY',
@@ -41,8 +37,8 @@ describe('PuzzleManager', () => {
     test('should return puzzle by id', () => {
       const puzzle = manager.getPuzzle('mate-in-1-001');
       expect(puzzle).toBeDefined();
-      expect(puzzle.id).toBe('mate-in-1-001');
-      expect(puzzle.title).toContain('Puzzle 1');
+      expect(puzzle!.id).toBe('mate-in-1-001');
+      expect(puzzle!.title).toContain('Puzzle 1');
     });
 
     test('should return undefined for non-existent id', () => {
@@ -66,7 +62,7 @@ describe('PuzzleManager', () => {
       // Index 1000 is now valid and triggers infinite generation (even indices are 'easy')
       const puzzle = manager.loadPuzzle(game, 1000);
       expect(puzzle).not.toBe(false);
-      expect(puzzle.id).toMatch(/^proc-/);
+      expect((puzzle as any).id).toMatch(/^proc-/);
     });
 
     test('should set up board from setupStr', () => {
@@ -114,7 +110,7 @@ describe('PuzzleManager', () => {
     test('should return "solved" for correct final move', () => {
       // Get the expected solution move
       const puzzle = manager.getPuzzle('mate-in-1-001');
-      const correctMove = puzzle.solution[0];
+      const correctMove = puzzle!.solution[0];
 
       const result = manager.checkMove(game, correctMove);
       expect(result).toBe('solved');
@@ -140,7 +136,7 @@ describe('PuzzleManager', () => {
         setupStr: '..'.repeat(81) + 'w',
         solution: [],
       };
-      const genSpy = vi.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue(mockPuzzle);
+      const genSpy = vi.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue(mockPuzzle as any);
 
       // Load the last puzzle
       const lastIndex = manager.puzzles.length - 1;
@@ -148,7 +144,7 @@ describe('PuzzleManager', () => {
 
       const next = manager.nextPuzzle(game);
       expect(next).not.toBeNull();
-      expect(next.id).toBe('proc-mock'); // Check for our mock ID
+      expect((next as any).id).toBe('proc-mock'); // Check for our mock ID
 
       genSpy.mockRestore();
     });
@@ -167,7 +163,7 @@ describe('PuzzleManager', () => {
       expect(game.board[1][5]).toEqual(expect.objectContaining({ type: 'q', color: 'white' }));
 
       // Verify Solution
-      const sol = manager.getPuzzle('mate-in-1-queen-001').solution[0];
+      const sol = manager.getPuzzle('mate-in-1-queen-001')!.solution[0];
       const result = manager.checkMove(game, sol);
       expect(result).toBe('solved');
     });
@@ -192,7 +188,7 @@ describe('PuzzleGenerator', () => {
       const { board, turn } = PuzzleGenerator.stringToBoard(str);
 
       expect(turn).toBe('white');
-      expect(board[8][4]).toEqual({ type: 'k', color: 'white', hasMoved: true });
+      expect((board[8][4] as any)).toEqual({ type: 'k', color: 'white', hasMoved: true });
     });
 
     test('should handle black pieces', () => {
@@ -201,18 +197,18 @@ describe('PuzzleGenerator', () => {
       const { board, turn } = PuzzleGenerator.stringToBoard(str);
 
       expect(turn).toBe('black');
-      expect(board[0][0]).toEqual({ type: 'k', color: 'black', hasMoved: true });
+      expect((board[0][0] as any)).toEqual({ type: 'k', color: 'black', hasMoved: true });
     });
   });
 
   describe('boardToString', () => {
     test('should convert board to string', () => {
-      const board = Array(BOARD_SIZE)
+      const board: (any | null)[][] = Array(BOARD_SIZE)
         .fill(null)
         .map(() => Array(BOARD_SIZE).fill(null));
       board[4][4] = { type: 'k', color: 'white' };
 
-      const str = PuzzleGenerator.boardToString(board, 'white');
+      const str = PuzzleGenerator.boardToString(board as any, 'white');
 
       expect(str).toContain('wk');
       expect(str.endsWith('w')).toBe(true);

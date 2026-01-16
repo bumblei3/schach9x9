@@ -1,12 +1,22 @@
+import { describe, expect, test } from 'vitest';
+
 /**
  * Tests for Enhanced Debug Console Logic
  * Pure unit tests without external dependencies
  */
 
+interface LogEntry {
+  id: number;
+  timestamp: Date | string;
+  level: string;
+  message: string;
+  context: string;
+}
+
 describe('DebugConsole Logic', () => {
   describe('Log Management', () => {
     test('should create log entries with correct structure', () => {
-      const log = {
+      const log: Partial<LogEntry> = {
         id: Date.now(),
         timestamp: new Date(),
         level: 'info',
@@ -23,7 +33,7 @@ describe('DebugConsole Logic', () => {
 
     test('should limit logs array to maxLogs', () => {
       const maxLogs = 5;
-      const logs = [];
+      const logs: any[] = [];
 
       for (let i = 0; i < 10; i++) {
         logs.push({ id: i, message: `Message ${i}` });
@@ -62,37 +72,37 @@ describe('DebugConsole Logic', () => {
 
   describe('Time Formatting', () => {
     test('should format seconds correctly', () => {
-      const formatTime = date => {
+      const formatTime = (date: Date) => {
         const now = new Date();
-        const diff = (now - date) / 1000;
+        const diff = (now.getTime() - date.getTime()) / 1000;
         if (diff < 60) return `${Math.floor(diff)}s`;
         if (diff < 3600) return `${Math.floor(diff / 60)}m`;
         return date.toLocaleTimeString();
       };
 
       const now = new Date();
-      const thirtySecsAgo = new Date(now - 30000);
+      const thirtySecsAgo = new Date(now.getTime() - 30000);
       expect(formatTime(thirtySecsAgo)).toMatch(/\d+s/);
     });
 
     test('should format minutes correctly', () => {
-      const formatTime = date => {
+      const formatTime = (date: Date) => {
         const now = new Date();
-        const diff = (now - date) / 1000;
+        const diff = (now.getTime() - date.getTime()) / 1000;
         if (diff < 60) return `${Math.floor(diff)}s`;
         if (diff < 3600) return `${Math.floor(diff / 60)}m`;
         return date.toLocaleTimeString();
       };
 
       const now = new Date();
-      const fiveMinsAgo = new Date(now - 300000);
+      const fiveMinsAgo = new Date(now.getTime() - 300000);
       expect(formatTime(fiveMinsAgo)).toMatch(/\d+m/);
     });
 
     test('should return time string for old dates', () => {
-      const formatTime = date => {
+      const formatTime = (date: Date) => {
         const now = new Date();
-        const diff = (now - date) / 1000;
+        const diff = (now.getTime() - date.getTime()) / 1000;
         if (diff < 60) return `${Math.floor(diff)}s`;
         if (diff < 3600) return `${Math.floor(diff / 60)}m`;
         return date.toLocaleTimeString();
@@ -155,7 +165,7 @@ describe('DebugConsole Logic', () => {
 
   describe('Level Icons', () => {
     test('should map levels to icons', () => {
-      const icons = { error: '❌', warn: '⚠️', info: 'ℹ️', debug: '🔧' };
+      const icons: Record<string, string> = { error: '❌', warn: '⚠️', info: 'ℹ️', debug: '🔧' };
 
       expect(icons['error']).toBe('❌');
       expect(icons['warn']).toBe('⚠️');
@@ -164,14 +174,14 @@ describe('DebugConsole Logic', () => {
     });
 
     test('should return undefined for unknown levels', () => {
-      const icons = { error: '❌', warn: '⚠️', info: 'ℹ️', debug: '🔧' };
+      const icons: Record<string, string> = { error: '❌', warn: '⚠️', info: 'ℹ️', debug: '🔧' };
       expect(icons['unknown']).toBeUndefined();
     });
   });
 
   describe('Material Calculation', () => {
     test('should calculate material correctly', () => {
-      const board = Array(9)
+      const board: (any | null)[][] = Array(9)
         .fill(null)
         .map(() => Array(9).fill(null));
       board[8][4] = { type: 'k', color: 'white' };
@@ -180,7 +190,7 @@ describe('DebugConsole Logic', () => {
       board[7][8] = { type: 'q', color: 'white' };
       board[1][0] = { type: 'n', color: 'black' };
 
-      const values = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+      const values: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 
       let matWhite = 0,
         matBlack = 0;
@@ -213,7 +223,7 @@ describe('DebugConsole Logic', () => {
     });
 
     test('should handle empty logs array', () => {
-      const logs = [];
+      const logs: any[] = [];
       const json = JSON.stringify(logs, null, 2);
       expect(json).toBe('[]');
     });
@@ -221,8 +231,8 @@ describe('DebugConsole Logic', () => {
 
   describe('HTML Escaping', () => {
     test('should escape HTML special characters', () => {
-      const escapeHtml = text => {
-        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+      const escapeHtml = (text: string) => {
+        const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
         return text.replace(/[&<>"']/g, m => map[m]);
       };
 

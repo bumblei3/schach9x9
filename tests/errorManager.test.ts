@@ -1,14 +1,15 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { errorManager } from '../js/utils/ErrorManager.js';
 import { notificationUI } from '../js/ui/NotificationUI.js';
 import { logger } from '../js/logger.js';
 
 // Use spyOn for notificationUI
-vi.spyOn(notificationUI, 'show').mockImplementation(function () {});
+vi.spyOn(notificationUI, 'show').mockImplementation(function () { });
 
 // Spy on logger instead of mocking entire module to avoid ESM issues
-vi.spyOn(logger, 'error').mockImplementation(function () {});
-vi.spyOn(logger, 'warn').mockImplementation(function () {});
-vi.spyOn(logger, 'info').mockImplementation(function () {});
+vi.spyOn(logger, 'error').mockImplementation(function () { });
+vi.spyOn(logger, 'warn').mockImplementation(function () { });
+vi.spyOn(logger, 'info').mockImplementation(function () { });
 
 describe('ErrorManager', () => {
   beforeEach(() => {
@@ -27,9 +28,9 @@ describe('ErrorManager', () => {
 
     expect(logger.error).toHaveBeenCalled();
     const overlay = document.getElementById('error-overlay');
-    expect(overlay.classList.contains('hidden')).toBe(false);
+    expect(overlay!.classList.contains('hidden')).toBe(false);
     const details = document.getElementById('error-details-content');
-    expect(details.textContent).toContain('Critical Failure');
+    expect(details!.textContent).toContain('Critical Failure');
   });
 
   test('should handle non-critical errors by showing toast', () => {
@@ -72,7 +73,7 @@ describe('ErrorManager', () => {
   test('should use alert fallback if overlay is missing', () => {
     // Remove overlay
     document.body.innerHTML = '';
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(function () {});
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(function () { });
 
     const error = new Error('Critical No UI');
     errorManager.handleError(error, { critical: true });
@@ -89,7 +90,7 @@ describe('ErrorManager', () => {
     const originalOnUnhandledRejection = window.onunhandledrejection;
 
     window.onerror = null;
-    window.onunhandledrejection = null;
+    (window as any).onunhandledrejection = null;
 
     errorManager.init();
 
@@ -102,8 +103,7 @@ describe('ErrorManager', () => {
 
     // Test onerror
     if (window.onerror) {
-      // @ts-ignore
-      window.onerror('Script Error', 'script.js', 10, 20, new Error('Script Error'));
+      (window.onerror as Function)('Script Error', 'script.js', 10, 20, new Error('Script Error'));
       expect(errorSpy).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({ context: 'Global' })
@@ -118,7 +118,7 @@ describe('ErrorManager', () => {
         reason: new Error('Async Fail'),
       };
 
-      window.onunhandledrejection(event);
+      (window as any).onunhandledrejection(event as any);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({ context: 'Promise' })
@@ -127,6 +127,6 @@ describe('ErrorManager', () => {
 
     // Cleanup
     window.onerror = originalOnError;
-    window.onunhandledrejection = originalOnUnhandledRejection;
+    (window as any).onunhandledrejection = originalOnUnhandledRejection;
   });
 });
