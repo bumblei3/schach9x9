@@ -1,15 +1,16 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { StorageManager } from '../js/storage.js';
 import { PHASES } from '../js/gameEngine.js';
 
 // Mock localStorage
 const localStorageMock = (function () {
-  let store = {};
+  let store: Record<string, string> = {};
   return {
-    getItem: vi.fn(key => store[key] || null),
-    setItem: vi.fn((key, value) => {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
       store[key] = value.toString();
     }),
-    removeItem: vi.fn(key => {
+    removeItem: vi.fn((key: string) => {
       delete store[key];
     }),
     clear: vi.fn(() => {
@@ -21,8 +22,8 @@ const localStorageMock = (function () {
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
 describe('StorageManager', () => {
-  let storageManager;
-  let mockGame;
+  let storageManager: StorageManager;
+  let mockGame: any;
 
   beforeEach(() => {
     storageManager = new StorageManager();
@@ -52,7 +53,7 @@ describe('StorageManager', () => {
     expect(localStorage.setItem).toHaveBeenCalled();
 
     const saveKey = 'schach9x9_save_test-slot';
-    const savedData = JSON.parse(localStorage.getItem(saveKey));
+    const savedData = JSON.parse(localStorage.getItem(saveKey)!);
 
     expect(savedData.mode).toBe('classic');
     expect(savedData.turn).toBe('white');
@@ -65,8 +66,8 @@ describe('StorageManager', () => {
     const loadedState = storageManager.loadGame('test-slot');
 
     expect(loadedState).not.toBeNull();
-    expect(loadedState.mode).toBe('classic');
-    expect(loadedState.turn).toBe('white');
+    expect(loadedState!.mode).toBe('classic');
+    expect(loadedState!.turn).toBe('white');
   });
 
   test('should return null if no save exists', () => {
@@ -84,7 +85,7 @@ describe('StorageManager', () => {
     storageManager.saveGame(mockGame, 'test-slot');
     const loadedState = storageManager.loadGame('test-slot');
 
-    const targetGame = {};
+    const targetGame: any = {};
     const success = storageManager.loadStateIntoGame(targetGame, loadedState);
 
     expect(success).toBe(true);

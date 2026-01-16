@@ -1,3 +1,5 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
+
 // Mock all internal dependencies of DOMHandler BEFORE importing it
 vi.mock('../js/ui.js', () => ({
   renderBoard: vi.fn(),
@@ -48,24 +50,24 @@ vi.mock('../js/ui/AnalysisUI.js', () => ({
 }));
 
 // Mock URL methods for JSDOM
-global.URL.createObjectURL = vi.fn(() => 'blob:mock');
-global.URL.revokeObjectURL = vi.fn();
+(global as any).URL.createObjectURL = vi.fn(() => 'blob:mock');
+(global as any).URL.revokeObjectURL = vi.fn();
 
 // Now import DOMHandler (must be dynamic because of ESM mocks)
 const { DOMHandler } = await import('../js/ui/DOMHandler.js');
 
 describe('DOMHandler', () => {
-  let app;
-  let domHandler;
+  let app: any;
+  let domHandler: any;
 
   beforeEach(() => {
     // Mock App and Game
     app = {
-      init: vi.fn().mockResolvedValue(),
+      init: vi.fn().mockResolvedValue(undefined),
       battleChess3D: {
         enabled: false,
         scene: null,
-        init: vi.fn().mockResolvedValue(),
+        init: vi.fn().mockResolvedValue(undefined),
         updateFromGameState: vi.fn(),
         onWindowResize: vi.fn(),
         pieceManager: {
@@ -195,8 +197,8 @@ describe('DOMHandler', () => {
 
   test('should handle difficulty selection and synchronization', () => {
     const selects = document.querySelectorAll('#difficulty-select');
-    const firstSelect = selects[0];
-    const secondSelect = selects[1];
+    const firstSelect = selects[0] as HTMLSelectElement;
+    const secondSelect = selects[1] as HTMLSelectElement;
 
     firstSelect.value = 'expert';
     firstSelect.dispatchEvent(new Event('change'));
@@ -206,7 +208,7 @@ describe('DOMHandler', () => {
   });
 
   test('should handle time control selection', () => {
-    const select = document.querySelector('#time-control-select');
+    const select = document.querySelector('#time-control-select') as HTMLSelectElement;
     expect(select).not.toBeNull();
     if (select) {
       select.value = 'rapid10';
@@ -216,40 +218,40 @@ describe('DOMHandler', () => {
   });
 
   test('should initialize and wire up points selection', () => {
-    const pointsBtn = document.querySelector('.points-btn');
+    const pointsBtn = document.querySelector('.points-btn') as HTMLButtonElement;
     pointsBtn.click();
 
     expect(app.init).toHaveBeenCalledWith(15, 'setup');
-    expect(document.getElementById('points-selection-overlay').classList.contains('hidden')).toBe(
+    expect(document.getElementById('points-selection-overlay')!.classList.contains('hidden')).toBe(
       true
     );
   });
 
   test('should wire up finish setup button', () => {
-    document.getElementById('finish-setup-btn').click();
+    document.getElementById('finish-setup-btn')!.click();
     expect(app.gameController.finishSetupPhase).toHaveBeenCalled();
   });
 
   test('should wire up shop item selection', () => {
-    const shopItem = document.querySelector('.shop-item');
+    const shopItem = document.querySelector('.shop-item') as HTMLElement;
     shopItem.click();
     expect(app.game.selectShopPiece).toHaveBeenCalledWith('p');
     expect(shopItem.classList.contains('selected')).toBe(true);
   });
 
   test('should toggle analysis display items', () => {
-    document.getElementById('best-move-btn').click();
+    document.getElementById('best-move-btn')!.click();
     expect(app.game.analysisManager.toggleBestMove).toHaveBeenCalled();
   });
 
   test('should wire up tutor hint button', () => {
-    document.getElementById('hint-btn').click();
+    document.getElementById('hint-btn')!.click();
     expect(app.gameController.requestHint).toHaveBeenCalled();
   });
 
   test('should handle menu toggle', () => {
-    const menuBtn = document.getElementById('menu-btn');
-    const mainMenu = document.getElementById('main-menu');
+    const menuBtn = document.getElementById('menu-btn')!;
+    const mainMenu = document.getElementById('main-menu')!;
 
     menuBtn.click();
     expect(mainMenu.classList.contains('active')).toBe(true);
@@ -262,58 +264,58 @@ describe('DOMHandler', () => {
   });
 
   test('should handle theme selection', () => {
-    const select = document.getElementById('theme-select');
+    const select = document.getElementById('theme-select') as HTMLSelectElement;
     select.value = 'blue';
     select.dispatchEvent(new Event('change'));
     expect(app.game.setTheme).toHaveBeenCalledWith('blue');
   });
 
   test('should handle campaign start', () => {
-    const campaignBtn = document.getElementById('campaign-start-btn');
+    const campaignBtn = document.getElementById('campaign-start-btn')!;
     campaignBtn.click();
-    expect(document.getElementById('points-selection-overlay').classList.contains('hidden')).toBe(
+    expect(document.getElementById('points-selection-overlay')!.classList.contains('hidden')).toBe(
       true
     );
   });
 
   test('should handle menu actions', () => {
-    document.getElementById('save-btn').click();
+    document.getElementById('save-btn')!.click();
     expect(app.gameController.saveGame).toHaveBeenCalled();
 
-    document.getElementById('load-btn').click();
+    document.getElementById('load-btn')!.click();
     expect(app.gameController.loadGame).toHaveBeenCalled();
 
-    window.confirm = vi.fn(() => true);
-    document.getElementById('draw-offer-btn').click();
+    (window as any).confirm = vi.fn(() => true);
+    document.getElementById('draw-offer-btn')!.click();
     expect(app.gameController.offerDraw).toHaveBeenCalled();
 
-    document.getElementById('resign-btn').click();
+    document.getElementById('resign-btn')!.click();
     expect(app.gameController.resign).toHaveBeenCalled();
 
-    document.getElementById('puzzle-mode-btn').click();
+    document.getElementById('puzzle-mode-btn')!.click();
     expect(app.gameController.startPuzzleMode).toHaveBeenCalled();
   });
 
   test('should handle skin selection', () => {
-    const selector = document.getElementById('skin-selector');
+    const selector = document.getElementById('skin-selector') as HTMLSelectElement;
     selector.value = 'modern';
     selector.dispatchEvent(new Event('change'));
     expect(app.game._forceFullRender).toBe(true);
   });
 
   test('should handle PGN export', async () => {
-    const exportBtn = document.getElementById('export-pgn-btn');
+    const exportBtn = document.getElementById('export-pgn-btn')!;
     app.game.moveHistory = [{ r: 0, c: 0 }];
 
-    window.alert = vi.fn();
+    (window as any).alert = vi.fn();
 
     exportBtn.click();
-    expect(window.alert).not.toHaveBeenCalled();
+    expect((window as any).alert).not.toHaveBeenCalled();
   });
 
   test('should handle sound toggle', () => {
-    const toggle = document.getElementById('sound-toggle');
-    const slider = document.getElementById('volume-slider');
+    const toggle = document.getElementById('sound-toggle') as HTMLInputElement;
+    const slider = document.getElementById('volume-slider') as HTMLInputElement;
     toggle.checked = false;
     toggle.dispatchEvent(new Event('change'));
     expect(slider.disabled).toBe(true);
@@ -321,8 +323,8 @@ describe('DOMHandler', () => {
 
   test('should handle volume slider input', () => {
     vi.useFakeTimers();
-    const slider = document.getElementById('volume-slider');
-    const valueDisplay = document.getElementById('volume-value');
+    const slider = document.getElementById('volume-slider') as HTMLInputElement;
+    const valueDisplay = document.getElementById('volume-value')!;
     slider.value = '50';
     slider.dispatchEvent(new Event('input'));
 
@@ -334,12 +336,12 @@ describe('DOMHandler', () => {
   });
 
   test('should handle fullscreen toggle and change', () => {
-    const btn = document.getElementById('fullscreen-btn');
-    document.documentElement.requestFullscreen = vi.fn().mockReturnValue(Promise.resolve());
-    document.exitFullscreen = vi.fn();
+    const btn = document.getElementById('fullscreen-btn')!;
+    (document.documentElement as any).requestFullscreen = vi.fn().mockReturnValue(Promise.resolve());
+    (document as any).exitFullscreen = vi.fn();
 
     btn.click();
-    expect(document.documentElement.requestFullscreen).toHaveBeenCalled();
+    expect((document.documentElement as any).requestFullscreen).toHaveBeenCalled();
 
     // Mock being in fullscreen
     Object.defineProperty(document, 'fullscreenElement', {
@@ -353,23 +355,23 @@ describe('DOMHandler', () => {
     expect(btn.classList.contains('active-fullscreen')).toBe(true);
 
     btn.click();
-    expect(document.exitFullscreen).toHaveBeenCalled();
+    expect((document as any).exitFullscreen).toHaveBeenCalled();
   });
 
   test('should handle classic and puzzle start', () => {
-    document.getElementById('classic-mode-btn').click();
+    document.getElementById('classic-mode-btn')!.click();
     expect(app.init).toHaveBeenCalledWith(0, 'classic');
 
-    document.getElementById('puzzle-start-btn').click();
+    document.getElementById('puzzle-start-btn')!.click();
     expect(app.init).toHaveBeenCalledWith(0, 'puzzle');
   });
 
   test('should handle mentor level selection', () => {
-    const select = document.getElementById('ki-mentor-level-select');
+    const select = document.getElementById('ki-mentor-level-select') as HTMLSelectElement;
     select.value = 'STRICT';
     try {
       select.dispatchEvent(new Event('change'));
-    } catch (e) {
+    } catch (_e) {
       // Silence for tests
     }
     expect(app.game.mentorLevel).toBe('STRICT');
@@ -377,8 +379,8 @@ describe('DOMHandler', () => {
   });
 
   test('should handle 3D toggle', () => {
-    const btn = document.getElementById('toggle-3d-btn');
-    const container3D = document.getElementById('battle-chess-3d-container');
+    const btn = document.getElementById('toggle-3d-btn')!;
+    const container3D = document.getElementById('battle-chess-3d-container')!;
 
     btn.click();
 
@@ -389,7 +391,7 @@ describe('DOMHandler', () => {
   });
 
   test('should handle personality selection', () => {
-    const select = document.getElementById('ai-personality-select');
+    const select = document.getElementById('ai-personality-select') as HTMLSelectElement;
     select.value = 'aggressive';
     select.dispatchEvent(new Event('change'));
     // The DOMHandler sets app.game.aiPersonality directly
@@ -397,7 +399,7 @@ describe('DOMHandler', () => {
   });
 
   test('should handle analysis actions', () => {
-    const analysisBtn = document.getElementById('toggle-analysis-btn');
+    const analysisBtn = document.getElementById('toggle-analysis-btn')!;
 
     // Mock the aiController.toggleAnalysisMode to return true
     app.game.aiController.toggleAnalysisMode = vi.fn().mockReturnValue(true);
@@ -407,11 +409,11 @@ describe('DOMHandler', () => {
   });
 
   test('should handle restart action', () => {
-    const restartBtn = document.getElementById('restart-btn');
-    window.confirm = vi.fn(() => false); // User cancels
+    const restartBtn = document.getElementById('restart-btn')!;
+    (window as any).confirm = vi.fn(() => false); // User cancels
 
     restartBtn.click();
-    expect(window.confirm).toHaveBeenCalled();
+    expect((window as any).confirm).toHaveBeenCalled();
   });
 
   test('should handle theme selection from localStorage', () => {
@@ -423,9 +425,9 @@ describe('DOMHandler', () => {
   });
 
   test('should handle help overlay', () => {
-    const helpBtn = document.getElementById('help-btn');
-    const overlay = document.getElementById('help-overlay');
-    const closeBtn = document.getElementById('close-help-btn');
+    const helpBtn = document.getElementById('help-btn')!;
+    const overlay = document.getElementById('help-overlay')!;
+    const closeBtn = document.getElementById('close-help-btn')!;
 
     helpBtn.click();
     expect(overlay.classList.contains('hidden')).toBe(false);
@@ -435,16 +437,16 @@ describe('DOMHandler', () => {
   });
 
   test('should handle PGN export "Keine Züge" case', () => {
-    const exportBtn = document.getElementById('export-pgn-btn');
+    const exportBtn = document.getElementById('export-pgn-btn')!;
     app.game.moveHistory = [];
-    window.alert = vi.fn();
+    (window as any).alert = vi.fn();
 
     exportBtn.click();
-    expect(window.alert).toHaveBeenCalledWith('Keine Züge zum Exportieren!');
+    expect((window as any).alert).toHaveBeenCalledWith('Keine Züge zum Exportieren!');
   });
 
   test('should handle standard 8x8 mode start', () => {
-    document.getElementById('standard-8x8-btn').click();
+    document.getElementById('standard-8x8-btn')!.click();
     expect(app.init).toHaveBeenCalledWith(0, 'standard8x8');
   });
 
@@ -452,8 +454,8 @@ describe('DOMHandler', () => {
     app.game.analysisManager.toggleThreats = vi.fn().mockReturnValue(true);
     app.game.analysisManager.toggleOpportunities = vi.fn().mockReturnValue(true);
 
-    const threatsBtn = document.getElementById('threats-btn');
-    const opportunitiesBtn = document.getElementById('opportunities-btn');
+    const threatsBtn = document.getElementById('threats-btn')!;
+    const opportunitiesBtn = document.getElementById('opportunities-btn')!;
 
     threatsBtn.click();
     expect(app.game.analysisManager.toggleThreats).toHaveBeenCalled();
@@ -466,7 +468,7 @@ describe('DOMHandler', () => {
 
   test('should handle close analysis button', () => {
     // Add close-analysis-btn to DOM if needed
-    const closeBtn = document.getElementById('close-analysis-btn');
+    const closeBtn = document.getElementById('close-analysis-btn')!;
     app.game.aiController.analysisActive = true;
 
     closeBtn.click();
@@ -474,7 +476,7 @@ describe('DOMHandler', () => {
   });
 
   test('should handle continuous analysis button', () => {
-    const continuousBtn = document.getElementById('continuous-analysis-btn');
+    const continuousBtn = document.getElementById('continuous-analysis-btn')!;
     app.game.continuousAnalysis = false;
 
     continuousBtn.click();
@@ -487,7 +489,7 @@ describe('DOMHandler', () => {
     const newHandler = new DOMHandler(app);
     newHandler.init();
 
-    const analysisBtn = document.getElementById('analysis-mode-btn');
+    const analysisBtn = document.getElementById('analysis-mode-btn')!;
 
     // Enter analysis mode
     app.game.analysisMode = false;
@@ -502,8 +504,8 @@ describe('DOMHandler', () => {
 
   test('should handle 3D toggle off after being enabled', () => {
     vi.useFakeTimers();
-    const btn = document.getElementById('toggle-3d-btn');
-    const container3D = document.getElementById('battle-chess-3d-container');
+    const btn = document.getElementById('toggle-3d-btn')!;
+    const container3D = document.getElementById('battle-chess-3d-container')!;
 
     // Enable 3D
     btn.click();
@@ -520,7 +522,7 @@ describe('DOMHandler', () => {
   });
 
   test('should handle 3D toggle when scene already exists', () => {
-    const btn = document.getElementById('toggle-3d-btn');
+    const btn = document.getElementById('toggle-3d-btn')!;
 
     // Simulate scene already existing
     app.battleChess3D.scene = {};
@@ -546,13 +548,13 @@ describe('DOMHandler', () => {
     const newHandler = new DOMHandler(app);
     newHandler.init();
 
-    document.getElementById('puzzle-exit-btn').click();
+    document.getElementById('puzzle-exit-btn')!.click();
     expect(app.gameController.exitPuzzleMode).toHaveBeenCalled();
 
-    document.getElementById('puzzle-next-btn').click();
+    document.getElementById('puzzle-next-btn')!.click();
     expect(app.gameController.nextPuzzle).toHaveBeenCalled();
 
-    document.getElementById('puzzle-menu-close-btn').click();
+    document.getElementById('puzzle-menu-close-btn')!.click();
     expect(app.gameController.puzzleMenu.hide).toHaveBeenCalled();
   });
 
@@ -566,8 +568,8 @@ describe('DOMHandler', () => {
     const newHandler = new DOMHandler(app);
     newHandler.init();
 
-    const gameOverOverlay = document.getElementById('game-over-overlay');
-    const closeBtn = document.getElementById('close-game-over-btn');
+    const gameOverOverlay = document.getElementById('game-over-overlay')!;
+    const closeBtn = document.getElementById('close-game-over-btn')!;
 
     closeBtn.click();
     expect(gameOverOverlay.classList.contains('hidden')).toBe(true);

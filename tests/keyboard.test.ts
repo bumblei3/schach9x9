@@ -1,3 +1,4 @@
+import { describe, expect, test, beforeEach, afterEach, vi, beforeAll } from 'vitest';
 import { KeyboardManager } from '../js/input/KeyboardManager.js';
 import { setupJSDOM } from './test-utils.js';
 
@@ -10,17 +11,17 @@ vi.mock('../js/ui.js', () => ({
   OverlayManager: { closeAll: vi.fn() },
 }));
 
-let UI;
+let UI: any;
 
 beforeAll(async () => {
   UI = await import('../js/ui.js');
 });
 
 describe('KeyboardManager', () => {
-  let app;
-  let keyboardManager;
-  let gameController;
-  let tutorController;
+  let app: any;
+  let keyboardManager: KeyboardManager;
+  let gameController: any;
+  let tutorController: any;
 
   beforeEach(() => {
     setupJSDOM();
@@ -112,10 +113,6 @@ describe('KeyboardManager', () => {
     // Wait for async handler
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    // Expect calls
-    // Escape logic calls UI.closeModal() if it exists on UI object, and UI.OverlayManager.closeAll() if exists
-    // In this test, we mocked imports.
-
     // Check behavior
     if (UI.closeModal) expect(UI.closeModal).toHaveBeenCalled();
     if (UI.OverlayManager) expect(UI.OverlayManager.closeAll).toHaveBeenCalled();
@@ -124,10 +121,6 @@ describe('KeyboardManager', () => {
     if (gameController.resetSelection.mock.calls.length > 0) {
       expect(gameController.resetSelection).toHaveBeenCalled();
     } else {
-      // handleCellClick might be called with selectedSquare coords OR different approach if not resetSelection
-      // The logic in KeyboardManager says:
-      // if (resetSelection) ... else { renderBoard... }
-      // Our mock gameController has resetSelection.
       expect(gameController.resetSelection).toHaveBeenCalled();
     }
   });
@@ -144,7 +137,7 @@ describe('KeyboardManager', () => {
       preventDefault: vi.fn(),
     };
 
-    keyboardManager.handleKeyDown(event);
+    keyboardManager.handleKeyDown(event as any);
     expect(gameController.undoMove).not.toHaveBeenCalled();
     document.body.removeChild(input);
   });
