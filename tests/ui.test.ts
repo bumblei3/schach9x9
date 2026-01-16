@@ -1,3 +1,4 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { PHASES, BOARD_SIZE } from '../js/config.js';
 import { setupJSDOM, createMockGame } from './test-utils.js';
 
@@ -27,10 +28,10 @@ vi.mock('../js/effects.js', () => ({
 }));
 
 // Import UI module
-const UI = await import('../js/ui.js');
+import * as UI from '../js/ui.js';
 
 describe('UI Module', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     setupJSDOM();
@@ -58,13 +59,13 @@ describe('UI Module', () => {
       game.phase = PHASES.PLAY;
       game.board[4][4] = { type: 'k', color: 'white' };
       // isSquareUnderAttack(r, c, attackerColor)
-      game.isSquareUnderAttack = vi.fn((r, c, color) => color === 'black');
+      game.isSquareUnderAttack = vi.fn((_r: number, _c: number, color: string) => color === 'black');
 
       UI.initBoardUI(game);
       UI.renderBoard(game);
 
       const kingCell = document.querySelector('.cell[data-r="4"][data-c="4"]');
-      expect(kingCell.classList.contains('threatened')).toBe(true);
+      expect(kingCell!.classList.contains('threatened')).toBe(true);
     });
   });
 
@@ -73,7 +74,7 @@ describe('UI Module', () => {
       const statusEl = document.getElementById('status-display');
       game.phase = PHASES.SETUP_WHITE_PIECES;
       UI.updateStatus(game);
-      expect(statusEl.textContent).toContain('Weiß');
+      expect(statusEl!.textContent).toContain('Weiß');
     });
 
     test('should update material advantage', () => {
@@ -81,14 +82,14 @@ describe('UI Module', () => {
       game.board[4][4] = { type: 'q', color: 'white' };
       UI.updateCapturedUI(game);
       const whiteAdv = document.querySelector('.material-advantage.white-adv');
-      expect(whiteAdv.textContent).toBe('+9');
+      expect(whiteAdv!.textContent).toBe('+9');
     });
 
     test('should update clock with active highlight', () => {
       game.turn = 'white';
       UI.updateClockUI(game);
       const whiteClock = document.getElementById('clock-white');
-      expect(whiteClock.classList.contains('active')).toBe(true);
+      expect(whiteClock!.classList.contains('active')).toBe(true);
     });
   });
 
@@ -98,13 +99,13 @@ describe('UI Module', () => {
       game.board[0][4] = { type: 'p', color: 'white' };
       UI.showPromotionUI(game, 0, 4, 'white', {}, callback);
       const overlay = document.getElementById('promotion-overlay');
-      expect(overlay.classList.contains('hidden')).toBe(false);
+      expect(overlay!.classList.contains('hidden')).toBe(false);
 
-      const firstOption = document.querySelector('.promotion-option');
+      const firstOption = document.querySelector('.promotion-option') as HTMLElement;
       expect(firstOption).not.toBeNull();
       firstOption.click();
       expect(callback).toHaveBeenCalled();
-      expect(overlay.classList.contains('hidden')).toBe(true);
+      expect(overlay!.classList.contains('hidden')).toBe(true);
     });
 
     test('should show tutor suggestions', async () => {
@@ -123,17 +124,21 @@ describe('UI Module', () => {
       };
       await UI.showTutorSuggestions(game);
       const overlay = document.getElementById('tutor-overlay');
-      expect(overlay.classList.contains('hidden')).toBe(false);
+      expect(overlay!.classList.contains('hidden')).toBe(false);
     });
 
     test('should show statistics overlay', () => {
       UI.showStatisticsOverlay(game);
       const overlay = document.getElementById('stats-overlay');
-      expect(overlay.classList.contains('hidden')).toBe(false);
+      expect(overlay!.classList.contains('hidden')).toBe(false);
       expect(document.getElementById('stat-moves')).toBeNull(); // Old ID removed
-      expect(document.getElementById('stat-accuracy')).not.toBeNull();
-      expect(document.getElementById('stat-elo')).not.toBeNull();
+      expect(statusElExists('stat-accuracy')).toBe(true);
+      expect(statusElExists('stat-elo')).toBe(true);
     });
+
+    function statusElExists(id: string) {
+      return document.getElementById(id) !== null;
+    }
   });
 
   describe('Animations', () => {
@@ -143,13 +148,13 @@ describe('UI Module', () => {
       const to = { r: 5, c: 4 };
       const piece = { type: 'p', color: 'white' };
 
-      const fromCell = document.querySelector('.cell[data-r="6"][data-c="4"]');
-      const toCell = document.querySelector('.cell[data-r="5"][data-c="4"]');
-      fromCell.getBoundingClientRect = () => ({ left: 0, top: 0, width: 50, height: 50 });
-      toCell.getBoundingClientRect = () => ({ left: 50, top: 50, width: 50, height: 50 });
+      const fromCell = document.querySelector('.cell[data-r="6"][data-c="4"]') as HTMLElement;
+      const toCell = document.querySelector('.cell[data-r="5"][data-c="4"]') as HTMLElement;
+      fromCell.getBoundingClientRect = () => ({ left: 0, top: 0, width: 50, height: 50, bottom: 50, right: 50, x: 0, y: 0, toJSON: () => { } });
+      toCell.getBoundingClientRect = () => ({ left: 50, top: 50, width: 50, height: 50, bottom: 100, right: 100, x: 50, y: 50, toJSON: () => { } });
 
       vi.useFakeTimers();
-      const animPromise = UI.animateMove(game, from, to, piece);
+      const animPromise = UI.animateMove(game, from, to, piece as any);
       vi.advanceTimersByTime(300);
       await animPromise;
       expect(game.isAnimating).toBe(false);

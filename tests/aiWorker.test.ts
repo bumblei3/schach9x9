@@ -1,15 +1,18 @@
+import { describe, expect, test, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { getBestMoveDetailed } from '../js/aiEngine.js';
 import { logger } from '../js/logger.js';
 
 // Mock Worker class
 class MockWorker {
-  constructor(scriptUrl) {
+  scriptUrl: string | URL;
+  onmessage: ((ev: MessageEvent) => any) | null = null;
+
+  constructor(scriptUrl: string | URL) {
     this.scriptUrl = scriptUrl;
-    this.onmessage = null;
     this.postMessage = this.postMessage.bind(this);
   }
 
-  postMessage(data) {
+  postMessage(data: any) {
     // Simulate async worker response
     setTimeout(() => {
       if (data.type === 'SEARCH' || data.type === 'getBestMove') {
@@ -26,32 +29,39 @@ class MockWorker {
                 nodes: 50,
               },
             },
-          });
+          } as MessageEvent);
         }
       }
     }, 10);
   }
+
+  terminate() { }
+  addEventListener() { }
+  removeEventListener() { }
+  dispatchEvent() { return true; }
+  onerror = null;
+  onmessageerror = null;
 }
 
 describe('AI Engine Worker Integration', () => {
-  let originalWorker;
-  let originalWindow;
-  let uiBoard;
+  let originalWorker: any;
+  let originalWindow: any;
+  let uiBoard: any[][];
 
   beforeAll(() => {
-    originalWorker = global.Worker;
-    originalWindow = global.window;
-    global.Worker = MockWorker;
-    global.window = {}; // Mock window existence
+    originalWorker = (global as any).Worker;
+    originalWindow = (global as any).window;
+    (global as any).Worker = MockWorker;
+    (global as any).window = {}; // Mock window existence
 
     // Silence logs
-    vi.spyOn(logger, 'info').mockImplementation(function () {});
-    vi.spyOn(logger, 'debug').mockImplementation(function () {});
+    vi.spyOn(logger, 'info').mockImplementation(function () { });
+    vi.spyOn(logger, 'debug').mockImplementation(function () { });
   });
 
   afterAll(() => {
-    global.Worker = originalWorker;
-    global.window = originalWindow;
+    (global as any).Worker = originalWorker;
+    (global as any).window = originalWindow;
     vi.restoreAllMocks();
   });
 
@@ -62,11 +72,11 @@ describe('AI Engine Worker Integration', () => {
   });
 
   test('should use Worker when available', async () => {
-    const result = await getBestMoveDetailed(uiBoard, 'white', 1, 'expert');
+    const result = await getBestMoveDetailed(uiBoard as any, 'white', 1, {} as any);
     expect(result).toBeDefined();
-    expect(result.score).toBe(100);
+    expect(result!.score).toBe(100);
     // The move comes from our mock, confirming worker was used
-    expect(result.move).toEqual({
+    expect(result!.move).toEqual({
       from: { r: 0, c: 1 }, // 1 -> row 0 col 1
       to: { r: 0, c: 2 }, // 2 -> row 0 col 2
       promotion: undefined,

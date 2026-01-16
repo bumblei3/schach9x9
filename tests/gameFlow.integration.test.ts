@@ -1,20 +1,17 @@
-/**
- * @jest-environment jsdom
- */
-
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import { setupJSDOM } from './test-utils.js';
 
 // Mock UI dependencies
-vi.mock('../js/ui.js', async importOriginal => {
-  const actual = await importOriginal();
+vi.mock('../js/ui.js', async (importOriginal) => {
+  const actual: any = await importOriginal();
   return {
     ...actual,
     renderBoard: vi.fn(),
-    showModal: vi.fn((title, message, buttons) => {
+    showModal: vi.fn((_title, _message, buttons) => {
       // Only auto-click 'Fortfahren' or 'OK', not 'undo' actions in tests unless desired
-      const continueBtn = buttons.find(b => b.text === 'Fortfahren' || b.text === 'OK');
+      const continueBtn = buttons.find((b: any) => b.text === 'Fortfahren' || b.text === 'OK');
       if (continueBtn && continueBtn.callback) continueBtn.callback();
     }),
     updateStatus: vi.fn(),
@@ -27,7 +24,7 @@ vi.mock('../js/ui.js', async importOriginal => {
     updateClockDisplay: vi.fn(),
     showToast: vi.fn(),
     renderEvalGraph: vi.fn(),
-    animateMove: vi.fn().mockResolvedValue(),
+    animateMove: vi.fn().mockResolvedValue(undefined),
     animateCheck: vi.fn(),
     animateCheckmate: vi.fn(),
     showPromotionUI: vi.fn(),
@@ -55,31 +52,32 @@ vi.mock('../js/aiEngine.js', () => ({
   getBestMove: vi.fn().mockResolvedValue(null),
 }));
 
-const { GameController } = await import('../js/gameController.js');
-const { MoveController } = await import('../js/moveController.js');
-const { TutorController } = await import('../js/tutorController.js');
+import { GameController } from '../js/gameController.js';
+import { MoveController } from '../js/moveController.js';
+import { TutorController } from '../js/tutorController.js';
+import * as UI from '../js/ui.js';
 
 describe('Comprehensive Game Flow Integration Tests', () => {
-  let game;
-  let gc;
-  let mc;
-  let tc;
+  let game: any;
+  let gc: GameController;
+  let mc: MoveController;
+  let tc: TutorController;
 
   beforeEach(() => {
     setupJSDOM();
 
     // Mock localStorage
     const localStorageMock = (() => {
-      let store = {};
+      let store: Record<string, string> = {};
       return {
-        getItem: vi.fn(key => store[key] || null),
-        setItem: vi.fn((key, value) => {
+        getItem: vi.fn((key: string) => store[key] || null),
+        setItem: vi.fn((key: string, value: any) => {
           store[key] = value.toString();
         }),
         clear: vi.fn(() => {
           store = {};
         }),
-        removeItem: vi.fn(key => {
+        removeItem: vi.fn((key: string) => {
           delete store[key];
         }),
       };
@@ -148,13 +146,10 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       game.board[8][7] = null; // Knight
 
       // Execute King move (castling)
-      // Note: RulesEngine handles the logic, but mc/gc handle the coordination
       const from = { r: 8, c: 4 };
       const to = { r: 8, c: 6 };
 
-      // In a real game, move validator would mark this as castling
-      // We'll simulate a move that the validator thinks is castling
-      await mc.executeMove(from, to, { type: 'castling', isKingside: true });
+      await mc.executeMove(from, to, false);
 
       expect(game.board[8][6]).toMatchObject({ type: 'k', color: 'white' });
       expect(game.board[8][5]).toMatchObject({ type: 'r', color: 'white' });
@@ -168,51 +163,8 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       game.board[0][4] = null;
 
       // Mock UI to select 'e' (Angel)
-      const UI = await import('../js/ui.js');
-      // showPromotionUI usually calls mc.choosePromotion
-      UI.showPromotionUI.mockImplementation(function (game, r, c, color, moveRecord, callback) {
-        // Callback logic to simulate user selection
-        // In the real code, this callback might take the piece type or handling validation
-        // But MoveExecutor passes a closure () => completeMoveExecution...
-        // Wait, MoveExecutor sets piece.type = 'e' inside? No, let's check.
-        // Re-reading MoveExecutor:
-        /*
-            UI.showPromotionUI(..., () => {
-              completeMoveExecution(...);
-            });
-        */
-        // The callback doesn't take an argument? Wait.
-        // In angelPromotion.test.js mock:
-        /*
-          if (g.board[r][c]) {
-             g.board[r][c].type = 'e';
-          }
-          if (cb) cb();
-        */
-        // So the PREVIOUS implementation of showPromotionUI inside MoveExecutor logic might have been different
-        // OR the mocked implementation here assumes it passes 'e' to callback.
-
-        // Let's verify what the callback EXPECTS or DOES.
-        // MoveExecutor:
-        /*
-             UI.showPromotionUI(..., () => {
-                 completeMoveExecution(game, moveController, moveRecord);
-             });
-        */
-        // It seems the callback DOES NOT take the piece type.
-        // The piece type must be set BEFORE calling the callback or BY the UI before calling callback?
-
-        // Actually, looking at MoveExecutor again (from memory/context):
-        // If isHuman: UI.showPromotionUI(..., callback)
-        // inside callback: completeMoveExecution(game, moveController, moveRecord).
-
-        // Where is the piece type set?
-        // In the REAL UI, `showPromotionUI` likely sets the piece type on the board OR calls a method to set it.
-        // In `angelPromotion.test.js`, the mock explicitly sets `g.board[r][c].type = 'e'`.
-
-        // So for this test, I must manually set the piece type on the board to 'e' AND call the callback.
-
-        game.board[0][4].type = 'e';
+      (UI.showPromotionUI as any).mockImplementation(function (_g: any, _r: any, _c: any, _color: any, _moveRecord: any, callback: any) {
+        game.board[0][4] = { type: 'e', color: 'white' };
         callback();
       });
 
@@ -241,8 +193,7 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       // Make the correct move
       await mc.executeMove(firstMove.from, firstMove.to);
 
-      // Verify puzzle progression (usually async/delayed by AI response toggle)
-      // For now check if it accepted the move
+      // Verify puzzle progression
       expect(game.moveHistory).toHaveLength(1);
     });
   });
