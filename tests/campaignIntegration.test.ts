@@ -1,26 +1,65 @@
+import { describe, expect, test, beforeEach, vi } from 'vitest';
+
 // Mock dependencies
-const mockUI = {
-  updateStatus: vi.fn(),
-  renderBoard: vi.fn(),
-  showModal: vi.fn(),
-  updateShopUI: vi.fn(),
-  updateStatistics: vi.fn(),
-  updateClockUI: vi.fn(),
-  updateClockDisplay: vi.fn(),
-  initBoardUI: vi.fn(),
-  showCampaignVictoryModal: vi.fn(),
-  showShop: vi.fn(),
-  closeModal: vi.fn(),
-  updatePointsUI: vi.fn(),
-};
+const { mockUI, mockSoundManager, MOCK_CAMPAIGN_LEVELS } = vi.hoisted(() => ({
+  mockUI: {
+    updateStatus: vi.fn(),
+    renderBoard: vi.fn(),
+    showModal: vi.fn(),
+    updateShopUI: vi.fn(),
+    updateStatistics: vi.fn(),
+    updateClockUI: vi.fn(),
+    updateClockDisplay: vi.fn(),
+    initBoardUI: vi.fn(),
+    showCampaignVictoryModal: vi.fn(),
+    showShop: vi.fn(),
+    closeModal: vi.fn(),
+    updatePointsUI: vi.fn(),
+  },
+  mockSoundManager: {
+    init: vi.fn(),
+    playGameOver: vi.fn(),
+    playSuccess: vi.fn(),
+  },
+  MOCK_CAMPAIGN_LEVELS: [
+    {
+      id: 'level_1',
+      title: 'Aufstand', // Match expect string in test
+      setupType: 'fixed',
+      difficulty: 'easy',
+      playerColor: 'white',
+      fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
+      winCondition: { type: 'checkmate' },
+      unlocks: ['level_2'],
+      goals: {},
+    },
+    {
+      id: 'level_2',
+      title: 'Level 2',
+      setupType: 'fixed',
+      difficulty: 'medium',
+      playerColor: 'white',
+      fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
+      winCondition: { type: 'checkmate' },
+      unlocks: ['level_3'],
+      goals: {},
+    },
+    {
+      id: 'level_3',
+      title: 'Level 3',
+      setupType: 'fixed',
+      difficulty: 'hard',
+      playerColor: 'white',
+      fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
+      winCondition: { type: 'checkmate' },
+      unlocks: [],
+      reward: 'angel', // Custom property for test
+      goals: {},
+    },
+  ],
+}));
 
 vi.mock('../js/ui.js', () => mockUI);
-
-const mockSoundManager = {
-  init: vi.fn(),
-  playGameOver: vi.fn(),
-  playSuccess: vi.fn(),
-};
 
 vi.mock('../js/sounds.js', () => ({
   soundManager: mockSoundManager,
@@ -28,18 +67,16 @@ vi.mock('../js/sounds.js', () => ({
 
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
-    constructor() {}
+    constructor() { }
   },
 }));
 
 // Mock other dependencies of GameController
 vi.mock('../js/gameEngine.js', () => ({
   Game: class {
-    constructor() {
-      this.board = [];
-      this.capturedPieces = { white: [], black: [] };
-      this.stats = { totalMoves: 0, promotions: 0 };
-    }
+    board = [];
+    capturedPieces = { white: [], black: [] };
+    stats = { totalMoves: 0, promotions: 0 };
     calculateMaterialAdvantage() {
       return 0;
     }
@@ -50,7 +87,7 @@ vi.mock('../js/gameEngine.js', () => ({
 
 // Mock localStorage
 const localStorageMock = (() => {
-  let store = {};
+  let store: Record<string, string> = {};
   return {
     getItem: vi.fn(key => store[key] || null),
     setItem: vi.fn((key, value) => {
@@ -63,59 +100,21 @@ const localStorageMock = (() => {
 })();
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
-// Mock campaign data to ensure test stability and match IDs
-const MOCK_CAMPAIGN_LEVELS = [
-  {
-    id: 'level_1',
-    title: 'Aufstand', // Match expect string in test
-    setupType: 'fixed',
-    difficulty: 'easy',
-    playerColor: 'white',
-    fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
-    winCondition: { type: 'checkmate' },
-    unlocks: ['level_2'],
-    goals: {},
-  },
-  {
-    id: 'level_2',
-    title: 'Level 2',
-    setupType: 'fixed',
-    difficulty: 'medium',
-    playerColor: 'white',
-    fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
-    winCondition: { type: 'checkmate' },
-    unlocks: ['level_3'],
-    goals: {},
-  },
-  {
-    id: 'level_3',
-    title: 'Level 3',
-    setupType: 'fixed',
-    difficulty: 'hard',
-    playerColor: 'white',
-    fen: '8/8/8/8/8/8/8/8/4K3 w - - 0 1',
-    winCondition: { type: 'checkmate' },
-    unlocks: [],
-    reward: 'angel', // Custom property for test
-    goals: {},
-  },
-];
-
 vi.mock('../js/campaign/campaignData.js', () => ({
   CAMPAIGN_LEVELS: MOCK_CAMPAIGN_LEVELS,
 }));
 
 // Import system under test
-const { GameController } = await import('../js/gameController.js');
-const { campaignManager } = await import('../js/campaign/CampaignManager.js');
+import { GameController } from '../js/gameController.js';
+import { campaignManager } from '../js/campaign/CampaignManager.js';
 
 describe('Campaign Integration', () => {
-  let gameController;
-  let game;
+  let gameController: GameController;
+  let game: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    (localStorage as any).clear();
     campaignManager.resetState();
 
     // Setup minimal DOM
@@ -133,12 +132,14 @@ describe('Campaign Integration', () => {
       stats: { totalMoves: 0, promotions: 0 },
       isAI: true,
       calculateMaterialAdvantage: vi.fn(() => 0),
+      applyState: vi.fn(),
+      initGame: vi.fn(),
     };
 
     // Instantiate controller
     gameController = new GameController(game);
-    gameController.statisticsManager = { saveGame: vi.fn() };
-    gameController.timeManager = { startClock: vi.fn() };
+    (gameController as any).statisticsManager = { saveGame: vi.fn() };
+    (gameController as any).timeManager = { startClock: vi.fn() };
   });
 
   test('startCampaignLevel should initialize level_1 (fixed)', () => {
@@ -201,8 +202,6 @@ describe('Campaign Integration', () => {
     expect(campaignManager.isLevelCompleted('level_3')).toBe(true);
 
     // Verify reward 'angel' is unlocked (concept reward in levels.ts)
-    // Note: level_3 reward is 'Unlock: Angel (Concept)' in current levels.ts
-    // In my logic I used 'angel' as the key.
     expect(campaignManager.isRewardUnlocked('angel')).toBe(true);
   });
 

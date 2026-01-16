@@ -1,3 +1,7 @@
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
+import * as BoardRenderer from '../js/ui/BoardRenderer.js';
+import { particleSystem } from '../js/effects.js';
+
 // Mock dependencies
 vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
@@ -12,26 +16,25 @@ vi.mock('../js/config.js', () => ({
 }));
 
 vi.mock('../js/utils.js', () => ({
-  debounce: fn => fn, // No delay for tests
+  debounce: (fn: any) => fn, // No delay for tests
 }));
 
 vi.mock('../js/effects.js', () => ({
   particleSystem: { spawn: vi.fn() },
   floatingTextManager: { show: vi.fn() },
   shakeScreen: vi.fn(),
+  triggerVibration: vi.fn(),
+  confettiSystem: { spawn: vi.fn() },
 }));
 
-const BoardRenderer = await import('../js/ui/BoardRenderer.js');
-const { particleSystem } = await import('../js/effects.js');
-
 describe('BoardRenderer Full Coverage', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     document.body.innerHTML = '<div id="board"></div><div id="board-wrapper"></div>';
 
     // Mock global PIECE_SVGS
-    window.PIECE_SVGS = {
+    (window as any).PIECE_SVGS = {
       white: { p: '<svg>wp</svg>', r: '<svg>wr</svg>' },
       black: { p: '<svg>bp</svg>', k: '<svg>bk</svg>' },
     };
@@ -44,7 +47,7 @@ describe('BoardRenderer Full Coverage', () => {
       if (!vi.isMockFunction(document.elementFromPoint)) {
         document.elementFromPoint = vi.fn();
       } else {
-        document.elementFromPoint.mockReset();
+        (document.elementFromPoint as any).mockReset();
       }
     }
 
@@ -55,6 +58,7 @@ describe('BoardRenderer Full Coverage', () => {
       board: Array(9)
         .fill(null)
         .map(() => Array(9).fill(null)),
+      boardSize: 9,
       phase: 'play',
       turn: 'white',
       handleCellClick: vi.fn(),
@@ -67,6 +71,7 @@ describe('BoardRenderer Full Coverage', () => {
       // Mocks for interaction
       isSquareUnderAttack: vi.fn(() => false),
       isTutorMove: vi.fn(() => false),
+      log: vi.fn(),
     };
 
     // Initialize UI
@@ -80,7 +85,7 @@ describe('BoardRenderer Full Coverage', () => {
   });
 
   test('getPieceSymbol returns correct SVG/HTML', () => {
-    const p1 = { type: 'p', color: 'white' };
+    const p1 = { type: 'p', color: 'white' } as any;
     const html1 = BoardRenderer.getPieceSymbol(p1);
     expect(html1).toContain('<svg>wp</svg>');
 
@@ -89,24 +94,24 @@ describe('BoardRenderer Full Coverage', () => {
     expect(html2).toBe(html1); // Should be identical string from cache
 
     // Test empty
-    expect(BoardRenderer.getPieceSymbol(null)).toBe('');
+    expect(BoardRenderer.getPieceSymbol(null as any)).toBe('');
   });
 
   test('getPieceText returns correct unicode', () => {
-    expect(BoardRenderer.getPieceText({ type: 'p', color: 'white' })).toBe('♙');
-    expect(BoardRenderer.getPieceText({ type: 'k', color: 'black' })).toBe('♚');
-    expect(BoardRenderer.getPieceText(null)).toBe('');
+    expect(BoardRenderer.getPieceText({ type: 'p', color: 'white' } as any)).toBe('♙');
+    expect(BoardRenderer.getPieceText({ type: 'k', color: 'black' } as any)).toBe('♚');
+    expect(BoardRenderer.getPieceText(null as any)).toBe('');
   });
 
   test('initBoardUI creates coordinates', () => {
     const wrapper = document.getElementById('board-wrapper');
-    expect(wrapper.querySelectorAll('.coord-label').length).toBe(18); // 9 cols + 9 rows
-    expect(wrapper.textContent).toContain('a');
-    expect(wrapper.textContent).toContain('9');
+    expect(wrapper!.querySelectorAll('.coord-label').length).toBe(18); // 9 cols + 9 rows
+    expect(wrapper!.textContent).toContain('a');
+    expect(wrapper!.textContent).toContain('9');
   });
 
   test('Interaction: Click calls handleCellClick', () => {
-    const cell00 = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell00 = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     cell00.click();
     expect(game.handleCellClick).toHaveBeenCalledWith(0, 0);
   });
@@ -117,9 +122,9 @@ describe('BoardRenderer Full Coverage', () => {
     game.turn = 'white';
     game.getValidMoves.mockReturnValue([{ r: 1, c: 0 }]);
 
-    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
 
-    const dragStartEvent = new Event('dragstart', { bubbles: true });
+    const dragStartEvent = new Event('dragstart', { bubbles: true }) as any;
     const dt = {
       setData: vi.fn(),
       setDragImage: vi.fn(),
@@ -128,7 +133,7 @@ describe('BoardRenderer Full Coverage', () => {
     Object.defineProperty(dragStartEvent, 'dataTransfer', { value: dt });
 
     // Mock cloneNode
-    cell.cloneNode = vi.fn(() => document.createElement('div'));
+    cell.cloneNode = vi.fn(() => document.createElement('div')) as any;
 
     cell.dispatchEvent(dragStartEvent);
 
@@ -144,7 +149,7 @@ describe('BoardRenderer Full Coverage', () => {
     game.board[0][0] = { type: 'p', color: 'black' };
     game.turn = 'white';
 
-    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     const event = new Event('dragstart', { bubbles: true });
     Object.defineProperty(event, 'preventDefault', { value: vi.fn() });
 
@@ -154,7 +159,7 @@ describe('BoardRenderer Full Coverage', () => {
 
   test('Drag: Prevent drag in replay mode', () => {
     game.replayMode = true;
-    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     const event = new Event('dragstart', { bubbles: true });
     const spy = vi.spyOn(event, 'preventDefault');
     cell.dispatchEvent(event);
@@ -168,8 +173,8 @@ describe('BoardRenderer Full Coverage', () => {
 
     game.getValidMoves.mockReturnValue([{ r: 2, c: 0 }]);
 
-    const targetCell = document.querySelector('.cell[data-r="2"][data-c="0"]');
-    const dropEvent = new Event('drop', { bubbles: true });
+    const targetCell = document.querySelector('.cell[data-r="2"][data-c="0"]') as HTMLElement;
+    const dropEvent = new Event('drop', { bubbles: true }) as any;
     Object.defineProperty(dropEvent, 'dataTransfer', {
       value: { getData: () => '0,0' },
     });
@@ -184,10 +189,10 @@ describe('BoardRenderer Full Coverage', () => {
     game.phase = 'play';
     game.turn = 'white';
 
-    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     cell.innerHTML = '<div class="piece-svg"></div>';
 
-    const touchEvent = new Event('touchstart', { bubbles: true });
+    const touchEvent = new Event('touchstart', { bubbles: true }) as any;
     const touch = { clientX: 100, clientY: 100 };
     Object.defineProperty(touchEvent, 'touches', { value: [touch] });
     Object.defineProperty(touchEvent, 'preventDefault', { value: vi.fn() });
@@ -197,21 +202,21 @@ describe('BoardRenderer Full Coverage', () => {
     expect(touchEvent.preventDefault).toHaveBeenCalled();
     expect(cell.classList.contains('dragging')).toBe(true);
 
-    const dragged = document.body.lastElementChild;
+    const dragged = document.body.lastElementChild as HTMLElement;
     expect(dragged.style.position).toBe('fixed');
 
-    const moveEvent = new Event('touchmove', { bubbles: true });
+    const moveEvent = new Event('touchmove', { bubbles: true }) as any;
     Object.defineProperty(moveEvent, 'touches', { value: [{ clientX: 150, clientY: 150 }] });
     cell.dispatchEvent(moveEvent);
 
     expect(dragged.style.left).toContain('150');
 
-    const endEvent = new Event('touchend', { bubbles: true });
+    const endEvent = new Event('touchend', { bubbles: true }) as any;
     Object.defineProperty(endEvent, 'changedTouches', { value: [{ clientX: 150, clientY: 150 }] });
     Object.defineProperty(endEvent, 'touches', { value: [] });
 
     // Mock elementFromPoint for cleanup check
-    document.elementFromPoint.mockReturnValue(null);
+    (document.elementFromPoint as any).mockReturnValue(null);
 
     cell.dispatchEvent(endEvent);
 
@@ -223,33 +228,33 @@ describe('BoardRenderer Full Coverage', () => {
     game.lastMoveHighlight = { from: { r: 0, c: 0 }, to: { r: 1, c: 0 } };
     BoardRenderer.renderBoard(game);
     const cell00 = document.querySelector('.cell[data-r="0"][data-c="0"]');
-    expect(cell00.classList.contains('last-move')).toBe(true);
+    expect(cell00!.classList.contains('last-move')).toBe(true);
 
     game.validMoves = [{ r: 2, c: 2 }];
     game.isTutorMove = vi.fn(() => true);
     BoardRenderer.renderBoard(game);
     const cell22 = document.querySelector('.cell[data-r="2"][data-c="2"]');
-    expect(cell22.classList.contains('valid-move')).toBe(true);
-    expect(cell22.classList.contains('tutor-move')).toBe(true);
+    expect(cell22!.classList.contains('valid-move')).toBe(true);
+    expect(cell22!.classList.contains('tutor-move')).toBe(true);
 
     game.board[0][0] = { type: 'p', color: 'white' };
     game.isSquareUnderAttack = vi.fn(() => true);
     BoardRenderer.renderBoard(game);
     const cellThreat = document.querySelector('.cell[data-r="0"][data-c="0"]');
-    expect(cellThreat.classList.contains('threatened')).toBe(true);
+    expect(cellThreat!.classList.contains('threatened')).toBe(true);
   });
 
   test('renderBoard corridors in setup phase', () => {
     game.phase = 'setup_white_king';
     BoardRenderer.renderBoard(game);
     const cell60 = document.querySelector('.cell[data-r="6"][data-c="0"]');
-    expect(cell60.classList.contains('selectable-corridor')).toBe(true);
+    expect(cell60!.classList.contains('selectable-corridor')).toBe(true);
 
     game.phase = 'setup_white_pieces';
     game.whiteCorridor = 3;
     BoardRenderer.renderBoard(game);
     const cell63 = document.querySelector('.cell[data-r="6"][data-c="3"]');
-    expect(cell63.classList.contains('selectable-corridor')).toBe(true);
+    expect(cell63!.classList.contains('selectable-corridor')).toBe(true);
   });
 
   test('animateMove moves piece and spawns particles', async () => {
@@ -258,23 +263,33 @@ describe('BoardRenderer Full Coverage', () => {
     const to = { r: 1, c: 1 };
     const piece = { type: 'p', color: 'white' };
 
-    const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
-    const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
+    const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
+    const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]') as HTMLElement;
 
     vi.spyOn(fromCell, 'getBoundingClientRect').mockReturnValue({
       left: 0,
       top: 0,
       width: 50,
       height: 50,
+      bottom: 50,
+      right: 50,
+      x: 0,
+      y: 0,
+      toJSON: () => { },
     });
     vi.spyOn(toCell, 'getBoundingClientRect').mockReturnValue({
       left: 100,
       top: 100,
       width: 50,
       height: 50,
+      bottom: 150,
+      right: 150,
+      x: 100,
+      y: 100,
+      toJSON: () => { },
     });
 
-    const promise = BoardRenderer.animateMove(game, from, to, piece);
+    const promise = BoardRenderer.animateMove(game, from, to, piece as any);
 
     expect(game.isAnimating).toBe(true);
 
@@ -291,16 +306,16 @@ describe('BoardRenderer Full Coverage', () => {
     const move = { to: { r: 5, c: 5 } };
     BoardRenderer.showMoveQuality(game, move, 'brilliant');
     const cell = document.querySelector('.cell[data-r="5"][data-c="5"]');
-    expect(cell.classList.contains('quality-brilliant')).toBe(true);
+    expect(cell!.classList.contains('quality-brilliant')).toBe(true);
 
     BoardRenderer.showMoveQuality(game, move, 'normal');
-    expect(cell.classList.contains('quality-brilliant')).toBe(false);
+    expect(cell!.classList.contains('quality-brilliant')).toBe(false);
   });
 
   test('Drag: End cleans up', () => {
-    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     cell.classList.add('dragging');
-    const target = document.querySelector('.cell[data-r="1"][data-c="1"]');
+    const target = document.querySelector('.cell[data-r="1"][data-c="1"]') as HTMLElement;
     target.classList.add('drag-target');
 
     cell.dispatchEvent(new Event('dragend', { bubbles: true }));
@@ -314,7 +329,7 @@ describe('BoardRenderer Full Coverage', () => {
     game.board[0][0] = { type: 'p', color: 'white' };
     game.getValidMoves.mockReturnValue([{ r: 1, c: 0 }]);
 
-    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]');
+    const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
 
     // Trigger mouseenter
     cell.dispatchEvent(new Event('mouseenter', { bubbles: true }));
@@ -322,7 +337,7 @@ describe('BoardRenderer Full Coverage', () => {
     // Since debounce is mocked to execute immediately:
     expect(game.getValidMoves).toHaveBeenCalledWith(0, 0, game.board[0][0]);
 
-    const target = document.querySelector('.cell[data-r="1"][data-c="0"]');
+    const target = document.querySelector('.cell[data-r="1"][data-c="0"]') as HTMLElement;
     expect(target.classList.contains('hover-move')).toBe(true);
     expect(cell.classList.contains('hover-piece')).toBe(true);
 
@@ -336,7 +351,7 @@ describe('BoardRenderer Full Coverage', () => {
     game.blackCorridor = 3;
     BoardRenderer.renderBoard(game);
     const cell03 = document.querySelector('.cell[data-r="0"][data-c="3"]');
-    expect(cell03.classList.contains('selectable-corridor')).toBe(true);
+    expect(cell03!.classList.contains('selectable-corridor')).toBe(true);
   });
 
   test('animateMove handles capture', async () => {
@@ -347,22 +362,32 @@ describe('BoardRenderer Full Coverage', () => {
     // Target has piece
     game.board[1][1] = { type: 'p', color: 'black' };
 
-    const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
-    const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
+    const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
+    const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]') as HTMLElement;
     vi.spyOn(fromCell, 'getBoundingClientRect').mockReturnValue({
-      right: 0,
+      right: 50,
       top: 0,
       width: 50,
       height: 50,
+      bottom: 50,
+      left: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => { },
     });
     vi.spyOn(toCell, 'getBoundingClientRect').mockReturnValue({
       left: 100,
       top: 100,
       width: 50,
       height: 50,
+      bottom: 150,
+      right: 150,
+      x: 100,
+      y: 100,
+      toJSON: () => { },
     });
 
-    const promise = BoardRenderer.animateMove(game, from, to, piece);
+    const promise = BoardRenderer.animateMove(game, from, to, piece as any);
 
     vi.runAllTimers();
     await promise;
