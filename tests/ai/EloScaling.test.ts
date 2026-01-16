@@ -41,9 +41,8 @@ describe('AI Elo Scaling & Noise', () => {
     expect(uniqueLow.size).toBeGreaterThanOrEqual(1); // Even 1 is possible but unlikely
   });
 
-  // Blunder simulation is currently disabled in the Rust WASM code (search.rs line 52-62)
-  // so this test is skipped until it's re-enabled.
-  test.skip('800 Elo should occasionally blunder material', async () => {
+  // Blunder simulation is now enabled in the Rust WASM code (search.rs)
+  test('800 Elo should occasionally blunder material', async () => {
     // White has a clear winning move (capture rook)
     setPiece(4, 4, 'r', 'white');
     setPiece(4, 5, 'r', 'black');

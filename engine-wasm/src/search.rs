@@ -3,7 +3,7 @@ use crate::move_gen::*;
 use crate::eval::*;
 use crate::zobrist::*;
 use crate::ordering::*;
-// use rand::Rng;
+use rand::Rng;
 
 const TT_SIZE: usize = 65536; // 64K entries, ~1.5MB RAM
 
@@ -50,16 +50,23 @@ pub fn search(board: &Board, depth: i8, color: i8, config: &EvalConfig) -> (Opti
     }
 
     // Blunder Simulation for low Elo
-    // Blunder Simulation removed for stability testing
-    /*
-    if let Some(best) = overall_best_move {
-        if let Some(elo) = config.elo {
-            if elo < 1200 {
-                // ...
+    if let Some(elo) = config.elo {
+        if elo < 1200 {
+            // Calculate blunder probability based on Elo
+            // 800 Elo = 40% blunder chance, 1200 Elo = 0%
+            let blunder_chance = ((1200 - elo) as f32 / 1000.0).min(0.4);
+            
+            let mut rng = rand::thread_rng();
+            if rng.r#gen::<f32>() < blunder_chance {
+                // Pick a random legal move instead of the best
+                let moves = get_all_legal_moves(board, color);
+                if moves.len() > 1 {
+                    let random_idx = rng.gen_range(0..moves.len());
+                    return (Some(moves[random_idx]), best_score, ctx.nodes);
+                }
             }
         }
     }
-    */
 
     (overall_best_move, best_score, ctx.nodes)
 }
