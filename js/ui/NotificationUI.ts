@@ -38,7 +38,11 @@ export class NotificationUI {
     duration: number = 3000
   ): void {
     if (typeof document === 'undefined') return;
-    if (!this.container) this.createContainer();
+
+    // Check if container still exists in DOM
+    if (!this.container || !document.body.contains(this.container)) {
+      this.createContainer();
+    }
 
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${type}`;

@@ -49,12 +49,7 @@ describe('TalentTreeUI', () => {
   });
 
   it('should render correct unit tabs', () => {
-    // We need to simulate the DOM created by showModal to test subsequent rendering
-    // since showModal is mocked, we must manually inject content if we want to query it,
-    // OR we just test what `renderContent` returns if it was public/accessible.
-    // However, `renderTabs` searches for `#talent-tabs` in document.
-
-    // Let's inject the container that `showModal` would have put in DOM
+    // Inject container
     document.body.innerHTML = `
       <div id="talent-tabs"></div>
       <div id="talent-tree-view"></div>
@@ -63,13 +58,11 @@ describe('TalentTreeUI', () => {
       <div id="unit-title"></div>
     `;
 
-    // Access private method or call public show which triggers it via setTimeout 0
-    // We can cast to any to call private methods for unit testing internal logic
     (talentTreeUI as any).renderTabs();
 
     const tabs = document.querySelectorAll('.talent-tab');
     expect(tabs.length).toBeGreaterThan(0);
-    expect(tabs[0].textContent).toContain('Bauer'); // 'p' is usually first
+    expect(tabs[0].textContent).toContain('Bauer');
   });
 
   it('should render talent tree nodes', () => {
@@ -81,7 +74,6 @@ describe('TalentTreeUI', () => {
       <div id="unit-title"></div>
     `;
 
-    // Ensure we are on a unit with talents (e.g. 'p')
     (talentTreeUI as any).currentUnitType = 'p';
     (talentTreeUI as any).renderTree();
 
@@ -89,7 +81,6 @@ describe('TalentTreeUI', () => {
     const nodes = treeContainer?.querySelectorAll('.talent-node');
 
     expect(nodes?.length).toBeGreaterThan(0);
-    // Check if tiers are rendered
     expect(treeContainer?.innerHTML).toContain('Tier 1');
   });
 
@@ -103,26 +94,25 @@ describe('TalentTreeUI', () => {
     `;
 
     (talentTreeUI as any).currentUnitType = 'p';
-    // 'p_scavenger' is a known talent ID from talents.ts
+    // Use a talent that exists in the tree for 'p'
     const talentId = 'p_scavenger';
 
     (talentTreeUI as any).selectTalent(talentId);
 
     const infoPanel = document.getElementById('talent-info');
     expect(infoPanel?.innerHTML).toContain('Plünderer');
-    expect(infoPanel?.innerHTML).toContain('Lernen'); // Should show buy button
+    expect(infoPanel?.innerHTML).toContain('Lernen');
   });
 
   it('should handle talent purchase', () => {
-    // Setup generic DOM
     document.body.innerHTML = `
       <div id="talent-info"></div>
+      <div id="talent-tree-view"></div>
     `;
 
     (talentTreeUI as any).currentUnitType = 'p';
     const talentId = 'p_scavenger';
 
-    // Call select to render button
     (talentTreeUI as any).selectTalent(talentId);
 
     const buyBtn = document.querySelector('.buy-talent-btn') as HTMLElement;
@@ -145,15 +135,14 @@ describe('TalentTreeUI', () => {
 
     (talentTreeUI as any).renderTabs();
 
-    // Find tab for Knight ('n')
     const knightTab = document.querySelector('[data-unit="n"]') as HTMLElement;
     expect(knightTab).toBeTruthy();
 
     knightTab.click();
 
     expect((talentTreeUI as any).currentUnitType).toBe('n');
-    // Title should update
     const title = document.getElementById('unit-title');
     expect(title?.textContent).toContain('Talente');
   });
 });
+
