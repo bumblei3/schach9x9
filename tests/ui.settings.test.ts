@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { setupJSDOM, createMockGame } from './test-utils.js';
 
 // Mock dependencies
@@ -9,7 +10,7 @@ vi.mock('../js/chess-pieces.js', () => ({
   },
 }));
 
-const AppMock = {
+const AppMock: any = {
   game: null,
   moveController: {
     setTheme: vi.fn(),
@@ -17,9 +18,9 @@ const AppMock = {
 };
 
 describe('UI Settings Tests', () => {
-  let UI;
-  let chessPieces;
-  let game;
+  let UI: any;
+  let chessPieces: any;
+  let game: any;
 
   beforeEach(async () => {
     setupJSDOM();
@@ -51,12 +52,12 @@ describe('UI Settings Tests', () => {
   });
 
   test('Skin selector should update skin and force render', () => {
-    const skinSelector = document.getElementById('skin-selector');
+    const skinSelector = document.getElementById('skin-selector') as HTMLSelectElement;
 
     // Simulate App.js event listener logic manually since we can't easily mock the entire App class structure here
     // but we can verify the core logic steps
 
-    skinSelector.addEventListener('change', e => {
+    skinSelector.addEventListener('change', (e: any) => {
       const newSkin = e.target.value;
       chessPieces.setPieceSkin(newSkin);
       UI.clearPieceCache();
@@ -87,10 +88,10 @@ describe('UI Settings Tests', () => {
   });
 
   test('Theme selector should call game.setTheme', () => {
-    const themeSelect = document.getElementById('theme-select');
+    const themeSelect = document.getElementById('theme-select') as HTMLSelectElement;
 
     // Mock the listener logic from App.js
-    themeSelect.addEventListener('change', e => {
+    themeSelect.addEventListener('change', (e: any) => {
       AppMock.moveController.setTheme(e.target.value);
     });
 

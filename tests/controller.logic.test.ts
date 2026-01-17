@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { PHASES } from '../js/config.js';
 
 // Setup JSDOM body
@@ -32,14 +33,16 @@ vi.mock('../js/ui.js', () => ({
   updateCapturedUI: vi.fn(),
   updateMoveHistoryUI: vi.fn(),
   updateStatistics: vi.fn(),
-  animateMove: vi.fn().mockResolvedValue(),
+  animateMove: vi.fn().mockResolvedValue(undefined),
   addCapturedPiece: vi.fn(),
-  showPromotionUI: vi.fn((game, r, c, color, moveRecord, callback) => {
-    if (game && game.board && game.board[r] && game.board[r][c]) {
-      game.board[r][c].type = 'e';
+  showPromotionUI: vi.fn(
+    (game: any, r: number, c: number, _color: string, _moveRecord: any, callback: any) => {
+      if (game && game.board && game.board[r] && game.board[r][c]) {
+        game.board[r][c].type = 'e';
+      }
+      callback();
     }
-    callback();
-  }),
+  ),
   showShop: vi.fn(),
   renderEvalGraph: vi.fn(),
   flashSquare: vi.fn(),
@@ -66,9 +69,9 @@ const { GameController } = await import('../js/gameController.js');
 const { MoveController } = await import('../js/moveController.js');
 
 describe('Controller Logic Deep Dive', () => {
-  let game;
-  let gameController;
-  let moveController;
+  let game: any;
+  let gameController: any;
+  let moveController: any;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -77,8 +80,8 @@ describe('Controller Logic Deep Dive', () => {
     game.whiteTime = 300; // 5 minutes in seconds
     game.blackTime = 300;
 
-    gameController = new GameController(game);
-    moveController = new MoveController(game);
+    gameController = new GameController(game as any);
+    moveController = new MoveController(game as any);
     game.gameController = gameController;
     game.moveController = moveController;
 
@@ -109,12 +112,12 @@ describe('Controller Logic Deep Dive', () => {
       expect(game.whiteTime).toBeCloseTo(299, 0);
 
       // Advance to timeout
-      Date.now.mockReturnValue(startNow + 301000);
+      (Date.now as any).mockReturnValue(startNow + 301000);
       vi.advanceTimersByTime(100);
 
       expect(game.whiteTime).toBe(0);
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      expect(document.getElementById('winner-text').textContent).toContain(
+      expect(document.getElementById('winner-text')!.textContent).toContain(
         'Schwarz gewinnt durch Zeitüberschreitung'
       );
     });
@@ -133,7 +136,7 @@ describe('Controller Logic Deep Dive', () => {
       game.turn = 'black';
       game.lastMoveTime = Date.now(); // Update to now (now + 1000)
 
-      Date.now.mockReturnValue(now + 2000);
+      (Date.now as any).mockReturnValue(now + 2000);
       vi.advanceTimersByTime(1000);
 
       expect(game.whiteTime).toBeCloseTo(299, 0);
@@ -154,7 +157,7 @@ describe('Controller Logic Deep Dive', () => {
       expect(savedData.points).toBe(10);
 
       // Mock load
-      spyGet.mockReturnValue(JSON.stringify(savedData));
+      (spyGet as any).mockReturnValue(JSON.stringify(savedData));
       game.points = 0;
       gameController.loadGame();
       expect(game.points).toBe(10);

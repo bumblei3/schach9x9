@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { generateRandomBoard, createPRNG } from './test-utils.js';
 import { PHASES } from '../js/config.js';
@@ -19,7 +20,7 @@ describe('Game Engine Property-Based Tests', () => {
   const SEED = 42; // Deterministic seed
   const { random: seededRandom } = createPRNG(SEED);
 
-  function countKings(board) {
+  function countKings(board: any[][]) {
     let white = 0,
       black = 0;
     for (let r = 0; r < 9; r++) {
@@ -38,7 +39,7 @@ describe('Game Engine Property-Based Tests', () => {
     for (let i = 0; i < NUM_ITERATIONS; i++) {
       const game = new Game();
       game.phase = PHASES.PLAY;
-      game.board = generateRandomBoard(8, 8, seededRandom);
+      game.board = generateRandomBoard(8, 8, seededRandom) as any;
       game.turn = seededRandom() > 0.5 ? 'white' : 'black';
 
       const opponentColor = game.turn === 'white' ? 'black' : 'white';
@@ -74,12 +75,12 @@ describe('Game Engine Property-Based Tests', () => {
     for (let i = 0; i < NUM_ITERATIONS; i++) {
       const game = new Game();
       game.phase = PHASES.PLAY;
-      game.board = generateRandomBoard(5, 5, seededRandom);
+      game.board = generateRandomBoard(5, 5, seededRandom) as any;
       game.turn = 'white';
 
       const moves = game.getAllLegalMoves('white');
 
-      moves.forEach(move => {
+      moves.forEach((move: any) => {
         const originalBoard = JSON.parse(JSON.stringify(game.board));
 
         const piece = game.board[move.from.r][move.from.c];

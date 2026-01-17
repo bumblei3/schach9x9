@@ -21,7 +21,7 @@ vi.mock('../../js/sounds.js', () => ({
 }));
 
 vi.mock('../../js/utils.js', () => ({
-  debounce: fn => fn,
+  debounce: (fn: any) => fn,
 }));
 
 vi.mock('../../js/chess-pieces.js', () => ({
@@ -41,12 +41,12 @@ global.URL.revokeObjectURL = vi.fn();
 const { DOMHandler } = await import('../../js/ui/DOMHandler.js');
 
 describe('DOMHandler Comprehensive Coverage', () => {
-  let app;
-  let domHandler;
+  let app: any;
+  let domHandler: any;
 
   beforeEach(() => {
     app = {
-      init: vi.fn().mockResolvedValue(),
+      init: vi.fn().mockResolvedValue(undefined),
       game: {
         phase: 'PLAY',
         turn: 'white',
@@ -93,10 +93,10 @@ describe('DOMHandler Comprehensive Coverage', () => {
     `;
 
     // Mock localStorage
-    const store = {};
+    const store: any = {};
     vi.stubGlobal('localStorage', {
-      getItem: key => store[key] || null,
-      setItem: (key, val) => {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, val: string) => {
         store[key] = val;
       },
     });
@@ -110,14 +110,14 @@ describe('DOMHandler Comprehensive Coverage', () => {
   it('initContinueButton should show continue button if autosave exists', () => {
     localStorage.setItem('schach9x9_save_autosave', 'true');
     domHandler.init();
-    expect(document.getElementById('main-menu-continue-btn').classList.contains('hidden')).toBe(
+    expect(document.getElementById('main-menu-continue-btn')!.classList.contains('hidden')).toBe(
       false
     );
   });
 
   it('Keyboard Shortcuts: should trigger analysis on "a" keydown', () => {
     domHandler.init();
-    const spy = vi.spyOn(document.getElementById('toggle-analysis-btn'), 'click');
+    const spy = vi.spyOn(document.getElementById('toggle-analysis-btn') as HTMLElement, 'click');
     const event = new KeyboardEvent('keydown', { key: 'a' });
     document.dispatchEvent(event);
     expect(spy).toHaveBeenCalled();
@@ -135,7 +135,9 @@ describe('DOMHandler Comprehensive Coverage', () => {
     ];
 
     keys.forEach((key, i) => {
-      const spy = vi.spyOn(document.getElementById(ids[i]), 'click').mockImplementation(() => {});
+      const spy = vi
+        .spyOn(document.getElementById(ids[i]) as HTMLElement, 'click')
+        .mockImplementation(() => {});
       const event = new KeyboardEvent('keydown', { key });
       document.dispatchEvent(event);
       expect(spy).toHaveBeenCalled();
@@ -145,7 +147,7 @@ describe('DOMHandler Comprehensive Coverage', () => {
   it('Keyboard Shortcuts: should toggle menu on "Escape" keydown if not in SETUP', () => {
     app.game.phase = 'PLAY';
     domHandler.init();
-    const menu = document.getElementById('main-menu');
+    const menu = document.getElementById('main-menu')!;
     menu.classList.remove('active');
 
     const event = new KeyboardEvent('keydown', { key: 'Escape' });
@@ -162,7 +164,7 @@ describe('DOMHandler Comprehensive Coverage', () => {
     document.body.appendChild(input);
     Object.defineProperty(document, 'activeElement', { value: input, configurable: true });
 
-    const spy = vi.spyOn(document.getElementById('hint-btn'), 'click');
+    const spy = vi.spyOn(document.getElementById('hint-btn') as HTMLElement, 'click');
     const event = new KeyboardEvent('keydown', { key: 'h' });
     document.dispatchEvent(event);
     expect(spy).not.toHaveBeenCalled();
@@ -171,20 +173,20 @@ describe('DOMHandler Comprehensive Coverage', () => {
   it('Edge Case: should alert if exporting PGN with no moves', () => {
     domHandler.init();
     window.alert = vi.fn();
-    document.getElementById('export-pgn-btn').click();
+    document.getElementById('export-pgn-btn')!.click();
     expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Keine Züge'));
   });
 
   it('Edge Case: should reload page on restart button confirm', () => {
     domHandler.init();
     window.confirm = vi.fn().mockReturnValue(true);
-    document.getElementById('restart-btn').click();
+    document.getElementById('restart-btn')!.click();
     expect(location.reload).toHaveBeenCalled();
   });
 
   it('Edge Case: should handle tutor level change', () => {
     domHandler.init();
-    const select = document.getElementById('ki-mentor-level-select');
+    const select = document.getElementById('ki-mentor-level-select') as HTMLInputElement;
     select.value = 'STRICT';
     select.dispatchEvent(new Event('change'));
     expect(app.game.mentorLevel).toBe('STRICT');
@@ -194,14 +196,14 @@ describe('DOMHandler Comprehensive Coverage', () => {
     app.game.phase = 'SETUP';
     domHandler.init();
     // Must click menu button to trigger updateResumeButton
-    document.getElementById('menu-btn').click();
-    const btn = document.getElementById('resume-game-btn');
+    document.getElementById('menu-btn')!.click();
+    const btn = document.getElementById('resume-game-btn')!;
     expect(btn.classList.contains('hidden')).toBe(true);
   });
 
   it('Fullscreen: should handle toggle and catch errors', async () => {
     domHandler.init();
-    const btn = document.getElementById('fullscreen-btn');
+    const btn = document.getElementById('fullscreen-btn')!;
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const error = new Error('Denied');
 

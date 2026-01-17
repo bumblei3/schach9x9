@@ -1,7 +1,8 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 import { StatisticsManager } from '../js/statisticsManager.js';
 
 describe('StatisticsManager - Tutor Points', () => {
-  let statsManager;
+  let statsManager: any;
 
   beforeEach(() => {
     // Clear localStorage

@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BattleChess3D } from '../js/battleChess3D.js';
 import { setBoardVariant } from '../js/config.js';
 
@@ -89,13 +90,13 @@ vi.mock('../js/pieces3D.js', () => ({
 // Mock battleAnimations
 vi.mock('../js/battleAnimations.js', () => ({
   BattleAnimator: vi.fn(() => ({
-    playBattle: vi.fn().mockResolvedValue(),
+    playBattle: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
 describe('BattleChess3D Dynamic Board Size', () => {
-  let battleChess;
-  let container;
+  let battleChess: any;
+  let container: any;
 
   beforeEach(() => {
     container = document.createElement('div');

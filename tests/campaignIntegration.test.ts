@@ -67,7 +67,7 @@ vi.mock('../js/sounds.js', () => ({
 
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
-    constructor() { }
+    constructor() {}
   },
 }));
 

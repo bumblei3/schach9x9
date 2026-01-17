@@ -149,7 +149,7 @@ describe('GameStatusUI Component', () => {
   test('should update statistics display', () => {
     game.stats.totalMoves = 10;
     game.stats.accuracies = [90, 100]; // Avg 95
-    game.calculateMaterialAdvantage.mockReturnValue(500);
+    (game.calculateMaterialAdvantage as any).mockReturnValue(500);
 
     GameStatusUI.updateStatistics(game);
 

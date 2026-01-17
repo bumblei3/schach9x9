@@ -1,9 +1,10 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 import { Game, BOARD_SIZE } from '../../js/gameEngine.js';
 import { detectTacticalPatterns, detectBattery } from '../../js/tutor/TacticsDetector.js';
 
 describe('TacticsDetector Dynamic', () => {
-  let game;
-  const analyzer = { getPieceName: t => t };
+  let game: any;
+  const analyzer: any = { getPieceName: (t: any) => t };
 
   beforeEach(() => {
     game = new Game(15, 'classic'); // 9x9 board
@@ -16,7 +17,7 @@ describe('TacticsDetector Dynamic', () => {
   });
 
   // Helper to place piece
-  const place = (r, c, type, color) => {
+  const place = (r: number, c: number, type: string, color: string) => {
     game.board[r][c] = { type, color, hasMoved: false };
   };
 
@@ -39,7 +40,7 @@ describe('TacticsDetector Dynamic', () => {
     game.board[4][5] = { type: 'r', color: 'white' };
     game.board[4][6] = null;
 
-    const batteries = detectBattery(game, analyzer, { r: 4, c: 5 }, 'white');
+    const batteries = detectBattery(game as any, analyzer, { r: 4, c: 5 }, 'white');
 
     expect(batteries).toHaveLength(1);
     expect(batteries[0].frontPos).toEqual({ r: 4, c: 5 });
@@ -59,8 +60,8 @@ describe('TacticsDetector Dynamic', () => {
     // 4,5 + (-1, -2) = 3,3. Yes.
     // 4,5 + (-1, +2) = 3,7. Yes.
 
-    const patterns = detectTacticalPatterns(game, analyzer, move);
-    const fork = patterns.find(p => p.type === 'fork');
+    const patterns = detectTacticalPatterns(game as any, analyzer, move);
+    const fork: any = patterns.find((p: any) => p.type === 'fork');
 
     expect(fork).toBeDefined();
     expect(fork.targets).toHaveLength(2);
@@ -81,8 +82,8 @@ describe('TacticsDetector Dynamic', () => {
     // Move
     const move = { from: { r: 4, c: 0 }, to: { r: 0, c: 5 } };
 
-    const patterns = detectTacticalPatterns(game, analyzer, move);
-    const pin = patterns.find(p => p.type === 'pin');
+    const patterns = detectTacticalPatterns(game as any, analyzer, move);
+    const pin: any = patterns.find((p: any) => p.type === 'pin');
 
     expect(pin).toBeDefined();
     expect(pin.targets).toContainEqual({ r: 0, c: 2 }); // Pinned Knight

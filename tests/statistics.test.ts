@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 // Mock logger
 vi.mock('../js/logger.js', () => ({
   logger: {
@@ -11,8 +12,8 @@ vi.mock('../js/logger.js', () => ({
 const { StatisticsManager } = await import('../js/statisticsManager.js');
 
 describe('StatisticsManager', () => {
-  let stats;
-  let localStorageMock;
+  let stats: any;
+  let localStorageMock: any;
 
   beforeEach(() => {
     localStorageMock = {
@@ -28,8 +29,8 @@ describe('StatisticsManager', () => {
   });
 
   test('should initialize with default structure if storage is empty', () => {
-    expect(stats.data.games).toEqual([]);
-    expect(stats.data.stats.totalGames).toBe(0);
+    expect((stats as any).data.games).toEqual([]);
+    expect((stats as any).data.stats.totalGames).toBe(0);
   });
 
   test('should load existing data from storage', () => {
@@ -37,11 +38,11 @@ describe('StatisticsManager', () => {
       games: [{ id: '1', result: 'win' }],
       stats: { totalGames: 1, wins: 1, losses: 0, draws: 0, winRate: 1 },
     };
-    localStorageMock.getItem.mockReturnValue(JSON.stringify(mockData));
+    (localStorageMock.getItem as any).mockReturnValue(JSON.stringify(mockData));
 
     const newStats = new StatisticsManager();
-    expect(newStats.data.games.length).toBe(1);
-    expect(newStats.data.stats.wins).toBe(1);
+    expect((newStats as any).data.games.length).toBe(1);
+    expect((newStats as any).data.stats.wins).toBe(1);
   });
 
   test('saveGame should append game and update stats', () => {
@@ -56,21 +57,21 @@ describe('StatisticsManager', () => {
 
     stats.saveGame(gameData);
 
-    expect(stats.data.games.length).toBe(1);
-    expect(stats.data.stats.totalGames).toBe(1);
-    expect(stats.data.stats.wins).toBe(1);
-    expect(stats.data.stats.winRate).toBe(1);
+    expect((stats as any).data.games.length).toBe(1);
+    expect((stats as any).data.stats.totalGames).toBe(1);
+    expect((stats as any).data.stats.wins).toBe(1);
+    expect((stats as any).data.stats.winRate).toBe(1);
     expect(localStorageMock.setItem).toHaveBeenCalled();
   });
 
   test('getStatistics should return a copy of stats', () => {
     const currentStats = stats.getStatistics();
-    expect(currentStats).toEqual(stats.data.stats);
-    expect(currentStats).not.toBe(stats.data.stats); // Verify it's a copy
+    expect(currentStats).toEqual((stats as any).data.stats);
+    expect(currentStats).not.toBe((stats as any).data.stats); // Verify it's a copy
   });
 
   test('getGameHistory should filter and sort games', () => {
-    stats.data.games = [
+    (stats as any).data.games = [
       { id: '1', result: 'win', opponent: 'AI-Expert', date: '2023-01-01T10:00:00Z' },
       { id: '2', result: 'loss', opponent: 'AI-Beginner', date: '2023-01-02T10:00:00Z' },
     ];
@@ -89,7 +90,7 @@ describe('StatisticsManager', () => {
   });
 
   test('getGameById should return game or null', () => {
-    stats.data.games = [{ id: 'test-id', result: 'win' }];
+    (stats as any).data.games = [{ id: 'test-id', result: 'win' }];
     expect(stats.getGameById('test-id')).toBeDefined();
     expect(stats.getGameById('nothing')).toBeNull();
   });
@@ -101,8 +102,8 @@ describe('StatisticsManager', () => {
     const newStats = new StatisticsManager();
     newStats.importGames(exported, false); // Replace
 
-    expect(newStats.data.games.length).toBe(1);
-    expect(newStats.data.stats.wins).toBe(1);
+    expect((newStats as any).data.games.length).toBe(1);
+    expect((newStats as any).data.stats.wins).toBe(1);
   });
 
   test('importGames with merge should avoid duplicates', () => {
@@ -115,7 +116,7 @@ describe('StatisticsManager', () => {
     // Import the first game again with merge
     stats.importGames(exported, true);
 
-    expect(stats.data.games.length).toBe(2); // Still 2, not 3 (no duplicate for Alpha)
+    expect((stats as any).data.games.length).toBe(2); // Still 2, not 3 (no duplicate for Alpha)
   });
 
   test('importGames should handle invalid JSON', () => {
@@ -124,22 +125,22 @@ describe('StatisticsManager', () => {
   });
 
   test('recalculateStats should handle losses', () => {
-    stats.data.games = [{ result: 'loss' }];
+    (stats as any).data.games = [{ result: 'loss' }];
     stats.recalculateStats();
-    expect(stats.data.stats.losses).toBe(1);
+    expect((stats as any).data.stats.losses).toBe(1);
   });
 
   test('clearHistory should reset data', () => {
     stats.saveGame({ result: 'win' });
     stats.clearHistory(true);
-    expect(stats.data.games.length).toBe(0);
-    expect(stats.data.stats.totalGames).toBe(0);
+    expect((stats as any).data.games.length).toBe(0);
+    expect((stats as any).data.stats.totalGames).toBe(0);
   });
 
   test('clearHistory should require confirmation', () => {
     stats.saveGame({ result: 'win' });
     stats.clearHistory(false);
-    expect(stats.data.games.length).toBe(1);
+    expect((stats as any).data.games.length).toBe(1);
   });
 
   test('getRecentStats should return stats for specified period', () => {
@@ -147,7 +148,7 @@ describe('StatisticsManager', () => {
     const oldDate = new Date();
     oldDate.setDate(now.getDate() - 40);
 
-    stats.data.games = [
+    (stats as any).data.games = [
       { result: 'win', date: now.toISOString() },
       { result: 'loss', date: oldDate.toISOString() },
     ];
@@ -158,7 +159,7 @@ describe('StatisticsManager', () => {
   });
 
   test('getStatsByOpponent should group correctly', () => {
-    stats.data.games = [
+    (stats as any).data.games = [
       { result: 'win', opponent: 'AI-1' },
       { result: 'loss', opponent: 'AI-1' },
       { result: 'draw', opponent: 'AI-2' },

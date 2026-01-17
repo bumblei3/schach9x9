@@ -6,8 +6,8 @@ vi.mock('../../js/ui/ShopUI.js', () => ({
 }));
 
 describe('TutorUI Coverage', () => {
-  let mockGame;
-  let container;
+  let mockGame: any;
+  let container: any;
 
   beforeEach(() => {
     // Setup DOM
@@ -65,14 +65,14 @@ describe('TutorUI Coverage', () => {
 
       TutorUI.updateTutorRecommendations(mockGame);
 
-      expect(section.classList.contains('hidden')).toBe(true);
+      expect(section!.classList.contains('hidden')).toBe(true);
     });
 
     it('should handle template click', () => {
       mockGame.phase = 'SETUP_WHITE_PIECES';
       TutorUI.updateTutorRecommendations(mockGame);
 
-      const card = container.querySelector('.setup-template-card');
+      const card = container.querySelector('.setup-template-card') as HTMLElement;
       card.click();
 
       expect(mockGame.tutorController.applySetupTemplate).toHaveBeenCalledWith('defensive');
@@ -91,7 +91,7 @@ describe('TutorUI Coverage', () => {
 
       await TutorUI.showTutorSuggestions(mockGame);
 
-      const overlay = document.getElementById('tutor-overlay');
+      const overlay = document.getElementById('tutor-overlay')!;
       expect(overlay).not.toBeNull();
       expect(overlay.classList.contains('hidden')).toBe(false);
       expect(overlay.innerHTML).toContain('Defensive Festung');
@@ -106,10 +106,10 @@ describe('TutorUI Coverage', () => {
 
       const overlay = document.getElementById('tutor-overlay');
       expect(overlay).not.toBeNull();
-      expect(overlay.classList.contains('hidden')).toBe(false);
+      expect(overlay!.classList.contains('hidden')).toBe(false);
 
-      const card = document.querySelector('#tutor-hints-body .setup-template-card');
-      expect(card).not.toBeNull(); // This was throwing TypeError before
+      const card = document.querySelector('#tutor-hints-body .setup-template-card') as HTMLElement;
+      expect(card).not.toBeNull();
       card.click();
 
       expect(mockGame.tutorController.applySetupTemplate).toHaveBeenCalledWith('defensive');
@@ -118,11 +118,11 @@ describe('TutorUI Coverage', () => {
 
   describe('showTutorSuggestions - Play Phase', () => {
     it('should return early if no hints', async () => {
-      mockGame.tutorController.getTutorHints.mockResolvedValue([]);
+      (mockGame.tutorController.getTutorHints as any).mockResolvedValue([]);
 
       await TutorUI.showTutorSuggestions(mockGame);
 
-      const suggestionsEl = document.getElementById('tutor-suggestions');
+      const suggestionsEl = document.getElementById('tutor-suggestions')!;
       expect(suggestionsEl.innerHTML).toContain('Keine Vorschläge');
     });
 
@@ -146,17 +146,17 @@ describe('TutorUI Coverage', () => {
       await TutorUI.showTutorSuggestions(mockGame);
 
       // Play phase uses 'tutor-suggestions' in panel
-      const panel = document.getElementById('tutor-suggestions');
+      const panel = document.getElementById('tutor-suggestions')!;
 
       expect(panel.innerHTML).toContain('Guter Zug');
       expect(panel.innerHTML).toContain('Warum gut?');
 
-      const showBtn = panel.querySelector('.show-details-btn');
+      const showBtn = panel.querySelector('.show-details-btn') as HTMLElement;
       expect(showBtn).not.toBeNull();
 
       showBtn.click();
       // Details should be toggled (removed hidden class typically)
-      const details = panel.querySelector('.suggestion-details');
+      const details = panel.querySelector('.suggestion-details')!;
       expect(details.classList.contains('hidden')).toBe(false);
     });
   });

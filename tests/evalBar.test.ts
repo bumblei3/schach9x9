@@ -1,10 +1,11 @@
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 /**
  * Unit tests for EvaluationBar
  */
 import { EvaluationBar } from '../js/ui/EvaluationBar.js';
 
 describe('EvaluationBar', () => {
-  let container;
+  let container: any;
 
   beforeEach(() => {
     // Setup DOM
@@ -18,7 +19,8 @@ describe('EvaluationBar', () => {
   });
 
   test('should initialize and insert into DOM', () => {
-    const _evalBar = new EvaluationBar('test-container');
+    // const _evalBar = new EvaluationBar('test-container');
+    new EvaluationBar('test-container');
     const wrapper = document.querySelector('.evaluation-bar-wrapper');
     expect(wrapper).not.toBeNull();
     expect(container.contains(wrapper)).toBe(true);
@@ -28,10 +30,10 @@ describe('EvaluationBar', () => {
     const evalBar = new EvaluationBar('test-container');
     evalBar.update(0);
 
-    const fill = document.querySelector('.eval-bar-fill');
+    const fill = document.querySelector('.eval-bar-fill') as HTMLElement;
     expect(fill.style.height).toBe('50%');
 
-    const score = document.querySelector('.eval-bar-score');
+    const score = document.querySelector('.eval-bar-score')!;
     expect(score.textContent).toBe('0.0');
   });
 
@@ -39,11 +41,11 @@ describe('EvaluationBar', () => {
     const evalBar = new EvaluationBar('test-container');
     evalBar.update(200); // +2.0
 
-    const fill = document.querySelector('.eval-bar-fill');
+    const fill = document.querySelector('.eval-bar-fill') as HTMLElement;
     // 50 + (200/1000)*50 = 50 + 10 = 60%
     expect(fill.style.height).toBe('60%');
 
-    const score = document.querySelector('.eval-bar-score');
+    const score = document.querySelector('.eval-bar-score')!;
     expect(score.textContent).toBe('+2.0');
   });
 
@@ -51,11 +53,11 @@ describe('EvaluationBar', () => {
     const evalBar = new EvaluationBar('test-container');
     evalBar.update(-400); // -4.0
 
-    const fill = document.querySelector('.eval-bar-fill');
+    const fill = document.querySelector('.eval-bar-fill') as HTMLElement;
     // 50 + (-400/1000)*50 = 50 - 20 = 30%
     expect(fill.style.height).toBe('30%');
 
-    const score = document.querySelector('.eval-bar-score');
+    const score = document.querySelector('.eval-bar-score')!;
     expect(score.textContent).toBe('-4.0');
   });
 
@@ -63,7 +65,7 @@ describe('EvaluationBar', () => {
     const evalBar = new EvaluationBar('test-container');
     evalBar.update(2000); // way above 1000
 
-    const fill = document.querySelector('.eval-bar-fill');
+    const fill = document.querySelector('.eval-bar-fill') as HTMLElement;
     expect(fill.style.height).toBe('100%');
 
     evalBar.update(-5000); // way below -1000
@@ -73,12 +75,12 @@ describe('EvaluationBar', () => {
   test('visible property should toggle display', () => {
     const evalBar = new EvaluationBar('test-container');
     evalBar.show(false);
-    expect(document.querySelector('.evaluation-bar-wrapper').classList.contains('hidden')).toBe(
+    expect(document.querySelector('.evaluation-bar-wrapper')!.classList.contains('hidden')).toBe(
       true
     );
 
     evalBar.show(true);
-    expect(document.querySelector('.evaluation-bar-wrapper').classList.contains('hidden')).toBe(
+    expect(document.querySelector('.evaluation-bar-wrapper')!.classList.contains('hidden')).toBe(
       false
     );
   });

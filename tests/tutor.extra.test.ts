@@ -1,7 +1,8 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { PHASES } from '../js/config.js';
 
 // Mock UI and other dependencies
-global.document = {
+(global as any).document = {
   getElementById: vi.fn(() => ({
     textContent: '',
     appendChild: vi.fn(),
@@ -27,7 +28,7 @@ const UI = await import('../js/ui.js');
 const { TutorController } = await import('../js/tutorController.js');
 
 describe('TutorController Extra Coverage', () => {
-  let game, tutor;
+  let game: any, tutor: any;
 
   beforeEach(() => {
     game = {
@@ -52,7 +53,7 @@ describe('TutorController Extra Coverage', () => {
       undoMove: vi.fn(),
       log: vi.fn(),
     };
-    tutor = new TutorController(game);
+    tutor = new TutorController(game as any);
     vi.clearAllMocks();
   });
 
@@ -61,7 +62,7 @@ describe('TutorController Extra Coverage', () => {
       game.tutorMode = 'guess_the_move';
       const move = { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } };
       game.bestMoves = [{ move: move }];
-      game.getAllLegalMoves.mockReturnValue([move]);
+      (game.getAllLegalMoves as any).mockReturnValue([move]);
 
       tutor.handlePlayerMove(move.from, move.to);
 
@@ -74,7 +75,7 @@ describe('TutorController Extra Coverage', () => {
       const move = { from: { r: 6, c: 4 }, to: { r: 5, c: 4 } };
       const bestMove = { from: { r: 6, c: 3 }, to: { r: 5, c: 3 } };
       game.bestMoves = [{ move: bestMove }];
-      game.getAllLegalMoves.mockReturnValue([move, bestMove]);
+      (game.getAllLegalMoves as any).mockReturnValue([move, bestMove]);
 
       tutor.handlePlayerMove(move.from, move.to);
 
@@ -86,7 +87,7 @@ describe('TutorController Extra Coverage', () => {
     });
 
     test('should do nothing if phase is not PLAY', () => {
-      game.phase = PHASES.SETUP;
+      game.phase = PHASES.SETUP_WHITE_PIECES;
       tutor.handlePlayerMove({ r: 6, c: 4 }, { r: 5, c: 4 });
       expect(game.getAllLegalMoves).not.toHaveBeenCalled();
     });

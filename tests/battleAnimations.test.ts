@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 // Comprehensive Three.js Mock for Animations
 // Comprehensive Three.js Mock for Animations
 const mockThree = {
@@ -18,7 +19,7 @@ const mockThree = {
       },
     };
   }),
-  Vector3: vi.fn().mockImplementation(function (x = 0, y = 0, z = 0) {
+  Vector3: vi.fn().mockImplementation(function (this: any, x = 0, y = 0, z = 0) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -71,7 +72,7 @@ mockThree.Vector3.prototype = {
   lerp: vi.fn(),
   lerpVectors: vi.fn(),
   length: vi.fn(() => 1),
-  normalize: vi.fn(function () {
+  normalize: vi.fn(function (this: any) {
     return this;
   }),
 };
@@ -81,7 +82,7 @@ vi.mock('three', () => mockThree);
 const { BattleAnimator } = await import('../js/battleAnimations.js');
 
 describe('BattleAnimator Class', () => {
-  let scene, camera, animator;
+  let scene: any, camera: any, animator: any;
 
   beforeEach(() => {
     scene = new mockThree.Scene();

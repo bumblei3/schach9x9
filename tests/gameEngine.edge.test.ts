@@ -1,8 +1,9 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 import { createEmptyBoard, Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 describe('Game Engine Edge Cases', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     game = new Game();

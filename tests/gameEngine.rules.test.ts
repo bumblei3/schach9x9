@@ -228,7 +228,7 @@ describe('Game Engine Rules', () => {
       game.board[8][8] = { type: 'r', color: 'white', hasMoved: false };
 
       const moves = game.getValidMoves(8, 4, game.board[8][4]!);
-      const castlingMove = moves.find(m => m.r === 8 && m.c === 6); // King moves 2 squares right
+      const castlingMove = moves.find((m: any) => m.r === 8 && m.c === 6); // King moves 2 squares right
 
       expect(castlingMove).toBeDefined();
     });
@@ -245,7 +245,7 @@ describe('Game Engine Rules', () => {
       game.board[8][5] = { type: 'n', color: 'white', hasMoved: false };
 
       const moves = game.getValidMoves(8, 4, game.board[8][4]!);
-      const castlingMove = moves.find(m => m.r === 8 && m.c === 6);
+      const castlingMove = moves.find((m: any) => m.r === 8 && m.c === 6);
 
       expect(castlingMove).toBeUndefined();
     });
@@ -262,7 +262,7 @@ describe('Game Engine Rules', () => {
       game.board[0][5] = { type: 'r', color: 'black', hasMoved: false };
 
       const moves = game.getValidMoves(8, 4, game.board[8][4]!);
-      const castlingMove = moves.find(m => m.r === 8 && m.c === 6);
+      const castlingMove = moves.find((m: any) => m.r === 8 && m.c === 6);
 
       expect(castlingMove).toBeUndefined();
     });
@@ -288,7 +288,7 @@ describe('Game Engine Rules', () => {
       };
 
       const moves = game.getValidMoves(3, 4, game.board[3][4]!);
-      const enPassantMove = moves.find(m => m.r === 2 && m.c === 3);
+      const enPassantMove = moves.find((m: any) => m.r === 2 && m.c === 3);
 
       expect(enPassantMove).toBeDefined();
     });

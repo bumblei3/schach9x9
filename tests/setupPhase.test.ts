@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Game, PHASES } from '../js/gameEngine.js';
 import { GameController } from '../js/gameController.js';
 
@@ -54,8 +55,8 @@ vi.stubGlobal('AudioContext', mockAudioContext);
 vi.stubGlobal('webkitAudioContext', mockAudioContext);
 
 describe('Setup Phase Integration', () => {
-  let game;
-  let controller;
+  let game: any;
+  let controller: any;
 
   beforeEach(() => {
     // Mock DOM for initGame

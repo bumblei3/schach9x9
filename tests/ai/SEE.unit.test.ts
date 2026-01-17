@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 import { see } from '../../js/ai/MoveGenerator.js';
 import {
   SQUARE_COUNT,
@@ -15,7 +16,7 @@ import {
 } from '../../js/ai/BoardDefinitions.js';
 
 describe('Static Exchange Evaluation (SEE)', () => {
-  let board;
+  let board: any;
 
   beforeEach(() => {
     board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);

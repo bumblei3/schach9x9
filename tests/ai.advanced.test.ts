@@ -1,14 +1,15 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 /* eslint-disable no-undef */
 
-global.BOARD_SIZE = 9;
+(global as any).BOARD_SIZE = 9;
 
 // Dynamic import
 const { evaluatePosition } = await import('../js/aiEngine.js');
 
 describe('AI Advanced Evaluation Tests', () => {
-  let board;
+  let board: any;
 
-  function createPiece(type, color) {
+  function createPiece(type: string, color: string) {
     return { type, color, hasMoved: false };
   }
 

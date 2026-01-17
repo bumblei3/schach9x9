@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 // Comprehensive Three.js Mock
 const mockThree = {
   Scene: vi.fn().mockImplementation(function () {
@@ -30,10 +31,10 @@ const mockThree = {
   }),
   Group: vi.fn().mockImplementation(function () {
     return {
-      add: vi.fn(function (obj) {
+      add: vi.fn(function (this: any, obj) {
         this.children.push(obj);
       }),
-      remove: vi.fn(function (obj) {
+      remove: vi.fn(function (this: any, obj) {
         const index = this.children.indexOf(obj);
         if (index > -1) this.children.splice(index, 1);
       }),
@@ -133,8 +134,8 @@ import { setupJSDOM } from './test-utils.js';
 const { BattleChess3D } = await import('../js/battleChess3D.js');
 
 describe('BattleChess3D Class', () => {
-  let container;
-  let engine;
+  let container: any;
+  let engine: any;
 
   beforeEach(() => {
     setupJSDOM();
@@ -264,8 +265,8 @@ describe('BattleChess3D Class', () => {
 
     expect(dispatchSpy).toHaveBeenCalled();
     const event = dispatchSpy.mock.calls[0][0];
-    expect(event.type).toBe('board3dclick');
-    expect(event.detail.row).toBe(4);
+    expect((event as any).type).toBe('board3dclick');
+    expect((event as any).detail.row).toBe(4);
   });
 
   test('should handle onWindowResize', async () => {

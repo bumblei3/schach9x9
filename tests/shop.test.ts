@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
@@ -37,12 +38,12 @@ vi.stubGlobal('webkitAudioContext', mockAudioContext);
 const { GameController } = await import('../js/gameController.js');
 
 describe('Shop System', () => {
-  let game;
-  let gameController;
+  let game: any;
+  let gameController: any;
 
   beforeEach(() => {
-    game = new Game(15, 'setup', false); // 15 points, setup mode, no AI
-    gameController = new GameController(game);
+    game = new Game(15, 'setup'); // 15 points, setup mode
+    gameController = new GameController(game as any);
     game.gameController = gameController;
     game.log = vi.fn();
 
@@ -231,14 +232,16 @@ describe('Shop System', () => {
       // Mock querySelector to return a proper button element
       const mockButton = { classList: { add: vi.fn(), remove: vi.fn() } };
       document.querySelector = vi.fn(() => mockButton);
-      document.querySelectorAll = vi.fn(() => [
-        { classList: { remove: vi.fn() } },
-        { classList: { remove: vi.fn() } },
-      ]);
-      document.getElementById = vi.fn(() => ({
-        innerHTML: '',
-        style: {},
-      }));
+      document.querySelectorAll = vi.fn(
+        () => [{ classList: { remove: vi.fn() } }, { classList: { remove: vi.fn() } }] as any
+      );
+      document.getElementById = vi.fn(
+        () =>
+          ({
+            innerHTML: '',
+            style: {},
+          }) as any
+      );
 
       gameController.selectShopPiece('q');
 

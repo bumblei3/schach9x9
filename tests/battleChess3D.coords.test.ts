@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BattleChess3D } from '../js/battleChess3D.js';
 
 // Mock THREE
@@ -80,13 +81,13 @@ vi.mock('../js/pieces3D.js', () => ({
 // Mock battleAnimations
 vi.mock('../js/battleAnimations.js', () => ({
   BattleAnimator: vi.fn(() => ({
-    playBattle: vi.fn().mockResolvedValue(),
+    playBattle: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
 describe('BattleChess3D Debug Tests', () => {
-  let battleChess;
-  let container;
+  let battleChess: any;
+  let container: any;
 
   beforeEach(() => {
     container = document.createElement('div');
@@ -99,7 +100,7 @@ describe('BattleChess3D Debug Tests', () => {
     // but init() is async and complex.
     // We can just mock the battleAnimator property directly if we don't call init.
     battleChess.battleAnimator = {
-      playBattle: vi.fn().mockResolvedValue(),
+      playBattle: vi.fn().mockResolvedValue(undefined),
     };
     battleChess.scene = {}; // Mock scene
   });

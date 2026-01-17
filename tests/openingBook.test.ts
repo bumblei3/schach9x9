@@ -4,7 +4,7 @@ import { logger } from '../js/logger.js';
 import { type Piece } from '../js/gameEngine.js';
 
 // Mock logger to avoid clutter
-vi.spyOn(logger, 'debug').mockImplementation(function () { });
+vi.spyOn(logger, 'debug').mockImplementation(function () {});
 
 describe('OpeningBook', () => {
   const mockBoard: (Piece | null)[][] = Array(9)

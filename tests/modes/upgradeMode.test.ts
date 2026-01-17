@@ -4,9 +4,9 @@ import { PHASES } from '../../js/config.js';
 // Mock dependencies
 vi.mock('../../js/ui.js', () => ({
   renderBoard: vi.fn(),
-  showModal: vi.fn((title, content, actions) => {
+  showModal: vi.fn((_title: any, _content: any, actions: any) => {
     if (actions) {
-      const confirm = actions.find(a => a.text === 'Fortfahren');
+      const confirm = actions.find((a: any) => a.text === 'Fortfahren');
       if (confirm && confirm.callback) confirm.callback();
     }
   }),
@@ -102,8 +102,8 @@ vi.mock('../../js/ui/PuzzleMenu.js', () => ({
 }));
 
 describe('Troop Upgrade Mode', () => {
-  let game;
-  let controller;
+  let game: any;
+  let controller: any;
 
   beforeEach(async () => {
     // Init Game with 'upgrade' mode

@@ -1,9 +1,11 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { MoveController } from '../js/moveController.js';
 import { PHASES } from '../js/config.js';
 
 describe('MoveController - Enhanced Coverage Tests', () => {
-  let game, moveController;
+  let game: any;
+  let moveController: any;
 
   beforeEach(() => {
     game = new Game(15, 'classic');
@@ -21,14 +23,28 @@ describe('MoveController - Enhanced Coverage Tests', () => {
     game.startClock = vi.fn();
 
     // Mock DOM elements
-    vi.spyOn(document, 'getElementById').mockImplementation(() => ({
-      classList: {
-        add: vi.fn(),
-        remove: vi.fn(),
-      },
-      textContent: '',
-      disabled: false,
-    }));
+    vi.spyOn(document, 'getElementById').mockImplementation(
+      () =>
+        ({
+          classList: {
+            add: vi.fn(),
+            remove: vi.fn(),
+            length: 0,
+            value: '',
+            contains: vi.fn(),
+            item: vi.fn(),
+            toggle: vi.fn(),
+            replace: vi.fn(),
+            supports: vi.fn(),
+            forEach: vi.fn(),
+            entries: vi.fn(),
+            keys: vi.fn(),
+            values: vi.fn(),
+          } as unknown as DOMTokenList,
+          textContent: '',
+          disabled: false,
+        }) as unknown as HTMLElement
+    );
 
     vi.clearAllMocks();
   });
@@ -244,7 +260,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
       expect(() => {
         try {
-          JSON.parse(localStorage.getItem('schach9x9_save_autosave'));
+          JSON.parse(localStorage.getItem('schach9x9_save_autosave') || '');
         } catch (e) {
           // Should catch parse error
           expect(e).toBeInstanceOf(SyntaxError);
@@ -261,7 +277,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(incompleteSave));
 
-      const loaded = JSON.parse(localStorage.getItem('schach9x9_save_autosave'));
+      const loaded = JSON.parse(localStorage.getItem('schach9x9_save_autosave') || '{}');
 
       // Should provide defaults
       const moveHistory = loaded.moveHistory || [];
@@ -280,7 +296,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
       localStorage.setItem('schach9x9_save_autosave', JSON.stringify(oldFormatSave));
 
-      const loaded = JSON.parse(localStorage.getItem('schach9x9_save_autosave'));
+      const loaded = JSON.parse(localStorage.getItem('schach9x9_save_autosave') || '{}');
 
       // Simulate migration
       const migratedBoard = loaded.board || loaded.boardState;
@@ -303,7 +319,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
 
       try {
         localStorage.setItem('schach9x9_save_autosave', JSON.stringify(largeSave));
-      } catch (e) {
+      } catch (e: any) {
         // Should handle QuotaExceededError
         expect(e.name).toBe('QuotaExceededError');
       }
@@ -323,7 +339,7 @@ describe('MoveController - Enhanced Coverage Tests', () => {
       moveController.positionHistory = ['hash1', 'hash2', 'hash1', 'hash2', 'hash1'];
 
       const currentHash = 'hash1';
-      const count = moveController.positionHistory.filter(h => h === currentHash).length;
+      const count = moveController.positionHistory.filter((h: any) => h === currentHash).length;
 
       expect(count).toBeGreaterThanOrEqual(3);
     });

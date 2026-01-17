@@ -1,10 +1,11 @@
+import { describe, test, expect, beforeEach, vi, type MockedFunction } from 'vitest';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
 vi.mock('../js/utils.js', () => ({
-  debounce: vi.fn(fn => fn),
-  formatTime: vi.fn(t => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
-  deepCopy: vi.fn(obj => JSON.parse(JSON.stringify(obj))),
+  debounce: vi.fn((fn: any) => fn),
+  formatTime: vi.fn((t: number) => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`),
+  deepCopy: vi.fn((obj: any) => JSON.parse(JSON.stringify(obj))),
   parseFEN: vi.fn(() => ({ board: [], turn: 'white' })),
 }));
 
@@ -81,7 +82,7 @@ const { soundManager } = await import('../js/sounds.js');
 const { puzzleManager } = await import('../js/puzzleManager.js');
 
 describe('Coverage Boost Tests', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     game = {
@@ -147,9 +148,31 @@ describe('Coverage Boost Tests', () => {
       <div id="chess-clock" class="hidden"></div>
     `;
 
-    global.window.PIECE_SVGS = {
-      white: { p: 'wp', n: 'wn', b: 'wb', r: 'wr', q: 'wq', k: 'wk', a: 'wa', c: 'wc', e: 'we' },
-      black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', a: 'ba', c: 'bc', e: 'be' },
+    (global as any).window.PIECE_SVGS = {
+      white: {
+        p: 'wp',
+        n: 'wn',
+        b: 'wb',
+        r: 'wr',
+        q: 'wq',
+        k: 'wk',
+        a: 'wa',
+        c: 'wc',
+        e: 'we',
+        j: 'wj',
+      },
+      black: {
+        p: 'bp',
+        n: 'bn',
+        b: 'bb',
+        r: 'br',
+        q: 'bq',
+        k: 'bk',
+        a: 'ba',
+        c: 'bc',
+        e: 'be',
+        j: 'bj',
+      },
     };
 
     global.confirm = vi.fn(() => true);
@@ -168,12 +191,12 @@ describe('Coverage Boost Tests', () => {
 
       UI.updateTutorRecommendations(game);
 
-      const container = document.getElementById('tutor-recommendations-container');
+      const container = document.getElementById('tutor-recommendations-container')!;
       expect(container.children.length).toBe(1);
-      expect(container.querySelector('.template-name').textContent).toBe('Balanced');
+      expect(container.querySelector('.template-name')!.textContent).toBe('Balanced');
 
       // Click template
-      container.firstChild.click();
+      (container.firstChild as HTMLElement).click();
       expect(game.tutorController.applySetupTemplate).toHaveBeenCalledWith('balanced');
     });
 
@@ -181,14 +204,14 @@ describe('Coverage Boost Tests', () => {
       game.phase = PHASES.PLAY;
       UI.updateTutorRecommendations(game);
       expect(
-        document.getElementById('tutor-recommendations-section').classList.contains('hidden')
+        document.getElementById('tutor-recommendations-section')!.classList.contains('hidden')
       ).toBe(true);
     });
   });
 
   describe('UI.renderEvalGraph', () => {
     test('should render SVG based on moveHistory scores', () => {
-      const svg = document.getElementById('eval-graph');
+      const svg = document.getElementById('eval-graph')!;
 
       game.moveHistory = [{ evalScore: 50 }, { evalScore: -100 }];
 
@@ -200,7 +223,7 @@ describe('Coverage Boost Tests', () => {
     });
 
     test('should handle empty move history gracefully', () => {
-      const svg = document.getElementById('eval-graph');
+      const svg = document.getElementById('eval-graph')!;
       game.moveHistory = [];
       UI.renderEvalGraph(game);
       expect(svg.innerHTML).toBe('');
@@ -212,11 +235,11 @@ describe('Coverage Boost Tests', () => {
       const actions = [{ text: 'OK', callback: vi.fn() }];
       UI.showModal('Title', 'Message', actions);
 
-      const modal = document.getElementById('generic-modal');
+      const modal = document.getElementById('generic-modal')!;
       expect(modal.classList.contains('hidden')).toBe(false);
-      expect(document.getElementById('modal-title').textContent).toBe('Title');
+      expect(document.getElementById('modal-title')!.textContent).toBe('Title');
 
-      const okBtn = document.querySelector('#modal-actions button');
+      const okBtn = document.querySelector('#modal-actions button') as HTMLButtonElement;
       okBtn.click();
       expect(actions[0].callback).toHaveBeenCalled();
 
@@ -228,7 +251,7 @@ describe('Coverage Boost Tests', () => {
       vi.useFakeTimers();
       UI.showToast('Test Toast', 'success');
 
-      const toast = document.querySelector('.toast');
+      const toast = document.querySelector('.toast')!;
       expect(toast).not.toBeNull();
       expect(toast.textContent).toContain('Test Toast');
       expect(toast.classList.contains('success')).toBe(true);
@@ -281,8 +304,11 @@ describe('Coverage Boost Tests', () => {
       };
       mockState.board[4][4] = { type: 'p', color: 'white' };
 
-      storageManager.loadGame.mockReturnValue(mockState);
-      storageManager.loadStateIntoGame.mockImplementation(function (g, s) {
+      (storageManager.loadGame as MockedFunction<any>).mockReturnValue(mockState);
+      (storageManager.loadStateIntoGame as MockedFunction<any>).mockImplementation(function (
+        g: any,
+        s: any
+      ) {
         Object.assign(g, s);
         return true;
       });
@@ -295,7 +321,7 @@ describe('Coverage Boost Tests', () => {
 
     test('should handle missing save data', () => {
       const controller = new GameController(game);
-      storageManager.loadGame.mockReturnValue(null);
+      (storageManager.loadGame as MockedFunction<any>).mockReturnValue(null);
 
       controller.loadGame();
       expect(game.log).toHaveBeenCalledWith(
@@ -305,7 +331,7 @@ describe('Coverage Boost Tests', () => {
   });
 
   describe('GameController edge cases and additional features', () => {
-    let controller;
+    let controller: any;
     beforeEach(() => {
       controller = new GameController(game);
       game.gameController = controller;
@@ -328,7 +354,7 @@ describe('Coverage Boost Tests', () => {
       controller.tickClock();
       expect(game.whiteTime).toBe(0);
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      expect(document.getElementById('winner-text').textContent).toContain('Schwarz gewinnt');
+      expect(document.getElementById('winner-text')!.textContent).toContain('Schwarz gewinnt');
     });
 
     test('resign should end game', () => {
@@ -338,7 +364,7 @@ describe('Coverage Boost Tests', () => {
 
       controller.resign('white');
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      expect(document.getElementById('winner-text').textContent).toContain('Weiß gibt auf');
+      expect(document.getElementById('winner-text')!.textContent).toContain('Weiß gibt auf');
     });
 
     test('offerDraw, acceptDraw, declineDraw', () => {
@@ -440,11 +466,11 @@ describe('Coverage Boost Tests', () => {
         moves: 'e2e4',
         description: 'Solve it',
       };
-      puzzleManager.loadPuzzle = vi.fn(g => {
+      (puzzleManager.loadPuzzle as MockedFunction<any>) = vi.fn((g: any) => {
         g.mode = 'puzzle';
         return mockPuzzle;
       });
-      puzzleManager.init = vi.fn();
+      (puzzleManager as any).init = vi.fn();
 
       controller.startPuzzleMode(0);
       expect(game.mode).toBe('puzzle');

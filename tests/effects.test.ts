@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as Effects from '../js/effects.js';
 
 describe('Effects System', () => {
@@ -32,7 +33,7 @@ describe('Effects System', () => {
     ftm.show(50, 50, '+10', 'score');
     const el = document.querySelector('.floating-text');
     expect(el).not.toBeNull();
-    expect(el.textContent).toBe('+10');
+    expect(el!.textContent).toBe('+10');
 
     vi.advanceTimersByTime(2000);
     expect(document.querySelector('.floating-text')).toBeNull();
@@ -42,7 +43,7 @@ describe('Effects System', () => {
     const cs = new Effects.ConfettiSystem();
     // Initialize container manually for test since it's lazy-loaded
     cs.container = document.createElement('div');
-    cs.container.getBoundingClientRect = () => ({ width: 1000, height: 1000 });
+    cs.container.getBoundingClientRect = () => ({ width: 1000, height: 1000 }) as DOMRect;
 
     cs.spawn();
     expect(cs.particles.length).toBe(150);
@@ -51,7 +52,7 @@ describe('Effects System', () => {
     expect(cs.animating).toBe(true);
 
     // Fade out - reduce iterations and force particles to expire
-    cs.particles.forEach(p => (p.life = 0));
+    cs.particles.forEach((p: any) => (p.life = 0));
     cs.update();
     expect(cs.particles.length).toBe(0);
   });
@@ -71,7 +72,7 @@ describe('Effects System', () => {
   test('shakeScreen', () => {
     Effects.shakeScreen(10, 100);
     // Request animation frame is called
-    expect(document.getElementById('board-wrapper').style.transition).toBe('none');
+    expect(document.getElementById('board-wrapper')!.style.transition).toBe('none');
 
     vi.advanceTimersByTime(200);
     // It should reset

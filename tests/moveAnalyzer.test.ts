@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 /**
  * Enhanced Tests for MoveAnalyzer
  */
@@ -41,7 +42,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
 
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 4 } }; // Knight to center
-      const patterns = MoveAnalyzer.analyzeStrategicValue(game, move);
+      const patterns = MoveAnalyzer.analyzeStrategicValue(game as any, move);
 
       expect(patterns.some(p => p.type === 'center_control')).toBe(true);
     });
@@ -51,7 +52,7 @@ describe('MoveAnalyzer', () => {
       game.board[8][1] = { type: 'n', color: 'white' };
 
       const move = { from: { r: 8, c: 1 }, to: { r: 6, c: 2 } }; // Knight development
-      const patterns = MoveAnalyzer.analyzeStrategicValue(game, move);
+      const patterns = MoveAnalyzer.analyzeStrategicValue(game as any, move);
 
       expect(patterns.some(p => p.type === 'development')).toBe(true);
     });
@@ -61,7 +62,7 @@ describe('MoveAnalyzer', () => {
       game.board[8][4] = { type: 'k', color: 'white' };
 
       const move = { from: { r: 8, c: 4 }, to: { r: 8, c: 6 } }; // Short castle
-      const patterns = MoveAnalyzer.analyzeStrategicValue(game, move);
+      const patterns = MoveAnalyzer.analyzeStrategicValue(game as any, move);
 
       expect(patterns.some(p => p.type === 'safety')).toBe(true);
     });
@@ -71,7 +72,7 @@ describe('MoveAnalyzer', () => {
       game.board[5][4] = { type: 'p', color: 'white' };
 
       const move = { from: { r: 5, c: 4 }, to: { r: 3, c: 4 } }; // Pawn push
-      const patterns = MoveAnalyzer.analyzeStrategicValue(game, move);
+      const patterns = MoveAnalyzer.analyzeStrategicValue(game as any, move);
 
       expect(patterns.some(p => p.type === 'space')).toBe(true);
     });
@@ -79,7 +80,7 @@ describe('MoveAnalyzer', () => {
     test('should return empty array for null piece', () => {
       const game = createTestGame();
       const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } }; // Empty square
-      const patterns = MoveAnalyzer.analyzeStrategicValue(game, move);
+      const patterns = MoveAnalyzer.analyzeStrategicValue(game as any, move);
 
       expect(patterns).toEqual([]);
     });
@@ -129,7 +130,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][3] = { type: 'n', color: 'white' };
 
       const move = { from: { r: 6, c: 3 }, to: { r: 4, c: 4 } };
-      const notation = MoveAnalyzer.getMoveNotation(game, move);
+      const notation = MoveAnalyzer.getMoveNotation(game as any, move);
 
       expect(notation).toContain('schlägt');
       expect(notation).toContain('Springer');
@@ -140,7 +141,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][3] = { type: 'n', color: 'white' };
 
       const move = { from: { r: 6, c: 3 }, to: { r: 4, c: 4 } };
-      const notation = MoveAnalyzer.getMoveNotation(game, move);
+      const notation = MoveAnalyzer.getMoveNotation(game as any, move);
 
       expect(notation).toContain('nach');
       expect(notation).toContain('e5');
@@ -149,7 +150,7 @@ describe('MoveAnalyzer', () => {
     test('should handle null piece gracefully', () => {
       const game = createTestGame();
       const move = { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } };
-      const notation = MoveAnalyzer.getMoveNotation(game, move);
+      const notation = MoveAnalyzer.getMoveNotation(game as any, move);
 
       expect(notation).toContain('Zug');
     });
@@ -179,7 +180,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 400, 400);
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game as any, move, 400, 400);
       expect(analysis.qualityLabel).toContain('Bester Zug');
       expect(analysis.category).toBe('best');
     });
@@ -189,7 +190,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, 130, 150); // diff = -0.2
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game as any, move, 130, 150); // diff = -0.2
       expect(analysis.category).toBe('excellent');
     });
 
@@ -198,7 +199,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -50, 150); // diff = -2.0
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game as any, move, -50, 150); // diff = -2.0
       expect(analysis.qualityLabel).toContain('Ungenauigkeit');
       expect(analysis.category).toBe('inaccuracy');
     });
@@ -208,7 +209,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -150, 150); // diff = -3.0
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game as any, move, -150, 150); // diff = -3.0
       expect(analysis.qualityLabel).toContain('Fehler');
       expect(analysis.category).toBe('mistake');
     });
@@ -218,7 +219,7 @@ describe('MoveAnalyzer', () => {
       game.board[6][0] = { type: 'n', color: 'white' };
       const move = { from: { r: 6, c: 0 }, to: { r: 4, c: 1 } };
 
-      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game, move, -300, 150); // diff = -4.5
+      const analysis = MoveAnalyzer.analyzeMoveWithExplanation(game as any, move, -300, 150); // diff = -4.5
       expect(analysis.qualityLabel).toContain('Grober Fehler');
       expect(analysis.category).toBe('blunder');
     });

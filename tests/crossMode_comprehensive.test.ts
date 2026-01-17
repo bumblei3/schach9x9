@@ -62,8 +62,8 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
 
       const moves = MoveGenerator.getAllLegalMoves(board, 'white');
 
-      const to11 = moves.find(m => m.from === from && m.to === 11); // Row 1, Col 2 (Blocked)
-      const to13 = moves.find(m => m.from === from && m.to === 13); // Row 1, Col 4 (Valid)
+      const to11 = moves.find((m: any) => m.from === from && m.to === 11); // Row 1, Col 2 (Blocked)
+      const to13 = moves.find((m: any) => m.from === from && m.to === 13); // Row 1, Col 4 (Valid)
 
       expect(to11).toBeUndefined();
       expect(to13).toBeDefined();
@@ -77,8 +77,8 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
 
       const moves = MoveGenerator.getAllLegalMoves(board, 'white');
 
-      const to21 = moves.find(m => m.from === from && m.to === 21); // Row 2, Col 3 (Adjacent valid)
-      const to20 = moves.find(m => m.from === from && m.to === 20); // Row 2, Col 2 (Blocked)
+      const to21 = moves.find((m: any) => m.from === from && m.to === 21); // Row 2, Col 3 (Adjacent valid)
+      const to20 = moves.find((m: any) => m.from === from && m.to === 20); // Row 2, Col 2 (Blocked)
 
       expect(to21).toBeDefined();
       expect(to20).toBeUndefined();
@@ -92,7 +92,7 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
       game.board[0][4] = { type: 'r', color: 'black', hasMoved: false };
 
       const blackMoves = game.getAllLegalMoves('black');
-      const invalidMove = blackMoves.find(m => isBlockedCell(m.to.r, m.to.c, 'cross'));
+      const invalidMove = blackMoves.find((m: any) => isBlockedCell(m.to.r, m.to.c, 'cross'));
       expect(invalidMove).toBeUndefined();
     });
   });
@@ -143,8 +143,8 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
 
       const moves = MoveGenerator.getAllLegalMoves(board, 'white');
 
-      const captureLeft = moves.find(m => m.from === pawnFrom && m.to === 2);
-      const captureRight = moves.find(m => m.from === pawnFrom && m.to === 4);
+      const captureLeft = moves.find((m: any) => m.from === pawnFrom && m.to === 2);
+      const captureRight = moves.find((m: any) => m.from === pawnFrom && m.to === 4);
 
       expect(captureLeft).toBeUndefined();
       expect(captureRight).toBeDefined();
@@ -166,7 +166,7 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
       expect(game.lastMove?.isDoublePawnPush).toBe(true);
 
       const moves = game.getAllLegalMoves('white');
-      const enPassant = moves.find(m => m.to.r === 2 && m.to.c === 3);
+      const enPassant = moves.find((m: any) => m.to.r === 2 && m.to.c === 3);
       expect(enPassant).toBeDefined();
     });
   });
@@ -190,8 +190,8 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
 
       const moves = MoveGenerator.getAllLegalMoves(board, 'white');
 
-      const to21 = moves.find(m => m.from === from && m.to === 21);
-      const to2 = moves.find(m => m.from === from && m.to === 2);
+      const to21 = moves.find((m: any) => m.from === from && m.to === 21);
+      const to2 = moves.find((m: any) => m.from === from && m.to === 2);
 
       expect(to21).toBeDefined();
       expect(to2).toBeUndefined();
@@ -209,8 +209,8 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
 
       const moves = MoveGenerator.getAllLegalMoves(board, 'white');
 
-      const to20 = moves.find(m => m.from === from && m.to === 20); // Diag block
-      const to11 = moves.find(m => m.from === from && m.to === 11); // Knight jump block
+      const to20 = moves.find((m: any) => m.from === from && m.to === 20); // Diag block
+      const to11 = moves.find((m: any) => m.from === from && m.to === 11); // Knight jump block
 
       expect(to20).toBeUndefined();
       expect(to11).toBeUndefined();
@@ -271,14 +271,14 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
       const moves = game.rulesEngine.getValidMoves(3, 3, game.board[3][3]!);
 
       // Check Knight jumps
-      const knightTo1_2 = moves.find(m => m.r === 1 && m.c === 2);
-      const knightTo1_4 = moves.find(m => m.r === 1 && m.c === 4);
+      const knightTo1_2 = moves.find((m: any) => m.r === 1 && m.c === 2);
+      const knightTo1_4 = moves.find((m: any) => m.r === 1 && m.c === 4);
       expect(knightTo1_2).toBeUndefined();
       expect(knightTo1_4).toBeDefined();
 
       // Check Sliding (Diagonal)
-      const bishopTo1_1 = moves.find(m => m.r === 1 && m.c === 1);
-      const bishopTo1_5 = moves.find(m => m.r === 1 && m.c === 5);
+      const bishopTo1_1 = moves.find((m: any) => m.r === 1 && m.c === 1);
+      const bishopTo1_5 = moves.find((m: any) => m.r === 1 && m.c === 5);
       expect(bishopTo1_1).toBeUndefined();
       expect(bishopTo1_5).toBeDefined();
     });
@@ -291,7 +291,7 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
       game.board[3][6] = { type: 'j', color: 'white', hasMoved: true };
 
       const moves = game.rulesEngine.getValidMoves(3, 6, game.board[3][6]!);
-      const to1_7 = moves.find(m => m.r === 1 && m.c === 7);
+      const to1_7 = moves.find((m: any) => m.r === 1 && m.c === 7);
       expect(to1_7).toBeUndefined();
     });
 

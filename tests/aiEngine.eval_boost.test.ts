@@ -1,8 +1,9 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 import { evaluatePosition } from '../js/aiEngine.js';
 import { createEmptyBoard } from '../js/gameEngine.js';
 
 describe('AI Engine - Evaluation Boost', () => {
-  let board;
+  let board: any;
 
   beforeEach(() => {
     board = createEmptyBoard();

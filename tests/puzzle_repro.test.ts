@@ -1,11 +1,12 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { PuzzleMenu } from '../js/ui/PuzzleMenu.js';
 import { puzzleManager } from '../js/puzzleManager.js';
 
 describe('PuzzleMenu Reproduction Test', () => {
-  let mockGameController;
-  let mockOverlay;
-  let mockContainer;
-  let puzzleMenu;
+  let mockGameController: any;
+  let mockOverlay: any;
+  let mockContainer: any;
+  let puzzleMenu: any;
 
   beforeEach(() => {
     // Mock DOM elements
@@ -25,22 +26,25 @@ describe('PuzzleMenu Reproduction Test', () => {
     };
 
     // Mock document.getElementById
-    document.getElementById = vi.fn(id => {
+    document.getElementById = vi.fn((id: any) => {
       if (id === 'puzzle-menu-overlay') return mockOverlay;
       if (id === 'puzzle-menu-list') return mockContainer;
       return null;
     });
 
     // Mock document.createElement
-    document.createElement = vi.fn(() => ({
-      className: '',
-      innerHTML: '',
-      onclick: null,
-      classList: {
-        add: vi.fn(),
-        remove: vi.fn(),
-      },
-    }));
+    document.createElement = vi.fn(
+      () =>
+        ({
+          className: '',
+          innerHTML: '',
+          onclick: null,
+          classList: {
+            add: vi.fn(),
+            remove: vi.fn(),
+          },
+        }) as any
+    );
 
     mockGameController = {
       loadPuzzle: vi.fn(),

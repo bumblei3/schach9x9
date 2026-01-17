@@ -12,7 +12,7 @@ describe('ShopManager', () => {
 
   beforeEach(() => {
     // Mock document
-    global.document = {
+    (global as any).document = {
       querySelectorAll: vi.fn(() => []),
       querySelector: vi.fn(() => null),
       getElementById: vi.fn(() => null),

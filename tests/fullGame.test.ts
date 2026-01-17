@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { setupJSDOM } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
@@ -42,7 +43,7 @@ const { MoveController } = await import('../js/moveController.js');
 const { Game } = await import('../js/gameEngine.js');
 
 describe('Full-Game Integration Test', () => {
-  let game, gc, mc;
+  let game: any, gc: any, mc: any;
 
   beforeEach(() => {
     setupJSDOM();
@@ -115,7 +116,7 @@ describe('Full-Game Integration Test', () => {
     game.phase = PHASES.PLAY;
     gc.resign('white');
     expect(game.phase).toBe(PHASES.GAME_OVER);
-    const winnerText = document.getElementById('winner-text').textContent;
+    const winnerText = document.getElementById('winner-text')!.textContent;
     expect(winnerText).toContain('Schwarz gewinnt');
   });
 });

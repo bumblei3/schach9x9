@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
@@ -14,10 +15,10 @@ vi.mock('../js/ui.js', () => ({
 }));
 
 describe('KeyboardManager', () => {
-  let app;
-  let keyboardManager;
-  let mockGameController;
-  let mockTutorController;
+  let app: any;
+  let keyboardManager: any;
+  let mockGameController: any;
+  let mockTutorController: any;
 
   beforeEach(() => {
     mockGameController = {
@@ -36,7 +37,7 @@ describe('KeyboardManager', () => {
       toggleFullscreen: vi.fn(),
     };
 
-    keyboardManager = new KeyboardManager(app);
+    keyboardManager = new KeyboardManager(app as any);
   });
 
   afterEach(() => {
@@ -47,7 +48,7 @@ describe('KeyboardManager', () => {
 
   it('should initialize and add event listener', () => {
     const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
-    new KeyboardManager(app);
+    new KeyboardManager(app as any);
     expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 
@@ -230,7 +231,7 @@ describe('KeyboardManager', () => {
 
   it('should handle Escape key when no square is selected', async () => {
     app.game.selectedSquare = null;
-    const { closeModal, OverlayManager } = await import('../js/ui.js');
+    const { closeModal, OverlayManager } = (await import('../js/ui.js')) as any;
 
     const event = new KeyboardEvent('keydown', { key: 'escape' });
     Object.defineProperty(event, 'target', { value: document.body });
@@ -299,7 +300,7 @@ describe('KeyboardManager', () => {
     expect(app.game.selectedSquare).toBeNull();
     expect(app.game._forceFullRender).toBe(true);
 
-    const spinner = document.getElementById('spinner-overlay');
+    const spinner = document.getElementById('spinner-overlay')!;
     expect(spinner.classList.contains('hidden')).toBe(true);
   });
 
@@ -311,7 +312,7 @@ describe('KeyboardManager', () => {
     Object.defineProperty(event, 'target', { value: document.body });
     await keyboardManager.handleKeyDown(event);
 
-    const btn = document.getElementById('threats-btn');
+    const btn = document.getElementById('threats-btn')!;
     expect(btn.classList.contains('active')).toBe(true);
   });
 
@@ -323,7 +324,7 @@ describe('KeyboardManager', () => {
     Object.defineProperty(event, 'target', { value: document.body });
     await keyboardManager.handleKeyDown(event);
 
-    const btn = document.getElementById('opportunities-btn');
+    const btn = document.getElementById('opportunities-btn')!;
     expect(btn.classList.contains('active')).toBe(true);
   });
 
@@ -335,7 +336,7 @@ describe('KeyboardManager', () => {
     Object.defineProperty(event, 'target', { value: document.body });
     await keyboardManager.handleKeyDown(event);
 
-    const btn = document.getElementById('best-move-btn');
+    const btn = document.getElementById('best-move-btn')!;
     expect(btn.classList.contains('active')).toBe(true);
   });
 

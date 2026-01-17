@@ -120,7 +120,7 @@ describe('BoardRenderer Full Coverage', () => {
     game.board[0][0] = { type: 'p', color: 'white' };
     game.phase = 'play';
     game.turn = 'white';
-    game.getValidMoves.mockReturnValue([{ r: 1, c: 0 }]);
+    (game.getValidMoves as any).mockReturnValue([{ r: 1, c: 0 }]);
 
     const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
 
@@ -171,7 +171,7 @@ describe('BoardRenderer Full Coverage', () => {
     game.phase = 'play';
     game.turn = 'white';
 
-    game.getValidMoves.mockReturnValue([{ r: 2, c: 0 }]);
+    (game.getValidMoves as any).mockReturnValue([{ r: 2, c: 0 }]);
 
     const targetCell = document.querySelector('.cell[data-r="2"][data-c="0"]') as HTMLElement;
     const dropEvent = new Event('drop', { bubbles: true }) as any;
@@ -275,7 +275,7 @@ describe('BoardRenderer Full Coverage', () => {
       right: 50,
       x: 0,
       y: 0,
-      toJSON: () => { },
+      toJSON: () => {},
     });
     vi.spyOn(toCell, 'getBoundingClientRect').mockReturnValue({
       left: 100,
@@ -286,7 +286,7 @@ describe('BoardRenderer Full Coverage', () => {
       right: 150,
       x: 100,
       y: 100,
-      toJSON: () => { },
+      toJSON: () => {},
     });
 
     const promise = BoardRenderer.animateMove(game, from, to, piece as any);
@@ -327,7 +327,7 @@ describe('BoardRenderer Full Coverage', () => {
   test('Hover shows valid moves', () => {
     game.phase = 'play';
     game.board[0][0] = { type: 'p', color: 'white' };
-    game.getValidMoves.mockReturnValue([{ r: 1, c: 0 }]);
+    (game.getValidMoves as any).mockReturnValue([{ r: 1, c: 0 }]);
 
     const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
 
@@ -373,7 +373,7 @@ describe('BoardRenderer Full Coverage', () => {
       left: 0,
       x: 0,
       y: 0,
-      toJSON: () => { },
+      toJSON: () => {},
     });
     vi.spyOn(toCell, 'getBoundingClientRect').mockReturnValue({
       left: 100,
@@ -384,7 +384,7 @@ describe('BoardRenderer Full Coverage', () => {
       right: 150,
       x: 100,
       y: 100,
-      toJSON: () => { },
+      toJSON: () => {},
     });
 
     const promise = BoardRenderer.animateMove(game, from, to, piece as any);

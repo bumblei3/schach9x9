@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import * as aiEngine from '../js/aiEngine.js';
@@ -8,9 +9,9 @@ vi.mock('../js/ui.js', () => ({
   showModal: vi.fn(),
   updateStatus: vi.fn(),
   updateShopUI: vi.fn(),
-  getPieceText: vi.fn(piece => {
+  getPieceText: vi.fn((piece: any) => {
     if (!piece) return '';
-    const symbols = {
+    const symbols: Record<string, string> = {
       p: '♟',
       n: '♞',
       b: '♝',
@@ -73,11 +74,11 @@ vi.mock('../js/aiEngine.js', () => ({
 const { TutorController } = await import('../js/tutorController.js');
 
 describe('TutorController', () => {
-  let game;
-  let tutorController;
+  let game: any;
+  let tutorController: any;
 
   beforeEach(() => {
-    game = new Game(15, 'classic', false);
+    game = new Game(15, 'classic');
     tutorController = new TutorController(game);
     game.tutorController = tutorController;
     game.log = vi.fn();
@@ -163,7 +164,7 @@ describe('TutorController', () => {
       game.board[4][5] = { type: 'p', color: 'black', hasMoved: false };
 
       // Mock a capture move
-      aiEngine.getTopMoves.mockResolvedValueOnce([
+      (aiEngine.getTopMoves as any).mockResolvedValueOnce([
         {
           move: { from: { r: 5, c: 4 }, to: { r: 4, c: 5 }, promotion: undefined },
           score: 200,
@@ -293,7 +294,7 @@ describe('TutorController', () => {
       const move = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
       game.board[6][4] = { type: 'n', color: 'white', hasMoved: false };
       const strategic = tutorController.analyzeStrategicValue(move);
-      expect(strategic.some(s => s.type === 'center_control')).toBe(true);
+      expect(strategic.some((s: any) => s.type === 'center_control')).toBe(true);
     });
 
     test('should return correct score descriptions', () => {
@@ -549,10 +550,10 @@ describe('TutorController', () => {
       game.board[3][5] = { type: 'q', color: 'black' }; // Black queen can be captured
 
       // Mock positive SEE (winning material)
-      aiEngine.see.mockReturnValue(800);
+      (aiEngine.see as any).mockReturnValue(800);
 
       // Mock capture move
-      aiEngine.getTopMoves.mockResolvedValueOnce([
+      (aiEngine.getTopMoves as any).mockResolvedValueOnce([
         {
           move: { from: { r: 4, c: 4 }, to: { r: 3, c: 5 }, promotion: undefined },
           score: 900,

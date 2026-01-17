@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 /**
  * Enhanced Tests for Logger System
  */
@@ -5,15 +6,15 @@
 import { logger, LOG_LEVELS } from '../js/logger.js';
 
 describe('Logger Enhanced', () => {
-  let consoleSpy;
-  let originalLevel;
-  let originalEnabled;
+  let consoleSpy: any;
+  let originalLevel: any;
+  let originalEnabled: any;
 
   beforeEach(() => {
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(function () {});
     // Save original state
-    originalLevel = logger.level;
-    originalEnabled = logger.enabled;
+    originalLevel = (logger as any).level;
+    originalEnabled = (logger as any).enabled;
 
     logger.setEnabled(true);
     logger.setLevel(LOG_LEVELS.DEBUG);
@@ -22,14 +23,14 @@ describe('Logger Enhanced', () => {
   afterEach(() => {
     consoleSpy.mockRestore();
     // Restore original state
-    logger.level = originalLevel;
-    logger.enabled = originalEnabled;
+    (logger as any).level = originalLevel;
+    (logger as any).enabled = originalEnabled;
   });
 
   describe('setLevel', () => {
     test('should set log level', () => {
       logger.setLevel(LOG_LEVELS.ERROR);
-      expect(logger.level).toBe(LOG_LEVELS.ERROR);
+      expect((logger as any).level).toBe(LOG_LEVELS.ERROR);
     });
 
     test('should filter debug logs when level is WARN', () => {

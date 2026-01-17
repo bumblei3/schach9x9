@@ -337,7 +337,9 @@ describe('DOMHandler', () => {
 
   test('should handle fullscreen toggle and change', () => {
     const btn = document.getElementById('fullscreen-btn')!;
-    (document.documentElement as any).requestFullscreen = vi.fn().mockReturnValue(Promise.resolve());
+    (document.documentElement as any).requestFullscreen = vi
+      .fn()
+      .mockReturnValue(Promise.resolve());
     (document as any).exitFullscreen = vi.fn();
 
     btn.click();

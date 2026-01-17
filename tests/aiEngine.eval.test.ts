@@ -1,10 +1,11 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 // Minimal mock for dependencies if needed
-global.BOARD_SIZE = 9;
+(global as any).BOARD_SIZE = 9;
 
 const { evaluatePosition } = await import('../js/aiEngine.js');
 
 describe('AIEngine Deep Evaluation', () => {
-  let board;
+  let board: any;
 
   beforeEach(() => {
     board = Array(9)
@@ -12,7 +13,7 @@ describe('AIEngine Deep Evaluation', () => {
       .map(() => Array(9).fill(null));
   });
 
-  function createPiece(type, color) {
+  function createPiece(type: string, color: string) {
     return { type, color, hasMoved: false };
   }
 

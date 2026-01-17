@@ -59,7 +59,9 @@ describe('UI Module', () => {
       game.phase = PHASES.PLAY;
       game.board[4][4] = { type: 'k', color: 'white' };
       // isSquareUnderAttack(r, c, attackerColor)
-      game.isSquareUnderAttack = vi.fn((_r: number, _c: number, color: string) => color === 'black');
+      game.isSquareUnderAttack = vi.fn(
+        (_r: number, _c: number, color: string) => color === 'black'
+      );
 
       UI.initBoardUI(game);
       UI.renderBoard(game);
@@ -150,8 +152,28 @@ describe('UI Module', () => {
 
       const fromCell = document.querySelector('.cell[data-r="6"][data-c="4"]') as HTMLElement;
       const toCell = document.querySelector('.cell[data-r="5"][data-c="4"]') as HTMLElement;
-      fromCell.getBoundingClientRect = () => ({ left: 0, top: 0, width: 50, height: 50, bottom: 50, right: 50, x: 0, y: 0, toJSON: () => { } });
-      toCell.getBoundingClientRect = () => ({ left: 50, top: 50, width: 50, height: 50, bottom: 100, right: 100, x: 50, y: 50, toJSON: () => { } });
+      fromCell.getBoundingClientRect = () => ({
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        bottom: 50,
+        right: 50,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      });
+      toCell.getBoundingClientRect = () => ({
+        left: 50,
+        top: 50,
+        width: 50,
+        height: 50,
+        bottom: 100,
+        right: 100,
+        x: 50,
+        y: 50,
+        toJSON: () => {},
+      });
 
       vi.useFakeTimers();
       const animPromise = UI.animateMove(game, from, to, piece as any);

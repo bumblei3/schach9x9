@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 /**
  * Tests for Tutorial System
  * @jest-environment jsdom
@@ -6,7 +7,7 @@
 import { Tutorial } from '../js/tutorial.js';
 
 describe('Tutorial', () => {
-  let tutorial;
+  let tutorial: any;
 
   beforeEach(() => {
     // Setup complete DOM structure that tutorial.js expects
@@ -164,7 +165,7 @@ describe('Tutorial', () => {
       tutorial.currentStep = tutorial.steps.length - 1;
       tutorial.nextStep();
 
-      const overlay = document.getElementById('tutorial-overlay');
+      const overlay = document.getElementById('tutorial-overlay')!;
       expect(overlay.classList.contains('hidden')).toBe(true);
     });
 
@@ -187,7 +188,7 @@ describe('Tutorial', () => {
     test('should show tutorial overlay', () => {
       tutorial.show();
 
-      const overlay = document.getElementById('tutorial-overlay');
+      const overlay = document.getElementById('tutorial-overlay')!;
       expect(overlay.classList.contains('hidden')).toBe(false);
     });
 
@@ -195,7 +196,7 @@ describe('Tutorial', () => {
       tutorial.show();
       tutorial.close();
 
-      const overlay = document.getElementById('tutorial-overlay');
+      const overlay = document.getElementById('tutorial-overlay')!;
       expect(overlay.classList.contains('hidden')).toBe(true);
     });
 
@@ -218,7 +219,7 @@ describe('Tutorial', () => {
     test('should update step indicator', () => {
       tutorial.updateStep();
 
-      const indicator = document.getElementById('tutorial-current-step');
+      const indicator = document.getElementById('tutorial-current-step')!;
       expect(indicator.textContent).toBe('1');
     });
 
@@ -226,7 +227,7 @@ describe('Tutorial', () => {
       tutorial.currentStep = 0;
       tutorial.updateStep();
 
-      const prevBtn = document.getElementById('tutorial-prev');
+      const prevBtn = document.getElementById('tutorial-prev') as HTMLButtonElement;
       expect(prevBtn.disabled).toBe(true);
     });
 
@@ -234,7 +235,7 @@ describe('Tutorial', () => {
       tutorial.currentStep = tutorial.steps.length - 1;
       tutorial.updateStep();
 
-      const nextBtn = document.getElementById('tutorial-next');
+      const nextBtn = document.getElementById('tutorial-next') as HTMLButtonElement;
       expect(nextBtn.textContent).toContain('Fertig');
       expect(nextBtn.disabled).toBe(false);
     });

@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
@@ -13,8 +14,8 @@ const { ShopManager } = await import('../js/shop/ShopManager.js');
 const { campaignManager } = await import('../js/campaign/CampaignManager.js');
 
 describe('Troop Upgrade Mode - Unit Tests', () => {
-  let game;
-  let shopManager;
+  let game: any;
+  let shopManager: any;
 
   beforeEach(() => {
     game = new Game(15, 'setup');
@@ -24,7 +25,7 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
     game.log = vi.fn();
 
     // Mock PIECE_SVGS globally if needed, though we don't call it directly in ShopManager logic usually
-    global.window = {
+    (global as any).window = {
       PIECE_SVGS: {
         white: { p: '', n: '', b: '', r: '', q: '', a: '', c: '', e: '' },
         black: { p: '', n: '', b: '', r: '', q: '', a: '', c: '', e: '' },
@@ -36,16 +37,16 @@ describe('Troop Upgrade Mode - Unit Tests', () => {
 
     // Unlock Angel for testing upgrade logic
     if (!campaignManager.isRewardUnlocked('angel')) {
-      campaignManager.state.unlockedRewards.push('angel');
+      (campaignManager as any).state.unlockedRewards.push('angel');
     }
   });
 
   test('should correctly identify available upgrades', () => {
     const bishopUpgrades = shopManager.getAvailableUpgrades('b');
-    expect(bishopUpgrades.some(u => u.symbol === 'a')).toBe(true); // Archbishop
+    expect(bishopUpgrades.some((u: any) => u.symbol === 'a')).toBe(true); // Archbishop
 
     const queenUpgrades = shopManager.getAvailableUpgrades('q');
-    expect(queenUpgrades.some(u => u.symbol === 'e')).toBe(true); // Angel
+    expect(queenUpgrades.some((u: any) => u.symbol === 'e')).toBe(true); // Angel
 
     const knightUpgrades = shopManager.getAvailableUpgrades('n');
     expect(knightUpgrades.length).toBe(4); // n -> a, c, e, j

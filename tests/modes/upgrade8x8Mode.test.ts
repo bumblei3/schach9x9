@@ -4,9 +4,9 @@ import { PHASES } from '../../js/config.js';
 // Mock dependencies (same as upgradeMode.test.js)
 vi.mock('../../js/ui.js', () => ({
   renderBoard: vi.fn(),
-  showModal: vi.fn((title, content, actions) => {
+  showModal: vi.fn((_title: any, _content: any, actions: any) => {
     if (actions) {
-      const confirm = actions.find(a => a.text === 'Fortfahren');
+      const confirm = actions.find((a: any) => a.text === 'Fortfahren');
       if (confirm && confirm.callback) confirm.callback();
     }
   }),
@@ -76,8 +76,8 @@ import { GameController } from '../../js/gameController.js';
 import { Game } from '../../js/gameEngine.js';
 
 describe('8x8 Upgrade Mode', () => {
-  let game;
-  let controller;
+  let game: any;
+  let controller: any;
 
   beforeEach(async () => {
     game = new Game(0, 'upgrade8x8');

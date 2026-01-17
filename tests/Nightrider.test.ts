@@ -1,8 +1,9 @@
+import { describe, test, expect, beforeEach } from 'vitest';
 import { RulesEngine } from '../js/RulesEngine.js';
 
 describe('Nightrider (j)', () => {
-  let mockGame;
-  let rulesEngine;
+  let mockGame: any;
+  let rulesEngine: any;
 
   beforeEach(() => {
     mockGame = {
@@ -11,7 +12,7 @@ describe('Nightrider (j)', () => {
         .map(() => Array(9).fill(null)),
       lastMove: null,
     };
-    rulesEngine = new RulesEngine(mockGame);
+    rulesEngine = new RulesEngine(mockGame as any);
   });
 
   test('should move in knight patterns multiple times in one direction', () => {
@@ -116,7 +117,7 @@ describe('Nightrider (j)', () => {
     expect(moves).toContainEqual({ r: 4, c: 8 });
 
     // Should NOT contain any negative coordinates
-    moves.forEach(m => {
+    moves.forEach((m: any) => {
       expect(m.r).toBeGreaterThanOrEqual(0);
       expect(m.c).toBeGreaterThanOrEqual(0);
       expect(m.r).toBeLessThan(9);
@@ -135,7 +136,7 @@ describe('Nightrider (j)', () => {
           .fill(null)
           .map(() => Array(8).fill(null)),
       };
-      const engine8x8 = new RulesEngine(game8x8);
+      const engine8x8 = new RulesEngine(game8x8 as any);
 
       // Nightrider at [0,0]
       game8x8.board[0][0] = { type: 'j', color: 'white' };
@@ -152,7 +153,7 @@ describe('Nightrider (j)', () => {
       expect(moves).toContainEqual({ r: 3, c: 6 });
       expect(moves).not.toContainEqual({ r: 4, c: 8 });
 
-      moves.forEach(m => {
+      moves.forEach((m: any) => {
         expect(m.r).toBeLessThan(8);
         expect(m.c).toBeLessThan(8);
       });

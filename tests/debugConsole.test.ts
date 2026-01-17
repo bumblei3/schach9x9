@@ -232,7 +232,13 @@ describe('DebugConsole Logic', () => {
   describe('HTML Escaping', () => {
     test('should escape HTML special characters', () => {
       const escapeHtml = (text: string) => {
-        const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        const map: Record<string, string> = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        };
         return text.replace(/[&<>"']/g, m => map[m]);
       };
 

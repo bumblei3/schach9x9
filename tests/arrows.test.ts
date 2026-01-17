@@ -1,8 +1,9 @@
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 const { ArrowRenderer } = await import('../js/arrows.js');
 
 describe('ArrowRenderer', () => {
-  let boardElement;
-  let renderer;
+  let boardElement: any;
+  let renderer: any;
 
   beforeEach(() => {
     // Mock DOM
@@ -27,7 +28,7 @@ describe('ArrowRenderer', () => {
   test('should initialize and create SVG layer', () => {
     const svg = document.getElementById('arrow-layer');
     expect(svg).toBeDefined();
-    expect(svg.tagName.toLowerCase()).toBe('svg');
+    expect(svg!.tagName.toLowerCase()).toBe('svg');
     expect(boardElement.parentElement.style.position).toBe('relative');
   });
 

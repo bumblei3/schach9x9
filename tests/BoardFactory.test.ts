@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { BoardFactory } from '../js/campaign/BoardFactory.js';
 import { BOARD_SIZE } from '../js/config.js';
 
@@ -6,7 +7,7 @@ describe('BoardFactory', () => {
     const board = BoardFactory.createEmptyBoard();
     expect(board.length).toBe(BOARD_SIZE);
     expect(board[0].length).toBe(BOARD_SIZE);
-    expect(board.every(row => row.every(cell => cell === null))).toBe(true);
+    expect(board.every((row: any) => row.every((cell: any) => cell === null))).toBe(true);
   });
 
   test('createLevel1Board should have required pieces', () => {

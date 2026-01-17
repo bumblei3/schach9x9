@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { PHASES } from '../js/gameEngine.js';
 
 // Setup JSDOM body
@@ -15,6 +16,8 @@ document.body.innerHTML = `
 
 // Mock Worker before any imports
 class MockWorker {
+  onmessage: any;
+  listeners: any;
   constructor() {
     this.onmessage = null;
     this.listeners = {};
@@ -32,7 +35,7 @@ global.Worker = vi.fn().mockImplementation(function () {
 
 // Mock fetch
 global.fetch = vi.fn(() =>
-  Promise.resolve({ ok: true, json: () => Promise.resolve({ e2e4: ['e2e5'] }) })
+  Promise.resolve({ ok: true, json: () => Promise.resolve({ e2e4: ['e2e5'] }) } as any)
 );
 
 // Mocks
@@ -55,7 +58,7 @@ const { AIController } = await import('../js/aiController.js');
 const aiEngine = await import('../js/aiEngine.js');
 
 describe('AIController Ultimate Precision V5 - Updated', () => {
-  let game, controller;
+  let game: any, controller: any;
 
   beforeEach(() => {
     game = {
@@ -93,21 +96,21 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
       halfMoveClock: 0,
       findKing: vi.fn(() => ({ r: 1, c: 4 })),
     };
-    controller = new AIController(game);
+    controller = new AIController(game as any);
     vi.clearAllMocks();
   });
 
   test('aiMove - should resign based on material and score', async () => {
-    aiEngine.evaluatePosition.mockResolvedValue(-2000);
-    game.calculateMaterialAdvantage.mockReturnValue(20); // White +20
+    (aiEngine.evaluatePosition as any).mockResolvedValue(-2000);
+    (game.calculateMaterialAdvantage as any).mockReturnValue(20); // White +20
     await controller.aiMove();
     expect(game.resign).toHaveBeenCalledWith('black');
   });
 
   test('aiMove - should NOT resign in upgrade mode despite material disadvantage', async () => {
     game.mode = 'upgrade';
-    aiEngine.evaluatePosition.mockResolvedValue(-2000); // Standard resign is -1500, but logic says -3000 for upgrade
-    game.calculateMaterialAdvantage.mockReturnValue(20); // 20 material diff (would trigger >15 normal logic)
+    (aiEngine.evaluatePosition as any).mockResolvedValue(-2000); // Standard resign is -1500, but logic says -3000 for upgrade
+    (game.calculateMaterialAdvantage as any).mockReturnValue(20); // 20 material diff (would trigger >15 normal logic)
 
     // Start aiMove but don't await immediately, as it waits for workers
     const movePromise = controller.aiMove();
@@ -137,7 +140,7 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
 
   test('aiMove - SHOULD resign in upgrade mode if score is terrible', async () => {
     game.mode = 'upgrade';
-    aiEngine.evaluatePosition.mockResolvedValue(-3001); // Threshold is -3000
+    (aiEngine.evaluatePosition as any).mockResolvedValue(-3001); // Threshold is -3000
 
     await controller.aiMove();
 

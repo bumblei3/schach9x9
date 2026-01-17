@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
 import { createEmptyBoard } from '../js/gameEngine.js';
 
@@ -12,10 +13,10 @@ describe('PuzzleGenerator', () => {
     const { board: newBoard, turn: newTurn } = PuzzleGenerator.stringToBoard(str);
 
     expect(newTurn).toBe(turn);
-    expect(newBoard[4][4].type).toBe('k');
-    expect(newBoard[4][4].color).toBe('white');
-    expect(newBoard[0][0].type).toBe('r');
-    expect(newBoard[0][0].color).toBe('black');
+    expect(newBoard[4][4]!.type).toBe('k');
+    expect(newBoard[4][4]!.color).toBe('white');
+    expect(newBoard[0][0]!.type).toBe('r');
+    expect(newBoard[0][0]!.color).toBe('black');
   });
 
   test('should find Mate in 1', () => {
@@ -30,8 +31,8 @@ describe('PuzzleGenerator', () => {
 
     const solution = PuzzleGenerator.findMateSequence(board, 'white', 1);
     expect(solution).not.toBeNull();
-    expect(solution.length).toBe(1);
-    expect(solution[0]).toEqual({
+    expect(solution!.length).toBe(1);
+    expect(solution![0]).toEqual({
       from: { r: 1, c: 7 },
       to: { r: 0, c: 7 },
     });
@@ -52,6 +53,6 @@ describe('PuzzleGenerator', () => {
     const solution = PuzzleGenerator.findMateSequence(board, 'white', 2);
     expect(solution).not.toBeNull();
     // Mate in 2 means 3 plys: W1, B1, W2
-    expect(solution.length).toBeGreaterThanOrEqual(1);
+    expect(solution!.length).toBeGreaterThanOrEqual(1);
   });
 });

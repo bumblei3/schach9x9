@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
@@ -32,8 +33,8 @@ const {
 } = await import('../js/tutor/HintGenerator.js');
 
 describe('HintGenerator - Unit Tests', () => {
-  let game;
-  let mockTutorController;
+  let game: any;
+  let mockTutorController: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -68,7 +69,7 @@ describe('HintGenerator - Unit Tests', () => {
 
     // Mock AI engine result
     const bestMove = { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } };
-    aiEngine.getTopMoves.mockReturnValue([
+    (aiEngine.getTopMoves as any).mockReturnValue([
       {
         move: bestMove,
         score: 50,
@@ -86,7 +87,7 @@ describe('HintGenerator - Unit Tests', () => {
   test('getTutorHints should filter out pieces of wrong color or missing', async () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'black' }; // Wrong color
-    aiEngine.getTopMoves.mockReturnValue([
+    (aiEngine.getTopMoves as any).mockReturnValue([
       {
         move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
         score: 50,
@@ -103,7 +104,7 @@ describe('HintGenerator - Unit Tests', () => {
     game.phase = PHASES.PLAY;
     game.board[7][4] = { type: 'p', color: 'white' };
     game.board[5][4] = { type: 'p', color: 'white' }; // Same color
-    aiEngine.getTopMoves.mockReturnValue([
+    (aiEngine.getTopMoves as any).mockReturnValue([
       {
         move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
         score: 50,
@@ -127,7 +128,7 @@ describe('HintGenerator - Unit Tests', () => {
 
   test('getTutorHints should skip invalid candidates', async () => {
     game.phase = PHASES.PLAY;
-    aiEngine.getTopMoves.mockReturnValue([
+    (aiEngine.getTopMoves as any).mockReturnValue([
       {
         move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
         score: 50,
@@ -202,7 +203,7 @@ describe('HintGenerator - Unit Tests', () => {
       name: 'Rush',
       pieces: ['q', 'p', 'p', 'p'],
     };
-    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+    (mockTutorController.getSetupTemplates as any).mockReturnValue([template]);
 
     applySetupTemplate(game, mockTutorController, 'rush_12');
 
@@ -225,7 +226,7 @@ describe('HintGenerator - Unit Tests', () => {
       id: 'test',
       pieces: ['r'],
     };
-    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+    (mockTutorController.getSetupTemplates as any).mockReturnValue([template]);
 
     applySetupTemplate(game, mockTutorController, 'test');
     expect(game.board[8][3].type).toBe('r');
@@ -249,7 +250,7 @@ describe('HintGenerator - Unit Tests', () => {
       id: 'fallback',
       pieces: ['q', 'n', 'e'], // Queen, Knight, Angel (others)
     };
-    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+    (mockTutorController.getSetupTemplates as any).mockReturnValue([template]);
 
     applySetupTemplate(game, mockTutorController, 'fallback');
     // They should all hit placeAnywhere and eventually find 8,3
@@ -274,7 +275,7 @@ describe('HintGenerator - Unit Tests', () => {
       id: 'blocked',
       pieces: ['r', 'b'],
     };
-    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+    (mockTutorController.getSetupTemplates as any).mockReturnValue([template]);
 
     applySetupTemplate(game, mockTutorController, 'blocked');
     expect(game.board[7][4]).toBeDefined();
@@ -293,7 +294,7 @@ describe('HintGenerator - Unit Tests', () => {
       id: 'queen_test',
       pieces: ['q'],
     };
-    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+    (mockTutorController.getSetupTemplates as any).mockReturnValue([template]);
 
     applySetupTemplate(game, mockTutorController, 'queen_test');
 
@@ -313,7 +314,7 @@ describe('HintGenerator - Unit Tests', () => {
     // Verify it didn't overwrite King
     expect(game.board[8][4].type).toBe('k');
     // Verify it found a spot (likely 8,3 or 8,5 as they are back row score 50+20=70 vs middle row 10)
-    expect(queenPos.r).toBe(8);
+    expect(queenPos!.r).toBe(8);
   });
 
   test('applySetupTemplate heuristics: Pawn preference', () => {
@@ -322,7 +323,7 @@ describe('HintGenerator - Unit Tests', () => {
 
     // We use a custom template with 1 pawn and 1 rook
     const template = { id: 'heuristic_test', pieces: ['p', 'r'] };
-    mockTutorController.getSetupTemplates.mockReturnValue([template]);
+    (mockTutorController.getSetupTemplates as any).mockReturnValue([template]);
 
     // Apply
     applySetupTemplate(game, mockTutorController, 'heuristic_test');

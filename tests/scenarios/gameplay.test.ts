@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 // Mock audio
 const mockAudioContext = vi.fn().mockImplementation(function () {
   return {
@@ -30,12 +31,12 @@ vi.stubGlobal('AudioContext', mockAudioContext);
 vi.mock('../../js/ui/BoardRenderer.js', () => ({
   renderBoard: vi.fn(),
   initBoardUI: vi.fn(),
-  animateMove: vi.fn((g, f, t, p, cb) => cb && cb()),
+  animateMove: vi.fn((_g, _f, _t, _p, cb) => cb && cb()),
   highlightLastMove: vi.fn(),
   clearHighlights: vi.fn(),
   getPieceSymbol: vi.fn(() => 'X'),
   getPieceText: vi.fn(() => 'X'),
-}));
+})) as any;
 
 // Import what we need
 const { Game, PHASES } = await import('../../js/gameEngine.js');
@@ -43,8 +44,8 @@ const { GameController } = await import('../../js/gameController.js');
 const { MoveController } = await import('../../js/moveController.js');
 
 describe('Gameplay Scenarios', () => {
-  let game;
-  let controller;
+  let game: any;
+  let controller: any;
 
   beforeEach(() => {
     // Setup DOM for Tutorial and Game
@@ -76,9 +77,10 @@ describe('Gameplay Scenarios', () => {
     controller.moveController = moveController;
 
     // Manual Patching of Game prototype (normally done in App.js)
-    game.handlePlayClick = (r, c) => moveController.handlePlayClick(r, c);
-    game.executeMove = (from, to) => moveController.executeMove(from, to);
-    game.animateMove = (f, t, p) => moveController.animateMove(f, t, p);
+    // Manual Patching of Game prototype (normally done in App.js)
+    game.handlePlayClick = (r: number, c: number) => moveController.handlePlayClick(r, c);
+    game.executeMove = (from: any, to: any) => moveController.executeMove(from, to);
+    game.animateMove = (f: any, t: any, p: any) => moveController.animateMove(f, t, p);
 
     // Mock necessary controller dependencies if they aren't fully mocked yet
     controller.shopManager = { updateShopUI: vi.fn() };

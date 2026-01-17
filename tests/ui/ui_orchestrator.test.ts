@@ -14,14 +14,14 @@ vi.mock('../../js/effects.js', () => ({
 }));
 
 describe('UI Orchestrator - Animation Tests', () => {
-  let mockGame;
-  let elementMock;
+  let mockGame: any;
+  let elementMock: any;
 
   beforeEach(() => {
     mockGame = { board: [] };
 
     // Clear mock calls
-    confettiSystem.spawn.mockClear();
+    vi.mocked(confettiSystem.spawn).mockClear();
 
     // Mock DOM elements
     elementMock = {

@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import { Game } from '../js/gameEngine.js';
 import * as HintGenerator from '../js/tutor/HintGenerator.js';
 
@@ -9,7 +10,7 @@ vi.mock('../js/ui.js', () => ({
 }));
 
 // Mock DOM
-global.document = {
+(global as any).document = {
   querySelectorAll: vi.fn(() => ({
     forEach: vi.fn(),
   })),
@@ -28,12 +29,12 @@ describe('Verification: Swarm Template and AI Fix', () => {
       const swarm12 = templates.find(t => t.id === 'swarm_12');
 
       expect(swarm12).toBeDefined();
-      expect(swarm12.pieces.length).toBe(8);
-      expect(swarm12.cost).toBe(12);
+      expect(swarm12!.pieces.length).toBe(8);
+      expect(swarm12!.cost).toBe(12);
 
       // Verification of pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p']
       // 3 (N) + 3 (B) + 6 * 1 (P) = 12
-      const pieceCounts = swarm12.pieces.reduce((acc, p) => {
+      const pieceCounts = swarm12!.pieces.reduce((acc: any, p: any) => {
         acc[p] = (acc[p] || 0) + 1;
         return acc;
       }, {});
@@ -48,12 +49,12 @@ describe('Verification: Swarm Template and AI Fix', () => {
       const swarm18 = templates.find(t => t.id === 'swarm_18');
 
       expect(swarm18).toBeDefined();
-      expect(swarm18.pieces.length).toBe(8);
-      expect(swarm18.cost).toBe(18);
+      expect(swarm18!.pieces.length).toBe(8);
+      expect(swarm18!.cost).toBe(18);
 
       // Verification of pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p']
       // 3+3 (2N) + 3 (B) + 5 (R) + 4 * 1 (P) = 18
-      const pieceCounts = swarm18.pieces.reduce((acc, p) => {
+      const pieceCounts = swarm18!.pieces.reduce((acc: any, p: any) => {
         acc[p] = (acc[p] || 0) + 1;
         return acc;
       }, {});
@@ -68,7 +69,7 @@ describe('Verification: Swarm Template and AI Fix', () => {
     test('highlightMove should not throw when move is undefined or incomplete', async () => {
       // Import AIController after mocking dependencies if needed
       const { AIController } = await import('../js/aiController.js');
-      const game = new Game(15, 'play', false);
+      const game = new Game(15, 'play' as any);
       const ai = new AIController(game);
 
       // These should not throw TypeError
@@ -76,7 +77,7 @@ describe('Verification: Swarm Template and AI Fix', () => {
       expect(() => ai.highlightMove({})).not.toThrow();
       expect(() => ai.highlightMove({ from: {} })).not.toThrow();
       expect(() => ai.highlightMove({ to: {} })).not.toThrow();
-      expect(() => ai.highlightMove({ from: { r: 0, c: 0 } })).not.toThrow(); // missing 'to'
+      expect(() => ai.highlightMove({ from: { r: 0, c: 0 } } as any)).not.toThrow(); // missing 'to'
     });
   });
 });

@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { getOpeningName } from '../../js/ai/OpeningDatabase.js';
 
 describe('OpeningDatabase', () => {

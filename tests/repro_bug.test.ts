@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Game, createEmptyBoard } from '../js/gameEngine.js';
 
 // Mock UI and SoundManager modules
@@ -6,7 +7,7 @@ vi.mock('../js/ui.js', () => ({
   showModal: vi.fn(),
   showPromotionModal: vi.fn(),
   showPromotionUI: vi.fn(),
-  animateMove: vi.fn().mockResolvedValue(),
+  animateMove: vi.fn().mockResolvedValue(undefined),
   animateCheck: vi.fn(),
   animateCheckmate: vi.fn(),
   updateStatistics: vi.fn(),
@@ -31,20 +32,23 @@ vi.mock('../js/sounds.js', () => ({
 }));
 
 // Mock document functions used in MoveController
-global.document = {
-  getElementById: vi.fn(() => ({
-    classList: { remove: vi.fn(), add: vi.fn() },
-    style: {},
-    textContent: '',
-    value: '',
-    checked: false,
-    disabled: false,
-    appendChild: vi.fn(),
-    scrollTop: 0,
-    scrollHeight: 100,
-    innerHTML: '',
-  })),
-};
+(global as any).document = {
+  getElementById: vi.fn(
+    () =>
+      ({
+        classList: { remove: vi.fn(), add: vi.fn() },
+        style: {},
+        textContent: '',
+        value: '',
+        checked: false,
+        disabled: false,
+        appendChild: vi.fn(),
+        scrollTop: 0,
+        scrollHeight: 100,
+        innerHTML: '',
+      }) as any
+  ),
+} as any;
 
 // Mock localStorage with proper jest functions
 global.localStorage = {
@@ -52,7 +56,7 @@ global.localStorage = {
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
-};
+} as any;
 
 // Mock alert
 global.alert = vi.fn();
@@ -61,15 +65,15 @@ global.alert = vi.fn();
 const { MoveController } = await import('../js/moveController.js');
 
 describe('Bug Reproduction: Rook transforming into King', () => {
-  let game;
-  let moveController;
+  let game: any;
+  let moveController: any;
 
   beforeEach(() => {
     game = new Game(15, 'classic'); // Use Classic Mode
     // Ensure board is set up for classic mode
     // Game constructor calls setupClassicBoard if mode is classic
 
-    moveController = new MoveController(game);
+    moveController = new MoveController(game as any);
     game.moveController = moveController;
     game.log = vi.fn();
     game.stopClock = vi.fn();

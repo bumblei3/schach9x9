@@ -1,18 +1,44 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 // Mock PIECE_SVGS
-global.window.PIECE_SVGS = {
+(global as any).window.PIECE_SVGS = {
   white: { p: 'wp', r: 'wr', n: 'wn', b: 'wb', q: 'wq', k: 'wk', e: 'we', a: 'wa', c: 'wc' },
   black: { p: 'bp', r: 'br', n: 'bn', b: 'bb', q: 'bq', k: 'bk', e: 'be', a: 'ba', c: 'bc' },
 };
 
 // Mock dependencies
 vi.mock('../js/chess-pieces.js', () => ({
-  PIECE_SVGS: global.window.PIECE_SVGS,
+  PIECE_SVGS: {
+    white: {
+      p: 'wp',
+      r: 'wr',
+      n: 'wn',
+      b: 'wb',
+      q: 'wq',
+      k: 'wk',
+      e: 'we',
+      a: 'wa',
+      c: 'wc',
+      j: 'wj',
+    },
+    black: {
+      p: 'bp',
+      r: 'br',
+      n: 'bn',
+      b: 'bb',
+      q: 'bq',
+      k: 'bk',
+      e: 'be',
+      a: 'ba',
+      c: 'bc',
+      j: 'bj',
+    },
+  },
 }));
 
-const { Tutorial } = await import('../js/tutorial.js');
+import { Tutorial } from '../js/tutorial.js';
 
 describe('Tutorial System', () => {
-  let tutorial;
+  let tutorial: any;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -39,11 +65,11 @@ describe('Tutorial System', () => {
 
   test('should show and close the tutorial', () => {
     tutorial.show();
-    const overlay = document.getElementById('tutorial-overlay');
+    const overlay = document.getElementById('tutorial-overlay')!;
     expect(overlay.classList.contains('hidden')).toBe(false);
 
     tutorial.close();
-    expect(overlay.classList.contains('hidden')).toBe(true);
+    expect(overlay!.classList.contains('hidden')).toBe(true);
   });
 
   test('should navigate steps', () => {
@@ -57,10 +83,10 @@ describe('Tutorial System', () => {
 
   test('should update UI on step change', () => {
     tutorial.updateStep();
-    const stepsContainer = document.getElementById('tutorial-steps');
+    const stepsContainer = document.getElementById('tutorial-steps')!;
     const activeStep = stepsContainer.querySelector('.tutorial-step.active');
     expect(activeStep).toBeDefined();
-    expect(activeStep.querySelector('h2').textContent).toBe(tutorial.steps[0].title);
+    expect(activeStep!.querySelector('h2')!.textContent).toBe(tutorial.steps[0].title);
   });
 
   test('getMoveType should correctly identify move categories', () => {
@@ -98,6 +124,6 @@ describe('Tutorial System', () => {
 
     const eventEsc = new KeyboardEvent('keydown', { key: 'Escape' });
     document.dispatchEvent(eventEsc);
-    expect(document.getElementById('tutorial-overlay').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('tutorial-overlay')!.classList.contains('hidden')).toBe(true);
   });
 });

@@ -1,8 +1,9 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { AnalysisManager } from '../js/AnalysisManager.js';
 
 describe('AnalysisManager', () => {
-  let mockGame;
-  let analysisManager;
+  let mockGame: any;
+  let analysisManager: any;
 
   // Mock Dependencies
   vi.mock('../js/tutor/TacticsDetector.js', () => ({
@@ -22,10 +23,10 @@ describe('AnalysisManager', () => {
     vi.clearAllMocks();
 
     // Default implementations
-    TacticsDetector.getThreatenedPieces.mockReturnValue([]);
-    TacticsDetector.countDefenders.mockReturnValue(0);
-    TacticsDetector.detectTacticalPatterns.mockReturnValue([]);
-    aiEngine.see.mockReturnValue(0);
+    (TacticsDetector.getThreatenedPieces as any).mockReturnValue([]);
+    (TacticsDetector.countDefenders as any).mockReturnValue(0);
+    (TacticsDetector.detectTacticalPatterns as any).mockReturnValue([]);
+    (aiEngine.see as any).mockReturnValue(0);
 
     mockGame = {
       boardSize: 9,
@@ -68,11 +69,11 @@ describe('AnalysisManager', () => {
     // Simulate Black Rook at (0,4) threatening White Queen at (4,4)
     mockGame.board[0][4] = { type: 'r', color: 'black' }; // Add attacker to board
 
-    TacticsDetector.getThreatenedPieces.mockReturnValue([
+    (TacticsDetector.getThreatenedPieces as any).mockReturnValue([
       { piece: { type: 'q', color: 'white' }, pos: { r: 4, c: 4 } },
     ]);
-    TacticsDetector.countDefenders.mockReturnValue(0); // Undefended
-    aiEngine.see.mockReturnValue(5); // Positive exchange
+    (TacticsDetector.countDefenders as any).mockReturnValue(0); // Undefended
+    (aiEngine.see as any).mockReturnValue(5); // Positive exchange
 
     mockGame.turn = 'white';
     analysisManager.showThreats = true;
@@ -116,19 +117,19 @@ describe('AnalysisManager', () => {
     mockGame.turn = 'white';
 
     // Case 1: Defended and low SEE -> Not serious
-    TacticsDetector.getThreatenedPieces.mockReturnValue([
+    (TacticsDetector.getThreatenedPieces as any).mockReturnValue([
       { piece: { type: 'n', color: 'white' }, pos: { r: 7, c: 7 } },
     ]);
-    TacticsDetector.countDefenders.mockReturnValue(1); // Defended
-    aiEngine.see.mockReturnValue(-2); // Bad trade
+    (TacticsDetector.countDefenders as any).mockReturnValue(1); // Defended
+    (aiEngine.see as any).mockReturnValue(-2); // Bad trade
 
     analysisManager.showThreats = true;
     let arrows = analysisManager.getThreatArrows();
     expect(arrows.length).toBe(0);
 
     // Case 2: Undefended (or High SEE) -> Serious
-    TacticsDetector.countDefenders.mockReturnValue(0); // Undefended
-    aiEngine.see.mockReturnValue(3); // Free knight
+    (TacticsDetector.countDefenders as any).mockReturnValue(0); // Undefended
+    (aiEngine.see as any).mockReturnValue(3); // Free knight
 
     arrows = analysisManager.getThreatArrows();
     expect(arrows.length).toBe(1);
@@ -137,9 +138,13 @@ describe('AnalysisManager', () => {
     const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
 
     // Simulate finding a Fork
-    mockGame.getAllLegalMoves.mockReturnValue([{ from: { r: 7, c: 6 }, to: { r: 5, c: 5 } }]);
+    (mockGame.getAllLegalMoves as any).mockReturnValue([
+      { from: { r: 7, c: 6 }, to: { r: 5, c: 5 } },
+    ]);
 
-    TacticsDetector.detectTacticalPatterns.mockReturnValue([{ type: 'fork', severity: 'high' }]);
+    (TacticsDetector.detectTacticalPatterns as any).mockReturnValue([
+      { type: 'fork', severity: 'high' },
+    ]);
 
     analysisManager.showOpportunities = true;
     const arrows = analysisManager.getOpportunityArrows();
@@ -158,9 +163,13 @@ describe('AnalysisManager', () => {
     const TacticsDetector = await import('../js/tutor/TacticsDetector.js');
 
     // Simulate finding a Pin
-    mockGame.getAllLegalMoves.mockReturnValue([{ from: { r: 0, c: 0 }, to: { r: 0, c: 4 } }]);
+    (mockGame.getAllLegalMoves as any).mockReturnValue([
+      { from: { r: 0, c: 0 }, to: { r: 0, c: 4 } },
+    ]);
 
-    TacticsDetector.detectTacticalPatterns.mockReturnValue([{ type: 'pin', severity: 'high' }]);
+    (TacticsDetector.detectTacticalPatterns as any).mockReturnValue([
+      { type: 'pin', severity: 'high' },
+    ]);
 
     analysisManager.showOpportunities = true;
     const arrows = analysisManager.getOpportunityArrows();

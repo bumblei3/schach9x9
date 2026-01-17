@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import {
   classifyMove,
   calculateAccuracy,
@@ -59,7 +60,7 @@ describe('PostGameAnalyzer', () => {
 
     test('should handle empty input', () => {
       expect(calculateAccuracy([])).toBe(0);
-      expect(calculateAccuracy(null)).toBe(0);
+      expect(calculateAccuracy(null as any)).toBe(0);
     });
 
     test('should handle objects with quality property', () => {
@@ -82,7 +83,7 @@ describe('PostGameAnalyzer', () => {
     ];
 
     test('should summarize counts for a specific player', () => {
-      const result = analyzeGame(mockHistory, 'white');
+      const result = analyzeGame(mockHistory as any, 'white');
       expect(result.totalMoves).toBe(3);
       expect(result.counts[MOVE_QUALITY.BEST]).toBe(1);
       expect(result.counts[MOVE_QUALITY.EXCELLENT]).toBe(1);
@@ -99,7 +100,7 @@ describe('PostGameAnalyzer', () => {
 
     test('should handle moves without classification by defaulting to GOOD', () => {
       const history = [{ piece: { color: 'white' } }];
-      const result = analyzeGame(history, 'white');
+      const result = analyzeGame(history as any, 'white');
       expect(result.accuracy).toBe(80); // Default to GOOD
     });
   });

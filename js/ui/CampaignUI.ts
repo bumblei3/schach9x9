@@ -1,5 +1,5 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
-import { Level } from '../campaign/types.js';
+import { Level, Perk, UnitXp, CampaignState } from '../campaign/types.js';
 import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
 import { showToast } from './OverlayManager.js';
 
@@ -232,7 +232,7 @@ export class CampaignUI {
 
     const unlockedPerks = campaignManager.getUnlockedPerks();
 
-    CAMPAIGN_PERKS.forEach((perk: any) => {
+    CAMPAIGN_PERKS.forEach((perk: Perk) => {
       const isUnlocked = unlockedPerks.includes(perk.id);
       const canAfford = campaignManager.getGold() >= perk.cost;
 
@@ -279,7 +279,7 @@ export class CampaignUI {
     });
   }
 
-  buyPerk(perk: any): void {
+  buyPerk(perk: Perk): void {
     if (campaignManager.isPerkUnlocked(perk.id)) return;
 
     // Attempt purchase
@@ -299,7 +299,7 @@ export class CampaignUI {
     grid.innerHTML = '';
 
     const unitTypes = ['p', 'n', 'b', 'r', 'q', 'k'];
-    const names: any = {
+    const names: Record<string, string> = {
       p: 'Infanterie (Bauer)',
       n: 'Kavallerie (Springer)',
       b: 'Priester (Läufer)',
@@ -307,12 +307,12 @@ export class CampaignUI {
       q: 'General (Dame)',
       k: 'König (Anführer)',
     };
-    const icons: any = { p: '🛡️', n: '🐎', b: '✨', r: '🏰', q: '👑', k: '🔱' };
+    const icons: Record<string, string> = { p: '🛡️', n: '🐎', b: '✨', r: '🏰', q: '👑', k: '🔱' };
 
-    const state = (campaignManager as any).state;
+    const state = (campaignManager as any).getState() as CampaignState;
 
     unitTypes.forEach(type => {
-      const xp = campaignManager.getUnitXp(type);
+      const xp: UnitXp = campaignManager.getUnitXp(type);
       const isChampion = state.championType === type;
 
       const card = document.createElement('div');

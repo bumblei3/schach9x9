@@ -144,7 +144,7 @@ describe('PGNParser', () => {
       const legalMoves = game.getAllLegalMoves('white');
 
       // Find knight move Nf3
-      const nf3Move = legalMoves.find(m => {
+      const nf3Move = legalMoves.find((m: any) => {
         const piece = game.board[m.from.r][m.from.c];
         return piece && piece.type === 'n' && m.to.c === 5 && m.to.r === 6;
       });

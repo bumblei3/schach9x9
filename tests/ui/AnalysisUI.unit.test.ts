@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 // Mock DOM
 document.body.innerHTML = `
   <div id="evaluation-bar">
@@ -23,18 +24,18 @@ vi.mock('../../js/tutor/PostGameAnalyzer.js', () => ({
 const { AnalysisUI } = await import('../../js/ui/AnalysisUI.js');
 
 describe('AnalysisUI', () => {
-  let analysisUI;
+  let analysisUI: any;
 
   beforeEach(() => {
-    analysisUI = new AnalysisUI();
-    document.getElementById('analysis-panel').classList.add('hidden');
+    analysisUI = new AnalysisUI({} as any);
+    document.getElementById('analysis-panel')!.classList.add('hidden');
   });
 
   test('update should update evaluation bar', () => {
     const data = { score: 120, depth: 10, nodes: 1000, topMoves: [] };
     analysisUI.update(data);
 
-    const evalText = document.getElementById('eval-text');
+    const evalText = document.getElementById('eval-text')!;
     expect(evalText.textContent).toBe('+1.2');
   });
 
@@ -42,16 +43,16 @@ describe('AnalysisUI', () => {
     const data = { score: 500, depth: 10, nodes: 1000, topMoves: [] };
     analysisUI.update(data);
 
-    const evalText = document.getElementById('eval-text');
+    const evalText = document.getElementById('eval-text')!;
     expect(evalText.textContent).toBe('+5.0');
   });
 
   test('togglePanel should toggle visibility', () => {
     analysisUI.togglePanel();
-    expect(document.getElementById('analysis-panel').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('analysis-panel')!.classList.contains('hidden')).toBe(false);
 
     analysisUI.togglePanel();
-    expect(document.getElementById('analysis-panel').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('analysis-panel')!.classList.contains('hidden')).toBe(true);
   });
 
   test('renderTopMoves should create list items when panel is visible', () => {
@@ -69,7 +70,7 @@ describe('AnalysisUI', () => {
     };
     analysisUI.update(data);
 
-    const list = document.getElementById('top-moves-content');
+    const list = document.getElementById('top-moves-content')!;
     expect(list.children.length).toBe(2);
     expect(list.innerHTML).toContain('e4');
     expect(list.innerHTML).toContain('d4');

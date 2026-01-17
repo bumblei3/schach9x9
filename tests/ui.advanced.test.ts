@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
@@ -22,7 +23,7 @@ vi.mock('../js/effects.js', () => ({
 const UI = await import('../js/ui.js');
 
 describe('UI Module - Advanced Features', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     // Mock Game state
@@ -93,19 +94,19 @@ describe('UI Module - Advanced Features', () => {
     test('should update all statistical elements', () => {
       UI.updateStatistics(game);
 
-      expect(document.getElementById('stat-moves').textContent).toBe('10');
-      expect(document.getElementById('stat-captures').textContent).toBe('0'); // 0 based on capturedPieces.length
-      expect(document.getElementById('stat-accuracy').textContent).toBe('60%');
-      expect(document.getElementById('stat-best-moves').textContent).toBe('3');
-      expect(document.getElementById('stat-material').textContent).toBe('+5');
-      expect(document.getElementById('stat-material').classList.contains('positive')).toBe(true);
+      expect(document.getElementById('stat-moves')!.textContent).toBe('10');
+      expect(document.getElementById('stat-captures')!.textContent).toBe('0'); // 0 based on capturedPieces.length
+      expect(document.getElementById('stat-accuracy')!.textContent).toBe('60%');
+      expect(document.getElementById('stat-best-moves')!.textContent).toBe('3');
+      expect(document.getElementById('stat-material')!.textContent).toBe('+5');
+      expect(document.getElementById('stat-material')!.classList.contains('positive')).toBe(true);
     });
 
     test('should handle zero player moves for accuracy', () => {
       game.stats.playerMoves = 0;
       game.stats.accuracies = [];
       UI.updateStatistics(game);
-      expect(document.getElementById('stat-accuracy').textContent).toBe('--%');
+      expect(document.getElementById('stat-accuracy')!.textContent).toBe('--%');
     });
   });
 
@@ -118,7 +119,7 @@ describe('UI Module - Advanced Features', () => {
       expect(game.replayPosition).toBe(0);
       expect(game.savedGameState).toBeDefined();
       expect(game.stopClock).toHaveBeenCalled();
-      expect(document.getElementById('replay-status').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('replay-status')!.classList.contains('hidden')).toBe(false);
     });
 
     test('exitReplayMode should restore state and update UI', () => {
@@ -140,7 +141,7 @@ describe('UI Module - Advanced Features', () => {
 
       expect(game.replayMode).toBe(false);
       expect(game.savedGameState).toBeNull();
-      expect(document.getElementById('replay-status').classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('replay-status')!.classList.contains('hidden')).toBe(true);
     });
 
     test('updateReplayUI should update button states', () => {
@@ -148,30 +149,30 @@ describe('UI Module - Advanced Features', () => {
       game.replayPosition = 1;
       UI.updateReplayUI(game);
 
-      expect(document.getElementById('replay-move-num').textContent).toBe('2');
-      expect(document.getElementById('replay-first').disabled).toBe(false);
-      expect(document.getElementById('replay-last').disabled).toBe(false);
+      expect(document.getElementById('replay-move-num')!.textContent).toBe('2');
+      expect((document.getElementById('replay-first') as HTMLButtonElement).disabled).toBe(false);
+      expect((document.getElementById('replay-last') as HTMLButtonElement).disabled).toBe(false);
 
       game.replayPosition = -1;
       UI.updateReplayUI(game);
-      expect(document.getElementById('replay-first').disabled).toBe(true);
+      expect((document.getElementById('replay-first') as HTMLButtonElement).disabled).toBe(true);
 
       game.replayPosition = 2;
       UI.updateReplayUI(game);
-      expect(document.getElementById('replay-last').disabled).toBe(true);
+      expect((document.getElementById('replay-last') as HTMLButtonElement).disabled).toBe(true);
     });
   });
 
   describe('Tutor Suggestions - Setup Templates', () => {
     test('should show setup templates in setup phase', async () => {
       game.phase = PHASES.SETUP_WHITE_PIECES;
-      game.tutorController.getSetupTemplates.mockReturnValue([
+      (game.tutorController.getSetupTemplates as any).mockReturnValue([
         { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
       ]);
 
       await UI.showTutorSuggestions(game);
 
-      const suggestions = document.getElementById('tutor-suggestions');
+      const suggestions = document.getElementById('tutor-suggestions')!;
       expect(suggestions.innerHTML).toContain('Classic');
       expect(suggestions.innerHTML).toContain('Empfohlene Aufstellungen');
     });
@@ -179,12 +180,12 @@ describe('UI Module - Advanced Features', () => {
     test('should apply template on click', async () => {
       window.confirm = vi.fn(() => true);
       game.phase = PHASES.SETUP_WHITE_PIECES;
-      game.tutorController.getSetupTemplates.mockReturnValue([
+      (game.tutorController.getSetupTemplates as any).mockReturnValue([
         { id: 'classic', name: 'Classic', description: 'desc', cost: 15, pieces: ['p'] },
       ]);
 
       await UI.showTutorSuggestions(game);
-      const templateEl = document.querySelector('.setup-template');
+      const templateEl = document.querySelector('.setup-template') as HTMLElement;
       templateEl.click();
 
       expect(game.tutorController.applySetupTemplate).toHaveBeenCalledWith('classic');
@@ -212,7 +213,7 @@ describe('UI Module - Advanced Features', () => {
     test('should render gameplay hints with analysis', async () => {
       await UI.showTutorSuggestions(game);
 
-      const suggestions = document.getElementById('tutor-suggestions');
+      const suggestions = document.getElementById('tutor-suggestions')!;
       expect(suggestions.innerHTML).toContain('Bester Zug');
       expect(suggestions.innerHTML).toContain('Gewinnt Zentrum');
       expect(suggestions.innerHTML).toContain('Vorsicht vor f7');
@@ -226,7 +227,7 @@ describe('UI Module - Advanced Features', () => {
       `;
 
       await UI.showTutorSuggestions(game);
-      const suggestion = document.querySelector('.tutor-suggestion');
+      const suggestion = document.querySelector('.tutor-suggestion') as HTMLElement;
       suggestion.click();
 
       expect(game.arrowRenderer.highlightMoves).toHaveBeenCalled();
@@ -236,11 +237,11 @@ describe('UI Module - Advanced Features', () => {
 
     test('should execute move on "Try This" button click', async () => {
       await UI.showTutorSuggestions(game);
-      const tryBtn = document.querySelector('.try-move-btn');
+      const tryBtn = document.querySelector('.try-move-btn') as HTMLElement;
       tryBtn.click();
 
       expect(game.executeMove).toHaveBeenCalledWith({ r: 6, c: 4 }, { r: 4, c: 4 });
-      expect(document.getElementById('tutor-panel').classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('tutor-panel')!.classList.contains('hidden')).toBe(true);
     });
   });
 });

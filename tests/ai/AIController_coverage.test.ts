@@ -88,7 +88,7 @@ describe('AIController Coverage Boost', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
-    mockEval.mockResolvedValue(0);
+    (mockEval as any).mockResolvedValue(0);
 
     mockGame = {
       board: Array(9)
@@ -145,25 +145,25 @@ describe('AIController Coverage Boost', () => {
   });
 
   test('aiEvaluateDrawOffer - accept insufficient material', async () => {
-    mockGame.isInsufficientMaterial.mockReturnValue(true);
+    (mockGame.isInsufficientMaterial as any).mockReturnValue(true);
     await controller.aiEvaluateDrawOffer();
     expect(mockGame.acceptDraw).toHaveBeenCalled();
   });
 
   test('aiEvaluateDrawOffer - accept losing position', async () => {
-    mockEval.mockResolvedValue(-300);
+    (mockEval as any).mockResolvedValue(-300);
     await controller.aiEvaluateDrawOffer();
     expect(mockGame.acceptDraw).toHaveBeenCalled();
   });
 
   test('aiEvaluateDrawOffer - decline winning position', async () => {
-    mockEval.mockResolvedValue(300);
+    (mockEval as any).mockResolvedValue(300);
     await controller.aiEvaluateDrawOffer();
     expect(mockGame.declineDraw).toHaveBeenCalled();
   });
 
   test('aiShouldOfferDraw - offer if bad but not hopeless', async () => {
-    mockEval.mockResolvedValue(-200);
+    (mockEval as any).mockResolvedValue(-200);
     mockGame.drawOffered = false;
     mockGame.moveHistory = Array(25).fill({});
     const result = await controller.aiShouldOfferDraw();
@@ -172,14 +172,14 @@ describe('AIController Coverage Boost', () => {
 
   test('aiShouldOfferDraw - offer on repetition', async () => {
     mockGame.drawOffered = false;
-    mockGame.getBoardHash.mockReturnValue('hash1');
+    (mockGame.getBoardHash as any).mockReturnValue('hash1');
     mockGame.positionHistory = ['hash1', 'hash1'];
     const result = await controller.aiShouldOfferDraw();
     expect(result).toBe(true);
   });
 
   test('aiShouldResign - resign if hopelessly lost', async () => {
-    mockEval.mockResolvedValue(-2000);
+    (mockEval as any).mockResolvedValue(-2000);
     expect(await controller.aiShouldResign()).toBe(true);
   });
 
@@ -203,7 +203,7 @@ describe('AIController Coverage Boost', () => {
   test('aiMove - handles successful worker results', async () => {
     controller.initWorkerPool();
     const worker = controller.aiWorkers[0] as any;
-    mockEval.mockResolvedValue(0);
+    (mockEval as any).mockResolvedValue(0);
 
     // Start aiMove
     const movePromise = controller.aiMove();
@@ -230,7 +230,9 @@ describe('AIController Coverage Boost', () => {
     vi.useFakeTimers();
 
     // Provide legal moves for fallback
-    mockGame.getAllLegalMoves.mockReturnValue([{ from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }]);
+    (mockGame.getAllLegalMoves as any).mockReturnValue([
+      { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } },
+    ]);
 
     // Start move - this will initialize workers and wait for response
     const movePromise = controller.aiMove();
@@ -268,7 +270,7 @@ describe('AIController Coverage Boost', () => {
     const initSpy = vi.spyOn(controller, 'initWorkerPool');
 
     // Ensure we don't crash on move execution
-    mockGame.getAllLegalMoves.mockReturnValue([]);
+    (mockGame.getAllLegalMoves as any).mockReturnValue([]);
 
     const movePromise = controller.aiMove(); // Start async
 
@@ -358,7 +360,7 @@ describe('AIController Coverage Boost', () => {
       mockGame.points = 100; // Enough for pieces
       mockGame.board[0][0] = null; // Ensure empty spot
       // Mock findKing to help heuristic
-      mockGame.findKing.mockReturnValue({ r: 1, c: 1 });
+      (mockGame.findKing as any).mockReturnValue({ r: 1, c: 1 });
 
       // Mock random to ensure we pick a piece and valid spot
       // We'll rely on the loop running at least once.

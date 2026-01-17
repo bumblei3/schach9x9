@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { BOARD_SIZE } from '../js/gameEngine.js';
 
 // Mock ProceduralGenerator BEFORE importing PuzzleManager
@@ -28,8 +29,8 @@ const { PuzzleManager } = await import('../js/puzzleManager.js');
 const { Game } = await import('../js/gameEngine.js');
 
 describe('PuzzleMode', () => {
-  let puzzleManager;
-  let game;
+  let puzzleManager: any;
+  let game: any;
 
   beforeEach(() => {
     puzzleManager = new PuzzleManager();

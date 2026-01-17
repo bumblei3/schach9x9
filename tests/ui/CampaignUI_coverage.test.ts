@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CampaignUI } from '../../js/ui/CampaignUI';
 import { campaignManager } from '../../js/campaign/CampaignManager';
+// @ts-ignore
+import { talentTreeUI } from '../../js/ui/TalentTreeUI';
 
 vi.mock('../../js/ui/OverlayManager', () => ({
   showToast: vi.fn(),
@@ -20,12 +22,19 @@ vi.mock('../../js/campaign/CampaignManager', () => ({
     unlockPerk: vi.fn(() => true),
     spendGold: vi.fn(() => true),
     isPerkUnlocked: vi.fn(() => false),
-    getUnitXp: vi.fn(() => 50),
-    getState: vi.fn(() => ({ championType: 'knight' })),
+    getUnitXp: vi.fn(() => ({ xp: 50, level: 1, captures: 10 })),
+    setChampion: vi.fn(),
+    getState: vi.fn(() => ({ championType: 'n' })),
     getUnits: vi.fn(() => [
       { id: 'knight', name: 'Knight', level: 2, xp: 50, xpToNext: 100 },
       { id: 'bishop', name: 'Bishop', level: 1, xp: 0, xpToNext: 100 },
     ]),
+  },
+}));
+
+vi.mock('../../js/ui/TalentTreeUI', () => ({
+  talentTreeUI: {
+    show: vi.fn(),
   },
 }));
 
@@ -173,5 +182,61 @@ describe('CampaignUI', () => {
 
     // Should have completed class
     expect(levelElement.className).toContain('completed');
+  });
+  it('should switch to army view', () => {
+    campaignUI.show();
+    campaignUI.switchView('army');
+
+    expect(document.getElementById('campaign-army-view')!.classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('campaign-main-view')!.classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('campaign-shop-view')!.classList.contains('hidden')).toBe(true);
+  });
+
+  it('should render army units', () => {
+    campaignUI.show();
+    campaignUI.renderArmy();
+
+    const grid = document.getElementById('campaign-army-grid')!;
+    // Should render 6 unit types (p, n, b, r, q, k)
+    expect(grid.children.length).toBe(6);
+
+    // Check champion styling
+    const championCard = grid.querySelector('.is-champion');
+    expect(championCard).toBeTruthy();
+  });
+
+  it('should handle setChampion interaction', () => {
+    campaignUI.show();
+    campaignUI.renderArmy();
+
+    const grid = document.getElementById('campaign-army-grid')!;
+    // Find a non-champion unit (e.g., first one if champion is knight/n)
+    // We mocked championType: 'knight'
+    // 'p' (pawn) is first.
+    const pawnCard = grid.children[0];
+    const btn = pawnCard.querySelector('.champion-btn') as HTMLElement;
+
+    if (btn) {
+      btn.click();
+      expect(campaignManager.setChampion).toHaveBeenCalledWith('p');
+    }
+  });
+
+  it('should open talent tree', async () => {
+    campaignUI.show();
+    campaignUI.renderArmy();
+
+    const grid = document.getElementById('campaign-army-grid')!;
+    const card = grid.children[0];
+    const btn = card.querySelector('.talents-btn') as HTMLElement;
+
+    if (btn) {
+      btn.click();
+      // Since it's a dynamic import, we need to wait a tiny bit or just expect it to be called eventually
+      // But verify that the implementation calls the dynamic import.
+      // For this test with mocked module, we assume it resolves.
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(talentTreeUI.show).toHaveBeenCalled();
+    }
   });
 });

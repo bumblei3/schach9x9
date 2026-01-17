@@ -43,7 +43,9 @@ describe('AI Personality System', () => {
       placePiece(board, 2, 4, 'p', 'black');
 
       const normalScore = await evaluatePosition(board as any, 'white', { personality: 'NORMAL' });
-      const aggressiveScore = await evaluatePosition(board as any, 'white', { personality: 'AGGRESSIVE' });
+      const aggressiveScore = await evaluatePosition(board as any, 'white', {
+        personality: 'AGGRESSIVE',
+      });
       const solidScore = await evaluatePosition(board as any, 'white', { personality: 'SOLID' });
 
       // Check that they return numbers

@@ -364,7 +364,7 @@ describe('GameController', () => {
       (gameController.game as any).turn = 'white';
 
       // We need to ensure the mocked method is recognized
-      game.handlePlayClick.mockImplementation(async (r: number, c: number) => {
+      (game.handlePlayClick as any).mockImplementation(async (r: number, c: number) => {
         game.selectedSquare = { r, c };
       });
 
@@ -382,7 +382,7 @@ describe('GameController', () => {
       (gameController.game as any).phase = PHASES.PLAY;
       (gameController.game as any).turn = 'white';
 
-      game.handlePlayClick.mockImplementation(async (r: number, c: number) => {
+      (game.handlePlayClick as any).mockImplementation(async (r: number, c: number) => {
         game.selectedSquare = { r, c };
       });
 
@@ -394,7 +394,7 @@ describe('GameController', () => {
 
       // Ensure move is valid
       // Mock validMoves to allow this move
-      game.getValidMoves.mockReturnValue([{ r: 5, c: 4, to: { r: 5, c: 4 } }]);
+      (game.getValidMoves as any).mockReturnValue([{ r: 5, c: 4, to: { r: 5, c: 4 } }]);
 
       await gameController.handleCellClick(6, 4); // Select
       expect(gameController.game.selectedSquare).toEqual({ r: 6, c: 4 });

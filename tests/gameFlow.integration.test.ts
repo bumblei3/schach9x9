@@ -4,7 +4,7 @@ import { PHASES } from '../js/config.js';
 import { setupJSDOM } from './test-utils.js';
 
 // Mock UI dependencies
-vi.mock('../js/ui.js', async (importOriginal) => {
+vi.mock('../js/ui.js', async importOriginal => {
   const actual: any = await importOriginal();
   return {
     ...actual,
@@ -163,7 +163,14 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       game.board[0][4] = null;
 
       // Mock UI to select 'e' (Angel)
-      (UI.showPromotionUI as any).mockImplementation(function (_g: any, _r: any, _c: any, _color: any, _moveRecord: any, callback: any) {
+      (UI.showPromotionUI as any).mockImplementation(function (
+        _g: any,
+        _r: any,
+        _c: any,
+        _color: any,
+        _moveRecord: any,
+        callback: any
+      ) {
         game.board[0][4] = { type: 'e', color: 'white' };
         callback();
       });

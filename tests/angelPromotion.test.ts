@@ -1,5 +1,7 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
+
 // Mock AudioContext
-global.window.AudioContext = vi.fn().mockImplementation(() => ({
+(global as any).window.AudioContext = vi.fn().mockImplementation(() => ({
   createGain: vi.fn().mockReturnValue({
     connect: vi.fn(),
     gain: {
@@ -19,12 +21,34 @@ global.window.AudioContext = vi.fn().mockImplementation(() => ({
   currentTime: 0,
   destination: {},
 }));
-global.window.webkitAudioContext = global.window.AudioContext;
+(global as any).window.webkitAudioContext = (global as any).window.AudioContext;
 
 // Mock PIECE_SVGS
-global.window.PIECE_SVGS = {
-  white: { p: 'wp', n: 'wn', b: 'wb', r: 'wr', q: 'wq', k: 'wk', e: 'we' },
-  black: { p: 'bp', n: 'bn', b: 'bb', r: 'br', q: 'bq', k: 'bk', e: 'be' },
+(global as any).window.PIECE_SVGS = {
+  white: {
+    p: 'wp',
+    n: 'wn',
+    b: 'wb',
+    r: 'wr',
+    q: 'wq',
+    k: 'wk',
+    e: 'we',
+    a: 'wa',
+    c: 'wc',
+    j: 'wj',
+  },
+  black: {
+    p: 'bp',
+    n: 'bn',
+    b: 'bb',
+    r: 'br',
+    q: 'bq',
+    k: 'bk',
+    e: 'be',
+    a: 'ba',
+    c: 'bc',
+    j: 'bj',
+  },
 };
 
 vi.mock('../js/aiEngine.js', () => ({
@@ -38,19 +62,20 @@ vi.mock('../js/ui.js', () => ({
   updateCapturedUI: vi.fn(),
   updateMoveHistoryUI: vi.fn(),
   updateStatus: vi.fn(),
-  showPromotionUI: vi.fn((g, r, c, col, mr, cb) => {
+  showPromotionUI: vi.fn((g: any, r: number, c: number, _col: string, _mr: any, cb: () => void) => {
     if (g.board[r][c]) {
       g.board[r][c].type = 'e';
     }
     if (cb) cb();
   }),
-  animateMove: vi.fn().mockResolvedValue(),
+  animateMove: vi.fn().mockResolvedValue(undefined),
   updateStatistics: vi.fn(),
   updateClockDisplay: vi.fn(),
   updateClockUI: vi.fn(),
   animateCheck: vi.fn(),
   animateCheckmate: vi.fn(),
   renderEvalGraph: vi.fn(),
+  flashSquare: vi.fn(),
 }));
 
 vi.mock('../js/sounds.js', () => ({
@@ -66,8 +91,8 @@ const { Game, BOARD_SIZE } = await import('../js/gameEngine.js');
 const MoveExecutor = await import('../js/move/MoveExecutor.js');
 
 describe('Angel Piece and Promotion', () => {
-  let game;
-  let moveController;
+  let game: any;
+  let moveController: any;
 
   beforeEach(() => {
     // Setup JSDOM elements
@@ -121,11 +146,11 @@ describe('Angel Piece and Promotion', () => {
 
     // Check diagonal move
     const moves = game.getValidMoves(4, 4, game.board[4][4]);
-    const diagonalMove = moves.find(m => m.r === 0 && m.c === 0);
+    const diagonalMove = moves.find((m: any) => m.r === 0 && m.c === 0);
     expect(diagonalMove).toBeDefined();
 
     // Check orthogonal move
-    const orthogonalMove = moves.find(m => m.r === 4 && m.c === 0);
+    const orthogonalMove = moves.find((m: any) => m.r === 4 && m.c === 0);
     expect(orthogonalMove).toBeDefined();
   });
 
@@ -135,7 +160,7 @@ describe('Angel Piece and Promotion', () => {
 
     // Check knight jump
     const moves = game.getValidMoves(4, 4, game.board[4][4]);
-    const knightMove = moves.find(m => m.r === 6 && m.c === 5);
+    const knightMove = moves.find((m: any) => m.r === 6 && m.c === 5);
     expect(knightMove).toBeDefined();
   });
 
@@ -152,10 +177,10 @@ describe('Angel Piece and Promotion', () => {
     const moves = game.getValidMoves(4, 4, game.board[4][4]);
 
     // Check diagonal capture
-    expect(moves.find(m => m.r === 2 && m.c === 2)).toBeDefined();
+    expect(moves.find((m: any) => m.r === 2 && m.c === 2)).toBeDefined();
 
     // Check knight capture
-    expect(moves.find(m => m.r === 6 && m.c === 5)).toBeDefined();
+    expect(moves.find((m: any) => m.r === 6 && m.c === 5)).toBeDefined();
   });
 
   test('Angel should be blocked by friendly pieces (Queen movement)', () => {
@@ -166,8 +191,8 @@ describe('Angel Piece and Promotion', () => {
     const moves = game.getValidMoves(4, 4, game.board[4][4]);
 
     // Should not be able to move to [4][2] or beyond [4][1], [4][0]
-    expect(moves.find(m => m.r === 4 && m.c === 2)).toBeUndefined();
-    expect(moves.find(m => m.r === 4 && m.c === 1)).toBeUndefined();
+    expect(moves.find((m: any) => m.r === 4 && m.c === 2)).toBeUndefined();
+    expect(moves.find((m: any) => m.r === 4 && m.c === 1)).toBeUndefined();
   });
 
   test('Angel should jump over pieces (Knight movement)', () => {
@@ -179,7 +204,7 @@ describe('Angel Piece and Promotion', () => {
     const moves = game.getValidMoves(4, 4, game.board[4][4]);
 
     // Should still be able to jump to knight square
-    expect(moves.find(m => m.r === 2 && m.c === 3)).toBeDefined();
+    expect(moves.find((m: any) => m.r === 2 && m.c === 3)).toBeDefined();
   });
 
   test('Angel should deliver check', () => {
@@ -231,7 +256,7 @@ describe('Angel Piece and Promotion', () => {
       game.board[0][0] = { type: 'e', color: 'white', hasMoved: false };
 
       const moves = game.getValidMoves(0, 0, game.board[0][0]);
-      const diagonalCorner = moves.find(m => m.r === 8 && m.c === 8);
+      const diagonalCorner = moves.find((m: any) => m.r === 8 && m.c === 8);
 
       expect(diagonalCorner).toBeDefined();
     });
@@ -244,7 +269,7 @@ describe('Angel Piece and Promotion', () => {
 
       const moves = game.getValidMoves(0, 0, game.board[0][0]);
       // Knight jump from corner
-      const knightMove = moves.find(m => m.r === 2 && m.c === 1);
+      const knightMove = moves.find((m: any) => m.r === 2 && m.c === 1);
 
       expect(knightMove).toBeDefined();
     });
@@ -255,9 +280,9 @@ describe('Angel Piece and Promotion', () => {
       const moves = game.getValidMoves(8, 8, game.board[8][8]);
 
       // Should have diagonal moves (Queen-like)
-      const diagonalMove = moves.find(m => m.r === 7 && m.c === 7);
+      const diagonalMove = moves.find((m: any) => m.r === 7 && m.c === 7);
       // Should have knight moves
-      const knightMove = moves.find(m => m.r === 6 && m.c === 7);
+      const knightMove = moves.find((m: any) => m.r === 6 && m.c === 7);
 
       expect(diagonalMove).toBeDefined();
       expect(knightMove).toBeDefined();
@@ -293,7 +318,7 @@ describe('Angel Piece and Promotion', () => {
 
       // Angel can only move along the line between King and Queen
       // or capture the Queen
-      const invalidMove = moves.find(m => m.r === 2 && m.c === 4);
+      const invalidMove = moves.find((m: any) => m.r === 2 && m.c === 4);
       expect(invalidMove).toBeUndefined();
     });
 
@@ -308,7 +333,7 @@ describe('Angel Piece and Promotion', () => {
 
       const moves = game.getValidMoves(2, 2, game.board[2][2]);
       // Can block at (1, 4), (2, 4), (3, 4)
-      const blockMove = moves.find(m => m.r === 2 && m.c === 4);
+      const blockMove = moves.find((m: any) => m.r === 2 && m.c === 4);
 
       expect(blockMove).toBeDefined();
     });
@@ -331,7 +356,7 @@ describe('Angel Piece and Promotion', () => {
 
       // Knight jump to block at (0, 2)
       // 0,2 is on the path between 0,0 and 0,5
-      const blockMove = moves.find(m => m.r === 0 && m.c === 2);
+      const blockMove = moves.find((m: any) => m.r === 0 && m.c === 2);
 
       expect(blockMove).toBeDefined();
     });
@@ -343,7 +368,7 @@ describe('Angel Piece and Promotion', () => {
       game.board[4][7] = { type: 'e', color: 'black', hasMoved: false };
 
       const moves = game.getValidMoves(4, 4, game.board[4][4]);
-      const captureMove = moves.find(m => m.r === 4 && m.c === 7);
+      const captureMove = moves.find((m: any) => m.r === 4 && m.c === 7);
 
       expect(captureMove).toBeDefined();
     });
@@ -353,7 +378,7 @@ describe('Angel Piece and Promotion', () => {
       game.board[6][5] = { type: 'e', color: 'black', hasMoved: false };
 
       const moves = game.getValidMoves(4, 4, game.board[4][4]);
-      const captureMove = moves.find(m => m.r === 6 && m.c === 5);
+      const captureMove = moves.find((m: any) => m.r === 6 && m.c === 5);
 
       expect(captureMove).toBeDefined();
     });

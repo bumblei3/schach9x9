@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 vi.mock('../js/sounds.js', () => ({
   soundManager: {
     init: vi.fn(),
@@ -12,7 +13,7 @@ vi.mock('../js/sounds.js', () => ({
 }));
 
 vi.mock('../js/ui.js', () => ({
-  animateMove: vi.fn().mockResolvedValue(),
+  animateMove: vi.fn().mockResolvedValue(undefined),
   renderBoard: vi.fn(),
   updateStatus: vi.fn(),
   updateCapturedUI: vi.fn(),
@@ -21,13 +22,15 @@ vi.mock('../js/ui.js', () => ({
   updateClockDisplay: vi.fn(),
   updateClockUI: vi.fn(),
   renderEvalGraph: vi.fn(),
-  showPromotionUI: vi.fn((game, r, c, color, moveRecord, callback) => {
-    // Simulate selection of Angel
-    if (game.board[r][c]) {
-      game.board[r][c].type = 'e';
+  showPromotionUI: vi.fn(
+    (game: any, r: number, c: number, _color: string, _moveRecord: any, callback: any) => {
+      // Simulate selection of Angel
+      if (game.board[r][c]) {
+        game.board[r][c].type = 'e';
+      }
+      callback();
     }
-    callback();
-  }),
+  ),
   animateCheck: vi.fn(),
   animateCheckmate: vi.fn(),
   showToast: vi.fn(),
@@ -44,8 +47,8 @@ const { Game } = await import('../js/gameEngine.js');
 const { MoveController } = await import('../js/moveController.js');
 
 describe('Undo/Redo System Reproduction Tests', () => {
-  let game;
-  let moveController;
+  let game: any;
+  let moveController: any;
 
   beforeEach(() => {
     game = new Game(0, 'classic');
@@ -69,7 +72,7 @@ describe('Undo/Redo System Reproduction Tests', () => {
     game.log = vi.fn();
 
     // Initialize MoveController
-    moveController = new MoveController(game);
+    moveController = new MoveController(game as any);
   });
 
   test('Simple Move Undo/Redo', async () => {

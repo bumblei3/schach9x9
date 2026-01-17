@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 /**
  * Tests for TimeManager
  */
@@ -6,9 +7,9 @@ import { TimeManager } from '../js/TimeManager.js';
 import { PHASES } from '../js/config.js';
 
 describe('TimeManager', () => {
-  let mockGame;
-  let mockController;
-  let timeManager;
+  let mockGame: any;
+  let mockController: any;
+  let timeManager: any;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -30,7 +31,7 @@ describe('TimeManager', () => {
     };
 
     // Mock document elements
-    global.document = {
+    (global as any).document = {
       getElementById: vi.fn(() => ({
         classList: { add: vi.fn(), remove: vi.fn() },
         textContent: '',

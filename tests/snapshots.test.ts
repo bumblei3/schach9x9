@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { setupJSDOM } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
@@ -16,7 +17,7 @@ const UI = await import('../js/ui.js');
 const { Game } = await import('../js/gameEngine.js');
 
 describe('Visual DOM Snapshot Tests', () => {
-  let game;
+  let game: any;
 
   beforeEach(() => {
     setupJSDOM();
@@ -43,7 +44,7 @@ describe('Visual DOM Snapshot Tests', () => {
     UI.renderBoard(game);
     UI.updateStatus(game);
 
-    expect(document.getElementById('board').innerHTML).toMatchSnapshot();
+    expect(document.getElementById('board')!.innerHTML).toMatchSnapshot();
   });
 
   test('Game over overlay snapshot', () => {
@@ -51,8 +52,8 @@ describe('Visual DOM Snapshot Tests', () => {
     UI.initBoardUI(game);
     UI.updateStatus(game);
 
-    const overlay = document.getElementById('game-over-overlay');
-    const winnerText = document.getElementById('winner-text');
+    const overlay = document.getElementById('game-over-overlay')!;
+    const winnerText = document.getElementById('winner-text')!;
     winnerText.textContent = 'Weiß gewinnt!';
     overlay.classList.remove('hidden');
 
@@ -64,7 +65,7 @@ describe('Visual DOM Snapshot Tests', () => {
     UI.updateShopUI(game);
     UI.showShop(game, true);
 
-    const shop = document.getElementById('shop-panel');
+    const shop = document.getElementById('shop-panel')!;
     expect(shop.innerHTML).toMatchSnapshot();
   });
 });

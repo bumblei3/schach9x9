@@ -1,3 +1,4 @@
+import { describe, test, expect, vi, beforeAll } from 'vitest';
 // Mock dependencies MUST be hoisted or defined before imports
 vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
@@ -11,8 +12,8 @@ vi.mock('../js/puzzleGenerator.js', () => ({
 }));
 
 describe('ProceduralGenerator', () => {
-  let ProceduralGenerator;
-  let PuzzleGenerator;
+  let ProceduralGenerator: any;
+  let PuzzleGenerator: any;
 
   beforeAll(async () => {
     // Import module AFTER mocking
@@ -24,13 +25,13 @@ describe('ProceduralGenerator', () => {
   });
 
   test('generatePuzzle returns null if no solution found', () => {
-    PuzzleGenerator.findMateSequence.mockReturnValue(null);
+    (PuzzleGenerator.findMateSequence as any).mockReturnValue(null);
     const puzzle = ProceduralGenerator.generatePuzzle('easy');
     expect(puzzle).toBeNull();
   });
 
   test('generatePuzzle returns puzzle if solution found', () => {
-    PuzzleGenerator.findMateSequence.mockReturnValue([
+    (PuzzleGenerator.findMateSequence as any).mockReturnValue([
       { from: { r: 0, c: 0 }, to: { r: 0, c: 1 } },
     ]);
     const puzzle = ProceduralGenerator.generatePuzzle('easy');

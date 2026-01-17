@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import * as TacticsDetector from '../js/tutor/TacticsDetector.js';
 import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
 
@@ -10,8 +11,8 @@ const mockGame = {
   isSquareUnderAttack: vi.fn(),
 };
 
-const mockAnalyzer = {
-  getPieceName: t => t,
+const mockAnalyzer: any = {
+  getPieceName: (t: any) => t,
 };
 
 describe('Tutor Improvements', () => {
@@ -43,7 +44,7 @@ describe('Tutor Improvements', () => {
 
       // Mock getValidMoves for Bishop to include f6 (attacking King)
       // Implementation iterates valid moves of the piece at pos.
-      mockGame.getValidMoves.mockReturnValue([
+      (mockGame.getValidMoves as any).mockReturnValue([
         { r: 3, c: 5 }, // Attacks King
         { r: 2, c: 6 }, // Attacks Rook (blocked by King normally, but getValidMoves logic handles it)
         // Wait, getValidMoves usually stops at first piece.
@@ -76,8 +77,8 @@ describe('Tutor Improvements', () => {
 
       const move = { from: { r: 8, c: 0 }, to: { r: 8, c: 3 } }; // Moving to d1
 
-      const patterns = MoveAnalyzer.analyzeStrategicValue(mockGame, move);
-      const openFile = patterns.find(p => p.type === 'open_file');
+      const patterns = MoveAnalyzer.analyzeStrategicValue(mockGame as any, move);
+      const openFile = patterns.find((p: any) => p.type === 'open_file');
 
       expect(openFile).toBeDefined();
       expect(openFile.explanation).toContain('offene Linie');
@@ -90,8 +91,8 @@ describe('Tutor Improvements', () => {
 
       const move = { from: { r: 8, c: 1 }, to: { r: 4, c: 4 } };
 
-      const patterns = MoveAnalyzer.analyzeStrategicValue(mockGame, move);
-      const outpost = patterns.find(p => p.type === 'outpost');
+      const patterns = MoveAnalyzer.analyzeStrategicValue(mockGame as any, move);
+      const outpost = patterns.find((p: any) => p.type === 'outpost');
 
       expect(outpost).toBeDefined();
       expect(outpost.explanation).toContain('Vorposten');
@@ -114,13 +115,17 @@ describe('Tutor Improvements', () => {
       mockGame.board[8][4] = { type: 'r', color: 'white' }; // piece attacking Victim
 
       // isSquareUnderAttack(e8, white) should be true
-      mockGame.isSquareUnderAttack.mockImplementation(function (r, c, color) {
+      (mockGame.isSquareUnderAttack as any).mockImplementation(function (
+        r: number,
+        c: number,
+        color: string
+      ) {
         if (r === 0 && c === 4 && color === 'white') return true;
         return false;
       });
 
       // Mock getValidMoves to show Rook e1 attacks e8
-      mockGame.getValidMoves.mockImplementation(function (r, c) {
+      (mockGame.getValidMoves as any).mockImplementation(function (r: number, c: number) {
         if (r === 8 && c === 4) return [{ r: 0, c: 4 }]; // Rook at e1 attacks e8
         return [];
       });

@@ -7,7 +7,9 @@ vi.mock('../js/ui.js', () => ({
   initBoardUI: vi.fn(),
   renderBoard: vi.fn(),
   showModal: vi.fn((_title, _message, buttons) => {
-    const continueBtn = buttons.find((b: any) => b.text === 'Fortfahren' || b.class === 'btn-primary');
+    const continueBtn = buttons.find(
+      (b: any) => b.text === 'Fortfahren' || b.class === 'btn-primary'
+    );
     if (continueBtn && continueBtn.callback) {
       continueBtn.callback();
     }

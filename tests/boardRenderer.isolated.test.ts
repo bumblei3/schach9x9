@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 vi.mock('../js/config.js', () => ({
   BOARD_SIZE: 9,
   PHASES: { PLAY: 'play' },
@@ -9,7 +10,7 @@ vi.mock('../js/effects.js', () => ({
   triggerVibration: vi.fn(),
 }));
 vi.mock('../js/utils.js', () => ({
-  debounce: fn => fn,
+  debounce: (fn: any) => fn,
 }));
 
 const BoardRenderer = await import('../js/ui/BoardRenderer.js');
@@ -17,8 +18,8 @@ const BoardRenderer = await import('../js/ui/BoardRenderer.js');
 describe('BoardRenderer Touch Isolation', () => {
   test('touch events find piece-svg', () => {
     document.body.innerHTML = '<div id="board"></div>';
-    window.PIECE_SVGS = { white: { p: '<svg id="p-svg"></svg>' } };
-    window._svgCache = null;
+    window.PIECE_SVGS = { white: { p: '<svg id="p-svg"></svg>' } } as any;
+    window._svgCache = {} as any;
 
     const game = {
       board: Array(9)
@@ -32,10 +33,10 @@ describe('BoardRenderer Touch Isolation', () => {
     BoardRenderer.initBoardUI(game);
     BoardRenderer.renderBoard(game);
 
-    const cell = document.querySelector('.cell[data-r="7"][data-c="4"]');
+    const cell = document.querySelector('.cell[data-r="7"][data-c="4"]')!;
     expect(cell.innerHTML).toContain('piece-svg');
 
-    const touch = new Event('touchstart');
+    const touch = new Event('touchstart') as any;
     touch.touches = [{ clientX: 0, clientY: 0 }];
     cell.dispatchEvent(touch); // Should not throw
   });

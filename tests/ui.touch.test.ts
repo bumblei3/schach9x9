@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initBoardUI, getPieceSymbol as _getPieceSymbol } from '../js/ui/BoardRenderer.js';
 import { PHASES } from '../js/config.js';
 
@@ -5,15 +6,15 @@ import { PHASES } from '../js/config.js';
 window.PIECE_SVGS = {
   white: { p: '<svg>white p</svg>' },
   black: { p: '<svg>black p</svg>' },
-};
+} as any;
 
 describe('BoardRenderer Touch Interactions', () => {
-  let gameMock;
-  let _boardElement;
+  let gameMock: any;
+  // let _boardElement: any;
 
   beforeEach(() => {
     document.body.innerHTML = '<div id="board"></div>';
-    _boardElement = document.getElementById('board');
+    // _boardElement = document.getElementById('board');
 
     gameMock = {
       board: Array(9)
@@ -31,7 +32,7 @@ describe('BoardRenderer Touch Interactions', () => {
     // Setup a piece at (4, 4)
     gameMock.board[4][4] = { type: 'p', color: 'white' };
 
-    initBoardUI(gameMock);
+    initBoardUI(gameMock as any);
 
     // Mock elementFromPoint globally for all tests in this suite
     // Note: in JSDOM, document.elementFromPoint might not exist or be writable directly on document
@@ -54,7 +55,7 @@ describe('BoardRenderer Touch Interactions', () => {
     vi.restoreAllMocks();
   });
 
-  function createTouch(target, identifier = 0, x = 0, y = 0) {
+  function createTouch(target: any, identifier = 0, x = 0, y = 0) {
     return {
       identifier,
       target,
@@ -71,7 +72,7 @@ describe('BoardRenderer Touch Interactions', () => {
     };
   }
 
-  function dispatchTouchEvent(type, element, touches) {
+  function dispatchTouchEvent(type: string, element: any, touches: any) {
     const event = new Event(type, { bubbles: true, cancelable: true });
     // JSDOM Event doesn't have touches by default?
     // We need to ensure properties are readable.
@@ -83,7 +84,7 @@ describe('BoardRenderer Touch Interactions', () => {
   }
 
   test('should initiate drag on touchstart for valid piece', () => {
-    const cell = document.querySelector('.cell[data-r="4"][data-c="4"]');
+    const cell = document.querySelector('.cell[data-r="4"][data-c="4"]') as HTMLElement;
 
     // Bounds mocking
     Object.defineProperty(cell, 'offsetWidth', { value: 64, configurable: true });
@@ -96,15 +97,18 @@ describe('BoardRenderer Touch Interactions', () => {
     cell.appendChild(wrapper);
 
     const touch = createTouch(cell, 0, 100, 100);
-    const _event = dispatchTouchEvent('touchstart', cell, [touch]);
+    dispatchTouchEvent('touchstart', cell, [touch]);
 
     expect(cell.classList.contains('dragging')).toBe(true);
     // Check if clone exists in body
     // The clone is appended to document.body and has position: fixed
     // Since initBoardUI puts cells in #board, the only direct children of body should be #board and our clones (and maybe scripts)
     const clones = Array.from(document.body.children).filter(
-      el => el.style && el.style.position === 'fixed' && el.classList.contains('piece-svg')
-    );
+      el =>
+        (el as HTMLElement).style &&
+        (el as HTMLElement).style.position === 'fixed' &&
+        el.classList.contains('piece-svg')
+    ) as HTMLElement[];
     expect(clones.length).toBeGreaterThan(0);
 
     // Cleanup
@@ -112,7 +116,7 @@ describe('BoardRenderer Touch Interactions', () => {
   });
 
   test('should move dragged element on touchmove', () => {
-    const cell = document.querySelector('.cell[data-r="4"][data-c="4"]');
+    const cell = document.querySelector('.cell[data-r="4"][data-c="4"]') as HTMLElement;
 
     Object.defineProperty(cell, 'offsetWidth', { value: 64, configurable: true });
     Object.defineProperty(cell, 'offsetHeight', { value: 64, configurable: true });
@@ -134,8 +138,8 @@ describe('BoardRenderer Touch Interactions', () => {
 
     // Verify position update of clone
     const clone = Array.from(document.body.children).find(
-      el => el.style.position === 'fixed' && el.classList.contains('piece-svg')
-    );
+      el => (el as HTMLElement).style.position === 'fixed' && el.classList.contains('piece-svg')
+    ) as HTMLElement;
     expect(clone).toBeTruthy();
     // Logic: left = clientX - width/2.
     // 200 - 32 = 168.
@@ -144,8 +148,8 @@ describe('BoardRenderer Touch Interactions', () => {
   });
 
   test('should execute move on touchend if valid target', () => {
-    const fromCell = document.querySelector('.cell[data-r="4"][data-c="4"]');
-    const toCell = document.querySelector('.cell[data-r="5"][data-c="4"]');
+    const fromCell = document.querySelector('.cell[data-r="4"][data-c="4"]') as HTMLElement;
+    const toCell = document.querySelector('.cell[data-r="5"][data-c="4"]') as HTMLElement;
 
     Object.defineProperty(fromCell, 'offsetWidth', { value: 64, configurable: true });
     Object.defineProperty(fromCell, 'offsetHeight', { value: 64, configurable: true });
@@ -156,7 +160,7 @@ describe('BoardRenderer Touch Interactions', () => {
 
     // Valid moves setup
     const validMoves = [{ r: 5, c: 4 }];
-    gameMock.getValidMoves.mockReturnValue(validMoves);
+    (gameMock.getValidMoves as any).mockReturnValue(validMoves);
 
     // Start
     const startTouch = createTouch(fromCell, 0, 100, 100);

@@ -136,7 +136,9 @@ describe('PuzzleManager', () => {
         setupStr: '..'.repeat(81) + 'w',
         solution: [],
       };
-      const genSpy = vi.spyOn(ProceduralGenerator, 'generatePuzzle').mockReturnValue(mockPuzzle as any);
+      const genSpy = vi
+        .spyOn(ProceduralGenerator, 'generatePuzzle')
+        .mockReturnValue(mockPuzzle as any);
 
       // Load the last puzzle
       const lastIndex = manager.puzzles.length - 1;
@@ -188,7 +190,7 @@ describe('PuzzleGenerator', () => {
       const { board, turn } = PuzzleGenerator.stringToBoard(str);
 
       expect(turn).toBe('white');
-      expect((board[8][4] as any)).toEqual({ type: 'k', color: 'white', hasMoved: true });
+      expect(board[8][4] as any).toEqual({ type: 'k', color: 'white', hasMoved: true });
     });
 
     test('should handle black pieces', () => {
@@ -197,7 +199,7 @@ describe('PuzzleGenerator', () => {
       const { board, turn } = PuzzleGenerator.stringToBoard(str);
 
       expect(turn).toBe('black');
-      expect((board[0][0] as any)).toEqual({ type: 'k', color: 'black', hasMoved: true });
+      expect(board[0][0] as any).toEqual({ type: 'k', color: 'black', hasMoved: true });
     });
   });
 

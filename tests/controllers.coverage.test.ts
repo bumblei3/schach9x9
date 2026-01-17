@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { setupJSDOM, createMockGame } from './test-utils.js';
 import { PHASES } from '../js/config.js';
 
@@ -57,7 +58,7 @@ const { storageManager } = await import('../js/storage.js');
 const { evaluatePosition } = await import('../js/aiEngine.js');
 
 describe('Controllers Coverage Expansion', () => {
-  let game, gc, ac, tc;
+  let game: any, gc: any, ac: any, tc: any;
 
   beforeEach(() => {
     setupJSDOM();
@@ -108,7 +109,7 @@ describe('Controllers Coverage Expansion', () => {
       game.phase = PHASES.PLAY;
       gc.resign('black');
       expect(game.phase).toBe(PHASES.GAME_OVER);
-      expect(document.getElementById('winner-text').textContent).toContain('Weiß gewinnt');
+      expect(document.getElementById('winner-text')!.textContent).toContain('Weiß gewinnt');
     });
 
     test('handleCellClick should do nothing in GAME_OVER', () => {
@@ -136,8 +137,8 @@ describe('Controllers Coverage Expansion', () => {
     });
 
     test('loadGame should handle successful load', () => {
-      storageManager.loadGame.mockReturnValue({ some: 'state' });
-      storageManager.loadStateIntoGame.mockReturnValue(true);
+      (storageManager.loadGame as any).mockReturnValue({ some: 'state' });
+      (storageManager.loadStateIntoGame as any).mockReturnValue(true);
 
       gc.loadGame();
       expect(game.log).toHaveBeenCalledWith(expect.stringContaining('geladen'));
@@ -147,7 +148,7 @@ describe('Controllers Coverage Expansion', () => {
   describe('AIController', () => {
     test('aiEvaluateDrawOffer should accept if losing', async () => {
       game.drawOffered = true;
-      evaluatePosition.mockResolvedValue(-500);
+      (evaluatePosition as any).mockResolvedValue(-500);
 
       await ac.aiEvaluateDrawOffer();
       expect(game.acceptDraw).toHaveBeenCalled();
@@ -155,13 +156,13 @@ describe('Controllers Coverage Expansion', () => {
 
     test('aiShouldOfferDraw should return true if slightly losing', async () => {
       game.moveHistory = Array(30).fill({});
-      evaluatePosition.mockResolvedValue(-200);
+      (evaluatePosition as any).mockResolvedValue(-200);
 
       expect(await ac.aiShouldOfferDraw()).toBe(true);
     });
 
     test('aiShouldResign should return true if losing badly', async () => {
-      evaluatePosition.mockResolvedValue(-2000);
+      (evaluatePosition as any).mockResolvedValue(-2000);
       expect(await ac.aiShouldResign()).toBe(true);
     });
 
@@ -262,13 +263,13 @@ describe('Controllers Coverage Expansion', () => {
       game.board[6][5] = knight;
 
       const move = { from: { r: 6, c: 5 }, to: { r: 4, c: 4 } };
-      game.getValidMoves.mockReturnValue([
+      (game.getValidMoves as any).mockReturnValue([
         { r: 2, c: 3 },
         { r: 2, c: 5 },
       ]);
 
       const patterns = tc.detectTacticalPatterns(move);
-      expect(patterns.some(p => p.type === 'fork')).toBe(true);
+      expect(patterns.some((p: any) => p.type === 'fork')).toBe(true);
     });
 
     test('detectPins should identify a pinned piece', () => {
@@ -277,7 +278,7 @@ describe('Controllers Coverage Expansion', () => {
       game.board[4][6] = { type: 'r', color: 'black' };
       game.board[4][8] = { type: 'k', color: 'black' };
 
-      game.getValidMoves.mockReturnValue([
+      (game.getValidMoves as any).mockReturnValue([
         { r: 4, c: 5 },
         { r: 4, c: 6 },
         { r: 4, c: 7 },
@@ -294,7 +295,7 @@ describe('Controllers Coverage Expansion', () => {
       game.board[6][4] = { type: 'p', color: 'white' };
 
       const strategy = tc.analyzeStrategicValue(move);
-      expect(strategy.some(s => s.type === 'center_control')).toBe(true);
+      expect(strategy.some((s: any) => s.type === 'center_control')).toBe(true);
     });
   });
 

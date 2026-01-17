@@ -1,7 +1,8 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { NotificationUI } from '../js/ui/NotificationUI.js';
 
 describe('NotificationUI', () => {
-  let notificationUI;
+  let notificationUI: any;
 
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -26,7 +27,7 @@ describe('NotificationUI', () => {
   test('should show success toast', () => {
     notificationUI.show('Saved successfully', 'success');
 
-    const toast = document.querySelector('.toast-success');
+    const toast = document.querySelector('.toast-success')!;
     expect(toast).not.toBeNull();
     expect(toast.textContent).toContain('Saved successfully');
     expect(toast.textContent).toContain('Erfolg');
@@ -36,7 +37,7 @@ describe('NotificationUI', () => {
   test('should show warning toast', () => {
     notificationUI.show('Disk almost full', 'warning');
 
-    const toast = document.querySelector('.toast-warning');
+    const toast = document.querySelector('.toast-warning')!;
     expect(toast).not.toBeNull();
     expect(toast.textContent).toContain('Warnung');
     expect(toast.textContent).toContain('⚠️');
@@ -45,7 +46,7 @@ describe('NotificationUI', () => {
   test('should show error toast with longer duration', () => {
     notificationUI.show('Load failed', 'error');
 
-    const toast = document.querySelector('.toast-error');
+    const toast = document.querySelector('.toast-error')!;
     expect(toast).not.toBeNull();
     expect(toast.textContent).toContain('Fehler');
 
@@ -59,16 +60,16 @@ describe('NotificationUI', () => {
 
   test('should handle manual close', () => {
     notificationUI.show('Close me', 'info');
-    const toast = document.querySelector('.toast-notification');
-    const closeBtn = toast.querySelector('.toast-close');
+    const toast = document.querySelector('.toast-notification')!;
+    const closeBtn = toast.querySelector('.toast-close') as HTMLElement;
 
-    closeBtn.onclick();
+    closeBtn.click();
     expect(toast.classList.contains('hiding')).toBe(true);
   });
 
   test('should remove from DOM after hide animation', () => {
     notificationUI.show('Hidden', 'info');
-    const toast = document.querySelector('.toast-notification');
+    const toast = document.querySelector('.toast-notification')!;
 
     notificationUI.hide(toast);
     expect(toast.classList.contains('hiding')).toBe(true);
@@ -80,7 +81,7 @@ describe('NotificationUI', () => {
 
   test('should use custom title', () => {
     notificationUI.show('Message', 'info', 'Custom Title');
-    const toast = document.querySelector('.toast-notification');
+    const toast = document.querySelector('.toast-notification')!;
     expect(toast.textContent).toContain('Custom Title');
   });
 });

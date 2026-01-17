@@ -76,7 +76,7 @@ describe('TacticsDetector Coverage', () => {
 
       // Simulation will move rook to 0,0.
       // Then detects check.
-      mockGame.isInCheck.mockReturnValue(true);
+      (mockGame.isInCheck as any).mockReturnValue(true);
 
       const patterns = TacticsDetector.detectTacticalPatterns(mockGame, mockAnalyzer, move);
       expect(patterns).toEqual(

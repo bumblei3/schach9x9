@@ -53,7 +53,7 @@ describe('Interactive Tutor', () => {
   });
 
   it('should request hint from AIController if it is player turn', async () => {
-    aiControllerMock.getHint.mockResolvedValue({
+    (aiControllerMock.getHint as any).mockResolvedValue({
       move: { from: { r: 1, c: 1 }, to: { r: 2, c: 1 } },
       explanation: 'Guter Zug',
     });
@@ -68,7 +68,7 @@ describe('Interactive Tutor', () => {
   });
 
   it('should visualize the hint arrow and show explanation', async () => {
-    aiControllerMock.getHint.mockResolvedValue({
+    (aiControllerMock.getHint as any).mockResolvedValue({
       move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
       explanation: 'Kontrolliert das Zentrum.',
     });
@@ -90,7 +90,7 @@ describe('Interactive Tutor', () => {
   });
 
   it('should handle case where no hint is found', async () => {
-    aiControllerMock.getHint.mockResolvedValue(null);
+    (aiControllerMock.getHint as any).mockResolvedValue(null);
 
     await gameController.requestHint();
 

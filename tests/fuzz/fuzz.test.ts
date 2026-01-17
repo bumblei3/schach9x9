@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { runRulesFuzzTest } from './rules.fuzz.js';
 
 describe('Rules Engine Fuzz Test', () => {

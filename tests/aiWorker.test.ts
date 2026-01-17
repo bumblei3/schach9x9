@@ -35,10 +35,12 @@ class MockWorker {
     }, 10);
   }
 
-  terminate() { }
-  addEventListener() { }
-  removeEventListener() { }
-  dispatchEvent() { return true; }
+  terminate() {}
+  addEventListener() {}
+  removeEventListener() {}
+  dispatchEvent() {
+    return true;
+  }
   onerror = null;
   onmessageerror = null;
 }
@@ -55,8 +57,8 @@ describe('AI Engine Worker Integration', () => {
     (global as any).window = {}; // Mock window existence
 
     // Silence logs
-    vi.spyOn(logger, 'info').mockImplementation(function () { });
-    vi.spyOn(logger, 'debug').mockImplementation(function () { });
+    vi.spyOn(logger, 'info').mockImplementation(function () {});
+    vi.spyOn(logger, 'debug').mockImplementation(function () {});
   });
 
   afterAll(() => {
@@ -90,9 +92,15 @@ describe('AI Worker Message Handlers', () => {
   beforeAll(async () => {
     // Mock all aiEngine functions
     vi.mock('../js/aiEngine.js', () => ({
-      getBestMoveDetailed: vi.fn().mockResolvedValue({ move: { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }, score: 50 }),
-      getTopMoves: vi.fn().mockResolvedValue([{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 100 }]),
-      analyzePosition: vi.fn().mockReturnValue({ bestMove: null, score: 0, threats: [], opportunities: [] }),
+      getBestMoveDetailed: vi
+        .fn()
+        .mockResolvedValue({ move: { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }, score: 50 }),
+      getTopMoves: vi
+        .fn()
+        .mockResolvedValue([{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 100 }]),
+      analyzePosition: vi
+        .fn()
+        .mockReturnValue({ bestMove: null, score: 0, threats: [], opportunities: [] }),
       evaluatePosition: vi.fn().mockResolvedValue(25),
       setOpeningBook: vi.fn(),
       setProgressCallback: vi.fn(),
@@ -177,7 +185,9 @@ describe('AI Worker Message Handlers', () => {
   });
 
   test('getBestMove - should return best move result', async () => {
-    const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const mockBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     await onmessageHandler({
       data: {
@@ -202,7 +212,9 @@ describe('AI Worker Message Handlers', () => {
   });
 
   test('evaluatePosition - should return position score', async () => {
-    const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const mockBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     await onmessageHandler({
       data: {
@@ -220,7 +232,9 @@ describe('AI Worker Message Handlers', () => {
   });
 
   test('getTopMoves - should return top moves array', async () => {
-    const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const mockBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     await onmessageHandler({
       data: {
@@ -245,7 +259,9 @@ describe('AI Worker Message Handlers', () => {
   });
 
   test('analyze - should return analysis result', async () => {
-    const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const mockBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     await onmessageHandler({
       data: {
@@ -263,7 +279,9 @@ describe('AI Worker Message Handlers', () => {
   });
 
   test('search - should return search result as bestMove', async () => {
-    const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const mockBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     await onmessageHandler({
       data: {
@@ -301,7 +319,9 @@ describe('AI Worker Message Handlers', () => {
   });
 
   test('legacy SEARCH - should handle old protocol', async () => {
-    const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const mockBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     await onmessageHandler({
       data: {
