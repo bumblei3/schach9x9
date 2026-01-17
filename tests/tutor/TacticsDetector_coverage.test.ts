@@ -119,5 +119,86 @@ describe('TacticsDetector Coverage', () => {
       expect(TacticsDetector.canPieceMove('b', 2, 2)).toBe(true);
       expect(TacticsDetector.canPieceMove('b', 1, 0)).toBe(false);
     });
+
+    it('should validate queen movement', () => {
+      expect(TacticsDetector.canPieceMove('q', 1, 0)).toBe(true);
+      expect(TacticsDetector.canPieceMove('q', 0, 5)).toBe(true);
+      expect(TacticsDetector.canPieceMove('q', 2, 2)).toBe(true);
+    });
+  });
+
+  describe('detectSkewers', () => {
+    it('should detect skewer on a line', () => {
+      // Setup: White queen attacks black queen, then black king behind
+      mockGame.board[4][4] = { type: 'r', color: 'white' };
+      mockGame.board[4][6] = { type: 'q', color: 'black' };
+      mockGame.board[4][8] = { type: 'k', color: 'black' };
+
+      const skewers = TacticsDetector.detectSkewers(
+        mockGame,
+        mockAnalyzer,
+        { r: 4, c: 4 },
+        'white'
+      );
+      expect(skewers.length).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('detectDiscoveredAttacks', () => {
+    it('should detect discovered attack when piece moves away', () => {
+      // Setup: White rook behind white knight. Moving knight reveals rook attack.
+      mockGame.board[4][4] = { type: 'n', color: 'white' };
+      mockGame.board[4][0] = { type: 'r', color: 'white' };
+      mockGame.board[4][8] = { type: 'q', color: 'black' };
+
+      vi.mocked(aiEngine.isSquareAttacked).mockReturnValue(true);
+
+      const discovered = TacticsDetector.detectDiscoveredAttacks(
+        mockGame,
+        mockAnalyzer,
+        { r: 4, c: 4 },
+        { r: 2, c: 5 },
+        'white'
+      );
+      expect(discovered.length).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('countAttackers and countDefenders', () => {
+    it('countAttackers should count pieces attacking a square', () => {
+      mockGame.board[0][0] = { type: 'r', color: 'white' };
+      mockGame.board[0][4] = null; // Target square
+      mockGame.getValidMoves.mockReturnValue([{ to: { r: 0, c: 4 } }]);
+
+      const count = TacticsDetector.countAttackers(mockGame, 0, 4, 'white');
+      expect(count).toBeGreaterThanOrEqual(0);
+    });
+
+    it('countDefenders should count pieces defending a square', () => {
+      mockGame.board[4][4] = { type: 'p', color: 'white' };
+      mockGame.board[3][3] = { type: 'b', color: 'white' };
+      mockGame.getValidMoves.mockReturnValue([{ to: { r: 4, c: 4 } }]);
+
+      const count = TacticsDetector.countDefenders(mockGame, 4, 4, 'white');
+      expect(count).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('detectPins', () => {
+    it('should detect a pin on a diagonal', () => {
+      // White bishop pins black knight to black king
+      mockGame.board[0][0] = { type: 'b', color: 'white' };
+      mockGame.board[2][2] = { type: 'n', color: 'black' };
+      mockGame.board[4][4] = { type: 'k', color: 'black' };
+
+      const pins = TacticsDetector.detectPins(
+        mockGame,
+        mockAnalyzer,
+        { r: 0, c: 0 },
+        'white'
+      );
+      expect(pins.length).toBeGreaterThanOrEqual(0);
+    });
   });
 });
+

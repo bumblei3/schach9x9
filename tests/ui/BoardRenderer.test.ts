@@ -112,4 +112,44 @@ describe('BoardRenderer Component', () => {
       expect(game.handleCellClick).not.toHaveBeenCalled();
     }
   });
+
+  test('flashSquare should not crash when called', () => {
+    BoardRenderer.initBoardUI(game);
+    BoardRenderer.renderBoard(game);
+    // Just verify no error is thrown
+    expect(() => BoardRenderer.flashSquare(0, 0, 'check')).not.toThrow();
+    expect(() => BoardRenderer.flashSquare(5, 5, 'mate')).not.toThrow();
+    expect(() => BoardRenderer.flashSquare(8, 8, 'capture')).not.toThrow();
+  });
+
+  test('showMoveQuality should not crash when called', () => {
+    BoardRenderer.initBoardUI(game);
+    BoardRenderer.renderBoard(game);
+    expect(() =>
+      BoardRenderer.showMoveQuality(game, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, 'brilliant')
+    ).not.toThrow();
+    expect(() =>
+      BoardRenderer.showMoveQuality(game, { from: { r: 2, c: 2 }, to: { r: 3, c: 3 } }, 'blunder')
+    ).not.toThrow();
+  });
+
+  test('getPieceText should return correct symbols', () => {
+    const pawnSymbol = BoardRenderer.getPieceText({ type: 'p', color: 'white' } as any);
+    expect(pawnSymbol).toBe('♙');
+
+    const kingSymbol = BoardRenderer.getPieceText({ type: 'k', color: 'black' } as any);
+    expect(kingSymbol).toBe('♚');
+
+    const nullSymbol = BoardRenderer.getPieceText(null);
+    expect(nullSymbol).toBe('');
+  });
+
+  test('clearPieceCache should clear the global cache', () => {
+    (window as any)._svgCache = { test: 'value' };
+    BoardRenderer.clearPieceCache();
+    expect((window as any)._svgCache).toEqual({});
+  });
 });
+
+
+

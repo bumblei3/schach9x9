@@ -75,4 +75,50 @@ describe('AnalysisUI', () => {
     expect(list.innerHTML).toContain('e4');
     expect(list.innerHTML).toContain('d4');
   });
+
+  test('updateBar should handle negative scores', () => {
+    analysisUI.updateBar(-350);
+    const evalText = document.getElementById('eval-text')!;
+    expect(evalText.textContent).toBe('-3.5');
+    const fill = document.getElementById('eval-fill')!;
+    // Percentage = 50 + (-350)/20 = 50 - 17.5 = 32.5%
+    expect(fill.style.height).toBe('32.5%');
+  });
+
+  test('updateBar should clamp extreme scores', () => {
+    analysisUI.updateBar(2000); // Greater than 1000, should clamp to 1000
+    const fill = document.getElementById('eval-fill')!;
+    expect(fill.style.height).toBe('100%'); // 50 + 1000/20 = 100
+
+    analysisUI.updateBar(-2000); // Less than -1000, should clamp to -1000
+    expect(fill.style.height).toBe('0%'); // 50 + (-1000)/20 = 0
+  });
+
+  test('updatePanel should update engine info', () => {
+    analysisUI.togglePanel(); // Show panel first
+    analysisUI.updatePanel(100, [], 15, 50000);
+    const engineInfo = document.getElementById('analysis-engine-info')!;
+    expect(engineInfo.textContent).toContain('Tiefe: 15');
+    expect(engineInfo.textContent).toContain('Knoten: 50000');
+  });
+
+  test('updatePanel should handle missing depth/nodes gracefully', () => {
+    analysisUI.togglePanel();
+    analysisUI.updatePanel(0, [], undefined, undefined);
+    const engineInfo = document.getElementById('analysis-engine-info')!;
+    expect(engineInfo.textContent).toContain('Tiefe: -');
+    expect(engineInfo.textContent).toContain('Knoten: -');
+  });
+
+  test('updateBar should not crash when bar elements are null', () => {
+    analysisUI.bar = null;
+    analysisUI.fill = null;
+    expect(() => analysisUI.updateBar(100)).not.toThrow();
+  });
+
+  test('togglePanel should return false when panel is null', () => {
+    analysisUI.panel = null;
+    expect(analysisUI.togglePanel()).toBe(false);
+  });
 });
+

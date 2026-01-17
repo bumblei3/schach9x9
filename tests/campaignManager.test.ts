@@ -233,5 +233,99 @@ describe('CampaignManager', () => {
       expect((newManager as any).state.championType).toBeNull();
       expect(newManager.getGold()).toBe(100);
     });
+
+    test('loadState should handle corrupted JSON gracefully', () => {
+      (localStorage.getItem as any).mockReturnValueOnce('{corrupted:json}');
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
+      const newManager = new CampaignManager();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect((newManager as any).state.currentLevelId).toBe('peasant_revolt');
+      expect((newManager as any).state.gold).toBe(0);
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('Talent System', () => {
+    test('isTalentUnlocked should return false for non-existent talents', () => {
+      expect(manager.isTalentUnlocked('non_existent_talent')).toBe(false);
+    });
+
+    test('unlockTalent should return false for invalid unit type', () => {
+      (manager as any).state.gold = 1000;
+      const result = manager.unlockTalent('invalid_unit', 'some_talent', 10);
+      expect(result).toBe(false);
+    });
+
+    test('unlockTalent should return false for invalid talent id', () => {
+      (manager as any).state.gold = 1000;
+      const result = manager.unlockTalent('p', 'invalid_talent_id', 10);
+      expect(result).toBe(false);
+    });
+
+    test('unlockTalent should return false when not enough gold', () => {
+      (manager as any).state.gold = 5;
+      const result = manager.unlockTalent('p', 'p_veteran', 100);
+      expect(result).toBe(false);
+    });
+
+    test('unlockTalent should return true when already unlocked', () => {
+      (manager as any).state.gold = 1000;
+      (manager as any).state.unlockedTalentIds = ['p_veteran'];
+      const result = manager.unlockTalent('p', 'p_veteran', 50);
+      expect(result).toBe(true);
+      expect((manager as any).state.gold).toBe(1000); // No gold deducted
+    });
+  });
+
+  describe('Goal Checking', () => {
+    test('checkGoal should handle unknown goal types', () => {
+      const result = (manager as any).checkGoal({ type: 'unknown', value: 10 }, { moves: 5 });
+      expect(result).toBe(false);
+    });
+
+    test('checkGoal should check material goal correctly', () => {
+      const goal = { type: 'material', value: 5 };
+      expect((manager as any).checkGoal(goal, { materialDiff: 10 })).toBe(true);
+      expect((manager as any).checkGoal(goal, { materialDiff: 3 })).toBe(false);
+    });
+
+    test('checkGoal should check promotion goal correctly', () => {
+      const goal = { type: 'promotion', value: 2 };
+      expect((manager as any).checkGoal(goal, { promotedCount: 2 })).toBe(true);
+      expect((manager as any).checkGoal(goal, { promotedCount: 1 })).toBe(false);
+    });
+  });
+
+  describe('Misc Methods', () => {
+    test('unlockAll should unlock all campaign levels', () => {
+      manager.unlockAll();
+      expect(manager.isLevelUnlocked('peasant_revolt')).toBe(true);
+      expect(manager.isLevelUnlocked('level_2')).toBe(true);
+      expect(manager.isLevelUnlocked('level_3')).toBe(true);
+    });
+
+    test('resetState should reset to initial values', () => {
+      (manager as any).state.gold = 999;
+      (manager as any).state.completedLevels = ['peasant_revolt'];
+      manager.resetState();
+      expect(manager.getGold()).toBe(0);
+      expect(manager.isLevelCompleted('peasant_revolt')).toBe(false);
+    });
+
+    test('incrementUnitCaptures should increase captures count', () => {
+      manager.incrementUnitCaptures('n');
+      const xp = manager.getUnitXp('n');
+      expect(xp.captures).toBe(1);
+    });
+
+    test('getChampion should return the current champion', () => {
+      manager.setChampion('r');
+      expect(manager.getChampion()).toBe('r');
+      manager.setChampion(null);
+      expect(manager.getChampion()).toBeNull();
+    });
   });
 });
+
