@@ -1,6 +1,6 @@
 # ♟️ Schach 9x9
 
-[![Deploy static content to Pages](https://github.com/bumblei3/schach9x9/actions/workflows/deploy.yml/badge.svg)](https://github.com/bumblei3/schach9x9/actions/workflows/deploy.yml)
+[![CI Status](https://github.com/bumblei3/schach9x9/actions/workflows/ci.yml/badge.svg)](https://github.com/bumblei3/schach9x9/actions/workflows/ci.yml)
 
 Ein innovatives Schachspiel auf einem 9x9 Brett mit neuen Figuren, strategischer Tiefe und modernen Features.
 
@@ -16,16 +16,17 @@ Das Spiel ist live unter folgender Adresse verfügbar:
   - **Erzbischof**: Kombiniert die Zugmöglichkeiten von Läufer und Springer.
   - **Kanzler**: Kombiniert die Zugmöglichkeiten von Turm und Springer.
   - **Engel**: Eine mächtige Premium-Figur für fortgeschrittene Strategien.
-- **Setup-Phase**: Platziere deinen König strategisch und stelle deine Armee mit einem Punktesystem (15 Punkte) zusammen.
+- **Kampagnen-Modus**: Spiele durch verschiedene Level, sammle XP für deine Figuren und schalte mächtige Talente frei.
+- **Talentbaum**: Individualisiere deine Armee mit spezialisierten Fähigkeiten (z.B. Veteran, Plünderer, Unaufhaltsam).
+- **Setup-Phase & Upgrade-Modus**: Platziere deinen König strategisch und verbessere deine Armee dynamisch.
 - **Optimierte KI**: Leistungsstarker Gegner mit Alpha-Beta-Suche, Transposition Table und effizientem Move-Ordering.
-- **Engine Analyse Modus**: Echtzeit-Evaluation mit vertikaler Bar, Top-Züge inkl. PV-Varianten und Engine-Statistiken (Tiefe, Knoten).
-- **Zug-Qualitäts-Indikatoren**: Sofortiges Feedback auf Züge (Brilliant, Best, Blunder) mit visuellen Badges und Effekten.
-- **Eröffnungs-Erkennung**: Dynamische Anzeige von Eröffnungsnamen (z.B. Sizilianisch, Kanzler-Gambit) während der Partie.
+- **Engine Analyse Modus**: Echtzeit-Evaluation mit vertikaler Bar, Top-Züge inkl. PV-Varianten und Engine-Statistiken.
+- **Zug-Qualitäts-Indikatoren**: Sofortiges Feedback auf Züge (Brilliant, Best, Blunder) mit visuellen Badges.
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
-- **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker. Mit Touch-Support für Drag & Drop.
+- **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
-- **Anpassbare Designs**: Wähle zwischen Classic, Deep Blue und Forest Green Themes.
+- **TypeScript Strict Mode**: Das gesamte Projekt ist zu 100% typisiert und strikt geprüft.
 
 ## 🧠 Technische Highlights
 
@@ -54,7 +55,9 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.220 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.450 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+
+Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors).
 
 | Modul             | Coverage (Lines) | Beschreibung                                      |
 | ----------------- | ---------------- | ------------------------------------------------- |
@@ -66,20 +69,24 @@ Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.220 
 
 ## 📁 Projektstruktur
 
-```
 schach9x9/
 ├── css/                # Styling (Modularisiert nach Komponenten)
 ├── js/
 │   ├── ai/             # KI-Logik (Suche, Bewertung, Opening Book)
 │   ├── assets/         # Statische Assets (Figuren SVGs)
-│   │   └── pieces/     # Modularisierte Schachfiguren-Sets
 │   ├── move/           # Zugvalidierung und Ausführung
 │   ├── tutor/          # Tutor-System und Analyse
 │   ├── ui/             # UI-Komponenten und Renderer
 │   │   └── 3d/         # 3D-Engine Module (Scene, Piece, Input)
+│   ├── game/           # Kern-Spiellogik (Modes, State)
 │   ├── App.js          # Hauptanwendungsklasse
 │   └── battleChess3D.js # 3D-Fassade
 ├── tests/              # Test-Suite (Unit & Integration)
+│   ├── campaign/       # Kampagnen-Logik Tests
+│   ├── modes/          # Spielmodi Tests (Classic, Setup, Upgrade)
+│   ├── ui/             # UI Tests
+│   └── ...
+├── engine-wasm/        # Rust KI-Engine Quellcode
 ├── opening-book-trainer-real.cjs # Self-Play Trainer für Eröffnungen
 └── index.html          # Einstiegspunkt
 ```
