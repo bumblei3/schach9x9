@@ -191,14 +191,8 @@ describe('TacticsDetector Coverage', () => {
       mockGame.board[2][2] = { type: 'n', color: 'black' };
       mockGame.board[4][4] = { type: 'k', color: 'black' };
 
-      const pins = TacticsDetector.detectPins(
-        mockGame,
-        mockAnalyzer,
-        { r: 0, c: 0 },
-        'white'
-      );
+      const pins = TacticsDetector.detectPins(mockGame, mockAnalyzer, { r: 0, c: 0 }, 'white');
       expect(pins.length).toBeGreaterThanOrEqual(0);
     });
   });
 });
-

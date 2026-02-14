@@ -140,6 +140,7 @@ export class Game {
   mentorLevel: string;
   kiMentorEnabled: boolean;
   aiPersonality: string;
+  playerColor: Player;
 
   constructor(initialPoints: number = 15, mode: GameMode = 'setup') {
     this.mode = mode;
@@ -186,6 +187,7 @@ export class Game {
     }
 
     this.turn = 'white';
+    this.playerColor = 'white';
     this.points = initialPoints;
     this.initialPoints = initialPoints;
     this.selectedShopPiece = null;

@@ -70,25 +70,26 @@ Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors).
 ## 📁 Projektstruktur
 
 schach9x9/
-├── css/                # Styling (Modularisiert nach Komponenten)
+├── css/ # Styling (Modularisiert nach Komponenten)
 ├── js/
-│   ├── ai/             # KI-Logik (Suche, Bewertung, Opening Book)
-│   ├── assets/         # Statische Assets (Figuren SVGs)
-│   ├── move/           # Zugvalidierung und Ausführung
-│   ├── tutor/          # Tutor-System und Analyse
-│   ├── ui/             # UI-Komponenten und Renderer
-│   │   └── 3d/         # 3D-Engine Module (Scene, Piece, Input)
-│   ├── game/           # Kern-Spiellogik (Modes, State)
-│   ├── App.js          # Hauptanwendungsklasse
-│   └── battleChess3D.js # 3D-Fassade
-├── tests/              # Test-Suite (Unit & Integration)
-│   ├── campaign/       # Kampagnen-Logik Tests
-│   ├── modes/          # Spielmodi Tests (Classic, Setup, Upgrade)
-│   ├── ui/             # UI Tests
-│   └── ...
-├── engine-wasm/        # Rust KI-Engine Quellcode
+│ ├── ai/ # KI-Logik (Suche, Bewertung, Opening Book)
+│ ├── assets/ # Statische Assets (Figuren SVGs)
+│ ├── move/ # Zugvalidierung und Ausführung
+│ ├── tutor/ # Tutor-System und Analyse
+│ ├── ui/ # UI-Komponenten und Renderer
+│ │ └── 3d/ # 3D-Engine Module (Scene, Piece, Input)
+│ ├── game/ # Kern-Spiellogik (Modes, State)
+│ ├── App.js # Hauptanwendungsklasse
+│ └── battleChess3D.js # 3D-Fassade
+├── tests/ # Test-Suite (Unit & Integration)
+│ ├── campaign/ # Kampagnen-Logik Tests
+│ ├── modes/ # Spielmodi Tests (Classic, Setup, Upgrade)
+│ ├── ui/ # UI Tests
+│ └── ...
+├── engine-wasm/ # Rust KI-Engine Quellcode
 ├── opening-book-trainer-real.cjs # Self-Play Trainer für Eröffnungen
-└── index.html          # Einstiegspunkt
+└── index.html # Einstiegspunkt
+
 ```
 
 ## 🚀 Installation & Start
@@ -119,3 +120,4 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 ## 📄 Lizenz
 
 Dieses Projekt ist unter der MIT Lizenz veröffentlicht.
+```

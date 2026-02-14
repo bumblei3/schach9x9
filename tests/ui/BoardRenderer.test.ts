@@ -150,6 +150,3 @@ describe('BoardRenderer Component', () => {
     expect((window as any)._svgCache).toEqual({});
   });
 });
-
-
-

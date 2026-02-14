@@ -236,7 +236,7 @@ describe('CampaignManager', () => {
 
     test('loadState should handle corrupted JSON gracefully', () => {
       (localStorage.getItem as any).mockReturnValueOnce('{corrupted:json}');
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const newManager = new CampaignManager();
 
@@ -328,4 +328,3 @@ describe('CampaignManager', () => {
     });
   });
 });
-

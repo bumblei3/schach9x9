@@ -46,6 +46,12 @@ vi.mock('../js/AnalysisController.js', () => ({
   },
 }));
 
+vi.mock('../js/ui/NotificationUI.js', () => ({
+  notificationUI: {
+    show: vi.fn(),
+  },
+}));
+
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
     constructor() {}
@@ -506,6 +512,59 @@ describe('GameController', () => {
         expect.anything()
       );
       consoleSpy.mockRestore();
+    });
+  });
+  describe('Hint System', () => {
+    test('should allow hints in Hotseat mode (isAI=false) regardless of playerColor', async () => {
+      game.phase = PHASES.PLAY;
+      game.isAI = false;
+      game.turn = 'black';
+      (game as any).playerColor = undefined; // Simulate Hotseat state
+
+      const showHintMock = vi.fn();
+      (game as any).tutorController = {
+        showHint: showHintMock,
+      };
+
+      await gameController.requestHint();
+
+      expect(showHintMock).toHaveBeenCalled();
+    });
+
+    test('should delegate requestHint to TutorController if available', async () => {
+      game.phase = PHASES.PLAY;
+      game.turn = 'white';
+      (game as any).playerColor = 'white';
+
+      const showHintMock = vi.fn();
+      (game as any).tutorController = {
+        showHint: showHintMock,
+      };
+
+      await gameController.requestHint();
+
+      expect(showHintMock).toHaveBeenCalled();
+    });
+
+    test('should fallback to AIController for hints if TutorController is missing', async () => {
+      game.phase = PHASES.PLAY;
+      game.turn = 'white';
+      (game as any).playerColor = 'white';
+      game.isAI = true;
+      (game as any).tutorController = undefined;
+
+      const getHintMock = vi.fn().mockResolvedValue({
+        move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+        explanation: 'Test explanation',
+      });
+      (game as any).aiController = {
+        getHint: getHintMock,
+      };
+      game.arrowRenderer = { clearArrows: vi.fn(), addArrow: vi.fn() };
+
+      await gameController.requestHint();
+
+      expect(getHintMock).toHaveBeenCalled();
     });
   });
 });

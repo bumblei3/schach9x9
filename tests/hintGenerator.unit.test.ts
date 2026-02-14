@@ -179,14 +179,14 @@ describe('HintGenerator - Unit Tests', () => {
     // Cost should be >= some reasonable amount but < 500 likely, or exactly what fit.
   });
 
-  test('showTutorSuggestions should return early if no bestMoves', async () => {
+  test('showTutorSuggestions should Call UI even if no bestMoves (to show "No suggestions")', async () => {
     game.bestMoves = null;
     await showTutorSuggestions(game);
-    expect(UI.showTutorSuggestions).not.toHaveBeenCalled();
+    expect(UI.showTutorSuggestions).toHaveBeenCalled();
 
     game.bestMoves = [];
     await showTutorSuggestions(game);
-    expect(UI.showTutorSuggestions).not.toHaveBeenCalled();
+    expect(UI.showTutorSuggestions).toHaveBeenCalledTimes(2);
   });
 
   test('showTutorSuggestions should call UI if bestMoves exists', async () => {
@@ -344,9 +344,9 @@ describe('HintGenerator - Unit Tests', () => {
     expect(isTutorMove(game, from, to)).toBe(true);
   });
 
-  test('updateBestMoves should trigger debounced hints', () => {
+  test('updateBestMoves should NOT trigger hints automatically (user request)', () => {
     game.phase = PHASES.PLAY;
     updateBestMoves(game, mockTutorController);
-    expect(mockTutorController.debouncedGetTutorHints).toHaveBeenCalled();
+    expect(mockTutorController.debouncedGetTutorHints).not.toHaveBeenCalled();
   });
 });

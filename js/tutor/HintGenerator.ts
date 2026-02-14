@@ -16,16 +16,15 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
     (UI as any).setTutorLoading(true);
   }
 
-  if (game.phase !== PHASES.PLAY) {
-    return [];
-  }
-
-  // Only show hints when it's the human player's turn
-  if (game.isAI && game.turn === 'black') {
-    return []; // Don't give hints for AI
-  }
-
   try {
+    if (game.phase !== PHASES.PLAY) {
+      return [];
+    }
+
+    // Only show hints when it's the human player's turn
+    if (game.isAI && game.turn === 'black') {
+      return []; // Don't give hints for AI
+    }
     // Calculate dynamic depth: AI depth + 2, but always at least 6 for strong hints
     const aiDepth =
       (AI_DEPTH_CONFIG[game.difficulty as keyof typeof AI_DEPTH_CONFIG] as number) || 4;
@@ -59,6 +58,7 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
 
       return true;
     });
+    console.log('[HintGenerator] Valid moves after filtering:', validMoves.length);
 
     // Convert engine moves to hints with explanations
     return Promise.all(
@@ -122,7 +122,11 @@ export function isTutorMove(game: any, from: any, to: any): boolean {
  * Updates the best moves and triggers UI update
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function updateBestMoves(game: any, tutorController: any): void {
+export function updateBestMoves(_game: any, _tutorController: any): void {
+  // User Request: Tutor info only on click.
+  // We disable automatic background calculation to prevent "Thinking..." state from appearing automatically.
+  // game.bestMoves will be calculated on-demand when the button is clicked.
+  /*
   if (game.phase !== PHASES.PLAY) return;
 
   // Immediately show "Thinking" UI when a new position needs analysis
@@ -132,6 +136,7 @@ export function updateBestMoves(game: any, tutorController: any): void {
 
   // Debounced part
   tutorController.debouncedGetTutorHints();
+  */
 }
 
 /**
@@ -139,12 +144,13 @@ export function updateBestMoves(game: any, tutorController: any): void {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function showTutorSuggestions(game: any): Promise<void> {
-  const isSetup = game.phase && String(game.phase).startsWith('SETUP');
-  if (
-    !isSetup &&
-    (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
-  )
-    return;
+  // const isSetup = game.phase && String(game.phase).startsWith('SETUP');
+  // Allow empty hints to pass through to UI so it can show "No suggestions" message
+  // if (
+  //   !isSetup &&
+  //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
+  // )
+  //   return;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (UI as any).showTutorSuggestions(game, game.bestMoves);
 }

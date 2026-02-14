@@ -36,7 +36,6 @@ import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 export interface GameExtended extends Game {
   campaignMode?: boolean;
   currentLevelId?: string;
-  playerColor?: Player;
   handlePlayClick?: (r: number, c: number) => Promise<void>;
   aiSetupKing?: () => void;
   aiSetupPieces?: () => void;
@@ -638,24 +637,39 @@ export class GameController {
   }
 
   async requestHint(): Promise<void> {
-    if (this.game.phase !== PHASES.PLAY || this.game.turn !== this.game.playerColor) {
+    const isPlayerTurn = this.game.turn === this.game.playerColor;
+    // Allow hints if:
+    // 1. It is the player's turn (vs AI)
+    // 2. It is Hotseat mode (!game.isAI) - anyone can ask
+    // 3. Debug/Analysis mode (implied if logic reaches here for AI turn)
+
+    if (this.game.phase !== PHASES.PLAY) {
+      notificationUI.show('Tipps sind nur während des Spiels verfügbar.', 'warning');
+      return;
+    }
+
+    if (this.game.isAI && !isPlayerTurn) {
       notificationUI.show('Tipps sind nur verfügbar, wenn du am Zug bist.', 'info');
       return;
     }
 
-    if (!this.game.isAI) {
-      // Initialize AI controller if playing hotseat
-      if (!this.game.aiController) {
-        // Dynamic import to avoid circular dependency issues if any
-        // But Game should have it. If not, we can't hint.
-        notificationUI.show('Tipps sind in diesem Modus nicht verfügbar.', 'warning');
-        return;
-      }
+    // 1. Prioritize TutorController (New System with Overlay)
+    if ((this.game as any).tutorController) {
+      notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
+      // Use the showHint method which forces calculation if needed
+      await (this.game as any).tutorController.showHint();
+      return;
+    }
+
+    // 2. Fallback to active AI Controller (Legacy/Hotseat)
+    if (!this.game.isAI && !this.game.aiController) {
+      notificationUI.show('Tipps sind in diesem Modus nicht verfügbar.', 'warning');
+      return;
     }
 
     notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
 
-    // We assume game.aiController is available
+    // We assume game.aiController is available as fallback
     if ((this.game as any).aiController) {
       // Use lower depth for hints to be fast
       const result = await (this.game as any).aiController.getHint(4);

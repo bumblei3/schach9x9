@@ -118,7 +118,6 @@ describe('DOMHandler Comprehensive Coverage', () => {
     domHandler = new DOMHandler(app);
   });
 
-
   it('initContinueButton should show continue button if autosave exists', () => {
     localStorage.setItem('schach9x9_save_autosave', 'true');
     domHandler.init();
@@ -149,7 +148,7 @@ describe('DOMHandler Comprehensive Coverage', () => {
     keys.forEach((key, i) => {
       const spy = vi
         .spyOn(document.getElementById(ids[i]) as HTMLElement, 'click')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
       const event = new KeyboardEvent('keydown', { key });
       document.dispatchEvent(event);
       expect(spy).toHaveBeenCalled();
@@ -216,7 +215,7 @@ describe('DOMHandler Comprehensive Coverage', () => {
   it('Fullscreen: should handle toggle and catch errors', async () => {
     domHandler.init();
     const btn = document.getElementById('fullscreen-btn')!;
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const error = new Error('Denied');
 
     document.documentElement.requestFullscreen = vi.fn().mockRejectedValue(error);
@@ -276,4 +275,3 @@ describe('DOMHandler Comprehensive Coverage', () => {
     // The test mock imports need to be spyable.
   });
 });
-

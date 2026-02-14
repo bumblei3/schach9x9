@@ -145,4 +145,3 @@ describe('TalentTreeUI', () => {
     expect(title?.textContent).toContain('Talente');
   });
 });
-

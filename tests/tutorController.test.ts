@@ -595,4 +595,43 @@ describe('TutorController', () => {
       expect(game.bestMoves).toEqual([]);
     });
   });
+
+  describe('debouncedGetTutorHints', () => {
+    test('should call showTutorSuggestions after fetching hints', async () => {
+      game.phase = PHASES.PLAY;
+      game.turn = 'white';
+      game.isAI = false;
+      // Add a white pawn that can move
+      game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
+
+      // Spy on showTutorSuggestions
+      // We need to cast to any because showTutorSuggestions might be protected/private or just to be safe with the mock setup
+      const showSpy = vi.spyOn(tutorController, 'showTutorSuggestions');
+
+      // Trigger the debounced function
+      tutorController.debouncedGetTutorHints();
+
+      // Wait for debounce delay (300ms) + buffer
+      await new Promise(resolve => setTimeout(resolve, 350));
+
+      expect(showSpy).toHaveBeenCalled();
+      // Verify bestMoves is set (mocked aiEngine returns data)
+      expect(game.bestMoves).toBeDefined();
+      expect(game.bestMoves.length).toBeGreaterThan(0);
+    });
+
+    test('should clear loading state even if phase is invalid', async () => {
+      game.phase = PHASES.GAME_OVER;
+
+      // Spy on setTutorLoading from the mocked UI module
+      const uiModule = await import('../js/ui.js');
+      const loadingSpy = uiModule.setTutorLoading as any;
+      loadingSpy.mockClear();
+
+      await tutorController.getTutorHints();
+
+      expect(loadingSpy).toHaveBeenCalledWith(true); // Should set true initially
+      expect(loadingSpy).toHaveBeenCalledWith(false); // Should clear it finally
+    });
+  });
 });

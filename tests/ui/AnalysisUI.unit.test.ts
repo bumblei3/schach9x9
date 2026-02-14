@@ -121,4 +121,3 @@ describe('AnalysisUI', () => {
     expect(analysisUI.togglePanel()).toBe(false);
   });
 });
-

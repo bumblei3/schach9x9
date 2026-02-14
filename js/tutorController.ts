@@ -18,6 +18,7 @@ export class TutorController {
     // Debounce the heavy calculation part
     this.debouncedGetTutorHints = debounce(async () => {
       this.game.bestMoves = await this.getTutorHints();
+      this.showTutorSuggestions();
     }, 300);
   }
 
