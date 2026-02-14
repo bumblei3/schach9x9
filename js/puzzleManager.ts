@@ -77,7 +77,10 @@ export class PuzzleManager {
         setupStr:
           '..'.repeat(4) +
           'bk' +
-          '..'.repeat(13) +
+          'bp' +
+          '..'.repeat(8) +
+          'wp' +
+          '..'.repeat(3) +
           'wr' +
           '..'.repeat(9) +
           'wr' +
