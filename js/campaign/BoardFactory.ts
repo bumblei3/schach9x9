@@ -1,4 +1,4 @@
-import { Board } from '../types/game.js';
+import { Board, PieceType } from '../types/game.js';
 
 export class BoardFactory {
   static createEmptyBoard(rows: number = 9, cols: number = 9): Board {
@@ -113,7 +113,7 @@ export class BoardFactory {
         } else {
           const color = char === char.toUpperCase() ? 'white' : 'black';
           board[r][c] = {
-            type: char.toLowerCase() as any,
+            type: char.toLowerCase() as Exclude<PieceType, null>,
             color: color,
             hasMoved: false,
           };

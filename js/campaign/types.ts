@@ -32,7 +32,8 @@ export interface Level {
   // Custom Rules
   winCondition: {
     type: 'checkmate' | 'survival' | 'capture_target';
-    [key: string]: any;
+    requiredMoves?: number;
+    drawCountsAsWin?: boolean;
   };
   targetPiece?: { r: number; c: number }; // For capture_target
 

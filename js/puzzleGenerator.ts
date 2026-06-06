@@ -6,7 +6,7 @@
 import { BOARD_SIZE } from './config.js';
 import * as AIEngine from './aiEngine.js';
 import { deepCopy } from './utils.js';
-import type { Board, Player, Piece } from './types/game.js';
+import type { Board, Player, Piece, PieceType } from './types/game.js';
 import type { MoveResult } from './aiEngine.js';
 
 export class PuzzleGenerator {
@@ -39,7 +39,7 @@ export class PuzzleGenerator {
       if (pieceStr !== '..') {
         board[r][c] = {
           color: pieceStr[0] === 'w' ? 'white' : 'black',
-          type: pieceStr[1] as any, // Cast to PieceType if necessary
+          type: pieceStr[1] as Exclude<PieceType, null>,
           hasMoved: true, // Assumption for puzzles
         } as Piece;
       }

@@ -7,7 +7,7 @@ const init = async () => {
   try {
     const { App } = await import('./App.js');
     const app = new App();
-    (window as any).app = app;
+    (window as unknown as Record<string, unknown>).app = app;
     app.initDOM();
   } catch (e) {
     console.error('[Main] Initialization failed:', e);
