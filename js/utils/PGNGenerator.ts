@@ -1,3 +1,4 @@
+import { logger } from '../logger.js';
 /**
  * PGN Generator for Schach 9x9
  * Generates Portable Game Notation strings from game history.
@@ -165,7 +166,7 @@ export async function copyPGNToClipboard(pgn: string): Promise<boolean> {
     await navigator.clipboard.writeText(pgn);
     return true;
   } catch (err) {
-    console.error('Failed to copy PGN:', err);
+    logger.context('PGNGenerator').error('Failed to copy PGN:', err);
     return false;
   }
 }

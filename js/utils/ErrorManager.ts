@@ -80,7 +80,7 @@ class ErrorManager {
     // Enhance error message
     const displayMsg = error.message || 'Unbekannter Fehler';
     if (error.stack) {
-      console.error('Full Stack:', error.stack);
+      logger.context('ErrorManager').error('Full Stack:', error.stack);
     }
 
     const contentContainer = errorOverlay.querySelector('div');

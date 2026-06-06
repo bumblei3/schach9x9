@@ -1,4 +1,5 @@
 import { describe, expect, test, beforeEach, vi } from 'vitest';
+import { logger } from '../js/logger.js';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -236,14 +237,14 @@ describe('CampaignManager', () => {
 
     test('loadState should handle corrupted JSON gracefully', () => {
       (localStorage.getItem as any).mockReturnValueOnce('{corrupted:json}');
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const newManager = new CampaignManager();
 
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(loggerSpy).toHaveBeenCalled();
       expect((newManager as any).state.currentLevelId).toBe('peasant_revolt');
       expect((newManager as any).state.gold).toBe(0);
-      consoleSpy.mockRestore();
+      loggerSpy.mockRestore();
     });
   });
 

@@ -1,3 +1,4 @@
+import { logger } from '../logger.js';
 import { PHASES } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import type { Game, PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
@@ -368,7 +369,7 @@ export function loadGame(game: Game): boolean {
     game.log('Spiel geladen! \u{1F4C2}');
     return true;
   } catch (e) {
-    console.error('Fehler beim Laden:', e);
+    logger.context('GameStateManager').error('Fehler beim Laden:', e);
     game.log('Fehler beim Laden des Spielstands.');
     return false;
   }

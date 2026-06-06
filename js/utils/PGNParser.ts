@@ -1,3 +1,4 @@
+import { logger } from '../logger.js';
 import { BOARD_SIZE } from '../gameEngine.js';
 
 export class PGNParser {
@@ -90,7 +91,7 @@ export class PGNParser {
 
         engine.executeMove(matchedMove.from, matchedMove.to);
       } else {
-        console.warn(`Could not parse move: ${san} for turn ${engine.turn}`);
+        logger.context('PGNParser').warn(`Could not parse move: ${san} for turn ${engine.turn}`);
         break;
       }
     }

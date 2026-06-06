@@ -1,3 +1,4 @@
+import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE } from '../gameEngine.js';
 import { AI_DEPTH_CONFIG } from '../config.js';
 import * as UI from '../ui.js';
@@ -58,7 +59,7 @@ export async function getTutorHints(game: any, tutorController: any): Promise<an
 
       return true;
     });
-    console.log('[HintGenerator] Valid moves after filtering:', validMoves.length);
+    logger.context('HintGenerator').debug('[HintGenerator] Valid moves after filtering:', validMoves.length);
 
     // Convert engine moves to hints with explanations
     return Promise.all(
@@ -194,7 +195,7 @@ function createTemplate(
 
   // Development warning if costs don't match
   if (calculatedCost !== expectedCost) {
-    console.warn(
+    logger.context('HintGenerator').warn(
       `[HintGenerator] Template "${id}" cost mismatch! ` +
         `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
         `(Pieces: ${pieces.join(', ')})`
@@ -750,7 +751,7 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
     if (bestSq) {
       placePiece(game, bestSq.r, bestSq.c, pieceType, isWhite);
     } else {
-      console.warn(`[Tutor] Could not find slot for ${pieceType}`);
+      logger.context('HintGenerator').warn(`[Tutor] Could not find slot for ${pieceType}`);
     }
   });
 

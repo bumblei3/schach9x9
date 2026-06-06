@@ -1,3 +1,4 @@
+import { logger } from '../logger.js';
 import { CAMPAIGN_LEVELS } from './campaignData.js';
 import { CampaignState, Level, UnitXp } from './types.js';
 import { UNIT_TALENT_TREES } from './talents.js';
@@ -67,7 +68,7 @@ export class CampaignManager {
         }
         return parsed;
       } catch (e) {
-        console.error('Failed to parse campaign state', e);
+        logger.context('CampaignManager').error('Failed to parse campaign state', e);
       }
     }
     // Default state: Level 1 unlocked
