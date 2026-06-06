@@ -85,4 +85,24 @@ export interface Statistics {
   puzzlesSolved: number;
   bestWinStreak: number;
   currentWinStreak: number;
+  playerMoves?: number;
+  playerBestMoves?: number;
+  promotions?: number;
+}
+
+/**
+ * Dynamically added properties on Game instance
+ * These are set at runtime by various controllers
+ */
+export interface GameExtensions {
+  tutorController?: {
+    handlePlayerMove?: (from: Square, to: Square) => void;
+    analyzePlayerMovePreExecution?: (move: { from: Square; to: Square }) => Promise<unknown>;
+    showBlunderWarning?: (analysis: unknown, callback: () => void) => void;
+  };
+  isTutorMove?: (move: Square) => boolean;
+  currentTheme?: string;
+  log?: (message: string) => void;
+  getValidMoves?: (r: number, c: number, piece: unknown) => Square[];
+  calculateMaterialAdvantage?: (color: Player) => number;
 }

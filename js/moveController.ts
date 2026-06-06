@@ -4,8 +4,6 @@ import * as MoveValidator from './move/MoveValidator.js';
 import * as MoveExecutor from './move/MoveExecutor.js';
 import * as GameStateManager from './move/GameStateManager.js';
 import * as UI from './ui.js';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 /**
  * Orchestrator for move-related logic, delegating to specialized sub-modules.

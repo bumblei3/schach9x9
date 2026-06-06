@@ -141,6 +141,13 @@ export class Game {
   kiMentorEnabled: boolean;
   aiPersonality: string;
   playerColor: Player;
+  tutorController?: {
+    handlePlayerMove?: (from: Square, to: Square) => void;
+    analyzePlayerMovePreExecution?: (move: { from: Square; to: Square }) => Promise<unknown>;
+    showBlunderWarning?: (analysis: unknown, callback: () => void) => void;
+  };
+  isTutorMove?: (move: Square) => boolean;
+  currentTheme?: string;
 
   constructor(initialPoints: number = 15, mode: GameMode = 'setup') {
     this.mode = mode;

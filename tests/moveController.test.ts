@@ -28,15 +28,16 @@ type MockUI = {
 };
 
 // Extended Game interface for testing to include mocked methods and properties
+// Uses a permissive type for isTutorMove to allow both mocks and real implementations
 interface TestGame
-  extends Omit<Game, 'moveController' | 'log' | 'stopClock' | 'startClock' | 'updateBestMoves'> {
+  extends Omit<Game, 'moveController' | 'log' | 'stopClock' | 'startClock' | 'updateBestMoves' | 'isTutorMove'> {
   moveController?: MoveController;
   log: MockInstance;
   stopClock: MockInstance;
   startClock: MockInstance;
   updateBestMoves: MockInstance;
   aiMove?: MockInstance;
-  isTutorMove?: MockInstance;
+  isTutorMove?: ((...args: unknown[]) => unknown) | MockInstance;
   currentTheme?: string;
   // Use any for stats to avoid strict GameStats checks in tests
   stats: any;
