@@ -1,29 +1,48 @@
+/**
+ * Opening Book for Schach 9x9
+ * Manages opening book data with weighted random move selection
+ */
+
 import { logger } from '../logger.js';
+import type { Square, Piece } from '../gameEngine.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface BookMove {
+  from: Square;
+  to: Square;
+  weight: number;
+  games: number;
+}
+
+interface BookPosition {
+  moves: BookMove[];
+  seenCount: number;
+}
+
+interface BookData {
+  positions: Record<string, BookPosition>;
+}
+
+/**
+ * Opening Book class for managing chess opening data
+ */
 export class OpeningBook {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  data: BookData;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(data: any = { positions: {} }) {
+  constructor(data: BookData = { positions: {} }) {
     this.data = data;
   }
 
   /**
    * Load book data
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  load(data: any): void {
+  load(data: BookData | null): void {
     this.data = data || { positions: {} };
   }
 
   /**
-   * Query for a move
+   * Query for a move from the opening book
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getMove(board: any, moveNumber: number): any | null {
-    // Only use book for first 12 moves (increased from 10)
+  getMove(board: (Piece | null)[][], moveNumber: number): { from: Square; to: Square } | null {
     if (moveNumber >= 12) {
       return null;
     }
@@ -42,8 +61,7 @@ export class OpeningBook {
     }
 
     // Weighted random selection
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const totalWeight = moves.reduce((sum: number, m: any) => sum + m.weight, 0);
+    const totalWeight = moves.reduce((sum: number, m: BookMove) => sum + m.weight, 0);
     let random = Math.random() * totalWeight;
 
     for (const move of moves) {
@@ -63,8 +81,7 @@ export class OpeningBook {
   /**
    * Add a move to the book
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  addMove(board: any, turn: string, move: any): void {
+  addMove(board: (Piece | null)[][], turn: string, move: { from: Square; to: Square }): void {
     const hash = this.getBoardHash(board, turn);
 
     if (!this.data.positions[hash]) {
@@ -75,9 +92,8 @@ export class OpeningBook {
     pos.seenCount++;
 
     // Check if move exists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingMove = pos.moves.find(
-      (m: any) =>
+      (m: BookMove) =>
         m.from.r === move.from.r &&
         m.from.c === move.from.c &&
         m.to.r === move.to.r &&
@@ -86,12 +102,11 @@ export class OpeningBook {
 
     if (existingMove) {
       existingMove.games++;
-      // Weight recalculation needed externally or periodically
     } else {
       pos.moves.push({
         from: move.from,
         to: move.to,
-        weight: 1, // Initial weight
+        weight: 1,
         games: 1,
       });
     }
@@ -100,25 +115,19 @@ export class OpeningBook {
   /**
    * Merge another book into this one
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  merge(otherBook: any): void {
+  merge(otherBook: OpeningBook | null): void {
     if (!otherBook || !otherBook.data || !otherBook.data.positions) return;
 
     for (const [hash, pos] of Object.entries(otherBook.data.positions)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!this.data.positions[hash]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.data.positions[hash] = JSON.parse(JSON.stringify(pos));
       } else {
         const myPos = this.data.positions[hash];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        myPos.seenCount += (pos as any).seenCount;
+        myPos.seenCount += pos.seenCount;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        for (const move of (pos as any).moves) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        for (const move of pos.moves) {
           const myMove = myPos.moves.find(
-            (m: any) =>
+            (m: BookMove) =>
               m.from.r === move.from.r &&
               m.from.c === move.from.c &&
               m.to.r === move.to.r &&
@@ -127,7 +136,6 @@ export class OpeningBook {
 
           if (myMove) {
             myMove.games += move.games;
-            // Weight requires recalculation
           } else {
             myPos.moves.push(JSON.parse(JSON.stringify(move)));
           }
@@ -138,11 +146,8 @@ export class OpeningBook {
 
   /**
    * Generate board hash
-   * Detects board size from the array rather than using constant
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getBoardHash(board: any, turn: string): string {
-    // Detect actual board size from the array
+  getBoardHash(board: (Piece | null)[][], turn: string): string {
     const size = board ? board.length : 0;
     if (size === 0) return turn ? turn[0] : '';
 
@@ -159,16 +164,19 @@ export class OpeningBook {
   }
 }
 
-// Singleton instance for backward compatibility or global usage
+// Singleton instance for backward compatibility
 export const openingBook = new OpeningBook();
 
-// Export legacy functions for compatibility if needed (deprecated)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function setOpeningBook(bookData: any): void {
+/**
+ * Legacy function for backward compatibility
+ */
+export function setOpeningBook(bookData: BookData): void {
   openingBook.load(bookData);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function queryOpeningBook(board: any, moveNumber: number): any {
+/**
+ * Legacy function for backward compatibility
+ */
+export function queryOpeningBook(board: (Piece | null)[][], moveNumber: number): { from: Square; to: Square } | null {
   return openingBook.getMove(board, moveNumber);
 }
