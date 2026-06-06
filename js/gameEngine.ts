@@ -145,8 +145,11 @@ export class Game {
     handlePlayerMove?: (from: Square, to: Square) => void;
     analyzePlayerMovePreExecution?: (move: { from: Square; to: Square }) => Promise<unknown>;
     showBlunderWarning?: (analysis: unknown, callback: () => void) => void;
+    showHint?: () => Promise<void>;
   };
   isTutorMove?: (move: Square) => boolean;
+  undoMove?: () => void;
+  redoMove?: () => void;
   // Dynamic properties set at runtime by controllers
   gameController?: unknown;
   aiController?: unknown;

@@ -326,16 +326,16 @@ export class GameController {
   undoMove(): void {
     if (this.moveExecutor && this.moveExecutor.undoMove) {
       this.moveExecutor.undoMove();
-    } else if ((this.game as any).undoMove) {
-      (this.game as any).undoMove();
+    } else if (this.game.undoMove) {
+      this.game.undoMove();
     }
   }
 
   redoMove(): void {
     if (this.moveExecutor && this.moveExecutor.redoMove) {
       this.moveExecutor.redoMove();
-    } else if ((this.game as any).redoMove) {
-      (this.game as any).redoMove();
+    } else if (this.game.redoMove) {
+      this.game.redoMove();
     }
   }
 
@@ -654,10 +654,10 @@ export class GameController {
     }
 
     // 1. Prioritize TutorController (New System with Overlay)
-    if ((this.game as any).tutorController) {
+    if (this.game.tutorController) {
       notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
       // Use the showHint method which forces calculation if needed
-      await (this.game as any).tutorController.showHint();
+      await this.game.tutorController?.showHint?.();
       return;
     }
 
@@ -670,9 +670,9 @@ export class GameController {
     notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
 
     // We assume game.aiController is available as fallback
-    if ((this.game as any).aiController) {
+    if (this.game.aiController) {
       // Use lower depth for hints to be fast
-      const result = await (this.game as any).aiController.getHint(4);
+      const result = await this.game.aiController.getHint(4);
 
       if (result) {
         const { move, explanation } = result;
