@@ -7,21 +7,21 @@
 import * as THREE from 'three';
 import { logger } from './logger.js';
 
+interface BattlePiece {
+  type: string;
+  color: string;
+}
+
 /**
  * Battle Animator - choreographs piece capture animations
  */
 export class BattleAnimator {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public scene: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public camera: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public originalCameraPos: any | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public originalCameraTarget: any | null = null;
+  public scene: THREE.Scene;
+  public camera: THREE.PerspectiveCamera;
+  public originalCameraPos: THREE.Vector3 | null = null;
+  public originalCameraTarget: THREE.Vector3 | null = null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(scene: any, camera: any) {
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
     this.scene = scene;
     this.camera = camera;
     this.originalCameraPos = null;
@@ -30,17 +30,12 @@ export class BattleAnimator {
 
   /**
    * Play a battle sequence
-   * @param {Object} attacker - Attacking piece data
-   * @param {Object} defender - Defending piece data
-   * @param {Object} attackerPos - Attacker 3D position
-   * @param {Object} defenderPos - Defender 3D position
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async playBattle(
-    attacker: any,
-    defender: any,
-    attackerPos: any,
-    defenderPos: any
+    attacker: BattlePiece,
+    defender: BattlePiece,
+    attackerPos: THREE.Vector3 | { x: number; z: number } | { x: number; z: number },
+    defenderPos: THREE.Vector3 | { x: number; z: number } | { x: number; z: number }
   ): Promise<void> {
     logger.info(`Battle: ${attacker.type} vs ${defender.type}`);
 
@@ -63,24 +58,22 @@ export class BattleAnimator {
    */
   public saveCameraState(): void {
     this.originalCameraPos = this.camera.position.clone();
-    this.originalCameraTarget = new THREE.Vector3(0, 0, 0); // Default target
+    this.originalCameraTarget = new THREE.Vector3(0, 0, 0);
   }
 
   /**
    * Move camera to battle viewpoint
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async moveCameraToBattle(attackerPos: any, defenderPos: any): Promise<void> {
-    // Calculate midpoint between attacker and defender
+  public async moveCameraToBattle(
+    attackerPos: THREE.Vector3 | { x: number; z: number },
+    defenderPos: THREE.Vector3 | { x: number; z: number }
+  ): Promise<void> {
     const midpoint = new THREE.Vector3(
       (attackerPos.x + defenderPos.x) / 2,
       0.5,
       (attackerPos.z + defenderPos.z) / 2
     );
-
-    // Camera position: side view of the battle
     const cameraPos = new THREE.Vector3(midpoint.x + 3, 2, midpoint.z + 3);
-
     return this.animateCameraMove(cameraPos, midpoint, 800);
   }
 
@@ -89,15 +82,17 @@ export class BattleAnimator {
    */
   public async restoreCamera(): Promise<void> {
     if (!this.originalCameraPos) return;
-
-    return this.animateCameraMove(this.originalCameraPos, this.originalCameraTarget, 600);
+    return this.animateCameraMove(this.originalCameraPos, this.originalCameraTarget!, 600);
   }
 
   /**
    * Animate camera movement
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public animateCameraMove(targetPos: any, lookAt: any, duration: number): Promise<void> {
+  public animateCameraMove(
+    targetPos: THREE.Vector3,
+    lookAt: THREE.Vector3,
+    duration: number
+  ): Promise<void> {
     const startPos = this.camera.position.clone();
     const startTime = Date.now();
 
@@ -105,8 +100,6 @@ export class BattleAnimator {
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
-
-        // Ease in-out
         const eased =
           progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
@@ -119,32 +112,27 @@ export class BattleAnimator {
           resolve();
         }
       };
-
       animate();
     });
   }
 
   /**
    * Select appropriate battle animation
-   * Returns animation type based on piece types
    */
   public selectBattleAnimation(_attackerType: string, _defenderType: string): string {
-    // Random selection from pool for variety
     const animations = ['charge', 'strike', 'clash', 'overpower'];
-    const randomIndex = Math.floor(Math.random() * animations.length);
-    return animations[randomIndex];
+    return animations[Math.floor(Math.random() * animations.length)];
   }
 
   /**
    * Execute the battle animation
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async executeBattleAnimation(
     animationType: string,
-    _attacker: any,
-    _defender: any,
-    attackerPos: any,
-    defenderPos: any
+    _attacker: BattlePiece,
+    _defender: BattlePiece,
+    attackerPos: THREE.Vector3 | { x: number; z: number },
+    defenderPos: THREE.Vector3 | { x: number; z: number }
   ): Promise<void> {
     switch (animationType) {
       case 'charge':
@@ -162,23 +150,20 @@ export class BattleAnimator {
       default:
         await this.animateCharge(attackerPos, defenderPos);
     }
-
-    // Defender defeat animation
     await this.animateDefeat(defenderPos);
   }
 
   /**
    * Charge animation - attacker rushes forward
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async animateCharge(attackerPos: any, _defenderPos: any): Promise<void> {
-    // Create temporary visual effect
+  public async animateCharge(
+    attackerPos: THREE.Vector3 | { x: number; z: number },
+    _defenderPos: THREE.Vector3 | { x: number; z: number }
+  ): Promise<void> {
     const particles = this.createDustParticles(attackerPos);
-
     return new Promise(resolve => {
       setTimeout(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        particles.forEach((p: any) => this.scene.remove(p));
+        particles.forEach(p => this.scene.remove(p));
         resolve();
       }, 500);
     });
@@ -187,11 +172,11 @@ export class BattleAnimator {
   /**
    * Strike animation - quick attack
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async animateStrike(_attackerPos: any, defenderPos: any): Promise<void> {
-    // Flash effect
+  public async animateStrike(
+    _attackerPos: THREE.Vector3 | { x: number; z: number },
+    defenderPos: THREE.Vector3 | { x: number; z: number }
+  ): Promise<void> {
     const flash = this.createFlashEffect(defenderPos);
-
     return new Promise(resolve => {
       setTimeout(() => {
         this.scene.remove(flash);
@@ -203,18 +188,18 @@ export class BattleAnimator {
   /**
    * Clash animation - both pieces engage
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async animateClash(attackerPos: any, defenderPos: any): Promise<void> {
+  public async animateClash(
+    attackerPos: THREE.Vector3 | { x: number; z: number },
+    defenderPos: THREE.Vector3 | { x: number; z: number }
+  ): Promise<void> {
     const sparks = this.createSparkParticles(
       (attackerPos.x + defenderPos.x) / 2,
       0.5,
       (attackerPos.z + defenderPos.z) / 2
     );
-
     return new Promise(resolve => {
       setTimeout(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sparks.forEach((s: any) => this.scene.remove(s));
+        sparks.forEach(s => this.scene.remove(s));
         resolve();
       }, 600);
     });
@@ -223,24 +208,21 @@ export class BattleAnimator {
   /**
    * Overpower animation - attacker dominates
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async animateOverpower(_attackerPos: any, defenderPos: any): Promise<void> {
-    // Shockwave effect
+  public async animateOverpower(
+    _attackerPos: THREE.Vector3 | { x: number; z: number },
+    defenderPos: THREE.Vector3 | { x: number; z: number }
+  ): Promise<void> {
     const shockwave = this.createShockwave(defenderPos);
-
     return new Promise(resolve => {
       const startTime = Date.now();
       const duration = 700;
-
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = elapsed / duration;
-
         if (shockwave) {
           shockwave.scale.set(1 + progress * 2, 1, 1 + progress * 2);
           (shockwave.material as THREE.Material).opacity = 1 - progress;
         }
-
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
@@ -248,7 +230,6 @@ export class BattleAnimator {
           resolve();
         }
       };
-
       animate();
     });
   }
@@ -256,15 +237,11 @@ export class BattleAnimator {
   /**
    * Defeat animation - defender is defeated
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async animateDefeat(defenderPos: any): Promise<void> {
-    // Smoke/dust cloud
+  public async animateDefeat(defenderPos: THREE.Vector3 | { x: number; z: number }): Promise<void> {
     const smoke = this.createSmokeEffect(defenderPos);
-
     return new Promise(resolve => {
       setTimeout(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        smoke.forEach((s: any) => this.scene.remove(s));
+        smoke.forEach(s => this.scene.remove(s));
         resolve();
       }, 800);
     });
@@ -273,48 +250,31 @@ export class BattleAnimator {
   /**
    * Create dust particle effects
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public createDustParticles(position: any): any[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const particles: any[] = [];
-    const particleCount = 10;
-
-    for (let i = 0; i < particleCount; i++) {
+  public createDustParticles(position: THREE.Vector3 | { x: number; z: number }): THREE.Mesh[] {
+    const particles: THREE.Mesh[] = [];
+    for (let i = 0; i < 10; i++) {
       const geometry = new THREE.SphereGeometry(0.05, 4, 4);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xccaa88,
-        transparent: true,
-        opacity: 0.6,
-      });
+      const material = new THREE.MeshBasicMaterial({ color: 0xccaa88, transparent: true, opacity: 0.6 });
       const particle = new THREE.Mesh(geometry, material);
-
       particle.position.set(
         position.x + (Math.random() - 0.5) * 0.5,
         0.1,
         position.z + (Math.random() - 0.5) * 0.5
       );
-
       this.scene.add(particle);
       particles.push(particle);
     }
-
     return particles;
   }
 
   /**
    * Create flash effect
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public createFlashEffect(position: any): any {
+  public createFlashEffect(position: THREE.Vector3 | { x: number; z: number }): THREE.Mesh {
     const geometry = new THREE.SphereGeometry(0.3, 16, 16);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xffff00,
-      transparent: true,
-      opacity: 0.8,
-    });
+    const material = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.8 });
     const flash = new THREE.Mesh(geometry, material);
     flash.position.set(position.x, 0.5, position.z);
-
     this.scene.add(flash);
     return flash;
   }
@@ -322,51 +282,28 @@ export class BattleAnimator {
   /**
    * Create spark particles
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public createSparkParticles(x: number, y: number, z: number): any[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sparks: any[] = [];
-    const sparkCount = 15;
-
-    for (let i = 0; i < sparkCount; i++) {
+  public createSparkParticles(x: number, y: number, z: number): THREE.Mesh[] {
+    const sparks: THREE.Mesh[] = [];
+    for (let i = 0; i < 15; i++) {
       const geometry = new THREE.SphereGeometry(0.03, 4, 4);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xffaa00,
-        transparent: true,
-        opacity: 0.9,
-      });
+      const material = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9 });
       const spark = new THREE.Mesh(geometry, material);
-
-      spark.position.set(
-        x + (Math.random() - 0.5) * 0.4,
-        y + Math.random() * 0.3,
-        z + (Math.random() - 0.5) * 0.4
-      );
-
+      spark.position.set(x + (Math.random() - 0.5) * 0.4, y + Math.random() * 0.3, z + (Math.random() - 0.5) * 0.4);
       this.scene.add(spark);
       sparks.push(spark);
     }
-
     return sparks;
   }
 
   /**
    * Create shockwave effect
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public createShockwave(position: any): any {
+  public createShockwave(position: THREE.Vector3 | { x: number; z: number }): THREE.Mesh {
     const geometry = new THREE.RingGeometry(0.2, 0.3, 32);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0x00aaff,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.7,
-    });
+    const material = new THREE.MeshBasicMaterial({ color: 0x00aaff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
     const shockwave = new THREE.Mesh(geometry, material);
-
     shockwave.position.set(position.x, 0.05, position.z);
     shockwave.rotation.x = -Math.PI / 2;
-
     this.scene.add(shockwave);
     return shockwave;
   }
@@ -374,31 +311,20 @@ export class BattleAnimator {
   /**
    * Create smoke effect
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public createSmokeEffect(position: any): any[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const smoke: any[] = [];
-    const smokeCount = 8;
-
-    for (let i = 0; i < smokeCount; i++) {
+  public createSmokeEffect(position: THREE.Vector3 | { x: number; z: number }): THREE.Mesh[] {
+    const smoke: THREE.Mesh[] = [];
+    for (let i = 0; i < 8; i++) {
       const geometry = new THREE.SphereGeometry(0.1 + Math.random() * 0.1, 8, 8);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x666666,
-        transparent: true,
-        opacity: 0.5,
-      });
+      const material = new THREE.MeshBasicMaterial({ color: 0x666666, transparent: true, opacity: 0.5 });
       const puff = new THREE.Mesh(geometry, material);
-
       puff.position.set(
         position.x + (Math.random() - 0.5) * 0.3,
         0.2 + Math.random() * 0.3,
         position.z + (Math.random() - 0.5) * 0.3
       );
-
       this.scene.add(puff);
       smoke.push(puff);
     }
-
     return smoke;
   }
 }
