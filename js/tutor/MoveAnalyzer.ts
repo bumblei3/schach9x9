@@ -1,4 +1,4 @@
-import { PHASES, BOARD_SIZE } from '../gameEngine.js';
+import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import * as TacticsDetector from './TacticsDetector.js';
 import * as aiEngine from '../aiEngine.js';
@@ -9,8 +9,7 @@ import { MENTOR_LEVELS } from '../config.js';
  * @param {Object} game
  * @param {Object} move {from: {r,c}, to: {r,c}}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function analyzePlayerMovePreExecution(game: any, move: any): Promise<any> {
+export async function analyzePlayerMovePreExecution(game: Game, move: { from: Square; to: Square }): Promise<unknown> {
   if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return null;
 
   const from = move.from;

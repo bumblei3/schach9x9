@@ -56,8 +56,8 @@ describe('MoveAnalyzer Coverage', () => {
       const result = await MoveAnalyzer.analyzePlayerMovePreExecution(mockGame, move);
 
       expect(result).not.toBeNull();
-      expect(result.scoreDiff).toBeLessThan(-100);
-      expect(result.warnings.length).toBeGreaterThan(0);
+      expect((result as any).scoreDiff).toBeLessThan(-100);
+      expect((result as any).warnings.length).toBeGreaterThan(0);
     });
 
     it('should not return analysis for good moves', async () => {
