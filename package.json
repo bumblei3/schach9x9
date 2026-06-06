@@ -23,7 +23,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.60.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.0.6",
     "@types/three": "^0.182.0",
