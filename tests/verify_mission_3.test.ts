@@ -15,7 +15,10 @@ describe('Mission 3 Simplification Verification', () => {
   test('Mission 3 FEN should not contain enemy Queen', () => {
     // Original FEN had 'q' (black queen)
     // New FEN should likely replace it with '1' or be different
-    const boardState = mission3?.fen.split(' ')[0];
+    const boardState = mission3?.fen?.split(' ')[0];
+    if (!boardState) {
+      throw new Error('Mission 3 FEN is undefined');
+    }
     expect(boardState).toContain('rnb1kcbjr');
     expect(boardState).not.toContain('q');
   });

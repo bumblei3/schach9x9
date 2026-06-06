@@ -2,6 +2,7 @@ import { SHOP_PIECES, PIECE_VALUES } from '../config.js';
 import { PIECE_SVGS } from '../chess-pieces.js';
 import { PHASES, type Game } from '../gameEngine.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
+import { logger } from '../logger.js';
 import * as UI from '../ui.js';
 
 /**
@@ -172,7 +173,7 @@ export class ShopManager {
         <button class="btn upgrade-btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
                 style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; text-align: left;"
                 ${!canAfford ? 'disabled' : ''}
-                onclick="console.log('UPGRADE CLICK detected: r=${r}, c=${c}, type=${up.symbol}'); if(window.app && window.app.gameController) { window.app.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else if(window.gameController) { window.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else { console.error('Neither window.app.gameController nor window.gameController found!'); }">
+                onclick="if(window.app && window.app.gameController) { window.app.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else if(window.gameController) { window.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); }">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 32px; height: 32px;">${(PIECE_SVGS as any)[piece.color][up.symbol]}</div>
             <div>
@@ -302,10 +303,10 @@ export class ShopManager {
    * Performs the actual upgrade logic.
    */
   performUpgrade(r: number, c: number, targetType: string): void {
-    console.log('[ShopManager] performUpgrade called:', { r, c, targetType });
+    logger.context('ShopManager').debug('[ShopManager] performUpgrade called:', { r, c, targetType });
     const piece = this.game.board[r][c];
     if (!piece) {
-      console.warn('[ShopManager] No piece found at', r, c);
+      logger.context('ShopManager').warn('[ShopManager] No piece found at', r, c);
       return;
     }
 
@@ -314,7 +315,7 @@ export class ShopManager {
     const cost = targetVal - currentVal;
 
     if (this.game.points >= cost) {
-      console.log('[ShopManager] Deducting points and updating piece type');
+      logger.context('ShopManager').debug('[ShopManager] Deducting points and updating piece type');
       this.game.points -= cost;
       piece.type = targetType as any;
 
@@ -333,7 +334,7 @@ export class ShopManager {
         (window as any).battleChess3D.addPiece(targetType, piece.color, r, c);
       }
     } else {
-      console.warn('[ShopManager] Not enough points:', this.game.points, '<', cost);
+      logger.context('ShopManager').warn('[ShopManager] Not enough points:', this.game.points, '<', cost);
     }
   }
 }

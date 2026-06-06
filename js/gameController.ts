@@ -146,7 +146,7 @@ export class GameController {
   }
 
   async handleCellClick(r: number, c: number): Promise<void> {
-    console.log(
+    logger.context('GameController').debug(
       '[GameController] handleCellClick called: row=%d, col=%d, phase=%s',
       r,
       c,
@@ -155,7 +155,7 @@ export class GameController {
 
     // Prevent interaction in replay mode
     if (this.game.replayMode) {
-      console.log('[GameController] Blocked: replay mode');
+      logger.context('GameController').debug('[GameController] Blocked: replay mode');
       return;
     }
     // Disable clicks if it's AI's turn
@@ -165,12 +165,12 @@ export class GameController {
         this.game.phase === (PHASES.SETUP_BLACK_PIECES as any) ||
         (this.game.phase === (PHASES.PLAY as any) && this.game.turn === 'black'))
     ) {
-      console.log('[GameController] Blocked: AI turn');
+      logger.context('GameController').debug('[GameController] Blocked: AI turn');
       return;
     }
 
     if (this.game.isAnimating) {
-      console.log('[GameController] Blocked: animating');
+      logger.context('GameController').debug('[GameController] Blocked: animating');
       return; // Block input during animation
     }
 
@@ -777,7 +777,7 @@ export class GameController {
     }, 2000);
     */
 
-    console.log('[GameController] handleGameEnd check:', {
+    logger.context('GameController').debug('[GameController] handleGameEnd check:', {
       campaignMode: this.game.campaignMode,
       result,
       winnerColor,
@@ -793,7 +793,7 @@ export class GameController {
       result === 'draw' && level && level.winCondition && level.winCondition.drawCountsAsWin;
 
     if (this.game.campaignMode && (isCheckmateWin || isDrawVictory)) {
-      console.log('[GameController] Triggering Campaign Victory');
+      logger.context('GameController').info('[GameController] Triggering Campaign Victory');
       if (this.game.currentLevelId) {
         // Gather stats for star calculation
         const stats = {

@@ -298,7 +298,7 @@ export class AIController {
 
     return new Promise<void>(resolve => {
       const processResults = () => {
-        console.log('[DEBUG] AI processResults started');
+        logger.context('AIController').debug('[DEBUG] AI processResults started');
         const elapsed = Date.now() - this._aiMoveStartTime;
         logger.info(`[AI] Processing results after ${elapsed}ms`);
 
@@ -346,7 +346,7 @@ export class AIController {
           logger.warn('[AI] No valid move found in worker results!');
           this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
         }
-        console.log('[DEBUG] AI processResults calling resolve');
+        logger.context('AIController').debug('[DEBUG] AI processResults calling resolve');
         resolve();
       };
 
@@ -383,13 +383,13 @@ export class AIController {
         const moveHandler = (e: MessageEvent) => {
           const { type, data } = e.data;
           if (type === 'bestMove') {
-            console.log(`[DEBUG] AI worker ${i} bestMove received`);
+            logger.context('AIController').debug(`[DEBUG] AI worker ${i} bestMove received`);
             worker.removeEventListener('message', moveHandler);
             workerResults[i] = data;
             completedWorkers++;
-            console.log(`[DEBUG] AI completedWorkers: ${completedWorkers}`);
+            logger.context('AIController').debug(`[DEBUG] AI completedWorkers: ${completedWorkers}`);
             if (completedWorkers === 1) {
-              console.log('[DEBUG] AI triggering processResultsWithTimeout');
+              logger.context('AIController').debug('[DEBUG] AI triggering processResultsWithTimeout');
               processResultsWithTimeout();
             }
           }

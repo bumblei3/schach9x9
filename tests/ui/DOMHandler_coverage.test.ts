@@ -250,7 +250,8 @@ describe('DOMHandler Comprehensive Coverage', () => {
   it('Sound Handlers: should toggle sound and disable volume slider', () => {
     domHandler.init();
     const soundToggle = document.getElementById('sound-toggle') as HTMLInputElement;
-    const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+    const _volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+    void _volumeSlider;
 
     // Initial state mocked as true/0.5
     expect(soundToggle.checked).toBe(true);
