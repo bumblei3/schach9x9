@@ -860,11 +860,29 @@ export class GameController {
     if (!level) return;
 
     // Check custom win conditions
-    // Check custom win conditions
     if (level.winCondition.type === 'capture_target') {
-      // TODO: Implement capture logic check
+      // Check if the target piece at the specified position has been captured
+      const target = level.targetPiece;
+      if (target) {
+        const pieceAtTarget = this.game.board[target.r]?.[target.c];
+        if (!pieceAtTarget) {
+          // Target piece was captured - player wins
+          this.handleGameEnd('win', this.game.playerColor!);
+        }
+      }
     } else if (level.winCondition.type === 'survival') {
-      // TODO: Implement survival logic
+      // Check if player has survived for the required number of moves
+      const requiredMoves = level.winCondition.requiredMoves || 0;
+      const playerMoves = Math.ceil(this.game.stats.totalMoves / 2);
+      if (playerMoves >= requiredMoves && this.game.turn === this.game.playerColor) {
+        // Player survived long enough - check if they still have their king
+        const playerKing = this.game.board
+          .flat()
+          .find((p: any) => p && p.type === 'k' && p.color === this.game.playerColor);
+        if (playerKing) {
+          this.handleGameEnd('win', this.game.playerColor!);
+        }
+      }
     }
   }
 }

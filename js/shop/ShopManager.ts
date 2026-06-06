@@ -145,9 +145,6 @@ export class ShopManager {
   /**
    * Shows upgrade options for a specific piece.
    */
-  /**
-   * Shows upgrade options for a specific piece.
-   */
   showUpgradeOptions(r: number, c: number): void {
     const piece = this.game.board[r][c];
     if (!piece) return;
