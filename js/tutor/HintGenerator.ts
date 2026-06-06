@@ -1,5 +1,5 @@
 import { logger } from '../logger.js';
-import { PHASES, BOARD_SIZE } from '../gameEngine.js';
+import { PHASES, BOARD_SIZE, type Game } from '../gameEngine.js';
 import { AI_DEPTH_CONFIG } from '../config.js';
 import * as UI from '../ui.js';
 import * as MoveAnalyzer from './MoveAnalyzer.js';
@@ -8,8 +8,7 @@ import * as aiEngine from '../aiEngine.js';
 /**
  * Gets tutor hints by calling the AI engine
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getTutorHints(game: any, tutorController: any): Promise<any[]> {
+export async function getTutorHints(game: Game, tutorController: unknown): Promise<unknown[]> {
   const turnColor = game.turn;
 
   // Signal that the tutor is thinking
@@ -758,9 +757,9 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
   delete game.availableKingPos;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (UI as any).renderBoard(game);
+  UI.renderBoard(game);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (UI as any).updateShopUI(game);
+  UI.updateShopUI(game);
   game.log(`Tutor: Aufstellung "${template.name}" angewendet.`);
 }
 
