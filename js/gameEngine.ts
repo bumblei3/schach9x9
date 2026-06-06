@@ -69,6 +69,20 @@ export interface MoveHistoryEntry {
   isCastling?: boolean;
   isEnPassant?: boolean;
   halfMoveClock?: number;
+  positionHistoryLength?: number;
+  evalScore?: number;
+  classification?: string;
+  specialMove?: {
+    type: string;
+    rookFrom?: Square;
+    rookTo?: Square;
+    rookHadMoved?: boolean;
+    rookType?: string;
+    capturedPawnPos?: Square;
+    capturedPawn?: { color: string };
+    promotedTo?: string;
+    isKingside?: boolean;
+  };
 }
 
 export interface LastMoveInfo {

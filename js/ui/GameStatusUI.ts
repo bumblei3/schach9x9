@@ -40,7 +40,7 @@ export function updateMoveHistoryUI(game: Game): void {
       const moveEl = document.createElement('div');
       moveEl.className = 'move-entry';
       let moveText = '';
-      const sm = (move as any).specialMove;
+      const sm = move.specialMove;
       if (sm?.type === 'castling') {
         moveText = sm.isKingside ? 'O-O' : 'O-O-O';
       } else {
@@ -49,12 +49,12 @@ export function updateMoveHistoryUI(game: Game): void {
           moveText += String.fromCharCode(97 + move.from.c);
         if (move.captured || sm?.type === 'enPassant') moveText += 'x';
         moveText += String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
-        if (sm?.type === 'promotion') moveText += `=${pieceSymbols[sm.promotedTo] || ''}`;
+        if (sm?.type === 'promotion') moveText += `=${pieceSymbols[sm.promotedTo || ''] || ''}`;
       }
       moveEl.textContent = `${index + 1}. ${moveText}`;
 
       // Add quality badge if analyzed
-      const classification = (move as any).classification;
+      const classification = move.classification;
       if (classification && qualityMeta[classification]) {
         const badge = document.createElement('span');
         badge.className = 'move-quality-badge';
@@ -69,7 +69,7 @@ export function updateMoveHistoryUI(game: Game): void {
     historyEl.scrollTop = historyEl.scrollHeight;
     const undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
     if (undoBtn)
-      undoBtn.disabled = game.moveHistory.length === 0 || (game.phase as any) !== PHASES.PLAY;
+      undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
   } catch (error) {
     console.error('Error updating move history:', error);
   }
@@ -90,16 +90,16 @@ export function updateCapturedUI(game: Game): void {
     for (let c = 0; c < game.boardSize; c++) {
       const p = game.board[r][c];
       if (p) {
-        const val = (PIECE_VALUES as any)[p.type] || 0;
+        const val = PIECE_VALUES[p.type] || 0 || 0;
         if (p.color === 'white') whiteMaterial += val;
         else blackMaterial += val;
       }
     }
   }
   const materialDiff = whiteMaterial - blackMaterial;
-  const getSymbol = (p: any) => {
-    if ((window as any)._svgCache && (window as any)._svgCache[p.color + p.type])
-      return (window as any)._svgCache[p.color + p.type];
+  const getSymbol = (p: { color: string; type: string }) => {
+    if ((window as unknown as Record<string, Record<string, string>>)._svgCache)
+      return (window as unknown as Record<string, Record<string, string>>)._svgCache[p.color + p.type];
     return p.type;
   };
   game.capturedPieces.white.forEach(p => {
@@ -135,7 +135,7 @@ export function updateStatus(game: Game): void {
   const statusEl = document.getElementById('status-display');
   if (!statusEl) return;
   let text = '';
-  switch (game.phase as any) {
+  switch (game.phase) {
     case PHASES.SETUP_WHITE_KING:
       text = 'Weiß: Wähle einen Korridor für den König';
       break;
@@ -176,7 +176,7 @@ export function updateOpeningUI(game: Game): void {
   const nameEl = document.getElementById('opening-name');
   if (!container || !nameEl) return;
 
-  if ((game.phase as any) !== PHASES.PLAY) {
+  if (game.phase !== PHASES.PLAY) {
     container.classList.add('hidden');
     return;
   }
@@ -233,9 +233,9 @@ export function updateClockDisplay(game: Game): void {
 export function renderEvalGraph(game: Game): void {
   if (game.isAnimating) return;
   const container = document.getElementById('eval-graph-container');
-  const svg = document.getElementById('eval-graph') as unknown as SVGSVGElement & { dataset: any };
+  const svg = document.getElementById('eval-graph') as unknown as SVGSVGElement & { dataset: Record<string, string> };
   if (!container || !svg) return;
-  if ((game.phase as any) === PHASES.ANALYSIS || (game.phase as any) === PHASES.GAME_OVER)
+  if (game.phase === PHASES.ANALYSIS || game.phase === PHASES.GAME_OVER)
     container.classList.remove('hidden');
   const history = game.moveHistory;
   if (history.length === 0) {
@@ -272,14 +272,15 @@ export function renderEvalGraph(game: Game): void {
   });
   svg.innerHTML = svgContent;
   if (!svg.dataset.hasListener) {
-    svg.addEventListener('click', (e: any) => {
-      const p = e.target.closest('.eval-point');
+    svg.addEventListener('click', (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      const p = target?.closest('.eval-point');
       if (!p) return;
-      const idx = parseInt(p.dataset.index);
-      if (idx >= 0 && (game as any).gameController?.jumpToMove)
-        (game as any).gameController.jumpToMove(idx);
-      else if (idx === -1 && (game as any).gameController?.jumpToStart)
-        (game as any).gameController.jumpToStart();
+      const idx = parseInt((p as HTMLElement).dataset.index || '0');
+      if (idx >= 0 && (game.gameController as Record<string, unknown>)?.jumpToMove)
+        (game.gameController as Record<string, Function>).jumpToMove(idx);
+      else if (idx === -1 && (game.gameController as Record<string, unknown>)?.jumpToStart)
+        (game.gameController as Record<string, Function>).jumpToStart();
     });
     svg.dataset.hasListener = 'true';
   }
@@ -404,8 +405,8 @@ export function exitReplayMode(game: Game): void {
   if (controlEl) controlEl.classList.add('hidden');
 
   const undo = document.getElementById('undo-btn') as HTMLButtonElement;
-  if (undo) undo.disabled = game.moveHistory.length === 0 || (game.phase as any) !== PHASES.PLAY;
+  if (undo) undo.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
   renderBoard(game);
-  if (game.clockEnabled && (game.phase as any) === PHASES.PLAY && (game as any).startClock)
+  if (game.clockEnabled && game.phase === PHASES.PLAY && (game as any).startClock)
     (game as any).startClock();
 }
