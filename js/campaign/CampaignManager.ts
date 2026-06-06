@@ -1,6 +1,6 @@
 import { logger } from '../logger.js';
 import { CAMPAIGN_LEVELS } from './campaignData.js';
-import { CampaignState, Level, UnitXp } from './types.js';
+import { CampaignState, Level, UnitXp, CampaignGoal } from './types.js';
 import { UNIT_TALENT_TREES } from './talents.js';
 
 export class CampaignManager {
@@ -218,7 +218,7 @@ export class CampaignManager {
     return this.state.levelStars[levelId] || 0;
   }
 
-  completeLevel(levelId: string, starsOrStats: number | any = 0): number {
+  completeLevel(levelId: string, starsOrStats: number | { moves?: number; materialDiff?: number; promotedCount?: number } = 0): number {
     if (!this.state.completedLevels.includes(levelId)) {
       this.state.completedLevels.push(levelId);
     }
@@ -266,7 +266,7 @@ export class CampaignManager {
     return stars;
   }
 
-  private calculateStars(level: Level, stats: any): number {
+  private calculateStars(level: Level, stats: { moves?: number; materialDiff?: number; promotedCount?: number }): number {
     let stars = 1; // Base star for completing the mission
 
     if (level.goals) {
@@ -283,14 +283,14 @@ export class CampaignManager {
     return stars;
   }
 
-  private checkGoal(goal: any, stats: any): boolean {
+  private checkGoal(goal: CampaignGoal, stats: { moves?: number; materialDiff?: number; promotedCount?: number }): boolean {
     switch (goal.type) {
       case 'moves':
-        return stats.moves <= goal.value;
+        return (stats.moves ?? 0) <= goal.value;
       case 'material':
-        return stats.materialDiff >= goal.value;
+        return (stats.materialDiff ?? 0) >= goal.value;
       case 'promotion':
-        return stats.promotedCount >= goal.value;
+        return (stats.promotedCount ?? 0) >= goal.value;
       default:
         return false;
     }
