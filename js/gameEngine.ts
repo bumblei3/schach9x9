@@ -147,6 +147,15 @@ export class Game {
     showBlunderWarning?: (analysis: unknown, callback: () => void) => void;
   };
   isTutorMove?: (move: Square) => boolean;
+  // Dynamic properties set at runtime by controllers
+  gameController?: unknown;
+  aiController?: unknown;
+  aiMove?: () => void;
+  updateBestMoves?: () => void;
+  analysisManager?: unknown;
+  arrowRenderer?: { clearArrows: () => void; addArrow?: (...args: unknown[]) => void };
+  evaluationBar?: { update: (score: number) => void };
+  campaignMode?: boolean;
   currentTheme?: string;
 
   constructor(initialPoints: number = 15, mode: GameMode = 'setup') {

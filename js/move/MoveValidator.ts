@@ -11,7 +11,7 @@ import { campaignManager } from '../campaign/CampaignManager.js';
  */
 export function checkDraw(game: Game): boolean {
   if (game.halfMoveClock >= 100) {
-    (game as any).phase = PHASES.GAME_OVER;
+    game.phase = PHASES.GAME_OVER as unknown as typeof PHASES[keyof typeof PHASES];
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (50-Züge-Regel)');
@@ -21,8 +21,8 @@ export function checkDraw(game: Game): boolean {
     if (overlay) overlay.classList.remove('hidden');
 
     // Save to statistics
-    if ((game as any).gameController) {
-      (game as any).gameController.saveGameToStatistics('draw', null);
+    if (game.gameController) {
+      (game.gameController as any).saveGameToStatistics('draw', null);
     }
     return true;
   }
@@ -30,7 +30,7 @@ export function checkDraw(game: Game): boolean {
   const currentHash = getBoardHash(game);
   const occurrences = game.positionHistory.filter(h => h === currentHash).length;
   if (occurrences >= 3) {
-    (game as any).phase = PHASES.GAME_OVER;
+    game.phase = PHASES.GAME_OVER as unknown as typeof PHASES[keyof typeof PHASES];
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (Stellungswiederholung)');
@@ -40,14 +40,14 @@ export function checkDraw(game: Game): boolean {
     if (overlay) overlay.classList.remove('hidden');
 
     // Save to statistics
-    if ((game as any).gameController) {
-      (game as any).gameController.saveGameToStatistics('draw', null);
+    if (game.gameController) {
+      (game.gameController as any).saveGameToStatistics('draw', null);
     }
     return true;
   }
 
   if (isInsufficientMaterial(game)) {
-    (game as any).phase = PHASES.GAME_OVER;
+    game.phase = PHASES.GAME_OVER as unknown as typeof PHASES[keyof typeof PHASES];
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (Ungenügendes Material)');
@@ -57,8 +57,8 @@ export function checkDraw(game: Game): boolean {
     if (overlay) overlay.classList.remove('hidden');
 
     // Save to statistics
-    if ((game as any).gameController) {
-      (game as any).gameController.saveGameToStatistics('draw', null);
+    if (game.gameController) {
+      (game.gameController as any).saveGameToStatistics('draw', null);
     }
     return true;
   }
@@ -183,13 +183,13 @@ export function calculateMaterialAdvantage(game: Game): number {
 
   // Perk: Stabile Bauern
   const stablePawnsActive =
-    (game as any).campaignMode && campaignManager.isPerkUnlocked('stabile_bauern');
+    game.campaignMode && campaignManager.isPerkUnlocked('stabile_bauern');
 
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       const piece = game.board[r][c];
       if (piece) {
-        let value = (PIECE_VALUES as any)[piece.type] || 0;
+        let value = PIECE_VALUES[piece.type] || 0 || 0;
 
         // Apply Perk: Double white pawn value
         if (stablePawnsActive && piece.type === 'p' && piece.color === 'white') {

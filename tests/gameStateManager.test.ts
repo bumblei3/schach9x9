@@ -288,7 +288,7 @@ describe('GameStateManager', () => {
       game.gameController = { requestPositionAnalysis: vi.fn() } as any;
 
       GameStateManager.undoMove(game as Game, moveController);
-      expect(game.gameController!.requestPositionAnalysis).toHaveBeenCalled();
+      expect((game.gameController as any).requestPositionAnalysis).toHaveBeenCalled();
     });
   });
 
