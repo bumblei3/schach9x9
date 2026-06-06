@@ -215,4 +215,34 @@ describe('AnalysisUI', () => {
       expect.any(Array)
     );
   });
+
+  test('showSummaryModal should render stat counts for both players', async () => {
+    const white = { accuracy: 95, counts: { brilliant: 2, best: 3, mistake: 1 } };
+    const black = { accuracy: 50, counts: { blunder: 2, good: 5 } };
+
+    (analysisUI as any).showSummaryModal(white, black);
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    expect(UI.showModal).toHaveBeenCalledWith(
+      'Analyse abgeschlossen',
+      expect.stringContaining('accuracy-low'),
+      expect.any(Array)
+    );
+  });
+
+  test('showSummaryModal should include review button', async () => {
+    const white = { accuracy: 80, counts: {} };
+    const black = { accuracy: 70, counts: {} };
+
+    (analysisUI as any).showSummaryModal(white, black);
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    expect(UI.showModal).toHaveBeenCalledWith(
+      'Analyse abgeschlossen',
+      expect.any(String),
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'Partie durchsehen' }),
+      ])
+    );
+  });
 });
