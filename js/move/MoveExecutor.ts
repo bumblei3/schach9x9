@@ -5,7 +5,7 @@ import { puzzleManager } from '../puzzleManager.js';
 import { evaluatePosition } from '../aiEngine.js';
 import * as MoveValidator from './MoveValidator.js';
 import { confettiSystem } from '../effects.js';
-import type { Square, PieceWithMoved, MoveHistoryEntry, Player } from '../gameEngine.js';
+import type { Square, PieceWithMoved, MoveHistoryEntry, Player, Piece } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
@@ -28,15 +28,15 @@ export async function executeMove(
 ): Promise<void> {
   // Clear redo stack if this is a new move
   if (!isUndoRedo) {
-    (moveController as any).redoStack = [];
+    moveController.redoStack = [];
     moveController.updateUndoRedoButtons();
   }
 
   // Clear tutor arrows and stale hints when making a move
-  if ((game as any).arrowRenderer) {
-    (game as any).arrowRenderer.clearArrows();
+  if (game.arrowRenderer) {
+    game.arrowRenderer.clearArrows();
   }
-  (game as any).bestMoves = [];
+  game.bestMoves = [];
 
   const piece = game.board[from.r][from.c] as PieceWithMoved;
   if (!piece) return;
@@ -59,7 +59,7 @@ export async function executeMove(
     const rookTargetCol = isKingside ? to.c - 1 : to.c + 1;
     const rook = game.board[from.r][rookCol] as PieceWithMoved;
 
-    (moveRecord as any).specialMove = {
+    moveRecord.specialMove = {
       type: 'castling',
       isKingside,
       rookFrom: { r: from.r, c: rookCol },
@@ -82,10 +82,10 @@ export async function executeMove(
     const capturedPawnRow = from.r;
     const capturedPawn = game.board[capturedPawnRow][to.c] as PieceWithMoved;
 
-    (moveRecord as any).specialMove = {
+    moveRecord.specialMove = {
       type: 'enPassant',
       capturedPawnPos: { r: capturedPawnRow, c: to.c },
-      capturedPawn: { type: capturedPawn.type, color: capturedPawn.color },
+      capturedPawn: { type: capturedPawn.type, color: capturedPawn.color } as any,
     };
 
     moveRecord.isEnPassant = true;
@@ -130,8 +130,8 @@ export async function executeMove(
     // Talent: Scavenger (Pawn)
     // Erhalte 1-2 Gold beim Schlagen von Figuren.
     if (
-      (game as any).campaignMode &&
-      piece.color === (game as any).playerColor &&
+      game.campaignMode &&
+      piece.color === game.playerColor &&
       piece.type === 'p'
     ) {
       if (campaignManager.isTalentUnlocked('p_scavenger')) {
@@ -141,18 +141,18 @@ export async function executeMove(
       }
     }
   } else if (
-    (moveRecord as any).specialMove &&
-    (moveRecord as any).specialMove.type === 'enPassant'
+    moveRecord.specialMove &&
+    moveRecord.specialMove.type === 'enPassant'
   ) {
     const capturerColor = piece.color;
-    game.capturedPieces[capturerColor].push((moveRecord as any).specialMove.capturedPawn);
+    game.capturedPieces[capturerColor].push(moveRecord.specialMove!.capturedPawn as Piece);
     UI.updateCapturedUI(game);
   }
 
   // Award XP in Campaign Mode
   if (
-    (game as any).campaignMode &&
-    piece.color === (game as any).playerColor &&
+    game.campaignMode &&
+    piece.color === game.playerColor &&
     (targetPiece || moveRecord.isEnPassant)
   ) {
     let xpAmount = 10;
@@ -201,9 +201,9 @@ export async function executeMove(
     if (to.r === promotionRow) {
       if (promotionType) {
         // Use provided promotion type (AI, Undo/Redo, or after selection)
-        piece.type = promotionType as any;
+        piece.type = promotionType as Piece['type'];
         game.stats.promotions++;
-        (moveRecord as any).specialMove = { type: 'promotion', promotedTo: promotionType };
+        moveRecord.specialMove = { type: 'promotion', promotedTo: promotionType };
         moveRecord.promotion = promotionType;
         game.log(
           `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${promotionType} befördert!`
@@ -219,14 +219,14 @@ export async function executeMove(
             // Update moveRecord validation
             const actualType = game.board[to.r][to.c]?.type || 'q'; // Fallback
             if (actualType !== 'p') {
-              (moveRecord as any).specialMove = { type: 'promotion', promotedTo: actualType };
+              moveRecord.specialMove = { type: 'promotion', promotedTo: actualType };
               moveRecord.promotion = actualType;
               game.stats.promotions++;
               game.log(
                 `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${actualType} befördert!`
               );
               // Award XP for promotion in Campaign
-              if ((game as any).campaignMode && piece.color === (game as any).playerColor) {
+              if (game.campaignMode && piece.color === game.playerColor) {
                 campaignManager.addUnitXp('p', 50);
                 notificationUI.show(
                   `Beförderungs-Bonus: +50 XP für die Infanterie!`,
@@ -242,7 +242,7 @@ export async function executeMove(
           // Default for AI if no type was passed (should not happen with updated AI)
           piece.type = 'e';
           game.stats.promotions++;
-          (moveRecord as any).specialMove = { type: 'promotion', promotedTo: 'e' };
+          moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
           moveRecord.promotion = 'e';
           game.log(
             `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`
@@ -266,11 +266,11 @@ export async function completeMoveExecution(
 ): Promise<void> {
   // Calculate evaluation score
   const evalScore = await evaluatePosition(game.board, 'white');
-  (moveRecord as any).evalScore = evalScore;
+  moveRecord.evalScore = evalScore;
 
   // Update evaluation bar if available
-  if ((game as any).evaluationBar) {
-    (game as any).evaluationBar.update(evalScore);
+  if (game.evaluationBar) {
+    game.evaluationBar.update(evalScore);
   }
 
   // Add move to history
@@ -279,29 +279,29 @@ export async function completeMoveExecution(
   UI.updateStatus(game);
 
   // Blunder Detection
-  if ((game as any).tutorController && (game as any).tutorController.checkBlunder) {
+  if (game.tutorController && (game.tutorController as any).checkBlunder) {
     // Fire and forget or await? Safer to await to ensure sequence
-    await (game as any).tutorController.checkBlunder(moveRecord);
+    await (game.tutorController as any).checkBlunder(moveRecord);
   }
 
   // Puzzle Logic Check
   if (game.mode === 'puzzle') {
-    const result = (puzzleManager as any).checkMove(game, moveRecord);
+    const result = puzzleManager.checkMove(game, moveRecord);
     if (result === 'wrong') {
       setTimeout(() => {
         moveController.undoMove();
-        (UI as any).updatePuzzleStatus('error', 'Falscher Zug!');
+        UI.updatePuzzleStatus('error', 'Falscher Zug!');
         soundManager.playError();
       }, 500);
     } else if (result === 'solved') {
-      (UI as any).updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
+      UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
       soundManager.playSuccess();
     } else {
-      (UI as any).updatePuzzleStatus('neutral', 'Richtig... weiter!');
+      UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');
 
       // Auto-play opponent move if available
       const nextIndex = game.puzzleState ? game.puzzleState.currentMoveIndex : 0;
-      const puzzle = (puzzleManager as any).getPuzzle(
+      const puzzle = puzzleManager.getPuzzle(
         game.puzzleState ? (game.puzzleState as any).puzzleId : ''
       );
 
@@ -309,7 +309,7 @@ export async function completeMoveExecution(
         const nextMove = puzzle.solution[nextIndex];
         setTimeout(() => {
           // Ensure we are in a state to move
-          if (game.phase === (PHASES.PLAY as any) || (game.phase as any) === 'play') {
+          if (game.phase === PHASES.PLAY) {
             moveController.executeMove(nextMove.from, nextMove.to);
           }
         }, 600);
@@ -329,8 +329,8 @@ export async function completeMoveExecution(
     if (winnerText) winnerText.textContent = 'Unentschieden (Material)';
     if (overlay) overlay.classList.remove('hidden');
 
-    if ((game as any).gameController) {
-      (game as any).gameController.handleGameEnd('draw', null);
+    if (game.gameController) {
+      (game.gameController as any).handleGameEnd('draw', null);
     }
     return;
   }
@@ -384,9 +384,9 @@ export function finishMove(game: Game, lastTo?: Square): void {
     UI.renderBoard(game);
     UI.updateStatus(game);
 
-    if ((game as any).gameController) {
+    if (game.gameController) {
       const winnerColor: Player = !whiteKingExists ? 'black' : 'white';
-      (game as any).gameController.handleGameEnd('win', winnerColor);
+      (game.gameController as any).handleGameEnd('win', winnerColor);
     }
     return;
   }
@@ -425,10 +425,10 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
     const captured =
       targetPiece ||
-      ((lastMove as any).specialMove && (lastMove as any).specialMove.type === 'enPassant');
+      (lastMove.specialMove && lastMove.specialMove.type === 'enPassant');
     if (captured) {
       const attackerData = { type: piece.type, color: piece.color };
-      const defenderData = targetPiece || (lastMove as any).specialMove.capturedPawn;
+      const defenderData = targetPiece || lastMove.specialMove?.capturedPawn;
       (window as any).battleChess3D
         .playBattleSequence(attackerData, defenderData, from, to)
         .then(() => {
@@ -448,7 +448,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     const winner = opponentColor === 'white' ? 'Schwarz' : 'Weiß';
     game.log(`SCHACHMATT! ${winner} gewinnt!`);
 
-    (UI as any).animateCheckmate(game, opponentColor);
+    UI.animateCheckmate(game, opponentColor);
 
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
@@ -459,12 +459,12 @@ export function finishMove(game: Game, lastTo?: Square): void {
     soundManager.playGameOver(isPlayerWin);
     if (isPlayerWin) confettiSystem.spawn();
 
-    if ((game as any).gameController) {
+    if (game.gameController) {
       const winningColor: Player = opponentColor === 'white' ? 'black' : 'white';
-      (game as any).gameController.handleGameEnd('win', winningColor);
+      (game.gameController as any).handleGameEnd('win', winningColor);
 
       // Award Checkmate XP in Campaign
-      if ((game as any).campaignMode && winningColor === (game as any).playerColor) {
+      if (game.campaignMode && winningColor === game.playerColor) {
         campaignManager.addUnitXp('k', 100); // King gets XP for victory leadership
         notificationUI.show(`Mission erfüllt! Bonus: +100 XP für den König!`, 'success', 'Triumph');
       }
@@ -480,8 +480,8 @@ export function finishMove(game: Game, lastTo?: Square): void {
     if (winnerText) winnerText.textContent = 'Unentschieden (Patt)';
     if (overlay) overlay.classList.remove('hidden');
 
-    if ((game as any).gameController) {
-      (game as any).gameController.handleGameEnd('draw', null);
+    if (game.gameController) {
+      (game.gameController as any).handleGameEnd('draw', null);
     }
     return;
   } else if (MoveValidator.checkDraw(game)) {
@@ -489,18 +489,18 @@ export function finishMove(game: Game, lastTo?: Square): void {
   } else if (game.isInCheck(opponentColor)) {
     game.log(`SCHACH! ${opponentColor === 'white' ? 'Weiß' : 'Schwarz'} steht im Schach.`);
     soundManager.playCheck();
-    (UI as any).animateCheck(game, opponentColor);
+    UI.animateCheck(game, opponentColor);
   }
 
   UI.updateStatus(game);
-  (UI as any).renderEvalGraph(game);
+  UI.renderEvalGraph(game);
 
   // Auto-save every 5 moves
   if (game.moveHistory.length > 0 && game.moveHistory.length % 5 === 0) {
     try {
-      if ((game as any).gameController && (game as any).gameController.saveGame) {
-        (game as any).gameController.saveGame(true); // silent save
-        (UI as any).showToast('Spiel automatisch gespeichert', 'success');
+      if (game.gameController && (game.gameController as any).saveGame) {
+        (game.gameController as any).saveGame(true); // silent save
+        UI.showToast('Spiel automatisch gespeichert', 'success');
       }
     } catch (e) {
       console.warn('Auto-save failed:', e);
@@ -509,21 +509,21 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
   game.log(`${game.turn === 'white' ? 'Weiß' : 'Schwarz'} ist am Zug.`);
 
-  if (game.isAI && game.turn === 'black' && game.phase === (PHASES.PLAY as any)) {
+  if (game.isAI && game.turn === 'black' && game.phase === PHASES.PLAY) {
     setTimeout(() => {
-      if ((game as any).aiMove) (game as any).aiMove();
+      if (game.aiMove) game.aiMove();
     }, 1000);
   } else {
     setTimeout(() => {
-      if ((game as any).updateBestMoves) (game as any).updateBestMoves();
+      if (game.updateBestMoves) game.updateBestMoves();
 
       // Trigger analysis update if in analysis mode OR live engine analysis is active
       if (
-        (game as any).gameController &&
-        ((game as any).analysisMode ||
-          ((game as any).aiController && (game as any).aiController.analysisActive))
+        game.gameController &&
+        (game.analysisMode ||
+          ((game.aiController as any) && (game.aiController as any).analysisActive))
       ) {
-        (game as any).gameController.requestPositionAnalysis();
+        (game.gameController as any).requestPositionAnalysis();
       }
 
       if ((game as any).analysisManager) {

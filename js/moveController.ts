@@ -11,7 +11,7 @@ import * as UI from './ui.js';
  */
 export class MoveController {
     private game: Game;
-    private redoStack: MoveHistoryEntry[];
+    public redoStack: MoveHistoryEntry[];
 
     constructor(game: Game) {
     this.game = game;

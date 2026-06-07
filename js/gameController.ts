@@ -52,6 +52,8 @@ export interface GameExtended extends Game {
     undoMove: () => void;
     redoMove: () => void;
   };
+  startClock?: () => void;
+  stopClock?: () => void;
 }
 
 export class GameController {

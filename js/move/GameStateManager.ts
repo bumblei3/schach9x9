@@ -12,15 +12,15 @@ import type { MoveController } from '../moveController.js';
 export function undoMove(game: Game, moveController: MoveController): void {
   if (
     game.moveHistory.length === 0 ||
-    ((game as any).phase !== (PHASES as any).PLAY &&
-      (game as any).phase !== (PHASES as any).ANALYSIS &&
-      (game as any).phase !== (PHASES as any).GAME_OVER)
+    (game.phase !== (PHASES as any).PLAY &&
+      game.phase !== (PHASES as any).ANALYSIS &&
+      game.phase !== (PHASES as any).GAME_OVER)
   ) {
     return;
   }
 
   const move = game.moveHistory.pop()!;
-  (moveController as any).redoStack.push(move);
+  moveController.redoStack.push(move);
 
   const piece = game.board[move.to.r][move.to.c] as PieceWithMoved;
   if (!piece) return;
@@ -32,32 +32,32 @@ export function undoMove(game: Game, moveController: MoveController): void {
         type: (move.captured as any).type,
         color: (move.captured as any).color,
         hasMoved: true,
-      } as any)
+      })
     : null;
 
   // Restore piece properties (hasMoved and type)
-  if ((move.piece as any).hasMoved !== undefined) {
-    piece.hasMoved = (move.piece as any).hasMoved;
+  if (move.piece?.hasMoved !== undefined) {
+    piece.hasMoved = move.piece?.hasMoved;
   }
   piece.type = (move.piece as any).type;
 
-  if ((move as any).specialMove) {
-    const sm = (move as any).specialMove;
+  if (move.specialMove) {
+    const sm = move.specialMove;
     if (sm.type === 'castling') {
       // Undo rook movement
-      const rook = game.board[sm.rookTo.r][sm.rookTo.c] as PieceWithMoved;
+      const rook = game.board[sm.rookTo!.r][sm.rookTo!.c] as PieceWithMoved;
       if (rook) {
-        game.board[sm.rookFrom.r][sm.rookFrom.c] = rook;
-        game.board[sm.rookTo.r][sm.rookTo.c] = null;
-        rook.hasMoved = sm.rookHadMoved;
+        game.board[sm.rookFrom!.r][sm.rookFrom!.c] = rook;
+        game.board[sm.rookTo!.r][sm.rookTo!.c] = null;
+        rook.hasMoved = sm.rookHadMoved ?? false;
         if (sm.rookType) {
-          rook.type = sm.rookType;
+          rook.type = sm.rookType as any;
         }
       }
     } else if (sm.type === 'enPassant') {
-      game.board[sm.capturedPawnPos.r][sm.capturedPawnPos.c] = {
+      game.board[sm.capturedPawnPos!.r][sm.capturedPawnPos!.c] = {
         type: 'p',
-        color: sm.capturedPawn.color,
+        color: sm.capturedPawn!.color,
         hasMoved: true,
       } as any;
     }
@@ -68,14 +68,14 @@ export function undoMove(game: Game, moveController: MoveController): void {
     const capturerColor = (move.piece as any).color;
     game.capturedPieces[capturerColor as 'white' | 'black'].pop();
     UI.updateCapturedUI(game);
-  } else if ((move as any).specialMove && (move as any).specialMove.type === 'enPassant') {
+  } else if (move.specialMove && move.specialMove.type === 'enPassant') {
     const capturerColor = (move.piece as any).color;
     game.capturedPieces[capturerColor as 'white' | 'black'].pop();
     UI.updateCapturedUI(game);
   }
 
   game.halfMoveClock = move.halfMoveClock || 0;
-  while (game.positionHistory.length > (move as any).positionHistoryLength) {
+  while (game.positionHistory.length > (move.positionHistoryLength ?? 0)) {
     game.positionHistory.pop();
   }
 
@@ -99,11 +99,11 @@ export function undoMove(game: Game, moveController: MoveController): void {
   UI.updateMoveHistoryUI(game);
   UI.updateStatus(game);
   game.log(
-    `Zug ${move.piece && (move.piece as any).color === 'white' ? 'Weiß' : 'Schwarz'} zurückgenommen`
+    `Zug ${move.piece && move.piece?.color === 'white' ? 'Weiß' : 'Schwarz'} zurückgenommen`
   );
 
   // If we undid a move that caused game over, reset phase to PLAY
-  if ((game.phase as any) === PHASES.GAME_OVER) {
+  if (game.phase === PHASES.GAME_OVER) {
     game.phase = PHASES.PLAY as any;
     // Hide game over overlay
     const overlay = document.getElementById('game-over-overlay');
@@ -115,11 +115,11 @@ export function undoMove(game: Game, moveController: MoveController): void {
     (window as any).battleChess3D.updateFromGameState(game);
   }
 
-  if ((game as any).updateBestMoves) (game as any).updateBestMoves();
+  if (game.updateBestMoves) game.updateBestMoves();
 
   // Trigger analysis update if in analysis mode
-  if (game.analysisMode && game.continuousAnalysis && (game as any).gameController) {
-    (game as any).gameController.requestPositionAnalysis();
+  if (game.analysisMode && game.continuousAnalysis && game.gameController) {
+    (game.gameController as any).requestPositionAnalysis();
   }
 
   moveController.updateUndoRedoButtons();
@@ -138,7 +138,7 @@ export function undoMove(game: Game, moveController: MoveController): void {
 export function enterReplayMode(game: Game, moveController: MoveController): void {
   if (game.replayMode || game.moveHistory.length === 0) return;
 
-  (game as any).savedGameState = {
+  game.savedGameState = {
     board: JSON.parse(JSON.stringify(game.board)),
     turn: game.turn,
     selectedSquare: game.selectedSquare,
@@ -168,7 +168,7 @@ export function enterReplayMode(game: Game, moveController: MoveController): voi
 export function exitReplayMode(game: Game): void {
   if (!game.replayMode) return;
 
-  const saved = (game as any).savedGameState;
+  const saved = game.savedGameState as any;
   game.board = saved.board;
   game.turn = saved.turn;
   game.selectedSquare = saved.selectedSquare;
@@ -177,7 +177,7 @@ export function exitReplayMode(game: Game): void {
 
   game.replayMode = false;
   game.replayPosition = -1;
-  (game as any).savedGameState = null;
+  game.savedGameState = null;
 
   const replayStatus = document.getElementById('replay-status');
   const replayExit = document.getElementById('replay-exit');
@@ -201,8 +201,8 @@ export function exitReplayMode(game: Game): void {
  * @param {number} moveIndex - The index in moveHistory
  */
 export function reconstructBoardAtMove(game: Game, moveIndex: number): void {
-  if ((game as any).savedGameState) {
-    game.board = JSON.parse(JSON.stringify((game as any).savedGameState.board));
+  if (game.savedGameState) {
+    game.board = JSON.parse(JSON.stringify((game.savedGameState as any).board));
     for (let i = game.moveHistory.length - 1; i > moveIndex; i--) {
       const move = game.moveHistory[i];
       undoMoveForReplay(game, move);
@@ -235,18 +235,18 @@ export function undoMoveForReplay(game: Game, move: MoveHistoryEntry): void {
         type: (move.captured as any).type,
         color: (move.captured as any).color,
         hasMoved: true,
-      } as any)
+      })
     : null;
 
-  if (move.piece && (move.piece as any).hasMoved !== undefined) {
-    piece.hasMoved = (move.piece as any).hasMoved;
+  if (move.piece && move.piece?.hasMoved !== undefined) {
+    piece.hasMoved = move.piece?.hasMoved;
   }
 
-  if ((move as any).specialMove) {
-    const sm = (move as any).specialMove;
+  if (move.specialMove) {
+    const sm = move.specialMove;
     if (sm.type === 'castling') {
-      const rookFrom = sm.rookFrom;
-      const rookTo = sm.rookTo;
+      const rookFrom = sm.rookFrom!;
+      const rookTo = sm.rookTo!;
       const rook = game.board[rookTo.r][rookTo.c] as PieceWithMoved;
       if (rook) {
         game.board[rookFrom.r][rookFrom.c] = rook;
@@ -254,10 +254,10 @@ export function undoMoveForReplay(game: Game, move: MoveHistoryEntry): void {
         rook.hasMoved = false;
       }
     } else if (sm.type === 'enPassant') {
-      const capturedPos = sm.capturedPawnPos;
+      const capturedPos = sm.capturedPawnPos!;
       game.board[capturedPos.r][capturedPos.c] = {
         type: 'p',
-        color: sm.capturedPawn.color,
+        color: sm.capturedPawn!.color,
         hasMoved: true,
       } as any;
     } else if (sm.type === 'promotion') {
@@ -277,8 +277,8 @@ export function saveGame(game: Game): void {
     turn: game.turn,
     points: game.points,
     selectedShopPiece: game.selectedShopPiece,
-    whiteCorridor: (game as any).whiteCorridor,
-    blackCorridor: (game as any).blackCorridor,
+    whiteCorridor: game.whiteCorridor,
+    blackCorridor: game.blackCorridor,
     isAI: game.isAI,
     difficulty: game.difficulty,
     moveHistory: game.moveHistory,
@@ -308,12 +308,12 @@ export function loadGame(game: Game): boolean {
     const state = JSON.parse(savedData);
 
     game.board = state.board;
-    (game as any).phase = state.phase;
+    game.phase = state.phase;
     game.turn = state.turn;
     game.points = state.points;
     game.selectedShopPiece = state.selectedShopPiece;
-    (game as any).whiteCorridor = state.whiteCorridor;
-    (game as any).blackCorridor = state.blackCorridor;
+    game.whiteCorridor = state.whiteCorridor;
+    game.blackCorridor = state.blackCorridor;
     game.isAI = state.isAI;
     game.difficulty = state.difficulty;
     game.moveHistory = state.moveHistory;
@@ -350,20 +350,20 @@ export function loadGame(game: Game): boolean {
     }
 
     if (
-      game.phase === (PHASES.SETUP_WHITE_PIECES as any) ||
-      game.phase === (PHASES.SETUP_BLACK_PIECES as any)
+      game.phase === PHASES.SETUP_WHITE_PIECES as any ||
+      game.phase === PHASES.SETUP_BLACK_PIECES as any
     ) {
       UI.showShop(game, true);
     } else {
       UI.showShop(game, false);
     }
 
-    if (game.phase === (PHASES.PLAY as any)) {
+    if (game.phase === PHASES.PLAY) {
       const historyPanel = document.getElementById('move-history-panel');
       const capturedPanel = document.getElementById('captured-pieces-panel');
       if (historyPanel) historyPanel.classList.remove('hidden');
       if (capturedPanel) capturedPanel.classList.remove('hidden');
-      if ((game as any).updateBestMoves) (game as any).updateBestMoves();
+      if (game.updateBestMoves) game.updateBestMoves();
     }
 
     game.log('Spiel geladen! \u{1F4C2}');
