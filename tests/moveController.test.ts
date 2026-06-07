@@ -105,7 +105,7 @@ describe('MoveController', () => {
     game.board = createEmptyBoard() as any;
     game.phase = PHASES.PLAY;
 
-    moveController = new MoveController(game);
+    moveController = new MoveController(game as unknown as Game);
     game.moveController = moveController; // Link back
     game.log = vi.fn(); // Mock log function
     game.stopClock = vi.fn();

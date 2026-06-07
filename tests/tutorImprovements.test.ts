@@ -60,8 +60,8 @@ describe('Tutor Improvements', () => {
       );
 
       expect(skewers.length).toBeGreaterThan(0);
-      expect(skewers[0].frontPiece.type).toBe('k');
-      expect(skewers[0].behindPiece.type).toBe('r');
+      expect(skewers[0]!.frontPiece!.type).toBe('k');
+      expect(skewers[0]!.behindPiece!.type).toBe('r');
     });
   });
 
@@ -138,7 +138,7 @@ describe('Tutor Improvements', () => {
       );
 
       expect(vulnerabilities.length).toBeGreaterThan(0);
-      expect(vulnerabilities[0].undefendedPiece.type).toBe('r');
+      expect(vulnerabilities[0]!.undefendedPiece!.type).toBe('r');
     });
 
     test('should detect Discovered Attack', () => {

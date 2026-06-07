@@ -2,6 +2,41 @@ import { BOARD_SIZE } from '../gameEngine.js';
 import * as aiEngine from '../aiEngine.js';
 import { isBlockedCell } from '../config.js';
 
+/** Minimal interface for analyzer (provides getPieceName) */
+export interface Analyzer {
+  getPieceName(type: string): string;
+}
+
+/** A position on the board */
+export interface Pos { r: number; c: number; }
+
+/** A tactical pattern detected in a position */
+interface TacticalPattern {
+  type: string;
+  severity: string;
+  explanation: string;
+  question: string;
+  targets: Pos[];
+}
+
+/** A skewer pattern */
+interface Skewer {
+  frontPiece?: { type: string; color: string };
+  frontName: string;
+  frontPos: Pos;
+  behindPiece?: { type: string; color: string };
+  behindName: string;
+  behindPos: Pos;
+}
+
+/** A removed guard vulnerability */
+interface RemovedGuard {
+  undefendedPiece?: { type: string; color: string };
+  undefendedName: string;
+  undefendedPos: Pos;
+}
+
+
 /**
  * Detects tactical patterns for a given move
  * @param {Object} game - The game instance
@@ -9,10 +44,8 @@ import { isBlockedCell } from '../config.js';
  * @param {Object} move - The move to analyze {from, to}
  * @returns {Array} List of detected patterns
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function detectTacticalPatterns(game: any, analyzer: any, move: any): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patterns: any[] = [];
+export function detectTacticalPatterns(game: any, analyzer: Analyzer, move: { from: Pos; to: Pos }): TacticalPattern[] {
+    const patterns: TacticalPattern[] = [];
   if (!move || !move.from || !move.to) return patterns;
   const from = move.from;
   const to = move.to;
@@ -30,19 +63,16 @@ export function detectTacticalPatterns(game: any, analyzer: any, move: any): any
 
     // 1. FORK - Attacks 2+ valuable pieces
     const threatened = getThreatenedPieces(game, analyzer, to, piece.color);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const valuableThreatened = threatened.filter((t: any) => t.type !== 'p');
+        const valuableThreatened = threatened.filter((t: { type: string }) => t.type !== 'p');
 
     if (valuableThreatened.length >= 2) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pieces = valuableThreatened.map((t: any) => t.name).join(' und ');
+            const pieces = valuableThreatened.map((t: { name: string }) => t.name).join(' und ');
       patterns.push({
         type: 'fork',
         severity: 'high',
         explanation: `🍴 Gabelangriff! Bedroht: ${pieces}`,
         question: 'Siehst du eine Möglichkeit, zwei wertvolle Figuren gleichzeitig zu bedrohen?',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        targets: valuableThreatened.map((t: any) => t.pos),
+                targets: valuableThreatened.map((t: { pos: { r: number; c: number } }) => t.pos),
       });
     }
 
@@ -51,8 +81,7 @@ export function detectTacticalPatterns(game: any, analyzer: any, move: any): any
       const pieceName = analyzer.getPieceName(capturedPiece.type);
 
       // Use SEE to check if capture is profitable
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const seeScore = (aiEngine as any).see(game.board, from, to);
+            const seeScore = (aiEngine as any).see(game.board, from, to);
       const isProfitable = seeScore >= 0;
 
       patterns.push({
@@ -123,10 +152,8 @@ export function detectTacticalPatterns(game: any, analyzer: any, move: any): any
 
     // 6. DEFENSE - Defending a threatened piece
     const defendedPieces = getDefendedPieces(game, analyzer, to, piece.color);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (defendedPieces.length > 0 && defendedPieces.some((d: any) => d.wasThreatened)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const defended = defendedPieces.find((d: any) => d.wasThreatened);
+        if (defendedPieces.length > 0 && defendedPieces.some((d: { wasThreatened?: boolean }) => d.wasThreatened)) {
+            const defended = defendedPieces.find((d: { wasThreatened?: boolean }) => d.wasThreatened);
       if (defended) {
         patterns.push({
           type: 'defense',
@@ -175,8 +202,7 @@ export function detectTacticalPatterns(game: any, analyzer: any, move: any): any
           severity: 'medium',
           explanation: `🔓 Zerstörung der Verteidigung! ${undefendedName} ist nun angreifbar`,
           question: 'Kannst du einen Verteidiger ausschalten, um eine andere Figur zu schwächen?',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          targets: removingGuard.map((rg: any) => rg.undefendedPos),
+                    targets: removingGuard.map((rg: { undefendedPos: { r: number; c: number } }) => rg.undefendedPos),
         });
       }
     }
@@ -192,10 +218,8 @@ export function detectTacticalPatterns(game: any, analyzer: any, move: any): any
 /**
  * Detect Skewers: Similar to Pin, but valuable piece is in front
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function detectSkewers(game: any, analyzer: any, pos: any, attackerColor: string): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const skewers: any[] = [];
+export function detectSkewers(game: any, analyzer: Analyzer, pos: Pos, attackerColor: string): Skewer[] {
+    const skewers: Skewer[] = [];
   const piece = game.board[pos.r][pos.c];
 
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
@@ -205,8 +229,7 @@ export function detectSkewers(game: any, analyzer: any, pos: any, attackerColor:
   const opponentColor = attackerColor === 'white' ? 'black' : 'white';
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const move of moves) {
+    for (const move of moves) {
     const targetPiece = game.board[move.r][move.c];
     if (!targetPiece || targetPiece.color !== opponentColor) continue;
 
@@ -261,15 +284,13 @@ export function detectSkewers(game: any, analyzer: any, pos: any, attackerColor:
 /**
  * Detect Removing the Guard: Did capturing 'capturedPiece' leave someone undefended?
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function detectRemovingGuard(
   game: any,
-  analyzer: any,
-  capturePos: any,
-  capturedPiece: any
-): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const revealedVulnerabilities: any[] = [];
+  analyzer: Analyzer,
+  capturePos: Pos,
+  capturedPiece: { type: string; color: string }
+): RemovedGuard[] {
+    const revealedVulnerabilities: RemovedGuard[] = [];
   const defenderColor = capturedPiece.color;
 
   // We already simulated the capture in the main loop (board has attacker at capturePos).
@@ -326,7 +347,6 @@ export function detectRemovingGuard(
   return revealedVulnerabilities;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function canPieceAttackSquare(game: any, piece: any, from: any, to: any): boolean {
   // Check if piece at 'from' can move to 'to' on the current board
   // (ignoring that 'from' might be occupied by attacker now, assume it's piece)
@@ -384,8 +404,7 @@ function canPieceAttackSquare(game: any, piece: any, from: any, to: any): boolea
  * @param {Object} move - The move to check
  * @returns {boolean} True if tactical
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isTactical(game: any, move: any): boolean {
+export function isTactical(game: any, move: { from: Pos; to: Pos }): boolean {
   // Simplest check: is it a capture?
   if (game.board[move.to.r][move.to.c]) return true;
 
@@ -398,8 +417,7 @@ export function isTactical(game: any, move: any): boolean {
 
   // Check for other tactical patterns (simplified to avoid deep recursion)
   // We check if the move creates a fork or pin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const analyzer = { getPieceName: (t: any) => t };
+    const analyzer = { getPieceName: (t: any) => t };
   const patterns = detectTacticalPatterns(game, analyzer, move);
   return patterns.length > 0;
 }
@@ -408,10 +426,8 @@ export function isTactical(game: any, move: any): boolean {
  * Detect if a piece at the given position is pinning an opponent piece
  * Returns array of pinned pieces
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function detectPins(game: any, analyzer: any, pos: any, attackerColor: string): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pinned: any[] = [];
+export function detectPins(game: any, analyzer: Analyzer, pos: Pos, attackerColor: string): any[] {
+    const pinned: any[] = [];
   const piece = game.board[pos.r][pos.c];
 
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
@@ -423,8 +439,7 @@ export function detectPins(game: any, analyzer: any, pos: any, attackerColor: st
   // Check all directions this piece can move
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const move of moves) {
+    for (const move of moves) {
     const targetPiece = game.board[move.r][move.c];
     if (!targetPiece || targetPiece.color !== opponentColor) continue;
 
@@ -463,16 +478,14 @@ export function detectPins(game: any, analyzer: any, pos: any, attackerColor: st
 /**
  * Detect discovered attacks - attacks revealed by moving a piece
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function detectDiscoveredAttacks(
   game: any,
-  analyzer: any,
-  from: any,
-  _to: any,
+  analyzer: Analyzer,
+  from: Pos,
+  _to: Pos,
   attackerColor: string
 ): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const discovered: any[] = [];
+    const discovered: any[] = [];
   const opponentColor = attackerColor === 'white' ? 'black' : 'white';
 
   // Check all our sliding pieces to see if moving from->to reveals an attack
@@ -552,10 +565,8 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
 /**
  * Detect threats to own pieces after making a move
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function detectThreatsAfterMove(game: any, analyzer: any, move: any): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const threats: any[] = [];
+export function detectThreatsAfterMove(game: any, analyzer: Analyzer, move: { from: Pos; to: Pos }): any[] {
+    const threats: any[] = [];
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
@@ -578,8 +589,7 @@ export function detectThreatsAfterMove(game: any, analyzer: any, move: any): any
         // Pawns are now included for STRICT mode detection
 
         // Is this piece under attack?
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const isUnderAttack = (aiEngine as any).isSquareAttacked(game.board, r, c, opponentColor);
+                const isUnderAttack = (aiEngine as any).isSquareAttacked(game.board, r, c, opponentColor);
         if (isUnderAttack) {
           // Is it defended?
           const defenders = countDefenders(game, r, c, piece.color);
@@ -615,8 +625,7 @@ export function countDefenders(game: any, r: number, c: number, defenderColor: s
       if (!piece || piece.color !== defenderColor) continue;
 
       const moves = game.getValidMoves(pr, pc, piece);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (moves.some((m: any) => m.r === r && m.c === c)) {
+            if (moves.some((m: any) => m.r === r && m.c === c)) {
         count++;
       }
     }
@@ -635,8 +644,7 @@ export function countAttackers(game: any, r: number, c: number, attackerColor: s
       if (!piece || piece.color !== attackerColor) continue;
 
       const moves = game.getValidMoves(pr, pc, piece);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (moves.some((m: any) => m.r === r && m.c === c)) {
+            if (moves.some((m: any) => m.r === r && m.c === c)) {
         count++;
       }
     }
@@ -647,22 +655,19 @@ export function countAttackers(game: any, r: number, c: number, attackerColor: s
 /**
  * Gets pieces threatened by a piece at pos
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getThreatenedPieces(
   game: any,
-  analyzer: any,
-  pos: any,
+  analyzer: Analyzer,
+  pos: Pos,
   attackerColor: string
 ): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const threatened: any[] = [];
+    const threatened: any[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece) return threatened;
 
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  moves.forEach((move: any) => {
+    moves.forEach((move: any) => {
     const targetPiece = game.board[move.r][move.c];
     if (targetPiece && targetPiece.color !== attackerColor) {
       threatened.push({
@@ -680,22 +685,19 @@ export function getThreatenedPieces(
 /**
  * Gets pieces defended by a piece at pos
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getDefendedPieces(
   game: any,
-  analyzer: any,
-  pos: any,
+  analyzer: Analyzer,
+  pos: Pos,
   defenderColor: string
 ): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const defended: any[] = [];
+    const defended: any[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece) return defended;
 
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  moves.forEach((move: any) => {
+    moves.forEach((move: any) => {
     const targetPiece = game.board[move.r][move.c];
     if (targetPiece && targetPiece.color === defenderColor) {
       // Check if this piece is threatened by opponent
@@ -718,10 +720,8 @@ export function getDefendedPieces(
 /**
  * Detect Battery: Aligning two sliding pieces
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function detectBattery(game: any, analyzer: any, pos: any, color: string): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const batteries: any[] = [];
+export function detectBattery(game: any, analyzer: Analyzer, pos: Pos, color: string): any[] {
+    const batteries: any[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) return batteries;
 
@@ -742,8 +742,7 @@ export function detectBattery(game: any, analyzer: any, pos: any, color: string)
     [-1, -1],
   ];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const checkDirs = (dirs: any[], types: string[]) => {
+    const checkDirs = (dirs: any[], types: string[]) => {
     dirs.forEach(d => {
       let r = pos.r + d[0];
       let c = pos.c + d[1];

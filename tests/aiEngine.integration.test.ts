@@ -1,12 +1,13 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import * as AIEngine from '../js/aiEngine.js';
 import { Game } from '../js/gameEngine.js';
+import type { Piece } from '../js/types/game.js';
 
 describe('AIEngine Integration', () => {
-  let game: any;
+  let game: Game;
 
   beforeEach(() => {
-    game = new Game(15, 'classic') as any;
+    game = new Game(15, 'classic');
   });
 
   test('analyzePosition re-export functionality', () => {
@@ -16,9 +17,9 @@ describe('AIEngine Integration', () => {
   });
 
   test('getBestMove re-export functionality', async () => {
-    const board = Array(9)
+    const board: (Piece | null)[][] = Array(9)
       .fill(null)
-      .map(() => Array(9).fill(null)) as any;
+      .map(() => Array(9).fill(null));
     board[7][4] = { type: 'k', color: 'white' };
     board[1][4] = { type: 'k', color: 'black' };
     const result = await AIEngine.getBestMove(board, 'white', 1, 'hard', { elo: 2500 });

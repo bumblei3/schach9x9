@@ -1,186 +1,130 @@
 import { debounce } from './utils.js';
-import * as TacticsDetector from './tutor/TacticsDetector.js';
-import * as MoveAnalyzer from './tutor/MoveAnalyzer.js';
-import * as HintGenerator from './tutor/HintGenerator.js';
+import { detectTacticalPatterns, detectPins, detectDiscoveredAttacks, canPieceMove, detectThreatsAfterMove, countDefenders, countAttackers, getThreatenedPieces, getDefendedPieces, type Analyzer } from './tutor/TacticsDetector.js';
+import { getMoveNotation, getPieceName, analyzeStrategicValue, getScoreDescription, analyzeMoveWithExplanation, handlePlayerMove, checkBlunder, showBlunderWarning, analyzePlayerMovePreExecution } from './tutor/MoveAnalyzer.js';
+import { updateBestMoves, isTutorMove, getTutorHints, showTutorSuggestions, getSetupTemplates, applySetupTemplate, placePiece } from './tutor/HintGenerator.js';
+import type { Game } from './gameEngine.js';
 
 /**
  * Orchestrator for tutor-related logic, delegating to specialized sub-modules.
  */
 export class TutorController {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public game: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public debouncedGetTutorHints: any;
+  public game: Game;
+  public debouncedGetTutorHints: () => void;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(game: any) {
+  constructor(game: Game) {
     this.game = game;
     // Debounce the heavy calculation part
     this.debouncedGetTutorHints = debounce(async () => {
-      this.game.bestMoves = await this.getTutorHints();
-      this.showTutorSuggestions();
+    this.game.bestMoves = (await getTutorHints(this.game, this)) as Game['bestMoves'];
+      await showTutorSuggestions(this.game);
     }, 300);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public updateBestMoves(): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (HintGenerator as any).updateBestMoves(this.game, this);
+  public updateBestMoves(): void {
+    return updateBestMoves(this.game, this);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public isTutorMove(from: any, to: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (HintGenerator as any).isTutorMove(this.game, from, to);
+  public isTutorMove(from: { r: number; c: number }, to: { r: number; c: number }): boolean {
+    return isTutorMove(this.game, from, to);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getTutorHints(): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (HintGenerator as any).getTutorHints(this.game, this);
+  public async getTutorHints(): Promise<unknown[]> {
+    return getTutorHints(this.game, this);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getMoveNotation(move: any): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).getMoveNotation(this.game, move);
+  public getMoveNotation(move: unknown): string {
+    return getMoveNotation(this.game, move);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async showTutorSuggestions(): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return await (HintGenerator as any).showTutorSuggestions(this.game);
+  public async showTutorSuggestions(): Promise<void> {
+    return showTutorSuggestions(this.game);
   }
 
   public async showHint(): Promise<void> {
-    // Campaign Mode Perk Check - Hints are now free in Campaign (User Request)
-    // Legacy: Previously required 'taktik_genie' perk or 10 Gold.
-
     // Force calculation if no hints available
     if (!this.game.bestMoves || this.game.bestMoves.length === 0) {
-      this.game.bestMoves = await this.getTutorHints();
+      this.game.bestMoves = (await this.getTutorHints()) as Game['bestMoves'];
     }
     await this.showTutorSuggestions();
   }
 
   public getPieceName(type: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).getPieceName(type);
+    return getPieceName(type);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getThreatenedPieces(pos: any, attackerColor: string): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).getThreatenedPieces(this.game, this, pos, attackerColor);
+  public getThreatenedPieces(pos: { r: number; c: number }, attackerColor: string): unknown {
+    return getThreatenedPieces(this.game, this as unknown as Analyzer, pos, attackerColor);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public detectTacticalPatterns(move: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).detectTacticalPatterns(this.game, this, move);
+  public detectTacticalPatterns(move: unknown): unknown[] {
+    return detectTacticalPatterns(this.game, this as unknown as Analyzer, move as { from: { r: number; c: number }; to: { r: number; c: number } });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public detectPins(pos: any, attackerColor: string): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).detectPins(this.game, this, pos, attackerColor);
+  public detectPins(pos: { r: number; c: number }, attackerColor: string): unknown[] {
+    return detectPins(this.game, this as unknown as Analyzer, pos, attackerColor);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public detectDiscoveredAttacks(from: any, to: any, attackerColor: string): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).detectDiscoveredAttacks(
-      this.game,
-      this,
-      from,
-      to,
-      attackerColor
-    );
+  public detectDiscoveredAttacks(from: { r: number; c: number }, to: { r: number; c: number }, attackerColor: string): unknown[] {
+    return detectDiscoveredAttacks(this.game, this as unknown as Analyzer, from, to, attackerColor);
   }
 
   public canPieceMove(type: string, dr: number, dc: number): boolean {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).canPieceMove(type, dr, dc);
+    return canPieceMove(type, dr, dc);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public detectThreatsAfterMove(move: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).detectThreatsAfterMove(this.game, this, move);
+  public detectThreatsAfterMove(move: unknown): unknown[] {
+    return detectThreatsAfterMove(this.game, this as unknown as Analyzer, move as { from: { r: number; c: number }; to: { r: number; c: number } });
   }
 
   public countDefenders(r: number, c: number, defenderColor: string): number {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).countDefenders(this.game, r, c, defenderColor);
+    return countDefenders(this.game, r, c, defenderColor);
   }
 
   public countAttackers(r: number, c: number, attackerColor: string): number {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).countAttackers(this.game, r, c, attackerColor);
+    return countAttackers(this.game, r, c, attackerColor);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getDefendedPieces(pos: any, defenderColor: string): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (TacticsDetector as any).getDefendedPieces(this.game, this, pos, defenderColor);
+  public getDefendedPieces(pos: { r: number; c: number }, defenderColor: string): unknown {
+    return getDefendedPieces(this.game, this, pos, defenderColor);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public analyzeStrategicValue(move: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).analyzeStrategicValue(this.game, move);
+  public analyzeStrategicValue(move: unknown): unknown[] {
+    return analyzeStrategicValue(this.game, move);
   }
 
   public getScoreDescription(score: number): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).getScoreDescription(score);
+    return getScoreDescription(score);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public analyzeMoveWithExplanation(move: any, score: number, bestScore: number): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).analyzeMoveWithExplanation(this.game, move, score, bestScore);
+  public analyzeMoveWithExplanation(move: unknown, score: number, bestScore: number): unknown {
+    return analyzeMoveWithExplanation(this.game, move, score, bestScore);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public handlePlayerMove(from: any, to: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).handlePlayerMove(this.game, this, from, to);
+  public handlePlayerMove(from: { r: number; c: number }, to: { r: number; c: number }): void {
+    return handlePlayerMove(this.game, this, from, to);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public checkBlunder(moveRecord: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).checkBlunder(this.game, this, moveRecord);
+  public checkBlunder(moveRecord: unknown): Promise<void> {
+    return checkBlunder(this.game, this, moveRecord);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public showBlunderWarning(analysis: any, callback: () => void): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).showBlunderWarning(this.game, analysis, callback);
+  public showBlunderWarning(analysis: unknown, callback: () => void): void {
+    return showBlunderWarning(this.game, analysis, callback);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getSetupTemplates(): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (HintGenerator as any).getSetupTemplates(this.game);
+  public getSetupTemplates(): unknown[] {
+    return getSetupTemplates(this.game);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public applySetupTemplate(templateId: string): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (HintGenerator as any).applySetupTemplate(this.game, this, templateId);
+  public applySetupTemplate(templateId: string): void {
+    return applySetupTemplate(this.game, this, templateId);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public placePiece(r: number, c: number, type: string, isWhite: boolean): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (HintGenerator as any).placePiece(this.game, r, c, type, isWhite);
+  public placePiece(r: number, c: number, type: string, isWhite: boolean): void {
+    return placePiece(this.game, r, c, type, isWhite);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public analyzePlayerMovePreExecution(move: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (MoveAnalyzer as any).analyzePlayerMovePreExecution(this.game, move);
+  public analyzePlayerMovePreExecution(move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<unknown> {
+    return analyzePlayerMovePreExecution(this.game, move);
   }
 }

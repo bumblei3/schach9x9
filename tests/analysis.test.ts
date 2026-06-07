@@ -91,7 +91,8 @@ describe('AnalysisManager', () => {
 
   test('should generate best move arrow correctly', () => {
     const mockMove = {
-      move: { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+      from: { r: 7, c: 4 },
+      to: { r: 5, c: 4 },
     };
     mockGame.bestMoves = [mockMove];
 

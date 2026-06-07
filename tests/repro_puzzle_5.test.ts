@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { PuzzleManager } from '../js/puzzleManager';
-import { Game } from '../js/gameEngine';
+import { Game, type PieceWithMoved } from '../js/gameEngine';
 import { PuzzleGenerator } from '../js/puzzleGenerator';
 import { RulesEngine } from '../js/RulesEngine';
 
@@ -18,7 +18,7 @@ describe('Puzzle 5 Logic Verification', () => {
     // Setup Board
     const game = new Game();
     const { board, turn } = PuzzleGenerator.stringToBoard(puzzle5.setupStr);
-    game.board = board as any;
+    game.board = board as (PieceWithMoved | null)[][];
     game.turn = turn;
 
     // Apply Move 1 (White)
@@ -36,7 +36,7 @@ describe('Puzzle 5 Logic Verification', () => {
     game.turn = 'black';
 
     // Check Black Responses
-    const rules = new RulesEngine(game as any);
+    const rules = new RulesEngine(game);
     const blackMoves = rules.getAllLegalMoves('black');
 
     // Expected Move from Solution

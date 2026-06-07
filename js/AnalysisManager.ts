@@ -1,17 +1,28 @@
 import * as TacticsDetector from './tutor/TacticsDetector.js';
 import * as aiEngine from './aiEngine.js';
 import type { Player, Piece } from './types/game.js';
+import type { MoveHistoryEntry } from './gameEngine.js';
+import type { Analyzer } from './tutor/TacticsDetector.js';
+import { Game } from './gameEngine.js';
+
+type Arrow = {
+  fromR: number;
+  fromC: number;
+  toR: number;
+  toC: number;
+  colorKey: string;
+};
 
 /**
  * Manages tactical and strategic analysis for visualization.
  */
 export class AnalysisManager {
-  private game: any;
+  private game: Game;
   public showThreats: boolean = false;
   public showOpportunities: boolean = false;
   public showBestMove: boolean = false;
 
-  constructor(game: any) {
+  constructor(game: Game) {
     this.game = game;
   }
 
@@ -36,7 +47,7 @@ export class AnalysisManager {
   public updateArrows(): void {
     if (!this.game.arrowRenderer) return;
 
-    const arrows: any[] = [];
+    const arrows: Arrow[] = [];
 
     if (this.showThreats) {
       arrows.push(...this.getThreatArrows());
@@ -50,11 +61,11 @@ export class AnalysisManager {
       arrows.push(...this.getBestMoveArrows());
     }
 
-    this.game.arrowRenderer.highlightMoves(arrows);
+    this.game.arrowRenderer?.highlightMoves?.(arrows);
   }
 
-  public getThreatArrows(): any[] {
-    const arrows: any[] = [];
+  public getThreatArrows(): Arrow[] {
+    const arrows: Arrow[] = [];
     const opponentColor: Player = this.game.turn === 'white' ? 'black' : 'white';
 
     const size = this.game.boardSize;
@@ -62,15 +73,15 @@ export class AnalysisManager {
       for (let c = 0; c < size; c++) {
         const piece = this.game.board[r][c] as Piece | null;
         if (piece && piece.color === opponentColor) {
-          const threatened = (TacticsDetector as any).getThreatenedPieces(
+          const threatened = TacticsDetector.getThreatenedPieces(
             this.game,
-            this.game.tutorController,
+            this.game.tutorController as unknown as Analyzer,
             { r, c },
             opponentColor
-          ) as any[];
+          );
 
           threatened.forEach(t => {
-            const defenders = (TacticsDetector as any).countDefenders(
+            const defenders = TacticsDetector.countDefenders(
               this.game,
               t.pos.r,
               t.pos.c,
@@ -115,19 +126,19 @@ export class AnalysisManager {
     return values[type] || 0;
   }
 
-  public getOpportunityArrows(): any[] {
-    const arrows: any[] = [];
+  public getOpportunityArrows(): Arrow[] {
+    const arrows: Arrow[] = [];
     const myColor: Player = this.game.turn;
 
     // Find tactical patterns for all legal moves (limited to high severity)
-    const moves = this.game.getAllLegalMoves(myColor) as any[];
+    const moves = this.game.getAllLegalMoves(myColor);
 
     moves.forEach(move => {
-      const patterns = (TacticsDetector as any).detectTacticalPatterns(
+      const patterns = TacticsDetector.detectTacticalPatterns(
         this.game,
-        this.game.tutorController,
+        this.game.tutorController as unknown as Analyzer,
         move
-      ) as any[];
+      );
       const highSeverity = patterns.some(p => p.severity === 'high');
 
       if (highSeverity) {
@@ -145,17 +156,17 @@ export class AnalysisManager {
     return arrows.slice(0, 3);
   }
 
-  public getBestMoveArrows(): any[] {
-    const arrows: any[] = [];
-    const hints = this.game.bestMoves || [];
+  public getBestMoveArrows(): Arrow[] {
+    const arrows: Arrow[] = [];
+    const hints: MoveHistoryEntry[] = this.game.bestMoves || [];
 
     if (hints.length > 0) {
       const best = hints[0];
       arrows.push({
-        fromR: best.move.from.r,
-        fromC: best.move.from.c,
-        toR: best.move.to.r,
-        toC: best.move.to.c,
+        fromR: best.from.r,
+        fromC: best.from.c,
+        toR: best.to.r,
+        toC: best.to.c,
         colorKey: 'green',
       });
     }

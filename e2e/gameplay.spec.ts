@@ -269,11 +269,11 @@ test.describe('Core Gameplay Loop', () => {
     // This test is slow due to AI engine initialization
     test.slow();
 
-    // 1. Start Standard Game (8x8)
-    await page.click('.gamemode-card:has-text("Standard 8x8")');
+    // 1. Start Classic 9x9 (directly in PLAY phase, no setup)
+    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
     await expect(page.locator('#board')).toBeVisible();
 
-    // Wait for game to be fully ready (with longer timeout for slower browsers)
+    // Wait for game to be fully ready
     await page.waitForFunction(() => (window as any).game?.phase === 'PLAY', { timeout: 15000 });
 
     // Disable AI to make it Human vs Human
@@ -282,63 +282,52 @@ test.describe('Core Gameplay Loop', () => {
       if (app && app.game) app.game.isAI = false;
     });
 
-    // 2. Make a Move programmatically to ensure it's recorded in history
+    // 2. Make a Move programmatically (9x9: white pawns at row 7)
     await page.evaluate(async () => {
       const game = (window as any).game;
-
-      // Use handlePlayClick which should properly record the move
       if (game.handlePlayClick) {
-        // First click to select
-        await game.handlePlayClick(6, 4);
-        // Second click to move
-        await game.handlePlayClick(4, 4);
+        await game.handlePlayClick(7, 4);
+        await game.handlePlayClick(5, 4);
       }
     });
 
     // Wait for move to complete
     await page.waitForTimeout(500);
 
-    // Force re-render
-    await page.evaluate(() => {
-      const game = (window as any).game;
-      const UI = (window as any).UI;
-      if (UI && UI.renderBoard) UI.renderBoard(game);
-    });
-    await page.waitForTimeout(100);
-
     // Check if we have a move in history
     const moveHistoryLength = await page.evaluate(
       () => (window as any).game?.moveHistory?.length || 0
     );
     console.log('Move history length:', moveHistoryLength);
-
-    // Fail if move not recorded
     expect(moveHistoryLength, 'Move not recorded in history').toBeGreaterThan(0);
 
-    const startCell = page.locator('.cell[data-r="6"][data-c="4"]');
-    const targetCell = page.locator('.cell[data-r="4"][data-c="4"]');
+    const startCell = page.locator('.cell[data-r="7"][data-c="4"]');
+    const targetCell = page.locator('.cell[data-r="5"][data-c="4"]');
 
     // Verify Move happened visually
     await expect(targetCell.locator('.piece-svg')).toBeVisible();
 
     // 3. Perform Undo
     await page.evaluate(() => {
-      const game = (window as any).game;
-      if (game.undoMove) game.undoMove();
+      const gc = (window as any).gameController;
+      if (gc?.undoMove) gc.undoMove();
     });
 
     await page.waitForTimeout(300);
 
-    // Force re-render
-    await page.evaluate(() => {
-      const game = (window as any).game;
-      const UI = (window as any).UI;
-      if (UI && UI.renderBoard) UI.renderBoard(game);
-    });
-    await page.waitForTimeout(100);
-
     // Pawn should be back at start
     await expect(startCell.locator('.piece-svg')).toBeVisible();
+
+    // 4. Perform Redo
+    await page.evaluate(() => {
+      const gc = (window as any).gameController;
+      if (gc?.redoMove) gc.redoMove();
+    });
+
+    await page.waitForTimeout(300);
+
+    // Pawn should be at target again
+    await expect(targetCell.locator('.piece-svg')).toBeVisible();
   });
 
   test('should handle Save and Load persistence', async ({ page }) => {

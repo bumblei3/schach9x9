@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach } from 'vitest';
-import { Game } from '../js/gameEngine.js';
+import { Game, type PieceWithMoved } from '../js/gameEngine.js';
 import {
   isInsufficientMaterial,
   checkDraw,
@@ -16,7 +16,7 @@ describe('MoveValidator - Unit Tests', () => {
     // Ensure board is fully initialized or overridden correctly
     game.board = Array(BOARD_SIZE)
       .fill(null)
-      .map(() => Array(BOARD_SIZE).fill(null)) as any;
+      .map(() => Array(BOARD_SIZE).fill(null as PieceWithMoved | null));
   });
 
   test('should detect King vs King as insufficient material', () => {

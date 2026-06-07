@@ -170,7 +170,7 @@ export class Game {
   aiMove?: () => void;
   updateBestMoves?: () => void;
   analysisManager?: unknown;
-  arrowRenderer?: { clearArrows: () => void; addArrow?: (...args: unknown[]) => void };
+  arrowRenderer?: { clearArrows: () => void; addArrow?: (...args: unknown[]) => void; highlightMoves?: (arrows: unknown[]) => void };
   evaluationBar?: { update: (score: number) => void };
   campaignMode?: boolean;
   currentTheme?: string;

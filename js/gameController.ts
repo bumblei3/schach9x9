@@ -48,6 +48,10 @@ export interface GameExtended extends Game {
   calculateMaterialAdvantage: (color: Player) => number;
   gameController?: any;
   aiController?: any;
+  moveController?: {
+    undoMove: () => void;
+    redoMove: () => void;
+  };
 }
 
 export class GameController {
@@ -324,18 +328,14 @@ export class GameController {
   }
 
   undoMove(): void {
-    if (this.moveExecutor && this.moveExecutor.undoMove) {
-      this.moveExecutor.undoMove();
-    } else if (this.game.undoMove) {
-      this.game.undoMove();
+    if (this.game.moveController?.undoMove) {
+      this.game.moveController.undoMove();
     }
   }
 
   redoMove(): void {
-    if (this.moveExecutor && this.moveExecutor.redoMove) {
-      this.moveExecutor.redoMove();
-    } else if (this.game.redoMove) {
-      this.game.redoMove();
+    if (this.game.moveController?.redoMove) {
+      this.game.moveController.redoMove();
     }
   }
 

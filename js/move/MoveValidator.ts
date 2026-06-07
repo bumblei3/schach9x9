@@ -22,7 +22,7 @@ export function checkDraw(game: Game): boolean {
 
     // Save to statistics
     if (game.gameController) {
-      (game.gameController as any).saveGameToStatistics('draw', null);
+      (game.gameController as unknown as { saveGameToStatistics: (result: string, winner: string | null) => void }).saveGameToStatistics('draw', null);
     }
     return true;
   }
@@ -41,7 +41,7 @@ export function checkDraw(game: Game): boolean {
 
     // Save to statistics
     if (game.gameController) {
-      (game.gameController as any).saveGameToStatistics('draw', null);
+      (game.gameController as unknown as { saveGameToStatistics: (result: string, winner: string | null) => void }).saveGameToStatistics('draw', null);
     }
     return true;
   }
@@ -58,7 +58,7 @@ export function checkDraw(game: Game): boolean {
 
     // Save to statistics
     if (game.gameController) {
-      (game.gameController as any).saveGameToStatistics('draw', null);
+      (game.gameController as unknown as { saveGameToStatistics: (result: string, winner: string | null) => void }).saveGameToStatistics('draw', null);
     }
     return true;
   }
