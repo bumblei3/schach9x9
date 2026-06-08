@@ -5,20 +5,49 @@
 
 import { logger } from './logger.js';
 import { campaignManager } from './campaign/CampaignManager.js';
+import { Game } from './gameEngine.js';
+
+interface DebugLogEntry {
+  id: number;
+  timestamp: Date;
+  level: string;
+  message: string;
+  context: string;
+}
+
+// Extend Game with dynamic properties set at runtime by controllers
+// that are not in the static type definition
+interface DebugGame extends Game {
+  selectShopPiece?: (pieceType: string) => void;
+  gameController?: Game['gameController'] & {
+    toggleAnalysisMode?: () => void;
+  };
+  aiController?: Game['aiController'] & {
+    triggerAIMove?: () => void;
+  };
+}
+
+declare global {
+  interface Window {
+    lastAIStats?: {
+      time: number;
+      nodes?: number;
+      depth?: number;
+      eval?: string;
+    };
+  }
+}
 
 export class DebugConsole {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public game: any;
+  public game: DebugGame;
   public isVisible: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public logs: any[];
+  public logs: DebugLogEntry[];
   public maxLogs: number;
   public activeFilter: string;
   public searchQuery: string;
   public contextFilter: string | null = null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(game: any) {
+  constructor(game: DebugGame) {
     this.game = game;
     this.isVisible = false;
     this.logs = [];
@@ -252,12 +281,12 @@ export class DebugConsole {
 
   public hookIntoLogger(): void {
     // Hook into the logger to capture all logs
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalLog = (logger as any)._log.bind(logger);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (logger as any)._log = (level: any, levelName: any, args: any) => {
+    // _log is private; cast to Function via unknown to avoid top-level `any`
+    const logProxy = logger as unknown as { _log: Function };
+    const originalLog = logProxy._log.bind(logger) as Function;
+    logProxy._log = (level: number, levelName: string, args: unknown[]): void => {
       originalLog(level, levelName, args);
-      this.addLog(levelName.toLowerCase(), args.join(' '));
+      this.addLog(levelName.toLowerCase(), (args as string[]).join(' '));
     };
   }
 
@@ -414,7 +443,7 @@ export class DebugConsole {
   public updateStateTab(): void {
     if (!this.game) return;
 
-    const set = (id: string, val: any) => {
+    const set = (id: string, val: string | number) => {
       const el = document.getElementById(id);
       if (el) el.textContent = String(val);
     };
@@ -460,7 +489,7 @@ export class DebugConsole {
   }
 
   public updateAITab(): void {
-    const set = (id: string, val: any) => {
+    const set = (id: string, val: string | number) => {
       const el = document.getElementById(id);
       if (el) el.textContent = String(val);
     };
@@ -468,10 +497,8 @@ export class DebugConsole {
     set('ai-personality', this.game?.aiPersonality || 'balanced');
 
     // Get AI stats from last calculation if available
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).lastAIStats) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stats = (window as any).lastAIStats;
+    if (window.lastAIStats) {
+      const stats = window.lastAIStats;
       set('ai-calc-time', `${stats.time}ms`);
       set('ai-nodes', stats.nodes?.toLocaleString() || '-');
       set('ai-depth', stats.depth || '-');
@@ -527,8 +554,8 @@ export class DebugConsole {
       try {
         this.game.selectShopPiece(pieceType);
         this.log(`✓ Selected: ${pieceType}`, 'info');
-      } catch (error: any) {
-        this.log(`✗ Error: ${error.message}`, 'error');
+      } catch (error: unknown) {
+        this.log(`✗ Error: ${error instanceof Error ? error.message : String(error)}`, 'error');
       }
     }
   }
@@ -598,11 +625,10 @@ export class DebugConsole {
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     const tryInit = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((window as any).game) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!(window as any).debugConsole) {
-          (window as any).debugConsole = new DebugConsole((window as any).game);
+      const win = window as unknown as Record<string, unknown>;
+      if (win['game']) {
+        if (!win['debugConsole']) {
+          win['debugConsole'] = new DebugConsole(win['game'] as DebugGame);
           console.log(
             '🛠️ Enhanced Debug Console ready. Press Ctrl+D or click the floating button.'
           );

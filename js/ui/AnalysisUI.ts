@@ -5,8 +5,24 @@ import { showModal, closeModal, updateMoveHistoryUI, renderEvalGraph } from '../
 import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
 
+interface AnalysisResult {
+  score?: number;
+  topMoves?: Array<{ move: { from: { r: number; c: number }; to: { r: number; c: number } }; score: number; notation?: string }>;
+  depth?: number;
+  nodes?: number;
+}
+
+interface PlayerStats {
+  accuracy: number;
+  counts: Record<string, number>;
+}
+
+interface AppWithGame {
+  game: Game;
+}
+
 export class AnalysisUI {
-  private app: any;
+  private app: AppWithGame;
   bar: HTMLElement | null;
   fill: HTMLElement | null;
   text: HTMLElement | null;
@@ -19,7 +35,7 @@ export class AnalysisUI {
   engineInfo: HTMLElement | null;
   isAnalyzing: boolean = false;
 
-  constructor(app: any) {
+  constructor(app: AppWithGame) {
     this.app = app;
     this.bar = document.getElementById('evaluation-bar');
     this.fill = document.getElementById('eval-fill');
@@ -39,8 +55,8 @@ export class AnalysisUI {
     return this.app.game;
   }
 
-  update(analysis: any): void {
-    const { score, topMoves, depth, nodes } = analysis;
+  update(analysis: AnalysisResult): void {
+    const { score = 0, topMoves = [], depth = 0, nodes = 0 } = analysis;
 
     this.updateBar(score);
     this.updatePanel(score, topMoves, depth, nodes);
@@ -62,7 +78,7 @@ export class AnalysisUI {
     this.bar.classList.remove('hidden');
   }
 
-  updatePanel(score: number, topMoves: any[], depth: number, nodes: number): void {
+  updatePanel(score: number, topMoves: AnalysisResult['topMoves'], depth: number, nodes: number): void {
     if (!this.panel || this.panel.classList.contains('hidden')) return;
 
     // Update panel score
@@ -142,7 +158,7 @@ export class AnalysisUI {
     showModal('Ganganalyse', 'Die KI analysiert die Stellungen...', []);
 
     const states = this.collectBoardStates();
-    const results: any[] = [];
+    const results: AnalysisResult[] = [];
     const worker = this.game.aiController?.aiWorkers?.[0];
     if (!worker) return;
 
@@ -157,8 +173,8 @@ export class AnalysisUI {
         []
       );
 
-      const analysis = await new Promise(resolve => {
-        const handler = (e: any) => {
+      const analysis: AnalysisResult = await new Promise(resolve => {
+        const handler = (e: MessageEvent) => {
           if (e.data.type === 'analysis') {
             worker.removeEventListener('message', handler);
             resolve(e.data.data);
@@ -184,13 +200,16 @@ export class AnalysisUI {
         const prevResult = results[i - 1];
         const currentResult = results[i];
 
+        const prevScore = prevResult.score ?? 0;
+        const currentScore = currentResult.score ?? 0;
+
         const bestEval =
           prevResult.topMoves && prevResult.topMoves[0]
-            ? prevResult.topMoves[0].score
-            : prevResult.score;
+            ? prevResult.topMoves[0].score ?? 0
+            : prevScore;
 
-        const prevEvalMover = turn === 'black' ? prevResult.score : -prevResult.score;
-        const currentEvalMover = turn === 'black' ? -currentResult.score : currentResult.score;
+        const prevEvalMover = turn === 'black' ? prevScore : -prevScore;
+        const currentEvalMover = turn === 'black' ? -currentScore : currentScore;
         const bestEvalMover = turn === 'black' ? bestEval : -bestEval;
 
         move.classification = classifyMove(
@@ -214,7 +233,7 @@ export class AnalysisUI {
     this.showSummaryModal(whiteStats, blackStats);
   }
 
-  collectBoardStates(): any[] {
+  collectBoardStates(): unknown[][] {
     const states = [];
     const tempBoard = JSON.parse(JSON.stringify(this.game.board));
     states.unshift(JSON.parse(JSON.stringify(tempBoard)));
@@ -227,8 +246,10 @@ export class AnalysisUI {
     return states;
   }
 
-  undoMoveOnBoard(board: any[][], move: any): void {
-    const { from, to, piece, captured, specialMove } = move;
+  undoMoveOnBoard(board: unknown[][], move: unknown): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const m = move as any;
+    const { from, to, piece, captured, specialMove } = m;
 
     // Move piece back
     board[from.r][from.c] = {
@@ -241,7 +262,7 @@ export class AnalysisUI {
     if (specialMove) {
       if (specialMove.type === 'castling') {
         const { rookFrom, rookTo } = specialMove;
-        const rook = board[rookTo.r][rookTo.c];
+        const rook = board[rookTo.r][rookTo.c] as Record<string, unknown> | null;
         if (rook) {
           rook.hasMoved = specialMove.rookHadMoved || false;
         }
@@ -270,7 +291,7 @@ export class AnalysisUI {
     }
   }
 
-  showSummaryModal(white: any, black: any): void {
+  showSummaryModal(white: PlayerStats, black: PlayerStats): void {
     const getAccuracyClass = (acc: number) =>
       acc >= 85 ? 'accuracy-high' : acc >= 60 ? 'accuracy-mid' : 'accuracy-low';
 
@@ -303,9 +324,9 @@ export class AnalysisUI {
     ]);
   }
 
-  renderStatCounts(counts: any): string {
+  renderStatCounts(counts: Record<string, number>): string {
     return Object.entries(counts)
-      .filter(([_, count]: [any, any]) => count > 0)
+      .filter(([, count]) => count > 0)
       .map(
         ([quality, count]) => `
         <div class="stat-row">

@@ -78,7 +78,7 @@ export class GameController {
     this.timeManager = new TimeManager(game, this);
     this.shopManager = new ShopManager(game);
     this.analysisController = new AnalysisController(this);
-    this.analysisUI = new AnalysisUI(game);
+    this.analysisUI = new AnalysisUI({ game });
     this.puzzleMenu = new PuzzleMenu(this);
     this.moveExecutor = null; // Circular dependency resolved later
     this.game.gameController = this;

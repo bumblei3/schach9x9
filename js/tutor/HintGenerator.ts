@@ -175,7 +175,7 @@ export async function showTutorSuggestions(game: Game): Promise<void> {
   //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
   // )
   //   return;
-  await showTutorSuggestionsUI(game, game.bestMoves);
+  await showTutorSuggestionsUI(game, game.bestMoves as any);
 }
 
 /**

@@ -5,7 +5,20 @@
 import { BOARD_SIZE, PHASES, PIECE_VALUES } from '../config.js';
 import { renderBoard } from './BoardRenderer.js';
 import { getOpeningName } from '../ai/OpeningDatabase.js';
-import type { Game } from '../gameEngine.js';
+import type { Game, PieceWithMoved } from '../gameEngine.js';
+import type { Square } from '../types/game.js';
+
+interface SavedGameState {
+  board: (PieceWithMoved | null)[][];
+  turn: 'white' | 'black';
+  selectedSquare: Square | null;
+  validMoves: Square[];
+  lastMoveHighlight: { from: Square; to: Square } | null;
+}
+
+/** Helper: access dynamic properties not in Game interface */
+const g = <T>(game: Game, key: string): T | undefined =>
+  (game as unknown as Record<string, T>)[key];
 
 /**
  * Aktualisiert die Zughistorie im UI.
@@ -242,7 +255,7 @@ export function renderEvalGraph(game: Game): void {
     svg.innerHTML = '';
     return;
   }
-  const scores = [0, ...history.map(m => (m as any).evalScore || 0)];
+  const scores = [0, ...history.map(m => (m as { evalScore?: number }).evalScore || 0)];
   const width = 1000,
     height = 100,
     centerY = height / 2,
@@ -318,8 +331,8 @@ export function updateStatistics(game: Game): void {
   const bestMovesEl = document.getElementById('stat-best-moves');
   if (bestMovesEl) bestMovesEl.textContent = String(game.stats.playerBestMoves);
 
-  if ((game as any).calculateMaterialAdvantage) {
-    const adv = (game as any).calculateMaterialAdvantage();
+  if (g<(color?: string) => number>(game, 'calculateMaterialAdvantage')) {
+    const adv = g<(color?: string) => number>(game, 'calculateMaterialAdvantage')!(game.turn);
     const materialEl = document.getElementById('stat-material');
     if (materialEl) {
       materialEl.textContent = adv > 0 ? '+' + adv : String(adv);
@@ -360,7 +373,8 @@ export function updateReplayUI(game: Game): void {
 
 export function enterReplayMode(game: Game): void {
   if (game.replayMode || game.moveHistory.length === 0) return;
-  (game as any).savedGameState = {
+  const gk = game as unknown as Record<string, unknown>;
+  gk.savedGameState = {
     board: JSON.parse(JSON.stringify(game.board)),
     turn: game.turn,
     selectedSquare: game.selectedSquare,
@@ -369,7 +383,7 @@ export function enterReplayMode(game: Game): void {
   };
   game.replayMode = true;
   game.replayPosition = game.moveHistory.length - 1;
-  if ((game as any).stopClock) (game as any).stopClock();
+  if (gk.stopClock) (gk.stopClock as () => void)();
 
   const statusEl = document.getElementById('replay-status');
   const exitEl = document.getElementById('replay-exit');
@@ -385,7 +399,8 @@ export function enterReplayMode(game: Game): void {
 
 export function exitReplayMode(game: Game): void {
   if (!game.replayMode) return;
-  const saved = (game as any).savedGameState;
+  const gk = game as unknown as Record<string, unknown>;
+  const saved = gk.savedGameState as SavedGameState | null;
   if (saved) {
     game.board = saved.board;
     game.turn = saved.turn;
@@ -395,7 +410,7 @@ export function exitReplayMode(game: Game): void {
   }
   game.replayMode = false;
   game.replayPosition = -1;
-  (game as any).savedGameState = null;
+  gk.savedGameState = null;
 
   const statusEl = document.getElementById('replay-status');
   const exitEl = document.getElementById('replay-exit');
@@ -407,6 +422,7 @@ export function exitReplayMode(game: Game): void {
   const undo = document.getElementById('undo-btn') as HTMLButtonElement;
   if (undo) undo.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
   renderBoard(game);
-  if (game.clockEnabled && game.phase === PHASES.PLAY && (game as any).startClock)
-    (game as any).startClock();
+  const gk2 = game as unknown as Record<string, unknown>;
+  if (game.clockEnabled && game.phase === PHASES.PLAY && gk2.startClock)
+    (gk2.startClock as () => void)();
 }

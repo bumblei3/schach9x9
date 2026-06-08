@@ -5,6 +5,40 @@
 import { PHASES } from '../config.js';
 import { updateShopUI } from './ShopUI.js';
 import type { Game } from '../gameEngine.js';
+import type { MoveExplanation } from '../tutor/MoveAnalyzer.js';
+
+interface TutorHint {
+  move: { from: { r: number; c: number }; to: { r: number; c: number } };
+  score: number;
+  notation: string;
+  analysis: MoveExplanation;
+  tacticsHighlight: string[];
+  pv: unknown[] | null;
+}
+
+interface SetupTemplate {
+  id: string;
+  name: string;
+  description: string;
+  pieces: string[];
+  cost: number;
+  isRecommended?: boolean;
+}
+
+interface ScoreDescription {
+  label: string;
+  color: string;
+  emoji: string;
+}
+
+interface GameExtensions {
+  executeMove: (from: { r: number; c: number }, to: { r: number; c: number }) => void;
+  getTutorHints: () => Promise<TutorHint[]>;
+  analyzeMoveWithExplanation: (move: unknown, score: number) => MoveExplanation;
+  getScoreDescription: (score: number) => ScoreDescription | null;
+}
+
+type GameWithExtensions = Game & Partial<GameExtensions> & Record<string, unknown>;
 
 /**
  * Zeigt oder verbirgt einen Lade-Status für den Tutor.
@@ -38,7 +72,7 @@ export function updateTutorRecommendations(game: Game): void {
     return;
   }
 
-  const g = game as any;
+  const g = game as GameWithExtensions;
   const inSetupPhase = g.phase && String(g.phase).startsWith('SETUP');
   const tutorSection = document.getElementById('tutor-recommendations-section');
 
@@ -65,13 +99,13 @@ export function updateTutorRecommendations(game: Game): void {
     container.innerHTML = '';
     container.dataset.points = String(g.initialPoints);
 
-    templates.forEach((template: any) => {
+    (templates as SetupTemplate[]).forEach((template: SetupTemplate) => {
       const card = document.createElement('div');
       card.className = 'setup-template-card';
       if (template.isRecommended) card.classList.add('recommended');
 
       const color = g.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
-      const svgs = (window as any).PIECE_SVGS || {};
+      const svgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<string, Record<string, string>> || {};
 
       const piecesPreview = template.pieces
         .map((pieceType: string) => {
@@ -105,7 +139,7 @@ export function updateTutorRecommendations(game: Game): void {
       `;
 
       card.addEventListener('click', () => {
-        g.tutorController.applySetupTemplate(template.id);
+        g.tutorController!.applySetupTemplate(template.id);
         updateShopUI(game);
       });
       container.appendChild(card);
@@ -120,9 +154,9 @@ export function updateTutorRecommendations(game: Game): void {
  */
 export async function showTutorSuggestions(
   game: Game,
-  providedHints: any[] | null = null
+  providedHints: TutorHint[] | null = null
 ): Promise<void> {
-  const g = game as any;
+  const g = game as GameWithExtensions;
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');
 
@@ -166,9 +200,9 @@ export async function showTutorSuggestions(
 
         const isWhite = currentPhase.includes('WHITE');
         const color = isWhite ? 'white' : 'black';
-        const svgs = (window as any).PIECE_SVGS || {};
+        const svgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<string, Record<string, string>> || {};
 
-        templates.forEach((template: any) => {
+        (templates as SetupTemplate[]).forEach((template: SetupTemplate) => {
           const div = document.createElement('div');
           div.className = 'setup-template-card' + (template.isRecommended ? ' recommended' : '');
 
@@ -188,7 +222,7 @@ export async function showTutorSuggestions(
             `;
           div.addEventListener('click', () => {
             if (confirm(`Aufstellung "${template.name}" anwenden?`)) {
-              g.tutorController.applySetupTemplate(template.id);
+              g.tutorController!.applySetupTemplate(template.id);
               overlay!.classList.add('hidden');
               updateShopUI(game);
             }
@@ -227,7 +261,7 @@ export async function showTutorSuggestions(
       const body = document.getElementById('tutor-hints-body');
       if (body) {
         body.innerHTML = '';
-        hints.forEach((hint: any, index: number) => {
+        (hints as TutorHint[]).forEach((hint: TutorHint, index: number) => {
           const div = document.createElement('div');
           div.className = 'tutor-hint-item';
           const getQualityColor = (cat: string) => {
@@ -292,7 +326,7 @@ export async function showTutorSuggestions(
       header.textContent = '🏗️ Empfohlene Aufstellungen';
       header.style.marginBottom = '1rem';
       suggestionsEl!.appendChild(header);
-      templates.forEach((template: any) => {
+      (templates as SetupTemplate[]).forEach((template: SetupTemplate) => {
         const el = document.createElement('div');
         el.className = 'setup-template';
         el.style.cssText =
@@ -304,7 +338,7 @@ export async function showTutorSuggestions(
           el.style.background = 'rgba(34, 197, 94, 0.1)';
         };
         const colorPrefix = g.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
-        const pieceSvgs = (window as any).PIECE_SVGS;
+        const pieceSvgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<string, Record<string, string>>;
         el.innerHTML = `
             <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">${template.name}</div>
             <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.5rem;">${template.description}</div>
@@ -320,7 +354,7 @@ export async function showTutorSuggestions(
               `Möchtest du die Aufstellung "${template.name}" anwenden? Deine aktuelle Aufstellung wird überschrieben.`
             )
           ) {
-            g.tutorController.applySetupTemplate(template.id);
+            g.tutorController!.applySetupTemplate(template.id);
           }
         };
         suggestionsEl!.appendChild(el);
@@ -331,7 +365,7 @@ export async function showTutorSuggestions(
   }
 
   if (!g.getTutorHints && !providedHints) return;
-  const hints = providedHints || (await g.getTutorHints());
+  const hints = providedHints || (await g.getTutorHints!());
   if (!hints || hints.length === 0) {
     suggestionsEl!.innerHTML =
       '<p style="padding: 1rem; color: #94a3b8;">Keine Vorschläge verfügbar.</p>';
@@ -343,8 +377,8 @@ export async function showTutorSuggestions(
   header.innerHTML = `🤖 Tutor Vorschläge <span style="font-size: 0.8rem; font-weight: normal; color: #94a3b8; display: block; margin-top: 0.25rem;">Beste Züge für ${g.turn === 'white' ? 'Weiß' : 'Schwarz'}</span>`;
   suggestionsEl!.appendChild(header);
 
-  hints.forEach((hint: any, index: number) => {
-    const analysis = hint.analysis || g.analyzeMoveWithExplanation(hint.move, hint.score);
+  (hints as TutorHint[]).forEach((hint: TutorHint, index: number) => {
+    const analysis = hint.analysis || g.analyzeMoveWithExplanation!(hint.move, hint.score);
     const suggEl = document.createElement('div');
     suggEl.className = `tutor-suggestion ${analysis.category}`;
     suggEl.style.cssText = 'margin-bottom: 1rem; cursor: pointer; transition: all 0.2s ease;';
@@ -500,9 +534,9 @@ export async function showTutorSuggestions(
       ];
 
       if (analysis.tacticalPatterns) {
-        analysis.tacticalPatterns.forEach((p: any) => {
+        (analysis.tacticalPatterns as Array<{ type: string; severity: string; explanation: string; question?: string; targets?: Array<{ r: number; c: number }> }>).forEach((p) => {
           if (p.targets) {
-            p.targets.forEach((t: any) => {
+            p.targets.forEach((t: { r: number; c: number }) => {
               arrows.push({
                 fromR: hint.move.to.r,
                 fromC: hint.move.to.c,
@@ -516,7 +550,7 @@ export async function showTutorSuggestions(
       }
 
       if (g.arrowRenderer) {
-        g.arrowRenderer.highlightMoves(arrows);
+        g.arrowRenderer.highlightMoves!(arrows);
       }
       const fromCell = document.querySelector(
         `.cell[data-r="${hint.move.from.r}"][data-c="${hint.move.from.c}"]`
