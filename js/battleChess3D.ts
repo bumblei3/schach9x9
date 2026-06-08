@@ -9,6 +9,8 @@ import { logger } from './logger.js';
 import { SceneManager3D } from './ui/3d/SceneManager3D.js';
 import { PieceManager3D } from './ui/3d/PieceManager3D.js';
 import { InputHandler3D } from './ui/3d/InputHandler3D.js';
+import type { Game, Piece } from './gameEngine.js';
+import type { Square } from './types/game.js';
 
 /**
  * Main 3D Battle Chess Engine
@@ -25,9 +27,9 @@ export class BattleChess3D {
     this.enabled = false;
 
     // Initialize managers
-        const SceneManager = (window as any).SceneManager3D || SceneManager3D;
-        const PieceManager = (window as any).PieceManager3D || PieceManager3D;
-        const InputHandler = (window as any).InputHandler3D || InputHandler3D;
+        const SceneManager = (window as unknown as Record<string, typeof SceneManager3D>).SceneManager3D || SceneManager3D;
+        const PieceManager = (window as unknown as Record<string, typeof PieceManager3D>).PieceManager3D || PieceManager3D;
+        const InputHandler = (window as unknown as Record<string, typeof InputHandler3D>).InputHandler3D || InputHandler3D;
 
     this.sceneManager = new SceneManager(containerElement);
     this.pieceManager = new PieceManager(this.sceneManager);
@@ -37,72 +39,40 @@ export class BattleChess3D {
   }
 
   // Getters and Setters for compatibility with tests and external access
-    get scene(): any {
-    return this.sceneManager.scene;
-  }
-    set scene(value: any) {
-    this.sceneManager.scene = value;
-  }
-
-    get camera(): any {
-    return this.sceneManager.camera;
-  }
-    set camera(value: any) {
-    this.sceneManager.camera = value;
-  }
-
-    get renderer(): any {
-    return this.sceneManager.renderer;
-  }
-    set renderer(value: any) {
-    this.sceneManager.renderer = value;
-  }
-
-    get controls(): any {
-    return this.sceneManager.controls;
-  }
-    set controls(value: any) {
-    this.sceneManager.controls = value;
-  }
-
-    get battleAnimator(): any {
-    return this.pieceManager.battleAnimator;
-  }
-    set battleAnimator(value: any) {
-    this.pieceManager.battleAnimator = value;
-  }
-
-    get pieces(): any {
-    return this.pieceManager.pieces;
-  }
-    set pieces(value: any) {
-    this.pieceManager.pieces = value;
-  }
-
-    get animating(): any {
-    return this.pieceManager.animating;
-  }
-
-    get currentSkin(): any {
-    return this.pieceManager.currentSkin;
-  }
-    set currentSkin(value: any) {
-    this.pieceManager.currentSkin = value;
-  }
-
-    get currentTheme(): any {
-    return this.sceneManager.currentTheme;
-  }
-    set currentTheme(value: any) {
-    this.sceneManager.currentTheme = value;
-  }
-
-    get highlights(): any {
-    return this.pieceManager.highlights;
-  }
-    set highlights(value: any) {
-    this.pieceManager.highlights = value;
-  }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get scene(): any { return this.sceneManager.scene; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set scene(value: any) { this.sceneManager.scene = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get camera(): any { return this.sceneManager.camera; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set camera(value: any) { this.sceneManager.camera = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get renderer(): any { return this.sceneManager.renderer; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set renderer(value: any) { this.sceneManager.renderer = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get controls(): any { return this.sceneManager.controls; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set controls(value: any) { this.sceneManager.controls = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get battleAnimator(): any { return this.pieceManager.battleAnimator; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set battleAnimator(value: any) { this.pieceManager.battleAnimator = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get pieces(): any { return this.pieceManager.pieces; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set pieces(value: any) { this.pieceManager.pieces = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get animating(): any { return this.pieceManager.animating; }
+  get currentSkin(): string { return this.pieceManager.currentSkin; }
+  set currentSkin(value: string) { this.pieceManager.currentSkin = value; }
+  get currentTheme(): string { return this.sceneManager.currentTheme; }
+  set currentTheme(value: string) { this.sceneManager.currentTheme = value; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get highlights(): any { return this.pieceManager.highlights; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set highlights(value: any) { this.pieceManager.highlights = value; }
 
   /**
    * Initialize the 3D scene
@@ -159,7 +129,7 @@ export class BattleChess3D {
   /**
    * Update 3D board from game state
    */
-    public updateFromGameState(game: any): void {
+    public updateFromGameState(game: Game): void {
     this.pieceManager.updateFromGameState(game);
   }
 
@@ -180,18 +150,18 @@ export class BattleChess3D {
    * Play battle animation when piece is captured
    */
     public async playBattleSequence(
-    attacker: any,
-    defender: any,
-    attackerPos: any,
-    defenderPos: any
-  ): Promise<any> {
+    attacker: Piece,
+    defender: Piece,
+    attackerPos: Square,
+    defenderPos: Square
+  ): Promise<void> {
     return this.pieceManager.playBattleSequence(attacker, defender, attackerPos, defenderPos);
   }
 
   /**
    * Highlight valid moves on the board
    */
-    public highlightMoves(moves: any[]): void {
+    public highlightMoves(moves: Square[]): void {
     this.pieceManager.highlightMoves(moves);
   }
 
@@ -235,7 +205,7 @@ export class BattleChess3D {
   }
 
   // Internal handlers exposed for testing
-    public onClick(event: any): void {
+    public onClick(event: MouseEvent): void {
     this.inputHandler.onClick(event);
   }
 
@@ -243,7 +213,7 @@ export class BattleChess3D {
     this.sceneManager.onWindowResize();
   }
 
-    public boardToWorld(row: number, col: number): any {
+    public boardToWorld(row: number, col: number): unknown {
     return this.sceneManager.boardToWorld(row, col);
   }
 }

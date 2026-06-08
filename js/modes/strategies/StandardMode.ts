@@ -1,6 +1,6 @@
 import type { GameModeStrategy } from '../GameModeStrategy.js';
 import type { GameExtended, GameController } from '../../gameController.js';
-import { PHASES } from '../../config.js';
+import { PHASES, type Phase } from '../../config.js';
 import * as UI from '../../ui.js';
 import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
@@ -17,7 +17,7 @@ export class StandardModeStrategy implements GameModeStrategy {
       UI.updateStatus(game);
       UI.renderBoard(game);
     } else {
-      game.phase = PHASES.PLAY as any;
+      game.phase = PHASES.PLAY as Phase;
       this.startGame(game, controller);
     }
 
@@ -31,14 +31,14 @@ export class StandardModeStrategy implements GameModeStrategy {
     c: number
   ): Promise<boolean> {
     if (
-      game.phase === (PHASES.SETUP_WHITE_UPGRADES as any) ||
-      game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)
+      game.phase === (PHASES.SETUP_WHITE_UPGRADES as Phase) ||
+      game.phase === (PHASES.SETUP_BLACK_UPGRADES as Phase)
     ) {
       controller.upgradePiece(r, c);
       return true;
     }
 
-    if (game.phase === (PHASES.PLAY as any) || (game.phase as any) === 'ANALYSIS') {
+    if (game.phase === (PHASES.PLAY as Phase) || (game.phase as any) === 'ANALYSIS') {
       if (game.handlePlayClick) {
         await game.handlePlayClick(r, c);
         return true;
@@ -49,8 +49,8 @@ export class StandardModeStrategy implements GameModeStrategy {
 
   onPhaseEnd(game: GameExtended, controller: GameController): void {
     const handleTransition = () => {
-      if (game.phase === (PHASES.SETUP_WHITE_UPGRADES as any)) {
-        game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
+      if (game.phase === (PHASES.SETUP_WHITE_UPGRADES as Phase)) {
+        game.phase = PHASES.SETUP_BLACK_UPGRADES as Phase;
         game.points = game.initialPoints;
         game.log('Weiß fertig. Schwarz: Truppen-Upgrades möglich.');
 
@@ -58,7 +58,7 @@ export class StandardModeStrategy implements GameModeStrategy {
           setTimeout(() => controller.finishSetupPhase(), 500);
         }
         controller.autoSave();
-      } else if (game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)) {
+      } else if (game.phase === (PHASES.SETUP_BLACK_UPGRADES as Phase)) {
         this.startGame(game, controller);
       }
       UI.updateStatus(game);
@@ -66,7 +66,7 @@ export class StandardModeStrategy implements GameModeStrategy {
     };
 
     if (game.points > 0) {
-      const isAIBlackSetup = game.isAI && game.phase === (PHASES.SETUP_BLACK_UPGRADES as any);
+      const isAIBlackSetup = game.isAI && game.phase === (PHASES.SETUP_BLACK_UPGRADES as Phase);
 
       if (isAIBlackSetup) {
         handleTransition();
@@ -88,7 +88,7 @@ export class StandardModeStrategy implements GameModeStrategy {
   }
 
   private startGame(game: GameExtended, controller: GameController): void {
-    game.phase = PHASES.PLAY as any;
+    game.phase = PHASES.PLAY as Phase;
     controller.showShop(false);
     controller.gameStartTime = Date.now();
 

@@ -7,8 +7,23 @@
 import * as THREE from 'three';
 
 // Skin preset configurations
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const SKIN_PRESETS: Record<string, any> = {
+export interface SkinMaterial {
+  color: number;
+  roughness: number;
+  metalness: number;
+  emissive?: number;
+  emissiveIntensity?: number;
+  transparent?: boolean;
+  opacity?: number;
+}
+
+export interface SkinPreset {
+  name: string;
+  white: { base: SkinMaterial; accent: SkinMaterial };
+  black: { base: SkinMaterial; accent: SkinMaterial };
+}
+
+export const SKIN_PRESETS: Record<string, SkinPreset> = {
   classic: {
     name: 'Classic',
     white: {
@@ -202,7 +217,7 @@ export function createPiece3D(
   // Make all pieces cast shadows
   pieceGroup.traverse(child => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((child as any).isMesh) {
+    if ((child as THREE.Mesh).isMesh) {
       child.castShadow = true;
       child.receiveShadow = true;
     }
@@ -214,8 +229,7 @@ export function createPiece3D(
 /**
  * Create a Pawn with LatheGeometry
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createPawn(group: THREE.Group, material: any): void {
+function createPawn(group: THREE.Group, material: THREE.Material): void {
   const points: THREE.Vector2[] = [];
   // Base
   points.push(new THREE.Vector2(0.26, 0.0));
@@ -241,8 +255,7 @@ function createPawn(group: THREE.Group, material: any): void {
 /**
  * Create a Knight
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createKnight(group: THREE.Group, material: any): void {
+function createKnight(group: THREE.Group, material: THREE.Material): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.28, 0.32, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -281,8 +294,7 @@ function createKnight(group: THREE.Group, material: any): void {
 /**
  * Create a Bishop with LatheGeometry
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createBishop(group: THREE.Group, material: any, accentMaterial: any): void {
+function createBishop(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   // Body Lathe
   const points: THREE.Vector2[] = [];
   points.push(new THREE.Vector2(0.28, 0.0));
@@ -314,8 +326,7 @@ function createBishop(group: THREE.Group, material: any, accentMaterial: any): v
 /**
  * Create a Rook with LatheGeometry
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createRook(group: THREE.Group, material: any): void {
+function createRook(group: THREE.Group, material: THREE.Material): void {
   const points: THREE.Vector2[] = [];
   // Base to column
   points.push(new THREE.Vector2(0.3, 0.0));
@@ -349,8 +360,7 @@ function createRook(group: THREE.Group, material: any): void {
 /**
  * Create a Queen with LatheGeometry
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createQueen(group: THREE.Group, material: any, accentMaterial: any): void {
+function createQueen(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   const points: THREE.Vector2[] = [];
   points.push(new THREE.Vector2(0.32, 0.0));
   points.push(new THREE.Vector2(0.32, 0.15));
@@ -395,8 +405,7 @@ function createQueen(group: THREE.Group, material: any, accentMaterial: any): vo
 /**
  * Create a King with LatheGeometry
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createKing(group: THREE.Group, material: any, accentMaterial: any): void {
+function createKing(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   const points: THREE.Vector2[] = [];
   points.push(new THREE.Vector2(0.35, 0.0));
   points.push(new THREE.Vector2(0.35, 0.15));
@@ -428,8 +437,7 @@ function createKing(group: THREE.Group, material: any, accentMaterial: any): voi
 /**
  * Create an Archbishop (Bishop + Knight hybrid)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createArchbishop(group: THREE.Group, material: any, accentMaterial: any): void {
+function createArchbishop(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.29, 0.33, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -465,8 +473,7 @@ function createArchbishop(group: THREE.Group, material: any, accentMaterial: any
 /**
  * Create a Chancellor (Rook + Knight hybrid)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createChancellor(group: THREE.Group, material: any, accentMaterial: any): void {
+function createChancellor(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.31, 0.35, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -508,8 +515,7 @@ function createChancellor(group: THREE.Group, material: any, accentMaterial: any
 /**
  * Create an Angel (premium piece)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createAngel(group: THREE.Group, material: any, accentMaterial: any): void {
+function createAngel(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.32, 0.37, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -563,8 +569,7 @@ function createAngel(group: THREE.Group, material: any, accentMaterial: any): vo
 /**
  * Create a Nightrider (sliding knight)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createNightrider(group: THREE.Group, material: any, accentMaterial: any): void {
+function createNightrider(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
