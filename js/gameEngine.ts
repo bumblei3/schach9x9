@@ -166,6 +166,10 @@ export class Game {
   redoMove?: () => void;
   // Dynamic properties set at runtime by controllers
   gameController?: GameController;
+  moveController?: {
+    undoMove: () => void;
+    redoMove: () => void;
+  };
   aiController?: AIController;
   aiMove?: () => void;
   updateBestMoves?: () => void;

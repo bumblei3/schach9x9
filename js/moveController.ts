@@ -35,7 +35,7 @@ import * as UI from './ui.js';
  * Maintains backward compatibility with the original MoveController API.
  */
 export class MoveController {
-  private game: Game;
+  public game: Game;
   public redoStack: MoveHistoryEntry[];
 
   constructor(game: Game) {

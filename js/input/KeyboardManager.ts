@@ -133,8 +133,8 @@ export class KeyboardManager {
       closeModal();
 
       if (g.selectedSquare) {
-        if (this.app.gameController.resetSelection) {
-          this.app.gameController.resetSelection();
+        if ((this.app.gameController as any).resetSelection) {
+          (this.app.gameController as any).resetSelection();
         } else {
           g.selectedSquare = null;
           g.validMoves = [];

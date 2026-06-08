@@ -6,25 +6,35 @@ import { logger } from './logger.js';
 import { DOMHandler } from './ui/DOMHandler.js';
 import { errorManager } from './utils/ErrorManager.js';
 import type { EvaluationBar } from './ui/EvaluationBar.js';
-import type { Player, Square, Piece } from './types/game.js';
+import type { Player, Square, Piece, GameMode } from './types/game.js';
+import type { Game, MoveHistoryEntry } from './gameEngine.js';
+import type { GameController } from './gameController.js';
+import type { MoveController } from './moveController.js';
+import type { AIController } from './aiController.js';
+import type { TutorController } from './tutorController.js';
+import type { AnalysisManager } from './AnalysisManager.js';
+import type { UIEffects } from './ui/ui_effects.js';
+import type { KeyboardManager } from './input/KeyboardManager.js';
+import type { BattleChess3D } from './battleChess3D.js';
+import type * as UIImport from './ui.js';
 
 // Global variable for UI since it's used in many places but we want to avoid static import
-let UI_MODULE: any = null;
+let UI_MODULE: typeof UIImport | null = null;
 
 export class App {
-  public game: any = null;
-  public gameController: any = null;
-  public moveController: any = null;
-  public aiController: any = null;
-  public tutorController: any = null;
-  public analysisManager: any = null;
+  public game: Game | null = null;
+  public gameController: GameController | null = null;
+  public moveController: MoveController | null = null;
+  public aiController: AIController | null = null;
+  public tutorController: TutorController | null = null;
+  public analysisManager: AnalysisManager | null = null;
   public evaluationBar: EvaluationBar | null = null;
-  public uiEffects: any = null;
-  public keyboardManager: any = null;
-  public battleChess3D: any = null;
+  public uiEffects: UIEffects | null = null;
+  public keyboardManager: KeyboardManager | null = null;
+  public battleChess3D: BattleChess3D | null = null;
   public domHandler: DOMHandler;
-  public battleChess3D_Class: any = null;
-  public Game_Class: any = null;
+  public battleChess3D_Class: typeof BattleChess3D | null = null;
+  public Game_Class: typeof Game | null = null;
 
   constructor() {
     errorManager.init();
@@ -32,10 +42,10 @@ export class App {
   }
 
   public async startCampaignLevel(levelId: string): Promise<void> {
-    if (!this.game) {
+    if (!this.gameController) {
       await this.init(0, 'campaign');
     }
-    this.gameController.startCampaignLevel(levelId);
+    this.gameController!.startCampaignLevel(levelId);
   }
 
   public async init(initialPoints: number, mode: string = 'setup'): Promise<void> {
@@ -64,7 +74,7 @@ export class App {
     (window as any).UI = UI_MODULE;
 
     this.Game_Class = Game;
-    this.game = new Game(initialPoints, mode as any);
+    this.game = new Game(initialPoints, mode as GameMode);
     (window as any).game = this.game;
     (window as any).app = this;
 
@@ -78,13 +88,13 @@ export class App {
     this.battleChess3D_Class = BC3D_MODULE.BattleChess3D;
 
     // Make controllers accessible to each other (circular dependencies)
-    this.aiController = this.game.aiController;
-    this.gameController = this.game.gameController;
-    this.moveController = this.game.moveController;
+    this.aiController = this.game.aiController as AIController | null;
+    this.gameController = this.game.gameController as GameController | null;
+    this.moveController = this.game.moveController as MoveController | null;
 
-    this.aiController.game = this.game;
-    this.gameController.game = this.game;
-    this.moveController.game = this.game;
+    this.aiController!.game = this.game;
+    this.gameController!.game = this.game;
+    this.moveController!.game = this.game;
 
     this.tutorController = new TutorController(this.game);
     this.game.tutorController = this.tutorController;
@@ -125,7 +135,7 @@ export class App {
     this.applyDelegates();
 
     // Initialize GameController logic
-    this.game.gameController.initGame(initialPoints, mode);
+    this.game.gameController!.initGame(initialPoints, mode as GameMode);
 
     // Broadcast boardShape to AI workers for cross-shaped board filtering
     if (this.game.boardShape && this.aiController) {
@@ -197,245 +207,246 @@ export class App {
 
   private applyDelegates(): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const GP = this.Game_Class.prototype as any;
+    const app = this;
+    const GP = (this.Game_Class as typeof Game).prototype as any;
 
     // GameController delegations
     GP.placeKing = function (r: number, c: number, color: Player) {
-      return self.gameController.placeKing(r, c, color);
+      return app.gameController!.placeKing(r, c, color);
     };
     GP.selectShopPiece = function (type: string) {
-      return self.gameController.selectShopPiece(type);
+      return app.gameController!.selectShopPiece(type);
     };
     GP.placeShopPiece = function (r: number, c: number) {
-      return self.gameController.placeShopPiece(r, c);
+      return app.gameController!.placeShopPiece(r, c);
     };
     GP.finishSetupPhase = function () {
-      return self.gameController.finishSetupPhase();
+      return app.gameController!.finishSetupPhase();
     };
     GP.setTimeControl = function (mode: string) {
-      return self.gameController.setTimeControl(mode);
+      return app.gameController!.setTimeControl(mode);
     };
     GP.updateClockVisibility = function () {
-      return self.gameController.updateClockVisibility();
+      return app.gameController!.updateClockVisibility();
     };
     GP.startClock = function () {
-      return self.gameController.startClock();
+      return app.gameController!.startClock();
     };
     GP.stopClock = function () {
-      return self.gameController.stopClock();
+      return app.gameController!.stopClock();
     };
     GP.tickClock = function () {
-      return self.gameController.tickClock();
+      return app.gameController!.tickClock();
     };
     GP.updateClockDisplay = function () {
-      return self.gameController.updateClockDisplay();
+      return app.gameController!.updateClockDisplay();
     };
     GP.updateClockUI = function () {
-      return self.gameController.updateClockUI();
+      return app.gameController!.updateClockUI();
     };
     GP.showShop = function (show: boolean) {
-      return self.gameController.showShop(show);
+      return app.gameController!.showShop(show);
     };
     GP.updateShopUI = function () {
-      return self.gameController.updateShopUI();
+      return app.gameController!.updateShopUI();
     };
     GP.handleCellClick = function (r: number, c: number) {
-      return self.gameController.handleCellClick(r, c);
+      return app.gameController!.handleCellClick(r, c);
     };
     GP.resign = function (color: Player) {
-      return self.gameController.resign(color);
+      return app.gameController!.resign(color);
     };
     GP.offerDraw = function (color: Player) {
-      return self.gameController.offerDraw(color);
+      return app.gameController!.offerDraw(color);
     };
     GP.acceptDraw = function () {
-      return self.gameController.acceptDraw();
+      return app.gameController!.acceptDraw();
     };
     GP.declineDraw = function () {
-      return self.gameController.declineDraw();
+      return app.gameController!.declineDraw();
     };
     GP.showDrawOfferDialog = function () {
-      return self.gameController.showDrawOfferDialog();
+      return app.gameController!.showDrawOfferDialog();
     };
 
     // MoveController delegations
     GP.handlePlayClick = function (r: number, c: number) {
-      return self.moveController.handlePlayClick(r, c);
+      return app.moveController!.handlePlayClick(r, c);
     };
     GP.executeMove = function (from: Square, to: Square) {
-      return self.moveController.executeMove(from, to);
+      return app.moveController!.executeMove(from, to);
     };
-    GP.showPromotionUI = function (r: number, c: number, color: Player, record: any) {
-      return self.moveController.showPromotionUI(r, c, color, record);
+    GP.showPromotionUI = function (r: number, c: number, color: Player, record: MoveHistoryEntry) {
+      return app.moveController!.showPromotionUI(r, c, color, record);
     };
     GP.animateMove = function (from: Square, to: Square, piece: Piece) {
-      return self.moveController.animateMove(from, to, piece);
+      return app.moveController!.animateMove(from, to, piece as any);
     };
     GP.finishMove = function () {
-      return self.moveController.finishMove();
+      return app.moveController!.finishMove();
     };
     GP.undoMove = function () {
-      return self.moveController.undoMove();
+      return app.moveController!.undoMove();
     };
     GP.redoMove = function () {
-      return self.moveController.redoMove();
+      return app.moveController!.redoMove();
     };
     GP.checkDraw = function () {
-      return self.moveController.checkDraw();
+      return app.moveController!.checkDraw();
     };
     GP.isInsufficientMaterial = function () {
-      return self.moveController.isInsufficientMaterial();
+      return app.moveController!.isInsufficientMaterial();
     };
     GP.getBoardHash = function () {
-      return self.moveController.getBoardHash();
+      return app.moveController!.getBoardHash();
     };
     GP.saveGame = function () {
-      return self.gameController.saveGame();
+      return app.gameController!.saveGame();
     };
     GP.loadGame = function () {
-      return self.gameController.loadGame();
+      return app.gameController!.loadGame();
     };
     GP.autoSave = function (show: boolean) {
-      if (self.moveController.autoSave) return self.moveController.autoSave(show);
+      const mc = app.moveController! as any;
+      if (mc.autoSave) return mc.autoSave(show);
     };
 
     GP.updateMoveHistoryUI = function () {
-      UI_MODULE.updateMoveHistoryUI(this);
+      UI_MODULE!.updateMoveHistoryUI(this);
     };
     GP.updateUndoRedoButtons = function () {
-      return self.moveController.updateUndoRedoButtons();
+      return app.moveController!.updateUndoRedoButtons();
     };
     GP.updateCapturedUI = function () {
-      UI_MODULE.updateCapturedUI(this);
+      UI_MODULE!.updateCapturedUI(this);
     };
     GP.animateCheck = function (color: Player) {
-      UI_MODULE.animateCheck(this, color);
+      UI_MODULE!.animateCheck(this, color);
     };
     GP.animateCheckmate = function (color: Player) {
-      UI_MODULE.animateCheckmate(this, color);
+      UI_MODULE!.animateCheckmate(this, color);
     };
     GP.calculateMaterialAdvantage = function () {
-      return self.moveController.calculateMaterialAdvantage();
+      return app.moveController!.calculateMaterialAdvantage();
     };
     GP.getMaterialValue = function (piece: Piece) {
-      return self.moveController.getMaterialValue(piece);
+      return app.moveController!.getMaterialValue(piece as any);
     };
     GP.updateStatistics = function () {
-      UI_MODULE.updateStatistics(this);
+      UI_MODULE!.updateStatistics(this);
     };
 
     // Replay methods
     GP.enterReplayMode = function () {
-      return self.moveController.enterReplayMode();
+      return app.moveController!.enterReplayMode();
     };
     GP.exitReplayMode = function () {
-      return self.moveController.exitReplayMode();
+      return app.moveController!.exitReplayMode();
     };
     GP.replayFirst = function () {
-      return self.moveController.replayFirst();
+      return app.moveController!.replayFirst();
     };
     GP.replayPrevious = function () {
-      return self.moveController.replayPrevious();
+      return app.moveController!.replayPrevious();
     };
     GP.replayNext = function () {
-      return self.moveController.replayNext();
+      return app.moveController!.replayNext();
     };
     GP.replayLast = function () {
-      return self.moveController.replayLast();
+      return app.moveController!.replayLast();
     };
     GP.updateReplayUI = function () {
-      return self.moveController.updateReplayUI();
+      return app.moveController!.updateReplayUI();
     };
     GP.reconstructBoardAtMove = function (idx: number) {
-      return self.moveController.reconstructBoardAtMove(idx);
+      return app.moveController!.reconstructBoardAtMove(idx);
     };
-    GP.undoMoveForReplay = function (move: any) {
-      return self.moveController.undoMoveForReplay(move);
+    GP.undoMoveForReplay = function (move: MoveHistoryEntry) {
+      return app.moveController!.undoMoveForReplay(move);
     };
     GP.setTheme = function (theme: string) {
-      return self.moveController.setTheme(theme);
+      return app.moveController!.setTheme(theme);
     };
     GP.applyTheme = function (theme: string) {
-      return self.moveController.applyTheme(theme);
+      return app.moveController!.applyTheme(theme);
     };
 
     // AI delegations
     GP.aiSetupKing = function () {
-      return self.aiController.aiSetupKing();
+      return app.aiController!.aiSetupKing();
     };
     GP.aiSetupPieces = function () {
-      return self.aiController.aiSetupPieces();
+      return app.aiController!.aiSetupPieces();
     };
     GP.aiSetupUpgrades = function () {
-      return self.aiController.aiSetupUpgrades();
+      return app.aiController!.aiSetupUpgrades();
     };
     GP.aiMove = function () {
-      return self.aiController.aiMove();
+      return app.aiController!.aiMove();
     };
     GP.evaluatePosition = function (color: Player) {
-      return self.aiController.evaluatePosition(color);
+      return (app.aiController! as any).evaluatePosition(color);
     };
-    GP.updateAIProgress = function (data: any) {
-      return self.aiController.updateAIProgress(data);
+    GP.updateAIProgress = function (data: { depth?: number; maxDepth?: number; nodes?: number; bestMove?: { from: { r: number; c: number }; to: { r: number; c: number } } } | null) {
+      return app.aiController!.updateAIProgress(data);
     };
     GP.aiEvaluateDrawOffer = function () {
-      return self.aiController.aiEvaluateDrawOffer();
+      return app.aiController!.aiEvaluateDrawOffer();
     };
     GP.aiShouldOfferDraw = function () {
-      return self.aiController.aiShouldOfferDraw();
+      return app.aiController!.aiShouldOfferDraw();
     };
     GP.aiShouldResign = function () {
-      return self.aiController.aiShouldResign();
+      return app.aiController!.aiShouldResign();
     };
 
     // Tutor delegations
     GP.updateBestMoves = function () {
-      return self.tutorController.updateBestMoves();
+      return app.tutorController!.updateBestMoves();
     };
     GP.isTutorMove = function (from: Square, to: Square) {
-      return self.tutorController.isTutorMove(from, to);
+      return app.tutorController!.isTutorMove(from, to);
     };
     GP.getTutorHints = function () {
-      return self.tutorController.getTutorHints();
+      return app.tutorController!.getTutorHints();
     };
-    GP.getMoveNotation = function (move: any) {
-      return self.tutorController.getMoveNotation(move);
+    GP.getMoveNotation = function (move: { from: Square; to: Square }) {
+      return app.tutorController!.getMoveNotation(move);
     };
     GP.showTutorSuggestions = function () {
-      return self.tutorController.showTutorSuggestions();
+      return app.tutorController!.showTutorSuggestions();
     };
     GP.getPieceName = function (type: string) {
-      return self.tutorController.getPieceName(type);
+      return app.tutorController!.getPieceName(type);
     };
     GP.getThreatenedPieces = function (pos: Square, color: Player) {
-      return self.tutorController.getThreatenedPieces(pos, color);
+      return app.tutorController!.getThreatenedPieces(pos, color);
     };
-    GP.detectTacticalPatterns = function (move: any) {
-      return self.tutorController.detectTacticalPatterns(move);
+    GP.detectTacticalPatterns = function (move: { from: Square; to: Square }) {
+      return app.tutorController!.detectTacticalPatterns(move);
     };
     GP.getDefendedPieces = function (pos: Square, color: Player) {
-      return self.tutorController.getDefendedPieces(pos, color);
+      return app.tutorController!.getDefendedPieces(pos, color);
     };
-    GP.analyzeStrategicValue = function (move: any) {
-      return self.tutorController.analyzeStrategicValue(move);
+    GP.analyzeStrategicValue = function (move: { from: Square; to: Square }) {
+      return app.tutorController!.analyzeStrategicValue(move);
     };
     GP.getScoreDescription = function (score: number) {
-      return self.tutorController.getScoreDescription(score);
+      return app.tutorController!.getScoreDescription(score);
     };
-    GP.analyzeMoveWithExplanation = function (move: any, score: number, best: any) {
-      return self.tutorController.analyzeMoveWithExplanation(move, score, best);
+    GP.analyzeMoveWithExplanation = function (move: { from: Square; to: Square }, score: number, best: number) {
+      return app.tutorController!.analyzeMoveWithExplanation(move, score, best);
     };
 
     // AnalysisManager delegations
     GP.toggleThreats = function () {
-      return self.analysisManager.toggleThreats();
+      return app.analysisManager!.toggleThreats();
     };
     GP.toggleOpportunities = function () {
-      return self.analysisManager.toggleOpportunities();
+      return app.analysisManager!.toggleOpportunities();
     };
     GP.toggleBestMove = function () {
-      return self.analysisManager.toggleBestMove();
+      return app.analysisManager!.toggleBestMove();
     };
   }
 
