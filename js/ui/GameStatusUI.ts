@@ -278,9 +278,9 @@ export function renderEvalGraph(game: Game): void {
       if (!p) return;
       const idx = parseInt((p as HTMLElement).dataset.index || '0');
       if (idx >= 0 && (game.gameController as unknown as Record<string, unknown>)?.jumpToMove)
-        (game.gameController as unknown as Record<string, Function>).jumpToMove(idx);
+        (game.gameController as unknown as Record<string, () => void>).jumpToMove(idx);
       else if (idx === -1 && (game.gameController as unknown as Record<string, unknown>)?.jumpToStart)
-        (game.gameController as unknown as Record<string, Function>).jumpToStart();
+        (game.gameController as unknown as Record<string, () => void>).jumpToStart();
     });
     svg.dataset.hasListener = 'true';
   }

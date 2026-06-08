@@ -196,6 +196,7 @@ export class App {
   }
 
   private applyDelegates(): void {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const GP = this.Game_Class.prototype as any;
 

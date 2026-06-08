@@ -14,7 +14,7 @@ import type { Game, Player } from '../gameEngine.js';
 export function showModal(
   title: string,
   message: string,
-  actions: Array<{ text: string; class?: string; callback?: Function }> = []
+  actions: Array<{ text: string; class?: string; callback?: () => void }> = []
 ): void {
   const modal = document.getElementById('generic-modal');
   const titleEl = document.getElementById('modal-title');
@@ -73,7 +73,7 @@ export function showPromotionUI(
   c: number,
   color: Player,
   moveRecord: any,
-  callback?: Function
+  callback?: () => void
 ): void {
   const overlay = document.getElementById('promotion-overlay');
   const optionsContainer = document.getElementById('promotion-options');

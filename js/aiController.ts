@@ -6,7 +6,7 @@ import * as aiEngine from './aiEngine.js';
 import type { MoveResult, SearchResult } from './aiEngine.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 
-// @ts-ignore
+// @ts-expect-error - Vite worker import (.ts extension)
 import AIWorker from './ai/aiWorker.ts?worker';
 
 // Piece values for shop
@@ -493,7 +493,7 @@ export class AIController {
       });
 
     for (let i = 0; i < numWorkers; i++) {
-      // @ts-ignore - Vite worker import
+      // @ts-expect-error - Vite worker import
       const worker = new AIWorker();
       this.aiWorkers.push(worker);
 
