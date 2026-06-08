@@ -222,7 +222,10 @@ export class CampaignManager {
     return this.state.levelStars[levelId] || 0;
   }
 
-  completeLevel(levelId: string, starsOrStats: number | { moves?: number; materialDiff?: number; promotedCount?: number } = 0): number {
+  completeLevel(
+    levelId: string,
+    starsOrStats: number | { moves?: number; materialDiff?: number; promotedCount?: number } = 0
+  ): number {
     if (!this.state.completedLevels.includes(levelId)) {
       this.state.completedLevels.push(levelId);
     }
@@ -270,7 +273,10 @@ export class CampaignManager {
     return stars;
   }
 
-  private calculateStars(level: Level, stats: { moves?: number; materialDiff?: number; promotedCount?: number }): number {
+  private calculateStars(
+    level: Level,
+    stats: { moves?: number; materialDiff?: number; promotedCount?: number }
+  ): number {
     let stars = 1; // Base star for completing the mission
 
     if (level.goals) {
@@ -287,7 +293,10 @@ export class CampaignManager {
     return stars;
   }
 
-  private checkGoal(goal: CampaignGoal, stats: { moves?: number; materialDiff?: number; promotedCount?: number }): boolean {
+  private checkGoal(
+    goal: CampaignGoal,
+    stats: { moves?: number; materialDiff?: number; promotedCount?: number }
+  ): boolean {
     switch (goal.type) {
       case 'moves':
         return (stats.moves ?? 0) <= goal.value;

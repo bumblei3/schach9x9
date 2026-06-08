@@ -130,21 +130,14 @@ export async function executeMove(
 
     // Talent: Scavenger (Pawn)
     // Erhalte 1-2 Gold beim Schlagen von Figuren.
-    if (
-      game.campaignMode &&
-      piece.color === game.playerColor &&
-      piece.type === 'p'
-    ) {
+    if (game.campaignMode && piece.color === game.playerColor && piece.type === 'p') {
       if (campaignManager.isTalentUnlocked('p_scavenger')) {
         const bonus = Math.floor(Math.random() * 2) + 1; // 1-2 Gold
         campaignManager.addGold(bonus);
         notificationUI.show(`Plünderer: +${bonus} Gold gefunden!`, 'success', 'Talent');
       }
     }
-  } else if (
-    moveRecord.specialMove &&
-    moveRecord.specialMove.type === 'enPassant'
-  ) {
+  } else if (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant') {
     const capturerColor = piece.color;
     game.capturedPieces[capturerColor].push(moveRecord.specialMove!.capturedPawn as Piece);
     UI.updateCapturedUI(game);
@@ -230,7 +223,7 @@ export async function executeMove(
               if (game.campaignMode && piece.color === game.playerColor) {
                 campaignManager.addUnitXp('p', 50);
                 notificationUI.show(
-                  `Beförderungs-Bonus: +50 XP für die Infanterie!`,
+                  'Beförderungs-Bonus: +50 XP für die Infanterie!',
                   'success',
                   'Held'
                 );
@@ -302,9 +295,7 @@ export async function completeMoveExecution(
 
       // Auto-play opponent move if available
       const nextIndex = game.puzzleState ? game.puzzleState.currentMoveIndex : 0;
-      const puzzle = puzzleManager.getPuzzle(
-        game.puzzleState ? game.puzzleState.id : ''
-      );
+      const puzzle = puzzleManager.getPuzzle(game.puzzleState ? game.puzzleState.id : '');
 
       if (puzzle && nextIndex < puzzle.solution.length) {
         const nextMove = puzzle.solution[nextIndex];
@@ -413,11 +404,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
   game.positionHistory.push(currentHash);
 
   // Update 3D board if active
-  if (
-    window.battleChess3D &&
-    window.battleChess3D.enabled &&
-    game.moveHistory.length > 0
-  ) {
+  if (window.battleChess3D && window.battleChess3D.enabled && game.moveHistory.length > 0) {
     const lastMove = game.moveHistory[game.moveHistory.length - 1];
     const piece = lastMove.piece!;
     const from = lastMove.from;
@@ -425,19 +412,20 @@ export function finishMove(game: Game, lastTo?: Square): void {
     const targetPiece = lastMove.captured;
 
     const captured =
-      targetPiece ||
-      (lastMove.specialMove && lastMove.specialMove.type === 'enPassant');
+      targetPiece || (lastMove.specialMove && lastMove.specialMove.type === 'enPassant');
     if (captured) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const attackerData = { type: piece.type, color: piece.color, hasMoved: piece.hasMoved } as any;
+      const attackerData = {
+        type: piece.type,
+        color: piece.color,
+        hasMoved: piece.hasMoved,
+      } as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const defenderData = (targetPiece || lastMove.specialMove?.capturedPawn || null) as any;
-      window.battleChess3D
-        .playBattleSequence(attackerData, defenderData, from, to)
-        .then(() => {
-          window.battleChess3D!.removePiece(to.r, to.c);
-          window.battleChess3D!.animateMove(from.r, from.c, to.r, to.c);
-        });
+      window.battleChess3D.playBattleSequence(attackerData, defenderData, from, to).then(() => {
+        window.battleChess3D!.removePiece(to.r, to.c);
+        window.battleChess3D!.animateMove(from.r, from.c, to.r, to.c);
+      });
     } else {
       window.battleChess3D.animateMove(from.r, from.c, to.r, to.c);
     }
@@ -469,7 +457,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
       // Award Checkmate XP in Campaign
       if (game.campaignMode && winningColor === game.playerColor) {
         campaignManager.addUnitXp('k', 100); // King gets XP for victory leadership
-        notificationUI.show(`Mission erfüllt! Bonus: +100 XP für den König!`, 'success', 'Triumph');
+        notificationUI.show('Mission erfüllt! Bonus: +100 XP für den König!', 'success', 'Triumph');
       }
     }
     return;

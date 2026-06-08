@@ -611,7 +611,9 @@ describe('TutorController', () => {
       game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
 
       // Mock getTutorHints
-      vi.spyOn(tutorController, 'getTutorHints').mockResolvedValue([{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }] as any);
+      vi.spyOn(tutorController, 'getTutorHints').mockResolvedValue([
+        { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+      ] as any);
       vi.spyOn(tutorController, 'showTutorSuggestions').mockResolvedValue(undefined);
 
       // Call the underlying async logic directly

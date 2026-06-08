@@ -12,7 +12,9 @@ class SoundManager {
 
   public init(): void {
     if (!this.audioContext) {
-      const AudioContextClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
       this.audioContext = new AudioContextClass();
     }
   }

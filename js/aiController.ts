@@ -1,5 +1,11 @@
 import { PHASES, type Game } from './gameEngine.js';
-import { SHOP_PIECES, AI_DEPTH_CONFIG, AI_DIFFICULTIES, isBlockedCell, type ShopPieceConfig } from './config.js';
+import {
+  SHOP_PIECES,
+  AI_DEPTH_CONFIG,
+  AI_DIFFICULTIES,
+  isBlockedCell,
+  type ShopPieceConfig,
+} from './config.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
 import * as aiEngine from './aiEngine.js';
@@ -410,9 +416,13 @@ export class AIController {
             worker.removeEventListener('message', moveHandler);
             workerResults[i] = data;
             completedWorkers++;
-            logger.context('AIController').debug(`[DEBUG] AI completedWorkers: ${completedWorkers}`);
+            logger
+              .context('AIController')
+              .debug(`[DEBUG] AI completedWorkers: ${completedWorkers}`);
             if (completedWorkers === 1) {
-              logger.context('AIController').debug('[DEBUG] AI triggering processResultsWithTimeout');
+              logger
+                .context('AIController')
+                .debug('[DEBUG] AI triggering processResultsWithTimeout');
               processResultsWithTimeout();
             }
           }
@@ -514,7 +524,9 @@ export class AIController {
    * Calculates the best move for the current player without executing it.
    * Used for the Interactive Tutor hint system.
    */
-  public async getHint(depth: number = 4): Promise<{ move: MoveResult; explanation: string } | null> {
+  public async getHint(
+    depth: number = 4
+  ): Promise<{ move: MoveResult; explanation: string } | null> {
     if (this.game.phase === PHASES.GAME_OVER) return null;
 
     // Initialize pool if needed
@@ -629,7 +641,7 @@ export class AIController {
 
     // Update global game state for best move arrows
     if (data.topMoves && data.topMoves.length > 0) {
-      this.game.bestMoves = data.topMoves.map((m) => ({
+      this.game.bestMoves = data.topMoves.map(m => ({
         move: m.move,
         score: m.score,
         notation: m.notation,
@@ -658,15 +670,17 @@ export class AIController {
     }
   }
 
-  public updateAIProgress(data: {
-    depth?: number;
-    maxDepth?: number;
-    nodes?: number;
-    bestMove?: {
-      from: { r: number; c: number };
-      to: { r: number; c: number };
-    };
-  } | null): void {
+  public updateAIProgress(
+    data: {
+      depth?: number;
+      maxDepth?: number;
+      nodes?: number;
+      bestMove?: {
+        from: { r: number; c: number };
+        to: { r: number; c: number };
+      };
+    } | null
+  ): void {
     const depthEl = document.getElementById('ai-depth');
     const nodesEl = document.getElementById('ai-nodes');
     const bestMoveEl = document.getElementById('ai-best-move');
@@ -791,7 +805,9 @@ export class AIController {
     }
 
     const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
-    const materialAdvantage = this.game.calculateMaterialAdvantage ? this.game.calculateMaterialAdvantage() : 0;
+    const materialAdvantage = this.game.calculateMaterialAdvantage
+      ? this.game.calculateMaterialAdvantage()
+      : 0;
 
     // In "Classic 9x9 + Upgrades" (mode='upgrade'), player starts with extra points (15).
     // So AI is naturally behind in material. We must be much more resilient.
@@ -874,8 +890,19 @@ export class AIController {
     }
   }
 
-  public highlightMove(move: { from?: { r?: number; c?: number }; to?: { r?: number; c?: number } } | null): void {
-    if (!move || !move.from || !move.to || move.from.r === undefined || move.from.c === undefined || move.to.r === undefined || move.to.c === undefined) return;
+  public highlightMove(
+    move: { from?: { r?: number; c?: number }; to?: { r?: number; c?: number } } | null
+  ): void {
+    if (
+      !move ||
+      !move.from ||
+      !move.to ||
+      move.from.r === undefined ||
+      move.from.c === undefined ||
+      move.to.r === undefined ||
+      move.to.c === undefined
+    )
+      return;
 
     // Clear previous highlights
     document.querySelectorAll('.cell').forEach(cell => {
@@ -892,7 +919,14 @@ export class AIController {
     if (toCell) toCell.classList.add('analysis-to');
 
     // Optionally draw an arrow
-    if (this.game.arrowRenderer && this.game.arrowRenderer.drawArrow && move.from.r !== undefined && move.from.c !== undefined && move.to.r !== undefined && move.to.c !== undefined) {
+    if (
+      this.game.arrowRenderer &&
+      this.game.arrowRenderer.drawArrow &&
+      move.from.r !== undefined &&
+      move.from.c !== undefined &&
+      move.to.r !== undefined &&
+      move.to.c !== undefined
+    ) {
       this.game.arrowRenderer.clearArrows();
       this.game.arrowRenderer.drawArrow(
         move.from.r,
@@ -904,7 +938,9 @@ export class AIController {
     }
   }
 
-  public getAlgebraicNotation(move: { from?: { r: number; c: number }; to?: { r: number; c: number } } | null): string {
+  public getAlgebraicNotation(
+    move: { from?: { r: number; c: number }; to?: { r: number; c: number } } | null
+  ): string {
     if (!move || !move.from || !move.to) return '??';
     const size = this.game.boardSize;
     const fromFile = String.fromCharCode(97 + move.from.c);

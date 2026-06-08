@@ -1,7 +1,36 @@
 import { debounce } from './utils.js';
-import { detectTacticalPatterns, detectPins, detectDiscoveredAttacks, canPieceMove, detectThreatsAfterMove, countDefenders, countAttackers, getThreatenedPieces, getDefendedPieces, type Analyzer } from './tutor/TacticsDetector.js';
-import { getMoveNotation, getPieceName, analyzeStrategicValue, getScoreDescription, analyzeMoveWithExplanation, handlePlayerMove, checkBlunder, showBlunderWarning, analyzePlayerMovePreExecution } from './tutor/MoveAnalyzer.js';
-import { updateBestMoves, isTutorMove, getTutorHints, showTutorSuggestions, getSetupTemplates, applySetupTemplate, placePiece } from './tutor/HintGenerator.js';
+import {
+  detectTacticalPatterns,
+  detectPins,
+  detectDiscoveredAttacks,
+  canPieceMove,
+  detectThreatsAfterMove,
+  countDefenders,
+  countAttackers,
+  getThreatenedPieces,
+  getDefendedPieces,
+  type Analyzer,
+} from './tutor/TacticsDetector.js';
+import {
+  getMoveNotation,
+  getPieceName,
+  analyzeStrategicValue,
+  getScoreDescription,
+  analyzeMoveWithExplanation,
+  handlePlayerMove,
+  checkBlunder,
+  showBlunderWarning,
+  analyzePlayerMovePreExecution,
+} from './tutor/MoveAnalyzer.js';
+import {
+  updateBestMoves,
+  isTutorMove,
+  getTutorHints,
+  showTutorSuggestions,
+  getSetupTemplates,
+  applySetupTemplate,
+  placePiece,
+} from './tutor/HintGenerator.js';
 import type { Game } from './gameEngine.js';
 
 interface ScoreDescription {
@@ -21,7 +50,7 @@ export class TutorController {
     this.game = game;
     // Debounce the heavy calculation part
     this.debouncedGetTutorHints = debounce(async () => {
-    this.game.bestMoves = (await getTutorHints(this.game, this)) as Game['bestMoves'];
+      this.game.bestMoves = (await getTutorHints(this.game, this)) as Game['bestMoves'];
       await showTutorSuggestions(this.game);
     }, 300);
   }
@@ -39,7 +68,10 @@ export class TutorController {
   }
 
   public getMoveNotation(move: unknown): string {
-    return getMoveNotation(this.game, move as { from: { r: number; c: number }; to: { r: number; c: number } });
+    return getMoveNotation(
+      this.game,
+      move as { from: { r: number; c: number }; to: { r: number; c: number } }
+    );
   }
 
   public async showTutorSuggestions(): Promise<void> {
@@ -63,14 +95,22 @@ export class TutorController {
   }
 
   public detectTacticalPatterns(move: unknown): unknown[] {
-    return detectTacticalPatterns(this.game, this as unknown as Analyzer, move as { from: { r: number; c: number }; to: { r: number; c: number } });
+    return detectTacticalPatterns(
+      this.game,
+      this as unknown as Analyzer,
+      move as { from: { r: number; c: number }; to: { r: number; c: number } }
+    );
   }
 
   public detectPins(pos: { r: number; c: number }, attackerColor: string): unknown[] {
     return detectPins(this.game, this as unknown as Analyzer, pos, attackerColor);
   }
 
-  public detectDiscoveredAttacks(from: { r: number; c: number }, to: { r: number; c: number }, attackerColor: string): unknown[] {
+  public detectDiscoveredAttacks(
+    from: { r: number; c: number },
+    to: { r: number; c: number },
+    attackerColor: string
+  ): unknown[] {
     return detectDiscoveredAttacks(this.game, this as unknown as Analyzer, from, to, attackerColor);
   }
 
@@ -79,7 +119,11 @@ export class TutorController {
   }
 
   public detectThreatsAfterMove(move: unknown): unknown[] {
-    return detectThreatsAfterMove(this.game, this as unknown as Analyzer, move as { from: { r: number; c: number }; to: { r: number; c: number } });
+    return detectThreatsAfterMove(
+      this.game,
+      this as unknown as Analyzer,
+      move as { from: { r: number; c: number }; to: { r: number; c: number } }
+    );
   }
 
   public countDefenders(r: number, c: number, defenderColor: string): number {
@@ -95,7 +139,10 @@ export class TutorController {
   }
 
   public analyzeStrategicValue(move: unknown): unknown[] {
-    return analyzeStrategicValue(this.game, move as { from: { r: number; c: number }; to: { r: number; c: number } });
+    return analyzeStrategicValue(
+      this.game,
+      move as { from: { r: number; c: number }; to: { r: number; c: number } }
+    );
   }
 
   public getScoreDescription(score: number): ScoreDescription {
@@ -130,7 +177,10 @@ export class TutorController {
     return placePiece(this.game, r, c, type, isWhite);
   }
 
-  public analyzePlayerMovePreExecution(move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<unknown> {
+  public analyzePlayerMovePreExecution(move: {
+    from: { r: number; c: number };
+    to: { r: number; c: number };
+  }): Promise<unknown> {
     return analyzePlayerMovePreExecution(this.game, move);
   }
 }

@@ -105,7 +105,11 @@ export function updateTutorRecommendations(game: Game): void {
       if (template.isRecommended) card.classList.add('recommended');
 
       const color = g.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
-      const svgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<string, Record<string, string>> || {};
+      const svgs =
+        ((window as unknown as Record<string, unknown>).PIECE_SVGS as Record<
+          string,
+          Record<string, string>
+        >) || {};
 
       const piecesPreview = template.pieces
         .map((pieceType: string) => {
@@ -200,7 +204,11 @@ export async function showTutorSuggestions(
 
         const isWhite = currentPhase.includes('WHITE');
         const color = isWhite ? 'white' : 'black';
-        const svgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<string, Record<string, string>> || {};
+        const svgs =
+          ((window as unknown as Record<string, unknown>).PIECE_SVGS as Record<
+            string,
+            Record<string, string>
+          >) || {};
 
         (templates as SetupTemplate[]).forEach((template: SetupTemplate) => {
           const div = document.createElement('div');
@@ -338,7 +346,10 @@ export async function showTutorSuggestions(
           el.style.background = 'rgba(34, 197, 94, 0.1)';
         };
         const colorPrefix = g.phase === PHASES.SETUP_WHITE_PIECES ? 'white' : 'black';
-        const pieceSvgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<string, Record<string, string>>;
+        const pieceSvgs = (window as unknown as Record<string, unknown>).PIECE_SVGS as Record<
+          string,
+          Record<string, string>
+        >;
         el.innerHTML = `
             <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">${template.name}</div>
             <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.5rem;">${template.description}</div>
@@ -534,7 +545,15 @@ export async function showTutorSuggestions(
       ];
 
       if (analysis.tacticalPatterns) {
-        (analysis.tacticalPatterns as Array<{ type: string; severity: string; explanation: string; question?: string; targets?: Array<{ r: number; c: number }> }>).forEach((p) => {
+        (
+          analysis.tacticalPatterns as Array<{
+            type: string;
+            severity: string;
+            explanation: string;
+            question?: string;
+            targets?: Array<{ r: number; c: number }>;
+          }>
+        ).forEach(p => {
           if (p.targets) {
             p.targets.forEach((t: { r: number; c: number }) => {
               arrows.push({

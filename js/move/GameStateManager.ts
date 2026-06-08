@@ -13,9 +13,9 @@ import type { MoveController } from '../moveController.js';
 export function undoMove(game: Game, moveController: MoveController): void {
   if (
     game.moveHistory.length === 0 ||
-    (game.phase !== PHASES.PLAY as Phase &&
-      game.phase !== PHASES.ANALYSIS as Phase &&
-      game.phase !== PHASES.GAME_OVER as Phase)
+    (game.phase !== (PHASES.PLAY as Phase) &&
+      game.phase !== (PHASES.ANALYSIS as Phase) &&
+      game.phase !== (PHASES.GAME_OVER as Phase))
   ) {
     return;
   }
@@ -189,11 +189,11 @@ export function exitReplayMode(game: Game): void {
 
   const undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
   if (undoBtn)
-    undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY as Phase;
+    undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== (PHASES.PLAY as Phase);
 
   UI.renderBoard(game);
 
-  if (game.clockEnabled && game.phase === PHASES.PLAY as Phase) {
+  if (game.clockEnabled && game.phase === (PHASES.PLAY as Phase)) {
     if ((game as any).startClock) (game as any).startClock();
   }
 }
@@ -353,8 +353,8 @@ export function loadGame(game: Game): boolean {
     }
 
     if (
-      game.phase === PHASES.SETUP_WHITE_PIECES as Phase ||
-      game.phase === PHASES.SETUP_BLACK_PIECES as Phase
+      game.phase === (PHASES.SETUP_WHITE_PIECES as Phase) ||
+      game.phase === (PHASES.SETUP_BLACK_PIECES as Phase)
     ) {
       UI.showShop(game, true);
     } else {

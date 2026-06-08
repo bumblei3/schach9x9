@@ -258,21 +258,19 @@ export class Tutorial {
         { r: 2, c: 1 },
       ];
       knightOffsets.forEach(off => {
-        let nr = center + off.r;
-        let nc = center + off.c;
+        const nr = center + off.r;
+        const nc = center + off.c;
         if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
           moves.push({ r: nr, c: nc });
 
           if (piece === 'nightrider') {
             // Continue in same direction
-            while (true) {
-              nr += off.r;
-              nc += off.c;
-              if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-                moves.push({ r: nr, c: nc });
-              } else {
-                break;
-              }
+            for (
+              let tr = nr + off.r, tc = nc + off.c;
+              tr >= 0 && tr < size && tc >= 0 && tc < size;
+              tr += off.r, tc += off.c
+            ) {
+              moves.push({ r: tr, c: tc });
             }
           }
         }

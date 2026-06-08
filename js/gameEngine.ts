@@ -170,7 +170,12 @@ export class Game {
   aiMove?: () => void;
   updateBestMoves?: () => void;
   analysisManager?: AnalysisManager;
-  arrowRenderer?: { clearArrows: () => void; drawArrow?: (fromR: number, fromC: number, toR: number, toC: number, color: string) => void; addArrow?: (...args: unknown[]) => void; highlightMoves?: (arrows: unknown[]) => void };
+  arrowRenderer?: {
+    clearArrows: () => void;
+    drawArrow?: (fromR: number, fromC: number, toR: number, toC: number, color: string) => void;
+    addArrow?: (...args: unknown[]) => void;
+    highlightMoves?: (arrows: unknown[]) => void;
+  };
   evaluationBar?: { show: (visible: boolean) => void; update: (score: number) => void };
   campaignMode?: boolean;
   currentTheme?: string;
@@ -450,7 +455,11 @@ export class Game {
 
       // Handle promotion
       if (promotion) {
-        this.board[to.r][to.c] = { type: promotion as Piece['type'], color: piece.color, hasMoved: true };
+        this.board[to.r][to.c] = {
+          type: promotion as Piece['type'],
+          color: piece.color,
+          hasMoved: true,
+        };
       }
 
       // Track last move for En Passant

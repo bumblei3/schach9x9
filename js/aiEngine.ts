@@ -569,7 +569,7 @@ export async function getTopMoves(
   const board = convertBoardToInt(uiBoard);
 
   // --- Step 1: Check Opening Book ---
-  let bookMoves: SearchResult[] = [];
+  const bookMoves: SearchResult[] = [];
   if (moveNumber !== undefined && moveNumber < 15) {
     // Note: OpeningBook.ts getMove returns a single weighted random move,
     // though the book might have multiple. Currently we just take one if available.

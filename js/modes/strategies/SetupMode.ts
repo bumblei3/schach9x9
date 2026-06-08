@@ -134,8 +134,7 @@ export class SetupModeStrategy implements GameModeStrategy {
       // Don't warn AI if it's their turn to finish setup
       const isAIBlackSetup =
         game.isAI &&
-        (game.phase === PHASES.SETUP_BLACK_PIECES ||
-          game.phase === PHASES.SETUP_BLACK_UPGRADES);
+        (game.phase === PHASES.SETUP_BLACK_PIECES || game.phase === PHASES.SETUP_BLACK_UPGRADES);
 
       if (isAIBlackSetup) {
         handleTransition();

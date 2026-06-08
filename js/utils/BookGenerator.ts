@@ -9,7 +9,12 @@ import { Game, type GameMode } from '../gameEngine.js';
  */
 
 interface BookPosition {
-  moves: Array<{ from: { r: number; c: number }; to: { r: number; c: number }; weight: number; games: number }>;
+  moves: Array<{
+    from: { r: number; c: number };
+    to: { r: number; c: number };
+    weight: number;
+    games: number;
+  }>;
   seenCount: number;
 }
 
@@ -69,20 +74,31 @@ async function generateBook(): Promise<void> {
 
     for (const item of history) {
       if (item.hash) {
-        addMoveDirectly(book, item.hash, item.move as { from: { r: number; c: number }; to: { r: number; c: number } });
+        addMoveDirectly(
+          book,
+          item.hash,
+          item.move as { from: { r: number; c: number }; to: { r: number; c: number } }
+        );
       }
     }
   }
 
   recalcWeights(book);
 
-  fs.writeFileSync(outputFile, JSON.stringify((book as unknown as { data: BookData }).data, null, 2));
+  fs.writeFileSync(
+    outputFile,
+    JSON.stringify((book as unknown as { data: BookData }).data, null, 2)
+  );
   console.log(
     `Book saved to ${outputFile}. Total positions: ${Object.keys((book as unknown as { data: BookData }).data.positions).length}`
   );
 }
 
-function addMoveDirectly(book: OpeningBook, hash: string, move: { from: { r: number; c: number }; to: { r: number; c: number } }): void {
+function addMoveDirectly(
+  book: OpeningBook,
+  hash: string,
+  move: { from: { r: number; c: number }; to: { r: number; c: number } }
+): void {
   const data = (book as unknown as { data: BookData }).data;
   if (!data.positions[hash]) {
     data.positions[hash] = { moves: [], seenCount: 0 };
@@ -91,7 +107,7 @@ function addMoveDirectly(book: OpeningBook, hash: string, move: { from: { r: num
   pos.seenCount++;
 
   const existing = pos.moves.find(
-    (m) =>
+    m =>
       m.from.r === move.from.r &&
       m.from.c === move.from.c &&
       m.to.r === move.to.r &&
@@ -109,7 +125,7 @@ function recalcWeights(book: OpeningBook): void {
   for (const hash in data.positions) {
     const pos = data.positions[hash];
     const totalGames = pos.moves.reduce((sum: number, m) => sum + m.games, 0);
-    pos.moves.forEach((m) => {
+    pos.moves.forEach(m => {
       m.weight = Math.round((m.games / totalGames) * 100);
     });
     pos.moves.sort((a, b) => b.weight - a.weight);

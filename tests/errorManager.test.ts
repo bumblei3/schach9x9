@@ -103,7 +103,13 @@ describe('ErrorManager', () => {
 
     // Test onerror
     if (window.onerror) {
-      (window.onerror as Function)('Script Error', 'script.js', 10, 20, new Error('Script Error'));
+      (window.onerror as (...args: unknown[]) => void)(
+        'Script Error',
+        'script.js',
+        10,
+        20,
+        new Error('Script Error')
+      );
       expect(errorSpy).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({ context: 'Global' })

@@ -158,7 +158,7 @@ export class AnalysisManager {
 
   public getBestMoveArrows(): Arrow[] {
     const arrows: Arrow[] = [];
-    const hints = this.game.bestMoves as unknown as MoveHistoryEntry[] || [];
+    const hints = (this.game.bestMoves as unknown as MoveHistoryEntry[]) || [];
 
     if (hints.length > 0) {
       const best = hints[0];

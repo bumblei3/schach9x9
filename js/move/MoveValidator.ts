@@ -11,7 +11,7 @@ import { campaignManager } from '../campaign/CampaignManager.js';
  */
 export function checkDraw(game: Game): boolean {
   if (game.halfMoveClock >= 100) {
-    game.phase = PHASES.GAME_OVER as unknown as typeof PHASES[keyof typeof PHASES];
+    game.phase = PHASES.GAME_OVER as unknown as (typeof PHASES)[keyof typeof PHASES];
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (50-Züge-Regel)');
@@ -22,7 +22,11 @@ export function checkDraw(game: Game): boolean {
 
     // Save to statistics
     if (game.gameController) {
-      (game.gameController as unknown as { saveGameToStatistics: (result: string, winner: string | null) => void }).saveGameToStatistics('draw', null);
+      (
+        game.gameController as unknown as {
+          saveGameToStatistics: (result: string, winner: string | null) => void;
+        }
+      ).saveGameToStatistics('draw', null);
     }
     return true;
   }
@@ -30,7 +34,7 @@ export function checkDraw(game: Game): boolean {
   const currentHash = getBoardHash(game);
   const occurrences = game.positionHistory.filter(h => h === currentHash).length;
   if (occurrences >= 3) {
-    game.phase = PHASES.GAME_OVER as unknown as typeof PHASES[keyof typeof PHASES];
+    game.phase = PHASES.GAME_OVER as unknown as (typeof PHASES)[keyof typeof PHASES];
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (Stellungswiederholung)');
@@ -41,13 +45,17 @@ export function checkDraw(game: Game): boolean {
 
     // Save to statistics
     if (game.gameController) {
-      (game.gameController as unknown as { saveGameToStatistics: (result: string, winner: string | null) => void }).saveGameToStatistics('draw', null);
+      (
+        game.gameController as unknown as {
+          saveGameToStatistics: (result: string, winner: string | null) => void;
+        }
+      ).saveGameToStatistics('draw', null);
     }
     return true;
   }
 
   if (isInsufficientMaterial(game)) {
-    game.phase = PHASES.GAME_OVER as unknown as typeof PHASES[keyof typeof PHASES];
+    game.phase = PHASES.GAME_OVER as unknown as (typeof PHASES)[keyof typeof PHASES];
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (Ungenügendes Material)');
@@ -58,7 +66,11 @@ export function checkDraw(game: Game): boolean {
 
     // Save to statistics
     if (game.gameController) {
-      (game.gameController as unknown as { saveGameToStatistics: (result: string, winner: string | null) => void }).saveGameToStatistics('draw', null);
+      (
+        game.gameController as unknown as {
+          saveGameToStatistics: (result: string, winner: string | null) => void;
+        }
+      ).saveGameToStatistics('draw', null);
     }
     return true;
   }
@@ -182,8 +194,7 @@ export function calculateMaterialAdvantage(game: Game): number {
   const size = game.boardSize;
 
   // Perk: Stabile Bauern
-  const stablePawnsActive =
-    game.campaignMode && campaignManager.isPerkUnlocked('stabile_bauern');
+  const stablePawnsActive = game.campaignMode && campaignManager.isPerkUnlocked('stabile_bauern');
 
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {

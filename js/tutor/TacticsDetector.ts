@@ -20,7 +20,10 @@ interface GameLike {
 }
 
 /** A position on the board */
-export interface Pos { r: number; c: number; }
+export interface Pos {
+  r: number;
+  c: number;
+}
 
 /** A tactical pattern detected in a position */
 interface TacticalPattern {
@@ -98,7 +101,6 @@ interface Battery {
   behindName: string;
 }
 
-
 /**
  * Detects tactical patterns for a given move
  * @param {Object} game - The game instance
@@ -106,8 +108,12 @@ interface Battery {
  * @param {Object} move - The move to analyze {from, to}
  * @returns {Array} List of detected patterns
  */
-export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move: { from: Pos; to: Pos }): TacticalPattern[] {
-    const patterns: TacticalPattern[] = [];
+export function detectTacticalPatterns(
+  game: GameLike,
+  analyzer: Analyzer,
+  move: { from: Pos; to: Pos }
+): TacticalPattern[] {
+  const patterns: TacticalPattern[] = [];
   if (!move || !move.from || !move.to) return patterns;
   const from = move.from;
   const to = move.to;
@@ -125,16 +131,16 @@ export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move:
 
     // 1. FORK - Attacks 2+ valuable pieces
     const threatened = getThreatenedPieces(game, analyzer, to, piece.color);
-        const valuableThreatened = threatened.filter((t: { type: string }) => t.type !== 'p');
+    const valuableThreatened = threatened.filter((t: { type: string }) => t.type !== 'p');
 
     if (valuableThreatened.length >= 2) {
-            const pieces = valuableThreatened.map((t: { name: string }) => t.name).join(' und ');
+      const pieces = valuableThreatened.map((t: { name: string }) => t.name).join(' und ');
       patterns.push({
         type: 'fork',
         severity: 'high',
         explanation: `🍴 Gabelangriff! Bedroht: ${pieces}`,
         question: 'Siehst du eine Möglichkeit, zwei wertvolle Figuren gleichzeitig zu bedrohen?',
-                targets: valuableThreatened.map((t: { pos: { r: number; c: number } }) => t.pos),
+        targets: valuableThreatened.map((t: { pos: { r: number; c: number } }) => t.pos),
       });
     }
 
@@ -143,7 +149,7 @@ export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move:
       const pieceName = analyzer.getPieceName(capturedPiece.type);
 
       // Use SEE to check if capture is profitable
-            const seeScore = aiEngine.see(game.board, from, to);
+      const seeScore = aiEngine.see(game.board, from, to);
       const isProfitable = seeScore >= 0;
 
       patterns.push({
@@ -214,8 +220,11 @@ export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move:
 
     // 6. DEFENSE - Defending a threatened piece
     const defendedPieces = getDefendedPieces(game, analyzer, to, piece.color);
-        if (defendedPieces.length > 0 && defendedPieces.some((d: { wasThreatened?: boolean }) => d.wasThreatened)) {
-            const defended = defendedPieces.find((d: { wasThreatened?: boolean }) => d.wasThreatened);
+    if (
+      defendedPieces.length > 0 &&
+      defendedPieces.some((d: { wasThreatened?: boolean }) => d.wasThreatened)
+    ) {
+      const defended = defendedPieces.find((d: { wasThreatened?: boolean }) => d.wasThreatened);
       if (defended) {
         patterns.push({
           type: 'defense',
@@ -264,7 +273,9 @@ export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move:
           severity: 'medium',
           explanation: `🔓 Zerstörung der Verteidigung! ${undefendedName} ist nun angreifbar`,
           question: 'Kannst du einen Verteidiger ausschalten, um eine andere Figur zu schwächen?',
-                    targets: removingGuard.map((rg: { undefendedPos: { r: number; c: number } }) => rg.undefendedPos),
+          targets: removingGuard.map(
+            (rg: { undefendedPos: { r: number; c: number } }) => rg.undefendedPos
+          ),
         });
       }
     }
@@ -280,8 +291,13 @@ export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move:
 /**
  * Detect Skewers: Similar to Pin, but valuable piece is in front
  */
-export function detectSkewers(game: GameLike, analyzer: Analyzer, pos: Pos, attackerColor: string): Skewer[] {
-    const skewers: Skewer[] = [];
+export function detectSkewers(
+  game: GameLike,
+  analyzer: Analyzer,
+  pos: Pos,
+  attackerColor: string
+): Skewer[] {
+  const skewers: Skewer[] = [];
   const piece = game.board[pos.r][pos.c];
 
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
@@ -291,7 +307,7 @@ export function detectSkewers(game: GameLike, analyzer: Analyzer, pos: Pos, atta
   const opponentColor = attackerColor === 'white' ? 'black' : 'white';
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-    for (const move of moves) {
+  for (const move of moves) {
     const targetPiece = game.board[move.r][move.c];
     if (!targetPiece || targetPiece.color !== opponentColor) continue;
 
@@ -352,7 +368,7 @@ export function detectRemovingGuard(
   capturePos: Pos,
   capturedPiece: { type: string; color: string }
 ): RemovedGuard[] {
-    const revealedVulnerabilities: RemovedGuard[] = [];
+  const revealedVulnerabilities: RemovedGuard[] = [];
   const defenderColor = capturedPiece.color;
 
   // We already simulated the capture in the main loop (board has attacker at capturePos).
@@ -409,7 +425,12 @@ export function detectRemovingGuard(
   return revealedVulnerabilities;
 }
 
-function canPieceAttackSquare(game: GameLike, piece: { type: string; color: string }, from: Pos, to: Pos): boolean {
+function canPieceAttackSquare(
+  game: GameLike,
+  piece: { type: string; color: string },
+  from: Pos,
+  to: Pos
+): boolean {
   // Check if piece at 'from' can move to 'to' on the current board
   // (ignoring that 'from' might be occupied by attacker now, assume it's piece)
 
@@ -479,7 +500,7 @@ export function isTactical(game: GameLike, move: { from: Pos; to: Pos }): boolea
 
   // Check for other tactical patterns (simplified to avoid deep recursion)
   // We check if the move creates a fork or pin
-    const analyzer: Analyzer = { getPieceName: (t: string) => t };
+  const analyzer: Analyzer = { getPieceName: (t: string) => t };
   const patterns = detectTacticalPatterns(game, analyzer, move);
   return patterns.length > 0;
 }
@@ -488,9 +509,14 @@ export function isTactical(game: GameLike, move: { from: Pos; to: Pos }): boolea
  * Detect if a piece at the given position is pinning an opponent piece
  * Returns array of pinned pieces
  */
- export function detectPins(game: GameLike, analyzer: Analyzer, pos: Pos, attackerColor: string): PinnedPiece[] {
-     const pinned: PinnedPiece[] = [];
-   const piece = game.board[pos.r][pos.c];
+export function detectPins(
+  game: GameLike,
+  analyzer: Analyzer,
+  pos: Pos,
+  attackerColor: string
+): PinnedPiece[] {
+  const pinned: PinnedPiece[] = [];
+  const piece = game.board[pos.r][pos.c];
 
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
     return pinned; // Only sliding pieces can pin
@@ -501,7 +527,7 @@ export function isTactical(game: GameLike, move: { from: Pos; to: Pos }): boolea
   // Check all directions this piece can move
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-    for (const move of moves) {
+  for (const move of moves) {
     const targetPiece = game.board[move.r][move.c];
     if (!targetPiece || targetPiece.color !== opponentColor) continue;
 
@@ -547,7 +573,7 @@ export function detectDiscoveredAttacks(
   _to: Pos,
   attackerColor: string
 ): DiscoveredAttack[] {
-    const discovered: DiscoveredAttack[] = [];
+  const discovered: DiscoveredAttack[] = [];
 
   // Check all our sliding pieces to see if moving from->to reveals an attack
   const opponentColor = attackerColor === 'white' ? 'black' : 'white';
@@ -628,9 +654,13 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
 /**
  * Detect threats to own pieces after making a move
  */
- export function detectThreatsAfterMove(game: GameLike, analyzer: Analyzer, move: { from: Pos; to: Pos }): Threat[] {
-     const threats: Threat[] = [];
-   const from = move.from;
+export function detectThreatsAfterMove(
+  game: GameLike,
+  analyzer: Analyzer,
+  move: { from: Pos; to: Pos }
+): Threat[] {
+  const threats: Threat[] = [];
+  const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
 
@@ -652,7 +682,7 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
         // Pawns are now included for STRICT mode detection
 
         // Is this piece under attack?
-                const isUnderAttack = aiEngine.isSquareAttacked(game.board, r, c, opponentColor);
+        const isUnderAttack = aiEngine.isSquareAttacked(game.board, r, c, opponentColor);
         if (isUnderAttack) {
           // Is it defended?
           const defenders = countDefenders(game, r, c, piece.color);
@@ -680,7 +710,12 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
 /**
  * Count how many pieces defend a square
  */
-export function countDefenders(game: GameLike, r: number, c: number, defenderColor: string): number {
+export function countDefenders(
+  game: GameLike,
+  r: number,
+  c: number,
+  defenderColor: string
+): number {
   let count = 0;
   for (let pr = 0; pr < BOARD_SIZE; pr++) {
     for (let pc = 0; pc < BOARD_SIZE; pc++) {
@@ -688,7 +723,7 @@ export function countDefenders(game: GameLike, r: number, c: number, defenderCol
       if (!piece || piece.color !== defenderColor) continue;
 
       const moves = game.getValidMoves(pr, pc, piece);
-            if (moves.some((m: Pos) => m.r === r && m.c === c)) {
+      if (moves.some((m: Pos) => m.r === r && m.c === c)) {
         count++;
       }
     }
@@ -699,7 +734,12 @@ export function countDefenders(game: GameLike, r: number, c: number, defenderCol
 /**
  * Count how many pieces attack a square
  */
-export function countAttackers(game: GameLike, r: number, c: number, attackerColor: string): number {
+export function countAttackers(
+  game: GameLike,
+  r: number,
+  c: number,
+  attackerColor: string
+): number {
   let count = 0;
   for (let pr = 0; pr < BOARD_SIZE; pr++) {
     for (let pc = 0; pc < BOARD_SIZE; pc++) {
@@ -707,7 +747,7 @@ export function countAttackers(game: GameLike, r: number, c: number, attackerCol
       if (!piece || piece.color !== attackerColor) continue;
 
       const moves = game.getValidMoves(pr, pc, piece);
-            if (moves.some((m: Pos) => m.r === r && m.c === c)) {
+      if (moves.some((m: Pos) => m.r === r && m.c === c)) {
         count++;
       }
     }
@@ -724,13 +764,13 @@ export function getThreatenedPieces(
   pos: Pos,
   attackerColor: string
 ): ThreatenedPiece[] {
-    const threatened: ThreatenedPiece[] = [];
+  const threatened: ThreatenedPiece[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece) return threatened;
 
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-    moves.forEach((move: Pos) => {
+  moves.forEach((move: Pos) => {
     const targetPiece = game.board[move.r][move.c];
     if (targetPiece && targetPiece.color !== attackerColor) {
       threatened.push({
@@ -754,13 +794,13 @@ export function getDefendedPieces(
   pos: Pos,
   defenderColor: string
 ): DefendedPiece[] {
-    const defended: DefendedPiece[] = [];
+  const defended: DefendedPiece[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece) return defended;
 
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-    moves.forEach((move: Pos) => {
+  moves.forEach((move: Pos) => {
     const targetPiece = game.board[move.r][move.c];
     if (targetPiece && targetPiece.color === defenderColor) {
       // Check if this piece is threatened by opponent
@@ -783,8 +823,13 @@ export function getDefendedPieces(
 /**
  * Detect Battery: Aligning two sliding pieces
  */
-export function detectBattery(game: GameLike, analyzer: Analyzer, pos: Pos, color: string): Battery[] {
-    const batteries: Battery[] = [];
+export function detectBattery(
+  game: GameLike,
+  analyzer: Analyzer,
+  pos: Pos,
+  color: string
+): Battery[] {
+  const batteries: Battery[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) return batteries;
 
@@ -805,7 +850,7 @@ export function detectBattery(game: GameLike, analyzer: Analyzer, pos: Pos, colo
     [-1, -1],
   ];
 
-    const checkDirs = (dirs: number[][], types: string[]) => {
+  const checkDirs = (dirs: number[][], types: string[]) => {
     dirs.forEach(d => {
       let r = pos.r + d[0];
       let c = pos.c + d[1];

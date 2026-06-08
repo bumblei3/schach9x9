@@ -2,7 +2,12 @@ import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import { AI_DEPTH_CONFIG } from '../config.js';
 import type { SearchResult, MoveResult } from '../aiEngine.js';
-import { setTutorLoading, showTutorSuggestions as showTutorSuggestionsUI, renderBoard, updateShopUI } from '../ui.js';
+import {
+  setTutorLoading,
+  showTutorSuggestions as showTutorSuggestionsUI,
+  renderBoard,
+  updateShopUI,
+} from '../ui.js';
 import { analyzeMoveWithExplanation, getMoveNotation } from './MoveAnalyzer.js';
 import type { MoveExplanation } from './MoveAnalyzer.js';
 import type { Piece } from '../types/game.js';
@@ -91,7 +96,9 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
 
       return true;
     });
-    logger.context('HintGenerator').debug('[HintGenerator] Valid moves after filtering:', validMoves.length);
+    logger
+      .context('HintGenerator')
+      .debug('[HintGenerator] Valid moves after filtering:', validMoves.length);
 
     // Convert engine moves to hints with explanations
     return Promise.all(
@@ -115,7 +122,9 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
         return {
           move: hint.move,
           score: hint.score,
-          notation: hint.move ? getMoveNotation(game, hint.move as unknown as { from: Square; to: Square }) : '',
+          notation: hint.move
+            ? getMoveNotation(game, hint.move as unknown as { from: Square; to: Square })
+            : '',
           analysis,
           tacticsHighlight,
           pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
@@ -132,18 +141,16 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
  */
 export function isTutorMove(game: Game, from: Square, to: Square): boolean {
   if (!game.bestMoves) return false;
-  return game.bestMoves.some(
-    (m: unknown) => {
-      const move = m as { move: { from: Square; to: Square }; score?: number };
-      if (!move || !move.move) return false;
-      return (
-        move.move.from.r === from.r &&
-        move.move.from.c === from.c &&
-        move.move.to.r === to.r &&
-        move.move.to.c === to.c
-      );
-    }
-  );
+  return game.bestMoves.some((m: unknown) => {
+    const move = m as { move: { from: Square; to: Square }; score?: number };
+    if (!move || !move.move) return false;
+    return (
+      move.move.from.r === from.r &&
+      move.move.from.c === from.c &&
+      move.move.to.r === to.r &&
+      move.move.to.c === to.c
+    );
+  });
 }
 
 /**
@@ -216,11 +223,13 @@ function createTemplate(
 
   // Development warning if costs don't match
   if (calculatedCost !== expectedCost) {
-    logger.context('HintGenerator').warn(
-      `[HintGenerator] Template "${id}" cost mismatch! ` +
-        `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
-        `(Pieces: ${pieces.join(', ')})`
-    );
+    logger
+      .context('HintGenerator')
+      .warn(
+        `[HintGenerator] Template "${id}" cost mismatch! ` +
+          `Expected: ${expectedCost}, Calculated: ${calculatedCost} ` +
+          `(Pieces: ${pieces.join(', ')})`
+      );
   }
 
   return {
@@ -708,7 +717,11 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
 /**
  * Applies a setup template to the board
  */
-export function applySetupTemplate(game: Game, tutorController: { getSetupTemplates?: () => SetupTemplate[] }, templateId: string): void {
+export function applySetupTemplate(
+  game: Game,
+  tutorController: { getSetupTemplates?: () => SetupTemplate[] },
+  templateId: string
+): void {
   let template: SetupTemplate | undefined;
   if (tutorController && tutorController.getSetupTemplates) {
     template = tutorController.getSetupTemplates().find((t: SetupTemplate) => t.id === templateId);
@@ -741,7 +754,8 @@ export function applySetupTemplate(game: Game, tutorController: { getSetupTempla
   }
 
   // Store king pos temporarily for heuristic
-  (game as Game & { availableKingPos?: { r: number; c: number } | null }).availableKingPos = kingPos;
+  (game as Game & { availableKingPos?: { r: number; c: number } | null }).availableKingPos =
+    kingPos;
 
   // Reset points
   game.points = game.initialPoints;

@@ -57,7 +57,10 @@ interface ThreatInfo {
  * @param {Object} game
  * @param {Object} move {from: {r,c}, to: {r,c}}
  */
-export async function analyzePlayerMovePreExecution(game: any, move: { from: Square; to: Square }): Promise<unknown> {
+export async function analyzePlayerMovePreExecution(
+  game: any,
+  move: { from: Square; to: Square }
+): Promise<unknown> {
   if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return Promise.resolve(null);
 
   const from = move.from;
@@ -66,16 +69,16 @@ export async function analyzePlayerMovePreExecution(game: any, move: { from: Squ
   if (!piece) return Promise.resolve(null);
 
   // 1. Get current evaluation
-    const currentEval = await evaluatePosition(game.board, 'white');
+  const currentEval = await evaluatePosition(game.board, 'white');
 
   // 🎯 Add tactical penalty for hanging pieces
-    const threats = detectThreatsAfterMove(
+  const threats = detectThreatsAfterMove(
     game,
     { getPieceName: (t: string) => t } as Analyzer,
     move
   );
   let penalty = 0;
-    threats.forEach((t: ThreatInfo) => {
+  threats.forEach((t: ThreatInfo) => {
     const val: Record<string, number> = {
       p: 100,
       n: 320,
@@ -96,7 +99,7 @@ export async function analyzePlayerMovePreExecution(game: any, move: { from: Squ
   game.board[from.r][from.c] = null;
 
   // 3. Evaluate resulting position
-    let newEval = await evaluatePosition(game.board, 'white');
+  let newEval = await evaluatePosition(game.board, 'white');
 
   const turn = piece.color;
   if (turn === 'white') newEval -= penalty;
@@ -109,7 +112,7 @@ export async function analyzePlayerMovePreExecution(game: any, move: { from: Squ
   // 4. Calculate drop from perspective of moving player
   const drop = turn === 'white' ? currentEval - newEval : newEval - currentEval;
 
-    const currentLevel = MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD;
+  const currentLevel = MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD;
   const threshold = currentLevel.threshold;
 
   if (drop >= threshold) {
@@ -134,9 +137,9 @@ export function analyzeMoveWithExplanation(
   score: number,
   bestScore: number
 ): MoveExplanation {
-    const tacticalExplanations: string[] = [];
-    const strategicExplanations: string[] = [];
-    const warnings: string[] = [];
+  const tacticalExplanations: string[] = [];
+  const strategicExplanations: string[] = [];
+  const warnings: string[] = [];
   let category = 'normal';
 
   // Calculate difference from best move (relative quality)
@@ -149,7 +152,7 @@ export function analyzeMoveWithExplanation(
 
   if (diffP >= 0) {
     // If it's as good or better than engine's top move
-        if (diffP > 0.5 && isTactical(game, move)) {
+    if (diffP > 0.5 && isTactical(game, move)) {
       category = 'brilliant';
       qualityLabel =
         '!! Brillanter Zug! Du hast eine taktische Tiefe gefunden, die die KI beeindruckt.';
@@ -179,23 +182,23 @@ export function analyzeMoveWithExplanation(
 
   // Detect tactical patterns
   const analyzer = { getPieceName };
-    const patterns = detectTacticalPatterns(game, analyzer, move);
-    const questions: string[] = [];
-    patterns.forEach((pattern) => {
+  const patterns = detectTacticalPatterns(game, analyzer, move);
+  const questions: string[] = [];
+  patterns.forEach(pattern => {
     tacticalExplanations.push(pattern.explanation);
     if (pattern.question) questions.push(pattern.question);
   });
 
   // Analyze strategic value
   const strategic = analyzeStrategicValue(game, move);
-    strategic.forEach((s) => {
+  strategic.forEach(s => {
     strategicExplanations.push(s.explanation);
   });
 
   // Check for threats to own pieces after this move
-    const threats = detectThreatsAfterMove(game, analyzer, move);
+  const threats = detectThreatsAfterMove(game, analyzer, move);
   if (threats.length > 0) {
-        threats.forEach((threat) => {
+    threats.forEach(threat => {
       warnings.push(threat.warning);
     });
   }
@@ -220,7 +223,7 @@ export function analyzeMoveWithExplanation(
  * Analyzes strategic value of a move
  */
 export function analyzeStrategicValue(game: Game, move: MoveInfo): StrategicPattern[] {
-    const patterns: StrategicPattern[] = [];
+  const patterns: StrategicPattern[] = [];
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
@@ -368,7 +371,7 @@ export function getMoveNotation(game: Game, move: MoveInfo): string {
   }
 
   const targetPiece = game.board[move.to.r][move.to.c];
-    const pieceSymbol = getPieceText(piece);
+  const pieceSymbol = getPieceText(piece);
   const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
 
   const pieceName = getPieceName(piece.type);
@@ -402,13 +405,19 @@ export function getPieceName(type: string): string {
 /**
  * Handles player moves for Guess the Move and warnings
  */
-export function handlePlayerMove(game: any, _tutorController: unknown, from: Square, to: Square): void {
+export function handlePlayerMove(
+  game: any,
+  _tutorController: unknown,
+  from: Square,
+  to: Square
+): void {
   if (game.phase !== PHASES.PLAY) return;
 
   // Get the move from legal moves
   const moves = game.getAllLegalMoves(game.turn);
-    const move = moves.find(
-    (m: MoveInfo) => m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
+  const move = moves.find(
+    (m: MoveInfo) =>
+      m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
   );
 
   if (!move) return;
@@ -417,7 +426,7 @@ export function handlePlayerMove(game: any, _tutorController: unknown, from: Squ
   if (game.tutorMode === 'guess_the_move') {
     const bestMoves = game.bestMoves || [];
     if (bestMoves.length > 0) {
-            const isBest = bestMoves.some(
+      const isBest = bestMoves.some(
         (hint: { move: MoveInfo }) =>
           hint.move.from.r === from.r &&
           hint.move.from.c === from.c &&
@@ -429,7 +438,7 @@ export function handlePlayerMove(game: any, _tutorController: unknown, from: Squ
         game.tutorPoints += 10;
         showToast('Richtig geraten! +10 Tutor-Punkte', 'success');
       } else {
-                showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
+        showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
       }
     }
   }
@@ -472,22 +481,20 @@ export async function checkBlunder(
   }
 
   // Show quality highlight on the board
-    if (showMoveQuality) {
-      // We assume the best move score is either the engine's best or the previous eval if no engine ran
-      const bestScore =
-        game.bestMoves && game.bestMoves.length > 0 ? (game.bestMoves[0].score ?? prevEval) : prevEval;
-      const analysis = analyzeMoveWithExplanation(
-        game,
-        { from: moveRecord.from, to: moveRecord.to },
-        currentEvalNum,
-        bestScore ?? prevEval
-      );
-      showMoveQuality(
-        game,
-        { from: moveRecord.from, to: moveRecord.to },
-        analysis.category
-      );
-    }
+  if (showMoveQuality) {
+    // We assume the best move score is either the engine's best or the previous eval if no engine ran
+    const bestScore =
+      game.bestMoves && game.bestMoves.length > 0
+        ? (game.bestMoves[0].score ?? prevEval)
+        : prevEval;
+    const analysis = analyzeMoveWithExplanation(
+      game,
+      { from: moveRecord.from, to: moveRecord.to },
+      currentEvalNum,
+      bestScore ?? prevEval
+    );
+    showMoveQuality(game, { from: moveRecord.from, to: moveRecord.to }, analysis.category);
+  }
 
   game.lastEval = currentEval;
 }
@@ -495,7 +502,15 @@ export async function checkBlunder(
 /**
  * Shows a blunder warning (can be post-move or pre-move)
  */
-export function showBlunderWarning(game: Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis: MoveExplanation, proceedCallback: (() => void) | null = null): void {
+export function showBlunderWarning(
+  game: Game & {
+    moveController?: { undoMove: () => void };
+    undoMove?: () => void;
+    lastEval?: number;
+  },
+  analysis: MoveExplanation,
+  proceedCallback: (() => void) | null = null
+): void {
   const warnings = analysis.warnings.join('\n');
   const explanation =
     analysis.tacticalExplanations.join('\n') ||
@@ -529,5 +544,5 @@ export function showBlunderWarning(game: Game & { moveController?: { undoMove: (
         },
       ];
 
-    showModal(title, message, buttons);
+  showModal(title, message, buttons);
 }

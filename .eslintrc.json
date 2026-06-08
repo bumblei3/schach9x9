@@ -11,14 +11,8 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "import"
-  ],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "plugins": ["@typescript-eslint", "import"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "rules": {
     "indent": "off",
     "linebreak-style": ["error", "unix"],
@@ -67,7 +61,7 @@
   },
   "overrides": [
     {
-      "files": ["vite.config.ts", "vitest.config.ts"],
+      "files": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "service-worker.ts"],
       "parserOptions": {
         "project": null
       }

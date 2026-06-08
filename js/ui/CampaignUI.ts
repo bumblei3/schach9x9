@@ -289,7 +289,7 @@ export class CampaignUI {
       this.renderPerks();
       showToast(`${perk.name} erfolgreich gekauft!`, 'success');
     } else {
-      showToast(`Nicht genug Gold!`, 'error');
+      showToast('Nicht genug Gold!', 'error');
     }
   }
 

@@ -50,11 +50,11 @@ export class E2EHelper {
 
     // Wait for menu to disappear
     await expect(this.page.locator('#main-menu')).not.toHaveClass(/active/, { timeout: 10000 });
-    console.log(`[E2EHelper] Main menu is now hidden`);
+    console.log('[E2EHelper] Main menu is now hidden');
 
     // Wait for board to appear
     await expect(this.page.locator('[data-testid="board"]')).toBeVisible({ timeout: 10000 });
-    console.log(`[E2EHelper] Board is now visible`);
+    console.log('[E2EHelper] Board is now visible');
   }
 
   /**

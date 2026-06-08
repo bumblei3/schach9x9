@@ -294,7 +294,11 @@ function createKnight(group: THREE.Group, material: THREE.Material): void {
 /**
  * Create a Bishop with LatheGeometry
  */
-function createBishop(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createBishop(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   // Body Lathe
   const points: THREE.Vector2[] = [];
   points.push(new THREE.Vector2(0.28, 0.0));
@@ -360,7 +364,11 @@ function createRook(group: THREE.Group, material: THREE.Material): void {
 /**
  * Create a Queen with LatheGeometry
  */
-function createQueen(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createQueen(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   const points: THREE.Vector2[] = [];
   points.push(new THREE.Vector2(0.32, 0.0));
   points.push(new THREE.Vector2(0.32, 0.15));
@@ -405,7 +413,11 @@ function createQueen(group: THREE.Group, material: THREE.Material, accentMateria
 /**
  * Create a King with LatheGeometry
  */
-function createKing(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createKing(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   const points: THREE.Vector2[] = [];
   points.push(new THREE.Vector2(0.35, 0.0));
   points.push(new THREE.Vector2(0.35, 0.15));
@@ -437,7 +449,11 @@ function createKing(group: THREE.Group, material: THREE.Material, accentMaterial
 /**
  * Create an Archbishop (Bishop + Knight hybrid)
  */
-function createArchbishop(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createArchbishop(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.29, 0.33, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -473,7 +489,11 @@ function createArchbishop(group: THREE.Group, material: THREE.Material, accentMa
 /**
  * Create a Chancellor (Rook + Knight hybrid)
  */
-function createChancellor(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createChancellor(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.31, 0.35, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -515,7 +535,11 @@ function createChancellor(group: THREE.Group, material: THREE.Material, accentMa
 /**
  * Create an Angel (premium piece)
  */
-function createAngel(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createAngel(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.32, 0.37, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);
@@ -569,7 +593,11 @@ function createAngel(group: THREE.Group, material: THREE.Material, accentMateria
 /**
  * Create a Nightrider (sliding knight)
  */
-function createNightrider(group: THREE.Group, material: THREE.Material, accentMaterial: THREE.MeshStandardMaterial): void {
+function createNightrider(
+  group: THREE.Group,
+  material: THREE.Material,
+  accentMaterial: THREE.MeshStandardMaterial
+): void {
   // Base
   const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.15, 16);
   const base = new THREE.Mesh(baseGeo, material);

@@ -24,7 +24,7 @@ export function coordToAlgebraic(r: number, c: number): string {
 /**
  * Debounce a function to limit how often it can be called
  */
-export function debounce<T extends (...args: unknown[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>( // eslint-disable-line space-before-function-paren
   fn: T,
   delay: number = 150
 ): (...args: Parameters<T>) => void {

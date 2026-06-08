@@ -73,7 +73,7 @@ export function runRulesFuzzTest(iterations: number = 1000) {
     for (const m of moves) {
       const targetPiece = board[m.to];
       if ((targetPiece & TYPE_MASK) === PIECE_KING) {
-        console.error(`CRITICAL: Generated move captures King!`, m);
+        console.error('CRITICAL: Generated move captures King!', m);
         throw new Error('King capture generated!');
       }
     }
@@ -98,7 +98,7 @@ export function runRulesFuzzTest(iterations: number = 1000) {
     // We just moved 'currentTurn'.
     const colorCode = currentTurn === 'white' ? COLOR_WHITE : COLOR_BLACK;
     if (isInCheck(board, colorCode)) {
-      console.error(`CRITICAL: Move left player in check!`, move);
+      console.error('CRITICAL: Move left player in check!', move);
       undoMove(board, undo); // Restore state for debugging context if needed
       throw new Error('Move left player in check!');
     }
@@ -110,9 +110,9 @@ export function runRulesFuzzTest(iterations: number = 1000) {
 
     if (originalBoardState !== postUndoBoardState) {
       console.error(`Inconsistency detected at iteration ${i}!`);
-      console.error(`Move:`, move);
-      console.error(`Undo Info:`, undo);
-      throw new Error(`Board state mismatch after undo!`);
+      console.error('Move:', move);
+      console.error('Undo Info:', undo);
+      throw new Error('Board state mismatch after undo!');
     }
 
     // Actually apply the move for next step

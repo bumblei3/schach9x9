@@ -177,6 +177,9 @@ export function setOpeningBook(bookData: BookData): void {
 /**
  * Legacy function for backward compatibility
  */
-export function queryOpeningBook(board: (Piece | null)[][], moveNumber: number): { from: Square; to: Square } | null {
+export function queryOpeningBook(
+  board: (Piece | null)[][],
+  moveNumber: number
+): { from: Square; to: Square } | null {
   return openingBook.getMove(board, moveNumber);
 }

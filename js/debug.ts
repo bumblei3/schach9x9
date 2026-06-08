@@ -281,9 +281,10 @@ export class DebugConsole {
 
   public hookIntoLogger(): void {
     // Hook into the logger to capture all logs
-    // _log is private; cast to Function via unknown to avoid top-level `any`
-    const logProxy = logger as unknown as { _log: Function };
-    const originalLog = logProxy._log.bind(logger) as Function;
+    // _log is private; cast via unknown to access it
+    type LogFn = (level: number, levelName: string, args: unknown[]) => void;
+    const logProxy = logger as unknown as { _log: LogFn };
+    const originalLog: LogFn = logProxy._log.bind(logger) as LogFn;
     logProxy._log = (level: number, levelName: string, args: unknown[]): void => {
       originalLog(level, levelName, args);
       this.addLog(levelName.toLowerCase(), (args as string[]).join(' '));

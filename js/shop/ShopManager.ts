@@ -93,9 +93,7 @@ export class ShopManager {
   handleBuyPiece(r: number, c: number): void {
     const isWhiteTurn = this.game.phase === PHASES.SETUP_WHITE_PIECES;
     const color = isWhiteTurn ? 'white' : 'black';
-    const colStart = isWhiteTurn
-      ? this.game.whiteCorridor
-      : this.game.blackCorridor;
+    const colStart = isWhiteTurn ? this.game.whiteCorridor : this.game.blackCorridor;
 
     if (typeof colStart !== 'number') return;
 
@@ -300,7 +298,9 @@ export class ShopManager {
    * Performs the actual upgrade logic.
    */
   performUpgrade(r: number, c: number, targetType: string): void {
-    logger.context('ShopManager').debug('[ShopManager] performUpgrade called:', { r, c, targetType });
+    logger
+      .context('ShopManager')
+      .debug('[ShopManager] performUpgrade called:', { r, c, targetType });
     const piece = this.game.board[r][c];
     if (!piece) {
       logger.context('ShopManager').warn('[ShopManager] No piece found at', r, c);
@@ -331,7 +331,9 @@ export class ShopManager {
         window.battleChess3D.addPiece(targetType, piece.color, r, c);
       }
     } else {
-      logger.context('ShopManager').warn('[ShopManager] Not enough points:', this.game.points, '<', cost);
+      logger
+        .context('ShopManager')
+        .warn('[ShopManager] Not enough points:', this.game.points, '<', cost);
     }
   }
 }

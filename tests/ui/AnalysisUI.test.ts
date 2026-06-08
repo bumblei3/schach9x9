@@ -240,9 +240,7 @@ describe('AnalysisUI', () => {
     expect(UI.showModal).toHaveBeenCalledWith(
       'Analyse abgeschlossen',
       expect.any(String),
-      expect.arrayContaining([
-        expect.objectContaining({ text: 'Partie durchsehen' }),
-      ])
+      expect.arrayContaining([expect.objectContaining({ text: 'Partie durchsehen' })])
     );
   });
 });

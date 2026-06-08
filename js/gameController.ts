@@ -5,7 +5,13 @@
  * and coordinating between game engine, shop, UI, and AI.
  */
 
-import { PHASES, AI_DELAY_MS, type Game, type PuzzleState, type PieceWithMoved } from './gameEngine.js';
+import {
+  PHASES,
+  AI_DELAY_MS,
+  type Game,
+  type PuzzleState,
+  type PieceWithMoved,
+} from './gameEngine.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
@@ -34,7 +40,11 @@ import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 
 /** Type for the arrowRenderer field on Game, matching gameEngine.ts line 173 */
-type ArrowRendererType = { clearArrows: () => void; addArrow?: (...args: unknown[]) => void; highlightMoves?: (arrows: unknown[]) => void };
+type ArrowRendererType = {
+  clearArrows: () => void;
+  addArrow?: (...args: unknown[]) => void;
+  highlightMoves?: (arrows: unknown[]) => void;
+};
 
 export interface GameExtended extends Game {
   campaignMode?: boolean;
@@ -156,12 +166,14 @@ export class GameController {
   }
 
   async handleCellClick(r: number, c: number): Promise<void> {
-    logger.context('GameController').debug(
-      '[GameController] handleCellClick called: row=%d, col=%d, phase=%s',
-      r,
-      c,
-      this.game.phase
-    );
+    logger
+      .context('GameController')
+      .debug(
+        '[GameController] handleCellClick called: row=%d, col=%d, phase=%s',
+        r,
+        c,
+        this.game.phase
+      );
 
     // Prevent interaction in replay mode
     if (this.game.replayMode) {
@@ -499,7 +511,12 @@ export class GameController {
     this.stopClock();
 
     // Restore state
-    if (storageManager.loadStateIntoGame(this.game as unknown as import('./storage.js').GameLike, state)) {
+    if (
+      storageManager.loadStateIntoGame(
+        this.game as unknown as import('./storage.js').GameLike,
+        state
+      )
+    ) {
       this.game.log('📂 Spielstand geladen.');
     } else {
       this.game.log('❌ Fehler beim Laden des Spielstands.');
@@ -562,7 +579,10 @@ export class GameController {
   }
 
   autoSave(): void {
-    if (this.game.mode !== 'puzzle' && storageManager.saveGame(this.game as unknown as import('./storage.js').GameLike)) {
+    if (
+      this.game.mode !== 'puzzle' &&
+      storageManager.saveGame(this.game as unknown as import('./storage.js').GameLike)
+    ) {
       logger.debug('Auto-saved game');
     }
   }
@@ -806,7 +826,9 @@ export class GameController {
         // Gather stats for star calculation
         const stats = {
           moves: Math.ceil(this.game.stats.totalMoves / 2), // Full moves
-          materialDiff: this.game.calculateMaterialAdvantage ? this.game.calculateMaterialAdvantage(this.game.playerColor!) : 0,
+          materialDiff: this.game.calculateMaterialAdvantage
+            ? this.game.calculateMaterialAdvantage(this.game.playerColor!)
+            : 0,
           promotedCount: this.game.stats.promotions || 0,
         };
 
@@ -886,7 +908,13 @@ export class GameController {
         // Player survived long enough - check if they still have their king
         const playerKing = this.game.board
           .flat()
-          .find((p): p is PieceWithMoved => p !== null && p.type === 'k' && p.hasMoved === true && p.color === this.game.playerColor);
+          .find(
+            (p): p is PieceWithMoved =>
+              p !== null &&
+              p.type === 'k' &&
+              p.hasMoved === true &&
+              p.color === this.game.playerColor
+          );
         if (playerKing) {
           this.handleGameEnd('win', this.game.playerColor!);
         }

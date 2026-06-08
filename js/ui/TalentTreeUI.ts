@@ -148,7 +148,7 @@ export class TalentTreeUI {
                     </div>
                 `;
         });
-        html += `</div>`;
+        html += '</div>';
       }
     });
 

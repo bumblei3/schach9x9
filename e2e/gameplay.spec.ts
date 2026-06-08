@@ -251,10 +251,10 @@ test.describe('Core Gameplay Loop', () => {
 
     // 6. Verify placement and cost deduction
     // Debug DOM state
-    const cellExists = await page.locator('.cell[data-r=\"8\"][data-c=\"3\"]').count();
+    const cellExists = await page.locator('.cell[data-r="8"][data-c="3"]').count();
     const cellHtml =
       cellExists > 0
-        ? await page.locator('.cell[data-r=\"8\"][data-c=\"3\"]').innerHTML()
+        ? await page.locator('.cell[data-r="8"][data-c="3"]').innerHTML()
         : 'cell not found';
     console.log('Cell 8,3 exists:', cellExists, 'content:', cellHtml);
 

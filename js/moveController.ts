@@ -1,8 +1,33 @@
-import { PHASES, PIECE_VALUES, type Player, type Game, type Piece, type MoveHistoryEntry, type Square, type PieceWithMoved } from './gameEngine.js';
+import {
+  PHASES,
+  PIECE_VALUES,
+  type Player,
+  type Game,
+  type Piece,
+  type MoveHistoryEntry,
+  type Square,
+  type PieceWithMoved,
+} from './gameEngine.js';
 import { campaignManager } from './campaign/CampaignManager.js';
-import { checkDraw, isInsufficientMaterial, getBoardHash, calculateMaterialAdvantage } from './move/MoveValidator.js';
-import { executeMove as executeMoveFromExecutor, finishMove as finishMoveFromExecutor } from './move/MoveExecutor.js';
-import { undoMove as undoMoveFromManager, saveGame as saveGameFromManager, loadGame as loadGameFromManager, enterReplayMode as enterReplayModeFromManager, exitReplayMode as exitReplayModeFromManager, reconstructBoardAtMove as reconstructBoardAtMoveFromManager, undoMoveForReplay as undoMoveForReplayFromManager } from './move/GameStateManager.js';
+import {
+  checkDraw,
+  isInsufficientMaterial,
+  getBoardHash,
+  calculateMaterialAdvantage,
+} from './move/MoveValidator.js';
+import {
+  executeMove as executeMoveFromExecutor,
+  finishMove as finishMoveFromExecutor,
+} from './move/MoveExecutor.js';
+import {
+  undoMove as undoMoveFromManager,
+  saveGame as saveGameFromManager,
+  loadGame as loadGameFromManager,
+  enterReplayMode as enterReplayModeFromManager,
+  exitReplayMode as exitReplayModeFromManager,
+  reconstructBoardAtMove as reconstructBoardAtMoveFromManager,
+  undoMoveForReplay as undoMoveForReplayFromManager,
+} from './move/GameStateManager.js';
 import * as UI from './ui.js';
 
 /**
@@ -10,10 +35,10 @@ import * as UI from './ui.js';
  * Maintains backward compatibility with the original MoveController API.
  */
 export class MoveController {
-    private game: Game;
-    public redoStack: MoveHistoryEntry[];
+  private game: Game;
+  public redoStack: MoveHistoryEntry[];
 
-    constructor(game: Game) {
+  constructor(game: Game) {
     this.game = game;
     this.redoStack = [];
   }
@@ -92,7 +117,7 @@ export class MoveController {
    * @param {Object} to Destination square {r, c}
    * @param {boolean} isUndoRedo Whether this move is from an undo/redo operation
    */
-    public async executeMove(
+  public async executeMove(
     from: Square,
     to: Square,
     isUndoRedo: boolean = false,
@@ -104,14 +129,14 @@ export class MoveController {
   /**
    * Finalizes the move, switches turns, and checks for game over
    */
-    public finishMove(): void {
+  public finishMove(): void {
     return finishMoveFromExecutor(this.game);
   }
 
   /**
    * Undoes the last move
    */
-    public undoMove(): void {
+  public undoMove(): void {
     return undoMoveFromManager(this.game, this);
   }
 
@@ -139,17 +164,22 @@ export class MoveController {
   /**
    * Shows the promotion UI
    */
-    public showPromotionUI(r: number, c: number, color: string, moveRecord: MoveHistoryEntry): void {
+  public showPromotionUI(r: number, c: number, color: string, moveRecord: MoveHistoryEntry): void {
     UI.showPromotionUI(this.game, r, c, color as Player, moveRecord, () => this.finishMove());
   }
 
   /**
    * Animates a move
    */
-    public async animateMove(from: Square, to: Square, piece: PieceWithMoved | null): Promise<void> {
+  public async animateMove(from: Square, to: Square, piece: PieceWithMoved | null): Promise<void> {
     // BoardRenderer.animateMove expects Piece, but PieceWithMoved extends Piece.
     // The null case is handled by the caller — this cast is safe.
-    const animFn = (UI as any).animateMove as (g: Game, f: Square, t: Square, p: Piece) => Promise<void>;
+    const animFn = (UI as any).animateMove as (
+      g: Game,
+      f: Square,
+      t: Square,
+      p: Piece
+    ) => Promise<void>;
     await animFn(this.game, from, to, piece as Piece);
   }
 
@@ -180,49 +210,49 @@ export class MoveController {
   /**
    * Checks for a draw
    */
-    public checkDraw(): boolean {
+  public checkDraw(): boolean {
     return checkDraw(this.game);
   }
 
   /**
    * Checks for insufficient material
    */
-    public isInsufficientMaterial(): boolean {
+  public isInsufficientMaterial(): boolean {
     return isInsufficientMaterial(this.game);
   }
 
   /**
    * Gets a hash of the current board state
    */
-    public getBoardHash(): string {
+  public getBoardHash(): string {
     return getBoardHash(this.game);
   }
 
   /**
    * Saves the current game state
    */
-    public saveGame(): void {
+  public saveGame(): void {
     return saveGameFromManager(this.game);
   }
 
   /**
    * Loads a saved game state
    */
-    public loadGame(): boolean {
+  public loadGame(): boolean {
     return loadGameFromManager(this.game);
   }
 
   /**
    * Calculates the current material advantage
    */
-    public calculateMaterialAdvantage(): number {
+  public calculateMaterialAdvantage(): number {
     return calculateMaterialAdvantage(this.game);
   }
 
   /**
    * Returns the material value of a piece
    */
-    public getMaterialValue(piece: PieceWithMoved | null): number {
+  public getMaterialValue(piece: PieceWithMoved | null): number {
     if (!piece) return 0;
     let baseValue = PIECE_VALUES[piece.type] || 0;
 
@@ -247,14 +277,14 @@ export class MoveController {
   /**
    * Enters replay mode
    */
-    public enterReplayMode(): void {
+  public enterReplayMode(): void {
     return enterReplayModeFromManager(this.game, this);
   }
 
   /**
    * Exits replay mode
    */
-    public exitReplayMode(): void {
+  public exitReplayMode(): void {
     return exitReplayModeFromManager(this.game);
   }
 
@@ -304,11 +334,11 @@ export class MoveController {
     UI.renderBoard(this.game);
   }
 
-    public reconstructBoardAtMove(moveIndex: number): void {
+  public reconstructBoardAtMove(moveIndex: number): void {
     return reconstructBoardAtMoveFromManager(this.game, moveIndex);
   }
 
-    public undoMoveForReplay(move: MoveHistoryEntry): void {
+  public undoMoveForReplay(move: MoveHistoryEntry): void {
     return undoMoveForReplayFromManager(this.game, move);
   }
 

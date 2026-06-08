@@ -81,8 +81,7 @@ export function updateMoveHistoryUI(game: Game): void {
     });
     historyEl.scrollTop = historyEl.scrollHeight;
     const undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
-    if (undoBtn)
-      undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
+    if (undoBtn) undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
   } catch (error) {
     console.error('Error updating move history:', error);
   }
@@ -112,7 +111,9 @@ export function updateCapturedUI(game: Game): void {
   const materialDiff = whiteMaterial - blackMaterial;
   const getSymbol = (p: { color: string; type: string }) => {
     if ((window as unknown as Record<string, Record<string, string>>)._svgCache)
-      return (window as unknown as Record<string, Record<string, string>>)._svgCache[p.color + p.type];
+      return (window as unknown as Record<string, Record<string, string>>)._svgCache[
+        p.color + p.type
+      ];
     return p.type;
   };
   game.capturedPieces.white.forEach(p => {
@@ -246,7 +247,9 @@ export function updateClockDisplay(game: Game): void {
 export function renderEvalGraph(game: Game): void {
   if (game.isAnimating) return;
   const container = document.getElementById('eval-graph-container');
-  const svg = document.getElementById('eval-graph') as unknown as SVGSVGElement & { dataset: Record<string, string> };
+  const svg = document.getElementById('eval-graph') as unknown as SVGSVGElement & {
+    dataset: Record<string, string>;
+  };
   if (!container || !svg) return;
   if (game.phase === PHASES.ANALYSIS || game.phase === PHASES.GAME_OVER)
     container.classList.remove('hidden');
@@ -292,7 +295,10 @@ export function renderEvalGraph(game: Game): void {
       const idx = parseInt((p as HTMLElement).dataset.index || '0');
       if (idx >= 0 && (game.gameController as unknown as Record<string, unknown>)?.jumpToMove)
         (game.gameController as unknown as Record<string, (idx: number) => void>).jumpToMove(idx);
-      else if (idx === -1 && (game.gameController as unknown as Record<string, unknown>)?.jumpToStart)
+      else if (
+        idx === -1 &&
+        (game.gameController as unknown as Record<string, unknown>)?.jumpToStart
+      )
         (game.gameController as unknown as Record<string, () => void>).jumpToStart();
     });
     svg.dataset.hasListener = 'true';

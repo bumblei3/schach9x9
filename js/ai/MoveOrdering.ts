@@ -93,7 +93,7 @@ export function orderMoves(
   // Counter move lookup
   const counterMove = getCounterMove(prevMove);
 
-  const scoredMoves = moves.map((move) => {
+  const scoredMoves = moves.map(move => {
     let score = 0;
 
     // 1. TT Move

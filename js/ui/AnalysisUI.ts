@@ -7,7 +7,11 @@ import type { Game } from '../gameEngine.js';
 
 interface AnalysisResult {
   score?: number;
-  topMoves?: Array<{ move: { from: { r: number; c: number }; to: { r: number; c: number } }; score: number; notation?: string }>;
+  topMoves?: Array<{
+    move: { from: { r: number; c: number }; to: { r: number; c: number } };
+    score: number;
+    notation?: string;
+  }>;
   depth?: number;
   nodes?: number;
 }
@@ -78,7 +82,12 @@ export class AnalysisUI {
     this.bar.classList.remove('hidden');
   }
 
-  updatePanel(score: number, topMoves: AnalysisResult['topMoves'], depth: number, nodes: number): void {
+  updatePanel(
+    score: number,
+    topMoves: AnalysisResult['topMoves'],
+    depth: number,
+    nodes: number
+  ): void {
     if (!this.panel || this.panel.classList.contains('hidden')) return;
 
     // Update panel score
@@ -167,11 +176,7 @@ export class AnalysisUI {
       const turn = i % 2 === 0 ? 'white' : 'black';
 
       // Update progress modal
-      showModal(
-        'Ganganalyse',
-        `Analysiere Stellung ${i + 1} von ${states.length}...`,
-        []
-      );
+      showModal('Ganganalyse', `Analysiere Stellung ${i + 1} von ${states.length}...`, []);
 
       const analysis: AnalysisResult = await new Promise(resolve => {
         const handler = (e: MessageEvent) => {
@@ -205,18 +210,14 @@ export class AnalysisUI {
 
         const bestEval =
           prevResult.topMoves && prevResult.topMoves[0]
-            ? prevResult.topMoves[0].score ?? 0
+            ? (prevResult.topMoves[0].score ?? 0)
             : prevScore;
 
         const prevEvalMover = turn === 'black' ? prevScore : -prevScore;
         const currentEvalMover = turn === 'black' ? -currentScore : currentScore;
         const bestEvalMover = turn === 'black' ? bestEval : -bestEval;
 
-        move.classification = classifyMove(
-          prevEvalMover,
-          currentEvalMover,
-          bestEvalMover
-        );
+        move.classification = classifyMove(prevEvalMover, currentEvalMover, bestEvalMover);
         move.evalScore = currentResult.score;
       }
     }

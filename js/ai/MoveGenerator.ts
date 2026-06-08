@@ -148,7 +148,7 @@ export function getAllLegalMovesFiltered(
 export function getAllCaptureMoves(board: BoardStorage, turnColor: string): Move[] {
   // Simplified for QS
   const allAndQuiet = getAllLegalMoves(board, turnColor);
-  return allAndQuiet.filter((m) => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture.
+  return allAndQuiet.filter(m => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture.
   // Actually getAllLegalMoves simulates, so board[m.to] is valid BEFORE simulation.
   // Wait, getAllLegalMoves returns move objects.
   // We can check if 'move.captured' property exists?

@@ -282,7 +282,9 @@ describe('AIController Coverage Boost', () => {
 
     try {
       await movePromise;
-    } catch (e) {}
+    } catch {
+      /* expected */
+    }
 
     expect(termSpy).toHaveBeenCalled();
     expect(initSpy).toHaveBeenCalledTimes(1);

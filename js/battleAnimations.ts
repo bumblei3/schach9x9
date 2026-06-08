@@ -254,7 +254,11 @@ export class BattleAnimator {
     const particles: THREE.Mesh[] = [];
     for (let i = 0; i < 10; i++) {
       const geometry = new THREE.SphereGeometry(0.05, 4, 4);
-      const material = new THREE.MeshBasicMaterial({ color: 0xccaa88, transparent: true, opacity: 0.6 });
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xccaa88,
+        transparent: true,
+        opacity: 0.6,
+      });
       const particle = new THREE.Mesh(geometry, material);
       particle.position.set(
         position.x + (Math.random() - 0.5) * 0.5,
@@ -272,7 +276,11 @@ export class BattleAnimator {
    */
   public createFlashEffect(position: THREE.Vector3 | { x: number; z: number }): THREE.Mesh {
     const geometry = new THREE.SphereGeometry(0.3, 16, 16);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.8 });
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      transparent: true,
+      opacity: 0.8,
+    });
     const flash = new THREE.Mesh(geometry, material);
     flash.position.set(position.x, 0.5, position.z);
     this.scene.add(flash);
@@ -286,9 +294,17 @@ export class BattleAnimator {
     const sparks: THREE.Mesh[] = [];
     for (let i = 0; i < 15; i++) {
       const geometry = new THREE.SphereGeometry(0.03, 4, 4);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9 });
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xffaa00,
+        transparent: true,
+        opacity: 0.9,
+      });
       const spark = new THREE.Mesh(geometry, material);
-      spark.position.set(x + (Math.random() - 0.5) * 0.4, y + Math.random() * 0.3, z + (Math.random() - 0.5) * 0.4);
+      spark.position.set(
+        x + (Math.random() - 0.5) * 0.4,
+        y + Math.random() * 0.3,
+        z + (Math.random() - 0.5) * 0.4
+      );
       this.scene.add(spark);
       sparks.push(spark);
     }
@@ -300,7 +316,12 @@ export class BattleAnimator {
    */
   public createShockwave(position: THREE.Vector3 | { x: number; z: number }): THREE.Mesh {
     const geometry = new THREE.RingGeometry(0.2, 0.3, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00aaff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x00aaff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.7,
+    });
     const shockwave = new THREE.Mesh(geometry, material);
     shockwave.position.set(position.x, 0.05, position.z);
     shockwave.rotation.x = -Math.PI / 2;
@@ -315,7 +336,11 @@ export class BattleAnimator {
     const smoke: THREE.Mesh[] = [];
     for (let i = 0; i < 8; i++) {
       const geometry = new THREE.SphereGeometry(0.1 + Math.random() * 0.1, 8, 8);
-      const material = new THREE.MeshBasicMaterial({ color: 0x666666, transparent: true, opacity: 0.5 });
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x666666,
+        transparent: true,
+        opacity: 0.5,
+      });
       const puff = new THREE.Mesh(geometry, material);
       puff.position.set(
         position.x + (Math.random() - 0.5) * 0.3,

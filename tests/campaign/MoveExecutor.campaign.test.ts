@@ -141,7 +141,7 @@ describe('MoveExecutor - Campaign Mechanics', () => {
     // Mock showPromotionUI to trigger callback immediately
     const uiModule = await import('../../js/ui');
     (uiModule.showPromotionUI as any).mockImplementation(
-      (_g: any, _r: number, _c: number, _color: string, _rec: any, callback: Function) => {
+      (_g: any, _r: number, _c: number, _color: string, _rec: any, callback: () => void) => {
         // Callback simulates user selecting a piece
         _rec.promotion = 'q';
         // Simulate the UI/User actually changing the piece on board
