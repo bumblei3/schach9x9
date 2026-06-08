@@ -13,7 +13,7 @@ import type { Game, Piece } from './gameEngine.js';
 import type { Square } from './types/game.js';
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { BattleAnimator} from './battleAnimations.js';
+import type { BattleAnimator } from './battleAnimations.js';
 
 /**
  * Main 3D Battle Chess Engine
