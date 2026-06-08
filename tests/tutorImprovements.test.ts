@@ -81,7 +81,7 @@ describe('Tutor Improvements', () => {
       const openFile = patterns.find((p: any) => p.type === 'open_file');
 
       expect(openFile).toBeDefined();
-      expect(openFile.explanation).toContain('offene Linie');
+      expect(openFile!.explanation).toContain('offene Linie');
     });
 
     test('should detect knight outpost', () => {
@@ -95,7 +95,7 @@ describe('Tutor Improvements', () => {
       const outpost = patterns.find((p: any) => p.type === 'outpost');
 
       expect(outpost).toBeDefined();
-      expect(outpost.explanation).toContain('Vorposten');
+      expect(outpost!.explanation).toContain('Vorposten');
     });
   });
 

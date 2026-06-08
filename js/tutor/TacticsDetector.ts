@@ -48,6 +48,56 @@ interface RemovedGuard {
   undefendedPos: Pos;
 }
 
+/** A pinned piece pattern */
+interface PinnedPiece {
+  pinnedPos: Pos;
+  pinnedPiece: Piece;
+  pinnedName: string;
+  behindPiece: Piece;
+  behindName: string;
+  behindPos: Pos;
+}
+
+/** A discovered attack pattern */
+interface DiscoveredAttack {
+  attackingPiece: Piece;
+  target: Piece;
+  name: string;
+  targetPos: Pos;
+}
+
+/** A threat detected after a move */
+interface Threat {
+  piece: Piece;
+  pos: Pos;
+  warning: string;
+}
+
+/** A piece threatened by an attacker */
+interface ThreatenedPiece {
+  piece: Piece;
+  pos: Pos;
+  type: string;
+  name: string;
+}
+
+/** A piece defended by a defender */
+interface DefendedPiece {
+  piece: Piece;
+  pos: Pos;
+  type: string;
+  name: string;
+  wasThreatened: boolean;
+}
+
+/** A battery pattern (aligned sliding pieces) */
+interface Battery {
+  frontPos: Pos;
+  frontName: string;
+  behindPos: Pos;
+  behindName: string;
+}
+
 
 /**
  * Detects tactical patterns for a given move
@@ -429,7 +479,7 @@ export function isTactical(game: GameLike, move: { from: Pos; to: Pos }): boolea
 
   // Check for other tactical patterns (simplified to avoid deep recursion)
   // We check if the move creates a fork or pin
-    const analyzer = { getPieceName: (t: any) => t };
+    const analyzer: Analyzer = { getPieceName: (t: string) => t };
   const patterns = detectTacticalPatterns(game, analyzer, move);
   return patterns.length > 0;
 }
@@ -438,9 +488,9 @@ export function isTactical(game: GameLike, move: { from: Pos; to: Pos }): boolea
  * Detect if a piece at the given position is pinning an opponent piece
  * Returns array of pinned pieces
  */
-export function detectPins(game: GameLike, analyzer: Analyzer, pos: Pos, attackerColor: string): any[] {
-    const pinned: any[] = [];
-  const piece = game.board[pos.r][pos.c];
+ export function detectPins(game: GameLike, analyzer: Analyzer, pos: Pos, attackerColor: string): PinnedPiece[] {
+     const pinned: PinnedPiece[] = [];
+   const piece = game.board[pos.r][pos.c];
 
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
     return pinned; // Only sliding pieces can pin
@@ -496,11 +546,12 @@ export function detectDiscoveredAttacks(
   from: Pos,
   _to: Pos,
   attackerColor: string
-): any[] {
-    const discovered: any[] = [];
-  const opponentColor = attackerColor === 'white' ? 'black' : 'white';
+): DiscoveredAttack[] {
+    const discovered: DiscoveredAttack[] = [];
 
   // Check all our sliding pieces to see if moving from->to reveals an attack
+  const opponentColor = attackerColor === 'white' ? 'black' : 'white';
+
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       const piece = game.board[r][c];
@@ -577,9 +628,9 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
 /**
  * Detect threats to own pieces after making a move
  */
-export function detectThreatsAfterMove(game: GameLike, analyzer: Analyzer, move: { from: Pos; to: Pos }): any[] {
-    const threats: any[] = [];
-  const from = move.from;
+ export function detectThreatsAfterMove(game: GameLike, analyzer: Analyzer, move: { from: Pos; to: Pos }): Threat[] {
+     const threats: Threat[] = [];
+   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
 
@@ -637,7 +688,7 @@ export function countDefenders(game: GameLike, r: number, c: number, defenderCol
       if (!piece || piece.color !== defenderColor) continue;
 
       const moves = game.getValidMoves(pr, pc, piece);
-            if (moves.some((m: any) => m.r === r && m.c === c)) {
+            if (moves.some((m: Pos) => m.r === r && m.c === c)) {
         count++;
       }
     }
@@ -656,7 +707,7 @@ export function countAttackers(game: GameLike, r: number, c: number, attackerCol
       if (!piece || piece.color !== attackerColor) continue;
 
       const moves = game.getValidMoves(pr, pc, piece);
-            if (moves.some((m: any) => m.r === r && m.c === c)) {
+            if (moves.some((m: Pos) => m.r === r && m.c === c)) {
         count++;
       }
     }
@@ -672,14 +723,14 @@ export function getThreatenedPieces(
   analyzer: Analyzer,
   pos: Pos,
   attackerColor: string
-): any[] {
-    const threatened: any[] = [];
+): ThreatenedPiece[] {
+    const threatened: ThreatenedPiece[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece) return threatened;
 
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-    moves.forEach((move: any) => {
+    moves.forEach((move: Pos) => {
     const targetPiece = game.board[move.r][move.c];
     if (targetPiece && targetPiece.color !== attackerColor) {
       threatened.push({
@@ -702,14 +753,14 @@ export function getDefendedPieces(
   analyzer: Analyzer,
   pos: Pos,
   defenderColor: string
-): any[] {
-    const defended: any[] = [];
+): DefendedPiece[] {
+    const defended: DefendedPiece[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece) return defended;
 
   const moves = game.getValidMoves(pos.r, pos.c, piece);
 
-    moves.forEach((move: any) => {
+    moves.forEach((move: Pos) => {
     const targetPiece = game.board[move.r][move.c];
     if (targetPiece && targetPiece.color === defenderColor) {
       // Check if this piece is threatened by opponent
@@ -732,8 +783,8 @@ export function getDefendedPieces(
 /**
  * Detect Battery: Aligning two sliding pieces
  */
-export function detectBattery(game: GameLike, analyzer: Analyzer, pos: Pos, color: string): any[] {
-    const batteries: any[] = [];
+export function detectBattery(game: GameLike, analyzer: Analyzer, pos: Pos, color: string): Battery[] {
+    const batteries: Battery[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) return batteries;
 
@@ -754,7 +805,7 @@ export function detectBattery(game: GameLike, analyzer: Analyzer, pos: Pos, colo
     [-1, -1],
   ];
 
-    const checkDirs = (dirs: any[], types: string[]) => {
+    const checkDirs = (dirs: number[][], types: string[]) => {
     dirs.forEach(d => {
       let r = pos.r + d[0];
       let c = pos.c + d[1];

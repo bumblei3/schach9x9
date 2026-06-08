@@ -102,8 +102,8 @@ describe('MoveAnalyzer Coverage', () => {
         from: { r: 0, c: 0 },
         to: { r: 1, c: 1 },
         evalScore: 100,
-        piece: { color: 'white' },
-      };
+        piece: { color: 'white', type: 'p' },
+      } as any;
       mockGame.lastEval = 100;
 
       await MoveAnalyzer.checkBlunder(mockGame, tutorController, moveRecord);
@@ -117,8 +117,8 @@ describe('MoveAnalyzer Coverage', () => {
         from: { r: 0, c: 0 },
         to: { r: 1, c: 1 },
         evalScore: -400, // Current eval (bad)
-        piece: { color: 'white' },
-      };
+        piece: { color: 'white', type: 'p' },
+      } as any;
       mockGame.lastEval = 100; // Previous eval (good) -> Drop of 500
 
       await MoveAnalyzer.checkBlunder(mockGame, tutorController, moveRecord);

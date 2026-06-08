@@ -493,7 +493,6 @@ export class AIController {
       });
 
     for (let i = 0; i < numWorkers; i++) {
-      // @ts-expect-error - Vite worker import
       const worker = new AIWorker();
       this.aiWorkers.push(worker);
 

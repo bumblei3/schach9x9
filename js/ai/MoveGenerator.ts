@@ -22,6 +22,30 @@ import { isBlockedSquare, getCurrentBoardShape, type BoardShape } from '../confi
 
 export type BoardStorage = number[] | Int8Array;
 
+/**
+ * Represents a chess move in the integer board engine.
+ * Squares are stored as flat indices (0-80) into the 9x9 board.
+ */
+export interface Move {
+  from: number;
+  to: number;
+  piece?: number;
+  captured?: number;
+  promotion?: number;
+  castling?: boolean;
+  flags?: string;
+  score?: number;
+}
+
+/**
+ * Information needed to undo a move on the integer board.
+ */
+export interface UndoInfo {
+  move: Move;
+  captured: number;
+  piece: number;
+}
+
 // Offsets
 const UP = -9;
 const DOWN = 9;
@@ -36,25 +60,23 @@ const ROOK_OFFSETS = [-9, 9, -1, 1];
 /**
  * Generate all legal moves for position
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getPseudoLegalMoves(
-  _board: any,
-  _r: any,
-  _c: any,
-  _piece: any,
-  _isCheck: any,
-  _lastMove: any
-): any[] {
+  _board: BoardStorage,
+  _r: number,
+  _c: number,
+  _piece: number,
+  _isCheck: boolean,
+  _lastMove: Move | null
+): Move[] {
   // Legacy stub for 8x8 tests compatibility
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAllLegalMoves(board: BoardStorage, turnColor: string): any[] {
+export function getAllLegalMoves(board: BoardStorage, turnColor: string): Move[] {
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const enemyColor = turnColor === 'white' ? COLOR_BLACK : COLOR_WHITE;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const moves: any[] = [];
+  const moves: Move[] = [];
 
   // 1. Generate Pseudo-Legal Moves
   for (let from = 0; from < SQUARE_COUNT; from++) {
@@ -74,8 +96,7 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): any[] 
   // 2. Filter Illegal Moves (Checks)
   // For optimization, we usually do this inside the search or make/undo,
   // but to match previous API, we return only legal moves.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const legalMoves: any[] = [];
+  const legalMoves: Move[] = [];
   const myKingPos = findKing(board, color);
 
   for (const move of moves) {
@@ -109,12 +130,11 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): any[] 
 /**
  * Get all legal moves with blocked square filtering for cross-shaped board
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getAllLegalMovesFiltered(
   board: BoardStorage,
   turnColor: string,
   boardShape?: BoardShape
-): any[] {
+): Move[] {
   const moves = getAllLegalMoves(board, turnColor);
 
   // Filter out blocked squares for cross-shaped board
@@ -125,20 +145,17 @@ export function getAllLegalMovesFiltered(
   return moves;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAllCaptureMoves(board: BoardStorage, turnColor: string): any[] {
+export function getAllCaptureMoves(board: BoardStorage, turnColor: string): Move[] {
   // Simplified for QS
   const allAndQuiet = getAllLegalMoves(board, turnColor);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return allAndQuiet.filter((m: any) => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture.
+  return allAndQuiet.filter((m) => board[m.to] !== PIECE_NONE); // Rough check, since makeMove assumes capture.
   // Actually getAllLegalMoves simulates, so board[m.to] is valid BEFORE simulation.
   // Wait, getAllLegalMoves returns move objects.
   // We can check if 'move.captured' property exists?
   // Or better, filter moves where target square is not empty.
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generatePawnMoves(board: BoardStorage, from: number, color: number, moves: any[]): void {
+function generatePawnMoves(board: BoardStorage, from: number, color: number, moves: Move[]): void {
   const direction = color === COLOR_WHITE ? UP : DOWN;
   // const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2.
   // 9x9 Board:
@@ -199,13 +216,12 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generatePieceMoves(
   board: BoardStorage,
   from: number,
   type: number,
   color: number,
-  moves: any[]
+  moves: Move[]
 ): void {
   // Steppers
   if (
@@ -245,13 +261,12 @@ function generatePieceMoves(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateSteppingMoves(
   board: BoardStorage,
   from: number,
   offsets: number[],
   color: number,
-  moves: any[]
+  moves: Move[]
 ): void {
   const r = indexToRow(from);
   const c = indexToCol(from);
@@ -277,13 +292,12 @@ function generateSteppingMoves(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateSlidingMoves(
   board: BoardStorage,
   from: number,
   offsets: number[],
   color: number,
-  moves: any[]
+  moves: Move[]
 ): void {
   const r = indexToRow(from);
   const c = indexToCol(from);
@@ -355,8 +369,7 @@ function generateSlidingMoves(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function makeMove(board: BoardStorage, move: any): any {
+export function makeMove(board: BoardStorage, move: Move): UndoInfo {
   const piece = board[move.from];
   const captured = board[move.to];
 
@@ -371,14 +384,12 @@ export function makeMove(board: BoardStorage, move: any): any {
   return { move, captured, piece };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function undoMove(board: BoardStorage, undoInfo: any): void {
+export function undoMove(board: BoardStorage, undoInfo: UndoInfo): void {
   const { move, captured, piece } = undoInfo;
   board[move.from] = piece;
   board[move.to] = captured;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isSquareAttacked(
   board: BoardStorage,
   square: number,
@@ -514,7 +525,6 @@ export function isSquareAttacked(
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function checkRayAttacks(
   board: BoardStorage,
   square: number,
@@ -568,7 +578,6 @@ function checkRayAttacks(
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function findKing(board: BoardStorage, color: number): number {
   // const kingType = PIECE_KING; // What about Angel? If Angel is royal?
   // User said "Grand Refactor".
@@ -586,8 +595,7 @@ export function isInCheck(board: BoardStorage, color: number): boolean {
 
 // Static Exchange Evaluation (SEE) - Full Swap Algorithm
 // Determines if a capture chain is profitable.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function see(board: BoardStorage, move: any): number {
+export function see(board: BoardStorage, move: Move): number {
   const PIECE_VALUES: Record<number, number> = {
     [PIECE_PAWN]: 100,
     [PIECE_KNIGHT]: 320,
@@ -654,7 +662,6 @@ export function see(board: BoardStorage, move: any): number {
 }
 
 // Find the Least Valuable Attacker of a square, ignoring pieces in usedSquares
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getLVA(
   board: BoardStorage,
   square: number,
@@ -728,7 +735,6 @@ function getLVA(
 }
 
 // Find least valuable slider along rays
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function findRayLVA(
   board: BoardStorage,
   square: number,
@@ -737,7 +743,7 @@ function findRayLVA(
   usedSquares: Set<number>,
   validTypes: number[]
 ): { square: number; piece: number } | null {
-  let bestLVA = null;
+  let bestLVA: { square: number; piece: number } | null = null;
   let bestValue = Infinity;
 
   const PIECE_VALUES_SIMPLE: Record<number, number> = {

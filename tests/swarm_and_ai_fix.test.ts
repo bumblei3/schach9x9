@@ -24,7 +24,7 @@ vi.mock('../js/ui.js', () => ({
 describe('Verification: Swarm Template and AI Fix', () => {
   describe('Swarm Templates', () => {
     test('swarm_12 should have 8 pieces and cost 12', () => {
-      const game = { initialPoints: 12 };
+      const game = { initialPoints: 12 } as any;
       const templates = HintGenerator.getSetupTemplates(game);
       const swarm12 = templates.find(t => t.id === 'swarm_12');
 
@@ -44,7 +44,7 @@ describe('Verification: Swarm Template and AI Fix', () => {
     });
 
     test('swarm_18 should have 8 pieces and cost 18', () => {
-      const game = { initialPoints: 18 };
+      const game = { initialPoints: 18 } as any;
       const templates = HintGenerator.getSetupTemplates(game);
       const swarm18 = templates.find(t => t.id === 'swarm_18');
 

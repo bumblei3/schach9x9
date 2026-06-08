@@ -1,20 +1,54 @@
 import { logger } from '../logger.js';
-import { PHASES, BOARD_SIZE, type Game } from '../gameEngine.js';
+import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import { AI_DEPTH_CONFIG } from '../config.js';
-import * as UI from '../ui.js';
+import type { SearchResult, MoveResult } from '../aiEngine.js';
+import { setTutorLoading, showTutorSuggestions as showTutorSuggestionsUI, renderBoard, updateShopUI } from '../ui.js';
 import { analyzeMoveWithExplanation, getMoveNotation } from './MoveAnalyzer.js';
+import type { MoveExplanation } from './MoveAnalyzer.js';
+import type { Piece } from '../types/game.js';
 import * as aiEngine from '../aiEngine.js';
+
+interface TacticalPattern {
+  type: string;
+  severity: string;
+  explanation: string;
+  question?: string;
+}
+
+interface TutorHint {
+  move: MoveResult | null;
+  score: number;
+  notation: string;
+  analysis: MoveExplanation;
+  tacticsHighlight: string[];
+  pv: MoveResult[] | null;
+}
+
+interface TemplateInput {
+  id: string;
+  name: string;
+  description: string;
+  pieces: string[];
+  isRecommended?: boolean;
+}
+
+interface SetupTemplate {
+  id: string;
+  name: string;
+  description: string;
+  pieces: string[];
+  cost: number;
+  isRecommended?: boolean;
+}
 
 /**
  * Gets tutor hints by calling the AI engine
  */
-export async function getTutorHints(game: Game, _tutorController: unknown): Promise<unknown[]> {
+export async function getTutorHints(game: Game, _tutorController: unknown): Promise<TutorHint[]> {
   const turnColor = game.turn;
 
   // Signal that the tutor is thinking
-  if ((UI as any).setTutorLoading) {
-    (UI as any).setTutorLoading(true);
-  }
+  setTutorLoading(true);
 
   try {
     if (game.phase !== PHASES.PLAY) {
@@ -31,7 +65,7 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
     const tutorDepth = Math.max(6, aiDepth + 2); // Minimum depth 6 for smart tutor
     const moveNumber = Math.floor(game.moveHistory.length / 2);
 
-        const topMoves: any[] = await (aiEngine as any).getTopMoves(
+    const topMoves: SearchResult[] = await aiEngine.getTopMoves(
       game.board,
       turnColor,
       3, // Get top 3 moves
@@ -43,7 +77,7 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
     if (!topMoves || topMoves.length === 0) return [];
 
     // Filter out invalid moves
-    const validMoves = topMoves.filter((result: any) => {
+    const validMoves = topMoves.filter((result: SearchResult) => {
       if (!result || !result.move) return false;
 
       const from = result.move.from;
@@ -61,8 +95,8 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
 
     // Convert engine moves to hints with explanations
     return Promise.all(
-            validMoves.map(async (hint: any, index: number) => {
-                const analysis = await analyzeMoveWithExplanation(
+      validMoves.map(async (hint: SearchResult, index: number) => {
+        const analysis = await analyzeMoveWithExplanation(
           game,
           hint.move,
           hint.score,
@@ -74,45 +108,48 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
 
         // Extract high-severity tactical patterns for prominent display
         const tacticsHighlight = (analysis.tacticalPatterns || [])
-                    .filter((p: any) => p.severity === 'high')
-                    .map((p: any) => p.explanation)
+          .filter((p: TacticalPattern) => p.severity === 'high')
+          .map((p: TacticalPattern) => p.explanation)
           .slice(0, 2); // Max 2 highlights
 
         return {
           move: hint.move,
           score: hint.score,
-                    notation: getMoveNotation(game, hint.move),
+          notation: hint.move ? getMoveNotation(game, hint.move as unknown as { from: Square; to: Square }) : '',
           analysis,
-          tacticsHighlight, // NEW: Prominent tactics display
+          tacticsHighlight,
           pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
         };
       })
     );
   } finally {
-    if ((UI as any).setTutorLoading) {
-      (UI as any).setTutorLoading(false);
-    }
+    setTutorLoading(false);
   }
 }
 
 /**
  * Checks if a move is a tutor recommended move
  */
-export function isTutorMove(game: any, from: any, to: any): boolean {
+export function isTutorMove(game: Game, from: Square, to: Square): boolean {
   if (!game.bestMoves) return false;
-    return game.bestMoves.some(
-    (m: any) =>
-      m.move.from.r === from.r &&
-      m.move.from.c === from.c &&
-      m.move.to.r === to.r &&
-      m.move.to.c === to.c
+  return game.bestMoves.some(
+    (m: unknown) => {
+      const move = m as { move: { from: Square; to: Square }; score?: number };
+      if (!move || !move.move) return false;
+      return (
+        move.move.from.r === from.r &&
+        move.move.from.c === from.c &&
+        move.move.to.r === to.r &&
+        move.move.to.c === to.c
+      );
+    }
   );
 }
 
 /**
  * Updates the best moves and triggers UI update
  */
-export function updateBestMoves(_game: any, _tutorController: any): void {
+export function updateBestMoves(_game: Game, _tutorController: unknown): void {
   // User Request: Tutor info only on click.
   // We disable automatic background calculation to prevent "Thinking..." state from appearing automatically.
   // game.bestMoves will be calculated on-demand when the button is clicked.
@@ -120,9 +157,7 @@ export function updateBestMoves(_game: any, _tutorController: any): void {
   if (game.phase !== PHASES.PLAY) return;
 
   // Immediately show "Thinking" UI when a new position needs analysis
-  if ((UI as any).setTutorLoading) {
-    (UI as any).setTutorLoading(true);
-  }
+  setTutorLoading(true);
 
   // Debounced part
   tutorController.debouncedGetTutorHints();
@@ -132,7 +167,7 @@ export function updateBestMoves(_game: any, _tutorController: any): void {
 /**
  * Shows tutor suggestions in the UI
  */
-export async function showTutorSuggestions(game: any): Promise<void> {
+export async function showTutorSuggestions(game: Game): Promise<void> {
   // const isSetup = game.phase && String(game.phase).startsWith('SETUP');
   // Allow empty hints to pass through to UI so it can show "No suggestions" message
   // if (
@@ -140,7 +175,7 @@ export async function showTutorSuggestions(game: any): Promise<void> {
   //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
   // )
   //   return;
-    await (UI as any).showTutorSuggestions(game, game.bestMoves);
+  await showTutorSuggestionsUI(game, game.bestMoves);
 }
 
 /**
@@ -174,9 +209,9 @@ function calculatePieceCost(pieces: string[]): number {
  * @returns {object} Template with calculated cost
  */
 function createTemplate(
-  { id, name, description, pieces, isRecommended }: any,
+  { id, name, description, pieces, isRecommended }: TemplateInput,
   expectedCost: number
-): any {
+): SetupTemplate {
   const calculatedCost = calculatePieceCost(pieces);
 
   // Development warning if costs don't match
@@ -209,13 +244,13 @@ function getSquareScore(
   c: number,
   pieceType: string,
   isWhite: boolean,
-  game: any
+  game: Game & { availableKingPos?: { r: number; c: number } | null }
 ): number {
   let score = 0;
 
   const corruptedColStart = isWhite ? game.whiteCorridor : game.blackCorridor;
-  const isCenterCol = c === corruptedColStart + 1;
-  const isCornerCol = c === corruptedColStart || c === corruptedColStart + 2;
+  const isCenterCol = c === corruptedColStart! + 1;
+  const isCornerCol = c === corruptedColStart || c === corruptedColStart! + 2;
 
   // King location
   const king = game.availableKingPos
@@ -223,7 +258,7 @@ function getSquareScore(
     : game.rulesEngine.findKing(isWhite ? 'white' : 'black');
 
   // Row definitions relative to player
-  let frontRow, middleRow, backRow;
+  let frontRow: number, middleRow: number, backRow: number;
   if (isWhite) {
     frontRow = 6;
     middleRow = 7;
@@ -293,18 +328,18 @@ function getSquareScore(
  * Finds the best empty square for a piece in the corridor
  */
 function getOptimalSquare(
-  game: any,
+  game: Game & { availableKingPos?: { r: number; c: number } | null },
   pieceType: string,
   isWhite: boolean
 ): { r: number; c: number } | null {
   const colStart = isWhite ? game.whiteCorridor : game.blackCorridor;
   const rowStart = isWhite ? 6 : 0;
 
-  let bestSquare = null;
+  let bestSquare: { r: number; c: number } | null = null;
   let maxScore = -Infinity;
 
   for (let r = rowStart; r < rowStart + 3; r++) {
-    for (let c = colStart; c < colStart + 3; c++) {
+    for (let c = colStart!; c < colStart! + 3; c++) {
       // Check boundaries and occupancy
       if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
       const piece = game.board[r][c];
@@ -324,7 +359,7 @@ function getOptimalSquare(
 /**
  * Returns available setup templates
  */
-export function getSetupTemplates(game: any): any[] {
+export function getSetupTemplates(game: Game): SetupTemplate[] {
   const points = game.initialPoints;
 
   // Templates for 12 points
@@ -673,12 +708,12 @@ export function getSetupTemplates(game: any): any[] {
 /**
  * Applies a setup template to the board
  */
-export function applySetupTemplate(game: any, tutorController: any, templateId: string): void {
-    let template;
+export function applySetupTemplate(game: Game, tutorController: { getSetupTemplates?: () => SetupTemplate[] }, templateId: string): void {
+  let template: SetupTemplate | undefined;
   if (tutorController && tutorController.getSetupTemplates) {
-    template = tutorController.getSetupTemplates().find((t: any) => t.id === templateId);
+    template = tutorController.getSetupTemplates().find((t: SetupTemplate) => t.id === templateId);
   } else {
-    template = getSetupTemplates(game).find((t: any) => t.id === templateId);
+    template = getSetupTemplates(game).find((t: SetupTemplate) => t.id === templateId);
   }
 
   if (!template) return;
@@ -691,7 +726,7 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
   const rowStart = isWhite ? 6 : 0;
 
   // Clear existing pieces in corridor (except King)
-  let kingPos = null;
+  let kingPos: { r: number; c: number } | null = null;
   for (let r = rowStart; r < rowStart + 3; r++) {
     for (let c = colStart; c < colStart + 3; c++) {
       if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
@@ -706,7 +741,7 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
   }
 
   // Store king pos temporarily for heuristic
-  game.availableKingPos = kingPos;
+  (game as Game & { availableKingPos?: { r: number; c: number } | null }).availableKingPos = kingPos;
 
   // Reset points
   game.points = game.initialPoints;
@@ -729,7 +764,11 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
   const sortedPieces = [...template.pieces].sort((a, b) => (priority[a] || 9) - (priority[b] || 9));
 
   sortedPieces.forEach((pieceType: string) => {
-    const bestSq = getOptimalSquare(game, pieceType, isWhite);
+    const bestSq = getOptimalSquare(
+      game as Game & { availableKingPos?: { r: number; c: number } | null },
+      pieceType,
+      isWhite
+    );
     if (bestSq) {
       placePiece(game, bestSq.r, bestSq.c, pieceType, isWhite);
     } else {
@@ -737,19 +776,19 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
     }
   });
 
-  delete game.availableKingPos;
+  delete (game as Game & { availableKingPos?: { r: number; c: number } | null }).availableKingPos;
 
-    UI.renderBoard(game);
-    UI.updateShopUI(game);
+  renderBoard(game);
+  updateShopUI(game);
   game.log(`Tutor: Aufstellung "${template.name}" angewendet.`);
 }
 
 /**
  * Places a piece and deducts points
  */
-export function placePiece(game: any, r: number, c: number, type: string, isWhite: boolean): void {
+export function placePiece(game: Game, r: number, c: number, type: string, isWhite: boolean): void {
   game.board[r][c] = {
-    type: type,
+    type: type as Piece['type'],
     color: isWhite ? 'white' : 'black',
     hasMoved: false,
   };

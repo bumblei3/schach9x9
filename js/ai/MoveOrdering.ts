@@ -11,6 +11,7 @@ import {
   PIECE_ANGEL,
   TYPE_MASK,
 } from './BoardDefinitions.js';
+import type { Move } from './MoveGenerator.js';
 
 // import { see } from './MoveGenerator.js';
 
@@ -53,8 +54,7 @@ export function clearMoveOrdering(): void {
   counterMoveTable.fill(0);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function updateCounterMove(prevMove: any, bestMove: any): void {
+export function updateCounterMove(prevMove: Move | null, bestMove: Move | null): void {
   if (!prevMove || !bestMove) return;
   // prevMove: {from, to}
   // bestMove: {from, to}
@@ -65,8 +65,7 @@ export function updateCounterMove(prevMove: any, bestMove: any): void {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getCounterMove(prevMove: any): any | null {
+function getCounterMove(prevMove: Move | null): Move | null {
   if (!prevMove) return null;
   const idx = prevMove.from * 81 + prevMove.to;
   if (idx >= counterMoveTable.length || idx < 0) return null; // Safety check
@@ -75,29 +74,26 @@ function getCounterMove(prevMove: any): any | null {
   return { from: (packed >> 8) & 0xff, to: packed & 0xff };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function areMovesEqual(m1: any, m2: any): boolean {
+function areMovesEqual(m1: Move | null, m2: Move | null): boolean {
   if (!m1 || !m2) return false;
   return m1.from === m2.from && m1.to === m2.to;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function orderMoves(
   board: number[] | Int8Array,
-  moves: any[],
-  ttMove: any,
-  killers: any,
-  history: any,
-  prevMove: any
-): any[] {
+  moves: Move[],
+  ttMove: Move | null,
+  killers: (Move | null)[] | null,
+  history: Int32Array | null,
+  prevMove: Move | null
+): Move[] {
   // Basic score assignment
   // Map moves to { move, score }
 
   // Counter move lookup
   const counterMove = getCounterMove(prevMove);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scoredMoves = moves.map((move: any) => {
+  const scoredMoves = moves.map((move) => {
     let score = 0;
 
     // 1. TT Move

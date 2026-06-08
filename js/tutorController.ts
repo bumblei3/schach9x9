@@ -4,6 +4,12 @@ import { getMoveNotation, getPieceName, analyzeStrategicValue, getScoreDescripti
 import { updateBestMoves, isTutorMove, getTutorHints, showTutorSuggestions, getSetupTemplates, applySetupTemplate, placePiece } from './tutor/HintGenerator.js';
 import type { Game } from './gameEngine.js';
 
+interface ScoreDescription {
+  label: string;
+  color: string;
+  emoji: string;
+}
+
 /**
  * Orchestrator for tutor-related logic, delegating to specialized sub-modules.
  */
@@ -33,7 +39,7 @@ export class TutorController {
   }
 
   public getMoveNotation(move: unknown): string {
-    return getMoveNotation(this.game, move);
+    return getMoveNotation(this.game, move as { from: { r: number; c: number }; to: { r: number; c: number } });
   }
 
   public async showTutorSuggestions(): Promise<void> {
@@ -89,10 +95,10 @@ export class TutorController {
   }
 
   public analyzeStrategicValue(move: unknown): unknown[] {
-    return analyzeStrategicValue(this.game, move);
+    return analyzeStrategicValue(this.game, move as { from: { r: number; c: number }; to: { r: number; c: number } });
   }
 
-  public getScoreDescription(score: number): string {
+  public getScoreDescription(score: number): ScoreDescription {
     return getScoreDescription(score);
   }
 
@@ -105,11 +111,11 @@ export class TutorController {
   }
 
   public checkBlunder(moveRecord: unknown): Promise<void> {
-    return checkBlunder(this.game, this, moveRecord);
+    return checkBlunder(this.game, this as any, moveRecord as any);
   }
 
   public showBlunderWarning(analysis: unknown, callback: () => void): void {
-    return showBlunderWarning(this.game, analysis, callback);
+    return showBlunderWarning(this.game, analysis as any, callback);
   }
 
   public getSetupTemplates(): unknown[] {
@@ -117,7 +123,7 @@ export class TutorController {
   }
 
   public applySetupTemplate(templateId: string): void {
-    return applySetupTemplate(this.game, this, templateId);
+    return applySetupTemplate(this.game, this as any, templateId);
   }
 
   public placePiece(r: number, c: number, type: string, isWhite: boolean): void {

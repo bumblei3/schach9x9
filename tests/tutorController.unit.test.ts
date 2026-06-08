@@ -17,7 +17,7 @@ vi.mock('../js/tutor/MoveAnalyzer.js', () => ({
   getMoveNotation: vi.fn(() => 'e4'),
   getPieceName: vi.fn(() => 'Bauer'),
   analyzeStrategicValue: vi.fn(),
-  getScoreDescription: vi.fn(),
+  getScoreDescription: vi.fn(() => ({ label: 'Test', color: '#000', emoji: '✓' })),
   analyzeMoveWithExplanation: vi.fn(),
   handlePlayerMove: vi.fn(),
   checkBlunder: vi.fn(),

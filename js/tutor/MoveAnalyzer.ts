@@ -1,21 +1,69 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
 import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './TacticsDetector.js';
+import type { Analyzer } from './TacticsDetector.js';
 import { evaluatePosition } from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
+import type { Piece } from '../types/game.js';
+
+// --- Type definitions ---
+
+interface MoveInfo {
+  from: Square;
+  to: Square;
+}
+
+interface StrategicPattern {
+  type: string;
+  explanation: string;
+}
+
+export interface MoveExplanation {
+  move: MoveInfo;
+  score: number;
+  category: string;
+  qualityLabel: string;
+  tacticalExplanations: string[];
+  strategicExplanations: string[];
+  warnings: string[];
+  tacticalPatterns: { type: string; severity: string; explanation: string; question?: string }[];
+  strategicValue: StrategicPattern[];
+  questions: string[];
+  scoreDiff: number;
+  notation: string;
+}
+
+interface ScoreDescription {
+  label: string;
+  color: string;
+  emoji: string;
+}
+
+interface MoveRecord {
+  from: Square;
+  to: Square;
+  piece: Piece;
+  evalScore?: number;
+}
+
+interface ThreatInfo {
+  piece: Piece;
+  pos: { r: number; c: number };
+  warning: string;
+}
 
 /**
  * Analyzes a move BEFORE it is executed to provide proactive warnings
  * @param {Object} game
  * @param {Object} move {from: {r,c}, to: {r,c}}
  */
-export async function analyzePlayerMovePreExecution(game: Game, move: { from: Square; to: Square }): Promise<unknown> {
-  if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return null;
+export async function analyzePlayerMovePreExecution(game: any, move: { from: Square; to: Square }): Promise<unknown> {
+  if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return Promise.resolve(null);
 
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
-  if (!piece) return null;
+  if (!piece) return Promise.resolve(null);
 
   // 1. Get current evaluation
     const currentEval = await evaluatePosition(game.board, 'white');
@@ -23,11 +71,11 @@ export async function analyzePlayerMovePreExecution(game: Game, move: { from: Sq
   // 🎯 Add tactical penalty for hanging pieces
     const threats = detectThreatsAfterMove(
     game,
-    { getPieceName: (t: any) => t },
+    { getPieceName: (t: string) => t } as Analyzer,
     move
   );
   let penalty = 0;
-    threats.forEach((t: any) => {
+    threats.forEach((t: ThreatInfo) => {
     const val: Record<string, number> = {
       p: 100,
       n: 320,
@@ -85,7 +133,7 @@ export function analyzeMoveWithExplanation(
   move: any,
   score: number,
   bestScore: number
-): any {
+): MoveExplanation {
     const tacticalExplanations: string[] = [];
     const strategicExplanations: string[] = [];
     const warnings: string[] = [];
@@ -133,21 +181,21 @@ export function analyzeMoveWithExplanation(
   const analyzer = { getPieceName };
     const patterns = detectTacticalPatterns(game, analyzer, move);
     const questions: string[] = [];
-    patterns.forEach((pattern: any) => {
+    patterns.forEach((pattern) => {
     tacticalExplanations.push(pattern.explanation);
     if (pattern.question) questions.push(pattern.question);
   });
 
   // Analyze strategic value
   const strategic = analyzeStrategicValue(game, move);
-    strategic.forEach((s: any) => {
+    strategic.forEach((s) => {
     strategicExplanations.push(s.explanation);
   });
 
   // Check for threats to own pieces after this move
     const threats = detectThreatsAfterMove(game, analyzer, move);
   if (threats.length > 0) {
-        threats.forEach((threat: any) => {
+        threats.forEach((threat) => {
       warnings.push(threat.warning);
     });
   }
@@ -171,8 +219,8 @@ export function analyzeMoveWithExplanation(
 /**
  * Analyzes strategic value of a move
  */
-export function analyzeStrategicValue(game: any, move: any): any[] {
-    const patterns: any[] = [];
+export function analyzeStrategicValue(game: Game, move: MoveInfo): StrategicPattern[] {
+    const patterns: StrategicPattern[] = [];
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
@@ -283,7 +331,7 @@ export function analyzeStrategicValue(game: any, move: any): any[] {
 /**
  * Gets a description for a score
  */
-export function getScoreDescription(score: number): any {
+export function getScoreDescription(score: number): ScoreDescription {
   // Score is in centipawns (100 = 1 pawn advantage)
   if (score >= 900) {
     return { label: '🏆 Gewinnstellung', color: '#10b981', emoji: '🏆' };
@@ -309,7 +357,7 @@ export function getScoreDescription(score: number): any {
 /**
  * Gets algebraic notation for a move
  */
-export function getMoveNotation(game: any, move: any): string {
+export function getMoveNotation(game: Game, move: MoveInfo): string {
   const piece = game.board[move.from.r][move.from.c];
 
   // Handle null piece gracefully
@@ -354,13 +402,13 @@ export function getPieceName(type: string): string {
 /**
  * Handles player moves for Guess the Move and warnings
  */
-export function handlePlayerMove(game: any, _tutorController: any, from: any, to: any): void {
+export function handlePlayerMove(game: any, _tutorController: unknown, from: Square, to: Square): void {
   if (game.phase !== PHASES.PLAY) return;
 
   // Get the move from legal moves
   const moves = game.getAllLegalMoves(game.turn);
     const move = moves.find(
-    (m: any) => m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
+    (m: MoveInfo) => m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
   );
 
   if (!move) return;
@@ -370,7 +418,7 @@ export function handlePlayerMove(game: any, _tutorController: any, from: any, to
     const bestMoves = game.bestMoves || [];
     if (bestMoves.length > 0) {
             const isBest = bestMoves.some(
-        (hint: any) =>
+        (hint: { move: MoveInfo }) =>
           hint.move.from.r === from.r &&
           hint.move.from.c === from.c &&
           hint.move.to.r === to.r &&
@@ -392,8 +440,8 @@ export function handlePlayerMove(game: any, _tutorController: any, from: any, to
  */
 export async function checkBlunder(
   game: any,
-  tutorController: any,
-  moveRecord: any
+  tutorController: { showBlunderWarning: (analysis: MoveExplanation) => void },
+  moveRecord: MoveRecord
 ): Promise<void> {
   if (!moveRecord || game.mode === 'puzzle') return;
 
@@ -402,7 +450,8 @@ export async function checkBlunder(
   const turn = moveRecord.piece.color;
 
   // Advantage drop (from perspective of current player)
-  const drop = turn === 'white' ? prevEval - currentEval : currentEval - prevEval;
+  const currentEvalNum = currentEval ?? 0;
+  const drop = turn === 'white' ? prevEval - currentEvalNum : currentEvalNum - prevEval;
 
   // Track accuracy for Elo estimation
   // Using a sigmoid-like curve or simple mapping:
@@ -416,7 +465,7 @@ export async function checkBlunder(
     const analysis = analyzeMoveWithExplanation(
       game,
       { from: moveRecord.from, to: moveRecord.to },
-      currentEval,
+      currentEvalNum,
       turn === 'white' ? prevEval : -prevEval
     );
     tutorController.showBlunderWarning(analysis);
@@ -426,12 +475,12 @@ export async function checkBlunder(
     if (showMoveQuality) {
       // We assume the best move score is either the engine's best or the previous eval if no engine ran
       const bestScore =
-        game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
+        game.bestMoves && game.bestMoves.length > 0 ? (game.bestMoves[0].score ?? prevEval) : prevEval;
       const analysis = analyzeMoveWithExplanation(
         game,
         { from: moveRecord.from, to: moveRecord.to },
-        currentEval,
-        bestScore
+        currentEvalNum,
+        bestScore ?? prevEval
       );
       showMoveQuality(
         game,
@@ -446,7 +495,7 @@ export async function checkBlunder(
 /**
  * Shows a blunder warning (can be post-move or pre-move)
  */
-export function showBlunderWarning(game: any, analysis: any, proceedCallback: any = null): void {
+export function showBlunderWarning(game: Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis: MoveExplanation, proceedCallback: (() => void) | null = null): void {
   const warnings = analysis.warnings.join('\n');
   const explanation =
     analysis.tacticalExplanations.join('\n') ||
