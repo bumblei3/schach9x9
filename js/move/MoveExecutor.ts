@@ -1,4 +1,5 @@
 import { PHASES, type Game } from '../gameEngine.js';
+import type { Phase } from '../config.js';
 import * as UI from '../ui.js';
 import { soundManager } from '../sounds.js';
 import { puzzleManager } from '../puzzleManager.js';
@@ -85,8 +86,8 @@ export async function executeMove(
     moveRecord.specialMove = {
       type: 'enPassant',
       capturedPawnPos: { r: capturedPawnRow, c: to.c },
-      capturedPawn: { type: capturedPawn.type, color: capturedPawn.color } as any,
-    };
+      capturedPawn: { type: capturedPawn.type, color: capturedPawn.color },
+    } as typeof moveRecord.specialMove;
 
     moveRecord.isEnPassant = true;
 
@@ -279,9 +280,9 @@ export async function completeMoveExecution(
   UI.updateStatus(game);
 
   // Blunder Detection
-  if (game.tutorController && (game.tutorController as any).checkBlunder) {
+  if (game.tutorController?.checkBlunder) {
     // Fire and forget or await? Safer to await to ensure sequence
-    await (game.tutorController as any).checkBlunder(moveRecord);
+    await game.tutorController.checkBlunder(moveRecord);
   }
 
   // Puzzle Logic Check
@@ -302,7 +303,7 @@ export async function completeMoveExecution(
       // Auto-play opponent move if available
       const nextIndex = game.puzzleState ? game.puzzleState.currentMoveIndex : 0;
       const puzzle = puzzleManager.getPuzzle(
-        game.puzzleState ? (game.puzzleState as any).puzzleId : ''
+        game.puzzleState ? game.puzzleState.id : ''
       );
 
       if (puzzle && nextIndex < puzzle.solution.length) {
@@ -319,7 +320,7 @@ export async function completeMoveExecution(
 
   // Check for insufficient material
   if (MoveValidator.isInsufficientMaterial(game)) {
-    game.phase = PHASES.GAME_OVER as any;
+    game.phase = PHASES.GAME_OVER as Phase;
     UI.renderBoard(game);
     UI.updateStatus(game);
 
@@ -330,7 +331,7 @@ export async function completeMoveExecution(
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {
-      (game.gameController as any).handleGameEnd('draw', null);
+      game.gameController.handleGameEnd('draw', null);
     }
     return;
   }
@@ -363,7 +364,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
   }
 
   if (!whiteKingExists || !blackKingExists) {
-    game.phase = PHASES.GAME_OVER as any;
+    game.phase = PHASES.GAME_OVER as Phase;
     const winner = !whiteKingExists ? 'Schwarz' : 'Weiß';
     game.log(`KÖNIG GESCHLAGEN! ${winner} gewinnt!`);
 
@@ -386,7 +387,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
     if (game.gameController) {
       const winnerColor: Player = !whiteKingExists ? 'black' : 'white';
-      (game.gameController as any).handleGameEnd('win', winnerColor);
+      game.gameController.handleGameEnd('win', winnerColor);
     }
     return;
   }
@@ -413,12 +414,12 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
   // Update 3D board if active
   if (
-    (window as any).battleChess3D &&
-    (window as any).battleChess3D.enabled &&
+    window.battleChess3D &&
+    window.battleChess3D.enabled &&
     game.moveHistory.length > 0
   ) {
     const lastMove = game.moveHistory[game.moveHistory.length - 1];
-    const piece = lastMove.piece as any;
+    const piece = lastMove.piece!;
     const from = lastMove.from;
     const to = lastMove.to;
     const targetPiece = lastMove.captured;
@@ -429,20 +430,20 @@ export function finishMove(game: Game, lastTo?: Square): void {
     if (captured) {
       const attackerData = { type: piece.type, color: piece.color };
       const defenderData = targetPiece || lastMove.specialMove?.capturedPawn;
-      (window as any).battleChess3D
+      window.battleChess3D
         .playBattleSequence(attackerData, defenderData, from, to)
         .then(() => {
-          (window as any).battleChess3D.removePiece(to.r, to.c);
-          (window as any).battleChess3D.animateMove(from.r, from.c, to.r, to.c);
+          window.battleChess3D!.removePiece(to.r, to.c);
+          window.battleChess3D!.animateMove(from.r, from.c, to.r, to.c);
         });
     } else {
-      (window as any).battleChess3D.animateMove(from.r, from.c, to.r, to.c);
+      window.battleChess3D.animateMove(from.r, from.c, to.r, to.c);
     }
   }
 
   const opponentColor = game.turn;
   if (game.isCheckmate(opponentColor)) {
-    game.phase = PHASES.GAME_OVER as any;
+    game.phase = PHASES.GAME_OVER as Phase;
     UI.renderBoard(game);
     UI.updateStatus(game);
     const winner = opponentColor === 'white' ? 'Schwarz' : 'Weiß';
@@ -461,7 +462,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
     if (game.gameController) {
       const winningColor: Player = opponentColor === 'white' ? 'black' : 'white';
-      (game.gameController as any).handleGameEnd('win', winningColor);
+      game.gameController.handleGameEnd('win', winningColor);
 
       // Award Checkmate XP in Campaign
       if (game.campaignMode && winningColor === game.playerColor) {
@@ -471,7 +472,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     }
     return;
   } else if (game.isStalemate(opponentColor)) {
-    game.phase = PHASES.GAME_OVER as any;
+    game.phase = PHASES.GAME_OVER as Phase;
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('PATT! Unentschieden.');
@@ -481,7 +482,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {
-      (game.gameController as any).handleGameEnd('draw', null);
+      game.gameController.handleGameEnd('draw', null);
     }
     return;
   } else if (MoveValidator.checkDraw(game)) {
@@ -498,8 +499,8 @@ export function finishMove(game: Game, lastTo?: Square): void {
   // Auto-save every 5 moves
   if (game.moveHistory.length > 0 && game.moveHistory.length % 5 === 0) {
     try {
-      if (game.gameController && (game.gameController as any).saveGame) {
-        (game.gameController as any).saveGame(true); // silent save
+      if (game.gameController && game.gameController.saveGame) {
+        game.gameController.saveGame();
         UI.showToast('Spiel automatisch gespeichert', 'success');
       }
     } catch (e) {
@@ -521,13 +522,13 @@ export function finishMove(game: Game, lastTo?: Square): void {
       if (
         game.gameController &&
         (game.analysisMode ||
-          ((game.aiController as any) && (game.aiController as any).analysisActive))
+          (game.aiController && (game.aiController as { analysisActive?: boolean }).analysisActive))
       ) {
-        (game.gameController as any).requestPositionAnalysis();
+        game.gameController.requestPositionAnalysis();
       }
 
-      if ((game as any).analysisManager) {
-        (game as any).analysisManager.updateArrows();
+      if (game.analysisManager) {
+        game.analysisManager.updateArrows();
       }
     }, 10);
   }

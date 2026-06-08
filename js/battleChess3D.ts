@@ -25,12 +25,9 @@ export class BattleChess3D {
     this.enabled = false;
 
     // Initialize managers
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SceneManager = (window as any).SceneManager3D || SceneManager3D;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const PieceManager = (window as any).PieceManager3D || PieceManager3D;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const InputHandler = (window as any).InputHandler3D || InputHandler3D;
+        const SceneManager = (window as any).SceneManager3D || SceneManager3D;
+        const PieceManager = (window as any).PieceManager3D || PieceManager3D;
+        const InputHandler = (window as any).InputHandler3D || InputHandler3D;
 
     this.sceneManager = new SceneManager(containerElement);
     this.pieceManager = new PieceManager(this.sceneManager);
@@ -40,89 +37,70 @@ export class BattleChess3D {
   }
 
   // Getters and Setters for compatibility with tests and external access
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get scene(): any {
+    get scene(): any {
     return this.sceneManager.scene;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set scene(value: any) {
+    set scene(value: any) {
     this.sceneManager.scene = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get camera(): any {
+    get camera(): any {
     return this.sceneManager.camera;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set camera(value: any) {
+    set camera(value: any) {
     this.sceneManager.camera = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get renderer(): any {
+    get renderer(): any {
     return this.sceneManager.renderer;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set renderer(value: any) {
+    set renderer(value: any) {
     this.sceneManager.renderer = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get controls(): any {
+    get controls(): any {
     return this.sceneManager.controls;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set controls(value: any) {
+    set controls(value: any) {
     this.sceneManager.controls = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get battleAnimator(): any {
+    get battleAnimator(): any {
     return this.pieceManager.battleAnimator;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set battleAnimator(value: any) {
+    set battleAnimator(value: any) {
     this.pieceManager.battleAnimator = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get pieces(): any {
+    get pieces(): any {
     return this.pieceManager.pieces;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set pieces(value: any) {
+    set pieces(value: any) {
     this.pieceManager.pieces = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get animating(): any {
+    get animating(): any {
     return this.pieceManager.animating;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get currentSkin(): any {
+    get currentSkin(): any {
     return this.pieceManager.currentSkin;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set currentSkin(value: any) {
+    set currentSkin(value: any) {
     this.pieceManager.currentSkin = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get currentTheme(): any {
+    get currentTheme(): any {
     return this.sceneManager.currentTheme;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set currentTheme(value: any) {
+    set currentTheme(value: any) {
     this.sceneManager.currentTheme = value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get highlights(): any {
+    get highlights(): any {
     return this.pieceManager.highlights;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set highlights(value: any) {
+    set highlights(value: any) {
     this.pieceManager.highlights = value;
   }
 
@@ -181,16 +159,14 @@ export class BattleChess3D {
   /**
    * Update 3D board from game state
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public updateFromGameState(game: any): void {
+    public updateFromGameState(game: any): void {
     this.pieceManager.updateFromGameState(game);
   }
 
   /**
    * Animate a piece move
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async animateMove(
+    public async animateMove(
     fromRow: number,
     fromCol: number,
     toRow: number,
@@ -203,8 +179,7 @@ export class BattleChess3D {
   /**
    * Play battle animation when piece is captured
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async playBattleSequence(
+    public async playBattleSequence(
     attacker: any,
     defender: any,
     attackerPos: any,
@@ -216,8 +191,7 @@ export class BattleChess3D {
   /**
    * Highlight valid moves on the board
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public highlightMoves(moves: any[]): void {
+    public highlightMoves(moves: any[]): void {
     this.pieceManager.highlightMoves(moves);
   }
 
@@ -261,8 +235,7 @@ export class BattleChess3D {
   }
 
   // Internal handlers exposed for testing
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public onClick(event: any): void {
+    public onClick(event: any): void {
     this.inputHandler.onClick(event);
   }
 
@@ -270,8 +243,13 @@ export class BattleChess3D {
     this.sceneManager.onWindowResize();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public boardToWorld(row: number, col: number): any {
+    public boardToWorld(row: number, col: number): any {
     return this.sceneManager.boardToWorld(row, col);
+  }
+}
+
+declare global {
+  interface Window {
+    battleChess3D?: BattleChess3D;
   }
 }

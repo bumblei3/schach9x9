@@ -1,6 +1,7 @@
 /**
  * Engine Analysis UI Component
  */
+import { showModal, closeModal, updateMoveHistoryUI, renderEvalGraph } from '../ui.js';
 import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
 
@@ -115,20 +116,18 @@ export class AnalysisUI {
   }
 
   showAnalysisPrompt(): void {
-    import('../ui.js').then(UI => {
-      (UI as any).showModal(
-        'Partie analysieren?',
-        'Möchtest du die gesamte Partie von der KI analysieren lassen? Dies zeigt dir deine Genauigkeit und Fehler an.',
-        [
-          { text: 'Abbrechen', class: 'btn-secondary' },
-          {
-            text: 'Analysieren',
-            class: 'btn-primary',
-            callback: () => this.startFullAnalysis(),
-          },
-        ]
-      );
-    });
+    showModal(
+      'Partie analysieren?',
+      'Möchtest du die gesamte Partie von der KI analysieren lassen? Dies zeigt dir deine Genauigkeit und Fehler an.',
+      [
+        { text: 'Abbrechen', class: 'btn-secondary' },
+        {
+          text: 'Analysieren',
+          class: 'btn-primary',
+          callback: () => this.startFullAnalysis(),
+        },
+      ]
+    );
   }
 
   async startFullAnalysis(): Promise<void> {
@@ -137,26 +136,25 @@ export class AnalysisUI {
       return;
     }
 
-    const UI = await import('../ui.js');
     const { analyzeGame, classifyMove } = PostGameAnalyzer;
 
     this.isAnalyzing = true;
-    (UI as any).showModal('Ganganalyse', 'Die KI analysiert die Stellungen...', [], false);
+    showModal('Ganganalyse', 'Die KI analysiert die Stellungen...', []);
 
     const states = this.collectBoardStates();
     const results: any[] = [];
-    const worker = (this.game as any).aiController.aiWorkers[0];
+    const worker = this.game.aiController?.aiWorkers?.[0];
+    if (!worker) return;
 
     for (let i = 0; i < states.length; i++) {
       const boardArr = states[i];
       const turn = i % 2 === 0 ? 'white' : 'black';
 
       // Update progress modal
-      (UI as any).showModal(
+      showModal(
         'Ganganalyse',
         `Analysiere Stellung ${i + 1} von ${states.length}...`,
-        [],
-        false
+        []
       );
 
       const analysis = await new Promise(resolve => {
@@ -195,23 +193,23 @@ export class AnalysisUI {
         const currentEvalMover = turn === 'black' ? -currentResult.score : currentResult.score;
         const bestEvalMover = turn === 'black' ? bestEval : -bestEval;
 
-        (move as any).classification = (classifyMove as any)(
+        move.classification = classifyMove(
           prevEvalMover,
           currentEvalMover,
           bestEvalMover
         );
-        (move as any).evalScore = currentResult.score;
+        move.evalScore = currentResult.score;
       }
     }
 
     this.isAnalyzing = false;
-    (UI as any).closeModal();
+    closeModal();
 
-    const whiteStats = (analyzeGame as any)(this.game.moveHistory, 'white');
-    const blackStats = (analyzeGame as any)(this.game.moveHistory, 'black');
+    const whiteStats = analyzeGame(this.game.moveHistory, 'white');
+    const blackStats = analyzeGame(this.game.moveHistory, 'black');
 
-    (UI as any).updateMoveHistoryUI(this.game);
-    (UI as any).renderEvalGraph(this.game);
+    updateMoveHistoryUI(this.game);
+    renderEvalGraph(this.game);
 
     this.showSummaryModal(whiteStats, blackStats);
   }
@@ -273,11 +271,10 @@ export class AnalysisUI {
   }
 
   showSummaryModal(white: any, black: any): void {
-    import('../ui.js').then(UI => {
-      const getAccuracyClass = (acc: number) =>
-        acc >= 85 ? 'accuracy-high' : acc >= 60 ? 'accuracy-mid' : 'accuracy-low';
+    const getAccuracyClass = (acc: number) =>
+      acc >= 85 ? 'accuracy-high' : acc >= 60 ? 'accuracy-mid' : 'accuracy-low';
 
-      const content = `
+    const content = `
         <div class="analysis-summary">
           <div class="player-stats">
             <h3>Weiß</h3>
@@ -292,29 +289,27 @@ export class AnalysisUI {
         </div>
       `;
 
-      (UI as any).showModal('Analyse abgeschlossen', content, [
-        { text: 'Schließen', class: 'btn-secondary' },
-        {
-          text: 'Partie durchsehen',
-          class: 'btn-primary',
-          callback: () => {
-            if ((this.game as any).gameController && (this.game as any).gameController.jumpToMove) {
-              (this.game as any).gameController.jumpToMove(0);
-            }
-          },
+    showModal('Analyse abgeschlossen', content, [
+      { text: 'Schließen', class: 'btn-secondary' },
+      {
+        text: 'Partie durchsehen',
+        class: 'btn-primary',
+        callback: () => {
+          if (this.game.gameController && this.game.gameController.jumpToMove) {
+            this.game.gameController.jumpToMove(0);
+          }
         },
-      ]);
-    });
+      },
+    ]);
   }
 
   renderStatCounts(counts: any): string {
-    const { QUALITY_METADATA } = PostGameAnalyzer as any;
     return Object.entries(counts)
       .filter(([_, count]: [any, any]) => count > 0)
       .map(
         ([quality, count]) => `
         <div class="stat-row">
-          <span class="stat-label" style="color: ${QUALITY_METADATA[quality].color}">${QUALITY_METADATA[quality].label}</span>
+          <span class="stat-label" style="color: ${PostGameAnalyzer.QUALITY_METADATA[quality].color}">${PostGameAnalyzer.QUALITY_METADATA[quality].label}</span>
           <span class="stat-count">${count}</span>
         </div>
       `

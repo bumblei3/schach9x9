@@ -5,7 +5,7 @@ import * as UI from '../../ui.js';
 import { logger } from '../../logger.js';
 import { campaignManager } from '../../campaign/CampaignManager.js';
 import { BoardFactory } from '../../campaign/BoardFactory.js';
-import { SetupModeStrategy } from './SetupMode.ts'; // Re-use setup logic if possible or composition
+import { SetupModeStrategy } from './SetupMode.js'; // Re-use setup logic if possible or composition
 
 export class CampaignModeStrategy implements GameModeStrategy {
   private setupStrategy = new SetupModeStrategy(); // Delegate for 'budget' setup type

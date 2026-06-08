@@ -3,7 +3,9 @@
  * Maps key combinations to game actions.
  * @module KeyboardManager
  */
+import { showToast, closeModal, renderBoard } from '../ui.js';
 import type { App } from '../App.js';
+import type { Game } from '../gameEngine.js';
 
 export class KeyboardManager {
   private app: App;
@@ -24,7 +26,7 @@ export class KeyboardManager {
   }
 
   async handleKeyDown(event: KeyboardEvent): Promise<void> {
-    const g = this.app.game as any;
+    const g: Game = this.app.game as unknown as Game;
     if (!this.app.gameController || !g) return;
 
     // Ignore input fields
@@ -37,14 +39,11 @@ export class KeyboardManager {
     const ctrl = event.ctrlKey || event.metaKey;
     const shift = event.shiftKey;
 
-    // Lazy load UI
-    const UI = await import('../ui.js');
-
     // Undo: Ctrl+Z or 'u'
     if ((ctrl && key === 'z' && !shift) || key === 'u') {
       event.preventDefault();
       this.app.gameController.undoMove();
-      (UI as any).showToast('Undo', 'info');
+      showToast('Undo', 'info');
       return;
     }
 
@@ -52,15 +51,15 @@ export class KeyboardManager {
     if ((ctrl && key === 'y') || (ctrl && shift && key === 'z') || key === 'r') {
       event.preventDefault();
       this.app.gameController.redoMove();
-      (UI as any).showToast('Redo', 'info');
+      showToast('Redo', 'info');
       return;
     }
 
     // Hint: 'h'
     if (key === 'h') {
       event.preventDefault();
-      if ((this.app as any).tutorController) {
-        await (this.app as any).tutorController.showHint();
+      if (this.app.tutorController) {
+        await this.app.tutorController.showHint();
       }
       return;
     }
@@ -70,7 +69,7 @@ export class KeyboardManager {
       event.preventDefault();
       if (g.analysisManager) {
         const active = g.analysisManager.toggleThreats();
-        (UI as any).showToast(active ? 'Drohungen AN' : 'Drohungen AUS', 'info');
+        showToast(active ? 'Drohungen AN' : 'Drohungen AUS', 'info');
         const btn = document.getElementById('threats-btn');
         if (btn) btn.classList.toggle('active', active);
       }
@@ -82,7 +81,7 @@ export class KeyboardManager {
       event.preventDefault();
       if (g.analysisManager) {
         const active = g.analysisManager.toggleOpportunities();
-        (UI as any).showToast(active ? 'Chancen AN' : 'Chancen AUS', 'info');
+        showToast(active ? 'Chancen AN' : 'Chancen AUS', 'info');
         const btn = document.getElementById('opportunities-btn');
         if (btn) btn.classList.toggle('active', active);
       }
@@ -94,7 +93,7 @@ export class KeyboardManager {
       event.preventDefault();
       if (g.analysisManager) {
         const active = g.analysisManager.toggleBestMove();
-        (UI as any).showToast(active ? 'Bester Zug AN' : 'Bester Zug AUS', 'info');
+        showToast(active ? 'Bester Zug AN' : 'Bester Zug AUS', 'info');
         const btn = document.getElementById('best-move-btn');
         if (btn) btn.classList.toggle('active', active);
       }
@@ -113,8 +112,8 @@ export class KeyboardManager {
     // Fullscreen: 'f'
     if (key === 'f') {
       event.preventDefault();
-      if ((this.app as any).toggleFullscreen) {
-        (this.app as any).toggleFullscreen();
+      if (this.app.toggleFullscreen) {
+        this.app.toggleFullscreen();
       }
       return;
     }
@@ -123,7 +122,7 @@ export class KeyboardManager {
     if (ctrl && shift && key === 'f12') {
       event.preventDefault();
       this.performEmergencyRecovery();
-      (UI as any).showToast('🔧 Emergency Recovery - Game unstuck!', 'warning');
+      showToast('🔧 Emergency Recovery - Game unstuck!', 'warning');
       return;
     }
 
@@ -131,9 +130,7 @@ export class KeyboardManager {
     if (key === 'escape') {
       event.preventDefault();
 
-      if ((UI as any).closeModal) (UI as any).closeModal();
-      if ((UI as any).OverlayManager && (UI as any).OverlayManager.closeAll)
-        (UI as any).OverlayManager.closeAll();
+      closeModal();
 
       if (g.selectedSquare) {
         if (this.app.gameController.resetSelection) {
@@ -141,7 +138,7 @@ export class KeyboardManager {
         } else {
           g.selectedSquare = null;
           g.validMoves = [];
-          UI.renderBoard(this.app.game);
+          renderBoard(this.app.game);
         }
       }
       return;
@@ -152,30 +149,25 @@ export class KeyboardManager {
    * Emergency recovery function to unstick frozen games.
    */
   performEmergencyRecovery(): void {
-    const game = this.app.game as any;
-    if (!game) return;
+    const g: Game = this.app.game as unknown as Game;
+    if (!g) return;
 
-    const previousTurn = game.turn;
-    game.turn = 'white';
-    game.isAnimating = false;
+    const previousTurn = g.turn;
+    g.turn = 'white';
+    g.isAnimating = false;
 
     const spinner = document.getElementById('spinner-overlay');
     if (spinner) spinner.classList.add('hidden');
 
-    game.selectedSquare = null;
-    game.validMoves = null;
-
-    if (game._forceFullRender !== undefined) {
-      game._forceFullRender = true;
-    }
+    g.selectedSquare = null;
+    g.validMoves = null;
+    g._forceFullRender = true;
 
     console.warn(
       `[RECOVERY] Previous turn: ${previousTurn}, isAnimating was reset, spinner hidden`
     );
 
-    import('../ui.js').then(UI => {
-      UI.renderBoard(game);
-      UI.updateStatus(game);
-    });
+    renderBoard(g);
+    import('../ui.js').then(UI => UI.updateStatus(g));
   }
 }

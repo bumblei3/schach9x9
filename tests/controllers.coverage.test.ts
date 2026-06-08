@@ -149,9 +149,10 @@ describe('Controllers Coverage Expansion', () => {
     test('aiEvaluateDrawOffer should accept if losing', async () => {
       game.drawOffered = true;
       (evaluatePosition as any).mockResolvedValue(-500);
+      const acceptDrawSpy = vi.spyOn(gc, 'acceptDraw');
 
       await ac.aiEvaluateDrawOffer();
-      expect(game.acceptDraw).toHaveBeenCalled();
+      expect(acceptDrawSpy).toHaveBeenCalled();
     });
 
     test('aiShouldOfferDraw should return true if slightly losing', async () => {

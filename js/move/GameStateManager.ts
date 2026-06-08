@@ -1,7 +1,8 @@
 import { logger } from '../logger.js';
 import { PHASES } from '../gameEngine.js';
+import type { Phase } from '../config.js';
 import * as UI from '../ui.js';
-import type { Game, PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
+import type { Game, PieceWithMoved, MoveHistoryEntry, Piece } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
 
 /**
@@ -12,9 +13,9 @@ import type { MoveController } from '../moveController.js';
 export function undoMove(game: Game, moveController: MoveController): void {
   if (
     game.moveHistory.length === 0 ||
-    (game.phase !== (PHASES as any).PLAY &&
-      game.phase !== (PHASES as any).ANALYSIS &&
-      game.phase !== (PHASES as any).GAME_OVER)
+    (game.phase !== PHASES.PLAY as Phase &&
+      game.phase !== PHASES.ANALYSIS as Phase &&
+      game.phase !== PHASES.GAME_OVER as Phase)
   ) {
     return;
   }
@@ -29,17 +30,19 @@ export function undoMove(game: Game, moveController: MoveController): void {
   game.board[move.from.r][move.from.c] = piece;
   game.board[move.to.r][move.to.c] = move.captured
     ? ({
-        type: (move.captured as any).type,
-        color: (move.captured as any).color,
+        type: move.captured.type,
+        color: move.captured.color,
         hasMoved: true,
-      })
+      } as PieceWithMoved)
     : null;
 
   // Restore piece properties (hasMoved and type)
   if (move.piece?.hasMoved !== undefined) {
-    piece.hasMoved = move.piece?.hasMoved;
+    piece.hasMoved = move.piece.hasMoved;
   }
-  piece.type = (move.piece as any).type;
+  if (move.piece) {
+    piece.type = move.piece.type;
+  }
 
   if (move.specialMove) {
     const sm = move.specialMove;
@@ -51,26 +54,26 @@ export function undoMove(game: Game, moveController: MoveController): void {
         game.board[sm.rookTo!.r][sm.rookTo!.c] = null;
         rook.hasMoved = sm.rookHadMoved ?? false;
         if (sm.rookType) {
-          rook.type = sm.rookType as any;
+          rook.type = sm.rookType as Piece['type'];
         }
       }
     } else if (sm.type === 'enPassant') {
       game.board[sm.capturedPawnPos!.r][sm.capturedPawnPos!.c] = {
         type: 'p',
-        color: sm.capturedPawn!.color,
+        color: sm.capturedPawn!.color as Piece['color'],
         hasMoved: true,
-      } as any;
+      };
     }
   }
 
   // Handle captured pieces restoration
   if (move.captured) {
-    const capturerColor = (move.piece as any).color;
-    game.capturedPieces[capturerColor as 'white' | 'black'].pop();
+    const capturerColor = move.piece!.color;
+    game.capturedPieces[capturerColor].pop();
     UI.updateCapturedUI(game);
   } else if (move.specialMove && move.specialMove.type === 'enPassant') {
-    const capturerColor = (move.piece as any).color;
-    game.capturedPieces[capturerColor as 'white' | 'black'].pop();
+    const capturerColor = move.piece!.color;
+    game.capturedPieces[capturerColor].pop();
     UI.updateCapturedUI(game);
   }
 
@@ -104,7 +107,7 @@ export function undoMove(game: Game, moveController: MoveController): void {
 
   // If we undid a move that caused game over, reset phase to PLAY
   if (game.phase === PHASES.GAME_OVER) {
-    game.phase = PHASES.PLAY as any;
+    game.phase = PHASES.PLAY as Phase;
     // Hide game over overlay
     const overlay = document.getElementById('game-over-overlay');
     if (overlay) overlay.classList.add('hidden');
@@ -186,11 +189,11 @@ export function exitReplayMode(game: Game): void {
 
   const undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
   if (undoBtn)
-    undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== (PHASES as any).PLAY;
+    undoBtn.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY as Phase;
 
   UI.renderBoard(game);
 
-  if (game.clockEnabled && game.phase === (PHASES as any).PLAY) {
+  if (game.clockEnabled && game.phase === PHASES.PLAY as Phase) {
     if ((game as any).startClock) (game as any).startClock();
   }
 }
@@ -232,10 +235,10 @@ export function undoMoveForReplay(game: Game, move: MoveHistoryEntry): void {
   game.board[move.from.r][move.from.c] = piece;
   game.board[move.to.r][move.to.c] = move.captured
     ? ({
-        type: (move.captured as any).type,
-        color: (move.captured as any).color,
+        type: move.captured.type,
+        color: move.captured.color,
         hasMoved: true,
-      })
+      } as PieceWithMoved)
     : null;
 
   if (move.piece && move.piece?.hasMoved !== undefined) {
@@ -257,9 +260,9 @@ export function undoMoveForReplay(game: Game, move: MoveHistoryEntry): void {
       const capturedPos = sm.capturedPawnPos!;
       game.board[capturedPos.r][capturedPos.c] = {
         type: 'p',
-        color: sm.capturedPawn!.color,
+        color: sm.capturedPawn!.color as Piece['color'],
         hasMoved: true,
-      } as any;
+      };
     } else if (sm.type === 'promotion') {
       piece.type = 'p';
     }
@@ -350,8 +353,8 @@ export function loadGame(game: Game): boolean {
     }
 
     if (
-      game.phase === PHASES.SETUP_WHITE_PIECES as any ||
-      game.phase === PHASES.SETUP_BLACK_PIECES as any
+      game.phase === PHASES.SETUP_WHITE_PIECES as Phase ||
+      game.phase === PHASES.SETUP_BLACK_PIECES as Phase
     ) {
       UI.showShop(game, true);
     } else {

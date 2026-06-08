@@ -95,6 +95,18 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
       arrowRenderer: { clearArrows: vi.fn(), drawArrow: vi.fn() },
       halfMoveClock: 0,
       findKing: vi.fn(() => ({ r: 1, c: 4 })),
+      gameController: {
+        placeKing: (r: number, c: number, color: string) => game.placeKing(r, c, color),
+        placeShopPiece: (r: number, c: number) => game.placeShopPiece(r, c),
+        finishSetupPhase: () => game.finishSetupPhase(),
+        resign: (color: string) => game.resign(color),
+        offerDraw: (color: string) => game.offerDraw(color),
+        acceptDraw: () => game.acceptDraw(),
+        declineDraw: () => game.declineDraw(),
+        shopManager: {
+          aiPerformUpgrades: vi.fn(),
+        },
+      },
     };
     controller = new AIController(game as any);
     vi.clearAllMocks();
@@ -121,14 +133,18 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
     // Simulate worker response to resolve the move promise
     if (controller.aiWorkers.length > 0) {
       const worker = controller.aiWorkers[0];
+      const messageEvent = {
+        data: {
+          type: 'bestMove',
+          data: { move: { from: { r: 1, c: 4 }, to: { r: 2, c: 4 } } },
+        },
+      } as MessageEvent;
       // Simulate 'bestMove' message to resolve the promise
       if (worker.listeners && worker.listeners['message']) {
-        worker.listeners['message']({
-          data: {
-            type: 'bestMove',
-            data: { move: { from: { r: 1, c: 4 }, to: { r: 2, c: 4 } } },
-          },
-        });
+        worker.listeners['message'](messageEvent);
+      }
+      if (worker.onmessage) {
+        worker.onmessage(messageEvent);
       }
     }
 

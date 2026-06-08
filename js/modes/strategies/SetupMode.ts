@@ -8,9 +8,9 @@ import { logger } from '../../logger.js';
 export class SetupModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
     if (game.mode === 'upgrade' || game.mode === 'upgrade8x8') {
-      game.phase = PHASES.SETUP_WHITE_UPGRADES as any;
+      game.phase = PHASES.SETUP_WHITE_UPGRADES;
     } else {
-      game.phase = PHASES.SETUP_WHITE_KING as any;
+      game.phase = PHASES.SETUP_WHITE_KING;
     }
     game.points = initialPoints;
 
@@ -32,22 +32,22 @@ export class SetupModeStrategy implements GameModeStrategy {
     r: number,
     c: number
   ): Promise<boolean> {
-    if (game.phase === (PHASES.SETUP_WHITE_KING as any)) {
+    if (game.phase === PHASES.SETUP_WHITE_KING) {
       console.log('[SetupMode] Placing King');
       controller.placeKing(r, c, 'white');
       return true;
-    } else if (game.phase === (PHASES.SETUP_BLACK_KING as any)) {
+    } else if (game.phase === PHASES.SETUP_BLACK_KING) {
       controller.placeKing(r, c, 'black');
       return true;
     } else if (
-      game.phase === (PHASES.SETUP_WHITE_PIECES as any) ||
-      game.phase === (PHASES.SETUP_BLACK_PIECES as any)
+      game.phase === PHASES.SETUP_WHITE_PIECES ||
+      game.phase === PHASES.SETUP_BLACK_PIECES
     ) {
       controller.placeShopPiece(r, c);
       return true;
     } else if (
-      game.phase === (PHASES.SETUP_WHITE_UPGRADES as any) ||
-      game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)
+      game.phase === PHASES.SETUP_WHITE_UPGRADES ||
+      game.phase === PHASES.SETUP_BLACK_UPGRADES
     ) {
       controller.upgradePiece(r, c);
       return true;
@@ -56,7 +56,7 @@ export class SetupModeStrategy implements GameModeStrategy {
     // If we reach here, it might be PLAY or ANALYSIS which are handled generally,
     // or this strategy doesn't handle it.
     // For Setup Mode, once we hit PLAY, we treat it as standard gameplay interaction.
-    if (game.phase === (PHASES.PLAY as any) || (game.phase as any) === 'ANALYSIS') {
+    if (game.phase === PHASES.PLAY || game.phase === PHASES.ANALYSIS) {
       if (game.handlePlayClick) {
         await game.handlePlayClick(r, c);
         return true;
@@ -68,12 +68,12 @@ export class SetupModeStrategy implements GameModeStrategy {
 
   onPhaseEnd(game: GameExtended, controller: GameController): void {
     const handleTransition = () => {
-      if (game.phase === (PHASES.SETUP_WHITE_PIECES as any)) {
-        game.phase = PHASES.SETUP_WHITE_UPGRADES as any;
+      if (game.phase === PHASES.SETUP_WHITE_PIECES) {
+        game.phase = PHASES.SETUP_WHITE_UPGRADES;
         game.selectedShopPiece = null;
         controller.updateShopUI();
         game.log('Weiß: Truppen-Upgrades möglich.');
-      } else if (game.phase === (PHASES.SETUP_WHITE_UPGRADES as any)) {
+      } else if (game.phase === PHASES.SETUP_WHITE_UPGRADES) {
         // Setup Mode Transition
         if (game.campaignMode) {
           // In Campaign budget levels, Black setup is already in FEN.
@@ -84,18 +84,18 @@ export class SetupModeStrategy implements GameModeStrategy {
         }
 
         if (game.mode === 'upgrade' || game.mode === 'upgrade8x8') {
-          game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
+          game.phase = PHASES.SETUP_BLACK_UPGRADES;
           game.points = game.initialPoints;
           // AI trigger
           if (game.isAI) {
             setTimeout(() => {
-              if ((game as any).aiSetupUpgrades) (game as any).aiSetupUpgrades();
+              if (game.aiSetupUpgrades) game.aiSetupUpgrades();
               controller.finishSetupPhase();
             }, 1000);
           }
           game.log('Weiß fertig. Schwarz rüstet auf.');
         } else {
-          game.phase = PHASES.SETUP_BLACK_PIECES as any;
+          game.phase = PHASES.SETUP_BLACK_PIECES;
           game.points = game.initialPoints;
           game.selectedShopPiece = null;
           controller.updateShopUI();
@@ -109,8 +109,8 @@ export class SetupModeStrategy implements GameModeStrategy {
             }, AI_DELAY_MS);
           }
         }
-      } else if (game.phase === (PHASES.SETUP_BLACK_PIECES as any)) {
-        game.phase = PHASES.SETUP_BLACK_UPGRADES as any;
+      } else if (game.phase === PHASES.SETUP_BLACK_PIECES) {
+        game.phase = PHASES.SETUP_BLACK_UPGRADES;
         game.selectedShopPiece = null;
         controller.updateShopUI();
         game.log('Schwarz: Truppen-Upgrades möglich.');
@@ -118,11 +118,11 @@ export class SetupModeStrategy implements GameModeStrategy {
         if (game.isAI) {
           // AI Upgrades
           setTimeout(() => {
-            if ((game as any).aiSetupUpgrades) (game as any).aiSetupUpgrades();
+            if (game.aiSetupUpgrades) game.aiSetupUpgrades();
             controller.finishSetupPhase();
           }, 1000); // Give it a moment
         }
-      } else if (game.phase === (PHASES.SETUP_BLACK_UPGRADES as any)) {
+      } else if (game.phase === PHASES.SETUP_BLACK_UPGRADES) {
         this.startGame(game, controller);
       }
       UI.updateStatus(game);
@@ -134,8 +134,8 @@ export class SetupModeStrategy implements GameModeStrategy {
       // Don't warn AI if it's their turn to finish setup
       const isAIBlackSetup =
         game.isAI &&
-        (game.phase === (PHASES.SETUP_BLACK_PIECES as any) ||
-          game.phase === (PHASES.SETUP_BLACK_UPGRADES as any));
+        (game.phase === PHASES.SETUP_BLACK_PIECES ||
+          game.phase === PHASES.SETUP_BLACK_UPGRADES);
 
       if (isAIBlackSetup) {
         handleTransition();
@@ -157,7 +157,7 @@ export class SetupModeStrategy implements GameModeStrategy {
   }
 
   private startGame(game: GameExtended, controller: GameController): void {
-    game.phase = PHASES.PLAY as any;
+    game.phase = PHASES.PLAY;
     controller.showShop(false);
 
     // Track game start time for statistics

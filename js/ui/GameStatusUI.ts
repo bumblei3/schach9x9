@@ -277,10 +277,10 @@ export function renderEvalGraph(game: Game): void {
       const p = target?.closest('.eval-point');
       if (!p) return;
       const idx = parseInt((p as HTMLElement).dataset.index || '0');
-      if (idx >= 0 && (game.gameController as Record<string, unknown>)?.jumpToMove)
-        (game.gameController as Record<string, Function>).jumpToMove(idx);
-      else if (idx === -1 && (game.gameController as Record<string, unknown>)?.jumpToStart)
-        (game.gameController as Record<string, Function>).jumpToStart();
+      if (idx >= 0 && (game.gameController as unknown as Record<string, unknown>)?.jumpToMove)
+        (game.gameController as unknown as Record<string, Function>).jumpToMove(idx);
+      else if (idx === -1 && (game.gameController as unknown as Record<string, unknown>)?.jumpToStart)
+        (game.gameController as unknown as Record<string, Function>).jumpToStart();
     });
     svg.dataset.hasListener = 'true';
   }

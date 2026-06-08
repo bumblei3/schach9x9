@@ -26,6 +26,10 @@ import {
 import { RulesEngine } from './RulesEngine.js';
 // import { makeMove } from './ai/MoveGenerator.js';
 import type { Player, Square, Piece } from './types/game.js';
+import type { GameController } from './gameController.js';
+import type { AIController } from './aiController.ts';
+import type { AnalysisManager } from './AnalysisManager.js';
+import type { TutorController } from './tutorController.js';
 export type { Player, Square, Piece };
 
 export { BOARD_SIZE, PHASES, PIECE_VALUES, AI_DELAY_MS };
@@ -138,11 +142,12 @@ export class Game {
   blackTime: number;
   clockInterval: ReturnType<typeof setInterval> | null;
   lastMoveTime: number;
+  _forceFullRender?: boolean;
   replayMode: boolean;
   replayPosition: number;
   savedGameState: unknown;
   isAnimating: boolean;
-  bestMoves: MoveHistoryEntry[];
+  bestMoves: unknown[];
   drawOffered: boolean;
   drawOfferedBy: Player | null;
   analysisMode: boolean;
@@ -155,25 +160,40 @@ export class Game {
   kiMentorEnabled: boolean;
   aiPersonality: string;
   playerColor: Player;
-  tutorController?: {
-    handlePlayerMove?: (from: Square, to: Square) => void;
-    analyzePlayerMovePreExecution?: (move: { from: Square; to: Square }) => Promise<unknown>;
-    showBlunderWarning?: (analysis: unknown, callback: () => void) => void;
-    showHint?: () => Promise<void>;
-  };
+  tutorController?: TutorController;
   isTutorMove?: (move: Square) => boolean;
   undoMove?: () => void;
   redoMove?: () => void;
   // Dynamic properties set at runtime by controllers
-  gameController?: unknown;
-  aiController?: unknown;
+  gameController?: GameController;
+  aiController?: AIController;
   aiMove?: () => void;
   updateBestMoves?: () => void;
-  analysisManager?: unknown;
-  arrowRenderer?: { clearArrows: () => void; addArrow?: (...args: unknown[]) => void; highlightMoves?: (arrows: unknown[]) => void };
-  evaluationBar?: { update: (score: number) => void };
+  analysisManager?: AnalysisManager;
+  arrowRenderer?: { clearArrows: () => void; drawArrow?: (fromR: number, fromC: number, toR: number, toC: number, color: string) => void; addArrow?: (...args: unknown[]) => void; highlightMoves?: (arrows: unknown[]) => void };
+  evaluationBar?: { show: (visible: boolean) => void; update: (score: number) => void };
   campaignMode?: boolean;
   currentTheme?: string;
+  // AI setup delegation methods
+  placeKing?: (r: number, c: number, color: Player) => void;
+  placeShopPiece?: (r: number, c: number) => void;
+  finishSetupPhase?: () => void;
+  // Game flow delegation methods
+  resign?: (color?: Player) => void;
+  offerDraw?: (color?: Player) => void;
+  acceptDraw?: () => void;
+  declineDraw?: () => void;
+  // Board analysis delegation methods
+  isInsufficientMaterial?: () => boolean;
+  calculateMaterialAdvantage?: (color?: Player) => number;
+  // Rendering
+  renderBoard?: () => void;
+  // Draw offer evaluation
+  aiEvaluateDrawOffer?: () => void;
+  // Best move from worker
+  lastBestMove?: unknown;
+  // Shop manager access
+  shopManager?: { aiPerformUpgrades: () => void };
 
   constructor(initialPoints: number = 15, mode: GameMode = 'setup') {
     this.mode = mode;
@@ -359,7 +379,7 @@ export class Game {
     return this.rulesEngine.isCheckmate(color);
   }
 
-  getAllLegalMoves(color: Player): { from: Square; to: Square }[] {
+  getAllLegalMoves(color: Player): { from: Square; to: Square; promotion?: string }[] {
     const moves = this.rulesEngine.getAllLegalMoves(color);
     if (this.boardShape && this.boardShape !== BOARD_SHAPES.STANDARD) {
       return moves.filter(move => !isBlockedCell(move.to.r, move.to.c, this.boardShape));
@@ -405,7 +425,7 @@ export class Game {
   /**
    * Execute a move on the board
    */
-  executeMove(from: Square, to: Square): unknown {
+  executeMove(from: Square, to: Square, _animate: boolean = false, promotion?: string): unknown {
     const piece = this.board[from.r][from.c];
     const captured = this.board[to.r][to.c];
 
@@ -427,6 +447,11 @@ export class Game {
       this.board[to.r][to.c] = piece;
       this.board[from.r][from.c] = null;
       (piece as PieceWithMoved).hasMoved = true;
+
+      // Handle promotion
+      if (promotion) {
+        this.board[to.r][to.c] = { type: promotion as Piece['type'], color: piece.color, hasMoved: true };
+      }
 
       // Track last move for En Passant
       this.lastMove = {

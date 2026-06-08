@@ -19,7 +19,7 @@ describe('BoardRenderer Touch Isolation', () => {
   test('touch events find piece-svg', () => {
     document.body.innerHTML = '<div id="board"></div>';
     window.PIECE_SVGS = { white: { p: '<svg id="p-svg"></svg>' } } as any;
-    window._svgCache = {} as any;
+    // Note: svgCache is now module-level, not on window
 
     const game = {
       board: Array(9)

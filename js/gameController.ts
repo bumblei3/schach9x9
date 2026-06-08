@@ -5,7 +5,7 @@
  * and coordinating between game engine, shop, UI, and AI.
  */
 
-import { PHASES, AI_DELAY_MS, type Game } from './gameEngine.js';
+import { PHASES, AI_DELAY_MS, type Game, type PuzzleState, type PieceWithMoved } from './gameEngine.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
@@ -33,21 +33,25 @@ import { ClassicModeStrategy } from './modes/strategies/ClassicMode.js';
 import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 
+/** Type for the arrowRenderer field on Game, matching gameEngine.ts line 173 */
+type ArrowRendererType = { clearArrows: () => void; addArrow?: (...args: unknown[]) => void; highlightMoves?: (arrows: unknown[]) => void };
+
 export interface GameExtended extends Game {
   campaignMode?: boolean;
   currentLevelId?: string;
   handlePlayClick?: (r: number, c: number) => Promise<void>;
   aiSetupKing?: () => void;
   aiSetupPieces?: () => void;
+  aiSetupUpgrades?: () => void;
   aiEvaluateDrawOffer?: () => void;
   updateBestMoves?: () => void;
   gameStartTime?: number;
-  arrowRenderer?: any;
+  arrowRenderer?: ArrowRendererType;
   puzzleMode?: boolean;
-  currentPuzzle?: any;
-  calculateMaterialAdvantage: (color: Player) => number;
-  gameController?: any;
-  aiController?: any;
+  currentPuzzle?: PuzzleState | null;
+  calculateMaterialAdvantage?: (color?: Player) => number;
+  gameController?: GameController;
+  aiController?: any; // AIController from aiController.ts - using any to avoid import resolution issues
   moveController?: {
     undoMove: () => void;
     redoMove: () => void;
@@ -58,26 +62,26 @@ export interface GameExtended extends Game {
 
 export class GameController {
   game: GameExtended;
-  statisticsManager: any;
+  statisticsManager: StatisticsManager;
   timeManager: TimeManager;
-  shopManager: any;
-  analysisController: any;
-  analysisUI: any;
-  puzzleMenu: any;
-  moveExecutor: any;
+  shopManager: ShopManager;
+  analysisController: AnalysisController;
+  analysisUI: AnalysisUI;
+  puzzleMenu: PuzzleMenu;
+  moveExecutor: unknown;
   gameStartTime: number | null;
   currentModeStrategy: GameModeStrategy | null = null;
 
   constructor(game: GameExtended) {
     this.game = game;
-    this.statisticsManager = new (StatisticsManager as any)();
+    this.statisticsManager = new StatisticsManager();
     this.timeManager = new TimeManager(game, this);
-    this.shopManager = new (ShopManager as any)(game, this);
-    this.analysisController = new (AnalysisController as any)(this);
-    this.analysisUI = new (AnalysisUI as any)(game);
-    this.puzzleMenu = new (PuzzleMenu as any)(this);
+    this.shopManager = new ShopManager(game);
+    this.analysisController = new AnalysisController(this);
+    this.analysisUI = new AnalysisUI(game);
+    this.puzzleMenu = new PuzzleMenu(this);
     this.moveExecutor = null; // Circular dependency resolved later
-    this.game.gameController = this as any;
+    this.game.gameController = this;
     this.gameStartTime = null;
   }
 
@@ -86,7 +90,7 @@ export class GameController {
     (this.currentModeStrategy as CampaignModeStrategy).startLevel(this.game, this, levelId);
   }
 
-  initGame(initialPoints: number, mode: GameMode = 'setup'): void {
+  initGame(initialPoints: number, mode: GameMode | 'puzzle' = 'setup'): void {
     // Ensure Main Menu is hidden when starting any game
     const mainMenu = document.getElementById('main-menu');
     if (mainMenu) mainMenu.classList.remove('active');
@@ -100,7 +104,7 @@ export class GameController {
       this.currentModeStrategy = new StandardModeStrategy();
     } else if (mode === 'campaign') {
       this.currentModeStrategy = new CampaignModeStrategy();
-    } else if ((mode as string) === 'puzzle') {
+    } else if (mode === 'puzzle') {
       // Puzzle mode currently handled slightly differently,
       // but could be a strategy. For now, let's defer if it's not a Strategy yet
       // OR add a basic one.
@@ -131,10 +135,10 @@ export class GameController {
     // Delegate to Strategy
     if (this.currentModeStrategy) {
       this.currentModeStrategy.init(this.game, this, initialPoints);
-    } else if ((mode as string) === 'puzzle') {
+    } else if (mode === 'puzzle') {
       // Legacy Puzzle initialization
       this.puzzleMenu.show();
-      this.game.mode = 'puzzle' as any;
+      this.game.mode = 'puzzle';
       UI.renderBoard(this.game);
     }
 
@@ -167,9 +171,9 @@ export class GameController {
     // Disable clicks if it's AI's turn
     if (
       this.game.isAI &&
-      (this.game.phase === (PHASES.SETUP_BLACK_KING as any) ||
-        this.game.phase === (PHASES.SETUP_BLACK_PIECES as any) ||
-        (this.game.phase === (PHASES.PLAY as any) && this.game.turn === 'black'))
+      (this.game.phase === PHASES.SETUP_BLACK_KING ||
+        this.game.phase === PHASES.SETUP_BLACK_PIECES ||
+        (this.game.phase === PHASES.PLAY && this.game.turn === 'black'))
     ) {
       logger.context('GameController').debug('[GameController] Blocked: AI turn');
       return;
@@ -190,7 +194,7 @@ export class GameController {
     }
 
     // Fallback or Global Interactions (like Play Phase default if strategy didn't handle it detailedly)
-    if (this.game.phase === (PHASES.PLAY as any) || (this.game.phase as any) === 'ANALYSIS') {
+    if (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS) {
       if (this.game.handlePlayClick) {
         await this.game.handlePlayClick(r, c);
       }
@@ -225,7 +229,7 @@ export class GameController {
     const kingR = validRowStart + 1;
     const kingC = colStart + 1;
 
-    this.game.board[kingR][kingC] = { type: 'k', color: color, hasMoved: false } as any;
+    this.game.board[kingR][kingC] = { type: 'k', color: color, hasMoved: false } as PieceWithMoved;
 
     if (color === 'white') {
       this.game.whiteCorridor = colStart;
@@ -233,12 +237,12 @@ export class GameController {
       if (this.game.campaignMode) {
         // In Campaign, Black (AI) setup is usually predefined in FEN.
         // Skip AI King placement and go straight to player piece buying.
-        this.game.phase = PHASES.SETUP_WHITE_PIECES as any;
+        this.game.phase = PHASES.SETUP_WHITE_PIECES;
         this.game.points = this.game.initialPoints;
         this.game.log('König platziert. Bitte stell deine Truppen auf.');
         this.showShop(true);
       } else {
-        this.game.phase = PHASES.SETUP_BLACK_KING as any;
+        this.game.phase = PHASES.SETUP_BLACK_KING;
         this.game.log('Weißer König platziert. Schwarz ist dran.');
         UI.updateStatus(this.game);
 
@@ -252,7 +256,7 @@ export class GameController {
       }
     } else {
       this.game.blackCorridor = colStart;
-      this.game.phase = PHASES.SETUP_WHITE_PIECES as any;
+      this.game.phase = PHASES.SETUP_WHITE_PIECES;
       this.game.points = this.game.initialPoints;
       UI.updateStatus(this.game);
       this.showShop(true);
@@ -273,7 +277,7 @@ export class GameController {
     const piece = this.game.board[r][c];
     if (!piece) return;
 
-    const isWhiteTurn = this.game.phase === (PHASES.SETUP_WHITE_UPGRADES as any);
+    const isWhiteTurn = this.game.phase === PHASES.SETUP_WHITE_UPGRADES;
     const color = isWhiteTurn ? 'white' : 'black';
 
     if (piece.color !== color) {
@@ -310,7 +314,7 @@ export class GameController {
   }
 
   tickClock(): void {
-    (this.timeManager as any).tickClock();
+    this.timeManager.tickClock();
   }
 
   updateClockDisplay(): void {
@@ -342,14 +346,14 @@ export class GameController {
   }
 
   resign(color?: Player): void {
-    if (this.game.phase !== (PHASES.PLAY as any)) {
+    if (this.game.phase !== PHASES.PLAY) {
       return;
     }
 
     const resigningColor = color || this.game.turn;
     const winningColor = resigningColor === 'white' ? 'black' : 'white';
 
-    this.game.phase = PHASES.GAME_OVER as any;
+    this.game.phase = PHASES.GAME_OVER;
     UI.renderBoard(this.game);
     UI.updateStatus(this.game);
 
@@ -377,7 +381,7 @@ export class GameController {
   }
 
   offerDraw(color?: Player): void {
-    if (this.game.phase !== (PHASES.PLAY as any)) {
+    if (this.game.phase !== PHASES.PLAY) {
       return;
     }
 
@@ -423,7 +427,7 @@ export class GameController {
       return;
     }
 
-    this.game.phase = PHASES.GAME_OVER as any;
+    this.game.phase = PHASES.GAME_OVER;
     this.game.drawOffered = false;
     this.game.drawOfferedBy = null;
 
@@ -469,8 +473,8 @@ export class GameController {
     }
   }
 
-  saveGame(): void {
-    if (storageManager.saveGame(this.game as any)) {
+  saveGame(_fromAutoSave?: boolean): void {
+    if (storageManager.saveGame(this.game as unknown as import('./storage.js').GameLike)) {
       this.game.log('💾 Spiel erfolgreich gespeichert!');
       soundManager.playMove(); // Feedback sound
     } else {
@@ -479,15 +483,15 @@ export class GameController {
   }
 
   loadGame(): void {
-    let state: any;
+    let state: import('./storage.js').SavedGameState | null;
     try {
       state = storageManager.loadGame();
       if (!state) {
         this.game.log('⚠️ Kein gespeichertes Spiel gefunden.');
         return;
       }
-    } catch (e: any) {
-      this.game.log('❌ Fehler beim Laden: ' + e.message);
+    } catch (e: unknown) {
+      this.game.log('❌ Fehler beim Laden: ' + (e instanceof Error ? e.message : String(e)));
       return;
     }
 
@@ -495,7 +499,7 @@ export class GameController {
     this.stopClock();
 
     // Restore state
-    if (storageManager.loadStateIntoGame(this.game as any, state)) {
+    if (storageManager.loadStateIntoGame(this.game as unknown as import('./storage.js').GameLike, state)) {
       this.game.log('📂 Spielstand geladen.');
     } else {
       this.game.log('❌ Fehler beim Laden des Spielstands.');
@@ -526,7 +530,7 @@ export class GameController {
     });
 
     // Ensure panels are visible in PLAY phase
-    if (this.game.phase === (PHASES.PLAY as any)) {
+    if (this.game.phase === PHASES.PLAY) {
       const historyPanel = document.getElementById('move-history-panel');
       const capturedPanel = document.getElementById('captured-pieces-panel');
       if (historyPanel) historyPanel.classList.remove('hidden');
@@ -534,18 +538,18 @@ export class GameController {
     }
 
     // Restart clock if needed
-    if (this.game.phase === (PHASES.PLAY as any) && this.game.clockEnabled) {
+    if (this.game.phase === PHASES.PLAY && this.game.clockEnabled) {
       this.startClock();
     }
 
     // Trigger AI actions if in setup phase
     if (this.game.isAI) {
-      if (this.game.phase === (PHASES.SETUP_BLACK_KING as any)) {
+      if (this.game.phase === PHASES.SETUP_BLACK_KING) {
         // AI needs to place black king
         setTimeout(() => {
           if (this.game.aiSetupKing) this.game.aiSetupKing();
         }, AI_DELAY_MS);
-      } else if (this.game.phase === (PHASES.SETUP_BLACK_PIECES as any)) {
+      } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
         // AI needs to place black pieces
         setTimeout(() => {
           if (this.game.aiSetupPieces) this.game.aiSetupPieces();
@@ -558,7 +562,7 @@ export class GameController {
   }
 
   autoSave(): void {
-    if (this.game.mode !== ('puzzle' as any) && storageManager.saveGame(this.game as any)) {
+    if (this.game.mode !== 'puzzle' && storageManager.saveGame(this.game as unknown as import('./storage.js').GameLike)) {
       logger.debug('Auto-saved game');
     }
   }
@@ -572,16 +576,16 @@ export class GameController {
   }
 
   loadPuzzle(index: number): void {
-    const puzzle = (puzzleManager as any).loadPuzzle(this.game, index);
+    const puzzle = puzzleManager.loadPuzzle(this.game, index);
     if (puzzle) {
-      this.game.currentPuzzle = puzzle;
-      (UI as any).showPuzzleOverlay(puzzle);
+      this.game.currentPuzzle = puzzle as unknown as PuzzleState;
+      UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
       UI.updateStatus(this.game);
 
       // Update 3D board if active
-      if ((window as any).battleChess3D && (window as any).battleChess3D.enabled) {
-        (window as any).battleChess3D.updateFromGameState(this.game);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.updateFromGameState(this.game);
       }
 
       // Ensure UI controls are appropriate
@@ -591,23 +595,23 @@ export class GameController {
   }
 
   nextPuzzle(): void {
-    const puzzle = (puzzleManager as any).nextPuzzle(this.game);
+    const puzzle = puzzleManager.nextPuzzle(this.game);
     if (puzzle) {
-      (UI as any).showPuzzleOverlay(puzzle);
+      UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
       UI.updateStatus(this.game);
 
-      if ((window as any).battleChess3D && (window as any).battleChess3D.enabled) {
-        (window as any).battleChess3D.updateFromGameState(this.game);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.updateFromGameState(this.game);
       }
     } else {
-      (UI as any).updatePuzzleStatus('success', 'Alle Puzzles gelöst!');
+      UI.updatePuzzleStatus('success', 'Alle Puzzles gelöst!');
     }
   }
 
   exitPuzzleMode(): void {
     this.game.puzzleMode = false;
-    (UI as any).hidePuzzleOverlay();
+    UI.hidePuzzleOverlay();
     // Return to main menu or restart
     this.reloadPage();
   }
@@ -673,27 +677,29 @@ export class GameController {
 
     // We assume game.aiController is available as fallback
     if (this.game.aiController) {
-      // Use lower depth for hints to be fast
-      const result = await this.game.aiController.getHint(4);
+      if (typeof this.game.aiController.getHint === 'function') {
+        // Use lower depth for hints to be fast
+        const result = await this.game.aiController.getHint(4);
 
-      if (result) {
-        const { move, explanation } = result;
-        const from = move.from;
-        const to = move.to;
+        if (result) {
+          const { move, explanation } = result;
+          const from = move.from;
+          const to = move.to;
 
-        // Visualize hint
-        if (this.game.arrowRenderer) {
-          this.game.arrowRenderer.clearArrows();
-          this.game.arrowRenderer.addArrow(
-            { r: from.r, c: from.c },
-            { r: to.r, c: to.c },
-            '#facc15' // Yellow/Gold for hint
-          );
+          // Visualize hint
+          if (this.game.arrowRenderer) {
+            this.game.arrowRenderer.clearArrows();
+            this.game.arrowRenderer.addArrow?.(
+              { r: from.r, c: from.c },
+              { r: to.r, c: to.c },
+              '#facc15' // Yellow/Gold for hint
+            );
+          }
+
+          notificationUI.show(`Tipp: ${explanation}`, 'success', 'Tutor', 5000);
+        } else {
+          notificationUI.show('Der Tutor konnte keinen klaren Rat finden.', 'info');
         }
-
-        notificationUI.show(`Tipp: ${explanation}`, 'success', 'Tutor', 5000);
-      } else {
-        notificationUI.show('Der Tutor konnte keinen klaren Rat finden.', 'info');
       }
     }
   }
@@ -719,7 +725,7 @@ export class GameController {
     }
 
     // Determine player color (assuming player is always white when playing against AI)
-    const playerColor = 'white';
+    const playerColor: Player = 'white';
 
     // Determine opponent
     let opponent = 'Human';
@@ -735,7 +741,7 @@ export class GameController {
     }
 
     // Determine actual result from player's perspective
-    let playerResult = result;
+    let playerResult: 'win' | 'draw' | 'loss' = result as 'win' | 'draw' | 'loss';
     if (result === 'loss') {
       playerResult = losingColor === 'white' ? 'loss' : 'win';
     } else if (result === 'win') {
@@ -746,7 +752,7 @@ export class GameController {
       result: playerResult,
       playerColor: playerColor,
       opponent: opponent,
-      moveHistory: this.game.moveHistory || [],
+      moveHistory: (this.game.moveHistory || []) as unknown as import('./types/game.js').Move[],
       duration: Date.now() - this.gameStartTime,
       finalPosition: JSON.stringify(this.game.board),
     };
@@ -756,11 +762,11 @@ export class GameController {
     logger.info('Game saved to statistics:', playerResult, 'vs', opponent);
   }
 
-  handleGameEnd(result: string, winnerColor: Player): void {
+  handleGameEnd(result: string, winnerColor: Player | null): void {
     // Save stats
     let saveColorArg: Player | null = null;
 
-    if (result === 'win') {
+    if (result === 'win' && winnerColor) {
       saveColorArg = winnerColor === 'white' ? 'black' : 'white'; // Loser
     } else if (result === 'draw') {
       saveColorArg = null;
@@ -788,7 +794,7 @@ export class GameController {
     });
 
     const level = this.game.currentLevelId
-      ? (campaignManager as any).getLevel(this.game.currentLevelId)
+      ? campaignManager.getLevel(this.game.currentLevelId)
       : null;
     const isCheckmateWin = result === 'win' && winnerColor === this.game.playerColor;
     const isDrawVictory =
@@ -800,16 +806,16 @@ export class GameController {
         // Gather stats for star calculation
         const stats = {
           moves: Math.ceil(this.game.stats.totalMoves / 2), // Full moves
-          materialDiff: this.game.calculateMaterialAdvantage(this.game.playerColor!),
+          materialDiff: this.game.calculateMaterialAdvantage ? this.game.calculateMaterialAdvantage(this.game.playerColor!) : 0,
           promotedCount: this.game.stats.promotions || 0,
         };
 
         const levelBefore = level as Level;
-        const rewardsBefore = [...(campaignManager as any).state.unlockedRewards];
+        const rewardsBefore = campaignManager.getUnlockedRewards();
 
-        const starsEarned = (campaignManager as any).completeLevel(this.game.currentLevelId, stats);
+        const starsEarned = campaignManager.completeLevel(this.game.currentLevelId, stats);
 
-        const rewardsAfter = (campaignManager as any).state.unlockedRewards;
+        const rewardsAfter = campaignManager.getUnlockedRewards();
         const newRewards = rewardsAfter.filter((r: string) => !rewardsBefore.includes(r));
 
         // Feedback: Level Complete Toast
@@ -830,7 +836,7 @@ export class GameController {
           const summary = await analysisManager.runPostGameAnalysis();
           const advice = analysisManager.getMentorAdvice(summary);
 
-          (UI as any).showCampaignVictoryModal(
+          UI.showCampaignVictoryModal(
             levelBefore.title,
             starsEarned,
             [
@@ -858,7 +864,7 @@ export class GameController {
   checkCampaignObjectives(): void {
     if (!this.game.campaignMode || !this.game.currentLevelId) return;
 
-    const level = (campaignManager as any).getLevel(this.game.currentLevelId) as Level;
+    const level = campaignManager.getLevel(this.game.currentLevelId) as Level;
     if (!level) return;
 
     // Check custom win conditions
@@ -880,7 +886,7 @@ export class GameController {
         // Player survived long enough - check if they still have their king
         const playerKing = this.game.board
           .flat()
-          .find((p: any) => p && p.type === 'k' && p.color === this.game.playerColor);
+          .find((p): p is PieceWithMoved => p !== null && p.type === 'k' && p.hasMoved === true && p.color === this.game.playerColor);
         if (playerKing) {
           this.handleGameEnd('win', this.game.playerColor!);
         }

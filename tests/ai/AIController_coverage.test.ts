@@ -106,10 +106,17 @@ describe('AIController Coverage Boost', () => {
       mode: 'standard',
       lastMove: null,
       boardSize: 9,
-      resign: vi.fn(),
-      offerDraw: vi.fn(),
-      acceptDraw: vi.fn(),
-      declineDraw: vi.fn(),
+      gameController: {
+        resign: vi.fn(),
+        offerDraw: vi.fn(),
+        acceptDraw: vi.fn(),
+        declineDraw: vi.fn(),
+        placeKing: vi.fn(),
+        placeShopPiece: vi.fn().mockImplementation(() => {
+          mockGame.points -= 5; // Simulate spending points
+        }),
+        finishSetupPhase: vi.fn(),
+      },
       executeMove: vi.fn(),
       calculateMaterialAdvantage: vi.fn().mockReturnValue(0),
       isInsufficientMaterial: vi.fn().mockReturnValue(false),
@@ -119,10 +126,6 @@ describe('AIController Coverage Boost', () => {
       findKing: vi.fn().mockReturnValue({ r: 0, c: 4 }),
       getAllLegalMoves: vi.fn().mockReturnValue([]),
       renderBoard: vi.fn(),
-      placeKing: vi.fn(),
-      placeShopPiece: vi.fn().mockImplementation(() => {
-        mockGame.points -= 5; // Simulate spending points
-      }),
       finishSetupPhase: vi.fn(),
     };
 
@@ -147,19 +150,19 @@ describe('AIController Coverage Boost', () => {
   test('aiEvaluateDrawOffer - accept insufficient material', async () => {
     (mockGame.isInsufficientMaterial as any).mockReturnValue(true);
     await controller.aiEvaluateDrawOffer();
-    expect(mockGame.acceptDraw).toHaveBeenCalled();
+    expect(mockGame.gameController.acceptDraw).toHaveBeenCalled();
   });
 
   test('aiEvaluateDrawOffer - accept losing position', async () => {
     (mockEval as any).mockResolvedValue(-300);
     await controller.aiEvaluateDrawOffer();
-    expect(mockGame.acceptDraw).toHaveBeenCalled();
+    expect(mockGame.gameController.acceptDraw).toHaveBeenCalled();
   });
 
   test('aiEvaluateDrawOffer - decline winning position', async () => {
     (mockEval as any).mockResolvedValue(300);
     await controller.aiEvaluateDrawOffer();
-    expect(mockGame.declineDraw).toHaveBeenCalled();
+    expect(mockGame.gameController.declineDraw).toHaveBeenCalled();
   });
 
   test('aiShouldOfferDraw - offer if bad but not hopeless', async () => {
@@ -336,7 +339,7 @@ describe('AIController Coverage Boost', () => {
       controller.aiSetupKing();
 
       // Expect row 1, randomCol + 1 = 3 + 1 = 4
-      expect(mockGame.placeKing).toHaveBeenCalledWith(1, 4, 'black');
+      expect(mockGame.gameController.placeKing).toHaveBeenCalledWith(1, 4, 'black');
       expect(UI.renderBoard).toHaveBeenCalled();
 
       randomSpy.mockRestore();
@@ -351,8 +354,8 @@ describe('AIController Coverage Boost', () => {
       controller.aiSetupPieces();
 
       // Should finish setup immediately without placing pieces
-      expect(mockGame.placeShopPiece).not.toHaveBeenCalled();
-      expect(mockGame.finishSetupPhase).toHaveBeenCalled();
+      expect(mockGame.gameController.placeShopPiece).not.toHaveBeenCalled();
+      expect(mockGame.gameController.finishSetupPhase).toHaveBeenCalled();
     });
 
     test('aiSetupPieces - places pieces when affordable', () => {
@@ -370,8 +373,8 @@ describe('AIController Coverage Boost', () => {
       controller.aiSetupPieces();
 
       expect(mockGame.selectedShopPiece).toBeDefined();
-      expect(mockGame.placeShopPiece).toHaveBeenCalled();
-      expect(mockGame.finishSetupPhase).toHaveBeenCalled();
+      expect(mockGame.gameController.placeShopPiece).toHaveBeenCalled();
+      expect(mockGame.gameController.finishSetupPhase).toHaveBeenCalled();
     });
 
     test('aiSetupUpgrades - delegates to shopManager', () => {
@@ -409,7 +412,7 @@ describe('AIController Coverage Boost', () => {
       controller.initWorkerPool();
       const worker = controller.aiWorkers[0] as any;
 
-      controller.setAnalysisUI({ update: vi.fn() });
+      controller.setAnalysisUI({ update: vi.fn() } as any);
 
       // Trigger analysis message
       worker.emit('message', {

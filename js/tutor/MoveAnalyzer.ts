@@ -1,7 +1,7 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
-import * as UI from '../ui.js';
-import * as TacticsDetector from './TacticsDetector.js';
-import * as aiEngine from '../aiEngine.js';
+import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
+import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './TacticsDetector.js';
+import { evaluatePosition } from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
 
 /**
@@ -18,19 +18,16 @@ export async function analyzePlayerMovePreExecution(game: Game, move: { from: Sq
   if (!piece) return null;
 
   // 1. Get current evaluation
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const currentEval = await (aiEngine as any).evaluatePosition(game.board, 'white');
+    const currentEval = await evaluatePosition(game.board, 'white');
 
   // 🎯 Add tactical penalty for hanging pieces
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const threats = (TacticsDetector as any).detectThreatsAfterMove(
+    const threats = detectThreatsAfterMove(
     game,
     { getPieceName: (t: any) => t },
     move
   );
   let penalty = 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  threats.forEach((t: any) => {
+    threats.forEach((t: any) => {
     const val: Record<string, number> = {
       p: 100,
       n: 320,
@@ -51,8 +48,7 @@ export async function analyzePlayerMovePreExecution(game: Game, move: { from: Sq
   game.board[from.r][from.c] = null;
 
   // 3. Evaluate resulting position
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let newEval = await (aiEngine as any).evaluatePosition(game.board, 'white');
+    let newEval = await evaluatePosition(game.board, 'white');
 
   const turn = piece.color;
   if (turn === 'white') newEval -= penalty;
@@ -65,8 +61,7 @@ export async function analyzePlayerMovePreExecution(game: Game, move: { from: Sq
   // 4. Calculate drop from perspective of moving player
   const drop = turn === 'white' ? currentEval - newEval : newEval - currentEval;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const currentLevel = (MENTOR_LEVELS as any)[game.mentorLevel] || (MENTOR_LEVELS as any).STANDARD;
+    const currentLevel = MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD;
   const threshold = currentLevel.threshold;
 
   if (drop >= threshold) {
@@ -85,19 +80,15 @@ export async function analyzePlayerMovePreExecution(game: Game, move: { from: Sq
 /**
  * Analyzes a move and provides a detailed explanation
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function analyzeMoveWithExplanation(
   game: any,
   move: any,
   score: number,
   bestScore: number
 ): any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tacticalExplanations: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const strategicExplanations: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const warnings: string[] = [];
+    const tacticalExplanations: string[] = [];
+    const strategicExplanations: string[] = [];
+    const warnings: string[] = [];
   let category = 'normal';
 
   // Calculate difference from best move (relative quality)
@@ -110,8 +101,7 @@ export function analyzeMoveWithExplanation(
 
   if (diffP >= 0) {
     // If it's as good or better than engine's top move
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (diffP > 0.5 && (TacticsDetector as any).isTactical(game, move)) {
+        if (diffP > 0.5 && isTactical(game, move)) {
       category = 'brilliant';
       qualityLabel =
         '!! Brillanter Zug! Du hast eine taktische Tiefe gefunden, die die KI beeindruckt.';
@@ -141,29 +131,23 @@ export function analyzeMoveWithExplanation(
 
   // Detect tactical patterns
   const analyzer = { getPieceName };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patterns = (TacticsDetector as any).detectTacticalPatterns(game, analyzer, move);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const questions: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  patterns.forEach((pattern: any) => {
+    const patterns = detectTacticalPatterns(game, analyzer, move);
+    const questions: string[] = [];
+    patterns.forEach((pattern: any) => {
     tacticalExplanations.push(pattern.explanation);
     if (pattern.question) questions.push(pattern.question);
   });
 
   // Analyze strategic value
   const strategic = analyzeStrategicValue(game, move);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  strategic.forEach((s: any) => {
+    strategic.forEach((s: any) => {
     strategicExplanations.push(s.explanation);
   });
 
   // Check for threats to own pieces after this move
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const threats = (TacticsDetector as any).detectThreatsAfterMove(game, analyzer, move);
+    const threats = detectThreatsAfterMove(game, analyzer, move);
   if (threats.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    threats.forEach((threat: any) => {
+        threats.forEach((threat: any) => {
       warnings.push(threat.warning);
     });
   }
@@ -187,10 +171,8 @@ export function analyzeMoveWithExplanation(
 /**
  * Analyzes strategic value of a move
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function analyzeStrategicValue(game: any, move: any): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patterns: any[] = [];
+    const patterns: any[] = [];
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];
@@ -301,7 +283,6 @@ export function analyzeStrategicValue(game: any, move: any): any[] {
 /**
  * Gets a description for a score
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getScoreDescription(score: number): any {
   // Score is in centipawns (100 = 1 pawn advantage)
   if (score >= 900) {
@@ -328,7 +309,6 @@ export function getScoreDescription(score: number): any {
 /**
  * Gets algebraic notation for a move
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getMoveNotation(game: any, move: any): string {
   const piece = game.board[move.from.r][move.from.c];
 
@@ -340,8 +320,7 @@ export function getMoveNotation(game: any, move: any): string {
   }
 
   const targetPiece = game.board[move.to.r][move.to.c];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pieceSymbol = (UI as any).getPieceText ? (UI as any).getPieceText(piece) : '';
+    const pieceSymbol = getPieceText(piece);
   const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
 
   const pieceName = getPieceName(piece.type);
@@ -375,14 +354,12 @@ export function getPieceName(type: string): string {
 /**
  * Handles player moves for Guess the Move and warnings
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function handlePlayerMove(game: any, _tutorController: any, from: any, to: any): void {
   if (game.phase !== PHASES.PLAY) return;
 
   // Get the move from legal moves
   const moves = game.getAllLegalMoves(game.turn);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const move = moves.find(
+    const move = moves.find(
     (m: any) => m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
   );
 
@@ -392,8 +369,7 @@ export function handlePlayerMove(game: any, _tutorController: any, from: any, to
   if (game.tutorMode === 'guess_the_move') {
     const bestMoves = game.bestMoves || [];
     if (bestMoves.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const isBest = bestMoves.some(
+            const isBest = bestMoves.some(
         (hint: any) =>
           hint.move.from.r === from.r &&
           hint.move.from.c === from.c &&
@@ -403,11 +379,9 @@ export function handlePlayerMove(game: any, _tutorController: any, from: any, to
 
       if (isBest) {
         game.tutorPoints += 10;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (UI as any).showToast('Richtig geraten! +10 Tutor-Punkte', 'success');
+        showToast('Richtig geraten! +10 Tutor-Punkte', 'success');
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (UI as any).showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
+                showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
       }
     }
   }
@@ -416,7 +390,6 @@ export function handlePlayerMove(game: any, _tutorController: any, from: any, to
 /**
  * Checks for blunders
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function checkBlunder(
   game: any,
   tutorController: any,
@@ -450,24 +423,22 @@ export async function checkBlunder(
   }
 
   // Show quality highlight on the board
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((UI as any).showMoveQuality) {
-    // We assume the best move score is either the engine's best or the previous eval if no engine ran
-    const bestScore =
-      game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
-    const analysis = analyzeMoveWithExplanation(
-      game,
-      { from: moveRecord.from, to: moveRecord.to },
-      currentEval,
-      bestScore
-    );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (UI as any).showMoveQuality(
-      game,
-      { from: moveRecord.from, to: moveRecord.to },
-      analysis.category
-    );
-  }
+    if (showMoveQuality) {
+      // We assume the best move score is either the engine's best or the previous eval if no engine ran
+      const bestScore =
+        game.bestMoves && game.bestMoves.length > 0 ? game.bestMoves[0].score : prevEval;
+      const analysis = analyzeMoveWithExplanation(
+        game,
+        { from: moveRecord.from, to: moveRecord.to },
+        currentEval,
+        bestScore
+      );
+      showMoveQuality(
+        game,
+        { from: moveRecord.from, to: moveRecord.to },
+        analysis.category
+      );
+    }
 
   game.lastEval = currentEval;
 }
@@ -475,7 +446,6 @@ export async function checkBlunder(
 /**
  * Shows a blunder warning (can be post-move or pre-move)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function showBlunderWarning(game: any, analysis: any, proceedCallback: any = null): void {
   const warnings = analysis.warnings.join('\n');
   const explanation =
@@ -510,6 +480,5 @@ export function showBlunderWarning(game: any, analysis: any, proceedCallback: an
         },
       ];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (UI as any).showModal(title, message, buttons);
+    showModal(title, message, buttons);
 }

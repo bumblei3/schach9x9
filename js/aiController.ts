@@ -1,16 +1,28 @@
-import { PHASES } from './gameEngine.js';
-import { SHOP_PIECES, AI_DEPTH_CONFIG, AI_DIFFICULTIES, isBlockedCell } from './config.js';
+import { PHASES, type Game } from './gameEngine.js';
+import { SHOP_PIECES, AI_DEPTH_CONFIG, AI_DIFFICULTIES, isBlockedCell, type ShopPieceConfig } from './config.js';
 import { logger } from './logger.js';
 import * as UI from './ui.js';
 import * as aiEngine from './aiEngine.js';
+import type { MoveResult, SearchResult } from './aiEngine.js';
+import { AnalysisUI } from './ui/AnalysisUI.js';
 
 // @ts-ignore
 import AIWorker from './ai/aiWorker.ts?worker';
 
 // Piece values for shop
-const PIECES: any = SHOP_PIECES;
+const PIECES: Record<string, ShopPieceConfig> = SHOP_PIECES;
 
-export const AI_PERSONALITIES: any = {
+interface AIPersonality {
+  id: string;
+  name: string;
+  mobilityWeight: number;
+  safetyWeight: number;
+  pawnStructureWeight: number;
+  centerControlWeight: number;
+  attackWeight: number;
+}
+
+export const AI_PERSONALITIES: Record<string, AIPersonality> = {
   balanced: {
     id: 'BALANCED',
     name: 'Balanced',
@@ -59,26 +71,27 @@ export const AI_PERSONALITIES: any = {
 };
 
 export class AIController {
-  public game: any;
+  public game: Game;
   public aiWorker: Worker | null;
   public aiWorkers: Worker[];
   public analysisActive: boolean;
-  public analysisUI: any;
+  public analysisUI: AnalysisUI | null;
   public currentBookMode: string | null;
-  public openingBookData: any;
+  public openingBookData: Record<string, unknown> | null;
   private _aiMoveStartTime: number;
 
-  constructor(game: any) {
+  constructor(game: Game) {
     this.game = game;
     this.aiWorker = null;
     this.aiWorkers = [];
     this.analysisActive = false;
     this.analysisUI = null;
     this.currentBookMode = null;
+    this.openingBookData = null;
     this._aiMoveStartTime = 0;
   }
 
-  public setAnalysisUI(analysisUI: any): void {
+  public setAnalysisUI(analysisUI: AnalysisUI): void {
     this.analysisUI = analysisUI;
   }
 
@@ -125,7 +138,9 @@ export class AIController {
 
     const randomCol = cols[Math.floor(Math.random() * cols.length)];
     // Black King goes to row 0-2 (top), specifically row 1, col randomCol+1
-    this.game.placeKing(1, randomCol + 1, 'black');
+    if (this.game.gameController) {
+      this.game.gameController.placeKing(1, randomCol + 1, 'black');
+    }
     UI.renderBoard(this.game);
   }
 
@@ -199,9 +214,13 @@ export class AIController {
       }
 
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
-      this.game.placeShopPiece(spot.r, spot.c);
+      if (this.game.gameController) {
+        this.game.gameController.placeShopPiece(spot.r, spot.c);
+      }
     }
-    this.game.finishSetupPhase();
+    if (this.game.gameController) {
+      this.game.gameController.finishSetupPhase();
+    }
   }
 
   public aiSetupUpgrades(): void {
@@ -226,13 +245,17 @@ export class AIController {
 
     // Check if AI should resign
     if (await this.aiShouldResign()) {
-      this.game.resign('black');
+      if (this.game.gameController) {
+        this.game.gameController.resign('black');
+      }
       return;
     }
 
     // Check if AI should offer draw
     if (await this.aiShouldOfferDraw()) {
-      this.game.offerDraw('black');
+      if (this.game.gameController) {
+        this.game.gameController.offerDraw('black');
+      }
       // Continue with move if player hasn't responded yet
     }
 
@@ -292,7 +315,7 @@ export class AIController {
     const lastMove = this.game.lastMove; // Needed for En Passant
 
     // Track results
-    const workerResults: any[] = [];
+    const workerResults: (SearchResult | null)[] = [];
     let completedWorkers = 0;
     const numWorkers = this.aiWorkers.length;
 
@@ -332,7 +355,7 @@ export class AIController {
             const bestMoveEl = document.getElementById('ai-best-move');
             if (bestMoveEl) {
               const pvText = bestResult.pv
-                .map((m: any) => {
+                .map((m: MoveResult) => {
                   const size = this.game.boardSize;
                   const from = String.fromCharCode(97 + m.from.c) + (size - m.from.r);
                   const to = String.fromCharCode(97 + m.to.c) + (size - m.to.r);
@@ -492,7 +515,7 @@ export class AIController {
    * Calculates the best move for the current player without executing it.
    * Used for the Interactive Tutor hint system.
    */
-  public async getHint(depth: number = 4): Promise<{ move: any; explanation: string } | null> {
+  public async getHint(depth: number = 4): Promise<{ move: MoveResult; explanation: string } | null> {
     if (this.game.phase === PHASES.GAME_OVER) return null;
 
     // Initialize pool if needed
@@ -590,14 +613,24 @@ export class AIController {
   /**
    * Processes live engine analysis results
    */
-  private handleAnalysisResult(data: any): void {
+  private handleAnalysisResult(data: {
+    score?: number;
+    topMoves?: Array<{
+      move: MoveResult;
+      score: number;
+      notation: string;
+    }>;
+    depth?: number;
+    maxDepth?: number;
+    nodes?: number;
+  }): void {
     if (this.analysisUI) {
       this.analysisUI.update(data);
     }
 
     // Update global game state for best move arrows
     if (data.topMoves && data.topMoves.length > 0) {
-      this.game.bestMoves = data.topMoves.map((m: any) => ({
+      this.game.bestMoves = data.topMoves.map((m) => ({
         move: m.move,
         score: m.score,
         notation: m.notation,
@@ -610,7 +643,7 @@ export class AIController {
     }
 
     // Also update eval bar outside the panel
-    if (this.game.evaluationBar) {
+    if (this.game.evaluationBar && data.score !== undefined) {
       this.game.evaluationBar.update(data.score);
     }
   }
@@ -626,7 +659,15 @@ export class AIController {
     }
   }
 
-  public updateAIProgress(data: any): void {
+  public updateAIProgress(data: {
+    depth?: number;
+    maxDepth?: number;
+    nodes?: number;
+    bestMove?: {
+      from: { r: number; c: number };
+      to: { r: number; c: number };
+    };
+  } | null): void {
     const depthEl = document.getElementById('ai-depth');
     const nodesEl = document.getElementById('ai-nodes');
     const bestMoveEl = document.getElementById('ai-best-move');
@@ -635,7 +676,7 @@ export class AIController {
     if (!data) return; // Guard against null data
 
     if (data && depthEl) {
-      depthEl.textContent = `Tiefe ${data.depth}/${data.maxDepth}`;
+      depthEl.textContent = `Tiefe ${data.depth ?? 0}/${data.maxDepth ?? 0}`;
     }
 
     if (nodesEl && data.nodes !== undefined) {
@@ -655,9 +696,13 @@ export class AIController {
       }
     }
 
-    if (progressFill && data.maxDepth > 0) {
-      const progress = (data.depth / data.maxDepth) * 100;
-      progressFill.style.width = `${progress}%`;
+    if (progressFill) {
+      const maxDepth = data.maxDepth ?? 0;
+      const depth = data.depth ?? 0;
+      if (maxDepth > 0) {
+        const progress = (depth / maxDepth) * 100;
+        progressFill.style.width = `${progress}%`;
+      }
     }
   }
 
@@ -678,7 +723,7 @@ export class AIController {
     }
 
     // Accept if insufficient material
-    if (this.game.isInsufficientMaterial()) {
+    if (this.game.isInsufficientMaterial && this.game.isInsufficientMaterial()) {
       shouldAccept = true;
       this.game.log('KI akzeptiert: Ungenügendes Material.');
     }
@@ -696,10 +741,14 @@ export class AIController {
     }
 
     if (shouldAccept) {
-      this.game.acceptDraw();
+      if (this.game.gameController) {
+        this.game.gameController.acceptDraw();
+      }
     } else {
       this.game.log('KI lehnt das Remis-Angebot ab.');
-      this.game.declineDraw();
+      if (this.game.gameController) {
+        this.game.gameController.declineDraw();
+      }
     }
   }
 
@@ -743,7 +792,7 @@ export class AIController {
     }
 
     const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
-    const materialAdvantage = this.game.calculateMaterialAdvantage();
+    const materialAdvantage = this.game.calculateMaterialAdvantage ? this.game.calculateMaterialAdvantage() : 0;
 
     // In "Classic 9x9 + Upgrades" (mode='upgrade'), player starts with extra points (15).
     // So AI is naturally behind in material. We must be much more resilient.
@@ -804,13 +853,19 @@ export class AIController {
     });
   }
 
-  public updateAnalysisUI(data: any): void {
+  public updateAnalysisUI(data: {
+    score?: number;
+    topMoves?: Array<{ move: MoveResult; score: number; notation: string }>;
+    depth?: number;
+    maxDepth?: number;
+    nodes?: number;
+  }): void {
     if (this.analysisUI) {
       this.analysisUI.update(data);
     }
   }
 
-  public updateAnalysisStats(data: any): void {
+  public updateAnalysisStats(data: { depth?: number; maxDepth?: number; nodes?: number }): void {
     const engineInfo = document.getElementById('analysis-engine-info');
     if (engineInfo) {
       const depth = data.depth || 0;
@@ -820,8 +875,8 @@ export class AIController {
     }
   }
 
-  public highlightMove(move: any): void {
-    if (!move || !move.from || !move.to) return;
+  public highlightMove(move: { from?: { r?: number; c?: number }; to?: { r?: number; c?: number } } | null): void {
+    if (!move || !move.from || !move.to || move.from.r === undefined || move.from.c === undefined || move.to.r === undefined || move.to.c === undefined) return;
 
     // Clear previous highlights
     document.querySelectorAll('.cell').forEach(cell => {
@@ -838,7 +893,7 @@ export class AIController {
     if (toCell) toCell.classList.add('analysis-to');
 
     // Optionally draw an arrow
-    if (this.game.arrowRenderer) {
+    if (this.game.arrowRenderer && this.game.arrowRenderer.drawArrow && move.from.r !== undefined && move.from.c !== undefined && move.to.r !== undefined && move.to.c !== undefined) {
       this.game.arrowRenderer.clearArrows();
       this.game.arrowRenderer.drawArrow(
         move.from.r,
@@ -850,7 +905,7 @@ export class AIController {
     }
   }
 
-  public getAlgebraicNotation(move: any): string {
+  public getAlgebraicNotation(move: { from?: { r: number; c: number }; to?: { r: number; c: number } } | null): string {
     if (!move || !move.from || !move.to) return '??';
     const size = this.game.boardSize;
     const fromFile = String.fromCharCode(97 + move.from.c);

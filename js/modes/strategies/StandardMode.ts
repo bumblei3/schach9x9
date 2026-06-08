@@ -10,7 +10,7 @@ export class StandardModeStrategy implements GameModeStrategy {
     game.setupStandard8x8Board();
 
     if (initialPoints > 0) {
-      game.phase = PHASES.SETUP_WHITE_UPGRADES as any;
+    game.phase = PHASES.SETUP_WHITE_UPGRADES;
       UI.updateShopUI(game);
       controller.showShop(true);
       // Ensure UI updates happen

@@ -93,7 +93,7 @@ describe('BoardRenderer Touch Interactions', () => {
     // Pre-populate with piece-svg so querySelector('.piece-svg') works
     const wrapper = document.createElement('div');
     wrapper.className = 'piece-svg';
-    wrapper.innerHTML = window.PIECE_SVGS.white.p;
+    wrapper.innerHTML = '<svg></svg>';
     cell.appendChild(wrapper);
 
     const touch = createTouch(cell, 0, 100, 100);

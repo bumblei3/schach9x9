@@ -1,6 +1,6 @@
 import { SHOP_PIECES, PIECE_VALUES } from '../config.js';
 import { PIECE_SVGS } from '../chess-pieces.js';
-import { PHASES, type Game } from '../gameEngine.js';
+import { PHASES, type Game, type PieceWithMoved } from '../gameEngine.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { logger } from '../logger.js';
 import * as UI from '../ui.js';
@@ -21,7 +21,7 @@ export class ShopManager {
    */
   selectShopPiece(pieceType: string): void {
     if (!pieceType) return;
-    const cost = (PIECE_VALUES as any)[pieceType];
+    const cost = PIECE_VALUES[pieceType];
 
     // Check if player has enough points
     if (cost > this.game.points) {
@@ -42,7 +42,7 @@ export class ShopManager {
       const pieceInfo = Object.values(SHOP_PIECES).find(p => p.symbol === pieceType);
 
       // Get SVG for display
-      const svg = (PIECE_SVGS as any)['white'][pieceType];
+      const svg = PIECE_SVGS['white'][pieceType];
 
       displayEl.innerHTML = `Ausgewählt: <div style="display:inline-block;width:30px;height:30px;vertical-align:middle;">${svg}</div> ${pieceInfo ? pieceInfo.name : pieceType} (${cost})`;
     }
@@ -66,7 +66,7 @@ export class ShopManager {
 
   handleSellPiece(r: number, c: number): void {
     const piece = this.game.board[r][c];
-    const isWhiteTurn = (this.game.phase as any) === PHASES.SETUP_WHITE_PIECES;
+    const isWhiteTurn = this.game.phase === PHASES.SETUP_WHITE_PIECES;
     const color = isWhiteTurn ? 'white' : 'black';
 
     // Can only remove own non-king pieces
@@ -82,8 +82,8 @@ export class ShopManager {
       if (this.game.log) this.game.log('Figur entfernt, Punkte erstattet.');
 
       // Update 3D board if active
-      if ((window as any).battleChess3D && (window as any).battleChess3D.enabled) {
-        (window as any).battleChess3D.removePiece(r, c);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.removePiece(r, c);
       }
     } else {
       if (this.game.log) this.game.log('Bitte zuerst eine Figur im Shop auswählen!');
@@ -91,11 +91,11 @@ export class ShopManager {
   }
 
   handleBuyPiece(r: number, c: number): void {
-    const isWhiteTurn = (this.game.phase as any) === PHASES.SETUP_WHITE_PIECES;
+    const isWhiteTurn = this.game.phase === PHASES.SETUP_WHITE_PIECES;
     const color = isWhiteTurn ? 'white' : 'black';
     const colStart = isWhiteTurn
-      ? (this.game as any).whiteCorridor
-      : (this.game as any).blackCorridor;
+      ? this.game.whiteCorridor
+      : this.game.blackCorridor;
 
     if (typeof colStart !== 'number') return;
 
@@ -116,12 +116,12 @@ export class ShopManager {
       return;
     }
 
-    const cost = (PIECE_VALUES as any)[this.game.selectedShopPiece!];
+    const cost = PIECE_VALUES[this.game.selectedShopPiece!];
     if (this.game.points >= cost) {
       const pieceType = this.game.selectedShopPiece!;
 
       this.game.board[r][c] = {
-        type: pieceType as any,
+        type: pieceType as PieceWithMoved['type'],
         color: color,
         hasMoved: false,
       };
@@ -136,8 +136,8 @@ export class ShopManager {
       UI.updateShopUI(this.game);
 
       // Update 3D board if active
-      if ((window as any).battleChess3D && (window as any).battleChess3D.enabled) {
-        (window as any).battleChess3D.addPiece(pieceType, color, r, c);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.addPiece(pieceType, color, r, c);
       }
     }
   }
@@ -172,7 +172,7 @@ export class ShopManager {
                 ${!canAfford ? 'disabled' : ''}
                 onclick="if(window.app && window.app.gameController) { window.app.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else if(window.gameController) { window.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); }">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 32px; height: 32px;">${(PIECE_SVGS as any)[piece.color][up.symbol]}</div>
+            <div style="width: 32px; height: 32px;">${PIECE_SVGS[piece.color as 'white' | 'black'][up.symbol]}</div>
             <div>
               <div style="font-weight: bold;">${up.name}</div>
               <div style="font-size: 0.8rem; opacity: 0.8;">Upgrade-Kosten: ${cost} Pkt</div>
@@ -184,7 +184,7 @@ export class ShopManager {
     });
     content += '</div>';
 
-    (UI as any).showModal(modalTitle, content, [
+    UI.showModal(modalTitle, content, [
       { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
     ]);
   }
@@ -219,7 +219,7 @@ export class ShopManager {
             return true;
           }
           // In other modes (setup, campaign), require campaign unlock
-          return (campaignManager as any).isRewardUnlocked('angel');
+          return campaignManager.isRewardUnlocked('angel');
         }
         return true;
       })
@@ -314,7 +314,7 @@ export class ShopManager {
     if (this.game.points >= cost) {
       logger.context('ShopManager').debug('[ShopManager] Deducting points and updating piece type');
       this.game.points -= cost;
-      piece.type = targetType as any;
+      piece.type = targetType as PieceWithMoved['type'];
 
       if (this.game.log)
         this.game.log(
@@ -322,13 +322,13 @@ export class ShopManager {
         );
 
       UI.updateShopUI(this.game);
-      (UI as any).renderBoard(this.game);
-      (UI as any).closeModal();
+      UI.renderBoard(this.game);
+      UI.closeModal();
 
       // Update 3D board if active
-      if ((window as any).battleChess3D && (window as any).battleChess3D.enabled) {
-        (window as any).battleChess3D.removePiece(r, c);
-        (window as any).battleChess3D.addPiece(targetType, piece.color, r, c);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.removePiece(r, c);
+        window.battleChess3D.addPiece(targetType, piece.color, r, c);
       }
     } else {
       logger.context('ShopManager').warn('[ShopManager] Not enough points:', this.game.points, '<', cost);

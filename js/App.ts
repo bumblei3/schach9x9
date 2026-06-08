@@ -437,4 +437,12 @@ export class App {
       return self.analysisManager.toggleBestMove();
     };
   }
+
+  toggleFullscreen(): void {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
 }

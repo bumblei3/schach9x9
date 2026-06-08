@@ -122,7 +122,7 @@ describe('Comprehensive Game Flow Integration Tests', () => {
       // Move 5 - Should trigger auto-save
       await mc.executeMove({ r: 7, c: 2 }, { r: 6, c: 2 });
       expect(saveSpy).toHaveBeenCalledTimes(1);
-      expect(saveSpy).toHaveBeenCalledWith(true); // Silent save
+      expect(saveSpy).toHaveBeenCalledWith(); // Silent save
 
       // Move 6-9 (Black moves 3 times, White moves once)
       await mc.executeMove({ r: 1, c: 0 }, { r: 2, c: 0 }); // 6

@@ -115,7 +115,6 @@ describe('KeyboardManager', () => {
 
     // Check behavior
     if (UI.closeModal) expect(UI.closeModal).toHaveBeenCalled();
-    if (UI.OverlayManager) expect(UI.OverlayManager.closeAll).toHaveBeenCalled();
 
     // Assuming the fallback logic triggers handleCellClick to deselect or resetSelection
     if (gameController.resetSelection.mock.calls.length > 0) {

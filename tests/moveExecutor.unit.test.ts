@@ -339,6 +339,6 @@ describe('MoveExecutor Integration Tests', () => {
 
     await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
 
-    expect((game as any).gameController.saveGame).toHaveBeenCalledWith(true);
+    expect((game as any).gameController.saveGame).toHaveBeenCalledWith();
   });
 });

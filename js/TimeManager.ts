@@ -70,7 +70,7 @@ export class TimeManager {
     }
   }
 
-  private tickClock(): void {
+  public tickClock(): void {
     if (this.game.phase !== PHASES.PLAY) {
       this.stopClock();
       return;

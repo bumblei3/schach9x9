@@ -106,6 +106,12 @@ export function createMockGame(overrides: Record<string, any> = {}) {
     acceptDraw: vi.fn(),
     declineDraw: vi.fn(),
     offerDraw: vi.fn(),
+    gameController: {
+      acceptDraw: vi.fn(),
+      declineDraw: vi.fn(),
+      offerDraw: vi.fn(),
+      resign: vi.fn(),
+    },
     undoMove: vi.fn(),
     updateBestMoves: vi.fn(),
     gameStartTime: Date.now(),

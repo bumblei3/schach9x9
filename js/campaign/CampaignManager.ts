@@ -121,6 +121,10 @@ export class CampaignManager {
     return this.state.unlockedLevels.includes(levelId);
   }
 
+  public getUnlockedRewards(): string[] {
+    return [...this.state.unlockedRewards];
+  }
+
   public isLevelCompleted(levelId: string): boolean {
     return this.state.completedLevels.includes(levelId);
   }

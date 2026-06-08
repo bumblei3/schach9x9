@@ -8,7 +8,12 @@ import { minimalist } from './minimalist';
 
 import { frost } from './frost';
 
-export const PIECE_SETS: Record<string, any> = {
+export interface PieceSet {
+  white: Record<string, string>;
+  black: Record<string, string>;
+}
+
+export const PIECE_SETS: Record<string, PieceSet> = {
   classic,
   modern,
   pixel,
@@ -21,6 +26,7 @@ export const PIECE_SETS: Record<string, any> = {
 
 let currentSkin = 'classic';
 export let PIECE_SVGS = PIECE_SETS[currentSkin];
+export { PIECE_SVGS as defaultPIECESVGS };
 
 if (typeof window !== 'undefined') {
   (window as any).PIECE_SVGS = PIECE_SVGS;

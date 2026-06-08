@@ -14,6 +14,8 @@ import {
   setProgressCallback,
 } from '../aiEngine.js';
 
+const workerSelf: Worker = self as unknown as Worker;
+
 self.onmessage = async function (e: MessageEvent) {
   try {
     const { type, data, id } = e.data;
@@ -21,11 +23,11 @@ self.onmessage = async function (e: MessageEvent) {
     switch (type) {
       case 'loadBook': {
         if (!data || !data.book) {
-          (logger as any).warn('[AI Worker] loadBook called without book data');
+          logger.warn('[AI Worker] loadBook called without book data');
           break;
         }
         setOpeningBook(data.book);
-        (logger as any).info('[AI Worker] Opening book loaded:', data.book.metadata);
+        logger.info('[AI Worker] Opening book loaded:', data.book.metadata);
         break;
       }
 
@@ -33,7 +35,7 @@ self.onmessage = async function (e: MessageEvent) {
         const shape = data?.shape as BoardShape;
         if (shape) {
           setCurrentBoardShape(shape);
-          (logger as any).debug('[AI Worker] Board shape set to:', shape);
+          logger.debug('[AI Worker] Board shape set to:', shape);
         }
         break;
       }
@@ -43,7 +45,7 @@ self.onmessage = async function (e: MessageEvent) {
 
         // Setup progress callback
         setProgressCallback((progress: any) => {
-          (self as any).postMessage({ type: 'progress', id, data: progress });
+          workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
 
         try {
@@ -53,10 +55,10 @@ self.onmessage = async function (e: MessageEvent) {
             maxDepth: depth,
           };
           const result = await getBestMoveDetailed(board, color, depth, timeParams, moveNumber);
-          (self as any).postMessage({ type: 'bestMove', id, data: result });
+          workerSelf.postMessage({ type: 'bestMove', id, data: result });
         } catch (error) {
-          (logger as any).error('[AI Worker] getBestMove failed:', error);
-          (self as any).postMessage({ type: 'bestMove', id, data: null });
+          logger.error('[AI Worker] getBestMove failed:', error);
+          workerSelf.postMessage({ type: 'bestMove', id, data: null });
         }
         break;
       }
@@ -64,7 +66,7 @@ self.onmessage = async function (e: MessageEvent) {
       case 'evaluatePosition': {
         const { board: evalBoard, forColor } = data;
         const score = await evaluatePosition(evalBoard, forColor);
-        (self as any).postMessage({ type: 'positionScore', id, data: score });
+        workerSelf.postMessage({ type: 'positionScore', id, data: score });
         break;
       }
 
@@ -72,10 +74,10 @@ self.onmessage = async function (e: MessageEvent) {
         const { board, color, count, depth, maxTimeMs, moveNumber } = data;
         try {
           const topMoves = await getTopMoves(board, color, count, depth, maxTimeMs, moveNumber);
-          (self as any).postMessage({ type: 'topMoves', id, data: topMoves });
+          workerSelf.postMessage({ type: 'topMoves', id, data: topMoves });
         } catch (error) {
-          (logger as any).error('[AI Worker] getTopMoves failed:', error);
-          (self as any).postMessage({ type: 'topMoves', id, data: [] });
+          logger.error('[AI Worker] getTopMoves failed:', error);
+          workerSelf.postMessage({ type: 'topMoves', id, data: [] });
         }
         break;
       }
@@ -84,12 +86,12 @@ self.onmessage = async function (e: MessageEvent) {
         const { board, color } = data;
 
         setProgressCallback(progress => {
-          (self as any).postMessage({ type: 'progress', id, data: progress });
+          workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
         // Use the new deep analysis function
         const analysis = analyzePosition(board, color); // Removed unsupported args depth, topMovesCount for now
 
-        (self as any).postMessage({
+        workerSelf.postMessage({
           type: 'analysis',
           id,
           data: analysis,
@@ -100,7 +102,7 @@ self.onmessage = async function (e: MessageEvent) {
       case 'search': {
         const { board, color, depth, personality } = data;
         // setProgressCallback((progress: any) => {
-        //   (self as any).postMessage({ type: 'progress', id, data: progress });
+        //   workerSelf.postMessage({ type: 'progress', id, data: progress });
         // });
 
         try {
@@ -111,10 +113,10 @@ self.onmessage = async function (e: MessageEvent) {
           const result = await getBestMoveDetailed(board, color, depth, timeParams);
           // Send back as 'bestMove' to match what AIController.getHint expects
           // result contains { bestMove, score, pv, ... }
-          (self as any).postMessage({ type: 'bestMove', id, ...result });
+          workerSelf.postMessage({ type: 'bestMove', id, ...result });
         } catch (error) {
-          (logger as any).error('[AI Worker] search failed:', error);
-          (self as any).postMessage({ type: 'bestMove', id, bestMove: null });
+          logger.error('[AI Worker] search failed:', error);
+          workerSelf.postMessage({ type: 'bestMove', id, bestMove: null });
         }
         break;
       }
@@ -130,17 +132,17 @@ self.onmessage = async function (e: MessageEvent) {
             maxDepth: depth,
           };
           const bestMove = await getBestMoveDetailed(board, turnColor, depth, timeParams);
-          (self as any).postMessage({
+          workerSelf.postMessage({
             type: 'SEARCH_RESULT',
             id: e.data.id,
             payload: bestMove,
           });
           return;
         }
-        (logger as any).warn('Unknown message type:', type);
+        logger.warn('Unknown message type:', type);
       }
     }
   } catch (error) {
-    (logger as any).error('[AI Worker] Error handling message:', error);
+    logger.error('[AI Worker] Error handling message:', error);
   }
 };

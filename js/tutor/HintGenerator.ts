@@ -2,13 +2,13 @@ import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE, type Game } from '../gameEngine.js';
 import { AI_DEPTH_CONFIG } from '../config.js';
 import * as UI from '../ui.js';
-import * as MoveAnalyzer from './MoveAnalyzer.js';
+import { analyzeMoveWithExplanation, getMoveNotation } from './MoveAnalyzer.js';
 import * as aiEngine from '../aiEngine.js';
 
 /**
  * Gets tutor hints by calling the AI engine
  */
-export async function getTutorHints(game: Game, tutorController: unknown): Promise<unknown[]> {
+export async function getTutorHints(game: Game, _tutorController: unknown): Promise<unknown[]> {
   const turnColor = game.turn;
 
   // Signal that the tutor is thinking
@@ -31,8 +31,7 @@ export async function getTutorHints(game: Game, tutorController: unknown): Promi
     const tutorDepth = Math.max(6, aiDepth + 2); // Minimum depth 6 for smart tutor
     const moveNumber = Math.floor(game.moveHistory.length / 2);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const topMoves: any[] = await (aiEngine as any).getTopMoves(
+        const topMoves: any[] = await (aiEngine as any).getTopMoves(
       game.board,
       turnColor,
       3, // Get top 3 moves
@@ -62,11 +61,8 @@ export async function getTutorHints(game: Game, tutorController: unknown): Promi
 
     // Convert engine moves to hints with explanations
     return Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      validMoves.map(async (hint: any, index: number) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const analysis = await (MoveAnalyzer as any).analyzeMoveWithExplanation.call(
-          tutorController,
+            validMoves.map(async (hint: any, index: number) => {
+                const analysis = await analyzeMoveWithExplanation(
           game,
           hint.move,
           hint.score,
@@ -78,17 +74,14 @@ export async function getTutorHints(game: Game, tutorController: unknown): Promi
 
         // Extract high-severity tactical patterns for prominent display
         const tacticsHighlight = (analysis.tacticalPatterns || [])
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .filter((p: any) => p.severity === 'high')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((p: any) => p.explanation)
+                    .filter((p: any) => p.severity === 'high')
+                    .map((p: any) => p.explanation)
           .slice(0, 2); // Max 2 highlights
 
         return {
           move: hint.move,
           score: hint.score,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          notation: (MoveAnalyzer as any).getMoveNotation(game, hint.move),
+                    notation: getMoveNotation(game, hint.move),
           analysis,
           tacticsHighlight, // NEW: Prominent tactics display
           pv: index === 0 ? pv : null, // Show PV only for the leading suggestion
@@ -105,11 +98,9 @@ export async function getTutorHints(game: Game, tutorController: unknown): Promi
 /**
  * Checks if a move is a tutor recommended move
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isTutorMove(game: any, from: any, to: any): boolean {
   if (!game.bestMoves) return false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return game.bestMoves.some(
+    return game.bestMoves.some(
     (m: any) =>
       m.move.from.r === from.r &&
       m.move.from.c === from.c &&
@@ -121,7 +112,6 @@ export function isTutorMove(game: any, from: any, to: any): boolean {
 /**
  * Updates the best moves and triggers UI update
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function updateBestMoves(_game: any, _tutorController: any): void {
   // User Request: Tutor info only on click.
   // We disable automatic background calculation to prevent "Thinking..." state from appearing automatically.
@@ -142,7 +132,6 @@ export function updateBestMoves(_game: any, _tutorController: any): void {
 /**
  * Shows tutor suggestions in the UI
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function showTutorSuggestions(game: any): Promise<void> {
   // const isSetup = game.phase && String(game.phase).startsWith('SETUP');
   // Allow empty hints to pass through to UI so it can show "No suggestions" message
@@ -151,8 +140,7 @@ export async function showTutorSuggestions(game: any): Promise<void> {
   //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
   // )
   //   return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (UI as any).showTutorSuggestions(game, game.bestMoves);
+    await (UI as any).showTutorSuggestions(game, game.bestMoves);
 }
 
 /**
@@ -185,7 +173,6 @@ function calculatePieceCost(pieces: string[]): number {
  * @param {number} expectedCost - Expected cost for validation
  * @returns {object} Template with calculated cost
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createTemplate(
   { id, name, description, pieces, isRecommended }: any,
   expectedCost: number
@@ -214,7 +201,6 @@ function createTemplate(
 /**
  * Returns available setup templates
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 /**
  * Calculates a score for placing a piece at a specific square
  */
@@ -338,7 +324,6 @@ function getOptimalSquare(
 /**
  * Returns available setup templates
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getSetupTemplates(game: any): any[] {
   const points = game.initialPoints;
 
@@ -688,10 +673,8 @@ export function getSetupTemplates(game: any): any[] {
 /**
  * Applies a setup template to the board
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applySetupTemplate(game: any, tutorController: any, templateId: string): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let template;
+    let template;
   if (tutorController && tutorController.getSetupTemplates) {
     template = tutorController.getSetupTemplates().find((t: any) => t.id === templateId);
   } else {
@@ -756,17 +739,14 @@ export function applySetupTemplate(game: any, tutorController: any, templateId: 
 
   delete game.availableKingPos;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  UI.renderBoard(game);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  UI.updateShopUI(game);
+    UI.renderBoard(game);
+    UI.updateShopUI(game);
   game.log(`Tutor: Aufstellung "${template.name}" angewendet.`);
 }
 
 /**
  * Places a piece and deducts points
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function placePiece(game: any, r: number, c: number, type: string, isWhite: boolean): void {
   game.board[r][c] = {
     type: type,

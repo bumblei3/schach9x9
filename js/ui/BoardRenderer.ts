@@ -7,14 +7,7 @@ import { debounce } from '../utils.js';
 import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
 import type { Piece, Player, PieceType, Square } from '../types/game.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
-
-// Define window extensions for piece SVGs and cache
-declare global {
-  interface Window {
-    PIECE_SVGS: Record<Player, Record<Exclude<PieceType, null>, string>>;
-    _svgCache: Record<string, string>;
-  }
-}
+import { PIECE_SVGS } from '../assets/pieces/index.js';
 
 /**
  * Get effective board size (from game instance or fallback to BOARD_SIZE)
@@ -23,6 +16,8 @@ function getBoardSize(game: any): number {
   return game && game.boardSize ? game.boardSize : BOARD_SIZE;
 }
 
+const svgCache: Record<string, string> = {};
+
 /**
  * Gibt das SVG-Symbol für eine Figur zurück.
  * @param piece - Die Figur
@@ -30,22 +25,21 @@ function getBoardSize(game: any): number {
  */
 export function getPieceSymbol(piece: Piece | null): string {
   if (!piece) return '';
-  if (!window._svgCache) window._svgCache = {};
   const key = piece.color + piece.type;
-  if (!window._svgCache[key]) {
+  if (!svgCache[key]) {
     const wrapper = document.createElement('div');
     wrapper.className = 'piece-svg';
-    wrapper.innerHTML = window.PIECE_SVGS[piece.color][piece.type];
-    window._svgCache[key] = wrapper.outerHTML;
+    wrapper.innerHTML = PIECE_SVGS[piece.color][piece.type];
+    svgCache[key] = wrapper.outerHTML;
   }
-  return window._svgCache[key];
+  return svgCache[key];
 }
 
 /**
  * Clears the piece SVG cache.
  */
 export function clearPieceCache(): void {
-  window._svgCache = {};
+  Object.keys(svgCache).forEach(k => delete svgCache[k]);
 }
 
 /**

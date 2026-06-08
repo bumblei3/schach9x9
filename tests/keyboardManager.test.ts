@@ -231,7 +231,7 @@ describe('KeyboardManager', () => {
 
   it('should handle Escape key when no square is selected', async () => {
     app.game.selectedSquare = null;
-    const { closeModal, OverlayManager } = (await import('../js/ui.js')) as any;
+    const { closeModal } = (await import('../js/ui.js')) as any;
 
     const event = new KeyboardEvent('keydown', { key: 'escape' });
     Object.defineProperty(event, 'target', { value: document.body });
@@ -240,7 +240,6 @@ describe('KeyboardManager', () => {
     // Should still close modals but not try to deselect
     expect(mockGameController.resetSelection).not.toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();
-    expect(OverlayManager.closeAll).toHaveBeenCalled();
   });
 
   it('should do nothing if app.game is missing', async () => {

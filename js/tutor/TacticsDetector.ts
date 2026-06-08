@@ -1,10 +1,22 @@
 import { BOARD_SIZE } from '../gameEngine.js';
 import * as aiEngine from '../aiEngine.js';
 import { isBlockedCell } from '../config.js';
+import type { Piece } from '../types/game.js';
+import type { BoardShape } from '../config.js';
+import type { Player } from '../types/game.js';
 
 /** Minimal interface for analyzer (provides getPieceName) */
 export interface Analyzer {
   getPieceName(type: string): string;
+}
+
+/** Minimal game interface — only the properties actually used by tactics detection */
+interface GameLike {
+  board: (Piece | null)[][];
+  boardShape?: BoardShape;
+  getValidMoves(r: number, c: number, piece: Piece): { r: number; c: number }[];
+  isInCheck?(color: Player): boolean;
+  isSquareUnderAttack(r: number, c: number, attackerColor: Player): boolean;
 }
 
 /** A position on the board */
@@ -44,7 +56,7 @@ interface RemovedGuard {
  * @param {Object} move - The move to analyze {from, to}
  * @returns {Array} List of detected patterns
  */
-export function detectTacticalPatterns(game: any, analyzer: Analyzer, move: { from: Pos; to: Pos }): TacticalPattern[] {
+export function detectTacticalPatterns(game: GameLike, analyzer: Analyzer, move: { from: Pos; to: Pos }): TacticalPattern[] {
     const patterns: TacticalPattern[] = [];
   if (!move || !move.from || !move.to) return patterns;
   const from = move.from;
@@ -81,7 +93,7 @@ export function detectTacticalPatterns(game: any, analyzer: Analyzer, move: { fr
       const pieceName = analyzer.getPieceName(capturedPiece.type);
 
       // Use SEE to check if capture is profitable
-            const seeScore = (aiEngine as any).see(game.board, from, to);
+            const seeScore = aiEngine.see(game.board, from, to);
       const isProfitable = seeScore >= 0;
 
       patterns.push({
@@ -96,7 +108,7 @@ export function detectTacticalPatterns(game: any, analyzer: Analyzer, move: { fr
     }
 
     // 3. CHECK - Threatening opponent's king
-    if (game.isInCheck(opponentColor)) {
+    if (game.isInCheck?.(opponentColor)) {
       // Find king pos
       let kingPos = null;
       for (let r = 0; r < BOARD_SIZE; r++) {
@@ -218,7 +230,7 @@ export function detectTacticalPatterns(game: any, analyzer: Analyzer, move: { fr
 /**
  * Detect Skewers: Similar to Pin, but valuable piece is in front
  */
-export function detectSkewers(game: any, analyzer: Analyzer, pos: Pos, attackerColor: string): Skewer[] {
+export function detectSkewers(game: GameLike, analyzer: Analyzer, pos: Pos, attackerColor: string): Skewer[] {
     const skewers: Skewer[] = [];
   const piece = game.board[pos.r][pos.c];
 
@@ -285,7 +297,7 @@ export function detectSkewers(game: any, analyzer: Analyzer, pos: Pos, attackerC
  * Detect Removing the Guard: Did capturing 'capturedPiece' leave someone undefended?
  */
 export function detectRemovingGuard(
-  game: any,
+  game: GameLike,
   analyzer: Analyzer,
   capturePos: Pos,
   capturedPiece: { type: string; color: string }
@@ -347,7 +359,7 @@ export function detectRemovingGuard(
   return revealedVulnerabilities;
 }
 
-function canPieceAttackSquare(game: any, piece: any, from: any, to: any): boolean {
+function canPieceAttackSquare(game: GameLike, piece: { type: string; color: string }, from: Pos, to: Pos): boolean {
   // Check if piece at 'from' can move to 'to' on the current board
   // (ignoring that 'from' might be occupied by attacker now, assume it's piece)
 
@@ -404,7 +416,7 @@ function canPieceAttackSquare(game: any, piece: any, from: any, to: any): boolea
  * @param {Object} move - The move to check
  * @returns {boolean} True if tactical
  */
-export function isTactical(game: any, move: { from: Pos; to: Pos }): boolean {
+export function isTactical(game: GameLike, move: { from: Pos; to: Pos }): boolean {
   // Simplest check: is it a capture?
   if (game.board[move.to.r][move.to.c]) return true;
 
@@ -426,7 +438,7 @@ export function isTactical(game: any, move: { from: Pos; to: Pos }): boolean {
  * Detect if a piece at the given position is pinning an opponent piece
  * Returns array of pinned pieces
  */
-export function detectPins(game: any, analyzer: Analyzer, pos: Pos, attackerColor: string): any[] {
+export function detectPins(game: GameLike, analyzer: Analyzer, pos: Pos, attackerColor: string): any[] {
     const pinned: any[] = [];
   const piece = game.board[pos.r][pos.c];
 
@@ -479,7 +491,7 @@ export function detectPins(game: any, analyzer: Analyzer, pos: Pos, attackerColo
  * Detect discovered attacks - attacks revealed by moving a piece
  */
 export function detectDiscoveredAttacks(
-  game: any,
+  game: GameLike,
   analyzer: Analyzer,
   from: Pos,
   _to: Pos,
@@ -565,7 +577,7 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
 /**
  * Detect threats to own pieces after making a move
  */
-export function detectThreatsAfterMove(game: any, analyzer: Analyzer, move: { from: Pos; to: Pos }): any[] {
+export function detectThreatsAfterMove(game: GameLike, analyzer: Analyzer, move: { from: Pos; to: Pos }): any[] {
     const threats: any[] = [];
   const from = move.from;
   const to = move.to;
@@ -589,7 +601,7 @@ export function detectThreatsAfterMove(game: any, analyzer: Analyzer, move: { fr
         // Pawns are now included for STRICT mode detection
 
         // Is this piece under attack?
-                const isUnderAttack = (aiEngine as any).isSquareAttacked(game.board, r, c, opponentColor);
+                const isUnderAttack = aiEngine.isSquareAttacked(game.board, r, c, opponentColor);
         if (isUnderAttack) {
           // Is it defended?
           const defenders = countDefenders(game, r, c, piece.color);
@@ -617,7 +629,7 @@ export function detectThreatsAfterMove(game: any, analyzer: Analyzer, move: { fr
 /**
  * Count how many pieces defend a square
  */
-export function countDefenders(game: any, r: number, c: number, defenderColor: string): number {
+export function countDefenders(game: GameLike, r: number, c: number, defenderColor: string): number {
   let count = 0;
   for (let pr = 0; pr < BOARD_SIZE; pr++) {
     for (let pc = 0; pc < BOARD_SIZE; pc++) {
@@ -636,7 +648,7 @@ export function countDefenders(game: any, r: number, c: number, defenderColor: s
 /**
  * Count how many pieces attack a square
  */
-export function countAttackers(game: any, r: number, c: number, attackerColor: string): number {
+export function countAttackers(game: GameLike, r: number, c: number, attackerColor: string): number {
   let count = 0;
   for (let pr = 0; pr < BOARD_SIZE; pr++) {
     for (let pc = 0; pc < BOARD_SIZE; pc++) {
@@ -656,7 +668,7 @@ export function countAttackers(game: any, r: number, c: number, attackerColor: s
  * Gets pieces threatened by a piece at pos
  */
 export function getThreatenedPieces(
-  game: any,
+  game: GameLike,
   analyzer: Analyzer,
   pos: Pos,
   attackerColor: string
@@ -686,7 +698,7 @@ export function getThreatenedPieces(
  * Gets pieces defended by a piece at pos
  */
 export function getDefendedPieces(
-  game: any,
+  game: GameLike,
   analyzer: Analyzer,
   pos: Pos,
   defenderColor: string
@@ -720,7 +732,7 @@ export function getDefendedPieces(
 /**
  * Detect Battery: Aligning two sliding pieces
  */
-export function detectBattery(game: any, analyzer: Analyzer, pos: Pos, color: string): any[] {
+export function detectBattery(game: GameLike, analyzer: Analyzer, pos: Pos, color: string): any[] {
     const batteries: any[] = [];
   const piece = game.board[pos.r][pos.c];
   if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) return batteries;

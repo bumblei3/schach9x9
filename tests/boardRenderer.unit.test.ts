@@ -87,7 +87,8 @@ describe('BoardRenderer Full Coverage', () => {
   test('getPieceSymbol returns correct SVG/HTML', () => {
     const p1 = { type: 'p', color: 'white' } as any;
     const html1 = BoardRenderer.getPieceSymbol(p1);
-    expect(html1).toContain('<svg>wp</svg>');
+    expect(html1).toContain('piece-svg');
+    expect(html1).toContain('<svg');
 
     // Test cache
     const html2 = BoardRenderer.getPieceSymbol(p1);
