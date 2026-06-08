@@ -2,6 +2,7 @@
  * Post-Game Analyzer for Schach 9x9
  * Classifies moves based on evaluation changes and calculates accuracy.
  */
+import type { MoveHistoryEntry } from '../gameEngine.js';
 
 export const MOVE_QUALITY = {
   BRILLIANT: 'brilliant',
@@ -13,9 +14,17 @@ export const MOVE_QUALITY = {
   MISTAKE: 'mistake',
   BLUNDER: 'blunder',
   BOOK: 'book',
-};
+} as const;
 
-export const QUALITY_METADATA = {
+export type MoveQuality = (typeof MOVE_QUALITY)[keyof typeof MOVE_QUALITY];
+
+export interface QualityMetadata {
+  label: string;
+  symbol: string;
+  color: string;
+}
+
+export const QUALITY_METADATA: Record<MoveQuality, QualityMetadata> = {
   [MOVE_QUALITY.BRILLIANT]: { label: 'Brilliant', symbol: '!!', color: '#31c48d' },
   [MOVE_QUALITY.GREAT]: { label: 'Großartig', symbol: '!', color: '#31c48d' },
   [MOVE_QUALITY.BEST]: { label: 'Bester Zug', symbol: '★', color: '#9f5fef' },
@@ -29,12 +38,8 @@ export const QUALITY_METADATA = {
 
 /**
  * Classifies a move based on evaluation change.
- * @param {number} prevEval - Evaluation before the move (from mover's perspective)
- * @param {number} currentEval - Evaluation after the move (from mover's perspective)
- * @param {number} bestEval - Evaluation of the best possible move (from mover's perspective)
- * @returns {string} One of MOVE_QUALITY constants
  */
-export function classifyMove(_prevEval: number, currentEval: number, bestEval: number): string {
+export function classifyMove(_prevEval: number, currentEval: number, bestEval: number): MoveQuality {
   const evalLoss = bestEval - currentEval;
 
   if (evalLoss <= 0) return MOVE_QUALITY.BEST;
@@ -45,13 +50,12 @@ export function classifyMove(_prevEval: number, currentEval: number, bestEval: n
   return MOVE_QUALITY.BLUNDER;
 }
 
+type ClassificationItem = string | { quality: string };
+
 /**
  * Calculates accuracy percentage based on move qualities.
- * @param {Array<Object>} classifications - Array of MOVE_QUALITY strings or objects containing them
- * @returns {number} 0-100 accuracy
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function calculateAccuracy(classifications: any[]): number {
+export function calculateAccuracy(classifications: ClassificationItem[]): number {
   if (!classifications || classifications.length === 0) return 0;
 
   const weights: Record<string, number> = {
@@ -66,7 +70,7 @@ export function calculateAccuracy(classifications: any[]): number {
     [MOVE_QUALITY.BLUNDER]: 0,
   };
 
-  const totalPoints = classifications.reduce((sum, c) => {
+  const totalPoints = classifications.reduce((sum: number, c: ClassificationItem) => {
     const quality = typeof c === 'string' ? c : c.quality;
     return sum + (weights[quality] || 0);
   }, 0);
@@ -74,18 +78,18 @@ export function calculateAccuracy(classifications: any[]): number {
   return Math.round(totalPoints / classifications.length);
 }
 
+export interface GameAnalysis {
+  counts: Record<MoveQuality, number>;
+  accuracy: number;
+  totalMoves: number;
+}
+
 /**
  * Summarizes a game's move qualities.
- * @param {Array} moveHistory
- * @param {string} playerColor
- * @returns {Object} Summary counts and accuracy
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function analyzeGame(moveHistory: any[], playerColor: string): any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const playerMoves = moveHistory.filter((m: any) => m.piece.color === playerColor);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const counts: any = {
+export function analyzeGame(moveHistory: MoveHistoryEntry[], playerColor: string): GameAnalysis {
+  const playerMoves = moveHistory.filter((m: MoveHistoryEntry) => m.piece?.color === playerColor);
+  const counts: Record<MoveQuality, number> = {
     [MOVE_QUALITY.BRILLIANT]: 0,
     [MOVE_QUALITY.GREAT]: 0,
     [MOVE_QUALITY.BEST]: 0,
@@ -97,17 +101,15 @@ export function analyzeGame(moveHistory: any[], playerColor: string): any {
     [MOVE_QUALITY.BOOK]: 0,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  playerMoves.forEach((m: any) => {
+  playerMoves.forEach((m: MoveHistoryEntry) => {
     if (m.classification) {
-      counts[m.classification]++;
+      counts[m.classification as MoveQuality]++;
     }
   });
 
   return {
     counts,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    accuracy: calculateAccuracy(playerMoves.map((m: any) => m.classification || MOVE_QUALITY.GOOD)),
+    accuracy: calculateAccuracy(playerMoves.map((m: MoveHistoryEntry) => m.classification || MOVE_QUALITY.GOOD)),
     totalMoves: playerMoves.length,
   };
 }

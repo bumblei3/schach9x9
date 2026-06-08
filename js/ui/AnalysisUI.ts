@@ -331,7 +331,7 @@ export class AnalysisUI {
       .map(
         ([quality, count]) => `
         <div class="stat-row">
-          <span class="stat-label" style="color: ${PostGameAnalyzer.QUALITY_METADATA[quality].color}">${PostGameAnalyzer.QUALITY_METADATA[quality].label}</span>
+          <span class="stat-label" style="color: ${PostGameAnalyzer.QUALITY_METADATA[quality as PostGameAnalyzer.MoveQuality].color}">${PostGameAnalyzer.QUALITY_METADATA[quality as PostGameAnalyzer.MoveQuality].label}</span>
           <span class="stat-count">${count}</span>
         </div>
       `
