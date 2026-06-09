@@ -50,26 +50,26 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
 
   beforeEach(async () => {
     document.body.innerHTML = `
-      <div id="tutorial-overlay"></div>
-      <div id="tutorial-steps"></div>
-      <button id="tutorial-prev"></button>
-      <button id="tutorial-next"></button>
-      <button id="tutorial-close"></button>
-      <span id="tutorial-current-step"></span>
-      <span id="tutorial-total-steps"></span>
-      <div id="status-display"></div>
-      <div id="shop-panel"></div>
-      <div id="shop-items"></div>
-      <div id="points-display"></div>
-      <div id="selected-piece-display"></div>
-      <div id="board-wrapper"><div id="board"></div></div>
-      <div id="game-over-overlay" class="hidden"></div>
-      <div id="winner-text"></div>
-      <div id="spinner-overlay" class="hidden"></div>
-      <div id="ai-best-move"></div>
-      <div id="ai-depth"></div>
-      <div id="ai-nodes"></div>
-      <div id="progress-fill"></div>
+      <div id=\"tutorial-overlay\"></div>
+      <div id=\"tutorial-steps\"></div>
+      <button id=\"tutorial-prev\"></button>
+      <button id=\"tutorial-next\"></button>
+      <button id=\"tutorial-close\"></button>
+      <span id=\"tutorial-current-step\"></span>
+      <span id=\"tutorial-total-steps\"></span>
+      <div id=\"status-display\"></div>
+      <div id=\"shop-panel\"></div>
+      <div id=\"shop-items\"></div>
+      <div id=\"points-display\"></div>
+      <div id=\"selected-piece-display\"></div>
+      <div id=\"board-wrapper\"><div id=\"board\"></div></div>
+      <div id=\"game-over-overlay\" class=\"hidden\"></div>
+      <div id=\"winner-text\"></div>
+      <div id=\"spinner-overlay\" class=\"hidden\"></div>
+      <div id=\"ai-best-move\"></div>
+      <div id=\"ai-depth\"></div>
+      <div id=\"ai-nodes\"></div>
+      <div id=\"progress-fill\"></div>
     `;
 
     game = new Game(10, 'classic');
@@ -101,15 +101,15 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     expect(game.turn).toBe('white');
 
     // Place a movable white pawn
-    game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
+    game.board[7][4] = { type: 'p', color: 'white', hasMoved: false };
     game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
-    game.getValidMoves = vi.fn(() => [{ r: 5, c: 4 }]);
+    game.getValidMoves = vi.fn(() => [{ r: 6, c: 4 }]);
 
     // Player selects and moves
-    game.selectedSquare = { r: 6, c: 4 };
-    game.validMoves = [{ r: 5, c: 4 }];
+    game.selectedSquare = { r: 7, c: 4 };
+    game.validMoves = [{ r: 6, c: 4 }];
 
-    await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
+    await moveController.executeMove({ r: 7, c: 4 }, { r: 6, c: 4 });
 
     expect(game.turn).toBe('black');
     expect(game.aiMove).not.toHaveBeenCalled();
@@ -138,15 +138,15 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     });
 
     // Place white pawn
-    game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
+    game.board[7][4] = { type: 'p', color: 'white', hasMoved: false };
     game.board[8][4] = { type: 'k', color: 'white', hasMoved: false };
-    game.getValidMoves = vi.fn(() => [{ r: 5, c: 4 }]);
+    game.getValidMoves = vi.fn(() => [{ r: 6, c: 4 }]);
 
     // Player moves
-    game.selectedSquare = { r: 6, c: 4 };
-    game.validMoves = [{ r: 5, c: 4 }];
+    game.selectedSquare = { r: 7, c: 4 };
+    game.validMoves = [{ r: 6, c: 4 }];
 
-    await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
+    await moveController.executeMove({ r: 7, c: 4 }, { r: 6, c: 4 });
 
     expect(game.turn).toBe('black');
 

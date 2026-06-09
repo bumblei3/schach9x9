@@ -49,21 +49,21 @@ describe('AI Trigger Integration', () => {
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <div id="tutorial-overlay"></div>
-      <div id="tutorial-steps"></div>
-      <button id="tutorial-prev"></button>
-      <button id="tutorial-next"></button>
-      <button id="tutorial-close"></button>
-      <span id="tutorial-current-step"></span>
-      <span id="tutorial-total-steps"></span>
-      <div id="status-display"></div>
-      <div id="shop-panel"></div>
-      <div id="shop-items"></div>
-      <div id="points-display"></div>
-      <div id="selected-piece-display"></div>
-      <div id="board-wrapper"><div id="board"></div></div>
-      <div id="game-over-overlay" class="hidden"></div>
-      <div id="winner-text"></div>
+      <div id=\"tutorial-overlay\"></div>
+      <div id=\"tutorial-steps\"></div>
+      <button id=\"tutorial-prev\"></button>
+      <button id=\"tutorial-next\"></button>
+      <button id=\"tutorial-close\"></button>
+      <span id=\"tutorial-current-step\"></span>
+      <span id=\"tutorial-total-steps\"></span>
+      <div id=\"status-display\"></div>
+      <div id=\"shop-panel\"></div>
+      <div id=\"shop-items\"></div>
+      <div id=\"points-display\"></div>
+      <div id=\"selected-piece-display\"></div>
+      <div id=\"board-wrapper\"><div id=\"board\"></div></div>
+      <div id=\"game-over-overlay\" class=\"hidden\"></div>
+      <div id=\"winner-text\"></div>
     `;
 
     game = new Game(10, 'classic');
@@ -89,15 +89,15 @@ describe('AI Trigger Integration', () => {
     expect(game.turn).toBe('white');
 
     // Setup: Place a white pawn that can move
-    game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
-    game.getValidMoves = vi.fn(() => [{ r: 5, c: 4 }]);
+    game.board[7][4] = { type: 'p', color: 'white', hasMoved: false };
+    game.getValidMoves = vi.fn(() => [{ r: 6, c: 4 }]);
 
     // Player selects pawn
-    game.selectedSquare = { r: 6, c: 4 };
-    game.validMoves = [{ r: 5, c: 4 }];
+    game.selectedSquare = { r: 7, c: 4 };
+    game.validMoves = [{ r: 6, c: 4 }];
 
     // Player clicks destination
-    await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
+    await moveController.executeMove({ r: 7, c: 4 }, { r: 6, c: 4 });
 
     // Turn should now be black
     expect(game.turn).toBe('black');
@@ -118,13 +118,13 @@ describe('AI Trigger Integration', () => {
     vi.useFakeTimers();
 
     game.isAI = false;
-    game.board[6][4] = { type: 'p', color: 'white', hasMoved: false };
-    game.getValidMoves = vi.fn(() => [{ r: 5, c: 4 }]);
+    game.board[7][4] = { type: 'p', color: 'white', hasMoved: false };
+    game.getValidMoves = vi.fn(() => [{ r: 6, c: 4 }]);
 
-    game.selectedSquare = { r: 6, c: 4 };
-    game.validMoves = [{ r: 5, c: 4 }];
+    game.selectedSquare = { r: 7, c: 4 };
+    game.validMoves = [{ r: 6, c: 4 }];
 
-    await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
+    await moveController.executeMove({ r: 7, c: 4 }, { r: 6, c: 4 });
 
     vi.runAllTimers();
 
