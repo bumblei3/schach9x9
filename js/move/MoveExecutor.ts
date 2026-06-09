@@ -341,7 +341,10 @@ export function finishMove(game: Game, lastTo?: Square): void {
   game.stats.totalMoves++;
   if (game.turn === 'white') game.stats.playerMoves++;
 
-  // Check if a king was captured
+  // Check if a king was captured – optimized: in chess, a king can only be
+  // captured by moving to its square, so we only need to check the destination.
+  // However, since executeMove already placed the moving piece at lastTo, we
+  // scan the board. For 9x9 this is only 81 cells – trivial cost.
   let whiteKingExists = false;
   let blackKingExists = false;
   for (let r = 0; r < game.boardSize; r++) {
