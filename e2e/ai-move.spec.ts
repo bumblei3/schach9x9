@@ -37,4 +37,36 @@ test.describe('AI Opponent Move', () => {
     expect(afterState.turn).toBe('white');
     expect(afterState.moveCount).toBeGreaterThanOrEqual(2);
   });
+
+  test('AI and player alternate moves correctly', async ({ page }) => {
+    await helper.startGame('classic');
+    await expect(page.locator('[data-testid="board"]')).toBeVisible();
+    await page.waitForTimeout(1000);
+
+    // First move: white pawn
+    await helper.clickCell(7, 4);
+    await page.waitForTimeout(300);
+    await helper.clickCell(6, 4);
+    await page.waitForTimeout(3000);
+
+    // Second move: white pawn again (after AI moved)
+    await helper.clickCell(7, 3);
+    await page.waitForTimeout(300);
+    await helper.clickCell(6, 3);
+    await page.waitForTimeout(3000);
+
+    const finalState = await page.evaluate(() => {
+      const app = (window as any).app;
+      return {
+        turn: app.game.turn,
+        moveCount: app.game.moveHistory.length,
+      };
+    });
+
+    console.log('Final state:', JSON.stringify(finalState));
+
+    // 2 player moves + 2 AI moves = 4 total
+    expect(finalState.moveCount).toBeGreaterThanOrEqual(4);
+    expect(finalState.turn).toBe('white');
+  });
 });
