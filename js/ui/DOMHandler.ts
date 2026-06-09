@@ -13,9 +13,12 @@ import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
 import { AnalysisUI } from './AnalysisUI.js';
 import { Tutorial } from '../tutorial.js';
+import type { App } from '../App.js';
+import type { Game } from '../gameEngine.js';
+import type { GameController } from '../gameController.js';
 
 export class DOMHandler {
-  private app: any;
+  private app: App;
   private analysisUI: AnalysisUI;
   private campaignUI?: CampaignUI;
   private tutorial?: Tutorial;
@@ -28,7 +31,7 @@ export class DOMHandler {
   /**
    * @param app - Reference to the main App instance
    */
-  constructor(app: any) {
+  constructor(app: App) {
     this.app = app;
     this.analysisUI = new AnalysisUI(app);
     if (app.game && app.game.aiController) {
@@ -39,14 +42,14 @@ export class DOMHandler {
   /**
    * Convenience getter for the game instance
    */
-  get game(): any {
+  get game(): Game | null {
     return this.app.game;
   }
 
   /**
    * Convenience getter for game controller
    */
-  get gameController(): any {
+  get gameController(): GameController | null {
     return this.app.gameController;
   }
 
@@ -85,7 +88,7 @@ export class DOMHandler {
           }
           this.app
             .init(points, 'setup')
-            .catch((err: any) => console.error('[DOMHandler] App init failed:', err));
+            .catch((err: unknown) => console.error('[DOMHandler] App init failed:', err));
         } else {
           console.error('[DOMHandler] Missing points data on button');
         }
