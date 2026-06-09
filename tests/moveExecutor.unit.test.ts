@@ -275,13 +275,17 @@ describe('MoveExecutor Integration Tests', () => {
     vi.useFakeTimers();
     game.isAI = true;
     game.turn = 'white'; // Will become black
-    (game as any).aiMove = vi.fn();
+    // Mock on prototype since finishMove now calls proto.aiMove directly
+    const proto = Object.getPrototypeOf(game);
+    const origAiMove = proto.aiMove;
+    proto.aiMove = vi.fn();
 
     game.board[6][4] = { type: 'p', color: 'white', hasMoved: true };
     await MoveExecutor.executeMove(game, moveController, { r: 6, c: 4 }, { r: 5, c: 4 });
 
     vi.advanceTimersByTime(1500);
-    expect((game as any).aiMove).toHaveBeenCalled();
+    expect(proto.aiMove).toHaveBeenCalled();
+    proto.aiMove = origAiMove;
     vi.useRealTimers();
   });
 

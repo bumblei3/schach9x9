@@ -46,6 +46,7 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
   let gameController: any;
   let moveController: any;
   let aiController: any;
+  let originalAiMove: any;
 
   beforeEach(async () => {
     document.body.innerHTML = `
@@ -79,7 +80,11 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     game.gameController = gameController;
     game.moveController = moveController;
     game.aiController = aiController;
-    game.aiMove = vi.fn();
+
+    // Mock aiMove on the prototype so it doesn't actually execute
+    const proto = Object.getPrototypeOf(game);
+    originalAiMove = proto.aiMove;
+    proto.aiMove = vi.fn();
 
     // Simulate applyDelegates
     game.handlePlayClick = (r: number, c: number) => moveController.handlePlayClick(r, c);
@@ -91,6 +96,14 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     gameController.timeManager = { startClock: vi.fn(), stopClock: vi.fn(), switchTurn: vi.fn(), setTimeControl: vi.fn(), updateClockVisibility: vi.fn(), tickClock: vi.fn(), updateClockDisplay: vi.fn(), updateClockUI: vi.fn() };
 
     gameController.initGame(10, 'classic');
+  });
+
+  afterEach(() => {
+    // Restore original aiMove
+    if (originalAiMove) {
+      const proto = Object.getPrototypeOf(game);
+      proto.aiMove = originalAiMove;
+    }
   });
 
   test('After player move, aiMove is called via setTimeout', async () => {
@@ -111,11 +124,16 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     await moveController.executeMove({ r: 7, c: 4 }, { r: 6, c: 4 });
 
     expect(game.turn).toBe('black');
-    expect(game.aiMove).not.toHaveBeenCalled();
 
+    // aiMove should NOT have been called yet (it's in setTimeout)
+    const proto = Object.getPrototypeOf(game);
+    expect(proto.aiMove).not.toHaveBeenCalled();
+
+    // Advance timers to trigger the setTimeout
     vi.runAllTimers();
 
-    expect(game.aiMove).toHaveBeenCalledTimes(1);
+    // NOW aiMove should have been called
+    expect(proto.aiMove).toHaveBeenCalledTimes(1);
 
     vi.useRealTimers();
   });
@@ -123,9 +141,9 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
   test('Game flow: player move -> AI trigger -> turn back to white', async () => {
     vi.useFakeTimers();
 
-    // Track the full flow
     const moveLog: string[] = [];
-    game.aiMove = vi.fn(() => {
+    const proto = Object.getPrototypeOf(game);
+    proto.aiMove = vi.fn(() => {
       moveLog.push('aiMove called');
       // Simulate AI making a move
       const blackMoves = game.getAllLegalMoves('black');
@@ -152,9 +170,9 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     // Trigger AI
     vi.runAllTimers();
 
-    expect(game.aiMove).toHaveBeenCalledTimes(1);
+    expect(proto.aiMove).toHaveBeenCalledTimes(1);
     expect(moveLog).toContain('aiMove called');
-    expect(game.turn).toBe('white'); // After AI move, turn back to white
+    expect(game.turn).toBe('white');
 
     vi.useRealTimers();
   });

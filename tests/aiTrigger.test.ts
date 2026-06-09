@@ -45,6 +45,7 @@ describe('AI Trigger Integration', () => {
   let game: any;
   let controller: any;
   let moveController: any;
+  let originalAiMove: any;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -71,7 +72,11 @@ describe('AI Trigger Integration', () => {
 
     game.gameController = controller;
     game.moveController = moveController;
-    game.aiMove = vi.fn();
+
+    // Mock aiMove on the prototype
+    const proto = Object.getPrototypeOf(game);
+    originalAiMove = proto.aiMove;
+    proto.aiMove = vi.fn();
 
     controller.moveController = moveController;
     controller.shopManager = { updateShopUI: vi.fn() };
@@ -79,6 +84,13 @@ describe('AI Trigger Integration', () => {
     controller.timeManager = { startClock: vi.fn(), stopClock: vi.fn(), switchTurn: vi.fn() };
 
     controller.initGame(10, 'classic');
+  });
+
+  afterEach(() => {
+    if (originalAiMove) {
+      const proto = Object.getPrototypeOf(game);
+      proto.aiMove = originalAiMove;
+    }
   });
 
   test('AI move is triggered after player move in classic mode', async () => {
@@ -102,13 +114,14 @@ describe('AI Trigger Integration', () => {
     expect(game.turn).toBe('black');
 
     // AI move should NOT have been called yet (it's in setTimeout)
-    expect(game.aiMove).not.toHaveBeenCalled();
+    const proto = Object.getPrototypeOf(game);
+    expect(proto.aiMove).not.toHaveBeenCalled();
 
     // Advance timers to trigger the setTimeout
     vi.runAllTimers();
 
     // NOW aiMove should have been called
-    expect(game.aiMove).toHaveBeenCalled();
+    expect(proto.aiMove).toHaveBeenCalled();
 
     vi.useRealTimers();
   });
@@ -127,7 +140,8 @@ describe('AI Trigger Integration', () => {
 
     vi.runAllTimers();
 
-    expect(game.aiMove).not.toHaveBeenCalled();
+    const proto = Object.getPrototypeOf(game);
+    expect(proto.aiMove).not.toHaveBeenCalled();
 
     vi.useRealTimers();
   });

@@ -983,13 +983,17 @@ describe('MoveController', () => {
       game.board[6][4] = { type: 'p', color: 'white' } as any;
       game.isAI = true;
       game.turn = 'white'; // Start with white, executeMove switches to black, triggering AI
-      game.aiMove = vi.fn();
+      // Mock on prototype since finishMove now calls proto.aiMove directly
+      const proto = Object.getPrototypeOf(game);
+      const origAiMove = proto.aiMove;
+      proto.aiMove = vi.fn();
 
       await moveController.executeMove({ r: 6, c: 4 }, { r: 5, c: 4 });
 
       vi.runAllTimers();
 
-      expect(game.aiMove).toHaveBeenCalled();
+      expect(proto.aiMove).toHaveBeenCalled();
+      proto.aiMove = origAiMove;
       vi.useRealTimers();
     });
   });

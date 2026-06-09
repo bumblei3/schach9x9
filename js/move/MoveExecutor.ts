@@ -502,11 +502,19 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
   if (game.isAI && game.turn === 'black' && game.phase === PHASES.PLAY) {
     setTimeout(() => {
-      if (game.aiMove) game.aiMove();
+      // Use prototype method directly to bypass any own property override
+      const proto = Object.getPrototypeOf(game);
+      if (typeof proto.aiMove === 'function') {
+        proto.aiMove.call(game);
+      }
     }, 1000);
   } else {
     setTimeout(() => {
-      if (game.updateBestMoves) game.updateBestMoves();
+      // Use prototype method directly to bypass any own property override
+      const proto2 = Object.getPrototypeOf(game);
+      if (typeof proto2.updateBestMoves === 'function') {
+        proto2.updateBestMoves.call(game);
+      }
 
       // Trigger analysis update if in analysis mode OR live engine analysis is active
       if (
