@@ -3,7 +3,6 @@ import { Game, PHASES } from '../js/gameEngine.js';
 import { GameController } from '../js/gameController.js';
 import { MoveController } from '../js/moveController.js';
 import { AIController } from '../js/aiController.js';
-import * as UI from '../js/ui.js';
 
 vi.mock('../js/ui.js', () => ({
   renderBoard: vi.fn(),

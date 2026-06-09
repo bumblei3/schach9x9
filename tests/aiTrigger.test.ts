@@ -2,7 +2,6 @@ import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Game, PHASES } from '../js/gameEngine.js';
 import { GameController } from '../js/gameController.js';
 import { MoveController } from '../js/moveController.js';
-import * as UI from '../js/ui.js';
 
 // Mock UI
 vi.mock('../js/ui.js', () => ({
