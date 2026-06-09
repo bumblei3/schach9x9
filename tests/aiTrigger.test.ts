@@ -49,21 +49,21 @@ describe('AI Trigger Integration', () => {
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <div id=\"tutorial-overlay\"></div>
-      <div id=\"tutorial-steps\"></div>
-      <button id=\"tutorial-prev\"></button>
-      <button id=\"tutorial-next\"></button>
-      <button id=\"tutorial-close\"></button>
-      <span id=\"tutorial-current-step\"></span>
-      <span id=\"tutorial-total-steps\"></span>
-      <div id=\"status-display\"></div>
-      <div id=\"shop-panel\"></div>
-      <div id=\"shop-items\"></div>
-      <div id=\"points-display\"></div>
-      <div id=\"selected-piece-display\"></div>
-      <div id=\"board-wrapper\"><div id=\"board\"></div></div>
-      <div id=\"game-over-overlay\" class=\"hidden\"></div>
-      <div id=\"winner-text\"></div>
+      <div id="tutorial-overlay"></div>
+      <div id="tutorial-steps"></div>
+      <button id="tutorial-prev"></button>
+      <button id="tutorial-next"></button>
+      <button id="tutorial-close"></button>
+      <span id="tutorial-current-step"></span>
+      <span id="tutorial-total-steps"></span>
+      <div id="status-display"></div>
+      <div id="shop-panel"></div>
+      <div id="shop-items"></div>
+      <div id="points-display"></div>
+      <div id="selected-piece-display"></div>
+      <div id="board-wrapper"><div id="board"></div></div>
+      <div id="game-over-overlay" class="hidden"></div>
+      <div id="winner-text"></div>
     `;
 
     game = new Game(10, 'classic');
