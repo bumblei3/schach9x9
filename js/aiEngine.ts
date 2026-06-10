@@ -25,6 +25,7 @@ import {
   isSquareAttacked as isSquareAttackedInt,
   findKing as findKingInt,
   see as seeInt,
+  type Move,
 } from './ai/MoveGenerator.js';
 
 import {
@@ -127,7 +128,7 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
       if (p) {
         const type = TYPE_MAP_TO_INT[p.type] || PIECE_NONE;
         const color = p.color === 'white' ? COLOR_WHITE : COLOR_BLACK;
-        board[r * 9 + c] = (type | color) as any;
+        board[r * 9 + c] = (type | color) as number;
       }
     }
   }
@@ -263,7 +264,7 @@ function runWorkerTopMoves(
 }
 
 function convertMoveToResult(
-  move: { from: any; to: any; promotion?: any } | null
+  move: { from: number | Square; to: number | Square; promotion?: number | string } | null
 ): MoveResult | null {
   if (!move) return null;
 
@@ -272,9 +273,13 @@ function convertMoveToResult(
     return move as unknown as MoveResult;
   }
 
+  // At this point from/to are guaranteed to be numbers
+  const fromIdx = move.from as number;
+  const toIdx = move.to as number;
+
   return {
-    from: { r: indexToRow(move.from), c: indexToCol(move.from) },
-    to: { r: indexToRow(move.to), c: indexToCol(move.to) },
+    from: { r: indexToRow(fromIdx), c: indexToCol(fromIdx) },
+    to: { r: indexToRow(toIdx), c: indexToCol(toIdx) },
     promotion:
       typeof move.promotion === 'number'
         ? TYPE_INT_TO_STR[move.promotion & TYPE_MASK]
@@ -403,7 +408,7 @@ const MATE_SCORE = 20000;
 const INFINITY = 30000;
 
 interface JsSearchResult {
-  move: any;
+  move: Move | null;
   score: number;
   nodes: number;
 }
@@ -453,7 +458,7 @@ async function runJsSearch(
     beta: number,
     maximizingPlayer: boolean,
     c: number
-  ): { score: number; bestMove: any } {
+  ): { score: number; bestMove: Move | null } {
     nodes++;
 
     // Check timeout every 2000 nodes
@@ -592,8 +597,9 @@ export async function getTopMoves(
   if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
     try {
       return await runWorkerTopMoves(board, turnColor, count, searchDepth, maxTimeMs);
-    } catch (err: any) {
-      if (err?.message?.includes('request cancelled')) {
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      if (errMsg.includes('request cancelled')) {
         logger.debug('[AiEngine] Worker getTopMoves cancelled (new request)');
       } else {
         logger.error('[AiEngine] Worker getTopMoves failed, falling back', err);
@@ -628,7 +634,7 @@ export async function getTopMoves(
   }
 
   // Step 1: Quick pre-filter all moves with simple evaluation
-  const quickScores: { move: any; score: number }[] = [];
+  const quickScores: { move: Move; score: number }[] = [];
   for (const move of legalMoves) {
     const undo = makeMoveInt(board, move);
     const score = quickEval(board);
@@ -641,7 +647,7 @@ export async function getTopMoves(
   const topCandidates = quickScores.slice(0, Math.min(8, quickScores.length));
 
   // Step 2: Use WASM for the top candidates
-  const moveScores: { move: any; score: number }[] = [];
+  const moveScores: { move: Move; score: number }[] = [];
   const loopDepth = Math.max(2, searchDepth - 3);
 
   for (const candidate of topCandidates) {
@@ -854,7 +860,16 @@ export function setTTMaxSize(): void {}
 export function testStoreTT(): void {}
 export function testProbeTT(): void {}
 
-export let progressCallback: ((progress: any) => void) | null = null;
-export function setProgressCallback(cb: (progress: any) => void | null): void {
+export interface AIProgressData {
+  depth?: number;
+  nodes?: number;
+  time?: number;
+  score?: number;
+  pv?: string;
+  [key: string]: number | string | undefined;
+}
+
+export let progressCallback: ((progress: AIProgressData) => void) | null = null;
+export function setProgressCallback(cb: ((progress: AIProgressData) => void) | null): void {
   progressCallback = cb || null;
 }

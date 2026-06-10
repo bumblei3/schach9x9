@@ -100,10 +100,9 @@ describe('PGNParser', () => {
 
       expect(history.length).toBe(1);
       expect(history[0].san).toBe('e4');
-      expect(history[0].move).toBeDefined();
-      expect(history[0].move!.from.r).toBe(7);
-      expect(history[0].move!.from.c).toBe(4);
-      expect(history[0].move!.to.r).toBe(5);
+      expect(history[0].from.r).toBe(7);
+      expect(history[0].from.c).toBe(4);
+      expect(history[0].to.r).toBe(5);
       expect(game.turn).toBe('black');
     });
 

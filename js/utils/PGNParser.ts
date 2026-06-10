@@ -1,8 +1,31 @@
 import { logger } from '../logger.js';
 import { BOARD_SIZE } from '../gameEngine.js';
 
+export interface PGNGame {
+  headers: Record<string, string>;
+  moves: string[];
+}
+
+export interface PGNHistoryEntry {
+  hash: string;
+  from: { r: number; c: number };
+  to: { r: number; c: number };
+  san: string;
+  promotion?: string;
+  move?: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string };
+}
+
+interface PgnEngine {
+  turn: string;
+  boardSize: number;
+  board: ({ type: string; color: string } | null)[][];
+  getAllLegalMoves(turn: string): { from: { r: number; c: number }; to: { r: number; c: number } }[];
+  getBoardHash(): string;
+  executeMove(from: { r: number; c: number }, to: { r: number; c: number }): void;
+}
+
 export class PGNParser {
-  games: any[] = [];
+  games: PGNGame[] = [];
 
   constructor() {
     this.games = [];
@@ -13,10 +36,10 @@ export class PGNParser {
    * @param pgnString
    * @returns List of parsed games
    */
-  parse(pgnString: string): any[] {
+  parse(pgnString: string): PGNGame[] {
     this.games = [];
     const lines = pgnString.split(/\r?\n/);
-    let currentGame: any = { headers: {}, moves: [] };
+    let currentGame: PGNGame = { headers: {}, moves: [] };
     let isReadingMoves = false;
 
     for (let line of lines) {
@@ -62,12 +85,12 @@ export class PGNParser {
   /**
    * Convert simplified PGN moves to coordinates
    */
-  replayGame(movesSan: string[], engine: any): any[] {
-    const history: any[] = [];
+  replayGame(movesSan: string[], engine: PgnEngine): PGNHistoryEntry[] {
+    const history: PGNHistoryEntry[] = [];
 
     for (const san of movesSan) {
       const legalMoves = engine.getAllLegalMoves(engine.turn);
-      let matchedMove: any = null;
+      let matchedMove: { from: { r: number; c: number }; to: { r: number; c: number } } | null = null;
 
       for (const move of legalMoves) {
         const notation = this.generateNotationForCheck(move, engine, legalMoves);
@@ -85,7 +108,8 @@ export class PGNParser {
         const hash = engine.getBoardHash();
         history.push({
           hash: hash,
-          move: matchedMove,
+          from: matchedMove.from,
+          to: matchedMove.to,
           san: san,
         });
 
@@ -102,7 +126,11 @@ export class PGNParser {
   /**
    * Minimal notation generator for matching purposes
    */
-  generateNotationForCheck(move: any, engine: any, allLegalMoves: any[]): string {
+  generateNotationForCheck(
+    move: { from: { r: number; c: number }; to: { r: number; c: number } },
+    engine: PgnEngine,
+    allLegalMoves: { from: { r: number; c: number }; to: { r: number; c: number } }[]
+  ): string {
     const piece = engine.board[move.from.r][move.from.c];
     if (!piece) return '';
 
@@ -132,6 +160,7 @@ export class PGNParser {
     // Check for ambiguity
     const others = allLegalMoves.filter(m => {
       const p = engine.board[m.from.r][m.from.c];
+      if (p === null) return false;
       return (
         p.type === piece.type &&
         p.color === piece.color &&
