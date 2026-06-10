@@ -26,7 +26,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
 - **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
-- **TypeScript Strict Mode**: Das gesamte Projekt ist zu 100% typisiert und strikt geprüft.
+- **TypeScript Strict Mode**: Das gesamte Projekt ist vollständig typisiert (0 `any`-Typen in Produktionscode).
 
 ## 🧠 Technische Highlights
 
@@ -45,19 +45,22 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Skin-System**: Unterstützung für verschiedene Ästhetiken (Classic, Infernale, Neon).
 - **Animationen**: Weiche Übergänge für Züge und Capture-Events durch integrierten `BattleAnimator`.
 
-### Architektur (`js/App.js`)
+### Architektur (`js/App.ts`)
 
 - **Modulare Struktur**: Klare Trennung von Verantwortlichkeiten.
   - **App**: Lifecycle-Management und Initialisierung.
-  - **RulesEngine**: Kapselt alle Regellogiken und Zugvalidierungen.
-  - **OpeningBook**: Robuste Klasse für Eröffnungsdatenverwaltung (`js/utils/PGNParser.js` für Importe).
-  - **TimeManager**: Verwaltet die Spieluhr sicher und präzise.
+  - **Game** (`gameEngine.ts`): Zentrale Spiellogik, Board-State, Phasen.
+  - **GameController** (`gameController.ts`): Spiele-Steuerung, Setup, Shop, Clock.
+  - **MoveController** (`moveController.ts`): Zug-Ausführung, Validierung, Undo/Redo.
+  - **AIController** (`aiController.ts`): KI-Steuerung, Analyse-Modus.
+  - **DOMHandler** (`ui/DOMHandler.ts`): DOM-Zugriff und Event-Listener.
+  - **Vollständig typisiert**: 0 `any`-Typen im Produktionscode.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.450 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.500 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
-Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors).
+Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
 
 | Modul             | Coverage (Lines) | Beschreibung                                      |
 | ----------------- | ---------------- | ------------------------------------------------- |
@@ -72,22 +75,30 @@ Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors).
 schach9x9/
 ├── css/ # Styling (Modularisiert nach Komponenten)
 ├── js/
-│ ├── ai/ # KI-Logik (Suche, Bewertung, Opening Book)
-│ ├── assets/ # Statische Assets (Figuren SVGs)
-│ ├── move/ # Zugvalidierung und Ausführung
-│ ├── tutor/ # Tutor-System und Analyse
-│ ├── ui/ # UI-Komponenten und Renderer
-│ │ └── 3d/ # 3D-Engine Module (Scene, Piece, Input)
-│ ├── game/ # Kern-Spiellogik (Modes, State)
-│ ├── App.js # Hauptanwendungsklasse
-│ └── battleChess3D.js # 3D-Fassade
+│   ├── ai/ # KI-Logik (Suche, Bewertung, Opening Book, WASM Bridge)
+│   ├── assets/ # Statische Assets (Figuren SVGs)
+│   ├── campaign/ # Kampagnen-System (Manager, BoardFactory)
+│   ├── input/ # Eingabe-Handler (KeyboardManager)
+│   ├── modes/ # Spielmodi-Strategien (Classic, Setup, Campaign)
+│   ├── move/ # Zugvalidierung und Ausführung
+│   ├── effects/ # Visuelle Effekte (Partikel, Animationen)
+│   ├── tutor/ # Tutor-System und Analyse
+│   ├── ui/ # UI-Komponenten und Renderer
+│   │   └── 3d/ # 3D-Engine Module (Scene, Piece, Input)
+│   ├── utils/ # Hilfsfunktionen (PGN, ErrorManager)
+│   ├── gameEngine.ts # Kern-Spiellogik (Game-Klasse)
+│   ├── gameController.ts # Spiele-Steuerung (Controller)
+│   ├── moveController.ts # Zug-Steuerung
+│   ├── aiController.ts # KI-Steuerung
+│   ├── App.ts # Hauptanwendungsklasse
+│   └── battleChess3D.ts # 3D-Fassade
 ├── tests/ # Test-Suite (Unit & Integration)
-│ ├── campaign/ # Kampagnen-Logik Tests
-│ ├── modes/ # Spielmodi Tests (Classic, Setup, Upgrade)
-│ ├── ui/ # UI Tests
-│ └── ...
+│   ├── ai/ KI-Tests
+│   ├── campaign/ # Kampagnen-Logik Tests
+│   ├── modes/ # Spielmodi Tests
+│   ├── ui/ # UI Tests
+│   └── ...
 ├── engine-wasm/ # Rust KI-Engine Quellcode
-├── opening-book-trainer-real.cjs # Self-Play Trainer für Eröffnungen
 └── index.html # Einstiegspunkt
 
 ```
@@ -96,7 +107,7 @@ schach9x9/
 
 ### Voraussetzungen
 
-- Node.js (v14+)
+- Node.js (v18+)
 - NPM
 - **Rust & wasm-pack** (für KI-Engine Performance-Optimierung)
 
