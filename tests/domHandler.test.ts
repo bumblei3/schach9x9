@@ -110,6 +110,7 @@ describe('DOMHandler', () => {
         exitAnalysisMode: vi.fn(),
         toggleContinuousAnalysis: vi.fn(),
         finishSetupPhase: vi.fn(),
+        selectShopPiece: vi.fn(),
         requestHint: vi.fn(),
         setTimeControl: vi.fn(),
       },
@@ -235,7 +236,7 @@ describe('DOMHandler', () => {
   test('should wire up shop item selection', () => {
     const shopItem = document.querySelector('.shop-item') as HTMLElement;
     shopItem.click();
-    expect(app.game.selectShopPiece).toHaveBeenCalledWith('p');
+    expect(app.gameController.selectShopPiece).toHaveBeenCalledWith('p');
     expect(shopItem.classList.contains('selected')).toBe(true);
   });
 

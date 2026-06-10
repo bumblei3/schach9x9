@@ -57,7 +57,7 @@ describe('ShopManager', () => {
       shopManager.selectShopPiece('n'); // Knight cost 3
 
       expect(mockGame.selectedShopPiece).toBe('n');
-      const btn = document.querySelector('.shop-btn[data-piece="n"]');
+      const btn = document.querySelector('.shop-item[data-piece="n"]');
       expect(btn?.classList.contains('selected')).toBe(true);
       expect(document.getElementById('selected-piece-display')?.innerHTML).toContain('Springer');
     });
