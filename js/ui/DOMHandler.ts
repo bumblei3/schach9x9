@@ -16,6 +16,7 @@ import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
 import type { GameController } from '../gameController.js';
+import type { AIDifficulty } from '../config.js';
 
 export class DOMHandler {
   private app: App;
@@ -33,7 +34,7 @@ export class DOMHandler {
    */
   constructor(app: App) {
     this.app = app;
-    this.analysisUI = new AnalysisUI(app);
+    this.analysisUI = new AnalysisUI(app as unknown as { game: Game; gameController: GameController | null });
     if (app.game && app.game.aiController) {
       app.game.aiController.setAnalysisUI(this.analysisUI);
     }
@@ -42,8 +43,8 @@ export class DOMHandler {
   /**
    * Convenience getter for the game instance
    */
-  get game(): Game | null {
-    return this.app.game;
+  get game(): Game {
+    return this.app.game!;
   }
 
   /**
@@ -262,7 +263,7 @@ export class DOMHandler {
         const target = e.target as HTMLSelectElement;
         const value = target.value;
         if (this.game) {
-          this.game.difficulty = value;
+          this.game.difficulty = value as AIDifficulty;
           console.log('[DOMHandler] AI Difficulty changed to:', value);
         }
         // Sync other difficulty selects
@@ -293,7 +294,9 @@ export class DOMHandler {
       tutorModeSelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
         if (this.game) {
-          this.game.tutorMode = target.value;
+          // tutorMode is a dynamic property set by applyDelegates()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this.game as any).tutorMode = target.value;
         }
       });
     }
@@ -343,20 +346,20 @@ export class DOMHandler {
             toggle3D.classList.add('active-3d');
             boardWrapper.style.opacity = '0'; // Hide 2D board
 
-            if (!this.app.battleChess3D.scene) {
-              this.app.battleChess3D.init().then(() => {
-                this.app.battleChess3D.updateFromGameState(this.game);
+            if (!this.app.battleChess3D!.scene) {
+              this.app.battleChess3D!.init().then(() => {
+                this.app.battleChess3D!.updateFromGameState(this.game);
               });
             } else {
-              this.app.battleChess3D.updateFromGameState(this.game);
-              this.app.battleChess3D.onWindowResize();
+              this.app.battleChess3D!.updateFromGameState(this.game);
+              this.app.battleChess3D!.onWindowResize();
             }
           } else {
             container3D.classList.remove('active');
             document.body.classList.remove('mode-3d');
             toggle3D.classList.remove('active-3d');
             setTimeout(() => {
-              if (!this.app.battleChess3D.enabled) {
+              if (!this.app.battleChess3D!.enabled) {
                 container3D.classList.add('hidden');
               }
             }, 500);
@@ -510,7 +513,7 @@ export class DOMHandler {
         // Toggle menu if game is running, otherwise ignore (or always toggle?)
         // Better: if menu is setup-only (initial state), maybe prevent closing?
         // But for now, simple toggle is good.
-        if (this.game && this.game.phase !== 'SETUP') {
+        if (this.game && (!this.game.phase || !this.game.phase.startsWith('SETUP'))) {
           // Simplistic check
           if (mainMenu) {
             if (mainMenu.classList.contains('active')) {
@@ -635,7 +638,9 @@ export class DOMHandler {
       themeSelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
         if (this.game) {
-          this.game.setTheme(target.value);
+          // setTheme is a dynamic property set by applyDelegates()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this.game as any).setTheme(target.value);
         }
       });
       if (localStorage.getItem('chess_theme')) {
@@ -796,7 +801,7 @@ export class DOMHandler {
   private updateResumeButton(): void {
     const resumeBtn = document.getElementById('resume-game-btn');
     if (resumeBtn) {
-      if (this.game && this.game.phase !== 'SETUP') {
+      if (this.game && (!this.game.phase || !this.game.phase.startsWith('SETUP'))) {
         resumeBtn.classList.remove('hidden');
       } else {
         resumeBtn.classList.add('hidden');
