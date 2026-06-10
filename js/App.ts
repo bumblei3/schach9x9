@@ -320,9 +320,7 @@ export class App {
     };
     GP.autoSave = function (show: boolean) {
       // autoSave is a dynamic method on MoveController
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mc = app.moveController! as any;
-      if (mc.autoSave) return mc.autoSave(show);
+      if (app.moveController!.autoSave) return app.moveController!.autoSave(show);
     };
 
     GP.updateMoveHistoryUI = function () {
@@ -401,9 +399,8 @@ export class App {
       return app.aiController!.aiMove();
     };
     // evaluatePosition is a dynamic method on AIController
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     GP.evaluatePosition = function (color: Player) {
-      return (app.aiController! as any).evaluatePosition(color);
+      return app.aiController!.evaluatePosition?.(color);
     };
     GP.updateAIProgress = function (data: { depth?: number; maxDepth?: number; nodes?: number; bestMove?: { from: { r: number; c: number }; to: { r: number; c: number } } } | null) {
       return app.aiController!.updateAIProgress(data);

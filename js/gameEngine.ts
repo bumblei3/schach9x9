@@ -203,6 +203,21 @@ export class Game {
   lastBestMove?: unknown;
   // Shop manager access
   shopManager?: { aiPerformUpgrades: () => void };
+  // Clock delegation methods
+  startClock?: () => void;
+  stopClock?: () => void;
+  // Shop delegation
+  selectShopPiece?: (type: string) => void;
+  // Tutor delegation
+  tutorMode?: string;
+  // Theme delegation
+  setTheme?: (value: string) => void;
+  // AI evaluation delegation
+  evaluatePosition?: (color: Player) => number;
+  // Auto-save delegation
+  autoSave?: (show: boolean) => void;
+  // Analysis delegation
+  requestPositionAnalysis?: () => void;
 
   constructor(initialPoints: number = 15, mode: GameMode = 'setup') {
     this.mode = mode;

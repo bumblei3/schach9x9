@@ -169,8 +169,8 @@ export class DOMHandler {
     document.querySelectorAll<HTMLElement>('.shop-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const pieceType = btn.dataset.piece;
-        if (pieceType && this.game && (this.game as any).selectShopPiece) {
-          (this.game as any).selectShopPiece(pieceType);
+        if (pieceType && this.game && this.game.selectShopPiece) {
+          this.game.selectShopPiece(pieceType);
           // Highlight selected button
           document.querySelectorAll('.shop-item').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
@@ -294,9 +294,7 @@ export class DOMHandler {
       tutorModeSelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
         if (this.game) {
-          // tutorMode is a dynamic property set by applyDelegates()
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (this.game as any).tutorMode = target.value;
+          this.game.tutorMode = target.value;
         }
       });
     }
@@ -637,10 +635,8 @@ export class DOMHandler {
     if (themeSelect) {
       themeSelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
-        if (this.game) {
-          // setTheme is a dynamic property set by applyDelegates()
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (this.game as any).setTheme(target.value);
+        if (this.game && this.game.setTheme) {
+          this.game.setTheme(target.value);
         }
       });
       if (localStorage.getItem('chess_theme')) {

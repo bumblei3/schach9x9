@@ -125,8 +125,9 @@ export function undoMove(game: Game, moveController: MoveController): void {
   // Trigger analysis update if in analysis mode
   if (game.analysisMode && game.continuousAnalysis && game.gameController) {
     // requestPositionAnalysis is a dynamic method set by applyDelegates()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (game.gameController as any).requestPositionAnalysis();
+    if (game.gameController.requestPositionAnalysis) {
+      game.gameController.requestPositionAnalysis();
+    }
   }
 
   moveController.updateUndoRedoButtons();
@@ -156,8 +157,7 @@ export function enterReplayMode(game: Game, moveController: MoveController): voi
   game.replayMode = true;
   game.replayPosition = game.moveHistory.length - 1;
   // stopClock is a dynamic method set by applyDelegates()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((game as any).stopClock) (game as any).stopClock();
+  if (game.stopClock) game.stopClock();
 
   const replayStatus = document.getElementById('replay-status');
   const replayExit = document.getElementById('replay-exit');
@@ -203,8 +203,7 @@ export function exitReplayMode(game: Game): void {
 
   if (game.clockEnabled && game.phase === (PHASES.PLAY as Phase)) {
     // startClock is a dynamic method set by applyDelegates()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((game as any).startClock) (game as any).startClock();
+    if (game.startClock) game.startClock();
   }
 }
 

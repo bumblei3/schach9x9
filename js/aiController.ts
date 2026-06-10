@@ -1,4 +1,5 @@
 import { PHASES, type Game } from './gameEngine.js';
+import type { Player } from './types/game.js';
 import {
   SHOP_PIECES,
   AI_DEPTH_CONFIG,
@@ -84,6 +85,9 @@ export class AIController {
   public analysisUI: AnalysisUI | null;
   public currentBookMode: string | null;
   public openingBookData: Record<string, unknown> | null;
+  // Dynamic delegate methods set by App.applyDelegates()
+  public evaluatePosition?: (color: Player) => number;
+  public requestPositionAnalysis?: () => void;
   private _aiMoveStartTime: number;
 
   constructor(game: Game) {

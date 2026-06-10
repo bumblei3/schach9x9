@@ -41,18 +41,19 @@ class ErrorManager {
    * @param error
    * @param options
    */
-  handleError(error: any, options: any = {}): void {
+  handleError(error: unknown, options: { context?: string; critical?: boolean; meta?: Record<string, unknown> } = {}): void {
     const context = options.context || 'App';
     const isCritical = options.critical || false;
 
     // Log to internal logger
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (logger as any).error(`[${context}]`, error);
 
     if (isCritical) {
       this.showCriticalError(error);
     } else {
       // Show toast for non-critical errors
-      const msg = error.message || String(error);
+      const msg = error instanceof Error ? error.message : String(error);
       notificationUI.show(msg, 'error', `Fehler (${context})`);
     }
   }
@@ -68,18 +69,18 @@ class ErrorManager {
   /**
    * Show Critical Error Modal (Game Over state)
    */
-  showCriticalError(error: any): void {
+  showCriticalError(error: unknown): void {
     const errorOverlay = document.getElementById('error-overlay');
 
     // Fallback if overlay doesn't exist
     if (!errorOverlay) {
-      alert(`KRITISCHER FEHLER:\n${error.message}`);
+      alert(`KRITISCHER FEHLER:\n${error instanceof Error ? error.message : String(error)}`);
       return;
     }
 
     // Enhance error message
-    const displayMsg = error.message || 'Unbekannter Fehler';
-    if (error.stack) {
+    const displayMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+    if (error instanceof Error && error.stack) {
       logger.context('ErrorManager').error('Full Stack:', error.stack);
     }
 
@@ -106,7 +107,7 @@ class ErrorManager {
 
     const detailsBox = document.getElementById('error-details-content');
     if (detailsBox) {
-      detailsBox.textContent = `${displayMsg}\n\n${error.stack || ''}`;
+      detailsBox.textContent = `${displayMsg}\n\n${error instanceof Error && error.stack ? error.stack : ''}`;
     }
 
     errorOverlay.classList.remove('hidden');
