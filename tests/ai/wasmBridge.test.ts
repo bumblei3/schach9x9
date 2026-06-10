@@ -52,9 +52,9 @@ describe('wasmBridge', () => {
       const result = await getBestMoveWasm(board, 'white', 4, 'NORMAL', 2000);
 
       expect(result).toBeDefined();
-      expect(result.move).toHaveProperty('from');
-      expect(result.move).toHaveProperty('to');
-      expect(result.score).toBe(50);
+      expect(result!.move).toHaveProperty('from');
+      expect(result!.move).toHaveProperty('to');
+      expect(result!.score).toBe(50);
     });
 
     test('should pass personality and elo to wasm', async () => {

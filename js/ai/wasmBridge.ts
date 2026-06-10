@@ -31,6 +31,8 @@ export async function ensureWasmInitialized(): Promise<boolean> {
         const path = await import('path');
         const url = await import('url');
 
+        // url module is dynamically imported; fileURLToPath is not typed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const __dirname = path.dirname((url as any).fileURLToPath(import.meta.url));
         const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
         const wasmBuffer = fs.readFileSync(wasmPath);
@@ -57,14 +59,12 @@ export async function ensureWasmInitialized(): Promise<boolean> {
  * Calls the Wasm best move search.
  */
 export async function getBestMoveWasm(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  boardIntArray: any,
+  boardIntArray: Int8Array | number[],
   turnColor: string,
   depth: number,
   personality: string = 'NORMAL',
   elo: number = 2500
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any | null> {
+): Promise<{ move: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string } | null; score: number; nodes: number } | null> {
   const initialized = await ensureWasmInitialized();
   if (!initialized || !wasmModule) {
     return null;
