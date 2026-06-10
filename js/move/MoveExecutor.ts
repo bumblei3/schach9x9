@@ -417,12 +417,12 @@ export function finishMove(game: Game, lastTo?: Square): void {
     const captured =
       targetPiece || (lastMove.specialMove && lastMove.specialMove.type === 'enPassant');
     if (captured) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const attackerData = {
         type: piece.type,
         color: piece.color,
         hasMoved: piece.hasMoved,
-      } as any;
+      } as Piece;
+      // defenderData may be a partial Piece (e.g. capturedPawn only has color)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const defenderData = (targetPiece || lastMove.specialMove?.capturedPawn || null) as any;
       window.battleChess3D.playBattleSequence(attackerData, defenderData, from, to).then(() => {

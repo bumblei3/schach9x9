@@ -114,14 +114,18 @@ export function undoMove(game: Game, moveController: MoveController): void {
   }
 
   // Update 3D board if active
-  if ((window as any).battleChess3D && (window as any).battleChess3D.enabled) {
-    (window as any).battleChess3D.updateFromGameState(game);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const battle3D = (window as any).battleChess3D as { enabled: boolean; updateFromGameState: (g: Game) => void } | undefined;
+  if (battle3D && battle3D.enabled) {
+    battle3D.updateFromGameState(game);
   }
 
   if (game.updateBestMoves) game.updateBestMoves();
 
   // Trigger analysis update if in analysis mode
   if (game.analysisMode && game.continuousAnalysis && game.gameController) {
+    // requestPositionAnalysis is a dynamic method set by applyDelegates()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (game.gameController as any).requestPositionAnalysis();
   }
 
@@ -151,6 +155,8 @@ export function enterReplayMode(game: Game, moveController: MoveController): voi
 
   game.replayMode = true;
   game.replayPosition = game.moveHistory.length - 1;
+  // stopClock is a dynamic method set by applyDelegates()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((game as any).stopClock) (game as any).stopClock();
 
   const replayStatus = document.getElementById('replay-status');
@@ -171,6 +177,8 @@ export function enterReplayMode(game: Game, moveController: MoveController): voi
 export function exitReplayMode(game: Game): void {
   if (!game.replayMode) return;
 
+  // savedGameState has a dynamic shape (board, turn, selectedSquare, etc.)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const saved = game.savedGameState as any;
   game.board = saved.board;
   game.turn = saved.turn;
@@ -194,6 +202,8 @@ export function exitReplayMode(game: Game): void {
   UI.renderBoard(game);
 
   if (game.clockEnabled && game.phase === (PHASES.PLAY as Phase)) {
+    // startClock is a dynamic method set by applyDelegates()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((game as any).startClock) (game as any).startClock();
   }
 }
@@ -205,6 +215,8 @@ export function exitReplayMode(game: Game): void {
  */
 export function reconstructBoardAtMove(game: Game, moveIndex: number): void {
   if (game.savedGameState) {
+    // savedGameState has a dynamic shape (board, turn, selectedSquare, etc.)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     game.board = JSON.parse(JSON.stringify((game.savedGameState as any).board));
     for (let i = game.moveHistory.length - 1; i > moveIndex; i--) {
       const move = game.moveHistory[i];
