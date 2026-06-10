@@ -4,7 +4,7 @@ import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './Ta
 import type { Analyzer } from './TacticsDetector.js';
 import { evaluatePosition } from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
-import type { Piece } from '../types/game.js';
+import type { Piece, GameLike, Square } from '../types/game.js';
 
 // --- Type definitions ---
 
@@ -58,7 +58,7 @@ interface ThreatInfo {
  * @param {Object} move {from: {r,c}, to: {r,c}}
  */
 export async function analyzePlayerMovePreExecution(
-  game: any,
+  game: GameLike,
   move: { from: Square; to: Square }
 ): Promise<unknown> {
   if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return Promise.resolve(null);
@@ -132,8 +132,8 @@ export async function analyzePlayerMovePreExecution(
  * Analyzes a move and provides a detailed explanation
  */
 export function analyzeMoveWithExplanation(
-  game: any,
-  move: any,
+  game: GameLike,
+  move: MoveInfo,
   score: number,
   bestScore: number
 ): MoveExplanation {
@@ -406,7 +406,7 @@ export function getPieceName(type: string): string {
  * Handles player moves for Guess the Move and warnings
  */
 export function handlePlayerMove(
-  game: any,
+  game: GameLike,
   _tutorController: unknown,
   from: Square,
   to: Square
@@ -448,7 +448,7 @@ export function handlePlayerMove(
  * Checks for blunders
  */
 export async function checkBlunder(
-  game: any,
+  game: GameLike,
   tutorController: { showBlunderWarning: (analysis: MoveExplanation) => void },
   moveRecord: MoveRecord
 ): Promise<void> {

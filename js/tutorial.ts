@@ -182,14 +182,15 @@ export class Tutorial {
         }`;
         html += `<div class="${cellClass}">`;
         if (isCenter) {
-          const symbolMap: any = {
+          const symbolMap: Record<string, string> = {
             archbishop: 'a',
             chancellor: 'c',
             nightrider: 'j',
             angel: 'e',
           };
+          const pieceKey = symbolMap[piece] as keyof typeof PIECE_SVGS.white;
           html += `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${
-            (PIECE_SVGS.white as any)[symbolMap[piece]]
+            PIECE_SVGS.white[pieceKey]
           }</div>`;
         } else if (isHighlight) {
           html += `<div class="move-indicator ${moveType}"></div>`;

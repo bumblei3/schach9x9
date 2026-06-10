@@ -3,9 +3,9 @@
  * Features: Log filtering, search, export, AI debug, board state
  */
 
-import { logger } from './logger.js';
-import { campaignManager } from './campaign/CampaignManager.js';
-import { Game } from './gameEngine.js';
+import { logger } from '../js/logger.js';
+import { campaignManager } from '../js/campaign/CampaignManager.js';
+import { Game } from '../js/gameEngine.js';
 
 interface DebugLogEntry {
   id: number;

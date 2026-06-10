@@ -3,8 +3,8 @@
  * Compares single-worker vs multi-worker AI performance
  */
 
-import { getBestMove } from './aiEngine.js';
-import { BOARD_SIZE } from './config.js';
+import { getBestMove } from '../js/aiEngine.js';
+import { BOARD_SIZE } from '../js/config.js';
 
 function createTestPosition(): any[][] {
   const board: any[][] = Array(BOARD_SIZE)

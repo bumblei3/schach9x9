@@ -304,7 +304,7 @@ describe('BoardRenderer Full Coverage', () => {
   });
 
   test('showMoveQuality highlights cell', () => {
-    const move = { to: { r: 5, c: 5 } };
+    const move = { from: { r: 4, c: 4 }, to: { r: 5, c: 5 } };
     BoardRenderer.showMoveQuality(game, move, 'brilliant');
     const cell = document.querySelector('.cell[data-r="5"][data-c="5"]');
     expect(cell!.classList.contains('quality-brilliant')).toBe(true);

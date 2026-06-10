@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
-import { Game } from '../js/gameEngine.js';
+import type { GameLike } from '../js/types/game.js';
 
 describe('MoveAnalyzer Unit Tests', () => {
   const board = Array(9)
@@ -14,7 +14,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as Game;
+    } as any as GameLike;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -31,7 +31,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as Game;
+    } as any as GameLike;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -49,7 +49,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as Game;
+    } as any as GameLike;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -74,7 +74,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as Game;
+    } as any as GameLike;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,

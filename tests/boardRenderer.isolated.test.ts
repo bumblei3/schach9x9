@@ -25,8 +25,18 @@ describe('BoardRenderer Touch Isolation', () => {
       board: Array(9)
         .fill(null)
         .map(() => Array(9).fill(null)),
+      boardSize: 9,
       phase: 'play',
+      turn: 'white' as const,
+      isAI: false,
+      isAnimating: false,
+      replayMode: false,
+      selectedSquare: null,
+      validMoves: null,
+      mode: 'classic',
+      lastMoveHighlight: null,
       getValidMoves: () => [],
+      handleCellClick: () => {},
     };
     game.board[7][4] = { type: 'p', color: 'white' };
 

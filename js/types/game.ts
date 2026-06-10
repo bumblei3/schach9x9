@@ -106,3 +106,30 @@ export interface GameExtensions {
   getValidMoves?: (r: number, c: number, piece: unknown) => Square[];
   calculateMaterialAdvantage?: (color: Player) => number;
 }
+
+/**
+ * Subset of Game properties consumed by UI/rendering/tutor modules.
+ * Avoids `any` while not requiring the full Game class import.
+ */
+export interface GameLike {
+  board: ({ type: string; color: Player; hasMoved?: boolean } | null)[][];
+  boardSize: number;
+  boardShape?: unknown;
+  phase: string;
+  turn: Player;
+  isAI: boolean;
+  isAnimating: boolean;
+  replayMode: boolean;
+  selectedSquare: Square | null;
+  validMoves: Square[] | null;
+  mode: string;
+  lastMoveHighlight: { from: Square; to: Square } | null;
+  isSquareUnderAttack?: (r: number, c: number, color: Player) => boolean;
+  isTutorMove?: (move: Square) => boolean;
+  playerColor?: Player;
+  whiteCorridor?: number | null;
+  blackCorridor?: number | null;
+  handleCellClick?: (r: number, c: number) => void;
+  getValidMoves: (r: number, c: number, piece: Piece) => Square[];
+  log?: (message: string) => void;
+}

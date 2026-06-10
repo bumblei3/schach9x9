@@ -10,14 +10,14 @@ export * from './ui/TutorUI.js';
 export * from './ui/OverlayManager.js';
 export * from './ui/GameStatusUI.js';
 
-import type { Player } from './types/game.js';
+import type { Player, GameLike } from './types/game.js';
 import * as AIEngine from './aiEngine.js';
 import { confettiSystem } from './effects.js';
 
 /**
  * Animation für den Schach-Zustand.
  */
-export function animateCheck(game: any, color: Player): void {
+export function animateCheck(game: GameLike, color: Player): void {
   const kingPos = AIEngine.findKing(game.board, color);
   if (kingPos) {
     const cell = document.querySelector(`.cell[data-r="${kingPos.r}"][data-c="${kingPos.c}"]`);
@@ -31,7 +31,7 @@ export function animateCheck(game: any, color: Player): void {
 /**
  * Animation für den Matt-Zustand.
  */
-export function animateCheckmate(game: any, color: Player): void {
+export function animateCheckmate(game: GameLike, color: Player): void {
   const kingPos = AIEngine.findKing(game.board, color);
   if (kingPos) {
     const cell = document.querySelector(`.cell[data-r="${kingPos.r}"][data-c="${kingPos.c}"]`);

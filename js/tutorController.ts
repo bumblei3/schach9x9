@@ -32,6 +32,8 @@ import {
   placePiece,
 } from './tutor/HintGenerator.js';
 import type { Game } from './gameEngine.js';
+import type { MoveExplanation } from './tutor/MoveAnalyzer.js';
+import type { Piece } from './types/game.js';
 
 interface ScoreDescription {
   label: string;
@@ -157,12 +159,12 @@ export class TutorController {
     return handlePlayerMove(this.game, this, from, to);
   }
 
-  public checkBlunder(moveRecord: unknown): Promise<void> {
-    return checkBlunder(this.game, this as any, moveRecord as any);
+  public checkBlunder(moveRecord: { from: { r: number; c: number }; to: { r: number; c: number }; piece: Piece; evalScore?: number }): Promise<void> {
+    return checkBlunder(this.game, this as unknown as Parameters<typeof checkBlunder>[1], moveRecord);
   }
 
-  public showBlunderWarning(analysis: unknown, callback: () => void): void {
-    return showBlunderWarning(this.game, analysis as any, callback);
+  public showBlunderWarning(analysis: MoveExplanation, callback: () => void): void {
+    return showBlunderWarning(this.game, analysis, callback);
   }
 
   public getSetupTemplates(): unknown[] {
@@ -170,7 +172,7 @@ export class TutorController {
   }
 
   public applySetupTemplate(templateId: string): void {
-    return applySetupTemplate(this.game, this as any, templateId);
+    return applySetupTemplate(this.game, this as unknown as Parameters<typeof applySetupTemplate>[1], templateId);
   }
 
   public placePiece(r: number, c: number, type: string, isWhite: boolean): void {
