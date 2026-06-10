@@ -7,7 +7,7 @@ import { DOMHandler } from './ui/DOMHandler.js';
 import { errorManager } from './utils/ErrorManager.js';
 import type { EvaluationBar } from './ui/EvaluationBar.js';
 import type { Player, Square, Piece, GameMode } from './types/game.js';
-import type { Game, MoveHistoryEntry } from './gameEngine.js';
+import type { Game, MoveHistoryEntry, PieceWithMoved } from './gameEngine.js';
 import type { GameController } from './gameController.js';
 import type { MoveController } from './moveController.js';
 import type { AIController } from './aiController.js';
@@ -71,15 +71,20 @@ export class App {
     const BC3D_MODULE = await import('./battleChess3D.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = await import('./ui.js');
+    // Expose to window for legacy/debug access
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).UI = UI_MODULE;
 
     this.Game_Class = Game;
     this.game = new Game(initialPoints, mode as GameMode);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).game = this.game;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).app = this;
 
     // Initialize controllers
     this.gameController = new GameController(this.game);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gameController = this.gameController;
 
     this.game.moveController = new MoveController(this.game);
@@ -116,6 +121,7 @@ export class App {
     this.keyboardManager = new KeyboardManager(this);
 
     // Expose global recovery function for console access
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).recoverGame = () => {
       if (this.keyboardManager && this.keyboardManager.performEmergencyRecovery) {
         this.keyboardManager.performEmergencyRecovery();
@@ -174,7 +180,10 @@ export class App {
   public init3D(): void {
     const container3D = document.getElementById('battle-chess-3d-container');
     if (container3D && !this.battleChess3D) {
+      // battleChess3D_Class is loaded dynamically via import()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.battleChess3D = new (this as any).battleChess3D_Class(container3D);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).battleChess3D = this.battleChess3D;
 
       // Hook into Game methods for 3D updates if not handled by event listeners
@@ -182,6 +191,7 @@ export class App {
       // via window.battleChess3D checks.
 
       // Listen for 3D board clicks
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.addEventListener('board3dclick', (e: any) => {
         if (this.game && this.gameController) {
           this.gameController.handleCellClick(e.detail.row, e.detail.col);
@@ -208,6 +218,8 @@ export class App {
   private applyDelegates(): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const app = this;
+    // Game prototype for delegate methods (dynamically patched)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const GP = (this.Game_Class as typeof Game).prototype as any;
 
     // GameController delegations
@@ -280,7 +292,7 @@ export class App {
       return app.moveController!.showPromotionUI(r, c, color, record);
     };
     GP.animateMove = function (from: Square, to: Square, piece: Piece) {
-      return app.moveController!.animateMove(from, to, piece as any);
+      return app.moveController!.animateMove(from, to, piece as PieceWithMoved);
     };
     GP.finishMove = function () {
       return app.moveController!.finishMove();
@@ -307,6 +319,8 @@ export class App {
       return app.gameController!.loadGame();
     };
     GP.autoSave = function (show: boolean) {
+      // autoSave is a dynamic method on MoveController
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mc = app.moveController! as any;
       if (mc.autoSave) return mc.autoSave(show);
     };
@@ -330,6 +344,8 @@ export class App {
       return app.moveController!.calculateMaterialAdvantage();
     };
     GP.getMaterialValue = function (piece: Piece) {
+      // Piece is passed as base type; MoveController expects PieceWithMoved
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return app.moveController!.getMaterialValue(piece as any);
     };
     GP.updateStatistics = function () {
@@ -384,6 +400,8 @@ export class App {
     GP.aiMove = function () {
       return app.aiController!.aiMove();
     };
+    // evaluatePosition is a dynamic method on AIController
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     GP.evaluatePosition = function (color: Player) {
       return (app.aiController! as any).evaluatePosition(color);
     };
