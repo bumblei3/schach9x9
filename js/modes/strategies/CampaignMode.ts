@@ -1,5 +1,7 @@
 import type { GameModeStrategy } from '../GameModeStrategy.js';
 import type { GameExtended, GameController } from '../../gameController.js';
+import type { Player } from '../../types/game.js';
+import type { PieceWithMoved } from '../../gameEngine.js';
 import { PHASES } from '../../config.js';
 import * as UI from '../../ui.js';
 import { logger } from '../../logger.js';
@@ -52,24 +54,24 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
 
     // Set Player Color
-    game.playerColor = level.playerColor as any;
+    game.playerColor = level.playerColor as Player;
 
     // Handle Setup Type
     if (level.fen) {
-      game.board = BoardFactory.fromFEN(level.fen) as any;
+      game.board = BoardFactory.fromFEN(level.fen) as (PieceWithMoved | null)[][];
       if (game.board.length !== game.boardSize) {
         game.boardSize = game.board.length;
       }
     } else {
-      game.board = BoardFactory.createEmptyBoard() as any;
+      game.board = BoardFactory.createEmptyBoard() as (PieceWithMoved | null)[][];
     }
 
     if (level.setupType === 'fixed') {
-      game.phase = PHASES.PLAY as any;
+      game.phase = PHASES.PLAY;
       controller.startClock();
     } else {
       // Budget mode -> Setup Phase
-      game.phase = PHASES.SETUP_WHITE_KING as any;
+      game.phase = PHASES.SETUP_WHITE_KING;
       controller.showShop(true);
     }
 
@@ -100,7 +102,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
       return this.setupStrategy.handleInteraction(game, controller, r, c);
     }
 
-    if (game.phase === (PHASES.PLAY as any)) {
+    if (game.phase === PHASES.PLAY) {
       if (game.handlePlayClick) {
         await game.handlePlayClick(r, c);
         return true;
@@ -116,7 +118,12 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
   }
 
-  private showIntroModal(level: any): void {
+  private showIntroModal(level: {
+    title: string;
+    description: string;
+    winCondition: { type: string };
+    opponentName?: string;
+  }): void {
     const desc = `
       <div class="campaign-intro">
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">${level.description}</p>
