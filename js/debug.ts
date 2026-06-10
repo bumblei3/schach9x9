@@ -551,9 +551,9 @@ export class DebugConsole {
 
   public testShopPiece(pieceType: string): void {
     this.log(`Testing: ${pieceType}`, 'debug');
-    if (this.game?.selectShopPiece) {
+    if (this.game?.gameController?.selectShopPiece) {
       try {
-        this.game.selectShopPiece(pieceType);
+        this.game.gameController.selectShopPiece(pieceType);
         this.log(`✓ Selected: ${pieceType}`, 'info');
       } catch (error: unknown) {
         this.log(`✗ Error: ${error instanceof Error ? error.message : String(error)}`, 'error');

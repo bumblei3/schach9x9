@@ -8,6 +8,7 @@ import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js'
 import type { Piece, Player, PieceType, Square } from '../types/game.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
+import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
 
 /**
  * Get effective board size (from game instance or fallback to BOARD_SIZE)
@@ -143,7 +144,7 @@ export function initBoardUI(game: any): void {
           dragImage.style.transform = 'rotate(5deg)';
           document.body.appendChild(dragImage);
           dragImage.style.position = 'absolute';
-          dragImage.style.top = '-1000px';
+          dragImage.style.top = `${DRAG_IMAGE_HIDDEN_OFFSET}px`;
           e.dataTransfer.setDragImage(dragImage, cell.offsetWidth / 2, cell.offsetHeight / 2);
           setTimeout(() => {
             if (document.body.contains(dragImage)) {

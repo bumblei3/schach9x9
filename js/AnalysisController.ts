@@ -1,20 +1,28 @@
-import { PHASES } from './gameEngine.js';
+import { PHASES, type Player, type Square, type PieceWithMoved, type MoveHistoryEntry, type LastMoveInfo } from './gameEngine.js';
+import type { GameController, GameExtended } from './gameController.js';
 import * as UI from './ui.js';
+
+interface AnalysisBasePosition {
+  board: (PieceWithMoved | null)[][];
+  turn: Player;
+  moveHistory: MoveHistoryEntry[];
+  redoStack: MoveHistoryEntry[];
+  lastMove: LastMoveInfo | null;
+  lastMoveHighlight: { from: Square; to: Square } | null;
+  selectedSquare: Square | null;
+  validMoves: Square[] | null;
+  halfMoveClock: number;
+  positionHistory: string[];
+}
 
 /**
  * Controller for Analysis Mode functionality
  */
 export class AnalysisController {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public gameController: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public game: any;
+  public gameController: GameController;
+  public game: GameExtended;
 
-  /**
-   * @param {GameController} gameController - Reference to the main game controller
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(gameController: any) {
+  constructor(gameController: GameController) {
     this.gameController = gameController;
     this.game = gameController.game;
   }
@@ -84,21 +92,20 @@ export class AnalysisController {
     }
 
     if (restore && this.game.analysisBasePosition) {
+      const saved = this.game.analysisBasePosition as AnalysisBasePosition;
       // Restore saved position
-      this.game.board = JSON.parse(JSON.stringify(this.game.analysisBasePosition.board));
-      this.game.turn = this.game.analysisBasePosition.turn;
-      this.game.moveHistory = [...this.game.analysisBasePosition.moveHistory];
-      this.game.redoStack = [...this.game.analysisBasePosition.redoStack];
-      this.game.lastMove = this.game.analysisBasePosition.lastMove
-        ? { ...this.game.analysisBasePosition.lastMove }
+      this.game.board = JSON.parse(JSON.stringify(saved.board)) as (PieceWithMoved | null)[][];
+      this.game.turn = saved.turn;
+      this.game.moveHistory = [...saved.moveHistory];
+      this.game.redoStack = [...saved.redoStack];
+      this.game.lastMove = saved.lastMove ? { ...saved.lastMove } : null;
+      this.game.lastMoveHighlight = saved.lastMoveHighlight
+        ? { ...saved.lastMoveHighlight }
         : null;
-      this.game.lastMoveHighlight = this.game.analysisBasePosition.lastMoveHighlight
-        ? { ...this.game.analysisBasePosition.lastMoveHighlight }
-        : null;
-      this.game.selectedSquare = this.game.analysisBasePosition.selectedSquare;
-      this.game.validMoves = this.game.analysisBasePosition.validMoves;
-      this.game.halfMoveClock = this.game.analysisBasePosition.halfMoveClock;
-      this.game.positionHistory = [...this.game.analysisBasePosition.positionHistory];
+      this.game.selectedSquare = saved.selectedSquare;
+      this.game.validMoves = saved.validMoves;
+      this.game.halfMoveClock = saved.halfMoveClock;
+      this.game.positionHistory = [...saved.positionHistory];
     }
 
     // Exit analysis mode

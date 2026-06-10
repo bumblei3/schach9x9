@@ -70,6 +70,7 @@ export interface MoveResult {
   from: Square;
   to: Square;
   promotion?: string;
+  capture?: boolean;
   score?: number;
 }
 

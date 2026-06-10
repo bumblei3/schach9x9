@@ -72,20 +72,16 @@ export class App {
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = await import('./ui.js');
     // Expose to window for legacy/debug access
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).UI = UI_MODULE;
+    window.UI = UI_MODULE;
 
     this.Game_Class = Game;
     this.game = new Game(initialPoints, mode as GameMode);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).game = this.game;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).app = this;
+    window.game = this.game;
+    window.app = this;
 
     // Initialize controllers
     this.gameController = new GameController(this.game);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).gameController = this.gameController;
+    window.gameController = this.gameController;
 
     this.game.moveController = new MoveController(this.game);
     this.game.aiController = new AIController(this.game);
@@ -121,8 +117,7 @@ export class App {
     this.keyboardManager = new KeyboardManager(this);
 
     // Expose global recovery function for console access
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).recoverGame = () => {
+    window.recoverGame = () => {
       if (this.keyboardManager && this.keyboardManager.performEmergencyRecovery) {
         this.keyboardManager.performEmergencyRecovery();
         console.log(
@@ -181,22 +176,23 @@ export class App {
     const container3D = document.getElementById('battle-chess-3d-container');
     if (container3D && !this.battleChess3D) {
       // battleChess3D_Class is loaded dynamically via import()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.battleChess3D = new (this as any).battleChess3D_Class(container3D);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).battleChess3D = this.battleChess3D;
+      if (this.battleChess3D_Class) {
+        this.battleChess3D = new this.battleChess3D_Class(container3D);
+      }
+      if (this.battleChess3D) {
+        window.battleChess3D = this.battleChess3D;
+      }
 
       // Hook into Game methods for 3D updates if not handled by event listeners
       // Note: 3D updates are currently handled in GameController/MoveController directly
       // via window.battleChess3D checks.
 
       // Listen for 3D board clicks
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      window.addEventListener('board3dclick', (e: any) => {
+      window.addEventListener('board3dclick', ((e: CustomEvent<{ row: number; col: number }>) => {
         if (this.game && this.gameController) {
           this.gameController.handleCellClick(e.detail.row, e.detail.col);
         }
-      });
+      }) as EventListener);
     }
   }
 
@@ -342,9 +338,7 @@ export class App {
       return app.moveController!.calculateMaterialAdvantage();
     };
     GP.getMaterialValue = function (piece: Piece) {
-      // Piece is passed as base type; MoveController expects PieceWithMoved
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return app.moveController!.getMaterialValue(piece as any);
+      return app.moveController!.getMaterialValue(piece as PieceWithMoved);
     };
     GP.updateStatistics = function () {
       UI_MODULE!.updateStatistics(this);

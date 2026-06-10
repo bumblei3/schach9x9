@@ -1,6 +1,14 @@
 import { PHASES, type Game } from './gameEngine.js';
 import type { Player } from './types/game.js';
 import {
+  DRAW_OFFER_THRESHOLD_LOW,
+  DRAW_OFFER_THRESHOLD_HIGH,
+  DRAW_OFFER_MIN_MOVES,
+  DRAW_ACCEPT_SCORE_MAX,
+  DRAW_ACCEPT_MOVES_MIN,
+  HALF_MOVE_CLOCK_NEAR_50,
+} from './constants.js';
+import {
   SHOP_PIECES,
   AI_DEPTH_CONFIG,
   AI_DIFFICULTIES,
@@ -540,7 +548,7 @@ export class AIController {
 
     const boardInt = aiEngine.convertBoardToInt(this.game.board);
     const lastMove = this.game.lastMove;
-    const workerResults: any[] = [];
+    const workerResults: SearchResult[] = [];
     let completedWorkers = 0;
     const numWorkers = this.aiWorkers.length;
 
@@ -746,13 +754,13 @@ export class AIController {
     }
 
     // Accept if 50-move rule is close
-    if (this.game.halfMoveClock >= 80) {
+    if (this.game.halfMoveClock >= HALF_MOVE_CLOCK_NEAR_50) {
       shouldAccept = true;
       this.game.log('KI akzeptiert: 50-Züge-Regel nahe.');
     }
 
     // Accept if position is roughly equal and many moves have been played
-    if (Math.abs(score) < 50 && this.game.moveHistory.length > 40) {
+    if (Math.abs(score) < DRAW_ACCEPT_SCORE_MAX && this.game.moveHistory.length > DRAW_ACCEPT_MOVES_MIN) {
       shouldAccept = true;
       this.game.log('KI akzeptiert: Ausgeglichene Position nach vielen Zügen.');
     }
@@ -777,8 +785,8 @@ export class AIController {
     const aiColor = 'black';
     const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
 
-    // Offer draw if position is bad but not hopeless (-300 to -100)
-    if (score >= -300 && score <= -100 && this.game.moveHistory.length > 20) {
+    // Offer draw if position is bad but not hopeless
+    if (score >= DRAW_OFFER_THRESHOLD_LOW && score <= DRAW_OFFER_THRESHOLD_HIGH && this.game.moveHistory.length > DRAW_OFFER_MIN_MOVES) {
       this.game.log('KI bietet Remis an (schlechte Position).');
       return true;
     }

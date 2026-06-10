@@ -1,3 +1,5 @@
+import { EVAL_MAX_SCORE, EVAL_WINNING_THRESHOLD } from '../constants.js';
+
 /**
  * Component for the vertical evaluation bar
  */
@@ -75,7 +77,7 @@ export class EvaluationBar {
   }
 
   private scoreToPercentage(score: number): number {
-    const max = 1000; // 10 pawns is "full"
+    const max = EVAL_MAX_SCORE;
     const clamped = Math.max(-max, Math.min(max, score));
     return ((clamped + max) / (max * 2)) * 100;
   }
@@ -83,9 +85,9 @@ export class EvaluationBar {
   private updateStyle(score: number): void {
     if (!this.scoreLabel) return;
 
-    if (score > 300) {
+    if (score > EVAL_WINNING_THRESHOLD) {
       this.scoreLabel.className = 'eval-bar-score win-white';
-    } else if (score < -300) {
+    } else if (score < -EVAL_WINNING_THRESHOLD) {
       this.scoreLabel.className = 'eval-bar-score win-black';
     } else {
       this.scoreLabel.className = 'eval-bar-score neutral';

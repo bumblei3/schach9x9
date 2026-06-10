@@ -33,7 +33,7 @@ class ErrorManager {
     };
 
     this.initialized = true;
-    (logger as any).info('ErrorManager initialized');
+    logger.info('ErrorManager initialized');
   }
 
   /**
@@ -46,8 +46,7 @@ class ErrorManager {
     const isCritical = options.critical || false;
 
     // Log to internal logger
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (logger as any).error(`[${context}]`, error);
+    logger.error(`[${context}]`, error);
 
     if (isCritical) {
       this.showCriticalError(error);
@@ -62,7 +61,7 @@ class ErrorManager {
    * Report a warning (non-blocking issue)
    */
   warning(message: string, context: string = 'App'): void {
-    (logger as any).warn(`[${context}]`, message);
+    logger.warn(`[${context}]`, message);
     notificationUI.show(message, 'warning', `Warnung (${context})`);
   }
 

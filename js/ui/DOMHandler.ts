@@ -169,8 +169,8 @@ export class DOMHandler {
     document.querySelectorAll<HTMLElement>('.shop-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const pieceType = btn.dataset.piece;
-        if (pieceType && this.game && this.game.selectShopPiece) {
-          this.game.selectShopPiece(pieceType);
+        if (pieceType && this.gameController) {
+          this.gameController.selectShopPiece(pieceType);
           // Highlight selected button
           document.querySelectorAll('.shop-item').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');

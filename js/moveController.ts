@@ -29,6 +29,7 @@ import {
   undoMoveForReplay as undoMoveForReplayFromManager,
 } from './move/GameStateManager.js';
 import * as UI from './ui.js';
+import { animateMove as animateMoveFromBoardRenderer } from './ui/BoardRenderer.js';
 
 /**
  * Orchestrator for move-related logic, delegating to specialized sub-modules.
@@ -176,13 +177,7 @@ export class MoveController {
   public async animateMove(from: Square, to: Square, piece: PieceWithMoved | null): Promise<void> {
     // BoardRenderer.animateMove expects Piece, but PieceWithMoved extends Piece.
     // The null case is handled by the caller — this cast is safe.
-    const animFn = (UI as any).animateMove as (
-      g: Game,
-      f: Square,
-      t: Square,
-      p: Piece
-    ) => Promise<void>;
-    await animFn(this.game, from, to, piece as Piece);
+    await animateMoveFromBoardRenderer(this.game, from, to, piece as Piece);
   }
 
   /**
@@ -267,8 +262,8 @@ export class MoveController {
       }
 
       // Champion bonus
-      const state = (campaignManager as any).state;
-      if (state.championType === piece.type) {
+      const championType = campaignManager.getChampion();
+      if (championType === piece.type) {
         baseValue += 0.5; // Flat hero bonus
       }
     }

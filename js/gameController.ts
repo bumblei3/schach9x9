@@ -23,6 +23,7 @@ import { puzzleManager } from './puzzleManager.js';
 import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
+import type { AIController } from './aiController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
@@ -43,7 +44,7 @@ import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 type ArrowRendererType = {
   clearArrows: () => void;
   addArrow?: (...args: unknown[]) => void;
-  highlightMoves?: (arrows: unknown[]) => void;
+  highlightMoves?: (arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
 };
 
 export interface GameExtended extends Game {
@@ -61,10 +62,11 @@ export interface GameExtended extends Game {
   currentPuzzle?: PuzzleState | null;
   calculateMaterialAdvantage?: (color?: Player) => number;
   gameController?: GameController;
-  aiController?: any; // AIController from aiController.ts - using any to avoid import resolution issues
+  aiController?: AIController;
   moveController?: {
     undoMove: () => void;
     redoMove: () => void;
+    reconstructBoardAtMove?: (moveIndex: number) => void;
   };
   startClock?: () => void;
   stopClock?: () => void;
@@ -646,11 +648,11 @@ export class GameController {
 
   // ===== ANALYSIS MODE METHODS =====
 
-  enterAnalysisMode(): any {
+  enterAnalysisMode(): boolean {
     return this.analysisController.enterAnalysisMode();
   }
 
-  exitAnalysisMode(restore: boolean = true): any {
+  exitAnalysisMode(restore: boolean = true): boolean {
     return this.analysisController.exitAnalysisMode(restore);
   }
 

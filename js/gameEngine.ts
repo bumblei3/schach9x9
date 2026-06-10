@@ -178,7 +178,7 @@ export class Game {
     clearArrows: () => void;
     drawArrow?: (fromR: number, fromC: number, toR: number, toC: number, color: string) => void;
     addArrow?: (...args: unknown[]) => void;
-    highlightMoves?: (arrows: unknown[]) => void;
+    highlightMoves?: (arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
   };
   evaluationBar?: { show: (visible: boolean) => void; update: (score: number) => void };
   campaignMode?: boolean;

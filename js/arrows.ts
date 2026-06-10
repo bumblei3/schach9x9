@@ -1,3 +1,12 @@
+interface ArrowData {
+  fromR: number;
+  fromC: number;
+  toR: number;
+  toC: number;
+  colorKey: string;
+  quality?: string;
+}
+
 /**
  * Arrow Renderer for chess board
  * Draws SVG arrows to show move suggestions
@@ -6,8 +15,7 @@ export class ArrowRenderer {
   public boardElement: HTMLElement;
   public cellSize: number;
   public svgLayer: SVGSVGElement;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public lastArrows: any[] | null = null;
+  public lastArrows: ArrowData[] | null = null;
 
   constructor(boardElement: HTMLElement) {
     this.boardElement = boardElement;
@@ -149,20 +157,17 @@ export class ArrowRenderer {
     this.drawArrow(fromR, fromC, toR, toC, colorKey);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public highlightMoves(moves: any[]): void {
+  public highlightMoves(moves: ArrowData[]): void {
     this.lastArrows = moves;
     this.clearArrows();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    moves.forEach((m: any) => this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey));
+    moves.forEach((m) => this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey));
   }
 
   public redraw(): void {
     this.updateCellSize();
     if (this.lastArrows) {
       this.clearArrows();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.lastArrows.forEach((m: any) =>
+      this.lastArrows.forEach((m) =>
         this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey || m.quality)
       );
     }

@@ -32,8 +32,8 @@ export class ShopManager {
     this.game.selectedShopPiece = pieceType;
 
     // Update UI highlights
-    document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('selected'));
-    const btn = document.querySelector(`.shop-btn[data-piece="${pieceType}"]`);
+    document.querySelectorAll('.shop-item').forEach(btn => btn.classList.remove('selected'));
+    const btn = document.querySelector(`.shop-item[data-piece="${pieceType}"]`);
     if (btn) btn.classList.add('selected');
 
     const displayEl = document.getElementById('selected-piece-display');
