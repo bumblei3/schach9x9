@@ -110,9 +110,10 @@ export interface GameExtensions {
 /**
  * Subset of Game properties consumed by UI/rendering/tutor modules.
  * Avoids `any` while not requiring the full Game class import.
+ * All optional — modules only need a subset.
  */
 export interface GameLike {
-  board: ({ type: string; color: Player; hasMoved?: boolean } | null)[][];
+  board: (Piece | null)[][];
   boardSize: number;
   boardShape?: unknown;
   phase: string;
@@ -124,6 +125,7 @@ export interface GameLike {
   validMoves: Square[] | null;
   mode: string;
   lastMoveHighlight: { from: Square; to: Square } | null;
+  isInCheck?(color: Player): boolean;
   isSquareUnderAttack?: (r: number, c: number, color: Player) => boolean;
   isTutorMove?: (move: Square) => boolean;
   playerColor?: Player;
@@ -132,4 +134,13 @@ export interface GameLike {
   handleCellClick?: (r: number, c: number) => void;
   getValidMoves: (r: number, c: number, piece: Piece) => Square[];
   log?: (message: string) => void;
+  // Tutor-specific (used by MoveAnalyzer)
+  kiMentorEnabled?: boolean;
+  mentorLevel?: string;
+  lastEval?: number;
+  bestMoves?: unknown[];
+  tutorMode?: string;
+  tutorPoints?: number;
+  stats?: { accuracies: number[] };
+  getAllLegalMoves?: (color: Player) => { from: Square; to: Square }[];
 }

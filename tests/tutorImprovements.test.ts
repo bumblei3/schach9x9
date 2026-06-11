@@ -7,9 +7,19 @@ const mockGame = {
   board: Array(9)
     .fill(null)
     .map(() => Array(9).fill(null)),
+  boardSize: 9,
+  phase: 'PLAY',
+  turn: 'white' as const,
+  isAI: false,
+  isAnimating: false,
+  replayMode: false,
+  selectedSquare: null,
+  validMoves: null,
+  mode: 'classic',
+  lastMoveHighlight: null,
   getValidMoves: vi.fn(),
   isSquareUnderAttack: vi.fn(),
-};
+} as any;
 
 const mockAnalyzer: any = {
   getPieceName: (t: any) => t,

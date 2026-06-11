@@ -1,5 +1,6 @@
 import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
+import type { MoveInfo } from './MoveAnalyzer.js';
 import { AI_DEPTH_CONFIG } from '../config.js';
 import type { SearchResult, MoveResult } from '../aiEngine.js';
 import {
@@ -105,7 +106,7 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
       validMoves.map(async (hint: SearchResult, index: number) => {
         const analysis = await analyzeMoveWithExplanation(
           game,
-          hint.move,
+          hint.move as unknown as MoveInfo,
           hint.score,
           validMoves[0].score
         );

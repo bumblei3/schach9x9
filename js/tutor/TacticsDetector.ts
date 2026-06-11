@@ -1,23 +1,13 @@
 import { BOARD_SIZE } from '../gameEngine.js';
 import * as aiEngine from '../aiEngine.js';
-import { isBlockedCell } from '../config.js';
-import type { Piece } from '../types/game.js';
-import type { BoardShape } from '../config.js';
-import type { Player } from '../types/game.js';
+import { isBlockedCell, type BoardShape } from '../config.js';
+import type { GameLike, Piece } from '../types/game.js';
 
 /** Minimal interface for analyzer (provides getPieceName) */
 export interface Analyzer {
   getPieceName(type: string): string;
 }
 
-/** Minimal game interface — only the properties actually used by tactics detection */
-interface GameLike {
-  board: (Piece | null)[][];
-  boardShape?: BoardShape;
-  getValidMoves(r: number, c: number, piece: Piece): { r: number; c: number }[];
-  isInCheck?(color: Player): boolean;
-  isSquareUnderAttack(r: number, c: number, attackerColor: Player): boolean;
-}
 
 /** A position on the board */
 export interface Pos {
@@ -319,7 +309,7 @@ export function detectSkewers(
     let c = move.c + dc;
 
     while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-      if (isBlockedCell(r, c, game.boardShape)) break;
+      if (isBlockedCell(r, c, game.boardShape as BoardShape)) break;
       const behindPiece = game.board[r][c];
       if (behindPiece) {
         if (behindPiece.color === opponentColor) {
@@ -391,7 +381,7 @@ export function detectRemovingGuard(
       // Wait, attackerColor is 'our' color (the one moving). defenderColor is victim.
       const ourColor = defenderColor === 'white' ? 'black' : 'white';
 
-      if (game.isSquareUnderAttack(r, c, ourColor)) {
+      if (game.isSquareUnderAttack?.(r, c, ourColor)) {
         // It is under attack. Was it defended by the captured piece?
         // Check if capturedPiece (at capturePos) had a valid move to (r,c) (pseudo-move)
         // We need to put capturedPiece back temporarily to check its moves?
@@ -473,7 +463,7 @@ function canPieceAttackSquare(
   let r = from.r + signDr;
   let c = from.c + signDc;
   while (r !== to.r || c !== to.c) {
-    if (isBlockedCell(r, c, game.boardShape)) return false; // Path blocked by boundary
+    if (isBlockedCell(r, c, game.boardShape as BoardShape)) return false; // Path blocked by boundary
     if (game.board[r][c]) return false; // Blocked by piece
     r += signDr;
     c += signDc;
@@ -539,7 +529,7 @@ export function detectPins(
     let c = move.c + dc;
 
     while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-      if (isBlockedCell(r, c, game.boardShape)) break;
+      if (isBlockedCell(r, c, game.boardShape as BoardShape)) break;
       const behindPiece = game.board[r][c];
       if (behindPiece) {
         if (behindPiece.color === opponentColor && behindPiece.type === 'k') {
@@ -602,7 +592,7 @@ export function detectDiscoveredAttacks(
       let foundFrom = false;
 
       while (checkR >= 0 && checkR < BOARD_SIZE && checkC >= 0 && checkC < BOARD_SIZE) {
-        if (isBlockedCell(checkR, checkC, game.boardShape)) break;
+        if (isBlockedCell(checkR, checkC, game.boardShape as BoardShape)) break;
         if (checkR === from.r && checkC === from.c) {
           foundFrom = true;
           checkR += dr;
@@ -805,7 +795,7 @@ export function getDefendedPieces(
     if (targetPiece && targetPiece.color === defenderColor) {
       // Check if this piece is threatened by opponent
       const opponentColor = defenderColor === 'white' ? 'black' : 'white';
-      const wasThreatened = game.isSquareUnderAttack(move.r, move.c, opponentColor);
+      const wasThreatened = game.isSquareUnderAttack?.(move.r, move.c, opponentColor) ?? false;
 
       defended.push({
         piece: targetPiece,
@@ -855,7 +845,7 @@ export function detectBattery(
       let r = pos.r + d[0];
       let c = pos.c + d[1];
       while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-        if (isBlockedCell(r, c, game.boardShape)) break;
+        if (isBlockedCell(r, c, game.boardShape as BoardShape)) break;
         const p = game.board[r][c];
         if (p) {
           if (p.color === color && types.includes(p.type)) {

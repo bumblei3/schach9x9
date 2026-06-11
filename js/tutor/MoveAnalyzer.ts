@@ -1,4 +1,5 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
+import type { GameLike } from '../types/game.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
 import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './TacticsDetector.js';
 import type { Analyzer } from './TacticsDetector.js';
@@ -8,7 +9,7 @@ import type { Piece, GameLike, Square } from '../types/game.js';
 
 // --- Type definitions ---
 
-interface MoveInfo {
+export interface MoveInfo {
   from: Square;
   to: Square;
 }
@@ -112,7 +113,7 @@ export async function analyzePlayerMovePreExecution(
   // 4. Calculate drop from perspective of moving player
   const drop = turn === 'white' ? currentEval - newEval : newEval - currentEval;
 
-  const currentLevel = MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD;
+  const currentLevel = game.mentorLevel ? (MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD) : MENTOR_LEVELS.STANDARD;
   const threshold = currentLevel.threshold;
 
   if (drop >= threshold) {
@@ -222,7 +223,7 @@ export function analyzeMoveWithExplanation(
 /**
  * Analyzes strategic value of a move
  */
-export function analyzeStrategicValue(game: Game, move: MoveInfo): StrategicPattern[] {
+export function analyzeStrategicValue(game: GameLike, move: MoveInfo): StrategicPattern[] {
   const patterns: StrategicPattern[] = [];
   const from = move.from;
   const to = move.to;
@@ -360,7 +361,7 @@ export function getScoreDescription(score: number): ScoreDescription {
 /**
  * Gets algebraic notation for a move
  */
-export function getMoveNotation(game: Game, move: MoveInfo): string {
+export function getMoveNotation(game: GameLike, move: MoveInfo): string {
   const piece = game.board[move.from.r][move.from.c];
 
   // Handle null piece gracefully
@@ -414,7 +415,7 @@ export function handlePlayerMove(
   if (game.phase !== PHASES.PLAY) return;
 
   // Get the move from legal moves
-  const moves = game.getAllLegalMoves(game.turn);
+  const moves = game.getAllLegalMoves?.(game.turn) ?? [];
   const move = moves.find(
     (m: MoveInfo) =>
       m.from.r === from.r && m.from.c === from.c && m.to.r === to.r && m.to.c === to.c
@@ -426,8 +427,8 @@ export function handlePlayerMove(
   if (game.tutorMode === 'guess_the_move') {
     const bestMoves = game.bestMoves || [];
     if (bestMoves.length > 0) {
-      const isBest = bestMoves.some(
-        (hint: { move: MoveInfo }) =>
+      const isBest = (bestMoves as { move: MoveInfo }[]).some(
+        (hint) =>
           hint.move.from.r === from.r &&
           hint.move.from.c === from.c &&
           hint.move.to.r === to.r &&
@@ -435,7 +436,7 @@ export function handlePlayerMove(
       );
 
       if (isBest) {
-        game.tutorPoints += 10;
+        if (game.tutorPoints !== undefined) game.tutorPoints += 10;
         showToast('Richtig geraten! +10 Tutor-Punkte', 'success');
       } else {
         showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
@@ -467,7 +468,7 @@ export async function checkBlunder(
   // 0 drop = 100%, 100 drop = 90%, 200 drop = 70%, 500 drop = 20%
   const clampedDrop = Math.max(0, drop);
   const accuracy = 100 * Math.pow(0.5, clampedDrop / 200);
-  game.stats.accuracies.push(accuracy);
+  if (game.stats) game.stats.accuracies.push(accuracy);
 
   if (drop >= 300) {
     // 3.0 evaluation drop is a blunder (increased from 2.0 to be less annoying)
@@ -485,7 +486,7 @@ export async function checkBlunder(
     // We assume the best move score is either the engine's best or the previous eval if no engine ran
     const bestScore =
       game.bestMoves && game.bestMoves.length > 0
-        ? (game.bestMoves[0].score ?? prevEval)
+        ? ((game.bestMoves[0] as { score?: number }).score ?? prevEval)
         : prevEval;
     const analysis = analyzeMoveWithExplanation(
       game,
