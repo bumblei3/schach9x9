@@ -1,11 +1,10 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
-import type { GameLike } from '../types/game.js';
+import type { GameLike, Piece } from '../types/game.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
 import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './TacticsDetector.js';
 import type { Analyzer } from './TacticsDetector.js';
 import { evaluatePosition } from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
-import type { Piece, GameLike, Square } from '../types/game.js';
 
 // --- Type definitions ---
 
