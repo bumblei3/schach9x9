@@ -39,7 +39,7 @@ const PIECE_VALUES: Record<number, number> = {
 
 // Counter Move Table (Indexed by [prevMoveFrom][prevMoveTo] -> BestMove)
 // Pack move {from, to} into Int16: (from << 8) | to
-let counterMoveTable = new Int16Array(81 * 81);
+const counterMoveTable = new Int16Array(81 * 81);
 
 export function clearMoveOrdering(): void {
   counterMoveTable.fill(0);

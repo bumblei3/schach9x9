@@ -53,7 +53,7 @@ import { getCurrentBoardShape } from './config.js';
 import type { Player, Square, Piece } from './types/game.js';
 
 // --- Types ---
-import { computeZobristHash, TranspositionTable, TTEntry } from './ai/transpositionTable';
+import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 
 export { computeZobristHash };
 
@@ -470,7 +470,7 @@ const KING_MIDGAME_TABLE = [
 ];
 
 // Transposition Table
-// TTEntry and computeZobristHash imported from ./transpositionTable.ts
+// computeZobristHash and TranspositionTable imported from ./transpositionTable
 
 function evaluate(b: IntBoard, c: number): number {
   let score = 0;
