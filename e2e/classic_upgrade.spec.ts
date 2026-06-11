@@ -9,7 +9,7 @@ test.describe('Classic 9x9 Upgrade Mode', () => {
     await helper.goto();
   });
 
-  test('should start with correct pieces and upgrade points', async ({ page: _page }) => {
+  test('should start with correct pieces and upgrade points', async () => {
     await helper.startGame('upgrade');
 
     // Verify Archbishop and Chancellor

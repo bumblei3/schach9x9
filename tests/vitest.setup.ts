@@ -1,7 +1,7 @@
 import { TextDecoder, TextEncoder } from 'util';
 import { vi } from 'vitest';
 
-global.TextDecoder = TextDecoder as any;
+global.TextDecoder = TextDecoder;
 global.TextEncoder = TextEncoder;
 
 // Global Fetch Mock
