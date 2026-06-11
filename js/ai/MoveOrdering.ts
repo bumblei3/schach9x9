@@ -22,7 +22,7 @@ const KILLER_MOVE_1_SCORE = 900000;
 const KILLER_MOVE_2_SCORE = 800000;
 const COUNTER_MOVE_SCORE = 700000;
 const HISTORY_SCORE_MAX = 100000; // Cap
-// const PROMOTION_SCORE = 1500000;
+const PROMOTION_SCORE = 1500000;
 
 const PIECE_VALUES: Record<number, number> = {
   [PIECE_PAWN]: 100,
@@ -135,7 +135,7 @@ export function orderMoves(
     }
 
     // Promotion?
-    // if (move.flags === 'promotion') score += PROMOTION_SCORE;
+    if (move.flags === 'promotion') score += PROMOTION_SCORE;
 
     return { move, score };
   });

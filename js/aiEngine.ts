@@ -539,7 +539,7 @@ function quiesce(
   const captures = getAllCaptureMoves(b, activeColorStr);
 
   // Order captures by MVV-LVA
-  captures.sort((a, mv) => {
+  captures.sort((_, mv) => {
     const victim = b[mv.to] & TYPE_MASK;
     const attacker = b[mv.from] & TYPE_MASK;
     return (EVAL_VALUES[victim] || 0) - (EVAL_VALUES[attacker] || 0);

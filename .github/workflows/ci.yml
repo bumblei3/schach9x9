@@ -23,15 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Use Node.js lts/*
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: 'npm'
+          node-version: 'lts/*'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -45,11 +44,6 @@ jobs:
       - name: Run Fuzz Test
         run: npm test tests/fuzz/fuzz.test.ts
 
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.5.0
-        with:
-          version: 'latest'
-
       - name: Verify Build
         run: npm run build
 
@@ -61,11 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Use Node.js lts/*
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: 'npm'
+          node-version: 'lts/*'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -98,25 +92,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.5.0
-        with:
-          version: 'latest'
-      - name: Install Node.js
+
+      # wasm-pack removed, TS/JS project only. Skip WASM build step! 💡
+      # Formerly here (removed):
+      #   actions/install/wasm-pack-action -> not needed for pure JS/TS projects
+      
+      - name: Install Node.js lts/*
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: 'npm'
+          node-version: 'lts/*'
+          cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
+      
+      # Note: No build step required here. Skip for now, or add when needed!
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: 'dist'
+      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
