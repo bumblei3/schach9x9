@@ -3,12 +3,12 @@
  * Handles move validation, check detection, and game end conditions.
  */
 import type { Player, Square, Piece } from './types/game.js';
-import { isBlockedCell } from './config.js';
+import { isBlockedCell, BoardShape } from './config.ts';
 
 export interface GameWithBoard {
   board: (Piece | null)[][];
   lastMove?: LastMoveInfo | null;
-  boardShape?: string;
+  boardShape?: BoardShape;
 }
 
 export interface LastMoveInfo {
@@ -154,7 +154,7 @@ export class RulesEngine {
 
     const size = this.board.length;
     const isInside = (r: number, c: number): boolean =>
-      r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape as any);
+      r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape);
     const isFriend = (r: number, c: number): boolean =>
       this.board[r][c] !== null && this.board[r][c]!.color === piece.color;
     const isEnemy = (r: number, c: number): boolean =>
@@ -260,9 +260,9 @@ export class RulesEngine {
     c: number,
     _piece: Piece,
     directions: Direction[],
-    isInside: (r: number, c: number) => boolean,
-    _isFriend: (r: number, c: number) => boolean,
-    isEnemy: (r: number, c: number) => boolean
+    isInside: (_r: number, _c: number) => boolean,
+    _isFriend: (_r: number, _c: number) => boolean,
+    isEnemy: (_r: number, _c: number) => boolean
   ): void {
     directions.forEach(([dr, dc]) => {
       let nr = r + dr,
@@ -284,8 +284,8 @@ export class RulesEngine {
     r: number,
     c: number,
     directions: Direction[],
-    isInside: (r: number, c: number) => boolean,
-    isFriend: (r: number, c: number) => boolean
+    isInside: (_r: number, _c: number) => boolean,
+    isFriend: (_r: number, _c: number) => boolean
   ): void {
     directions.forEach(([dr, dc]) => {
       const nr = r + dr,
@@ -350,7 +350,7 @@ export class RulesEngine {
   isSquareUnderAttack(r: number, c: number, attackerColor: Player): boolean {
     const size = this.board.length;
     const isInside = (r: number, c: number): boolean =>
-      r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape as any);
+      r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape);
 
     // Pawn attacks
     const pawnDir = attackerColor === 'white' ? 1 : -1;

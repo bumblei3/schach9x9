@@ -10,10 +10,10 @@ import {
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
   TYPE_MASK,
-} from './BoardDefinitions.js';
-import type { Move } from './MoveGenerator.js';
+} from './BoardDefinitions.ts';
+import type { Move } from './MoveGenerator.ts';
 
-// import { see } from './MoveGenerator.js';
+// import { see } from './MoveGenerator.ts';
 
 // Order Constants
 const HASH_MOVE_SCORE = 3000000;

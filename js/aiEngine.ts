@@ -3,17 +3,17 @@
  * Converts UI Objects to Integer Board for the optimized AI Engine.
  */
 
-import { logger } from './logger.js';
+import { logger } from './logger.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 import {
   getBestMoveWasm,
   getWasmNodesEvaluated,
   resetWasmNodesEvaluated,
-} from './ai/wasmBridge.js';
+} from './ai/wasmBridge.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.js';
+import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 import {
@@ -26,7 +26,7 @@ import {
   findKing as findKingInt,
   see as seeInt,
   type Move,
-} from './ai/MoveGenerator.js';
+} from './ai/MoveGenerator.ts';
 
 import {
   SQUARE_COUNT,
@@ -141,7 +141,7 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 let aiWorker: Worker | null = null;
 const workerPendingRequests = new Map<
   number,
-  { resolve: (value: unknown) => void; reject: (reason: unknown) => void }
+  { resolve: (_value: unknown) => void; reject: (_reason: unknown) => void }
 >();
 let workerReqId = 0;
 
