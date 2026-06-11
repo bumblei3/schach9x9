@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import * as MoveAnalyzer from '../js/tutor/MoveAnalyzer.js';
-import type { GameLike } from '../js/types/game.js';
 
 describe('MoveAnalyzer Unit Tests', () => {
   const board = Array(9)
@@ -8,13 +7,12 @@ describe('MoveAnalyzer Unit Tests', () => {
     .map(() => Array(9).fill(null));
 
   test('categorizeMove great move', () => {
-    // Partial mock of Game interface for analysis
     const mockGame = {
       board,
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as GameLike;
+    } as any;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -31,7 +29,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as GameLike;
+    } as any;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -39,7 +37,6 @@ describe('MoveAnalyzer Unit Tests', () => {
       -250,
       50
     );
-    // diff = -300. diffP = -3.0. category is 'mistake'
     expect(result.category).toBe('mistake');
   });
 
@@ -49,7 +46,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as GameLike;
+    } as any;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -57,12 +54,10 @@ describe('MoveAnalyzer Unit Tests', () => {
       -150,
       50
     );
-    // diff = -200. diffP = -2.0. >= -3.0 is 'mistake'
     expect(result.category).toBe('inaccuracy');
   });
 
   test('tactical explanations', () => {
-    // Setup a simple capture for explanation
     const testBoard = Array(9)
       .fill(null)
       .map(() => Array(9).fill(null));
@@ -74,7 +69,7 @@ describe('MoveAnalyzer Unit Tests', () => {
       getValidMoves: () => [],
       isInCheck: () => false,
       isSquareUnderAttack: () => false,
-    } as any as GameLike;
+    } as any;
 
     const result = MoveAnalyzer.analyzeMoveWithExplanation(
       mockGame,
@@ -82,7 +77,6 @@ describe('MoveAnalyzer Unit Tests', () => {
       100,
       0
     );
-    // Even if empty returns, it shouldn't crash
     expect(result.tacticalExplanations).toBeDefined();
   });
 });
