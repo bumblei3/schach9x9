@@ -294,13 +294,13 @@ function convertMoveToResult(
  * Maps Elo rating to search parameters
  */
 export function getParamsForElo(elo: number): EloParams {
-  // Reduced depths to prevent worker timeouts (was 3-8, now 2-4)
-  let depth = 3;
-  if (elo < 1000) depth = 2;
-  else if (elo < 1400) depth = 3;
-  else if (elo < 1800) depth = 3;
-  else if (elo < 2200) depth = 4;
-  else depth = 4;
+  // With TT + Move Ordering + Iterative Deepening, higher depths are feasible
+  let depth = 4;
+  if (elo < 1000) depth = 3;
+  else if (elo < 1400) depth = 4;
+  else if (elo < 1800) depth = 5;
+  else if (elo < 2200) depth = 6;
+  else depth = 7;
 
   return {
     maxDepth: depth,
@@ -403,160 +403,311 @@ export async function getBestMoveDetailed(
   return null;
 }
 
-// --- JS Fallback Search (Mini-Max with Alpha-Beta) ---
+// --- JS Fallback Search (Alpha-Beta with TT, Move Ordering, Iterative Deepening) ---
 
 const MATE_SCORE = 20000;
 const INFINITY = 30000;
+const MAX_SEARCH_TIME = 8000; // 8 seconds max per search
 
 interface JsSearchResult {
   move: Move | null;
   score: number;
   nodes: number;
+  depth: number;
 }
 
-// Simple material evaluation tables
-const PIECE_VALUES: Record<number, number> = {
+const EVAL_VALUES: Record<number, number> = {
   [PIECE_PAWN]: 100,
   [PIECE_KNIGHT]: 320,
   [PIECE_BISHOP]: 330,
   [PIECE_ROOK]: 500,
   [PIECE_QUEEN]: 900,
   [PIECE_KING]: 20000,
-  [PIECE_ARCHBISHOP]: 600,
-  [PIECE_CHANCELLOR]: 700,
-  [PIECE_ANGEL]: 1000,
+  [PIECE_ARCHBISHOP]: 650,
+  [PIECE_CHANCELLOR]: 850,
+  [PIECE_ANGEL]: 1220,
 };
+
+// Positional bonus tables (9x9 board, from white's perspective)
+// Encourages centralization, pawn advancement, king safety
+const PAWN_TABLE = [
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  5,  5,  5,  5,  5,  5,  5,  5,  5,
+  10, 10, 10, 10, 10, 10, 10, 10, 10,
+  15, 15, 15, 15, 15, 15, 15, 15, 15,
+  20, 20, 20, 20, 20, 20, 20, 20, 20,
+  15, 15, 15, 15, 15, 15, 15, 15, 15,
+  10, 10, 10, 10, 10, 10, 10, 10, 10,
+  5,  5,  5,  5,  5,  5,  5,  5,  5,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+];
+
+const KNIGHT_TABLE = [
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 10, 10, 10, 10, 10, 10, 10,  0,
+  0, 10, 20, 20, 20, 20, 20, 10,  0,
+  0, 10, 20, 30, 30, 30, 20, 10,  0,
+  0, 10, 20, 30, 40, 30, 20, 10,  0,
+  0, 10, 20, 30, 30, 30, 20, 10,  0,
+  0, 10, 20, 20, 20, 20, 20, 10,  0,
+  0, 10, 10, 10, 10, 10, 10, 10,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+];
+
+const KING_MIDGAME_TABLE = [
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  5,  5,  5,  5,  5,  0,  0,
+  0,  0,  5, 10, 10, 10,  5,  0,  0,
+  0,  0,  5, 10, 20, 10,  5,  0,  0,
+];
+
+// Transposition Table
+interface TTEntry {
+  depth: number;
+  score: number;
+  flag: 'exact' | 'lower' | 'upper';
+  bestMove: Move | null;
+}
+
+// Zobrist-like hash: simple board hash for TT lookup
+function computeBoardHash(b: IntBoard): number {
+  let h = 0;
+  for (let i = 0; i < SQUARE_COUNT; i++) {
+    h = ((h << 5) - h + b[i]) | 0;
+  }
+  return h;
+}
+
+function evaluate(b: IntBoard, c: number): number {
+  let score = 0;
+  let totalMaterial = 0;
+
+  for (let i = 0; i < SQUARE_COUNT; i++) {
+    const p = b[i];
+    if (p === PIECE_NONE) continue;
+
+    const type = p & TYPE_MASK;
+    const pColor = p & COLOR_MASK;
+    const val = EVAL_VALUES[type] || 0;
+    const row = indexToRow(i);
+    const col = indexToCol(i);
+
+    let positional = 0;
+    if (type === PIECE_PAWN) {
+      positional = PAWN_TABLE[pColor === c ? row * 9 + col : (8 - row) * 9 + col];
+    } else if (type === PIECE_KNIGHT) {
+      positional = KNIGHT_TABLE[pColor === c ? row * 9 + col : (8 - row) * 9 + col];
+    } else if (type === PIECE_KING) {
+      positional = KING_MIDGAME_TABLE[pColor === c ? row * 9 + col : (8 - row) * 9 + col];
+    }
+
+    const total = val + positional;
+    totalMaterial += val;
+
+    if (pColor === c) score += total;
+    else score -= total;
+  }
+
+  return score;
+}
+
+// Quiescence search: only resolve captures to avoid horizon effect
+function quiesce(
+  b: IntBoard,
+  alpha: number,
+  beta: number,
+  c: number,
+  start: number,
+  nodes: { count: number }
+): number {
+  nodes.count++;
+
+  if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+    return evaluate(b, c);
+  }
+
+  const standPat = evaluate(b, c);
+  if (standPat >= beta) return beta;
+  if (standPat > alpha) alpha = standPat;
+
+  const activeColorStr = c === COLOR_WHITE ? 'white' : 'black';
+  const captures = getAllCaptureMoves(b, activeColorStr);
+
+  // Order captures by MVV-LVA
+  captures.sort((a, mv) => {
+    const victim = b[mv.to] & TYPE_MASK;
+    const attacker = b[mv.from] & TYPE_MASK;
+    return (EVAL_VALUES[victim] || 0) - (EVAL_VALUES[attacker] || 0);
+  });
+
+  for (const move of captures) {
+    const undo = makeMoveInt(b, move);
+    const score = -quiesce(b, -beta, -alpha, c ^ COLOR_MASK, start, nodes);
+    undoMoveInt(b, undo);
+
+    if (score >= beta) return beta;
+    if (score > alpha) alpha = score;
+  }
+
+  return alpha;
+}
+
+// Move ordering for alpha-beta efficiency
+function orderMoves(moves: Move[], b: IntBoard, ttBest: Move | null): Move[] {
+  return moves
+    .map(move => {
+      let score = 0;
+
+      // TT best move gets highest priority
+      if (ttBest && move.from === ttBest.from && move.to === ttBest.to) {
+        score += 1000000;
+      }
+
+      // MVV-LVA for captures
+      const target = b[move.to];
+      if (target !== PIECE_NONE) {
+        const victimVal = EVAL_VALUES[target & TYPE_MASK] || 0;
+        const attackerVal = EVAL_VALUES[b[move.from] & TYPE_MASK] || 0;
+        score += 500000 + victimVal * 10 - attackerVal;
+      }
+
+      // Promotions
+      if (move.promotion) {
+        score += 400000;
+      }
+
+      return { move, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.move);
+}
 
 async function runJsSearch(
   board: IntBoard,
   turnColor: Player,
-  depth: number,
+  maxDepth: number,
   _elo: number
 ): Promise<JsSearchResult> {
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const start = performance.now();
   let nodes = 0;
+  const tt = new Map<number, TTEntry>();
 
-  function evaluate(b: IntBoard, c: number): number {
-    let score = 0;
-    for (let i = 0; i < SQUARE_COUNT; i++) {
-      const p = b[i];
-      if (p !== PIECE_NONE) {
-        const type = p & TYPE_MASK;
-        const pColor = p & COLOR_MASK;
-        const val = PIECE_VALUES[type] || 0;
-        if (pColor === c) score += val;
-        else score -= val;
-      }
-    }
-    return score;
-  }
-
-  function alphabeta(
-    b: IntBoard,
-    d: number,
-    alpha: number,
-    beta: number,
-    maximizingPlayer: boolean,
-    c: number
-  ): { score: number; bestMove: Move | null } {
+  function search(b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean): { score: number; bestMove: Move | null } {
     nodes++;
 
-    // Check timeout every 2000 nodes
-    if (nodes % 2000 === 0) {
-      if (performance.now() - start > 5000) {
-        // Hard 5s timeout
-        return { score: evaluate(b, c), bestMove: null };
+    // Time check every 1000 nodes
+    if (nodes % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+      return { score: evaluate(b, color), bestMove: null };
+    }
+
+    const hash = computeBoardHash(b);
+    const ttEntry = tt.get(hash);
+    let ttBest: Move | null = null;
+
+    if (ttEntry && ttEntry.depth >= d) {
+      ttBest = ttEntry.bestMove;
+      if (ttEntry.flag === 'exact') {
+        return { score: ttEntry.score, bestMove: ttEntry.bestMove };
       }
-      // Yield to main thread (optional, complex in sync logic)
+      if (ttEntry.flag === 'lower' && ttEntry.score >= beta) {
+        return { score: ttEntry.score, bestMove: ttEntry.bestMove };
+      }
+      if (ttEntry.flag === 'upper' && ttEntry.score <= alpha) {
+        return { score: ttEntry.score, bestMove: ttEntry.bestMove };
+      }
     }
 
     if (d === 0) {
-      return { score: evaluate(b, c), bestMove: null };
+      const qScore = quiesce(b, alpha, beta, color, start, { count: 0 });
+      return { score: qScore, bestMove: null };
     }
 
-    const currentMovingColor = maximizingPlayer ? c : c ^ COLOR_MASK;
-    // Wait, genLegalInt takes (board, turnColor: string)
-    const activeColorStr = currentMovingColor === COLOR_WHITE ? 'white' : 'black';
-
+    const activeColorStr = (maximizing ? color : color ^ COLOR_MASK) === COLOR_WHITE ? 'white' : 'black';
     const legalMoves = genLegalInt(b, activeColorStr);
 
     if (legalMoves.length === 0) {
-      if (checkInt(b, currentMovingColor)) {
-        // Checkmate: return score from perspective of root color 'c'
-        const score =
-          currentMovingColor === c ? -MATE_SCORE + (depth - d) : MATE_SCORE - (depth - d);
+      if (checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
+        const score = maximizing ? -MATE_SCORE + (maxDepth - d) : MATE_SCORE - (maxDepth - d);
         return { score, bestMove: null };
       }
-      // Stalemate
       return { score: 0, bestMove: null };
     }
 
-    let bestMove = null;
+    const ordered = orderMoves(legalMoves, b, ttBest);
+    let bestMove: Move | null = null;
+    let bestScore = maximizing ? -INFINITY : INFINITY;
+    let flag: 'exact' | 'lower' | 'upper' = 'upper';
 
-    if (maximizingPlayer) {
-      let maxEval = -INFINITY;
-      for (const move of legalMoves) {
+    if (maximizing) {
+      for (const move of ordered) {
         const undo = makeMoveInt(b, move);
-        const result = alphabeta(b, d - 1, alpha, beta, false, c);
-        const evalScore = result.score;
-        undoMoveInt(b, undo); // We need undoMove from MoveGenerator or internal helper
-        // undoMove from aiEngine.ts works on UI Board, not IntBoard?
-        // aiEngine.ts imports makeMove/undoMove from MoveGenerator... no it doesn't exports them helpers.
-        // checks imports:
-        // import { getAllLegalMoves as genLegalInt ... } from './ai/MoveGenerator.js'
-        // We need makeMove/undoMove for INT board.
-        // MoveGenerator.ts has export makeMove(board: BoardStorage, move: any): any
-        // So we need to import them or copy simple logic.
-        // Let's implement simple int make/undo here to be safe and fast.
+        const result = search(b, d - 1, alpha, beta, false);
+        undoMoveInt(b, undo);
 
-        if (evalScore > maxEval) {
-          maxEval = evalScore;
-          bestMove = move;
+        if (result.score > bestScore) {
+          bestScore = result.score;
+          bestMove = result.bestMove || move;
         }
-        alpha = Math.max(alpha, evalScore);
-        if (beta <= alpha) break;
+        alpha = Math.max(alpha, result.score);
+        if (beta <= alpha) {
+          flag = 'lower';
+          break;
+        }
       }
-      return { score: maxEval, bestMove };
+      if (bestScore > alpha) flag = 'exact';
     } else {
-      let minEval = INFINITY;
-      for (const move of legalMoves) {
+      for (const move of ordered) {
         const undo = makeMoveInt(b, move);
-        const result = alphabeta(b, d - 1, alpha, beta, true, c);
-        const evalScore = result.score;
-        undoMoveInt(b, undo); // Need to define this local undo or use import
+        const result = search(b, d - 1, alpha, beta, true);
+        undoMoveInt(b, undo);
 
-        if (evalScore < minEval) {
-          minEval = evalScore;
-          bestMove = move;
+        if (result.score < bestScore) {
+          bestScore = result.score;
+          bestMove = result.bestMove || move;
         }
-        beta = Math.min(beta, evalScore);
-        if (beta <= alpha) break;
+        beta = Math.min(beta, result.score);
+        if (beta <= alpha) {
+          flag = 'upper';
+          break;
+        }
       }
-      return { score: minEval, bestMove };
+      if (bestScore < beta) flag = 'exact';
     }
+
+    // Store in TT
+    tt.set(hash, { depth: d, score: bestScore, flag, bestMove });
+
+    return { score: bestScore, bestMove };
   }
 
-  // Import checks: I need makeMove/undoMove from MoveGenerator (Int version)
-  // Current imports:
-  /*
-  import {
-    getAllLegalMoves as genLegalInt,
-    getAllCaptureMoves,
-    isInCheck as checkInt,
-    ...
-  } from './ai/MoveGenerator.js';
-  */
-  // I should update imports first?
-  // Easier to use genLegalInt which is exported.
-  // makeMove/undoMove logic is simple array swap.
+  // Iterative Deepening: search depth 1, 2, 3, ... until time runs out
+  let bestResult: { score: number; bestMove: Move | null } = { score: 0, bestMove: null };
 
-  const result = alphabeta(board, depth, -INFINITY, INFINITY, true, color);
+  for (let d = 1; d <= maxDepth; d++) {
+    if (performance.now() - start > MAX_SEARCH_TIME * 0.8) break;
+
+    const result = search(board, d, -INFINITY, INFINITY, true);
+
+    // Only accept complete searches (not timed out at root)
+    if (performance.now() - start <= MAX_SEARCH_TIME) {
+      bestResult = result;
+    }
+
+    // If we found a mate, no need to search deeper
+    if (Math.abs(result.score) > MATE_SCORE - 100) break;
+  }
 
   return {
-    move: result.bestMove,
-    score: result.score,
+    move: bestResult.bestMove,
+    score: bestResult.score,
     nodes,
+    depth: maxDepth,
   };
 }
 

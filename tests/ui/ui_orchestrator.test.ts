@@ -41,26 +41,28 @@ describe('UI Orchestrator - Animation Tests', () => {
   });
 
   describe('animateCheck', () => {
-    it('should add flashing class to king cell when check occurs', () => {
+    it('should add in-check and flashing class to king cell when check occurs', () => {
       vi.mocked(AIEngine.findKing).mockReturnValue({ r: 4, c: 4 });
 
       animateCheck(mockGame, 'white');
 
       expect(AIEngine.findKing).toHaveBeenCalledWith(mockGame.board, 'white');
       expect(document.querySelector).toHaveBeenCalledWith('.cell[data-r="4"][data-c="4"]');
-      expect(elementMock.classList.add).toHaveBeenCalledWith('king-check-flash');
+      expect(elementMock.classList.add).toHaveBeenCalledWith('in-check', 'king-check-flash');
     });
 
-    it('should remove flashing class after 1 second', () => {
+    it('should remove flashing class after timeout but keep in-check', () => {
       vi.mocked(AIEngine.findKing).mockReturnValue({ r: 4, c: 4 });
 
       animateCheck(mockGame, 'white');
 
       expect(elementMock.classList.remove).not.toHaveBeenCalled();
 
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1500);
 
       expect(elementMock.classList.remove).toHaveBeenCalledWith('king-check-flash');
+      // in-check should NOT be removed — renderBoard re-applies it
+      expect(elementMock.classList.remove).not.toHaveBeenCalledWith('in-check');
     });
 
     it('should do nothing if king is not found', () => {
@@ -81,13 +83,14 @@ describe('UI Orchestrator - Animation Tests', () => {
   });
 
   describe('animateCheckmate', () => {
-    it('should add mate flash class and trigger confetti', () => {
+    it('should remove in-check, add mate flash class and trigger confetti', () => {
       vi.mocked(AIEngine.findKing).mockReturnValue({ r: 0, c: 4 });
 
       animateCheckmate(mockGame, 'black');
 
       expect(document.querySelector).toHaveBeenCalledWith('.cell[data-r="0"][data-c="4"]');
-      expect(elementMock.classList.add).toHaveBeenCalledWith('king-mate-flash');
+      expect(elementMock.classList.remove).toHaveBeenCalledWith('in-check');
+      expect(elementMock.classList.add).toHaveBeenCalledWith('checkmate', 'king-mate-flash');
       expect(confettiSystem.spawn).toHaveBeenCalled();
     });
 
@@ -99,7 +102,10 @@ describe('UI Orchestrator - Animation Tests', () => {
       vi.advanceTimersByTime(5000);
 
       // Unlike check, checkmate flash sticks around
-      expect(elementMock.classList.remove).not.toHaveBeenCalled();
+      // Only in-check is removed (to replace with checkmate class)
+      expect(elementMock.classList.remove).toHaveBeenCalledWith('in-check');
+      expect(elementMock.classList.remove).not.toHaveBeenCalledWith('king-mate-flash');
+      expect(elementMock.classList.remove).not.toHaveBeenCalledWith('checkmate');
     });
 
     it('should do nothing if king is not found', () => {

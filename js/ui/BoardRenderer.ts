@@ -525,6 +525,13 @@ export function renderBoard(game: any): void {
       ) {
         cell.classList.add('last-move');
       }
+      // Schach-Bedrohung: König im Schach rot markieren
+      if (game.phase === PHASES.PLAY && p && p.type === 'k' && game.isInCheck) {
+        if (game.isInCheck(p.color)) {
+          cell.classList.add('in-check');
+        }
+      }
+
       if (game.phase === PHASES.PLAY && p) {
         const opponent = p.color === 'white' ? 'black' : 'white';
         if (game.isSquareUnderAttack && game.isSquareUnderAttack(r, c, opponent))

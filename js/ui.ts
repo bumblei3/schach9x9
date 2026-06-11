@@ -16,31 +16,32 @@ import { confettiSystem } from './effects.js';
 
 /**
  * Animation für den Schach-Zustand.
+ * Nutzt .in-check (pulse-red) + .king-check-flash für sofortiges Feedback.
  */
 export function animateCheck(game: GameLike, color: Player): void {
   const kingPos = AIEngine.findKing(game.board, color);
   if (kingPos) {
     const cell = document.querySelector(`.cell[data-r="${kingPos.r}"][data-c="${kingPos.c}"]`);
     if (cell) {
-      cell.classList.add('king-check-flash');
-      setTimeout(() => cell.classList.remove('king-check-flash'), 1000);
+      cell.classList.add('in-check', 'king-check-flash');
+      setTimeout(() => {
+        cell.classList.remove('king-check-flash');
+      }, 1500);
     }
   }
 }
 
 /**
  * Animation für den Matt-Zustand.
+ * Nutzt .checkmate (roter Glow) + .king-mate-flash.
  */
 export function animateCheckmate(game: GameLike, color: Player): void {
   const kingPos = AIEngine.findKing(game.board, color);
   if (kingPos) {
     const cell = document.querySelector(`.cell[data-r="${kingPos.r}"][data-c="${kingPos.c}"]`);
     if (cell) {
-      cell.classList.add('king-mate-flash');
-      // No timeout for mate flash, keep it active
-
-      // Winner is the opposite color
-      // Trigger confetti
+      cell.classList.remove('in-check');
+      cell.classList.add('checkmate', 'king-mate-flash');
       confettiSystem.spawn();
     }
   }
