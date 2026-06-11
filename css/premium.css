@@ -298,3 +298,29 @@
   z-index: 10;
   pointer-events: none;
 }
+
+
+/* --- Promotion UI Animation --- */
+#promotion-overlay {
+  /* Will be animated when .animate-in class is added */
+  opacity: 0;
+  transform: translateY(20px);
+}
+#promotion-overlay.animate-in {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Promotion Overlay Animation --- */
+#promotion-overlay {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#promotion-overlay.show {
+  opacity: 1;
+  transform: scale(1);
+}

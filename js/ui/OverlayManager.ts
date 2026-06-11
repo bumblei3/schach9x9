@@ -149,6 +149,7 @@ export function showPromotionUI(
       optionsContainer.appendChild(btn);
     });
     overlay.classList.remove('hidden');
+    overlay.classList.add('show');
 
     // Focus first recommended option
     const firstRec = optionsContainer.querySelector('.promotion-option.recommended') as HTMLElement;
