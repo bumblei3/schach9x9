@@ -1,4 +1,4 @@
-import { SHOP_PIECES, PIECE_VALUES } from '../config.js';
+import { SHOP_PIECES, PIECE_VALUES, type ShopPieceConfig } from '../config.js';
 import { PIECE_SVGS } from '../chess-pieces.js';
 import { PHASES, type Game, type PieceWithMoved } from '../gameEngine.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
@@ -190,7 +190,7 @@ export class ShopManager {
   /**
    * Returns list of available upgrades for a piece type.
    */
-  private getAvailableUpgrades(type: string): any[] {
+  private getAvailableUpgrades(type: string): ShopPieceConfig[] {
     const upgrades: Record<string, string[]> = {
       p: ['n', 'b', 'r', 'j', 'a', 'c', 'q'], // Pawn upgrades
       q: ['e'], // Queen -> Angel
@@ -204,8 +204,8 @@ export class ShopManager {
 
     const symbols = upgrades[type] || [];
     return symbols
-      .map(sym => Object.values(SHOP_PIECES).find(p => p.symbol === sym))
-      .filter(p => {
+      .map(sym => Object.values(SHOP_PIECES).find(p => p.symbol === sym) ?? null)
+      .filter((p): p is ShopPieceConfig => {
         if (!p) return false;
         // Check for specific unlock conditions
         // Angel ('e') requires campaign unlock in 'setup' mode
