@@ -12,6 +12,7 @@ import {
   evaluatePosition,
   setOpeningBook,
   setProgressCallback,
+  type AIProgressData,
 } from '../aiEngine.js';
 
 const workerSelf: Worker = self as unknown as Worker;
@@ -44,7 +45,7 @@ self.onmessage = async function (e: MessageEvent) {
         const { board, color, depth, config, personality, moveNumber } = data;
 
         // Setup progress callback
-        setProgressCallback((progress: any) => {
+        setProgressCallback((progress: AIProgressData) => {
           workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
 
@@ -101,7 +102,7 @@ self.onmessage = async function (e: MessageEvent) {
 
       case 'search': {
         const { board, color, depth, personality } = data;
-        // setProgressCallback((progress: any) => {
+        // setProgressCallback((progress: AIProgressData) => {
         //   workerSelf.postMessage({ type: 'progress', id, data: progress });
         // });
 

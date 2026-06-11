@@ -243,8 +243,8 @@ export class StatisticsManager {
       if (merge) {
         // Merge games (avoid duplicates by ID)
         const existingIds = new Set(this.data.games.map(g => g.id));
-        const newGames = importData.data.games.filter((g: any) => !existingIds.has(g.id));
-        this.data.games.push(...newGames);
+        const newGames = (importData.data as { games: Array<{ id: string }> }).games.filter((g: any) => !existingIds.has(g.id));
+        this.data.games.push(...(newGames as any[]));
 
         // Recalculate stats from all games
         this.recalculateStats();

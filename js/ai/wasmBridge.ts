@@ -33,7 +33,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
 
         // url module is dynamically imported; fileURLToPath is not typed
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const __dirname = path.dirname((url as any).fileURLToPath(import.meta.url));
+        const __dirname = path.dirname((url as unknown as { fileURLToPath: (u: unknown) => string }).fileURLToPath(import.meta.url));
         const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
         const wasmBuffer = fs.readFileSync(wasmPath);
 

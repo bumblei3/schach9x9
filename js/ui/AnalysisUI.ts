@@ -249,6 +249,7 @@ export class AnalysisUI {
 
   undoMoveOnBoard(board: unknown[][], move: unknown): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const m = move as any;
     const { from, to, piece, captured, specialMove } = m;
 

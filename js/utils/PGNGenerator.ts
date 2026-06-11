@@ -53,7 +53,7 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
   }
 
   // Handle castling
-  const sm = (move as any).specialMove;
+  const sm = (move as any).specialMove as Record<string, unknown> | undefined;
   if (sm?.type === 'castling') {
     return sm.isKingside ? 'O-O' : 'O-O-O';
   }
@@ -87,7 +87,7 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
   // Promotion
   if (sm?.type === 'promotion') {
     const promotedTo = sm.promotedTo || 'q';
-    notation += '=' + (PIECE_NOTATION[promotedTo] || 'Q');
+    notation += '=' + (PIECE_NOTATION[promotedTo as string] || 'Q');
   }
 
   return notation;
@@ -99,7 +99,7 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
  * @param options - Optional metadata
  * @returns PGN formatted string
  */
-export function generatePGN(game: Game, options: any = {}): string {
+export function generatePGN(game: Game, options: Record<string, unknown> = {}): string {
   const headers: string[] = [];
 
   // Standard headers
