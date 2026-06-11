@@ -3,6 +3,7 @@
  * @module OverlayManager
  */
 import { renderBoard } from './BoardRenderer.js';
+import { soundManager } from '../sounds.js';
 import type { Game, Player } from '../gameEngine.js';
 
 /**
@@ -66,6 +67,7 @@ export function closeModal(): void {
 
 /**
  * Zeigt das Overlay für die Bauernbeförderung an.
+ * Nutzt ein 4-Spalten Grid mit empfohlenen Figuren, Sound und Keyboard-Support.
  */
 export function showPromotionUI(
   game: Game,
@@ -83,21 +85,46 @@ export function showPromotionUI(
   }
 
   optionsContainer.innerHTML = '';
+  optionsContainer.className = 'promotion-grid';
+
+  // Sort by value descending, mark top 2 as recommended
   const options = [
     { type: 'q', name: 'Dame', cost: 9 },
-    { type: 'e', name: 'Angel', cost: 12 },
+    { type: 'e', name: 'Engel', cost: 12 },
     { type: 'c', name: 'Kanzler', cost: 8 },
     { type: 'a', name: 'Erzbischof', cost: 7 },
     { type: 'r', name: 'Turm', cost: 5 },
     { type: 'b', name: 'Läufer', cost: 3 },
     { type: 'n', name: 'Springer', cost: 3 },
-  ];
+  ].sort((a, b) => b.cost - a.cost);
+
+  const recommended = new Set([options[0].type, options[1].type]);
+
+  const selectPiece = (opt: typeof options[0]) => {
+    const piece = game.board[r][c];
+    if (piece) {
+      piece.type = opt.type as any;
+      if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
+      if (game.log) game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zu ${opt.name} befördert!`);
+      soundManager.playPromotion();
+      overlay.classList.add('hidden');
+      renderBoard(game);
+      if (callback) callback();
+    }
+  };
 
   try {
     options.forEach(opt => {
       const btn = document.createElement('div');
       btn.className = 'promotion-option';
       btn.dataset.piece = opt.type;
+      btn.tabIndex = 0;
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('aria-label', `${opt.name} befördern`);
+
+      if (recommended.has(opt.type)) {
+        btn.classList.add('recommended');
+      }
 
       const svgs = (window as any).PIECE_SVGS;
       if (!svgs || !svgs[color] || !svgs[color][opt.type]) {
@@ -105,24 +132,27 @@ export function showPromotionUI(
       }
 
       btn.innerHTML = `
+        ${recommended.has(opt.type) ? '<div class="promo-badge">★</div>' : ''}
         <div class="piece-svg">${svgs ? svgs[color][opt.type] : '?'}</div>
         <div class="piece-name">${opt.name}</div>
         <div class="piece-cost">${opt.cost} Pkt</div>
       `;
-      btn.onclick = () => {
-        const piece = game.board[r][c];
-        if (piece) {
-          piece.type = opt.type as any;
-          if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
-          if (game.log) game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer befördert!`);
-          overlay.classList.add('hidden');
-          renderBoard(game);
-          if (callback) callback();
+
+      btn.onclick = () => selectPiece(opt);
+      btn.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectPiece(opt);
         }
       };
+
       optionsContainer.appendChild(btn);
     });
     overlay.classList.remove('hidden');
+
+    // Focus first recommended option
+    const firstRec = optionsContainer.querySelector('.promotion-option.recommended') as HTMLElement;
+    if (firstRec) firstRec.focus();
   } catch (e) {
     console.error('[OverlayManager] Error showing promotion UI:', e);
   }

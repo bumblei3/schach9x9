@@ -409,6 +409,35 @@ class SoundManager {
     });
   }
 
+  public playPromotion(): void {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.audioContext) return;
+
+    // Ascending arpeggio: C-E-G-C (celebration)
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      if (!this.audioContext) return;
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+
+      osc.connect(gain);
+      gain.connect(this.audioContext.destination);
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, this.audioContext.currentTime + i * 0.08);
+
+      gain.gain.setValueAtTime(this.volume * 0.4, this.audioContext.currentTime + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(
+        0.01,
+        this.audioContext.currentTime + i * 0.08 + 0.15
+      );
+
+      osc.start(this.audioContext.currentTime + i * 0.08);
+      osc.stop(this.audioContext.currentTime + i * 0.08 + 0.15);
+    });
+  }
+
   public playGameStart(): void {
     if (!this.enabled) return;
     this.init();

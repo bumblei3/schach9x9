@@ -27,6 +27,17 @@ vi.mock('../js/effects.js', () => ({
   confettiSystem: { spawn: vi.fn() },
 }));
 
+vi.mock('../js/sounds.js', () => ({
+  soundManager: {
+    playPromotion: vi.fn(),
+    playMove: vi.fn(),
+    playCheck: vi.fn(),
+    playGameOver: vi.fn(),
+    playGameStart: vi.fn(),
+    enabled: true,
+  },
+}));
+
 // Import UI module
 import * as UI from '../js/ui.js';
 

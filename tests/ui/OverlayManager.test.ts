@@ -8,6 +8,14 @@ vi.mock('../../js/ui/BoardRenderer.js', () => ({
   renderBoard: vi.fn(),
 }));
 
+// Mock SoundManager
+vi.mock('../../js/sounds.js', () => ({
+  soundManager: {
+    playPromotion: vi.fn(),
+    enabled: true,
+  },
+}));
+
 const OverlayManager = await import('../../js/ui/OverlayManager.js');
 const { renderBoard } = await import('../../js/ui/BoardRenderer.js');
 
@@ -138,12 +146,13 @@ describe('OverlayManager', () => {
 
       OverlayManager.showPromotionUI(game as any, 0, 0, 'white', moveRecord, callback);
 
-      // Click second option (e = Engel)
+      // Options are sorted by cost descending: e(12), q(9), c(8), a(7), r(5), b(3), n(3)
+      // Click second option (q = Dame)
       const options = document.getElementById('promotion-options');
       (options!.children[1] as HTMLElement).click();
 
-      expect(game.board[0][0].type).toBe('e');
-      expect((moveRecord as any).specialMove).toEqual({ type: 'promotion', promotedTo: 'e' });
+      expect(game.board[0][0].type).toBe('q');
+      expect((moveRecord as any).specialMove).toEqual({ type: 'promotion', promotedTo: 'q' });
       expect(game.log).toHaveBeenCalled();
       expect(renderBoard).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
