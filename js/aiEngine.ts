@@ -774,7 +774,7 @@ export async function getTopMoves(
       if (p !== PIECE_NONE) {
         const type = p & TYPE_MASK;
         const pColor = p & COLOR_MASK;
-        const val = PIECE_VALUES[type] || 0;
+        const val = EVAL_VALUES[type] || 0;
         const row = Math.floor(i / 9);
         const col = i % 9;
         const centerBonus = 4 - Math.abs(row - 4) + (4 - Math.abs(col - 4));
