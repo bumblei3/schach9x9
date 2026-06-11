@@ -3,7 +3,7 @@
  * Handles move validation, check detection, and game end conditions.
  */
 import type { Player, Square, Piece } from './types/game.js';
-import { isBlockedCell, BoardShape } from './config.ts';
+import { isBlockedCell, BoardShape } from './config';
 
 export interface GameWithBoard {
   board: (Piece | null)[][];
@@ -151,7 +151,6 @@ export class RulesEngine {
 
   getPseudoLegalMoves(r: number, c: number, piece: Piece): Square[] {
     const moves: Square[] = [];
-
     const size = this.board.length;
     const isInside = (r: number, c: number): boolean =>
       r >= 0 && r < size && c >= 0 && c < size && !isBlockedCell(r, c, this.game.boardShape);

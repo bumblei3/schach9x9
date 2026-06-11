@@ -3,17 +3,17 @@
  * Converts UI Objects to Integer Board for the optimized AI Engine.
  */
 
-import { logger } from './logger.ts';
+import { logger } from './logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 import {
   getBestMoveWasm,
   getWasmNodesEvaluated,
   resetWasmNodesEvaluated,
-} from './ai/wasmBridge.ts';
+} from './ai/wasmBridge';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook.ts';
+import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 import {
@@ -26,7 +26,7 @@ import {
   findKing as findKingInt,
   see as seeInt,
   type Move,
-} from './ai/MoveGenerator.ts';
+} from './ai/MoveGenerator';
 
 import {
   SQUARE_COUNT,
@@ -53,6 +53,9 @@ import { getCurrentBoardShape } from './config.js';
 import type { Player, Square, Piece } from './types/game.js';
 
 // --- Types ---
+import { computeZobristHash, TranspositionTable, TTEntry } from './ai/transpositionTable';
+
+export { computeZobristHash };
 
 export interface EloParams {
   maxDepth: number;
@@ -467,21 +470,7 @@ const KING_MIDGAME_TABLE = [
 ];
 
 // Transposition Table
-interface TTEntry {
-  depth: number;
-  score: number;
-  flag: 'exact' | 'lower' | 'upper';
-  bestMove: Move | null;
-}
-
-// Zobrist-like hash: simple board hash for TT lookup
-function computeBoardHash(b: IntBoard): number {
-  let h = 0;
-  for (let i = 0; i < SQUARE_COUNT; i++) {
-    h = ((h << 5) - h + b[i]) | 0;
-  }
-  return h;
-}
+// TTEntry and computeZobristHash imported from ./transpositionTable.ts
 
 function evaluate(b: IntBoard, c: number): number {
   let score = 0;
@@ -596,7 +585,7 @@ async function runJsSearch(
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const start = performance.now();
   let nodes = 0;
-  const tt = new Map<number, TTEntry>();
+  const tt = new TranspositionTable();
 
   function search(b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean): { score: number; bestMove: Move | null } {
     nodes++;
@@ -606,8 +595,8 @@ async function runJsSearch(
       return { score: evaluate(b, color), bestMove: null };
     }
 
-    const hash = computeBoardHash(b);
-    const ttEntry = tt.get(hash);
+    const hash = computeZobristHash(b);
+    const ttEntry = tt.probe(hash, d);
     let ttBest: Move | null = null;
 
     if (ttEntry && ttEntry.depth >= d) {
@@ -681,7 +670,7 @@ async function runJsSearch(
     }
 
     // Store in TT
-    tt.set(hash, { depth: d, score: bestScore, flag, bestMove });
+    tt.store(hash, d, bestScore, flag, bestMove);
 
     return { score: bestScore, bestMove };
   }
@@ -881,10 +870,6 @@ export async function evaluatePosition(
   return jsResult.score;
 }
 
-// Deprecated/Stubbed
-export function computeZobristHash(_uiBoard: UiBoard, _turnColor: Player): number {
-  return 0;
-}
 
 export function getAllLegalMoves(uiBoard: UiBoard, turnColor: Player): MoveResult[] {
   const board = convertBoardToInt(uiBoard);

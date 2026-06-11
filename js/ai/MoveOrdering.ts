@@ -10,10 +10,10 @@ import {
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
   TYPE_MASK,
-} from './BoardDefinitions.ts';
-import type { Move } from './MoveGenerator.ts';
-
-// import { see } from './MoveGenerator.ts';
+  COLOR_MASK,
+} from './BoardDefinitions';
+import type { Move } from './MoveGenerator';
+import { makeMove, isInCheck } from './MoveGenerator';
 
 // Order Constants
 const HASH_MOVE_SCORE = 3000000;
@@ -23,6 +23,7 @@ const KILLER_MOVE_2_SCORE = 800000;
 const COUNTER_MOVE_SCORE = 700000;
 const HISTORY_SCORE_MAX = 100000; // Cap
 const PROMOTION_SCORE = 1500000;
+const THREAT_CHECK_SCORE = 300000; // Bonus for moves that give check
 
 const PIECE_VALUES: Record<number, number> = {
   [PIECE_PAWN]: 100,
@@ -36,19 +37,9 @@ const PIECE_VALUES: Record<number, number> = {
   [PIECE_ANGEL]: 1000,
 };
 
-// Counter Move Table (Indexed by [prevMoveTo][prevMovePieceType] -> BestMove)
-// Or simple [prevTo][currTo]?
-// Old logic: updateCounterMove(prevMove, bestMove).
-// let counterMoveTable = new Int32Array(SQUARE_COUNT * SQUARE_COUNT); // ?
-// Let's use a simpler structure or Map for now.
-// For Grand Refactor speed, fixed array is best.
-// Index by 'prevMove.to' (0-80). Store 'bestMove' (packed int).
-// This is "Last move reply".
-// A full [from][to] table is too big? 81*81 = 6561. Small!
-// We can track [prevMove.to] -> responseMove. (1D array).
-// Or [prevMove.from][prevMove.to]? (6561 * 2 bytes). 13KB. Easy.
-
-const counterMoveTable = new Int16Array(81 * 81); // Pack move {from, to} into Int16
+// Counter Move Table (Indexed by [prevMoveFrom][prevMoveTo] -> BestMove)
+// Pack move {from, to} into Int16: (from << 8) | to
+let counterMoveTable = new Int16Array(81 * 81);
 
 export function clearMoveOrdering(): void {
   counterMoveTable.fill(0);
@@ -136,6 +127,19 @@ export function orderMoves(
 
     // Promotion?
     if (move.flags === 'promotion') score += PROMOTION_SCORE;
+
+    // 6. Threat: check if move gives check
+    const moverPiece = board[move.from];
+    const moverColor = moverPiece & COLOR_MASK;
+    if (moverColor !== 0) {
+      const opponentColor = moverColor ^ COLOR_MASK;
+      // Copy board to avoid modifying original
+      const boardCopy = new Int8Array(board);
+      makeMove(boardCopy, move);
+      if (isInCheck(boardCopy, opponentColor)) {
+        score += THREAT_CHECK_SCORE;
+      }
+    }
 
     return { move, score };
   });
