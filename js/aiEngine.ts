@@ -1044,6 +1044,29 @@ async function runJsSearch(
       }
     }
 
+    // --- Futility Pruning / Razoring ---
+    // At low depths, if static eval + margin can't reach alpha, skip to quiescence.
+    // d==1: Futility (margin ~2 pawns), d==2: Razoring (margin ~4 pawns)
+    const FUTILITY_MARGIN = 200;
+    const RAZOR_MARGIN = 400;
+    if (d <= 2 && d >= 1 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
+      const standPat = evaluate(b, color);
+      const margin = d === 2 ? RAZOR_MARGIN : FUTILITY_MARGIN;
+      // For maximizing: if standPat + margin < alpha, position is too good to improve
+      // For minimizing: if standPat - margin > beta, position is too bad to worsen
+      if (maximizing) {
+        if (standPat + margin < alpha) {
+          const qScore = quiesce(b, alpha, beta, color, start, { count: 0 });
+          return { score: qScore, bestMove: null };
+        }
+      } else {
+        if (standPat - margin > beta) {
+          const qScore = quiesce(b, alpha, beta, color, start, { count: 0 });
+          return { score: qScore, bestMove: null };
+        }
+      }
+    }
+
     const activeColorStr = (maximizing ? color : color ^ COLOR_MASK) === COLOR_WHITE ? 'white' : 'black';
     const legalMoves = genLegalInt(b, activeColorStr);
 
