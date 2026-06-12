@@ -241,7 +241,7 @@ export class OpeningBook {
       const moveTo = { r: move.to.r, c: move.to.c };
 
       // Find existing move in book
-      let existing = pos.moves.find(
+      const existing = pos.moves.find(
         (m) =>
           m.from.r === moveFrom.r &&
           m.from.c === moveFrom.c &&
