@@ -1015,6 +1015,35 @@ async function runJsSearch(
       return { score: qScore, bestMove: null };
     }
 
+    // --- Null-Move Pruning ---
+    // If we have enough depth and material, and we're not in check,
+    // try a "null move" (pass the turn) with reduced depth.
+    // If the opponent can't even gain an advantage after we pass, the position is so good we can prune.
+    const NULL_MOVE_R = 2; // reduction amount
+    if (d >= 3 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
+      // Check if we have enough material to avoid NMP in endgame
+      let hasMaterial = false;
+      const activeColor = maximizing ? color : color ^ COLOR_MASK;
+      for (let i = 0; i < SQUARE_COUNT; i++) {
+        const p = b[i];
+        if (p !== PIECE_NONE && (p & COLOR_MASK) === activeColor) {
+          const type = p & TYPE_MASK;
+          if (type !== PIECE_PAWN && type !== PIECE_KING) {
+            hasMaterial = true;
+            break;
+          }
+        }
+      }
+      if (hasMaterial) {
+        // Search with reduced depth: same board, same side to move, but reduced depth
+        const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, maximizing);
+        if (nullScore.score >= beta) {
+          // Null-move cutoff — position is so good that even passing doesn't hurt
+          return { score: beta, bestMove: null };
+        }
+      }
+    }
+
     const activeColorStr = (maximizing ? color : color ^ COLOR_MASK) === COLOR_WHITE ? 'white' : 'black';
     const legalMoves = genLegalInt(b, activeColorStr);
 
