@@ -13,7 +13,7 @@ import {
   COLOR_MASK,
 } from './BoardDefinitions';
 import type { Move } from './MoveGenerator';
-import { makeMove, isInCheck } from './MoveGenerator';
+import { makeMove, isInCheck, see } from './MoveGenerator';
 
 // Order Constants
 const HASH_MOVE_SCORE = 3000000;
@@ -97,12 +97,13 @@ export function orderMoves(
         const victimVal = PIECE_VALUES[target & TYPE_MASK] || 0;
         const attackerVal = PIECE_VALUES[board[move.from] & TYPE_MASK] || 0;
 
-        // MVV-LVA
-        score = WINNING_CAPTURE_SCORE + victimVal * 10 - attackerVal;
-
-        // SEE penalty if bad capture?
-        // if (see(board, move) < 0) score -= 500000;
-        // For speed, trust MVV-LVA for now.
+        // MVV-LVA + SEE: penalize losing captures
+        const seeScore = see(board, move);
+        if (seeScore < 0) {
+          score = WINNING_CAPTURE_SCORE + seeScore; // Use SEE score directly for losing captures
+        } else {
+          score = WINNING_CAPTURE_SCORE + victimVal * 10 - attackerVal;
+        }
       } else {
         // 3. Killer Moves
         if (killers) {
