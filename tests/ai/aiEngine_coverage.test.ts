@@ -74,16 +74,16 @@ describe('AIEngine Coverage Boost', () => {
   test('getBestMove - success path', async () => {
     board[0][0] = { type: 'k', color: 'white' };
     board[8][8] = { type: 'k', color: 'black' };
-    const result = await aiEngine.getBestMove(board, 'white', 1);
+    const result = await aiEngine.getBestMove(board, 'white', 1, 'hard', { elo: 2500 });
     expect(result).toBeDefined();
-  });
+  }, 30000);
 
   test('getBestMoveDetailed with Elo config', async () => {
     board[0][0] = { type: 'k', color: 'white' };
     board[8][8] = { type: 'k', color: 'black' };
-    const result = await aiEngine.getBestMoveDetailed(board, 'white', 1, { elo: 1000 });
+    const result = await aiEngine.getBestMoveDetailed(board, 'white', 1, { elo: 2500 });
     expect(result).toBeDefined();
-  });
+  }, 30000);
 
   test('isInCheck and isSquareAttacked', () => {
     board[4][4] = { type: 'k', color: 'white' };

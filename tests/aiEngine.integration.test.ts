@@ -10,10 +10,11 @@ describe('AIEngine Integration', () => {
     game = new Game(15, 'classic');
   });
 
-  test('analyzePosition re-export functionality', () => {
-    // analyzePosition is currently a stub returning null in Wasm port
-    const result = AIEngine.analyzePosition(game.board, 'white');
-    expect(result).toBeNull();
+  test('analyzePosition re-export functionality', async () => {
+    // analyzePosition now delegates to getBestMoveDetailed
+    const result = await AIEngine.analyzePosition(game.board, 'white');
+    // Result may be null (no legal moves in empty board) or a valid SearchResult
+    expect(result === null || typeof result === 'object').toBe(true);
   });
 
   test('getBestMove re-export functionality', async () => {

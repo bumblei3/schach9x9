@@ -393,5 +393,16 @@ export function evaluate(b: IntBoard, c: number): number {
   // --- Tapered evaluation ---
   const maxPhase = 24;
   phase = Math.min(phase, maxPhase);
+
+  // Tempo bonus: small advantage for side to move
+  const TEMPO_BONUS = 10;
+  if (c === COLOR_WHITE) {
+    mgScore += TEMPO_BONUS;
+    egScore += TEMPO_BONUS;
+  } else {
+    mgScore -= TEMPO_BONUS;
+    egScore -= TEMPO_BONUS;
+  }
+
   return Math.round((mgScore * phase + egScore * (maxPhase - phase)) / maxPhase);
 }

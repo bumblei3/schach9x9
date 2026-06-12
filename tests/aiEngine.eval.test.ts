@@ -59,19 +59,13 @@ describe('AIEngine Deep Evaluation', () => {
   });
 
   test('Endgame King positioning', async () => {
-    // Only kings left
+    // White king in center (row 4, col 4) vs corner (row 8, col 8)
     board[0][0] = createPiece('k', 'black');
-    board[8][4] = createPiece('k', 'white');
-
+    board[4][4] = createPiece('k', 'white');
     const centerScore = await evaluatePosition(board, 'white');
-
-    // Move white king to corner
-    board[8][4] = null;
+    board[4][4] = null;
     board[8][8] = createPiece('k', 'white');
     const cornerScore = await evaluatePosition(board, 'white');
-
-    // In endgame, king should prefer center (or attacking black king)
-    // Our PST_EG for King has higher values in center
     expect(centerScore).toBeGreaterThan(cornerScore);
   });
 

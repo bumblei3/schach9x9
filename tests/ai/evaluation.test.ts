@@ -45,9 +45,10 @@ function minimalPosition(): Int8Array {
 }
 
 describe('Evaluation - Material + Positional', () => {
-  test('empty board should evaluate to 0', () => {
+  test('empty board should evaluate to tempo bonus', () => {
     const board = emptyBoard();
-    expect(evaluate(board, COLOR_WHITE)).toBe(0);
+    // Empty board: only tempo bonus applies (side to move gets +10)
+    expect(evaluate(board, COLOR_WHITE)).toBe(10);
   });
 
   test('single white pawn should be positive for white', () => {
