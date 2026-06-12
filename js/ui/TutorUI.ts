@@ -244,6 +244,10 @@ export async function showTutorSuggestions(
       if (!hints || hints.length === 0) {
         // Instead of an alert, we could show a toast or just a log
         console.log('[TutorUI] No hints available yet.');
+        // Show user-friendly toast
+        import('../ui.js').then(ui => {
+          ui.showToast('Keine Vorschläge verfügbar. Möglicherweise ist die KI noch am Denken oder es gibt keine legalen Züge.', 'info');
+        }).catch(() => {});
         return;
       }
 

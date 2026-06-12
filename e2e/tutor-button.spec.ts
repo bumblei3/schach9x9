@@ -6,7 +6,7 @@ test.describe('Tutor Button Functionality', () => {
     page.on('console', msg => console.log(`[PAGE LOG] ${msg.type()}: ${msg.text()}`));
 
     // Navigate to the app with e2e flag for faster AI in tests
-    await page.goto('/?disable-sw&e2e=1');
+    await page.goto('/?disable-sw');
 
     // Wait for app and gameController to be ready
     await page.waitForFunction(

@@ -96,6 +96,16 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
       if (isTestEnv) {
         return createMockHints(game, turnColor);
       }
+      // Debug logging for production
+      console.warn('[HintGenerator] getTopMoves returned empty array', {
+        turnColor,
+        tutorDepth,
+        maxTimeMs,
+        moveNumber,
+        phase: game.phase,
+        isAI: game.isAI,
+        boardSize: game.board.length
+      });
       return [];
     }
 
