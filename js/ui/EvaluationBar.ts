@@ -49,7 +49,8 @@ export class EvaluationBar {
     this.fill = document.getElementById('eval-bar-fill');
     this.scoreLabel = document.getElementById('eval-bar-score');
 
-    this.update(0); // Initial state (balanced)
+    // Initialize at 50% (balanced) with transition
+    this.update(0);
   }
 
   /**
@@ -69,11 +70,17 @@ export class EvaluationBar {
     // 0 = Black winning (-1000cp or more), 100 = White winning (+1000cp or more), 50 = Balanced
     const percentage = this.scoreToPercentage(score);
 
-    // Update fill height (White is top, Black is bottom)
+    // Update fill height (White is top, Black is bottom) with smooth transition
     this.fill.style.height = `${percentage}%`;
 
-    // Update color/labels if needed
+    // Update fill color based on who's winning - smooth transition
+    this.updateFillColor(score);
+
+    // Update score label style/color
     this.updateStyle(score);
+
+    // Subtle pulse on significant score changes (> 1.5 pawns)
+    this.maybePulse(score);
   }
 
   private scoreToPercentage(score: number): number {
@@ -91,6 +98,58 @@ export class EvaluationBar {
       this.scoreLabel.className = 'eval-bar-score win-black';
     } else {
       this.scoreLabel.className = 'eval-bar-score neutral';
+    }
+  }
+
+  /**
+   * Updates the fill gradient color based on evaluation
+   * White winning -> green gradient, Black winning -> red gradient, Balanced -> neutral
+   */
+  private updateFillColor(score: number): void {
+    if (!this.fill) return;
+
+    const normalized = Math.max(-1, Math.min(1, score / 1000)); // Clamp to [-1, 1]
+    
+    // Interpolate between red (black winning) -> neutral -> green (white winning)
+    let gradient: string;
+    if (normalized > 0) {
+      // White advantage: neutral -> green
+      const intensity = Math.min(1, normalized * 2); // 0 to 1
+      const r = Math.round(30 * (1 - intensity) + 34 * intensity);
+      const g = Math.round(41 * (1 - intensity) + 197 * intensity);
+      const b = Math.round(59 * (1 - intensity) + 94 * intensity);
+      gradient = `linear-gradient(to bottom, rgb(${r}, ${g}, ${b}), rgb(${Math.max(15, r - 20)}, ${Math.max(20, g - 30)}, ${Math.max(15, b - 20)}))`;
+    } else if (normalized < 0) {
+      // Black advantage: neutral -> red
+      const intensity = Math.min(1, -normalized * 2);
+      const r = Math.round(30 * (1 - intensity) + 239 * intensity);
+      const g = Math.round(41 * (1 - intensity) + 68 * intensity);
+      const b = Math.round(59 * (1 - intensity) + 68 * intensity);
+      gradient = `linear-gradient(to bottom, rgb(${r}, ${g}, ${b}), rgb(${Math.max(15, r - 20)}, ${Math.max(20, g - 30)}, ${Math.max(15, b - 20)}))`;
+    } else {
+      // Neutral
+      gradient = 'linear-gradient(to bottom, #1e293b, #0f172a)';
+    }
+
+    this.fill.style.background = gradient;
+    this.fill.style.transition = 'background 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+  }
+
+  /**
+   * Adds a subtle pulse animation when score changes significantly
+   */
+  private maybePulse(score: number): void {
+    if (!this.fill) return;
+    
+    const diff = Math.abs(score - this.currentScore);
+    const prevScore = this.currentScore; // Will be updated after this call
+    
+    // Only pulse on significant changes (> 150 centipawns = 1.5 pawns)
+    if (diff > 150) {
+      this.fill.style.animation = 'eval-pulse 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      this.fill.addEventListener('animationend', () => {
+        this.fill!.style.animation = '';
+      }, { once: true });
     }
   }
 

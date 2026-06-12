@@ -5,6 +5,7 @@
 import { BOARD_SIZE, PHASES, isBlockedCell } from '../config.js';
 import { debounce } from '../utils.js';
 import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
+import { updateLastMoveArrow, clearArrows } from './ArrowRenderer.js';
 import type { Piece, Player, PieceType, Square } from '../types/game.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
@@ -552,6 +553,15 @@ export function renderBoard(game: any): void {
         }
       }
     }
+  }
+
+  // Draw last move arrow (after all cells rendered)
+  const boardContainer = document.getElementById('board-container') as HTMLElement | null;
+  if (game.lastMoveHighlight) {
+    const isPlayerMove = game.lastMoveHighlight.piece?.color === game.playerColor;
+    updateLastMoveArrow(boardContainer, game.lastMoveHighlight, isPlayerMove);
+  } else {
+    clearArrows(boardContainer);
   }
 }
 
