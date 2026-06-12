@@ -554,8 +554,15 @@ export function createJsSearch() {
         return { score: bestScore, bestMove };
       }
 
-      // Iterative Deepening with Aspiration Windows
+      // Iterative Deepening with Aspiration Windows + Internal Iterative Reduction (IIR)
       let bestResult: { score: number; bestMove: Move | null } = { score: 0, bestMove: null };
+      
+      // IIR State tracking
+      const lastScores: number[] = [];
+      const IIR_WINDOW = 3;           // Number of iterations to track for stability
+      const IIR_STABILITY_THRESHOLD = 50; // Score delta considered "stable" (centipawns)
+      let iirStableCount = 0;
+      let iirUnstableCount = 0;
 
       for (let d = 1; d <= maxDepth; d++) {
         if (performance.now() - start > MAX_SEARCH_TIME * 0.8) break;
@@ -563,8 +570,26 @@ export function createJsSearch() {
         let prevScore = d === 1 ? 0 : bestResult.score;
         if (Math.abs(prevScore) > MATE_SCORE - 200) prevScore = 0;
 
-        let a = prevScore - ASPIRATION_WINDOW;
-        let be = prevScore + ASPIRATION_WINDOW;
+        // --- Internal Iterative Reduction (IIR) ---
+        // Adjust aspiration window based on score stability
+        let aspirationMult = 1;
+        if (lastScores.length >= 2) {
+          const delta = Math.abs(lastScores[lastScores.length - 1] - lastScores[lastScores.length - 2]);
+          if (delta <= IIR_STABILITY_THRESHOLD) {
+            iirStableCount++;
+            iirUnstableCount = 0;
+            // Stable: tighten aspiration window for efficiency
+            if (iirStableCount >= 2) aspirationMult = 0.5;
+          } else {
+            iirUnstableCount++;
+            iirStableCount = 0;
+            // Unstable: widen aspiration window to avoid re-searches
+            if (iirUnstableCount >= 1) aspirationMult = 2.0;
+          }
+        }
+
+        let a = prevScore - ASPIRATION_WINDOW * aspirationMult;
+        let be = prevScore + ASPIRATION_WINDOW * aspirationMult;
         let result = search(board, d, a, be, true);
 
         if (result.score <= a) {
@@ -577,8 +602,25 @@ export function createJsSearch() {
           result = search(board, d, a, be, true);
         }
 
+        // Track scores for IIR
+        lastScores.push(result.score);
+        if (lastScores.length > IIR_WINDOW) lastScores.shift();
+
+        // IIR: Skip depth if score is extremely stable (diminishing returns)
+        // Only skip if we have enough data and time permits next depth
+        const shouldSkipDepth = d >= 4 && 
+          lastScores.length >= 3 &&
+          Math.abs(lastScores[lastScores.length - 1] - lastScores[lastScores.length - 2]) < 10 &&
+          Math.abs(lastScores[lastScores.length - 2] - lastScores[lastScores.length - 3]) < 10 &&
+          (performance.now() - start) < MAX_SEARCH_TIME * 0.5;
+
         if (performance.now() - start <= MAX_SEARCH_TIME) bestResult = result;
         if (Math.abs(result.score) > MATE_SCORE - 100) break;
+        
+        // Optional: Early exit if IIR suggests depth increase won't help
+        if (shouldSkipDepth && d + 1 <= maxDepth) {
+          // Still do one more iteration for safety, but could break here
+        }
       }
 
       return { move: bestResult.bestMove, score: bestResult.score, nodes, depth: maxDepth };
