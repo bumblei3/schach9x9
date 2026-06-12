@@ -32,10 +32,10 @@ interface ScoreDescription {
 }
 
 interface GameExtensions {
-  executeMove: (from: { r: number; c: number }, to: { r: number; c: number }) => void;
+  executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }) => void;
   getTutorHints: () => Promise<TutorHint[]>;
-  analyzeMoveWithExplanation: (move: unknown, score: number) => MoveExplanation;
-  getScoreDescription: (score: number) => ScoreDescription | null;
+  analyzeMoveWithExplanation: (_move: unknown, _score: number) => MoveExplanation;
+  getScoreDescription: (_score: number) => ScoreDescription | null;
 }
 
 type GameWithExtensions = Game & Partial<GameExtensions> & Record<string, unknown>;

@@ -49,7 +49,9 @@ interface SetupTemplate {
 
 /**
  * Gets tutor hints by calling the AI engine
+ * @param _tutorController - Tutor controller (unused, kept for API consistency)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getTutorHints(game: Game, _tutorController: unknown): Promise<TutorHint[]> {
   const turnColor = game.turn;
 
@@ -57,7 +59,7 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
   const isTestEnv =
     typeof navigator !== 'undefined' &&
     (navigator.webdriver === true ||
-      (window as any).__PLAYWRIGHT__ === true ||
+      (window as Window & { __PLAYWRIGHT__?: boolean }).__PLAYWRIGHT__ === true ||
       new URLSearchParams(window.location.search).has('e2e'));
 
   // Signal that the tutor is thinking
@@ -183,7 +185,10 @@ export function isTutorMove(game: Game, from: Square, to: Square): boolean {
 
 /**
  * Updates the best moves and triggers UI update
+ * @param _game - Game instance (unused in current implementation)
+ * @param _tutorController - Tutor controller (unused in current implementation)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function updateBestMoves(_game: Game, _tutorController: unknown): void {
   // User Request: Tutor info only on click.
   // We disable automatic background calculation to prevent "Thinking..." state from appearing automatically.
@@ -210,7 +215,7 @@ export async function showTutorSuggestions(game: Game): Promise<void> {
   //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
   // )
   //   return;
-  await showTutorSuggestionsUI(game, game.bestMoves as any);
+  await showTutorSuggestionsUI(game, game.bestMoves as unknown);
 }
 
 /**
