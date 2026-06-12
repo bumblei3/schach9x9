@@ -142,6 +142,140 @@ const EVAL_VALUES: Record<number, number> = {
 };
 
 // =====================================================================
+// Probcut (Probabilistic Cut-off) - ~15-20% node reduction
+// =====================================================================
+// Probcut tries a shallow search with a reduced beta bound to prove
+// the current move fails high before doing a full-depth search.
+// Only applied when depth >= PROBCUT_DEPTH and score is near beta.
+
+const PROBCUT_DEPTH = 5;
+const PROBCUT_REDUCTION = 3;           // How much to reduce depth
+const PROBCUT_BETA_MARGIN = 150;       // Beta margin for probcut (beta - margin)
+
+function probcut(
+  b: IntBoard,
+  d: number,
+  beta: number,
+  maximizing: boolean,
+  start: number,
+  nodes: { count: number }
+): boolean {
+  // Only apply probcut at sufficient depth
+  if (d < PROBCUT_DEPTH) return false;
+  
+  // Don't probcut if in check (forced moves need full search)
+  const activeColor = maximizing ? color : color ^ COLOR_MASK;
+  if (checkInt(b, activeColor)) return false;
+  
+  // Probcut beta is stricter than normal beta
+  const probcutBeta = beta - PROBCUT_BETA_MARGIN;
+  if (probcutBeta < -INFINITY) return false;
+  
+  // Generate captures and promotions only for probcut
+  const activeColorStr = activeColor === COLOR_WHITE ? 'white' : 'black';
+  const legalMoves = genLegalInt(b, activeColorStr);
+  
+  // Filter: only captures, promotions, and TT-move likely to cause cutoffs
+  const probcutMoves = legalMoves.filter(m => 
+    b[m.to] !== PIECE_NONE || (m.promotion !== undefined)
+  );
+  
+  if (probcutMoves.length === 0) return false;
+  
+  // Order by capture value (MVV-LVA)
+  probcutMoves.sort((a, b) => {
+    const victimA = b[a.to] & TYPE_MASK;
+    const victimB = b[b.to] & TYPE_MASK;
+    const valA = EVAL_VALUES[victimA] || 0;
+    const valB = EVAL_VALUES[victimB] || 0;
+    return valB - valA;
+  });
+  
+  // Try probcut on top few moves
+  const maxTries = Math.min(probcutMoves.length, 3);
+  for (let i = 0; i < maxTries; i++) {
+    const move = probcutMoves[i];
+    const undo = makeMoveInt(b, move);
+    nodes.count++;
+    if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+      undoMoveInt(b, undo);
+      return false;
+    }
+    
+    // Reduced depth search with null window
+    const result = search(b, d - 1 - PROBCUT_REDUCTION, probcutBeta - 1, probcutBeta, !maximizing);
+    undoMoveInt(b, undo);
+    
+    // If reduced search returns >= probcutBeta, we cut off
+    if (result.score >= probcutBeta) return true;
+  }
+  
+  return false;
+}
+
+// =====================================================================
+// Singular Extensions - Extend search for forced/singular moves
+// =====================================================================
+// A singular move is one where all alternatives fail significantly
+// lower than the best move. We search it one ply deeper.
+
+const SINGULAR_DEPTH = 6;           // Minimum depth for singular extensions
+const SINGULAR_MARGIN = 100;        // Margin to consider move singular
+
+function isSingularMove(
+  b: IntBoard,
+  d: number,
+  bestMove: Move,
+  bestScore: number,
+  alpha: number,
+  beta: number,
+  maximizing: boolean,
+  start: number,
+  nodes: { count: number }
+): boolean {
+  if (d < SINGULAR_DEPTH) return false;
+  if (!bestMove) return false;
+  
+  // Don't extend in check (already forced)
+  const activeColor = maximizing ? color : color ^ COLOR_MASK;
+  if (checkInt(b, activeColor)) return false;
+  
+  // Search all other moves with reduced depth and tight bounds
+  // around bestScore to verify no alternative is close
+  const activeColorStr = activeColor === COLOR_WHITE ? 'white' : 'black';
+  const legalMoves = genLegalInt(b, activeColorStr);
+  
+  for (const move of legalMoves) {
+    // Skip the best move
+    if (move.from === bestMove.from && move.to === bestMove.to) continue;
+    
+    const undo = makeMoveInt(b, move);
+    nodes.count++;
+    if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+      undoMoveInt(b, undo);
+      return false;
+    }
+    
+    // Search with reduced depth and tight window
+    const margin = SINGULAR_MARGIN;
+    const singularAlpha = bestScore - margin;
+    const singularBeta = bestScore + margin;
+    
+    const result = search(b, d - 1 - 2, singularAlpha, singularBeta, !maximizing);
+    undoMoveInt(b, undo);
+    
+    // If any alternative is within margin, the move is NOT singular
+    if (maximizing) {
+      if (result.score >= singularAlpha) return false;
+    } else {
+      if (result.score <= singularBeta) return false;
+    }
+  }
+  
+  return true;
+}
+
+// =====================================================================
 // JS Fallback Search — Alpha-Beta with TT, Move Ordering, Iterative Deepening
 // =====================================================================
 
@@ -255,125 +389,165 @@ export function createJsSearch() {
         // Track if we're in check (for LMR condition)
         const inCheck = checkInt(b, maximizing ? color : color ^ COLOR_MASK);
 
-        if (maximizing) {
-          let movesSearched = 0;
-          for (const move of ordered) {
-            movesSearched++;
+        // --- Probcut (before move loop, for both sides) ---
+        let probcutCutoff = false;
+        if (d >= PROBCUT_DEPTH && !inCheck) {
+          if (probcut(b, d, beta, maximizing, start, { count: nodes })) {
+            probcutCutoff = true;
+          }
+        }
 
-            // --- Late Move Reductions (LMR) ---
-            let reduction = 0;
-            const isCapture = b[move.to] !== PIECE_NONE;
-            const isPromotion = move.promotion !== undefined;
-            const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
+        if (!probcutCutoff) {
+          if (maximizing) {
+            let movesSearched = 0;
+            for (const move of ordered) {
+              movesSearched++;
 
-            // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
-            if (
-              d >= LMR_BASE_DEPTH &&
-              movesSearched > LMR_MOVE_COUNT &&
-              !isCapture &&
-              !isPromotion &&
-              !isTTMove &&
-              !inCheck
-            ) {
-              // Standard LMR formula: reduction = log(depth) * log(movesSearched) / scale
-              const depthLog = Math.log(d);
-              const moveLog = Math.log(movesSearched);
-              reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
-              reduction = Math.max(1, reduction); // At least 1 ply reduction
-            }
+              // --- Late Move Reductions (LMR) ---
+              let reduction = 0;
+              const isCapture = b[move.to] !== PIECE_NONE;
+              const isPromotion = move.promotion !== undefined;
+              const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
 
-            const undo = makeMoveInt(b, move);
-            let result: { score: number; bestMove: Move | null };
+              // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
+              if (
+                d >= LMR_BASE_DEPTH &&
+                movesSearched > LMR_MOVE_COUNT &&
+                !isCapture &&
+                !isPromotion &&
+                !isTTMove &&
+                !inCheck
+              ) {
+                // Standard LMR formula: reduction = log(depth) * log(movesSearched) / scale
+                const depthLog = Math.log(d);
+                const moveLog = Math.log(movesSearched);
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
+                reduction = Math.max(1, reduction); // At least 1 ply reduction
+              }
 
-            if (reduction > 0) {
-              // Reduced search first
-              result = search(b, d - 1 - reduction, alpha, beta, false);
+              const undo = makeMoveInt(b, move);
+              let result: { score: number; bestMove: Move | null };
 
-              // If reduced search fails high (>= beta), re-search at full depth
-              if (result.score >= beta) {
+              if (reduction > 0) {
+                // Reduced search first
+                result = search(b, d - 1 - reduction, alpha, beta, false);
+
+                // If reduced search fails high (>= beta), re-search at full depth
+                if (result.score >= beta) {
+                  result = search(b, d - 1, alpha, beta, false);
+                }
+              } else {
+                // Full depth search
                 result = search(b, d - 1, alpha, beta, false);
               }
-            } else {
-              // Full depth search
-              result = search(b, d - 1, alpha, beta, false);
-            }
 
-            undoMoveInt(b, undo);
+              undoMoveInt(b, undo);
 
-            if (result.score > bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
-            alpha = Math.max(alpha, result.score);
-            if (beta <= alpha) {
-              flag = 'lower';
-              if (b[move.to] === PIECE_NONE) {
-                const k = killers[d];
-                if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
-                  k[1] = k[0]; k[0] = move;
+              if (result.score > bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
+              alpha = Math.max(alpha, result.score);
+              if (beta <= alpha) {
+                flag = 'lower';
+                if (b[move.to] === PIECE_NONE) {
+                  const k = killers[d];
+                  if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
+                    k[1] = k[0]; k[0] = move;
+                  }
+                  history[move.from * 81 + move.to] += d * d;
                 }
-                history[move.from * 81 + move.to] += d * d;
+                break;
               }
-              break;
             }
-          }
-          if (bestScore > alpha) flag = 'exact';
-        } else {
-          let movesSearched = 0;
-          for (const move of ordered) {
-            movesSearched++;
+            if (bestScore > alpha) flag = 'exact';
 
-            // --- Late Move Reductions (LMR) ---
-            let reduction = 0;
-            const isCapture = b[move.to] !== PIECE_NONE;
-            const isPromotion = move.promotion !== undefined;
-            const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
-
-            // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
-            if (
-              d >= LMR_BASE_DEPTH &&
-              movesSearched > LMR_MOVE_COUNT &&
-              !isCapture &&
-              !isPromotion &&
-              !isTTMove &&
-              !inCheck
-            ) {
-              const depthLog = Math.log(d);
-              const moveLog = Math.log(movesSearched);
-              reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
-              reduction = Math.max(1, reduction);
+            // --- Singular Extension (after finding best move) ---
+            if (d >= SINGULAR_DEPTH && bestMove && !inCheck) {
+              if (isSingularMove(b, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes })) {
+                // Re-search best move with depth + 1
+                const undo = makeMoveInt(b, bestMove);
+                const extResult = search(b, d, alpha, beta, false);
+                undoMoveInt(b, undo);
+                // If extension improves score, use it
+                if (extResult.score > bestScore) {
+                  bestScore = extResult.score;
+                  bestMove = extResult.bestMove || bestMove;
+                }
+              }
             }
 
-            const undo = makeMoveInt(b, move);
-            let result: { score: number; bestMove: Move | null };
+          } else {
+            let movesSearched = 0;
+            for (const move of ordered) {
+              movesSearched++;
 
-            if (reduction > 0) {
-              // Reduced search first
-              result = search(b, d - 1 - reduction, alpha, beta, true);
+              // --- Late Move Reductions (LMR) ---
+              let reduction = 0;
+              const isCapture = b[move.to] !== PIECE_NONE;
+              const isPromotion = move.promotion !== undefined;
+              const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
 
-              // If reduced search fails high (>= beta), re-search at full depth
-              if (result.score >= beta) {
+              // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
+              if (
+                d >= LMR_BASE_DEPTH &&
+                movesSearched > LMR_MOVE_COUNT &&
+                !isCapture &&
+                !isPromotion &&
+                !isTTMove &&
+                !inCheck
+              ) {
+                const depthLog = Math.log(d);
+                const moveLog = Math.log(movesSearched);
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
+                reduction = Math.max(1, reduction);
+              }
+
+              const undo = makeMoveInt(b, move);
+              let result: { score: number; bestMove: Move | null };
+
+              if (reduction > 0) {
+                // Reduced search first
+                result = search(b, d - 1 - reduction, alpha, beta, true);
+
+                // If reduced search fails high (>= beta), re-search at full depth
+                if (result.score >= beta) {
+                  result = search(b, d - 1, alpha, beta, true);
+                }
+              } else {
+                // Full depth search
                 result = search(b, d - 1, alpha, beta, true);
               }
-            } else {
-              // Full depth search
-              result = search(b, d - 1, alpha, beta, true);
-            }
 
-            undoMoveInt(b, undo);
+              undoMoveInt(b, undo);
 
-            if (result.score < bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
-            beta = Math.min(beta, result.score);
-            if (beta <= alpha) {
-              flag = 'upper';
-              if (b[move.to] === PIECE_NONE) {
-                const k = killers[d];
-                if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
-                  k[1] = k[0]; k[0] = move;
+              if (result.score < bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
+              beta = Math.min(beta, result.score);
+              if (beta <= alpha) {
+                flag = 'upper';
+                if (b[move.to] === PIECE_NONE) {
+                  const k = killers[d];
+                  if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
+                    k[1] = k[0]; k[0] = move;
+                  }
+                  history[move.from * 81 + move.to] += d * d;
                 }
-                history[move.from * 81 + move.to] += d * d;
+                break;
               }
-              break;
+            }
+            if (bestScore < beta) flag = 'exact';
+
+            // --- Singular Extension (after finding best move) ---
+            if (d >= SINGULAR_DEPTH && bestMove && !inCheck) {
+              if (isSingularMove(b, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes })) {
+                // Re-search best move with depth + 1
+                const undo = makeMoveInt(b, bestMove);
+                const extResult = search(b, d, alpha, beta, true);
+                undoMoveInt(b, undo);
+                if (extResult.score < bestScore) {
+                  bestScore = extResult.score;
+                  bestMove = extResult.bestMove || bestMove;
+                }
+              }
             }
           }
-          if (bestScore < beta) flag = 'exact';
         }
 
         tt.store(hash, d, bestScore, flag, bestMove);
