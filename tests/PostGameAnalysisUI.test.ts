@@ -76,7 +76,7 @@ describe('PostGameAnalysisUI', () => {
     });
 
     test('should return early if button element not found', () => {
-      document.body.innerHTML = `<div id="game-over-stats"></div>`;
+      document.body.innerHTML = '<div id="game-over-stats"></div>';
       expect(() => showPostGameStats({ moveHistory: [], playerColor: 'white' }, 'win', 'white')).not.toThrow();
     });
 
@@ -187,7 +187,7 @@ describe('PostGameAnalysisUI', () => {
     });
 
     test('should handle missing stats element', () => {
-      document.body.innerHTML = `<button id="postgame-analysis-btn"></button>`;
+      document.body.innerHTML = '<button id="postgame-analysis-btn"></button>';
       const newBtnEl = document.getElementById('postgame-analysis-btn')!;
       newBtnEl.style.display = 'inline-block';
 
@@ -196,7 +196,7 @@ describe('PostGameAnalysisUI', () => {
     });
 
     test('should handle missing button element', () => {
-      document.body.innerHTML = `<div id="game-over-stats" style="display: block;"></div>`;
+      document.body.innerHTML = '<div id="game-over-stats" style="display: block;"></div>';
       const newStatsEl = document.getElementById('game-over-stats')!;
       newStatsEl.style.display = 'block';
 
