@@ -311,6 +311,19 @@ export async function getTopMoves(
     } catch { moveScores.push({ move: candidate.move, score: candidate.score }); }
   }
   moveScores.sort((a, b) => b.score - a.score);
+
+  // Guaranteed fallback: if WASM/search failed but we have legal moves,
+  // return them with their quick-eval scores (at least something useful)
+  if (moveScores.length === 0 && legalMoves.length > 0) {
+    for (const move of legalMoves.slice(0, count)) {
+      const undo = makeMoveInt(board, move);
+      const score = quickEval(board);
+      undoMoveInt(board, undo);
+      moveScores.push({ move, score });
+    }
+    moveScores.sort((a, b) => b.score - a.score);
+  }
+
   return [...bookMoves, ...moveScores.slice(0, count).map(ms => ({
     move: convertMoveToResult(ms.move as unknown as { from: number; to: number }),
     score: ms.score, depth: loopDepth, nodes: 0,
