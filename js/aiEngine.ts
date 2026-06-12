@@ -590,21 +590,7 @@ const DOUBLED_PAWN_PENALTY = -15;
 const ISOLATED_PAWN_PENALTY = -20;
 
 // --- Phase / Game detection ---
-
-/** Material threshold: below this we consider it "endgame" (no queen-side material) */
-const ENDGAME_MATERIAL_THRESHOLD = 1300; // Queen=900 — below one minor piece + king
-
-/** Mobility bonus per legal move by piece type (centipawns per move) */
-const MOBILITY_BONUS: Record<number, number> = {
-  [PIECE_KNIGHT]: 4,
-  [PIECE_BISHOP]: 5,
-  [PIECE_ROOK]: 3,
-  [PIECE_QUEEN]: 2,
-  [PIECE_KING]: 0,
-  [PIECE_ARCHBISHOP]: 3,
-  [PIECE_CHANCELLOR]: 3,
-  [PIECE_ANGEL]: 2,
-};
+// (phase is computed inline in evaluate())
 
 // Transposition Table
 // computeZobristHash and TranspositionTable imported from ./transpositionTable
@@ -624,13 +610,11 @@ export function evaluate(b: IntBoard, c: number): number {
   let whiteKingSq = -1;
   let blackKingSq = -1;
 
-  // Pawn file/row tracking for structure evaluation
+  // Pawn file tracking for structure evaluation
   const whitePawnFiles = new Set<number>();
   const blackPawnFiles = new Set<number>();
   const whitePawnsPerFile: number[] = new Array(9).fill(0);
   const blackPawnsPerFile: number[] = new Array(9).fill(0);
-  const whitePawnRows: number[] = [];
-  const blackPawnRows: number[] = [];
 
   // --- Pass 1: Material + Positional + Phase ---
   for (let i = 0; i < SQUARE_COUNT; i++) {
@@ -682,11 +666,9 @@ export function evaluate(b: IntBoard, c: number): number {
         if (isWhitePiece) {
           whitePawnFiles.add(col);
           whitePawnsPerFile[col]++;
-          whitePawnRows.push(row);
         } else {
           blackPawnFiles.add(col);
           blackPawnsPerFile[col]++;
-          blackPawnRows.push(row);
         }
         break;
       case PIECE_KNIGHT:
@@ -779,13 +761,7 @@ export function evaluate(b: IntBoard, c: number): number {
     if (!hasLeft && !hasRight) mgScore -= ISOLATED_PAWN_PENALTY;
   }
 
-  // Passed pawns
-  for (const row of whitePawnRows) {
-    const col = -1; // we need col too — re-scan
-    void col; // handled below
-    break;
-  }
-  // Re-scan for passed pawns (need both row and col)
+  // Passed pawns — re-scan board (need both row and col)
   for (let i = 0; i < SQUARE_COUNT; i++) {
     const p = b[i];
     if (p === PIECE_NONE) continue;
