@@ -1147,13 +1147,38 @@ async function runJsSearch(
     return { score: bestScore, bestMove };
   }
 
-  // Iterative Deepening: search depth 1, 2, 3, ... until time runs out
+  // Iterative Deepening with Aspiration Windows
+  // Start with narrow window around previous iteration's score.
+  // On fail-low/high, widen the window and retry.
   let bestResult: { score: number; bestMove: Move | null } = { score: 0, bestMove: null };
+  const ASPIRATION_INITIAL_WINDOW = 50; // centipawns (~half a pawn)
 
   for (let d = 1; d <= maxDepth; d++) {
     if (performance.now() - start > MAX_SEARCH_TIME * 0.8) break;
 
-    const result = search(board, d, -INFINITY, INFINITY, true);
+    // Determine aspiration window from previous iteration's score
+    let prevScore = d === 1 ? 0 : bestResult.score;
+    if (Math.abs(prevScore) > MATE_SCORE - 200) {
+      // Near mate — use wide window
+      prevScore = 0;
+    }
+
+    let alpha = prevScore - ASPIRATION_INITIAL_WINDOW;
+    let beta = prevScore + ASPIRATION_INITIAL_WINDOW;
+    let result = search(board, d, alpha, beta, true);
+
+    // If aspiration window fails, widen and retry once
+    if (result.score <= alpha) {
+      // Fail low: widen alpha and retry
+      alpha = prevScore - ASPIRATION_INITIAL_WINDOW * 10;
+      if (alpha < -INFINITY + 100) alpha = -INFINITY + 100;
+      result = search(board, d, alpha, beta, true);
+    } else if (result.score >= beta) {
+      // Fail high: widen beta and retry
+      beta = prevScore + ASPIRATION_INITIAL_WINDOW * 10;
+      if (beta > INFINITY - 100) beta = INFINITY - 100;
+      result = search(board, d, alpha, beta, true);
+    }
 
     // Only accept complete searches (not timed out at root)
     if (performance.now() - start <= MAX_SEARCH_TIME) {
