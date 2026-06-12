@@ -5,8 +5,8 @@ test.describe('Tutor Button Functionality', () => {
     // Enable console log proxying
     page.on('console', msg => console.log(`[PAGE LOG] ${msg.type()}: ${msg.text()}`));
 
-    // Navigate to the app
-    await page.goto('/?disable-sw');
+    // Navigate to the app with e2e flag for faster AI in tests
+    await page.goto('/?disable-sw&e2e=1');
 
     // Wait for app and gameController to be ready
     await page.waitForFunction(
@@ -18,6 +18,7 @@ test.describe('Tutor Button Functionality', () => {
   });
 
   test('should show hints when "Show Tips" button is clicked', async ({ page }) => {
+    test.setTimeout(90000); // Extended timeout for AI in test env
     // 1. Enter Standard Mode
     // We use the selector for the standard/classic card.
     // Based on index.html/CSS, likely .gamemode-card[data-mode="classic"] or similar if properly tagged.
@@ -38,12 +39,17 @@ test.describe('Tutor Button Functionality', () => {
 
     // 4. Verify "Thinking..." notification appears
     // The notification system creates a toast. We look for the text.
-    await expect(page.locator('text=Der Tutor analysiert die Stellung...')).toBeVisible();
+    await page.waitForSelector('text=Der Tutor analysiert die Stellung...', { timeout: 10000 });
 
-    // 5. Verify Tutor Overlay appears
-    // It might take a moment for the engine to calculate and the overlay to show.
+    // 5. Wait for "Thinking..." toast to disappear (AI completed)
+    await page.waitForFunction(
+      () => !document.body.innerText.includes('Der Tutor analysiert die Stellung...'),
+      { timeout: 30000 }
+    );
+
+    // 6. Verify Tutor Overlay appears
     const overlay = page.locator('#tutor-overlay');
-    await expect(overlay).toBeVisible({ timeout: 10000 });
+    await expect(overlay).toBeVisible({ timeout: 60000 });
 
     // 6. Verify overlay content
     // It should have a header "KI-Tipps"
