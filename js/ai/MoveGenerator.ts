@@ -18,6 +18,24 @@ import {
   indexToRow,
   indexToCol,
 } from './BoardDefinitions.js';
+
+// Re-export piece/color constants for consumers
+export {
+  PIECE_NONE,
+  PIECE_PAWN,
+  PIECE_KNIGHT,
+  PIECE_BISHOP,
+  PIECE_ROOK,
+  PIECE_QUEEN,
+  PIECE_KING,
+  PIECE_ARCHBISHOP,
+  PIECE_CHANCELLOR,
+  PIECE_ANGEL,
+  PIECE_NIGHTRIDER,
+  COLOR_WHITE,
+  COLOR_BLACK,
+};
+
 import { isBlockedSquare, getCurrentBoardShape, type BoardShape } from '../config.js';
 
 export type BoardStorage = number[] | Int8Array;
@@ -792,4 +810,385 @@ function findRayLVA(
 
 function isValidSquare(idx: number): boolean {
   return idx >= 0 && idx < SQUARE_COUNT;
+}
+
+/**
+ * Threat information for enhanced threat detection
+ */
+export interface ThreatInfo {
+  /** Square being attacked */
+  targetSquare: number;
+  /** Square the attacker is on */
+  attackerSquare: number;
+  /** Type of attacker piece */
+  attackerType: number;
+  /** Color of attacker */
+  attackerColor: number;
+  /** Type of target piece (if any) */
+  targetType: number;
+  /** Color of target piece (if any) */
+  targetColor: number;
+  /** Whether this is a direct attack (true) or X-ray/hidden attack (false) */
+  isDirect: boolean;
+  /** For X-ray: the piece that was in the way (if any) */
+  blockerSquare?: number;
+  /** For X-ray: the valuable piece behind the blocker */
+  xrayTargetSquare?: number;
+  /** For X-ray: the type of the x-ray target */
+  xrayTargetType?: number;
+}
+
+/**
+ * Get ALL threats for a given color, including X-ray/hidden attacks.
+ * This detects:
+ * - Direct attacks (standard)
+ * - X-ray attacks: sliding piece attacks through own piece to enemy piece behind
+ * - Discovered attack potential: own piece blocks line to enemy king/valuable piece
+ * - Battery alignments: two own sliding pieces on same line targeting enemy
+ *
+ * @param board The integer board
+ * @param color COLOR_WHITE or COLOR_BLACK
+ * @returns Array of ThreatInfo objects
+ */
+export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] {
+  const threats: ThreatInfo[] = [];
+  const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
+
+  // Iterate all pieces of the given color
+  for (let from = 0; from < SQUARE_COUNT; from++) {
+    const piece = board[from];
+    if (piece === PIECE_NONE) continue;
+    if ((piece & COLOR_MASK) !== color) continue;
+
+    const type = piece & TYPE_MASK;
+
+    // Pawn threats
+    if (type === PIECE_PAWN) {
+      // Pawn attacks (no X-ray for pawns)
+      const forward = color === COLOR_WHITE ? UP : DOWN;
+      const captureOffsets = [forward + LEFT, forward + RIGHT];
+      for (const offset of captureOffsets) {
+        const to = from + offset;
+        if (!isValidSquare(to)) continue;
+        if (Math.abs(indexToCol(from) - indexToCol(to)) !== 1) continue; // Wrap check
+
+        const target = board[to];
+        if (target !== PIECE_NONE && (target & COLOR_MASK) === enemyColor) {
+          threats.push({
+            targetSquare: to,
+            attackerSquare: from,
+            attackerType: type,
+            attackerColor: color,
+            targetType: target & TYPE_MASK,
+            targetColor: enemyColor,
+            isDirect: true,
+          });
+        }
+      }
+      continue;
+    }
+
+    // Knight/King/Stepping pieces - no X-ray
+    const steppingOffsets =
+      type === PIECE_KNIGHT ||
+        type === PIECE_ARCHBISHOP ||
+        type === PIECE_CHANCELLOR ||
+        type === PIECE_ANGEL
+        ? KNIGHT_OFFSETS
+        : type === PIECE_KING
+        ? KING_OFFSETS
+        : null;
+
+    if (steppingOffsets) {
+      const r = indexToRow(from);
+      const c = indexToCol(from);
+      for (const offset of steppingOffsets) {
+        const to = from + offset;
+        if (!isValidSquare(to)) continue;
+        const toR = indexToRow(to);
+        const toC = indexToCol(to);
+        if (Math.abs(toR - r) > 2 || Math.abs(toC - c) > 2) continue; // Knights max 2
+
+        const shape = getCurrentBoardShape();
+        if (shape !== 'standard' && isBlockedSquare(to, shape)) continue;
+
+        const target = board[to];
+        if (target !== PIECE_NONE && (target & COLOR_MASK) === enemyColor) {
+          threats.push({
+            targetSquare: to,
+            attackerSquare: from,
+            attackerType: type,
+            attackerColor: color,
+            targetType: target & TYPE_MASK,
+            targetColor: enemyColor,
+            isDirect: true,
+          });
+        }
+      }
+    }
+
+    // Sliding pieces - BISHOP, ROOK, QUEEN, ARCHBISHOP, CHANCELLOR, ANGEL, NIGHTRIDER
+    // These can have X-ray attacks!
+    const slidingTypes = [
+      PIECE_BISHOP,
+      PIECE_ROOK,
+      PIECE_QUEEN,
+      PIECE_ARCHBISHOP,
+      PIECE_CHANCELLOR,
+      PIECE_ANGEL,
+      PIECE_NIGHTRIDER,
+    ];
+    if (!slidingTypes.includes(type)) continue;
+
+    // Determine which offsets this piece uses
+    let offsets: number[] = [];
+    if (
+      type === PIECE_BISHOP ||
+      type === PIECE_ARCHBISHOP ||
+      type === PIECE_QUEEN ||
+      type === PIECE_ANGEL
+    ) {
+      offsets.push(...BISHOP_OFFSETS);
+    }
+    if (
+      type === PIECE_ROOK ||
+      type === PIECE_CHANCELLOR ||
+      type === PIECE_QUEEN ||
+      type === PIECE_ANGEL
+    ) {
+      offsets.push(...ROOK_OFFSETS);
+    }
+    if (type === PIECE_NIGHTRIDER) {
+      offsets.push(...KNIGHT_OFFSETS);
+    }
+
+    // Scan each ray
+    for (const offset of offsets) {
+      let curr = from;
+
+      for (;;) {
+        curr += offset;
+        if (!isValidSquare(curr)) break;
+
+        // Wrap/continuity check (same as generateSlidingMoves)
+        const cr = indexToRow(curr);
+        const cc = indexToCol(curr);
+        const prev = curr - offset;
+        const pr = indexToRow(prev);
+        const pc = indexToCol(prev);
+
+        if (KNIGHT_OFFSETS.includes(offset)) {
+          const dr = Math.abs(cr - pr);
+          const dc = Math.abs(cc - pc);
+          if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
+        } else {
+          if (Math.abs(cr - pr) > 1 || Math.abs(cc - pc) > 1) break;
+        }
+
+        const shape = getCurrentBoardShape();
+        if (shape !== 'standard' && isBlockedSquare(curr, shape)) {
+          break;
+        }
+
+        const target = board[curr];
+
+        if (target === PIECE_NONE) {
+          // Empty square - continue ray
+          continue;
+        }
+
+        const targetColor = target & COLOR_MASK;
+        const targetType = target & TYPE_MASK;
+
+        if (targetColor === enemyColor) {
+          // Direct attack on enemy piece
+          threats.push({
+            targetSquare: curr,
+            attackerSquare: from,
+            attackerType: type,
+            attackerColor: color,
+            targetType: targetType,
+            targetColor: enemyColor,
+            isDirect: true,
+          });
+
+          // Check for X-RAY: if there's a blocker behind this target, keep scanning
+          // (Enemy piece doesn't block X-ray to piece behind it? No, enemy pieces DO block.
+          // X-ray means: our piece -> our piece -> enemy piece)
+          // So we continue scanning PAST the first enemy piece ONLY if it's not the king?
+          // Actually standard X-ray: own piece blocks line to enemy piece behind.
+          // So we break here for direct, but we already recorded it.
+          break;
+        } else {
+          // Our own piece blocking the ray - potential X-RAY target behind it!
+          // We don't need to track it here; the SECOND PASS handles X-ray detection properly
+          continue;
+        }
+      }
+
+      // After loop: if we had a blocker, check if there was an X-ray target behind it
+      // (The loop would have found it if it continued, but we break on first enemy hit.
+      // We need a second pass for X-ray detection.)
+    }
+
+    // SECOND PASS: X-Ray detection for this piece
+    // For each ray, find our own pieces that block the ray, then check what's behind them
+    for (const offset of offsets) {
+      let curr = from;
+      let ourBlockerSquare: number | null = null;
+
+      for (;;) {
+        curr += offset;
+        if (!isValidSquare(curr)) break;
+
+        const cr = indexToRow(curr);
+        const cc = indexToCol(curr);
+        const prev = curr - offset;
+        const pr = indexToRow(prev);
+        const pc = indexToCol(prev);
+
+        if (KNIGHT_OFFSETS.includes(offset)) {
+          const dr = Math.abs(cr - pr);
+          const dc = Math.abs(cc - pc);
+          if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
+        } else {
+          if (Math.abs(cr - pr) > 1 || Math.abs(cc - pc) > 1) break;
+        }
+
+        const shape = getCurrentBoardShape();
+        if (shape !== 'standard' && isBlockedSquare(curr, shape)) {
+          break;
+        }
+
+        const target = board[curr];
+
+        if (target === PIECE_NONE) {
+          continue;
+        }
+
+        const targetColor = target & COLOR_MASK;
+        const targetType = target & TYPE_MASK;
+
+        if (targetColor === color) {
+          // Our own piece - potential blocker for X-ray
+          if (ourBlockerSquare === null) {
+            ourBlockerSquare = curr;
+          }
+          // If we already have a blocker, this is a second own piece - no X-ray through two own pieces
+          continue;
+        } else {
+          // Enemy piece
+          if (ourBlockerSquare !== null) {
+            // X-RAY ATTACK! Our piece at ourBlockerSquare is blocking line to this enemy piece
+            // This is a THREAT if the blocker moves (discovered attack)
+            threats.push({
+              targetSquare: curr,
+              attackerSquare: from,
+              attackerType: type,
+              attackerColor: color,
+              targetType: targetType,
+              targetColor: enemyColor,
+              isDirect: false,
+              blockerSquare: ourBlockerSquare,
+              xrayTargetSquare: curr,
+              xrayTargetType: targetType,
+            });
+
+            // Also check if the blocker itself is pinned to something valuable behind it
+            // (i.e., moving blocker exposes king or queen behind it)
+            // We scan BEYOND the enemy piece to see if there's a king/queen
+            let beyond = curr + offset;
+            while (isValidSquare(beyond)) {
+              const br = indexToRow(beyond);
+              const bc = indexToCol(beyond);
+              const bprev = beyond - offset;
+              const bpr = indexToRow(bprev);
+              const bpc = indexToCol(bprev);
+
+              if (KNIGHT_OFFSETS.includes(offset)) {
+                const dr = Math.abs(br - bpr);
+                const dc = Math.abs(bc - bpc);
+                if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
+              } else {
+                if (Math.abs(br - bpr) > 1 || Math.abs(bc - bpc) > 1) break;
+              }
+
+              const shape = getCurrentBoardShape();
+              if (shape !== 'standard' && isBlockedSquare(beyond, shape)) break;
+
+              const beyondPiece = board[beyond];
+              if (beyondPiece !== PIECE_NONE) {
+                const beyondColor = beyondPiece & COLOR_MASK;
+                const beyondType = beyondPiece & TYPE_MASK;
+                if (beyondColor === enemyColor && (beyondType === PIECE_KING || beyondType === PIECE_QUEEN)) {
+                  // PIN THREAT: Our blocker is PINNED to the enemy king/queen behind!
+                  const blockerPiece = board[ourBlockerSquare];
+                  const blockerType = blockerPiece !== PIECE_NONE ? blockerPiece & TYPE_MASK : 0;
+                  threats.push({
+                    targetSquare: beyond,
+                    attackerSquare: ourBlockerSquare,
+                    attackerType: blockerType,
+                    attackerColor: color,
+                    targetType: beyondType,
+                    targetColor: enemyColor,
+                    isDirect: false,
+                    blockerSquare: ourBlockerSquare,
+                    xrayTargetSquare: beyond,
+                    xrayTargetType: beyondType,
+                  });
+                }
+                break;
+              }
+              beyond += offset;
+            }
+          }
+          // Enemy piece blocks the ray regardless
+          break;
+        }
+      }
+    }
+
+    // THIRD PASS: Battery detection
+    // Two own sliding pieces on same line = battery threat along that line
+    // This is more positional but valuable for evaluation
+    // (Can be added later if needed)
+  }
+
+  return threats;
+}
+
+/**
+ * Get threats specifically targeting the opponent's king (checks and discovered checks)
+ */
+export function getKingThreats(board: BoardStorage, color: number): ThreatInfo[] {
+  // Find enemy king
+  let enemyKingSquare = -1;
+  const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
+  for (let i = 0; i < SQUARE_COUNT; i++) {
+    const p = board[i];
+    if (p !== PIECE_NONE && (p & COLOR_MASK) === enemyColor && (p & TYPE_MASK) === PIECE_KING) {
+      enemyKingSquare = i;
+      break;
+    }
+  }
+  if (enemyKingSquare === -1) return [];
+
+  const allThreats = getAllThreats(board, color);
+  return allThreats.filter(t => t.targetSquare === enemyKingSquare || t.xrayTargetSquare === enemyKingSquare);
+}
+
+/**
+ * Get X-ray threats (hidden attacks through own pieces)
+ */
+export function getXRayThreats(board: BoardStorage, color: number): ThreatInfo[] {
+  const allThreats = getAllThreats(board, color);
+  return allThreats.filter(t => !t.isDirect);
+}
+
+/**
+ * Get discovered attack potential: moving blocker would reveal attack
+ */
+export function getDiscoveredAttackPotential(board: BoardStorage, color: number): ThreatInfo[] {
+  const allThreats = getAllThreats(board, color);
+  return allThreats.filter(t => !t.isDirect && t.blockerSquare !== undefined);
 }

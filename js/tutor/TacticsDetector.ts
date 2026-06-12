@@ -643,6 +643,7 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
 
 /**
  * Detect threats to own pieces after making a move
+ * Uses enhanced threat detection including X-ray, discovered attacks, and pins
  */
 export function detectThreatsAfterMove(
   game: GameLike,
@@ -662,30 +663,108 @@ export function detectThreatsAfterMove(
   game.board[from.r][from.c] = null;
 
   try {
-    const opponentColor = piece.color === 'white' ? 'black' : 'white';
+    const playerColor = piece.color;
 
-    // Check if any of our pieces are now under attack and undefended
+    // Convert UI board to integer board for AI threat detection
+    const intBoard = convertUiBoardToIntBoard(game.board);
+
+    // Determine player's color in AI terms
+    const aiOpponentColor = playerColor === 'white' ? aiEngine.COLOR_BLACK : aiEngine.COLOR_WHITE;
+
+    // Get ALL threats from opponent, including X-ray and discovered attacks
+    const allThreats = aiEngine.getAllThreats(intBoard, aiOpponentColor);
+
+    // Also get X-ray threats specifically
+    const xrayThreats = allThreats.filter(t => !t.isDirect);
+    const directThreats = allThreats.filter(t => t.isDirect);
+
+    // Build a map of our pieces by square for quick lookup
+    const ourPieces = new Map<number, { piece: Piece; square: number }>();
     for (let r = 0; r < BOARD_SIZE; r++) {
       for (let c = 0; c < BOARD_SIZE; c++) {
-        const ownPiece = game.board[r][c];
-        if (!ownPiece || ownPiece.color !== piece.color) continue;
-        // Pawns are now included for STRICT mode detection
-
-        // Is this piece under attack?
-        const isUnderAttack = aiEngine.isSquareAttacked(game.board, r, c, opponentColor);
-        if (isUnderAttack) {
-          // Is it defended?
-          const defenders = countDefenders(game, r, c, piece.color);
-          const attackers = countAttackers(game, r, c, opponentColor);
-
-          if (attackers > defenders) {
-            threats.push({
-              piece: ownPiece,
-              pos: { r, c },
-              warning: `⚠️ ${analyzer.getPieceName(ownPiece.type)} wird ungeschützt!`,
-            });
-          }
+        const p = game.board[r][c];
+        if (p && p.color === playerColor) {
+          const sq = r * BOARD_SIZE + c;
+          ourPieces.set(sq, { piece: p, square: sq });
         }
+      }
+    }
+
+    // For each of our pieces, check if it's threatened
+    for (const [sq, { piece: ownPiece }] of ourPieces) {
+      // Direct attacks on this piece
+      const directAttacks = directThreats.filter(t => t.targetSquare === sq);
+      // X-ray attacks on this piece (through another of our pieces)
+      const xrayAttacks = xrayThreats.filter(t => t.targetSquare === sq);
+
+      const allAttacksOnThisPiece = [...directAttacks, ...xrayAttacks];
+
+      if (allAttacksOnThisPiece.length > 0) {
+        // Count defenders and attackers using existing logic (but now we have richer info)
+        const defenders = countDefenders(game, from.r, from.c, playerColor);
+        const attackers = allAttacksOnThisPiece.length; // Simplified: each threat = 1 attacker
+
+        // Determine threat severity and type
+        const isXray = xrayAttacks.length > 0;
+        const isDirect = directAttacks.length > 0;
+        const isDiscovered = xrayAttacks.some(t => t.blockerSquare !== undefined);
+
+        // Check if this is a PIN (our piece is blocking attack on king/queen behind it)
+        const pinThreats = allAttacksOnThisPiece.filter(t =>
+          t.xrayTargetType === aiEngine.PIECE_KING || t.xrayTargetType === aiEngine.PIECE_QUEEN
+        );
+        const isPinned = pinThreats.length > 0;
+
+        // Only warn if undefended or pinned
+        if (attackers > defenders || isPinned) {
+          let warning = '';
+          const pieceName = analyzer.getPieceName(ownPiece.type);
+
+          if (isPinned) {
+            const pinTargetType = pinThreats[0].xrayTargetType === aiEngine.PIECE_KING ? 'König' : 'Dame';
+            warning = `📌 ${pieceName} ist GEFESSELT an ${pinTargetType}! Ziehen nicht erlaubt.`;
+          } else if (isDiscovered) {
+            warning = `🌟 ${pieceName} deckt Abzugsangriff auf! Gegner droht durch ${xrayAttacks[0].blockerSquare !== undefined ? 'Wegzug' : 'X-Ray'}.`;
+          } else if (isXray) {
+            warning = `🔍 ${pieceName} unter X-Ray-Angriff (verdeckt durch eigene Figur)!`;
+          } else {
+            warning = `⚠️ ${pieceName} wird ungeschützt angegriffen!`;
+          }
+
+          // Add move-specific context
+          if (isPinned && isDirect) {
+            warning += ` (Direkt bedroht + Gefesselt)`;
+          }
+
+          threats.push({
+            piece: ownPiece,
+            pos: { r: from.r, c: from.c },
+            warning,
+          });
+        }
+      }
+    }
+
+    // Also check: did our move expose our king to check? (Standard check detection)
+    // This is handled by the general threat detection above, but we can be explicit
+    const kingPos = findOwnKing(game, playerColor);
+    if (kingPos) {
+      const kingSq = kingPos.r * BOARD_SIZE + kingPos.c;
+      const kingThreatsDirect = directThreats.filter(t => t.targetSquare === kingSq);
+      const kingThreatsXray = xrayThreats.filter(t => t.targetSquare === kingSq || t.xrayTargetSquare === kingSq);
+
+      if (kingThreatsDirect.length > 0) {
+        threats.push({
+          piece: { type: 'k', color: playerColor },
+          pos: kingPos,
+          warning: '♔ SCHACH! Dein König wird direkt angegriffen!',
+        });
+      } else if (kingThreatsXray.length > 0) {
+        threats.push({
+          piece: { type: 'k', color: playerColor },
+          pos: kingPos,
+          warning: '♔ Entdecktes Schach droht! Deine Figur deckt König ab.',
+        });
       }
     }
   } finally {
@@ -695,6 +774,52 @@ export function detectThreatsAfterMove(
   }
 
   return threats;
+}
+
+/**
+ * Convert UI board (Piece[][]) to AI integer board (Int8Array)
+ */
+function convertUiBoardToIntBoard(board: (Piece | null)[][]): Int8Array {
+  const intBoard = new Int8Array(BOARD_SIZE * BOARD_SIZE);
+  const TYPE_MAP: Record<string, number> = {
+    p: aiEngine.PIECE_PAWN,
+    n: aiEngine.PIECE_KNIGHT,
+    b: aiEngine.PIECE_BISHOP,
+    r: aiEngine.PIECE_ROOK,
+    q: aiEngine.PIECE_QUEEN,
+    k: aiEngine.PIECE_KING,
+    a: aiEngine.PIECE_ARCHBISHOP,
+    c: aiEngine.PIECE_CHANCELLOR,
+    e: aiEngine.PIECE_ANGEL,
+    j: aiEngine.PIECE_NIGHTRIDER,
+  };
+
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const p = board[r]?.[c];
+      if (p) {
+        const type = TYPE_MAP[p.type] || aiEngine.PIECE_NONE;
+        const color = p.color === 'white' ? aiEngine.COLOR_WHITE : aiEngine.COLOR_BLACK;
+        intBoard[r * BOARD_SIZE + c] = type | color;
+      }
+    }
+  }
+  return intBoard;
+}
+
+/**
+ * Find own king position
+ */
+function findOwnKing(game: GameLike, color: string): Pos | null {
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const p = game.board[r][c];
+      if (p && p.type === 'k' && p.color === color) {
+        return { r, c };
+      }
+    }
+  }
+  return null;
 }
 
 /**

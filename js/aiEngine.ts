@@ -21,6 +21,12 @@ import {
   isSquareAttacked as isSquareAttackedInt,
   findKing as findKingInt,
   see as seeInt,
+  getAllThreats,
+  getKingThreats,
+  getXRayThreats,
+  getDiscoveredAttackPotential,
+  type ThreatInfo,
+  // Note: Piece constants (PIECE_*, COLOR_*) are re-exported from BoardDefinitions below
 } from './ai/MoveGenerator';
 import {
   SQUARE_COUNT, PIECE_NONE, PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP,
@@ -410,4 +416,4 @@ export function setProgressCallback(cb: ((progress: AIProgressData) => void) | n
 }
 
 // Re-exports
-export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves };
+export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves, getAllThreats, getKingThreats, getXRayThreats, getDiscoveredAttackPotential, type ThreatInfo, PIECE_KING, PIECE_QUEEN, COLOR_WHITE, COLOR_BLACK, PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_ARCHBISHOP, PIECE_CHANCELLOR, PIECE_ANGEL, PIECE_NIGHTRIDER, PIECE_NONE };
