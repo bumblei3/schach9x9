@@ -941,7 +941,7 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
     if (!slidingTypes.includes(type)) continue;
 
     // Determine which offsets this piece uses
-    let offsets: number[] = [];
+    const offsets: number[] = [];
     if (
       type === PIECE_BISHOP ||
       type === PIECE_ARCHBISHOP ||
