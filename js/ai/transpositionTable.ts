@@ -19,6 +19,7 @@ import {
   COLOR_WHITE,
   COLOR_BLACK,
 } from './BoardDefinitions';
+import { PIECE_TYPE_INDEX } from './BoardDefinitions';
 import type { Move } from './MoveGenerator';
 
 // Number of piece types (excluding NONE) * 2 colors + maybe for en passant/castling later
@@ -91,16 +92,9 @@ export function computeZobristHash(board: Int8Array, sideToMove?: number): numbe
     if (piece !== PIECE_NONE) {
       const type = piece & TYPE_MASK;
       const color = piece & COLOR_MASK;
-      // find index of type in PIECE_TYPES
-      let typeIndex = -1;
-      for (let i = 0; i < PIECE_TYPES.length; i++) {
-        if (PIECE_TYPES[i] === type) {
-          typeIndex = i;
-          break;
-        }
-      }
+      const typeIndex = PIECE_TYPE_INDEX[type];
       if (typeIndex !== -1) {
-        const colorIndex = color === COLOR_WHITE ? 0 : 1; // 0 for white, 1 for black
+        const colorIndex = color === COLOR_WHITE ? 0 : 1;
         h ^= zobristTable[sq][typeIndex][colorIndex];
       }
     }
@@ -116,42 +110,88 @@ export function computeZobristHash(board: Int8Array, sideToMove?: number): numbe
 }
 
 /**
- * Transposition Table entry interface (same as existing TTEntry)
+ * Transposition Table entry — packed into a compact object.
+ * Uses depth-preferred replacement: always replace if new depth >= stored depth.
  */
 export interface TTEntry {
-  depth: number;
-  score: number;
+  hash: number;       // full 32-bit hash for collision detection
+  depth: number;      // search depth
+  score: number;      // evaluation score
   flag: 'exact' | 'lower' | 'upper';
   bestMove: Move | null;
 }
 
 /**
- * Simple TT using Map<number, TTEntry> (as existing code)
+ * Fixed-size transposition table using Zobrist hash as index.
+ * Size: 2^18 = 262144 entries (~4MB with packed entries).
+ * Replacement: depth-preferred (replace if new depth >= stored depth, or same slot).
  */
-export class TranspositionTable {
-  private tt: Map<number, TTEntry> = new Map();
+const TT_SIZE = 1 << 18; // 262144 entries
+const TT_MASK = TT_SIZE - 1;
 
+// Pre-allocated arrays for cache-friendly access
+const ttHashes = new Int32Array(TT_SIZE);
+const ttDepths = new Int8Array(TT_SIZE);
+const ttScores = new Int32Array(TT_SIZE);
+const ttFlags = new Uint8Array(TT_SIZE); // 0=empty, 1=exact, 2=lower, 3=upper
+const ttBestFrom = new Uint8Array(TT_SIZE);
+const ttBestTo = new Uint8Array(TT_SIZE);
+const ttBestMoveValid = new Uint8Array(TT_SIZE); // 0=no best move, 1=valid
+
+let ttEntryCount = 0;
+
+function flagToUint8(f: 'exact' | 'lower' | 'upper'): number {
+  return f === 'exact' ? 1 : f === 'lower' ? 2 : 3;
+}
+
+function uint8ToFlag(f: number): 'exact' | 'lower' | 'upper' {
+  return f === 1 ? 'exact' : f === 2 ? 'lower' : 'upper';
+}
+
+export class TranspositionTable {
   clear(): void {
-    this.tt.clear();
+    ttHashes.fill(0);
+    ttDepths.fill(0);
+    ttScores.fill(0);
+    ttFlags.fill(0);
+    ttBestMoveValid.fill(0);
+    ttEntryCount = 0;
   }
 
   probe(hash: number, depth: number): TTEntry | null {
-    const entry = this.tt.get(hash);
-    if (entry && entry.depth >= depth) {
-      return entry;
+    const idx = (hash >>> 0) & TT_MASK;
+    if (ttFlags[idx] !== 0 && ttHashes[idx] === hash && ttDepths[idx] >= depth) {
+      return {
+        hash: ttHashes[idx],
+        depth: ttDepths[idx],
+        score: ttScores[idx],
+        flag: uint8ToFlag(ttFlags[idx]),
+        bestMove: ttBestMoveValid[idx] ? { from: ttBestFrom[idx], to: ttBestTo[idx] } : null,
+      };
     }
     return null;
   }
 
   store(hash: number, depth: number, score: number, flag: 'exact' | 'lower' | 'upper', bestMove: Move | null): void {
-    // Always store if deeper or not present
-    const existing = this.tt.get(hash);
-    if (!existing || depth > existing.depth) {
-      this.tt.set(hash, { depth, score, flag, bestMove });
+    const idx = (hash >>> 0) & TT_MASK;
+    // Depth-preferred replacement: replace if empty, same hash, or deeper search
+    if (ttFlags[idx] === 0 || ttHashes[idx] === hash || depth >= ttDepths[idx]) {
+      if (ttFlags[idx] === 0) ttEntryCount++;
+      ttHashes[idx] = hash;
+      ttDepths[idx] = depth;
+      ttScores[idx] = score;
+      ttFlags[idx] = flagToUint8(flag);
+      if (bestMove) {
+        ttBestFrom[idx] = bestMove.from;
+        ttBestTo[idx] = bestMove.to;
+        ttBestMoveValid[idx] = 1;
+      } else {
+        ttBestMoveValid[idx] = 0;
+      }
     }
   }
 
   size(): number {
-    return this.tt.size;
+    return ttEntryCount;
   }
 }

@@ -74,6 +74,19 @@ export function coordsToIndex(r: number, c: number): number {
   return r * BOARD_SIZE + c;
 }
 
+// Piece type -> index lookup table for Zobrist hashing (O(1) instead of linear search)
+// Index by PIECE_TYPE value (0-10), returns 0-8 for valid pieces, -1 for NONE/unknown
+export const PIECE_TYPE_INDEX: number[] = new Array(16).fill(-1);
+PIECE_TYPE_INDEX[PIECE_PAWN] = 0;
+PIECE_TYPE_INDEX[PIECE_KNIGHT] = 1;
+PIECE_TYPE_INDEX[PIECE_BISHOP] = 2;
+PIECE_TYPE_INDEX[PIECE_ROOK] = 3;
+PIECE_TYPE_INDEX[PIECE_QUEEN] = 4;
+PIECE_TYPE_INDEX[PIECE_KING] = 5;
+PIECE_TYPE_INDEX[PIECE_ARCHBISHOP] = 6;
+PIECE_TYPE_INDEX[PIECE_CHANCELLOR] = 7;
+PIECE_TYPE_INDEX[PIECE_ANGEL] = 8;
+
 // Debug / String conversions
 const TYPE_CHARS: Record<number, string> = {
   [PIECE_NONE]: '.',
