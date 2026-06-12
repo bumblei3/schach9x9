@@ -68,6 +68,24 @@ vi.mock('../js/aiEngine.js', () => ({
   see: vi.fn().mockReturnValue(0),
   findKing: vi.fn().mockReturnValue({ r: 0, c: 0 }),
   isInCheck: vi.fn().mockReturnValue(false),
+  getAllThreats: vi.fn().mockReturnValue([]),
+  getKingThreats: vi.fn().mockReturnValue([]),
+  getXRayThreats: vi.fn().mockReturnValue([]),
+  getDiscoveredAttackPotential: vi.fn().mockReturnValue([]),
+  // Piece constants needed by TacticsDetector
+  PIECE_PAWN: 1,
+  PIECE_KNIGHT: 2,
+  PIECE_BISHOP: 3,
+  PIECE_ROOK: 4,
+  PIECE_QUEEN: 5,
+  PIECE_KING: 6,
+  PIECE_ARCHBISHOP: 7,
+  PIECE_CHANCELLOR: 8,
+  PIECE_ANGEL: 9,
+  PIECE_NIGHTRIDER: 10,
+  PIECE_NONE: 0,
+  COLOR_WHITE: 16,
+  COLOR_BLACK: 32,
 }));
 
 // Import after mocking

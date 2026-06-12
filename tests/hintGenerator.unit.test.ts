@@ -18,6 +18,24 @@ vi.mock('../js/aiEngine.js', () => ({
   evaluatePosition: vi.fn(() => 0),
   isSquareAttacked: vi.fn(() => false),
   see: vi.fn(() => 0),
+  getAllThreats: vi.fn().mockReturnValue([]),
+  getKingThreats: vi.fn().mockReturnValue([]),
+  getXRayThreats: vi.fn().mockReturnValue([]),
+  getDiscoveredAttackPotential: vi.fn().mockReturnValue([]),
+  // Piece constants needed by TacticsDetector
+  PIECE_PAWN: 1,
+  PIECE_KNIGHT: 2,
+  PIECE_BISHOP: 3,
+  PIECE_ROOK: 4,
+  PIECE_QUEEN: 5,
+  PIECE_KING: 6,
+  PIECE_ARCHBISHOP: 7,
+  PIECE_CHANCELLOR: 8,
+  PIECE_ANGEL: 9,
+  PIECE_NIGHTRIDER: 10,
+  PIECE_NONE: 0,
+  COLOR_WHITE: 16,
+  COLOR_BLACK: 32,
 }));
 
 const aiEngine = await import('../js/aiEngine.js');

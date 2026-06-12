@@ -48,6 +48,24 @@ vi.mock('../js/aiEngine.js', () => ({
   getAllLegalMoves: vi.fn(() => []),
   getParamsForElo: vi.fn(() => ({ maxDepth: 4, elo: 2500 })),
   convertBoardToInt: vi.fn(() => new Int8Array(64)),
+  getAllThreats: vi.fn().mockReturnValue([]),
+  getKingThreats: vi.fn().mockReturnValue([]),
+  getXRayThreats: vi.fn().mockReturnValue([]),
+  getDiscoveredAttackPotential: vi.fn().mockReturnValue([]),
+  // Piece constants needed by TacticsDetector
+  PIECE_PAWN: 1,
+  PIECE_KNIGHT: 2,
+  PIECE_BISHOP: 3,
+  PIECE_ROOK: 4,
+  PIECE_QUEEN: 5,
+  PIECE_KING: 6,
+  PIECE_ARCHBISHOP: 7,
+  PIECE_CHANCELLOR: 8,
+  PIECE_ANGEL: 9,
+  PIECE_NIGHTRIDER: 10,
+  PIECE_NONE: 0,
+  COLOR_WHITE: 16,
+  COLOR_BLACK: 32,
 }));
 
 // Use top-level await
