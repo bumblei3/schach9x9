@@ -518,14 +518,18 @@ export function renderBoard(game: any): void {
             cell.classList.add('tutor-move');
         }
       }
-      if (
-        game.lastMoveHighlight &&
-        ((game.lastMoveHighlight.from.r === r && game.lastMoveHighlight.from.c === c) ||
-          (game.lastMoveHighlight.to.r === r && game.lastMoveHighlight.to.c === c))
-      ) {
-        cell.classList.add('last-move');
+
+      // Last move highlight
+      if (game.lastMoveHighlight) {
+        if (
+          (game.lastMoveHighlight.from.r === r && game.lastMoveHighlight.from.c === c) ||
+          (game.lastMoveHighlight.to.r === r && game.lastMoveHighlight.to.c === c)
+        ) {
+          cell.classList.add('last-move');
+        }
       }
-      // Schach-Bedrohung: König im Schach rot markieren
+
+      // Check highlight
       if (game.phase === PHASES.PLAY && p && p.type === 'k' && game.isInCheck) {
         if (game.isInCheck(p.color)) {
           cell.classList.add('in-check');
