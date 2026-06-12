@@ -38,7 +38,7 @@ import type { IntBoard } from './evaluate';
 // =====================================================================
 const MATE_SCORE = 20000;
 const INFINITY = 30000;
-const MAX_SEARCH_TIME = 8000;
+const MAX_SEARCH_TIME = 3000; // 3 seconds max per search (was 8s)
 
 // =====================================================================
 // Quiescence search — resolve captures to avoid horizon effect
@@ -173,6 +173,11 @@ export function createJsSearch() {
       const RAZOR_MARGIN = 400;
       const ASPIRATION_WINDOW = 50;
 
+      // Late Move Reductions (LMR) constants
+      const LMR_BASE_DEPTH = 3;        // Minimum depth for LMR
+      const LMR_MOVE_COUNT = 3;        // First N moves not reduced
+      const LMR_MAX_REDUCTION = 3;     // Max reduction
+
       function search(
         b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean
       ): { score: number; bestMove: Move | null } {
@@ -247,11 +252,54 @@ export function createJsSearch() {
         let bestScore = maximizing ? -INFINITY : INFINITY;
         let flag: 'exact' | 'lower' | 'upper' = 'upper';
 
+        // Track if we're in check (for LMR condition)
+        const inCheck = checkInt(b, maximizing ? color : color ^ COLOR_MASK);
+
         if (maximizing) {
+          let movesSearched = 0;
           for (const move of ordered) {
+            movesSearched++;
+
+            // --- Late Move Reductions (LMR) ---
+            let reduction = 0;
+            const isCapture = b[move.to] !== PIECE_NONE;
+            const isPromotion = move.promotion !== undefined;
+            const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
+
+            // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
+            if (
+              d >= LMR_BASE_DEPTH &&
+              movesSearched > LMR_MOVE_COUNT &&
+              !isCapture &&
+              !isPromotion &&
+              !isTTMove &&
+              !inCheck
+            ) {
+              // Standard LMR formula: reduction = log(depth) * log(movesSearched) / scale
+              const depthLog = Math.log(d);
+              const moveLog = Math.log(movesSearched);
+              reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
+              reduction = Math.max(1, reduction); // At least 1 ply reduction
+            }
+
             const undo = makeMoveInt(b, move);
-            const result = search(b, d - 1, alpha, beta, false);
+            let result: { score: number; bestMove: Move | null };
+
+            if (reduction > 0) {
+              // Reduced search first
+              result = search(b, d - 1 - reduction, alpha, beta, false);
+
+              // If reduced search fails high (>= beta), re-search at full depth
+              if (result.score >= beta) {
+                result = search(b, d - 1, alpha, beta, false);
+              }
+            } else {
+              // Full depth search
+              result = search(b, d - 1, alpha, beta, false);
+            }
+
             undoMoveInt(b, undo);
+
             if (result.score > bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
             alpha = Math.max(alpha, result.score);
             if (beta <= alpha) {
@@ -268,10 +316,49 @@ export function createJsSearch() {
           }
           if (bestScore > alpha) flag = 'exact';
         } else {
+          let movesSearched = 0;
           for (const move of ordered) {
+            movesSearched++;
+
+            // --- Late Move Reductions (LMR) ---
+            let reduction = 0;
+            const isCapture = b[move.to] !== PIECE_NONE;
+            const isPromotion = move.promotion !== undefined;
+            const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
+
+            // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
+            if (
+              d >= LMR_BASE_DEPTH &&
+              movesSearched > LMR_MOVE_COUNT &&
+              !isCapture &&
+              !isPromotion &&
+              !isTTMove &&
+              !inCheck
+            ) {
+              const depthLog = Math.log(d);
+              const moveLog = Math.log(movesSearched);
+              reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
+              reduction = Math.max(1, reduction);
+            }
+
             const undo = makeMoveInt(b, move);
-            const result = search(b, d - 1, alpha, beta, true);
+            let result: { score: number; bestMove: Move | null };
+
+            if (reduction > 0) {
+              // Reduced search first
+              result = search(b, d - 1 - reduction, alpha, beta, true);
+
+              // If reduced search fails high (>= beta), re-search at full depth
+              if (result.score >= beta) {
+                result = search(b, d - 1, alpha, beta, true);
+              }
+            } else {
+              // Full depth search
+              result = search(b, d - 1, alpha, beta, true);
+            }
+
             undoMoveInt(b, undo);
+
             if (result.score < bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
             beta = Math.min(beta, result.score);
             if (beta <= alpha) {
