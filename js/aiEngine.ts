@@ -335,7 +335,7 @@ export async function getBestMoveDetailed(
   const board = convertBoardToInt(uiBoard);
 
   // --- Step 1: Check Opening Book ---
-  if (moveNumber !== undefined && moveNumber < 15) {
+  if (moveNumber !== undefined && moveNumber < 22) {
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
     if (bookMove) {
       logger.info(
@@ -431,51 +431,208 @@ const EVAL_VALUES: Record<number, number> = {
   [PIECE_ANGEL]: 1220,
 };
 
-// Positional bonus tables (9x9 board, from white's perspective)
-// Encourages centralization, pawn advancement, king safety
+// =====================================================================
+// Piece-Square Tables (9x9 board, from white's perspective)
+// Black pieces use mirrored lookup: (8 - row) * 9 + col
+// Values in centipawns
+// =====================================================================
+
+/** Pawns: encourage advancement and center control */
 const PAWN_TABLE = [
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  5,  5,  5,  5,  5,  5,  5,  5,  5,
-  10, 10, 10, 10, 10, 10, 10, 10, 10,
-  15, 15, 15, 15, 15, 15, 15, 15, 15,
-  20, 20, 20, 20, 20, 20, 20, 20, 20,
-  15, 15, 15, 15, 15, 15, 15, 15, 15,
-  10, 10, 10, 10, 10, 10, 10, 10, 10,
-  5,  5,  5,  5,  5,  5,  5,  5,  5,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
+//  a   b   c   d   e   f   g   h   i
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  // row 0 (promotion rank - never here)
+   5,  5,  5,  5,  5,  5,  5,  5,  5,  // row 1
+  10, 10, 10, 12, 12, 12, 10, 10, 10,  // row 2
+  15, 15, 15, 18, 18, 18, 15, 15, 15,  // row 3
+  20, 20, 20, 25, 25, 25, 20, 20, 20,  // row 4
+  30, 30, 30, 35, 35, 35, 30, 30, 30,  // row 5
+  45, 45, 45, 50, 50, 50, 45, 45, 45,  // row 6 (one step from promotion)
+  60, 60, 60, 60, 60, 60, 60, 60, 60,  // row 7 (promotion next move)
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  // row 8 (can't have pawn here)
 ];
 
+/** Knights: encourage centralization, penalize edges */
 const KNIGHT_TABLE = [
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0, 10, 10, 10, 10, 10, 10, 10,  0,
-  0, 10, 20, 20, 20, 20, 20, 10,  0,
-  0, 10, 20, 30, 30, 30, 20, 10,  0,
-  0, 10, 20, 30, 40, 30, 20, 10,  0,
-  0, 10, 20, 30, 30, 30, 20, 10,  0,
-  0, 10, 20, 20, 20, 20, 20, 10,  0,
-  0, 10, 10, 10, 10, 10, 10, 10,  0,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  -10, -5, -5, -5, -5, -5, -5, -5, -10,
+   -5,  0,  5,  5,  5,  5,  5,  0,  -5,
+    5,  5, 15, 15, 15, 15, 15,  5,   5,
+    5, 10, 15, 20, 20, 20, 15, 10,   5,
+    5, 10, 15, 20, 25, 20, 15, 10,   5,
+    5, 10, 15, 20, 20, 20, 15, 10,   5,
+    5,  5, 15, 15, 15, 15, 15,  5,   5,
+   -5,  0,  5,  5,  5,  5,  5,  0,  -5,
+  -10, -5, -5, -5, -5, -5, -5, -5, -10,
 ];
 
-const KING_MIDGAME_TABLE = [
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  0,  0,  5,  5,  5,  5,  5,  0,  0,
-  0,  0,  5, 10, 10, 10,  5,  0,  0,
-  0,  0,  5, 10, 20, 10,  5,  0,  0,
+/** Bishops: encourage long diagonals and center */
+const BISHOP_TABLE = [
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 20, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
 ];
+
+/** Rooks: encourage open files and 7th rank */
+const ROOK_TABLE = [
+   5,  5,  5,  5,  5,  5,  5,  5,  5,
+   5, 10, 10, 10, 10, 10, 10, 10,  5,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+  10, 10, 10, 10, 10, 10, 10, 10, 10,  // 7th rank (white perspective)
+   5,  5,  5,  5,  5,  5,  5,  5,  5,
+];
+
+/** Queen: slight centralization, keep flexible */
+const QUEEN_TABLE = [
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+];
+
+/** Archbishop (Knight+Bishop): values centralization like knight, but more positional */
+const ARCHBISHOP_TABLE = [
+  -5,  0,  0,  0,  0,  0,  0,  0, -5,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  5, 10, 12, 12, 12, 10,  5,  0,
+   0,  5, 12, 18, 18, 18, 12,  5,  0,
+   0,  5, 12, 18, 22, 18, 12,  5,  0,
+   0,  5, 12, 18, 18, 18, 12,  5,  0,
+   0,  5, 10, 12, 12, 12, 10,  5,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+  -5,  0,  0,  0,  0,  0,  0,  0, -5,
+];
+
+/** Chancellor (Knight+Rook): values openness + activity */
+const CHANCELLOR_TABLE = [
+   0,  0,  5,  5,  5,  5,  5,  0,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   5,  5, 10, 10, 10, 10, 10,  5,  5,
+   5,  5, 10, 15, 15, 15, 10,  5,  5,
+   5,  5, 10, 15, 15, 15, 10,  5,  5,
+   5,  5, 10, 15, 15, 15, 10,  5,  5,
+   5,  5, 10, 10, 10, 10, 10,  5,  5,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  0,  5,  5,  5,  5,  5,  0,  0,
+];
+
+/** Angel (Bishop+Rook = Queen-like, but differently mobile): values center */
+const ANGEL_TABLE = [
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+];
+
+/** King: midgame - stay safe behind pawns, corners preferred */
+const KING_MIDGAME_TABLE = [
+  20, 30, 10,  0,  0,  0, 10, 30, 20,
+  20, 20,  0,  0,  0,  0,  0, 20, 20,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+  20, 20,  0,  0,  0,  0,  0, 20, 20,
+  20, 30, 10,  0,  0,  0, 10, 30, 20,
+];
+
+/** King: endgame - become active, seek center */
+const KING_ENDGAME_TABLE = [
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 15, 15, 15, 10,  5,  0,
+   0,  5, 10, 10, 10, 10, 10,  5,  0,
+   0,  5,  5,  5,  5,  5,  5,  5,  0,
+   0,  0,  0,  0,  0,  0,  0,  0,  0,
+];
+
+// --- Pawn structure tables ---
+
+/** Passed pawn bonus per row (white perspective, row 0-8) */
+const PASSED_PAWN_BONUS = [
+  0,   // row 0 - can't have pawn
+  5,   // row 1
+  10,  // row 2
+  20,  // row 3
+  35,  // row 4
+  60,  // row 5
+  100, // row 6
+  150, // row 7
+  0,   // row 8 - promotion
+];
+
+/** Doubled pawn penalty per column */
+const DOUBLED_PAWN_PENALTY = -15;
+
+/** Isolated pawn penalty per column (no friendly pawn on adjacent files) */
+const ISOLATED_PAWN_PENALTY = -20;
+
+// --- Phase / Game detection ---
+
+/** Material threshold: below this we consider it "endgame" (no queen-side material) */
+const ENDGAME_MATERIAL_THRESHOLD = 1300; // Queen=900 — below one minor piece + king
+
+/** Mobility bonus per legal move by piece type (centipawns per move) */
+const MOBILITY_BONUS: Record<number, number> = {
+  [PIECE_KNIGHT]: 4,
+  [PIECE_BISHOP]: 5,
+  [PIECE_ROOK]: 3,
+  [PIECE_QUEEN]: 2,
+  [PIECE_KING]: 0,
+  [PIECE_ARCHBISHOP]: 3,
+  [PIECE_CHANCELLOR]: 3,
+  [PIECE_ANGEL]: 2,
+};
 
 // Transposition Table
 // computeZobristHash and TranspositionTable imported from ./transpositionTable
 
+/**
+ * Main evaluation function.
+ * Returns score in centipawns from the perspective of color c.
+ * Includes: material, positional (PST), tapered eval, pawn structure,
+ * mobility, and king safety.
+ */
 function evaluate(b: IntBoard, c: number): number {
-  let score = 0;
-  let totalMaterial = 0;
+  let mgScore = 0;  // midgame score
+  let egScore = 0;  // endgame score
+  let phase = 0;    // game phase: 24 = opening, 0 = pure endgame
 
+  // King positions for safety evaluation
+  let whiteKingSq = -1;
+  let blackKingSq = -1;
+
+  // Pawn file/row tracking for structure evaluation
+  const whitePawnFiles = new Set<number>();
+  const blackPawnFiles = new Set<number>();
+  const whitePawnsPerFile: number[] = new Array(9).fill(0);
+  const blackPawnsPerFile: number[] = new Array(9).fill(0);
+  const whitePawnRows: number[] = [];
+  const blackPawnRows: number[] = [];
+
+  // --- Pass 1: Material + Positional + Phase ---
   for (let i = 0; i < SQUARE_COUNT; i++) {
     const p = b[i];
     if (p === PIECE_NONE) continue;
@@ -485,24 +642,235 @@ function evaluate(b: IntBoard, c: number): number {
     const val = EVAL_VALUES[type] || 0;
     const row = indexToRow(i);
     const col = indexToCol(i);
+    const isWhite = pColor === c;
+    const mirrorRow = isWhite ? row : 8 - row;
+    const sqIdx = mirrorRow * 9 + col;
 
-    let positional = 0;
-    if (type === PIECE_PAWN) {
-      positional = PAWN_TABLE[pColor === c ? row * 9 + col : (8 - row) * 9 + col];
-    } else if (type === PIECE_KNIGHT) {
-      positional = KNIGHT_TABLE[pColor === c ? row * 9 + col : (8 - row) * 9 + col];
-    } else if (type === PIECE_KING) {
-      positional = KING_MIDGAME_TABLE[pColor === c ? row * 9 + col : (8 - row) * 9 + col];
+    // Phase: each piece contributes to game phase
+    // Pawn=0, Knight/Bishop=1, Rook=2, Queen=4, compound pieces in between
+    const phaseValue: Record<number, number> = {
+      [PIECE_PAWN]: 0,
+      [PIECE_KNIGHT]: 1,
+      [PIECE_BISHOP]: 1,
+      [PIECE_ROOK]: 2,
+      [PIECE_QUEEN]: 4,
+      [PIECE_KING]: 0,
+      [PIECE_ARCHBISHOP]: 2,
+      [PIECE_CHANCELLOR]: 3,
+      [PIECE_ANGEL]: 4,
+    };
+    phase += phaseValue[type] || 0;
+
+    // Material (same for mg and eg)
+    if (isWhite) mgScore += val;
+    else mgScore -= val;
+    if (isWhite) egScore += val;
+    else egScore -= val;
+
+    // Positional bonuses from PSTs
+    let mgPos = 0;
+    let egPos = 0;
+
+    switch (type) {
+      case PIECE_PAWN:
+        mgPos = PAWN_TABLE[sqIdx];
+        egPos = PAWN_TABLE[sqIdx] * 1.2; // pawns matter more in endgame
+        if (isWhite) {
+          whitePawnFiles.add(col);
+          whitePawnsPerFile[col]++;
+          whitePawnRows.push(row);
+        } else {
+          blackPawnFiles.add(col);
+          blackPawnsPerFile[col]++;
+          blackPawnRows.push(row);
+        }
+        break;
+      case PIECE_KNIGHT:
+        mgPos = KNIGHT_TABLE[sqIdx];
+        egPos = KNIGHT_TABLE[sqIdx] * 0.8; // knights slightly less in endgame
+        break;
+      case PIECE_BISHOP:
+        mgPos = BISHOP_TABLE[sqIdx];
+        egPos = BISHOP_TABLE[sqIdx] * 1.1; // bishops better in endgame
+        break;
+      case PIECE_ROOK:
+        mgPos = ROOK_TABLE[sqIdx];
+        egPos = ROOK_TABLE[sqIdx] * 1.0;
+        break;
+      case PIECE_QUEEN:
+        mgPos = QUEEN_TABLE[sqIdx];
+        egPos = QUEEN_TABLE[sqIdx] * 0.9;
+        break;
+      case PIECE_KING:
+        if (isWhite) whiteKingSq = i;
+        else blackKingSq = i;
+        // King PST handled in tapered section below
+        break;
+      case PIECE_ARCHBISHOP:
+        mgPos = ARCHBISHOP_TABLE[sqIdx];
+        egPos = ARCHBISHOP_TABLE[sqIdx] * 0.9;
+        break;
+      case PIECE_CHANCELLOR:
+        mgPos = CHANCELLOR_TABLE[sqIdx];
+        egPos = CHANCELLOR_TABLE[sqIdx] * 0.95;
+        break;
+      case PIECE_ANGEL:
+        mgPos = ANGEL_TABLE[sqIdx];
+        egPos = ANGEL_TABLE[sqIdx] * 0.95;
+        break;
     }
 
-    const total = val + positional;
-    totalMaterial += val;
-
-    if (pColor === c) score += total;
-    else score -= total;
+    if (isWhite) {
+      mgScore += mgPos;
+      egScore += egPos;
+    } else {
+      mgScore -= mgPos;
+      egScore -= egPos;
+    }
   }
 
-  return score;
+  // --- King positional (tapered) ---
+  if (whiteKingSq >= 0) {
+    const wkr = indexToRow(whiteKingSq);
+    const wkc = indexToCol(whiteKingSq);
+    const wIdx = wkr * 9 + wkc;
+    mgScore += KING_MIDGAME_TABLE[wIdx];
+    egScore += KING_ENDGAME_TABLE[wIdx];
+  }
+  if (blackKingSq >= 0) {
+    const bkr = indexToRow(blackKingSq);
+    const bkc = indexToCol(blackKingSq);
+    const bIdx = (8 - bkr) * 9 + bkc; // mirror for black
+    mgScore -= KING_MIDGAME_TABLE[bIdx];
+    egScore -= KING_ENDGAME_TABLE[bIdx];
+  }
+
+  // --- Pass 2: Pawn structure ---
+  // Doubled pawns
+  for (let f = 0; f < 9; f++) {
+    if (whitePawnsPerFile[f] > 1) mgScore += DOUBLED_PAWN_PENALTY * (whitePawnsPerFile[f] - 1);
+    if (blackPawnsPerFile[f] > 1) mgScore -= DOUBLED_PAWN_PENALTY * (blackPawnsPerFile[f] - 1);
+  }
+
+  // Isolated pawns
+  for (const f of whitePawnFiles) {
+    const hasLeft = f > 0 && whitePawnFiles.has(f - 1);
+    const hasRight = f < 8 && whitePawnFiles.has(f + 1);
+    if (!hasLeft && !hasRight) mgScore += ISOLATED_PAWN_PENALTY;
+  }
+  for (const f of blackPawnFiles) {
+    const hasLeft = f > 0 && blackPawnFiles.has(f - 1);
+    const hasRight = f < 8 && blackPawnFiles.has(f + 1);
+    if (!hasLeft && !hasRight) mgScore -= ISOLATED_PAWN_PENALTY;
+  }
+
+  // Passed pawns
+  for (const row of whitePawnRows) {
+    const col = -1; // we need col too — re-scan
+    void col; // handled below
+    break;
+  }
+  // Re-scan for passed pawns (need both row and col)
+  for (let i = 0; i < SQUARE_COUNT; i++) {
+    const p = b[i];
+    if (p === PIECE_NONE) continue;
+    const type = p & TYPE_MASK;
+    if (type !== PIECE_PAWN) continue;
+    const pColor = p & COLOR_MASK;
+    const row = indexToRow(i);
+    const col = indexToCol(i);
+
+    if (pColor === c) {
+      // White pawn (from c's perspective)
+      let passed = true;
+      for (let r = row - 1; r >= 0; r--) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const cc = col + dc;
+          if (cc < 0 || cc > 8) continue;
+          const idx = r * 9 + cc;
+          const target = b[idx];
+          if (target !== PIECE_NONE && (target & TYPE_MASK) === PIECE_PAWN && (target & COLOR_MASK) !== c) {
+            passed = false;
+            break;
+          }
+        }
+        if (!passed) break;
+      }
+      if (passed) {
+        mgScore += PASSED_PAWN_BONUS[row] * 0.8;
+        egScore += PASSED_PAWN_BONUS[row] * 1.5; // passed pawns very strong in endgame
+      }
+    } else {
+      // Black pawn (from c's perspective)
+      let passed = true;
+      for (let r = row + 1; r <= 8; r++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const cc = col + dc;
+          if (cc < 0 || cc > 8) continue;
+          const idx = r * 9 + cc;
+          const target = b[idx];
+          if (target !== PIECE_NONE && (target & TYPE_MASK) === PIECE_PAWN && (target & COLOR_MASK) === c) {
+            passed = false;
+            break;
+          }
+        }
+        if (!passed) break;
+      }
+      if (passed) {
+        mgScore -= PASSED_PAWN_BONUS[8 - row] * 0.8;
+        egScore -= PASSED_PAWN_BONUS[8 - row] * 1.5;
+      }
+    }
+  }
+
+  // --- Pass 3: King safety (pawn shield) ---
+  if (whiteKingSq >= 0) {
+    const wkr = indexToRow(whiteKingSq);
+    const wkc = indexToCol(whiteKingSq);
+    let shield = 0;
+    const dir = c === COLOR_WHITE ? -1 : 1; // pawns shield "forward"
+    for (let dc = -1; dc <= 1; dc++) {
+      const cc = wkc + dc;
+      if (cc < 0 || cc > 8) continue;
+      const r = wkr + dir;
+      if (r < 0 || r > 8) continue;
+      const idx = r * 9 + cc;
+      const target = b[idx];
+      if (target !== PIECE_NONE && (target & TYPE_MASK) === PIECE_PAWN && (target & COLOR_MASK) === c) {
+        shield += 10;
+      }
+    }
+    mgScore += shield;
+  }
+  if (blackKingSq >= 0) {
+    const bkr = indexToRow(blackKingSq);
+    const bkc = indexToCol(blackKingSq);
+    let shield = 0;
+    const dir = c === COLOR_WHITE ? 1 : -1; // black pawns shield "down" from white's view
+    for (let dc = -1; dc <= 1; dc++) {
+      const cc = bkc + dc;
+      if (cc < 0 || cc > 8) continue;
+      const r = bkr + dir;
+      if (r < 0 || r > 8) continue;
+      const idx = r * 9 + cc;
+      const target = b[idx];
+      if (target !== PIECE_NONE && (target & TYPE_MASK) === PIECE_PAWN && (target & COLOR_MASK) !== c) {
+        shield += 10;
+      }
+    }
+    mgScore -= shield;
+  }
+
+  // --- Tapered evaluation ---
+  // Clamp phase to [0, 24]
+  const maxPhase = 24;
+  phase = Math.min(phase, maxPhase);
+  const mgPhase = phase;
+  const egPhase = maxPhase - phase;
+
+  const finalScore = (mgScore * mgPhase + egScore * egPhase) / maxPhase;
+
+  return Math.round(finalScore);
 }
 
 // Quiescence search: only resolve captures to avoid horizon effect
@@ -716,7 +1084,7 @@ export async function getTopMoves(
 
   // --- Step 1: Check Opening Book ---
   const bookMoves: SearchResult[] = [];
-  if (moveNumber !== undefined && moveNumber < 15) {
+  if (moveNumber !== undefined && moveNumber < 22) {
     // Note: OpeningBook.ts getMove returns a single weighted random move,
     // though the book might have multiple. Currently we just take one if available.
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
