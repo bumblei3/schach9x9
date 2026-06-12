@@ -906,28 +906,58 @@ function quiesce(
   return alpha;
 }
 
-// Move ordering for alpha-beta efficiency
-function orderMoves(moves: Move[], b: IntBoard, ttBest: Move | null): Move[] {
+// Move ordering for alpha-beta efficiency (JS fallback search)
+// Uses TT move, MVV-LVA, promotions, killer moves, and history heuristic.
+function orderMoves(
+  moves: Move[],
+  b: IntBoard,
+  ttBest: Move | null,
+  killers: (Move | null)[],
+  history: Int32Array
+): Move[] {
+  const PIECE_VALS: Record<number, number> = {
+    [PIECE_PAWN]: 100,
+    [PIECE_KNIGHT]: 320,
+    [PIECE_BISHOP]: 330,
+    [PIECE_ROOK]: 500,
+    [PIECE_QUEEN]: 900,
+    [PIECE_KING]: 20000,
+    [PIECE_ARCHBISHOP]: 600,
+    [PIECE_CHANCELLOR]: 700,
+    [PIECE_ANGEL]: 1000,
+  };
+
   return moves
     .map(move => {
       let score = 0;
 
-      // TT best move gets highest priority
+      // 1. TT best move gets highest priority
       if (ttBest && move.from === ttBest.from && move.to === ttBest.to) {
-        score += 1000000;
+        score = 2000000;
+      } else {
+        const target = b[move.to];
+        if (target !== PIECE_NONE) {
+          // 2. MVV-LVA for captures
+          const victimVal = PIECE_VALS[target & TYPE_MASK] || 0;
+          const attackerVal = PIECE_VALS[b[move.from] & TYPE_MASK] || 0;
+          score = 1000000 + victimVal * 10 - attackerVal;
+        } else {
+          // 3. Killer Moves
+          if (killers[0] && move.from === killers[0].from && move.to === killers[0].to) {
+            score = 900000;
+          } else if (killers[1] && move.from === killers[1].from && move.to === killers[1].to) {
+            score = 800000;
+          } else {
+            // 4. History Heuristic
+            const hIdx = move.from * 81 + move.to;
+            score = history[hIdx] || 0;
+          }
+        }
       }
 
-      // MVV-LVA for captures
-      const target = b[move.to];
-      if (target !== PIECE_NONE) {
-        const victimVal = EVAL_VALUES[target & TYPE_MASK] || 0;
-        const attackerVal = EVAL_VALUES[b[move.from] & TYPE_MASK] || 0;
-        score += 500000 + victimVal * 10 - attackerVal;
-      }
-
-      // Promotions
+      // 5. Promotion bonus
       if (move.promotion) {
-        score += 400000;
+        score += 1500000;
       }
 
       return { move, score };
@@ -946,6 +976,14 @@ async function runJsSearch(
   const start = performance.now();
   let nodes = 0;
   const tt = new TranspositionTable();
+
+  // Killer moves: [depth][0..1] — indexed by remaining depth
+  const killers: (Move | null)[][] = [];
+  for (let i = 0; i <= maxDepth; i++) {
+    killers[i] = [null, null];
+  }
+  // History heuristic: indexed by from*81+to
+  const history = new Int32Array(81 * 81);
 
   function search(b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean): { score: number; bestMove: Move | null } {
     nodes++;
@@ -988,7 +1026,7 @@ async function runJsSearch(
       return { score: 0, bestMove: null };
     }
 
-    const ordered = orderMoves(legalMoves, b, ttBest);
+    const ordered = orderMoves(legalMoves, b, ttBest, killers[d] || [null, null], history);
     let bestMove: Move | null = null;
     let bestScore = maximizing ? -INFINITY : INFINITY;
     let flag: 'exact' | 'lower' | 'upper' = 'upper';
@@ -1005,7 +1043,19 @@ async function runJsSearch(
         }
         alpha = Math.max(alpha, result.score);
         if (beta <= alpha) {
+          // Beta cutoff — store killer and update history
           flag = 'lower';
+          if (b[move.to] === PIECE_NONE) {
+            // Only store quiet moves as killers
+            const k = killers[d];
+            if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
+              k[1] = k[0];
+              k[0] = move;
+            }
+            // Update history
+            const hIdx = move.from * 81 + move.to;
+            history[hIdx] += d * d;
+          }
           break;
         }
       }
@@ -1022,7 +1072,17 @@ async function runJsSearch(
         }
         beta = Math.min(beta, result.score);
         if (beta <= alpha) {
+          // Beta cutoff — store killer and update history
           flag = 'upper';
+          if (b[move.to] === PIECE_NONE) {
+            const k = killers[d];
+            if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
+              k[1] = k[0];
+              k[0] = move;
+            }
+            const hIdx = move.from * 81 + move.to;
+            history[hIdx] += d * d;
+          }
           break;
         }
       }
