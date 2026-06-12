@@ -180,7 +180,7 @@ describe('ArrowRenderer', () => {
       expect(head).not.toBeNull();
       expect(head?.getAttribute('fill')).toBe('#6366f1');
       // Points should be set (format: "x1,y1 x2,y2 x3,y3")
-      expect(head?.getAttribute('points')).toMatch(/^[\d\.\-, ]+$/);
+      expect(head?.getAttribute('points')).toMatch(/^[\d.,\-\s]+$/);
     });
 
     test('should use default values when options omitted', () => {
