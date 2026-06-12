@@ -733,7 +733,7 @@ export function detectThreatsAfterMove(
 
           // Add move-specific context
           if (isPinned && isDirect) {
-            warning += ` (Direkt bedroht + Gefesselt)`;
+            warning += ' (Direkt bedroht + Gefesselt)';
           }
 
           threats.push({
