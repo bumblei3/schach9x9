@@ -12,6 +12,7 @@ import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
 import { AnalysisUI } from './AnalysisUI.js';
+import { hidePostGameStats } from './PostGameAnalysisUI.js';
 import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
@@ -314,6 +315,7 @@ export class DOMHandler {
     if (restartBtnOverlay) {
       restartBtnOverlay.addEventListener('click', () => {
         document.getElementById('game-over-overlay')?.classList.add('hidden');
+        hidePostGameStats();
         window.location.reload();
       });
     }
@@ -322,6 +324,7 @@ export class DOMHandler {
     if (closeGameOverBtn) {
       closeGameOverBtn.addEventListener('click', () => {
         document.getElementById('game-over-overlay')?.classList.add('hidden');
+        hidePostGameStats();
       });
     }
 

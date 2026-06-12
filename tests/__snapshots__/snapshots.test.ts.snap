@@ -4,6 +4,8 @@ exports[`Visual DOM Snapshot Tests > Game over overlay snapshot 1`] = `
 "
             <div class="modal-content">
               <h2 id="winner-text">Weiß gewinnt!</h2>
+              <div id="game-over-stats" class="game-over-stats" style="margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;"></div>
+              <button id="postgame-analysis-btn" class="btn-primary" style="margin-top: 0.5rem; display: none;">📊 Nachspiel-Analyse</button>
               <button id="restart-btn-overlay" class="btn-primary">Neues Spiel</button>
               <button id="close-game-over-btn" class="btn-secondary">Schließen</button>
             </div>
@@ -485,6 +487,8 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           <div id="game-over-overlay" class="modal-overlay hidden">
             <div class="modal-content">
               <h2 id="winner-text">Spiel beendet</h2>
+              <div id="game-over-stats" class="game-over-stats" style="margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;"></div>
+              <button id="postgame-analysis-btn" class="btn-primary" style="margin-top: 0.5rem; display: none;">📊 Nachspiel-Analyse</button>
               <button id="restart-btn-overlay" class="btn-primary">Neues Spiel</button>
               <button id="close-game-over-btn" class="btn-secondary">Schließen</button>
             </div>

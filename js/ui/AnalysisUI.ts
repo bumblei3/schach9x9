@@ -22,7 +22,7 @@ interface PlayerStats {
 }
 
 interface AppWithGame {
-  game: Game;
+  game: Partial<Game> & { moveHistory: unknown[]; playerColor: 'white' | 'black'; gameController?: any };
 }
 
 export class AnalysisUI {
@@ -56,7 +56,7 @@ export class AnalysisUI {
   }
 
   get game(): Game {
-    return this.app.game;
+    return this.app.game as Game;
   }
 
   update(analysis: AnalysisResult): void {

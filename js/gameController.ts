@@ -27,6 +27,7 @@ import type { AIController } from './aiController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
+import { showPostGameStats } from './ui/PostGameAnalysisUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
@@ -784,7 +785,7 @@ export class GameController {
     logger.info('Game saved to statistics:', playerResult, 'vs', opponent);
   }
 
-  handleGameEnd(result: string, winnerColor: Player | null): void {
+  handleGameEnd(result: 'win' | 'draw', winnerColor: Player | null): void {
     // Save stats
     let saveColorArg: Player | null = null;
 
@@ -795,6 +796,11 @@ export class GameController {
     }
 
     this.saveGameToStatistics(result, saveColorArg);
+
+    // Show post-game stats and analysis button (unless in campaign mode)
+    if (!this.game.campaignMode) {
+      showPostGameStats(this.game, result, winnerColor);
+    }
 
     // Show analysis prompt after a short delay (only if not campaign win)
     /* 
