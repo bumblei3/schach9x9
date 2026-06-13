@@ -6,32 +6,17 @@
 
 import { logger } from './logger.js';
 import { 
-  getBestMoveWasm, 
   getBestMoveDetailed,
   convertBoardToInt,
   type MoveResult,
-  type SearchResult,
-  type TimeParams,
-  type Game 
+  type SearchResult
 } from './aiEngine.js';
 import { 
-  getAllLegalMoves as genLegalInt,
-  makeMove as makeMoveInt,
-  undoMove as undoMoveInt,
-  isInCheck as checkInt,
-  findKing as findKingInt,
-  type Move,
-  type UndoInfo,
-  SQUARE_COUNT,
-  PIECE_NONE,
+  isInCheck,
   COLOR_WHITE,
-  COLOR_BLACK,
-  TYPE_MASK
+  COLOR_BLACK
 } from './ai/MoveGenerator.js';
-import { evaluate } from './evaluate.js';
-import { computeZobristHash, TranspositionTable } from './ai/transpositionTable.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
-import { calculateTimeAllocation, type TimeAllocationParams } from './ai/timeManagement.js';
 
 // ============================================================================
 // Types
@@ -267,7 +252,7 @@ export class EngineMatchRunner {
 
         if (!move) {
           // No legal moves
-          const inCheck = checkInt(boardInt, isWhiteTurn ? COLOR_WHITE : COLOR_BLACK) as boolean;
+          const inCheck = isInCheck(boardInt, isWhiteTurn ? COLOR_WHITE : COLOR_BLACK) as boolean;
           if (inCheck) {
             return this.createResult(gameNumber, whiteConfig, blackConfig,
               isWhiteTurn ? '0-1' : '1-0',
