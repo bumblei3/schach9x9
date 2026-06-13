@@ -6,8 +6,6 @@
 import { logger } from './logger.js';
 import { PGNParser, PGNGame, PGNHistoryEntry } from './utils/PGNParser.js';
 
-import type { Game } from './gameEngine.js';
-
 /**
  * Imports a PGN file/string and converts it to a replayable game state
  */
@@ -111,7 +109,9 @@ export class PGNImportReplay {
     whitePawns.forEach((piece: string, c: number) => { board[7][c] = { type: piece, color: 'white', hasMoved: false }; });
     whiteBack.forEach((piece: string, c: number) => { board[8][c] = { type: piece, color: 'white', hasMoved: false }; });
 
+    // Cast to satisfy PgnEngine interface
     return {
+      turn: 'white',
       boardSize: 9,
       board,
       getAllLegalMoves: (): { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }[] => {
@@ -122,7 +122,7 @@ export class PGNImportReplay {
       executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }): void => {
         // Simplified move execution
       }
-    };
+    } as any;
   }
 
   /**
@@ -499,7 +499,7 @@ export class PGNImportUI {
   }
 
   private updateMoveListHighlight(activeIndex: number): void {
-    this.moveListContainer?.querySelectorAll('.pgn-move-item').forEach((item, index) => {
+    this.moveListContainer?.querySelectorAll<HTMLElement>('.pgn-move-item').forEach((item, index) => {
       if (index === activeIndex) {
         item.classList.add('active');
         item.style.background = 'rgba(99, 102, 241, 0.2)';
@@ -510,6 +510,3 @@ export class PGNImportUI {
     });
   }
 }
-
-// Export for module usage
-export { PGNImportReplay, PGNImportUI, PGNImportResult };
