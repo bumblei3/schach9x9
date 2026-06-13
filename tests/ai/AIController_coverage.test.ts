@@ -221,7 +221,10 @@ describe('AIController Coverage Boost', () => {
       type: 'bestMove',
       data: {
         move: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } },
-        pv: [{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 } }],
+        // pv is a UCI string like "e2e4 e7e5" from SearchResult
+        pv: 'g5g3 g7g5',
+        depth: 8,
+        nodes: 12345,
       },
     });
 

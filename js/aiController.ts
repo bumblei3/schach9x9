@@ -28,23 +28,6 @@ import AIWorker from './ai/aiWorker.ts?worker';
 // Piece values for shop
 const PIECES: Record<string, ShopPieceConfig> = SHOP_PIECES;
 
-interface AIPersonality {
-  id: string;
-  name: string;
-  // Evaluation weights
-  mobilityWeight: number;
-  safetyWeight: number;
-  pawnStructureWeight: number;
-  centerControlWeight: number;
-  attackWeight: number;
-  // Search behavior modifiers
-  aggressionLevel: number;        // 0.5-2.0: affects aspiration windows, pruning thresholds
-  timeManagementFactor: number;   // 0.5-2.0: multiplies allocated time per move
-  riskTolerance: number;          // 0.0-1.0: willingness to play sharp/complex lines
-  // Maps to WASM Personality enum
-  wasmPersonality: 'AGGRESSIVE' | 'SOLID' | 'GENTLE' | 'NORMAL';
-}
-
 export class AIController {
   public game: Game;
   public aiWorker: Worker | null;
@@ -332,12 +315,15 @@ export class AIController {
           if (bestResult.pv && bestResult.pv.length > 0) {
             const bestMoveEl = document.getElementById('ai-best-move');
             if (bestMoveEl) {
-              const pvText = bestResult.pv
-                .map((m: MoveResult) => {
-                  const size = this.game.boardSize;
-                  const from = String.fromCharCode(97 + m.from.c) + (size - m.from.r);
-                  const to = String.fromCharCode(97 + m.to.c) + (size - m.to.r);
-                  return `${from}${to}`;
+              // PV is a UCI string like "e2e4 e7e5 g1f3"
+              // Parse each 4-char move into from/to coordinates
+              const uciMoves = bestResult.pv.split(' ').filter(Boolean);
+              const pvText = uciMoves
+                .map((uci: string) => {
+                  if (uci.length >= 4) {
+                    return uci.slice(0, 2) + uci.slice(2, 4);
+                  }
+                  return uci;
                 })
                 .join(' ');
               bestMoveEl.textContent = `KI Plan: ${pvText}`;
@@ -537,9 +523,9 @@ export class AIController {
       }, 5000);
 
       const workerHandler = (e: MessageEvent) => {
-        const { type, id, bestMove, score, pv } = e.data;
+        const { type, id, bestMove, score, pv, depth, nodes } = e.data;
         if (type === 'bestMove') {
-          workerResults[id] = { move: bestMove, score, pv };
+          workerResults[id] = { move: bestMove, score, pv, depth: depth ?? 0, nodes: nodes ?? 0 };
           completedWorkers++;
           if (completedWorkers >= numWorkers) {
             clearTimeout(timeoutId);

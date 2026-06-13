@@ -23,12 +23,16 @@ export async function ensureWasmInitialized(): Promise<boolean> {
       const module = await import('../../engine-wasm/pkg/engine_wasm.js');
 
       // Check if we're in Node.js
+      // @ts-ignore - Node.js globals only available at runtime
       const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
 
       if (isNode) {
         // In Node.js, we need to pass the WASM file buffer
+        // @ts-ignore - Dynamic import only in Node.js
         const fs = await import('fs');
+        // @ts-ignore - Dynamic import only in Node.js
         const path = await import('path');
+        // @ts-ignore - Dynamic import only in Node.js
         const url = await import('url');
 
         // url module is dynamically imported; fileURLToPath is not typed
