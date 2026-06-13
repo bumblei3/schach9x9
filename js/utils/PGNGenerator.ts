@@ -1,6 +1,5 @@
 import { logger } from '../logger.js';
 import type { Game } from '../gameEngine.js';
-import type { MoveResult, SearchResult } from './aiEngine';
 
 /**
  * Piece type to standard notation letter.
@@ -246,3 +245,4 @@ export function downloadPGN(pgn: string, filename: string = 'game.pgn'): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+

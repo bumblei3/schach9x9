@@ -17,6 +17,50 @@ import {
   COLOR_BLACK
 } from './ai/MoveGenerator.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
+import type { Piece } from './types/game.js';
+
+// ============================================================================
+// Helper: Convert internal number[][] board to UiBoard format
+// ============================================================================
+
+/**
+ * Converts a piece code to Piece object
+ * Code mapping: +1..+10 = white pieces, -1..-10 = black pieces, 0 = empty
+ */
+function pieceCodeToPiece(code: number): Piece | null {
+  switch (code) {
+    // White pieces
+    case 1: return { type: 'p', color: 'white', hasMoved: false };
+    case 2: return { type: 'n', color: 'white', hasMoved: false };
+    case 3: return { type: 'b', color: 'white', hasMoved: false };
+    case 4: return { type: 'r', color: 'white', hasMoved: false };
+    case 5: return { type: 'q', color: 'white', hasMoved: false };
+    case 6: return { type: 'k', color: 'white', hasMoved: false };
+    case 7: return { type: 'a', color: 'white', hasMoved: false };
+    case 8: return { type: 'c', color: 'white', hasMoved: false };
+    case 9: return { type: 'e', color: 'white', hasMoved: false };
+    case 10: return { type: 'j', color: 'white', hasMoved: false };
+    // Black pieces
+    case -1: return { type: 'p', color: 'black', hasMoved: false };
+    case -2: return { type: 'n', color: 'black', hasMoved: false };
+    case -3: return { type: 'b', color: 'black', hasMoved: false };
+    case -4: return { type: 'r', color: 'black', hasMoved: false };
+    case -5: return { type: 'q', color: 'black', hasMoved: false };
+    case -6: return { type: 'k', color: 'black', hasMoved: false };
+    case -7: return { type: 'a', color: 'black', hasMoved: false };
+    case -8: return { type: 'c', color: 'black', hasMoved: false };
+    case -9: return { type: 'e', color: 'black', hasMoved: false };
+    case -10: return { type: 'j', color: 'black', hasMoved: false };
+    default: return null;
+  }
+}
+
+/**
+ * Converts internal number[][] board to UiBoard format expected by convertBoardToInt
+ */
+function convertToUiBoard(board: number[][]): (Piece | null)[][] {
+  return board.map(row => row.map(code => pieceCodeToPiece(code)));
+}
 
 // ============================================================================
 // Types
@@ -93,6 +137,7 @@ export type TerminationReason =
 // ============================================================================
 // Engine Match Runner Class
 // ============================================================================
+
 export class EngineMatchRunner {
   private config: EngineMatchConfig;
   private results: GameResult[] = [];
@@ -192,7 +237,8 @@ export class EngineMatchRunner {
         });
 
         // Get move from engine
-        const boardInt = convertBoardToInt(gameState);
+        const uiBoard = convertToUiBoard(gameState);
+        const boardInt = convertBoardToInt(uiBoard);
         const color = currentTurn === 'white' ? 'white' : 'black';
         const personality = AI_PERSONALITIES[engineConfig.personality]?.wasmPersonality || 'NORMAL';
         const elo = engineConfig.elo || 2500;
@@ -203,7 +249,7 @@ export class EngineMatchRunner {
         try {
           // Use WASM for speed
           const result = await getBestMoveDetailed(
-            boardInt, 
+            uiBoard, 
             color as 'white' | 'black', 
             engineConfig.depth || 6,
             { elo, personality, maxTimeMs: timeAlloc.allocatedTimeMs },
@@ -225,7 +271,7 @@ export class EngineMatchRunner {
 
         if (!move) {
           // No legal moves
-          const inCheck = isInCheck(boardInt, isWhiteTurn ? COLOR_WHITE : COLOR_BLACK) as boolean;
+          const inCheck = isInCheck(boardInt as number[] | Int8Array, isWhiteTurn ? COLOR_WHITE : COLOR_BLACK) as boolean;
           if (inCheck) {
             return this.createResult(gameNumber, whiteConfig, blackConfig,
               isWhiteTurn ? '0-1' : '1-0',
@@ -307,11 +353,11 @@ export class EngineMatchRunner {
     return { allocatedTimeMs: Math.min(maxTime, params.maxTimePerMove) };
   }
 
-  private applyMove(board: any[][], move: MoveResult, _turn: string): void {
+  private applyMove(board: number[][], move: MoveResult, _turn: string): void {
     // Simplified - just for functionality
     if (move && move.from && move.to) {
       board[move.to.r][move.to.c] = board[move.from.r][move.from.c];
-      board[move.from.r][move.from.c] = null;
+      board[move.from.r][move.from.c] = 0;
     }
   }
 
@@ -365,7 +411,7 @@ export async function runEngineMatch(config: EngineMatchConfig): Promise<GameRes
 }
 
 // Auto-run if executed directly
-  if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const config: EngineMatchConfig = {
     engineWhite: { name: 'Engine-A', personality: 'balanced', elo: 2500, color: 'white' },
     engineBlack: { name: 'Engine-B', personality: 'aggressive', elo: 2400, color: 'black' },
@@ -377,4 +423,3 @@ export async function runEngineMatch(config: EngineMatchConfig): Promise<GameRes
   
   await runEngineMatch(config);
 }
-
