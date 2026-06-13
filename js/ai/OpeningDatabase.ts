@@ -74,7 +74,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Evans Gambit (1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4) - C51-C52
-  '...': {
+  'PLACEHOLDER_EVANS_GAMBIT': {
     name: 'Evans-Gambit',
     eco: 'C51',
     category: 'Gambit',
@@ -88,7 +88,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Two Knights Defense (1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6) - C55-C59
-  '...': {
+  'PLACEHOLDER_TWO_KNIGHTS': {
     name: 'Zweispringerspiel',
     eco: 'C57',
     category: 'Open Game',
@@ -102,7 +102,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Ruy Lopez (Spanish Game) - C60-C99
-  '...': {
+  'PLACEHOLDER_RUY_LOPEZ': {
     name: 'Spanische Partie (Ruy Lopez)',
     eco: 'C70',
     category: 'Open Game',
@@ -116,7 +116,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Berlin Defense (1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6) - C67
-  '...': {
+  'PLACEHOLDER_BERLIN': {
     name: 'Berliner Verteidigung',
     eco: 'C67',
     category: 'Open Game',
@@ -130,7 +130,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Scotch Game (1. e4 e5 2. Nf3 Nc6 3. d4) - C45
-  '...': {
+  'PLACEHOLDER_SCOTCH': {
     name: 'Schottische Partie',
     eco: 'C45',
     category: 'Open Game',
@@ -144,7 +144,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Four Knights Game (1. e4 e5 2. Nf3 Nc6 3. Nc3 Nf6) - C47-C49
-  '...': {
+  'PLACEHOLDER_FOUR_KNIGHTS': {
     name: 'Vierspringerspiel',
     eco: 'C47',
     category: 'Open Game',
@@ -158,7 +158,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // King's Gambit (1. e4 e5 2. f4) - C30-C39
-  '...': {
+  'PLACEHOLDER_KINGS_GAMBIT': {
     name: 'Königsgambit',
     eco: 'C33',
     category: 'Gambit',
@@ -172,7 +172,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Vienna Game (1. e4 e5 2. Nc3) - C25-C29
-  '...': {
+  'PLACEHOLDER_VIENNA': {
     name: 'Wiener Partie',
     eco: 'C25',
     category: 'Open Game',
@@ -203,7 +203,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Najdorf Variation (1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nf3 Nf6 5. Nc3 a6) - B90-B99
-  '...': {
+  'PLACEHOLDER_NAJDORF': {
     name: 'Najdorf-Variante',
     eco: 'B90',
     category: 'Sicilian Defense',
@@ -217,7 +217,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Dragon Variation (1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nf3 Nf6 5. Nc3 g6) - B70-B79
-  '...': {
+  'PLACEHOLDER_DRAGON': {
     name: 'Drachenvariante',
     eco: 'B70',
     category: 'Sicilian Defense',
@@ -245,7 +245,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Winawer Variation (1. e4 e6 2. d4 d5 3. Nc3 Bb4) - C15-C19
-  '...': {
+  'PLACEHOLDER_WINAWER': {
     name: 'Winawer-Variante',
     eco: 'C18',
     category: 'French Defense',
@@ -259,7 +259,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Caro-Kann Defense (1. e4 c6) - B10-B19
-  '...': {
+  'PLACEHOLDER_CARO_KANN': {
     name: 'Caro-Kann-Verteidigung',
     eco: 'B10',
     category: 'Semi-Open Game',
@@ -273,7 +273,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Pirc/Modern Defense (1. e4 d6/g6) - B06-B09
-  '...': {
+  'PLACEHOLDER_PIRC': {
     name: 'Pirc-Verteidigung',
     eco: 'B07',
     category: 'Semi-Open Game',
@@ -290,7 +290,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   // CLOSED GAMES (D00-D99) - 1. d4 d5
   // ==========================================
   // Queen's Gambit Declined (1. d4 d5 2. c4 e6) - D30-D69
-  '...': {
+  'PLACEHOLDER_QGD': {
     name: 'Abgelehntes Damengambit',
     eco: 'D30',
     category: 'Closed Game',
@@ -304,7 +304,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Queen's Gambit Accepted (1. d4 d5 2. c4 dxc4) - D20-D29
-  '...': {
+  'PLACEHOLDER_QGA': {
     name: 'Angenommenes Damengambit',
     eco: 'D20',
     category: 'Closed Game',
@@ -318,7 +318,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Slav Defense (1. d4 d5 2. c4 c6) - D10-D19
-  '...': {
+  'PLACEHOLDER_SLAV': {
     name: 'Slawische Verteidigung',
     eco: 'D10',
     category: 'Closed Game',
@@ -332,7 +332,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Semi-Slav (1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6) - D43-D49
-  '...': {
+  'PLACEHOLDER_SEMI_SLAV': {
     name: 'Halbslawisch',
     eco: 'D45',
     category: 'Closed Game',
@@ -346,7 +346,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Nimzo-Indian (1. d4 Nf6 2. c4 e6 3. Nc3 Bb4) - E20-E59
-  '...': {
+  'PLACEHOLDER_NIMZO': {
     name: 'Nimzo-Indisch',
     eco: 'E20',
     category: 'Indian System',
@@ -360,7 +360,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // King's Indian Defense (1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6) - E60-E99
-  '...': {
+  'PLACEHOLDER_KID': {
     name: 'Königsindisch',
     eco: 'E60',
     category: 'Indian System',
@@ -374,7 +374,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Grünfeld Defense (1. d4 Nf6 2. c4 g6 3. Nc3 d5) - D70-D99
-  '...': {
+  'PLACEHOLDER_GRUNFELD': {
     name: 'Grünfeld-Verteidigung',
     eco: 'D85',
     category: 'Indian System',
@@ -388,7 +388,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // English Opening (1. c4) - A10-A39
-  '...': {
+  'PLACEHOLDER_ENGLISH': {
     name: 'Englische Eröffnung',
     eco: 'A10',
     category: 'Flank Opening',
@@ -402,7 +402,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Reti Opening (1. Nf3) - A04-A09
-  '...': {
+  'PLACEHOLDER_RETI': {
     name: 'Retieröffnung',
     eco: 'A04',
     category: 'Flank Opening',
