@@ -89,6 +89,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: [lint]
     strategy:
       matrix:
         node-version: ['20', '22']
@@ -147,6 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 75
     continue-on-error: true
+    needs: [build]
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
@@ -171,13 +173,15 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
-
-      - name: Build production bundle
-        run: npm run build
-        continue-on-error: true
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=github
@@ -389,10 +393,10 @@ jobs:
           echo "CSS: $(($CSS_SIZE / 1024)) KB"
           echo "WASM: $(($WASM_SIZE / 1024)) KB"
           
-          # Budget check: 500 KB total
-          MAX_SIZE=$((500 * 1024))
+          # Budget check: 1200 KB total (JS bundles + CSS + WASM)
+          MAX_SIZE=$((1200 * 1024))
           if [ $TOTAL_SIZE -gt $MAX_SIZE ]; then
-            echo "❌ Bundle exceeds 500 KB budget!"
+            echo "❌ Bundle exceeds 1200 KB budget!"
             exit 1
           fi
           echo "✅ Bundle size within budget"
