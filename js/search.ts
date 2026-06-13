@@ -31,6 +31,7 @@ import {
 } from './ai/MoveGenerator';
 import { evaluate } from './evaluate';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
+import { progressCallback, type AIProgressData } from './aiEngine';
 import type { IntBoard } from './evaluate';
 
 // =====================================================================
@@ -548,11 +549,22 @@ export function createJsSearch() {
               }
             }
           }
-        }
+        } // end of move loop
 
         tt.store(hash, d, bestScore, flag, bestMove);
         return { score: bestScore, bestMove };
-      }
+        }
+
+        // Report progress at each depth iteration
+        if (progressCallback) {
+        progressCallback({
+          depth: d,
+          nodes,
+          time: performance.now() - start,
+          score: bestResult.score,
+          pv: bestResult.bestMove ? `${bestResult.bestMove.from}-${bestResult.bestMove.to}` : undefined,
+        } as AIProgressData);
+        }
 
       // Iterative Deepening with Aspiration Windows + Internal Iterative Reduction (IIR)
       let bestResult: { score: number; bestMove: Move | null } = { score: 0, bestMove: null };
@@ -615,6 +627,18 @@ export function createJsSearch() {
           (performance.now() - start) < MAX_SEARCH_TIME * 0.5;
 
         if (performance.now() - start <= MAX_SEARCH_TIME) bestResult = result;
+
+        // Report progress at each depth iteration
+        if (progressCallback) {
+          progressCallback({
+            depth: d,
+            nodes,
+            time: performance.now() - start,
+            score: result.score,
+            pv: result.bestMove ? `${result.bestMove.from}-${result.bestMove.to}` : undefined,
+          } as AIProgressData);
+        }
+
         if (Math.abs(result.score) > MATE_SCORE - 100) break;
         
         // Optional: Early exit if IIR suggests depth increase won't help

@@ -287,6 +287,20 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   🔄 Kontinuierlich
                 </button>
               </div>
+              
+              <!-- Live Search Progress -->
+              <div class="live-search-progress" style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 0.85rem;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 0.5rem;">
+                  <div><strong>Tiefe:</strong> <span id="live-depth">-</span></div>
+                  <div><strong>Knoten:</strong> <span id="live-nodes">-</span></div>
+                  <div><strong>Bewertung:</strong> <span id="live-score">-</span></div>
+                  <div><strong>Zeit:</strong> <span id="live-time">-</span></div>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                  <strong>Hauptvariante:</strong> <span id="live-pv" style="color: var(--accent-primary); font-family: monospace;">-</span>
+                </div>
+              </div>
+              
             </div>
           </div>
 

@@ -4,6 +4,7 @@
 import { showModal, closeModal, updateMoveHistoryUI, renderEvalGraph } from '../ui.js';
 import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
+import type { AIProgressData } from '../aiEngine';
 
 interface AnalysisResult {
   score?: number;
@@ -37,6 +38,12 @@ export class AnalysisUI {
   panelBarValue: HTMLElement | null;
   evalScoreValue: HTMLElement | null;
   engineInfo: HTMLElement | null;
+  // Live search elements
+  liveDepth: HTMLElement | null;
+  liveNodes: HTMLElement | null;
+  liveScore: HTMLElement | null;
+  liveTime: HTMLElement | null;
+  livePV: HTMLElement | null;
   isAnalyzing: boolean = false;
 
   constructor(app: AppWithGame) {
@@ -53,6 +60,12 @@ export class AnalysisUI {
     this.evalScoreValue = document.getElementById('eval-score');
 
     this.engineInfo = document.getElementById('analysis-engine-info');
+    // Live search elements
+    this.liveDepth = document.getElementById('live-depth');
+    this.liveNodes = document.getElementById('live-nodes');
+    this.liveScore = document.getElementById('live-score');
+    this.liveTime = document.getElementById('live-time');
+    this.livePV = document.getElementById('live-pv');
   }
 
   get game(): Game {
@@ -127,7 +140,53 @@ export class AnalysisUI {
     if (this.engineInfo) {
       this.engineInfo.textContent = `Tiefe: ${depth || '-'} | Knoten: ${nodes || '-'}`;
     }
-  }
+    }
+
+    // Live progress update during search
+    updateLiveProgress(progress: AIProgressData): void {
+    if (!this.isAnalyzing) return;
+  
+    if (this.liveDepth) {
+      this.liveDepth.textContent = progress.depth?.toString() || '-';
+    }
+    if (this.liveNodes) {
+      this.liveNodes.textContent = progress.nodes ? progress.nodes.toLocaleString() : '-';
+    }
+    if (this.liveScore) {
+      const score = progress.score !== undefined ? (progress.score / 100).toFixed(2) : '-';
+      const prefix = progress.score !== undefined && progress.score > 0 ? '+' : '';
+      this.liveScore.textContent = `${prefix}${score}`;
+    }
+    if (this.liveTime) {
+      const secs = progress.time ? (progress.time / 1000).toFixed(1) : '-';
+      this.liveTime.textContent = `${secs}s`;
+    }
+    if (this.livePV) {
+      this.livePV.textContent = progress.pv || '-';
+    }
+  
+    // Also update the engine info with live data
+    if (this.engineInfo && progress.depth !== undefined) {
+      const secs = progress.time ? (progress.time / 1000).toFixed(1) : '-';
+      const nodesStr = progress.nodes?.toLocaleString() || '-';
+      this.engineInfo.textContent = 'Tiefe: ' + progress.depth + ' | Knoten: ' + nodesStr + ' | ' + secs + 's';
+    }
+    }
+
+    // Update engine info with live data (compat method)
+    updateAnalysisStats(data: { depth?: number; maxDepth?: number; nodes?: number; score?: number; time?: number }): void {
+    if (this.liveDepth) this.liveDepth.textContent = data.depth?.toString() || '-';
+    if (this.liveNodes) this.liveNodes.textContent = data.nodes?.toLocaleString() || '-';
+    if (this.liveTime && data.time) this.liveTime.textContent = `${(data.time / 1000).toFixed(1)}s`;
+    if (this.liveScore && data.score !== undefined) {
+      const prefix = data.score > 0 ? '+' : '';
+      this.liveScore.textContent = `${prefix}${(data.score / 100).toFixed(2)}`;
+    }
+    if (this.engineInfo) {
+      const secs = (data.time ?? 0) / 1000;
+      this.engineInfo.textContent = 'Tiefe: ' + (data.depth ?? '-') + ' | Knoten: ' + (data.nodes?.toLocaleString() ?? '-') + ' | ' + secs.toFixed(1) + 's';
+    }
+    }
 
   togglePanel(): boolean {
     if (!this.panel) return false;

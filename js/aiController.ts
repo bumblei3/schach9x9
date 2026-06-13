@@ -653,6 +653,10 @@ export class AIController {
 
     if (type === 'progress') {
       if (workerIndex === 0) this.updateAIProgress(data);
+      // Also update live analysis UI
+      if (this.analysisUI) {
+        this.analysisUI.updateLiveProgress(data);
+      }
     } else if (type === 'bestMove') {
       // Handled by specific promises in aiMove, but we can store it here too
       this.game.lastBestMove = data;
