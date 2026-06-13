@@ -60,6 +60,13 @@ jobs:
       - name: Run TypeScript type check
         run: npx tsc --noEmit
 
+      - name: Run Commitlint (if PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+          git fetch origin main
+          commitlint --from=origin/main --to=HEAD --verbose
+
   # =======================================================================
   # UNIT TESTS (Fast, parallelizable)
   # =======================================================================
@@ -67,13 +74,16 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        node-version: ['18', '20', '22']
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ matrix.node-version }}
           cache: npm
           cache-dependency-path: package-lock.json
 
@@ -95,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report
+          name: coverage-report-${{ matrix.node-version }}
           path: coverage/
           retention-days: 7
 
@@ -266,6 +276,17 @@ jobs:
           echo "Build size:"
           du -sh dist/
           find dist -name "*.js" -exec wc -c {} \; | sort -rn | head -5
+
+      - name: Bundle Size Diff (PR only)
+        if: github.event_name == 'pull_request'
+        uses: github-action-bundle-diff@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dist-dir: dist
+          check-size-budget: true
+          max-bundle-size: 500 KB
+          output-format: markdown
+          comment-on-pr: true
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
