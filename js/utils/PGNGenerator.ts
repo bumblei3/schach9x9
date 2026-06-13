@@ -1,11 +1,6 @@
 import { logger } from '../logger.js';
-/**
- * PGN Generator for Schach 9x9
- * Generates Portable Game Notation strings from game history.
- * @module PGNGenerator
- */
-
 import type { Game } from '../gameEngine.js';
+import type { MoveResult, SearchResult } from './aiEngine';
 
 /**
  * Piece type to standard notation letter.
@@ -20,6 +15,7 @@ const PIECE_NOTATION: Record<string, string> = {
   a: 'A', // Archbishop (custom)
   c: 'C', // Chancellor (custom)
   e: 'E', // Angel (custom)
+  j: 'J', // Nightrider (custom)
 };
 
 /**
@@ -42,12 +38,32 @@ function rowToRank(row: number): string {
 }
 
 /**
- * Convert a move record to algebraic notation.
+ * Quality symbols for PGN annotations.
+ */
+const QUALITY_SYMBOLS: Record<string, string> = {
+  brilliant: '!!',
+  great: '!',
+  best: '!', // or leave empty for best
+  excellent: '!',
+  good: '', // good moves don't need special marker
+  inaccuracy: '?!',
+  mistake: '?',
+  blunder: '??',
+  book: '',
+};
+
+/**
+ * Convert a move record to algebraic notation with optional engine annotations.
  * @param move - Move record from game history
  * @param _game - Game instance (for disambiguation)
- * @returns Algebraic notation string
+ * @param includeEngineAnnotations - Whether to include engine evaluation annotations
+ * @returns Algebraic notation string with optional annotations
  */
-export function moveToNotation(move: any, _game: Game | null = null): string {
+export function moveToNotation(
+  move: any,
+  _game: Game | null = null,
+  includeEngineAnnotations: boolean = false
+): string {
   if (!move || !move.from || !move.to) {
     return '??';
   }
@@ -71,7 +87,7 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
     notation += pieceLetter;
   }
 
-  // Disambiguation
+  // Disambiguation (only for pawn captures)
   if (!pieceLetter && move.captured) {
     notation += fromFile;
   }
@@ -90,6 +106,42 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
     notation += '=' + (PIECE_NOTATION[promotedTo as string] || 'Q');
   }
 
+  // Engine annotations (Nag - Numeric Annotation Glyphs + eval)
+  if (includeEngineAnnotations) {
+    const annotations: string[] = [];
+
+    // Quality symbol
+    const quality = move.classification as string | undefined;
+    if (quality && QUALITY_SYMBOLS[quality]) {
+      annotations.push(QUALITY_SYMBOLS[quality]);
+    }
+
+    // Eval score
+    if (move.evalScore !== undefined && move.evalScore !== null) {
+      const cp = move.evalScore;
+      const sign = cp >= 0 ? '+' : '';
+      annotations.push(`[%eval ${sign}${cp / 100}]`);
+    }
+
+    // Time on clock
+    if (move.timeUsed !== undefined && move.timeUsed !== null) {
+      const mins = Math.floor(move.timeUsed / 60);
+      const secs = Math.floor(move.timeUsed % 60);
+      annotations.push(`[%clk ${mins}:${secs.toString().padStart(2, '0')}]`);
+    }
+
+    // Principal variation (if available in analysis)
+    if (move.pv && move.pv.length > 0) {
+      const pvMoves = move.pv.map((pvMove: any) => moveToNotation(pvMove));
+      annotations.push(`[%pv ${pvMoves.join(' ')}]`);
+    }
+
+    // Add annotations to notation
+    if (annotations.length > 0) {
+      notation += ' ' + annotations.join(' ');
+    }
+  }
+
   return notation;
 }
 
@@ -97,9 +149,14 @@ export function moveToNotation(move: any, _game: Game | null = null): string {
  * Generate PGN string from a game.
  * @param game - Game instance with moveHistory
  * @param options - Optional metadata
+ * @param includeEngineAnnotations - Whether to include engine evaluation annotations
  * @returns PGN formatted string
  */
-export function generatePGN(game: Game, options: Record<string, unknown> = {}): string {
+export function generatePGN(
+  game: Game,
+  options: Record<string, unknown> = {},
+  includeEngineAnnotations: boolean = true
+): string {
   const headers: string[] = [];
 
   // Standard headers
@@ -121,13 +178,15 @@ export function generatePGN(game: Game, options: Record<string, unknown> = {}): 
   // Variant and FEN for non-standard boards
   if (game.boardShape === 'cross') {
     headers.push('[Variant "Cross"]');
-    // Cross mode has 15 total rows/cols logically but 9x9 in the data array.
-    // However, the initial state is fixed. We should provide a Setup/FEN header
-    // so readers know it's not a standard start.
     headers.push('[SetUp "1"]');
-    headers.push('[FEN "3pp3/3pp3/3pp3/pppppppp/pppkpppb/pppppppp/3pp3/3pp3/3pp3 w - - 0 1"]'); // Simplified or specific to state
+    headers.push('[FEN "3pp3/3pp3/3pp3/pppppppp/pppkpppb/pppppppp/3pp3/3pp3/3pp3 w - - 0 1"]');
   } else {
     headers.push('[Variant "9x9"]');
+  }
+
+  // Engine info header
+  if (includeEngineAnnotations) {
+    headers.push('[Annotator "Schach9x9 Engine"]');
   }
 
   // Move text
@@ -137,7 +196,7 @@ export function generatePGN(game: Game, options: Record<string, unknown> = {}): 
 
   for (let i = 0; i < moves.length; i++) {
     const move = moves[i];
-    const notation = moveToNotation(move, game);
+    const notation = moveToNotation(move, game, includeEngineAnnotations);
 
     if (i % 2 === 0) {
       // White's move
