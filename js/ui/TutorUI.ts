@@ -275,6 +275,8 @@ export async function showTutorSuggestions(
       if (body) {
         body.innerHTML = '';
         (hints as TutorHint[]).forEach((hint: TutorHint, index: number) => {
+          if (!hint.move) return;
+          const move = hint.move!;
           const div = document.createElement('div');
           div.className = 'tutor-hint-item';
           const getQualityColor = (cat: string) => {
@@ -316,7 +318,7 @@ export async function showTutorSuggestions(
         `;
           div.addEventListener('click', () => {
             overlay!.classList.add('hidden');
-            g.executeMove(hint.move.from, hint.move.to);
+            g.executeMove(move.from, move.to);
           });
           body.appendChild(div);
         });
@@ -394,7 +396,9 @@ export async function showTutorSuggestions(
   suggestionsEl!.appendChild(header);
 
   (hints as TutorHint[]).forEach((hint: TutorHint, index: number) => {
-    const analysis = hint.analysis || g.analyzeMoveWithExplanation!(hint.move, hint.score);
+    if (!hint.move) return;
+    const move = hint.move!;
+    const analysis = hint.analysis || g.analyzeMoveWithExplanation!(move, hint.score);
     const suggEl = document.createElement('div');
     suggEl.className = `tutor-suggestion ${analysis.category}`;
     suggEl.style.cssText = 'margin-bottom: 1rem; cursor: pointer; transition: all 0.2s ease;';
@@ -436,7 +440,7 @@ export async function showTutorSuggestions(
     tryBtn.onclick = (e: MouseEvent) => {
       e.stopPropagation();
       if (g.executeMove) {
-        g.executeMove(hint.move.from, hint.move.to);
+        g.executeMove(move.from, move.to);
         if (tutorPanel) tutorPanel.classList.add('hidden');
       }
     };
@@ -541,10 +545,10 @@ export async function showTutorSuggestions(
 
       const arrows = [
         {
-          fromR: hint.move.from.r,
-          fromC: hint.move.from.c,
-          toR: hint.move.to.r,
-          toC: hint.move.to.c,
+          fromR: move.from.r,
+          fromC: move.from.c,
+          toR: move.to.r,
+          toC: move.to.c,
           colorKey: quality,
         },
       ];
@@ -562,8 +566,8 @@ export async function showTutorSuggestions(
           if (p.targets) {
             p.targets.forEach((t: { r: number; c: number }) => {
               arrows.push({
-                fromR: hint.move.to.r,
-                fromC: hint.move.to.c,
+                fromR: move.to.r,
+                fromC: move.to.c,
                 toR: t.r,
                 toC: t.c,
                 colorKey: 'red',
@@ -577,10 +581,10 @@ export async function showTutorSuggestions(
         g.arrowRenderer.highlightMoves!(arrows);
       }
       const fromCell = document.querySelector(
-        `.cell[data-r="${hint.move.from.r}"][data-c="${hint.move.from.c}"]`
+        `.cell[data-r="${move.from.r}"][data-c="${move.from.c}"]`
       );
       const toCell = document.querySelector(
-        `.cell[data-r="${hint.move.to.r}"][data-c="${hint.move.to.c}"]`
+        `.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`
       );
       if (fromCell) fromCell.classList.add('suggestion-highlight');
       if (toCell) toCell.classList.add('suggestion-highlight');
