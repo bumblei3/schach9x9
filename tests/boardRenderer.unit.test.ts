@@ -192,6 +192,10 @@ describe('BoardRenderer Full Coverage', () => {
 
     const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     cell.innerHTML = '<div class="piece-svg"></div>';
+    
+    // Mock cell dimensions for touch drag calculations
+    Object.defineProperty(cell, 'offsetWidth', { value: 64, configurable: true });
+    Object.defineProperty(cell, 'offsetHeight', { value: 64, configurable: true });
 
     const touchEvent = new Event('touchstart', { bubbles: true }) as any;
     const touch = { clientX: 100, clientY: 100 };
@@ -210,7 +214,7 @@ describe('BoardRenderer Full Coverage', () => {
     Object.defineProperty(moveEvent, 'touches', { value: [{ clientX: 150, clientY: 150 }] });
     cell.dispatchEvent(moveEvent);
 
-    expect(dragged.style.left).toContain('150');
+    expect(dragged.style.left).toContain('118');
 
     const endEvent = new Event('touchend', { bubbles: true }) as any;
     Object.defineProperty(endEvent, 'changedTouches', { value: [{ clientX: 150, clientY: 150 }] });

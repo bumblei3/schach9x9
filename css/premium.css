@@ -135,29 +135,65 @@
 }
 
 /* Mobile: 2 columns on very small screens */
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .promotion-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .promotion-option {
     padding: 12px;
+    min-height: 48px; /* Apple/Google touch target guideline: 48x48px */
+    min-width: 48px;
+  }
+
+  .promotion-option .piece-svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .promotion-option .piece-name {
+    font-size: 0.75rem;
+  }
+
+  .promotion-option .piece-cost {
+    font-size: 0.7rem;
+  }
+
+  #promotion-overlay h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Ensure modal fits on small screens */
+  #promotion-overlay .modal-content {
+    max-width: calc(100vw - 24px) !important;
+    width: calc(100vw - 24px) !important;
+    margin: 0 12px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 360px) {
+  .promotion-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 6px;
   }
 
   .promotion-option {
     padding: 10px;
+    min-height: 44px;
   }
 
   .promotion-option .piece-svg {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
   }
 
   .promotion-option .piece-name {
-    font-size: 0.8rem;
-  }
-
-  #promotion-overlay h2 {
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
+    font-size: 0.7rem;
   }
 }
 

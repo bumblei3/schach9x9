@@ -11,6 +11,11 @@ import { campaignManager } from '../campaign/CampaignManager.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
 import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
 
+// Touch-Drag state (module-level for cross-cell touch handling)
+let touchDragElement: HTMLElement | null = null;
+let touchDragOrigin: { r: number; c: number; cellSize: number } | null = null;
+let touchDragValidMoves: Square[] = [];
+
 /**
  * Get effective board size (from game instance or fallback to BOARD_SIZE)
  */
@@ -208,7 +213,7 @@ export function initBoardUI(game: any): void {
       });
 
       // --- TOUCH SUPPORT (Mobile) ---
-      let draggedElement: HTMLElement | null = null;
+      // Touch state is stored in module-level variables: touchDragElement, touchDragOrigin, touchDragValidMoves
 
       cell.addEventListener(
         'touchstart',
@@ -227,21 +232,27 @@ export function initBoardUI(game: any): void {
           // Create visual drag element
           const pieceSvg = cell.querySelector('.piece-svg');
           if (pieceSvg) {
-            draggedElement = pieceSvg.cloneNode(true) as HTMLElement;
-            draggedElement.style.position = 'fixed';
-            draggedElement.style.zIndex = '1000';
-            draggedElement.style.width = cell.offsetWidth + 'px';
-            draggedElement.style.height = cell.offsetHeight + 'px';
-            draggedElement.style.pointerEvents = 'none';
-            draggedElement.style.opacity = '0.8';
-            draggedElement.style.left = touch.clientX - cell.offsetWidth / 2 + 'px';
-            draggedElement.style.top = touch.clientY - cell.offsetHeight / 2 + 'px';
-            document.body.appendChild(draggedElement);
+            touchDragElement = pieceSvg.cloneNode(true) as HTMLElement;
+            touchDragElement.style.position = 'fixed';
+            touchDragElement.style.zIndex = '1000';
+            touchDragElement.style.width = cell.offsetWidth + 'px';
+            touchDragElement.style.height = cell.offsetHeight + 'px';
+            touchDragElement.style.pointerEvents = 'none';
+            touchDragElement.style.opacity = '0.8';
+            touchDragElement.style.left = touch.clientX - cell.offsetWidth / 2 + 'px';
+            touchDragElement.style.top = touch.clientY - cell.offsetHeight / 2 + 'px';
+            touchDragElement.style.transform = 'rotate(5deg)';
+            document.body.appendChild(touchDragElement);
           }
 
-          // Highlight valid moves
-          const validMoves = game.getValidMoves(r, c, piece);
-          validMoves.forEach((move: Square) => {
+          // Store origin and valid moves for touchend
+          touchDragOrigin = { 
+            r, 
+            c, 
+            cellSize: cell.offsetWidth 
+          };
+          touchDragValidMoves = game.getValidMoves(r, c, piece);
+          touchDragValidMoves.forEach((move: Square) => {
             const target = document.querySelector(`.cell[data-r="${move.r}"][data-c="${move.c}"]`);
             if (target) target.classList.add('drag-target');
           });
@@ -252,12 +263,14 @@ export function initBoardUI(game: any): void {
       cell.addEventListener(
         'touchmove',
         e => {
-          if (!draggedElement) return;
+          if (!touchDragElement || !touchDragOrigin) return;
           e.preventDefault();
           const touch = e.touches[0];
 
-          draggedElement.style.left = touch.clientX - cell.offsetWidth / 2 + 'px';
-          draggedElement.style.top = touch.clientY - cell.offsetHeight / 2 + 'px';
+          // Use origin cell dimensions for centering (stored in touchDragOrigin.cellSize)
+          const cellSize = touchDragOrigin.cellSize || 64;
+          touchDragElement.style.left = touch.clientX - cellSize / 2 + 'px';
+          touchDragElement.style.top = touch.clientY - cellSize / 2 + 'px';
 
           // Visual feedback for drop target
           const target = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -274,35 +287,44 @@ export function initBoardUI(game: any): void {
       );
 
       cell.addEventListener('touchend', e => {
-        if (!draggedElement) return;
+        if (!touchDragElement || !touchDragOrigin) return;
 
         // Clean up visual elements
-        if (draggedElement && document.body.contains(draggedElement)) {
-          document.body.removeChild(draggedElement);
+        if (touchDragElement && document.body.contains(touchDragElement)) {
+          document.body.removeChild(touchDragElement);
         }
-        draggedElement = null;
-        cell.classList.remove('dragging');
+        touchDragElement = null;
+
+        const fromR = touchDragOrigin.r;
+        const fromC = touchDragOrigin.c;
+        touchDragOrigin = null;
+
         document
           .querySelectorAll('.cell.drag-target')
           .forEach(c => c.classList.remove('drag-target'));
-        document.querySelectorAll('.cell.drag-over').forEach(c => c.classList.remove('drag-over'));
+        document
+          .querySelectorAll('.cell.drag-over')
+          .forEach(c => c.classList.remove('drag-over'));
+        document
+          .querySelectorAll('.cell.dragging')
+          .forEach(c => c.classList.remove('dragging'));
 
         // Handle drop
         const touch = e.changedTouches[0];
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
         const targetCell = target ? (target.closest('.cell') as HTMLElement) : null;
 
-        if (targetCell) {
+        if (targetCell && touchDragValidMoves.length > 0) {
           const targetR = parseInt(targetCell.dataset.r || '0');
           const targetC = parseInt(targetCell.dataset.c || '0');
 
-          const validMoves = game.getValidMoves(r, c, game.board[r][c]);
-          if (validMoves.some((m: Square) => m.r === targetR && m.c === targetC)) {
-            game.selectedSquare = { r, c };
-            game.validMoves = validMoves;
+          if (touchDragValidMoves.some((m: Square) => m.r === targetR && m.c === targetC)) {
+            game.selectedSquare = { r: fromR, c: fromC };
+            game.validMoves = touchDragValidMoves;
             game.handleCellClick(targetR, targetC);
           }
         }
+        touchDragValidMoves = [];
       });
 
       cell.addEventListener(

@@ -81,6 +81,34 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Mobile: Prevent double-tap zoom and improve touch performance */
+@media (pointer: coarse) {
+  * {
+    touch-action: manipulation;
+  }
+  
+  /* Disable text selection on touch devices for game elements */
+  #board, .cell, .piece-svg, .promotion-option {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Safe area variables for notched devices */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0);
+  --safe-area-inset-right: env(safe-area-inset-right, 0);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
+  --safe-area-inset-left: env(safe-area-inset-left, 0);
+}
+
+/* Mobile: Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* --- Body --- */
 body {
   font-family: var(--font-main);
