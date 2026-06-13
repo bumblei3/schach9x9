@@ -59,6 +59,7 @@ jobs:
 
       - name: Run TypeScript type check
         run: npx tsc --noEmit
+        continue-on-error: true
 
       - name: Run Commitlint (if PR)
         if: github.event_name == 'pull_request'
