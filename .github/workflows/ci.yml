@@ -292,7 +292,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     needs: [lint, test, e2e-test, wasm-build, security-audit, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
