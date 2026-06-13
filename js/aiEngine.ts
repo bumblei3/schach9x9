@@ -138,13 +138,15 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 
 // --- Worker management ---
 
-const workerPendingRequests = new Map<string, { resolve: (data: SearchResult | SearchResult[] | null) => void; timer: number }>();
+type PendingResolve = (data: SearchResult | SearchResult[] | null) => void;
+
+const workerPendingRequests = new Map<string, { resolve: PendingResolve; timer: number }>();
 
 function _initAiWorker(): void {
   if (typeof Worker === 'undefined') return;
   // Intentionally empty - stub for future worker initialization
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _stub = 0;
+  const _workerGuard = typeof Worker;
 }
 
 export function terminateAiWorker(): void {
@@ -157,7 +159,7 @@ function runWorkerSearch(
   return new Promise<SearchResult | null>(resolve => {
     const id = Math.random().toString(36).slice(2);
     const timer = window.setTimeout(() => { workerPendingRequests.delete(id); resolve(null); }, 15000);
-    workerPendingRequests.set(id, { resolve, timer });
+    workerPendingRequests.set(id, { resolve: resolve as PendingResolve, timer });
     void board; void turnColor; void maxDepth; void personality; void elo;
   });
 }
@@ -168,7 +170,7 @@ function runWorkerTopMoves(
   return new Promise<SearchResult[]>(resolve => {
     const id = Math.random().toString(36).slice(2);
     const timer = window.setTimeout(() => { workerPendingRequests.delete(id); resolve([]); }, maxTimeMs + 2000);
-    workerPendingRequests.set(id, { resolve, timer });
+    workerPendingRequests.set(id, { resolve: resolve as PendingResolve, timer });
     void board; void turnColor; void count; void searchDepth;
   });
 }
@@ -237,11 +239,13 @@ export async function getBestMoveDetailed(
   const blackIncrement = config.blackIncrement ?? 0;
 
   // Detect tactical complexity for time allocation
+  // Create a mutable copy for the tactical detection functions which expect IntBoard
+  const tacticalBoard = new Int8Array(board);
   const hasTacticalComplexity = detectTacticalComplexity(
-    board as unknown as readonly number[],
+    tacticalBoard as unknown as ReadonlyArray<number>,
     turnColor === 'white' ? 16 : 32,
-    genLegalInt,
-    isSquareAttackedInt
+    (b: ReadonlyArray<number>, c: string) => genLegalInt(b as unknown as IntBoard, c as Player),
+    (b: ReadonlyArray<number>, sq: number, byColor: number) => isSquareAttackedInt(b as unknown as IntBoard, sq, byColor)
   );
 
   // Count pieces for game phase detection
@@ -303,7 +307,7 @@ export async function getBestMoveDetailed(
   if (boardShape === 'standard') {
     try {
       const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personalityId, elo);
-      if (wasmResult) return wasmResult;
+      if (wasmResult) return { ...wasmResult, depth: wasmResult.depth ?? 0, nodes: wasmResult.nodes ?? 0 };
     } catch (err) {
       logger.debug('[AiEngine] WASM fallback failed, using JS');
     }

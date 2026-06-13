@@ -68,7 +68,7 @@ export async function getBestMoveWasm(
   depth: number,
   personality: string = 'NORMAL',
   elo: number = 2500
-): Promise<{ move: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string } | null; score: number; nodes: number } | null> {
+): Promise<{ move: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string } | null; score: number; nodes: number; depth?: number } | null> {
   const initialized = await ensureWasmInitialized();
   if (!initialized || !wasmModule) {
     return null;
