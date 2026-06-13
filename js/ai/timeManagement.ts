@@ -56,7 +56,7 @@ export function estimatePositionComplexity(params: {
 }): { score: number; // 0-1, higher = more complex
   reason: string } {
   let score = 0;
-  let reasons: string[] = [];
+  const reasons: string[] = [];
 
   // Midgame is most complex
   if (params.pieceCount > MIDDLEGAME_PIECE_LIMIT) {
@@ -227,3 +227,5 @@ export function detectTacticalComplexity(
   // Complex if multiple captures or checks, or many forcing moves
   return captureCount >= 3 || checkCount >= 2 || moves.length > 40;
 }
+
+

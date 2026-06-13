@@ -506,3 +506,5 @@ export function setProgressCallback(cb: ((progress: AIProgressData) => void) | n
 
 // Re-exports
 export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves, getAllThreats, getKingThreats, getXRayThreats, getDiscoveredAttackPotential, type ThreatInfo, PIECE_KING, PIECE_QUEEN, COLOR_WHITE, COLOR_BLACK, PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_ARCHBISHOP, PIECE_CHANCELLOR, PIECE_ANGEL, PIECE_NIGHTRIDER, PIECE_NONE };
+
+
