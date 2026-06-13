@@ -555,16 +555,6 @@ export function createJsSearch() {
         return { score: bestScore, bestMove };
         }
 
-        // Report progress at each depth iteration
-        if (progressCallback) {
-        progressCallback({
-          depth: d,
-          nodes,
-          time: performance.now() - start,
-          score: bestResult.score,
-          pv: bestResult.bestMove ? `${bestResult.bestMove.from}-${bestResult.bestMove.to}` : undefined,
-        } as AIProgressData);
-        }
 
       // Iterative Deepening with Aspiration Windows + Internal Iterative Reduction (IIR)
       let bestResult: { score: number; bestMove: Move | null } = { score: 0, bestMove: null };
