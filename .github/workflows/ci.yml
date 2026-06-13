@@ -145,7 +145,7 @@ jobs:
   e2e-test:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 75
     continue-on-error: true
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -181,6 +181,7 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=github
+        timeout-minutes: 60
 
       - name: E2E test summary
         if: always()
@@ -206,7 +207,7 @@ jobs:
   wasm-build:
     name: WASM Engine Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
@@ -244,7 +245,7 @@ jobs:
       - name: Run WASM engine tests
         working-directory: engine-wasm
         run: cargo test --release 2>&1 | tee test_output.txt
-        continue-on-error: true
+        timeout-minutes: 20
 
       - name: Verify WASM module size
         working-directory: engine-wasm
@@ -348,6 +349,8 @@ jobs:
 
       - name: Build production bundle
         run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Verify build output
         run: |

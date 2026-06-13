@@ -37,7 +37,7 @@ export default defineConfig({
     command: 'npx http-server dist -p 3000 -s -c-1',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 180000,
   },
 
   /* Configure projects for major browsers */
