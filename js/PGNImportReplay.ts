@@ -26,8 +26,7 @@ export class PGNImportReplay {
   private currentGame: PGNGame | null = null;
   private history: PGNHistoryEntry[] = [];
   private currentMoveIndex: number = -1;
-  private originalGameState: Game | null = null;
-  
+
   constructor() {
     this.parser = new PGNParser();
   }
@@ -40,16 +39,16 @@ export class PGNImportReplay {
   importPGN(pgnString: string): PGNImportResult {
     try {
       const games = this.parser.parse(pgnString);
-      
+
       if (games.length === 0) {
         return { success: false, game: null, history: [], error: 'No games found in PGN' };
       }
 
       this.currentGame = games[0]; // Use first game for now
-      
+
       // Create a minimal engine for replay
       const mockEngine = this.createMockEngine();
-      
+
       // Generate replay history
       this.history = this.parser.replayGame(this.currentGame.moves, mockEngine);
       this.currentMoveIndex = -1;
@@ -61,10 +60,10 @@ export class PGNImportReplay {
       };
     } catch (err) {
       logger.error('[PGNImportReplay] Import failed:', err);
-      return { 
-        success: false, 
-        game: null, 
-        history: [], 
+      return {
+        success: false,
+        game: null,
+        history: [],
         error: err instanceof Error ? err.message : 'Unknown error'
       };
     }
@@ -82,11 +81,11 @@ export class PGNImportReplay {
         const text = e.target?.result as string;
         resolve(this.importPGN(text));
       };
-      reader.onerror = () => resolve({ 
-        success: false, 
-        game: null, 
-        history: [], 
-        error: 'Failed to read file' 
+      reader.onerror = () => resolve({
+        success: false,
+        game: null,
+        history: [],
+        error: 'Failed to read file'
       });
       reader.readAsText(file);
     });
@@ -97,30 +96,30 @@ export class PGNImportReplay {
    */
   private createMockEngine() {
     // Minimal engine that can replay moves
-    const board: ({ type: string; color: string } | null)[][] = Array(9).fill(null).map(() => Array(9).fill(null));
-    
+    type PieceWithHasMoved = { type: string; color: string; hasMoved: boolean } | null;
+
+    const board: PieceWithHasMoved[][] = Array(9).fill(null).map(() => Array(9).fill(null));
+
     // Setup initial position
     const whiteBack = ['r', 'n', 'b', 'a', 'k', 'c', 'b', 'n', 'r'];
     const whitePawns = Array(9).fill('p');
     const blackBack = ['R', 'N', 'B', 'A', 'K', 'C', 'B', 'N', 'R'];
     const blackPawns = Array(9).fill('P');
 
-    blackBack.forEach((piece: string, c: number) => board[0][c] = { type: piece.toLowerCase(), color: 'black', hasMoved: false });
-    blackPawns.forEach((_: string, c: number) => board[1][c] = { type: 'p', color: 'black', hasMoved: false });
-    whitePawns.forEach((piece: string, c: number) => board[7][c] = { type: piece, color: 'white', hasMoved: false });
-    whiteBack.forEach((piece: string, c: number) => board[8][c] = { type: piece, color: 'white', hasMoved: false });
+    blackBack.forEach((piece: string, c: number) => { board[0][c] = { type: piece.toLowerCase(), color: 'black', hasMoved: false }; });
+    blackPawns.forEach((_: string, c: number) => { board[1][c] = { type: 'p', color: 'black', hasMoved: false }; });
+    whitePawns.forEach((piece: string, c: number) => { board[7][c] = { type: piece, color: 'white', hasMoved: false }; });
+    whiteBack.forEach((piece: string, c: number) => { board[8][c] = { type: piece, color: 'white', hasMoved: false }; });
 
     return {
-      turn: 'white',
       boardSize: 9,
       board,
-      getAllLegalMoves: (turn: string) => {
+      getAllLegalMoves: (): { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }[] => {
         // Simplified - just return all possible moves for basic replay
-        const moves: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }[] = [];
-        return moves;
+        return [];
       },
-      getBoardHash: () => '',
-      executeMove: (from: { r: number; c: number }, to: { r: number; c: number }) => {
+      getBoardHash: (): string => '',
+      executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }): void => {
         // Simplified move execution
       }
     };
@@ -141,20 +140,34 @@ export class PGNImportReplay {
   }
 
   /**
+   * Can go to next move
+   */
+  get canGoNext(): boolean {
+    return this.currentMoveIndex < this.history.length - 1;
+  }
+
+  /**
+   * Can go to previous move
+   */
+  get canGoPrev(): boolean {
+    return this.currentMoveIndex >= 0;
+  }
+
+  /**
    * Go to specific move
    * @param moveIndex - Move index to jump to
    * @returns Updated game state info
    */
-  goToMove(moveIndex: number): { 
-    history: PGNHistoryEntry[]; 
-    currentIndex: number; 
+  goToMove(moveIndex: number): {
+    history: PGNHistoryEntry[];
+    currentIndex: number;
     totalMoves: number;
     canGoNext: boolean;
     canGoPrev: boolean;
   } {
     moveIndex = Math.max(-1, Math.min(moveIndex, this.history.length - 1));
     this.currentMoveIndex = moveIndex;
-    
+
     return {
       history: this.history.slice(0, this.currentMoveIndex + 1),
       currentIndex: this.currentMoveIndex,
@@ -209,40 +222,40 @@ export class PGNImportReplay {
   /**
    * Get PGN move list with annotations for UI
    */
-  getMoveListWithAnnotations(): Array<{ 
-    moveNumber: number; 
-    white: string; 
-    black: string; 
+  getMoveListWithAnnotations(): Array<{
+    moveNumber: number;
+    white: string;
+    black: string;
     annotations?: { quality?: string; eval?: string; time?: string; pv?: string };
   }> {
     if (!this.currentGame) return [];
-    
-    const moves: Array<{ 
-      moveNumber: number; 
-      white: string; 
-      black: string; 
+
+    const moves: Array<{
+      moveNumber: number;
+      white: string;
+      black: string;
       annotations?: { quality?: string; eval?: string; time?: string; pv?: string };
     }> = [];
 
     let moveNumber = 1;
-    
+
     for (let i = 0; i < this.currentGame.moves.length; i++) {
-      const move = this.currentGame.moves[i];
-      
+      const san = this.currentGame.moves[i];
+
       if (i % 2 === 0) {
-        moves.push({ 
-          moveNumber: moveNumber++, 
-          white: move, 
+        moves.push({
+          moveNumber: moveNumber++,
+          white: san,
           black: '',
           annotations: {}
         });
       } else {
         if (moves.length > 0) {
-          moves[moves.length - 1].black = move;
+          moves[moves.length - 1].black = san;
         }
       }
     }
-    
+
     return moves;
   }
 
@@ -258,7 +271,7 @@ export class PGNImportReplay {
    */
   exportPGN(): string {
     if (!this.currentGame) return '';
-    
+
     const headers = [
       `[Event "${this.currentGame.headers.Event || 'Imported Game'}"]`,
       `[Site "${this.currentGame.headers.Site || 'Local'}"]`,
@@ -271,10 +284,8 @@ export class PGNImportReplay {
 
     let moveText = '';
     let moveNumber = 1;
-    
+
     for (let i = 0; i < this.currentGame.moves.length; i++) {
-      const move = this.currentGame.moves[i];
-      
       if (i % 2 === 0) {
         moveText += `${moveNumber}. ${this.currentGame.moves[i]} `;
       } else {
@@ -282,7 +293,7 @@ export class PGNImportReplay {
         moveNumber++;
       }
     }
-    
+
     return headers.join('\n') + '\n\n' + moveText.trim();
   }
 }
@@ -356,7 +367,7 @@ export class PGNImportUI {
     e.stopPropagation();
     this.dropZone?.classList.remove('drag-over');
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer?.files && e.dataTransfer.files[0]) {
       this.loadPGNFile(e.dataTransfer.files[0]);
     }
   }
@@ -369,7 +380,7 @@ export class PGNImportUI {
 
     try {
       const result = await this.importer.importPGNFile(file);
-      
+
       if (result.success) {
         this.showReplayControls();
         this.renderMoveList();
@@ -402,7 +413,7 @@ export class PGNImportUI {
     prevBtn?.addEventListener('click', () => this.goToPrev());
     nextBtn?.addEventListener('click', () => this.goToNext());
     lastBtn?.addEventListener('click', () => this.goToLast());
-    
+
     gotoBtn?.addEventListener('click', () => {
       const moveNum = parseInt(moveInput?.value || '1');
       if (!isNaN(moveNum)) this.goToMove(moveNum);
@@ -419,7 +430,7 @@ export class PGNImportUI {
   private goToFirst(): void {
     const state = this.importer.goToFirst();
     this.updateReplayButtons();
-    this.updateMoveListHighlight(0);
+    this.updateMoveListHighlight(state.currentIndex);
   }
 
   private goToPrev(): void {
@@ -452,7 +463,6 @@ export class PGNImportUI {
     const nextBtn = document.getElementById('pgn-next-btn') as HTMLButtonElement;
     const lastBtn = document.getElementById('pgn-last-btn') as HTMLButtonElement;
     const moveInput = document.getElementById('pgn-move-input') as HTMLInputElement;
-    const gotoBtn = document.getElementById('pgn-goto-btn');
 
     if (firstBtn) firstBtn.disabled = !this.importer.canGoPrev;
     if (prevBtn) prevBtn.disabled = !this.importer.canGoPrev;
@@ -469,12 +479,12 @@ export class PGNImportUI {
     if (!this.moveListContainer) return;
 
     const moveList = this.importer.getMoveListWithAnnotations();
-    
-    this.moveListContainer!.innerHTML = moveList.map((move, index) => `
+
+    this.moveListContainer!.innerHTML = moveList.map((m, index) => `
       <div class="pgn-move-item" data-index="${index}" style="padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 1rem;">
-        <span class="move-number" style="font-weight: bold; min-width: 3rem;">${move.moveNumber}.</span>
-        <span class="white-move" style="flex: 1;">${move.white}</span>
-        <span class="black-move" style="flex: 1;">${move.black}</span>
+        <span class="move-number" style="font-weight: bold; min-width: 3rem;">${m.moveNumber}.</span>
+        <span class="white-move" style="flex: 1;">${m.white}</span>
+        <span class="black-move" style="flex: 1;">${m.black}</span>
       </div>
     `).join('');
 
