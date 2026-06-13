@@ -3,28 +3,10 @@
  * Imports PGN files/strings and provides replay functionality
  */
 
-import { logger } from '../logger.js';
-import { PGNParser, PGNGame, PGNHistoryEntry } from './PGNParser.js';
-import { evaluate } from '../evaluate.js';
-import { convertBoardToInt } from '../aiEngine.js';
-import { 
-  getAllLegalMoves as genLegalInt,
-  makeMove as makeMoveInt,
-  undoMove as undoMoveInt,
-  isInCheck as checkInt,
-  isSquareAttacked as isSquareAttackedInt,
-  findKing as findKingInt,
-  getAllThreats,
-  getAllCaptureMoves,
-  type Move,
-  type BoardStorage
-} from '../ai/MoveGenerator.js';
-import { EngineMatchConfig, GameResult } from '../engineMatch.js';
-import { calculateTimeAllocation, detectTacticalComplexity } from '../ai/timeManagement.js';
-import { AI_PERSONALITIES } from '../ai/personalities.js';
+import { logger } from './logger.js';
+import { PGNParser, PGNGame, PGNHistoryEntry } from './utils/PGNParser.js';
 
-import type { Game, PieceWithMoved, Piece } from '../gameEngine.js';
-import { PHASES } from '../config.js';
+import type { Game } from './gameEngine.js';
 
 /**
  * Imports a PGN file/string and converts it to a replayable game state
