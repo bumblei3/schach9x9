@@ -279,14 +279,26 @@ jobs:
 
       - name: Bundle Size Diff (PR only)
         if: github.event_name == 'pull_request'
-        uses: github-action-bundle-diff@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          dist-dir: dist
-          check-size-budget: true
-          max-bundle-size: 500 KB
-          output-format: markdown
-          comment-on-pr: true
+        run: |
+          echo "📦 Checking production bundle size..."
+          TOTAL_SIZE=$(du -sb dist/ | cut -f1)
+          echo "Total dist size: $TOTAL_SIZE bytes ($(($TOTAL_SIZE / 1024)) KB)"
+          
+          JS_SIZE=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
+          CSS_SIZE=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
+          WASM_SIZE=$(find dist -name "*.wasm" -exec wc -c {} + | tail -1 | awk '{print $1}')
+          
+          echo "JS bundle: $(($JS_SIZE / 1024)) KB"
+          echo "CSS: $(($CSS_SIZE / 1024)) KB"
+          echo "WASM: $(($WASM_SIZE / 1024)) KB"
+          
+          # Budget check: 500 KB total
+          MAX_SIZE=$((500 * 1024))
+          if [ $TOTAL_SIZE -gt $MAX_SIZE ]; then
+            echo "❌ Bundle exceeds 500 KB budget!"
+            exit 1
+          fi
+          echo "✅ Bundle size within budget"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
