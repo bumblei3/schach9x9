@@ -9,8 +9,8 @@ import {
   renderBoard,
   updateShopUI,
 } from '../ui.js';
+import type { TutorHint } from '../ui.js';
 import { analyzeMoveWithExplanation, getMoveNotation } from './MoveAnalyzer.js';
-import type { MoveExplanation } from './MoveAnalyzer.js';
 import type { Piece } from '../types/game.js';
 import * as aiEngine from '../aiEngine.js';
 
@@ -19,15 +19,6 @@ interface TacticalPattern {
   severity: string;
   explanation: string;
   question?: string;
-}
-
-interface TutorHint {
-  move: MoveResult | null;
-  score: number;
-  notation: string;
-  analysis: MoveExplanation;
-  tacticsHighlight: string[];
-  pv: MoveResult[] | null;
 }
 
 interface TemplateInput {
@@ -141,7 +132,7 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
         );
 
         // Extract PV from engine result
-        const pv = hint.pv || [];
+        const pv = (hint.pv || []) as string | MoveResult[];
 
         // Extract high-severity tactical patterns for prominent display
         const tacticsHighlight = (analysis.tacticalPatterns || [])
@@ -215,7 +206,7 @@ export async function showTutorSuggestions(game: Game): Promise<void> {
   //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
   // )
   //   return;
-  await showTutorSuggestionsUI(game, game.bestMoves as unknown);
+  await showTutorSuggestionsUI(game, game.bestMoves as TutorHint[] | null | undefined);
 }
 
 /**
@@ -865,7 +856,7 @@ function createMockHints(game: Game, turnColor: 'white' | 'black'): TutorHint[] 
       promotion: move.promotion,
     },
     score: 100 - index * 20, // Decreasing scores
-    notation: game.getTutorHints ? getMoveNotation(game, move) : `${move.from.r},${move.from.c}→${move.to.r},${move.to.c}`,
+    notation: (game as any).getTutorHints?.() ? getMoveNotation(game, move) : `${move.from.r},${move.from.c}→${move.to.r},${move.to.c}`,
     analysis: {
       move: { from: move.from, to: move.to },
       score: 100 - index * 20,

@@ -6,14 +6,15 @@ import { PHASES } from '../config.js';
 import { updateShopUI } from './ShopUI.js';
 import type { Game } from '../gameEngine.js';
 import type { MoveExplanation } from '../tutor/MoveAnalyzer.js';
+import type { MoveResult } from '../aiEngine.js';
 
-interface TutorHint {
-  move: { from: { r: number; c: number }; to: { r: number; c: number } };
+export interface TutorHint {
+  move: MoveResult | { from: { r: number; c: number }; to: { r: number; c: number } } | null;
   score: number;
   notation: string;
   analysis: MoveExplanation;
   tacticsHighlight: string[];
-  pv: unknown[] | null;
+  pv: string | MoveResult[] | unknown[] | null;
 }
 
 interface SetupTemplate {
