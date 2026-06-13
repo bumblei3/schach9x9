@@ -90,59 +90,32 @@ export type TerminationReason =
   | 'illegal-move'
   | 'engine-error';
 
-function colToFile(col: number): string {
-  return String.fromCharCode(97 + col);
-}
-
-function rowToRank(row: number): string {
-  return String(9 - row);
-}
-
-function moveToNotation(move: any, _game: any = null): string {
-  if (!move || !move.from || !move.to) return '??';
-  
-  const sm = sm?.type === 'castling' ? sm : undefined;
-  if (sm) return sm.isKingside ? 'O-O' : 'O-O-O';
-
-  const pieceType = move.piece?.type || 'p';
-  const PIECE_NOTATION: Record<string, string> = { k: 'K', q: 'Q', r: 'R', b: 'B', n: 'N', p: '', a: 'A', c: 'C', e: 'E' };
-  const pieceLetter = PIECE_NOTATION[pieceType] || '';
-  const fromFile = colToFile(move.from.c);
-  const toFile = colToFile(move.to.c);
-  const toRank = rowToRank(move.to.r);
-
-  let notation = pieceLetter;
-  if (!pieceLetter && move.captured) notation += fromFile;
-  if (move.captured) notation += 'x';
-  notation += toFile + toRank;
-  if (sm?.type === 'promotion') notation += '=' + (PIECE_NOTATION[sm.promotedTo || 'q'] || 'Q');
-  
-  return notation;
-}
-
 // ============================================================================
 // Engine Match Runner Class
 // ============================================================================
-
 export class EngineMatchRunner {
   private config: EngineMatchConfig;
   private results: GameResult[] = [];
-  private gameNumber: number = 0;
-  
+
   constructor(config: EngineMatchConfig) {
-    this.config = {
+    // Create config with defaults, overriding with provided config
+    const defaults: EngineMatchConfig = {
+      engineWhite: config.engineWhite,
+      engineBlack: config.engineBlack,
+      numGames: config.numGames,
       alternateColors: true,
       timeControl: { type: 'fixed-time', baseTimeMs: 2000, incrementMs: 100 },
-      maxMoves: 300,
       openingBook: false,
+      maxMoves: 300,
+      outputDir: undefined,
       savePgns: true,
-      ...config,
+      quiet: false,
     };
+    this.config = { ...defaults, ...config };
   }
 
   async runAll(): Promise<GameResult[]> {
     this.results = [];
-    this.gameNumber = 0;
 
     const totalGames = this.config.alternateColors 
       ? this.config.numGames * 2 
@@ -334,7 +307,7 @@ export class EngineMatchRunner {
     return { allocatedTimeMs: Math.min(maxTime, params.maxTimePerMove) };
   }
 
-  private applyMove(board: any[][], move: MoveResult, turn: string): void {
+  private applyMove(board: any[][], move: MoveResult, _turn: string): void {
     // Simplified - just for functionality
     if (move && move.from && move.to) {
       board[move.to.r][move.to.c] = board[move.from.r][move.from.c];
@@ -359,7 +332,7 @@ export class EngineMatchRunner {
     gameNumber: number, whiteConfig: EngineConfig, blackConfig: EngineConfig,
     result: string, winner: GameResult['winner'], terminationReason: TerminationReason,
     moves: number, whiteStats: EngineGameStats, blackStats: EngineGameStats,
-    moveHistory: any[], durationMs: number
+    _moveHistory: any[], durationMs: number
   ): GameResult {
     return {
       gameNumber, whiteEngine: whiteConfig.name, blackEngine: blackConfig.name,

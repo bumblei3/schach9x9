@@ -142,7 +142,7 @@ export class EvaluationBar {
     if (!this.fill) return;
     
     const diff = Math.abs(score - this.currentScore);
-    const prevScore = this.currentScore; // Will be updated after this call
+    const _prevScore = this.currentScore; // Will be updated after this call
     
     // Only pulse on significant changes (> 150 centipawns = 1.5 pawns)
     if (diff > 150) {

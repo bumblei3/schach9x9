@@ -54,7 +54,6 @@ export function drawArrow(
   if (!fromCell || !toCell) return null as any;
 
   // Calculate positions relative to board container
-  const boardRect = boardEl.getBoundingClientRect();
   const containerRect = boardContainer.getBoundingClientRect();
 
   const fromRect = fromCell.getBoundingClientRect();
@@ -82,7 +81,7 @@ export function drawArrow(
   const dx = toX - fromX;
   const dy = toY - fromY;
   const angle = Math.atan2(dy, dx);
-  const distance = Math.sqrt(dx * dx + dy * dy);
+  // const distance = Math.sqrt(dx * dx + dy * dy); // unused
 
   // Shorten the line so it doesn't cover the piece entirely
   const piecePadding = fromRect.width * 0.35;
