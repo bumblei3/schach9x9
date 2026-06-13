@@ -12,6 +12,7 @@ import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
 import { AnalysisUI } from './AnalysisUI.js';
+import { OpeningBookUI } from './OpeningBookUI.js';
 import { hidePostGameStats } from './PostGameAnalysisUI.js';
 import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
@@ -22,6 +23,7 @@ import type { AIDifficulty } from '../config.js';
 export class DOMHandler {
   private app: App;
   private analysisUI: AnalysisUI;
+  private openingBookUI: OpeningBookUI;
   private campaignUI?: CampaignUI;
   private tutorial?: Tutorial;
   private domInitialized: boolean = false;
@@ -36,6 +38,7 @@ export class DOMHandler {
   constructor(app: App) {
     this.app = app;
     this.analysisUI = new AnalysisUI(app as unknown as { game: Game; gameController: GameController | null });
+    this.openingBookUI = new OpeningBookUI();
     if (app.game && app.game.aiController) {
       app.game.aiController.setAnalysisUI(this.analysisUI);
     }
@@ -241,6 +244,28 @@ export class DOMHandler {
           if (analysisBtn) analysisBtn.classList.remove('active');
         }
         this.analysisUI.panel?.classList.add('hidden');
+      });
+    }
+
+    // Opening Book Toggle Button
+    const openingBookBtn = document.getElementById('toggle-opening-book-btn');
+    if (openingBookBtn) {
+      openingBookBtn.addEventListener('click', () => {
+        this.openingBookUI.toggle();
+        openingBookBtn.classList.toggle('active', this.openingBookUI.visible);
+        // If opening book is shown, pass the current game to it
+        if (this.openingBookUI.visible) {
+          this.openingBookUI.setGame(this.game);
+          this.openingBookUI.updateCurrentOpening();
+        }
+      });
+    }
+
+    const closeOpeningBookBtn = document.getElementById('close-opening-book-btn');
+    if (closeOpeningBookBtn) {
+      closeOpeningBookBtn.addEventListener('click', () => {
+        this.openingBookUI.hide();
+        if (openingBookBtn) openingBookBtn.classList.remove('active');
       });
     }
 

@@ -225,6 +225,15 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <path d="M12 20v-8m-4 8v-4m8 4v-6m-12 6h16"></path>
               </svg>
             </button>
+            <button id="toggle-opening-book-btn" class="action-icon-btn" title="Eröffnungsbuch (O)">
+              <svg viewBox="0 0 24 24" width="24" height="24" stroke="#9f5fef" stroke-width="2" fill="none">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 17H20"></path>
+                <path d="M12.5 17V10.5"></path>
+                <path d="M9 13h7"></path>
+                <path d="M9 17h7"></path>
+              </svg>
+            </button>
             <button id="toggle-3d-btn" class="action-icon-btn" title="3D Battle Modus (3)">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -301,6 +310,48 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 </div>
               </div>
               
+            </div>
+          </div>
+
+          <!-- Opening Book Panel -->
+          <div id="opening-book-panel" class="opening-book-panel hidden">
+            <div class="opening-book-header">
+              <h3>Eröffnungsbuch</h3>
+              <button id="close-opening-book-btn" class="close-icon-btn">×</button>
+            </div>
+            <div class="opening-book-body">
+              <!-- Current Opening Display -->
+              <div id="current-opening-display" class="current-opening-section hidden">
+                <h4>Aktuelle Eröffnung</h4>
+                <div class="current-opening-info">
+                  <div class="current-opening-name-row">
+                    <span id="current-opening-name" class="current-opening-name"></span>
+                    <span id="current-opening-eco" class="current-opening-eco"></span>
+                  </div>
+                  <span id="current-opening-category" class="current-opening-category"></span>
+                  <div id="current-opening-stats" class="current-opening-stats"></div>
+                  <div id="current-opening-moves" class="current-opening-moves"></div>
+                  <p id="current-opening-description" class="current-opening-description"></p>
+                </div>
+              </div>
+
+              <!-- Book Move Suggestion -->
+              <div class="book-move-section">
+                <h4>Buchzug-Vorschlag</h4>
+                <div id="book-moves-list" class="book-moves-list"></div>
+              </div>
+
+              <!-- Opening Database Browser -->
+              <div class="opening-browser-section">
+                <div class="browser-controls">
+                  <input type="text" id="opening-search" class="opening-search-input" placeholder="Eröffnung suchen (Name, ECO, Kategorie)...">
+                  <select id="opening-category-filter" class="opening-category-filter">
+                    <option value="all">Alle Kategorien</option>
+                  </select>
+                </div>
+                <div id="opening-search-results" class="opening-search-results"></div>
+                <div id="top-openings-list" class="top-openings-list"></div>
+              </div>
             </div>
           </div>
 

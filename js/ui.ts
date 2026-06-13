@@ -1,18 +1,19 @@
 /**
- * UI-Orchestrator für Schach9x9.
- * Importiert und re-exportiert Funktionen aus spezialisierten UI-Modulen.
- * @module ui
- */
+ /**
+  * UI-Orchestrator für Schach9x9.
+  * Importiert und re-exportiert Funktionen aus spezialisierten UI-Modulen.
+  * @module ui
+  */
+ export * from './ui/BoardRenderer.js';
+ export * from './ui/ShopUI.js';
+ export * from './ui/TutorUI.js';
+ export * from './ui/OverlayManager.js';
+ export * from './ui/GameStatusUI.js';
+ export * from './ui/OpeningBookUI.js';
 
-export * from './ui/BoardRenderer.js';
-export * from './ui/ShopUI.js';
-export * from './ui/TutorUI.js';
-export * from './ui/OverlayManager.js';
-export * from './ui/GameStatusUI.js';
-
-import type { Player, GameLike } from './types/game.js';
-import * as AIEngine from './aiEngine.js';
-import { confettiSystem } from './effects.js';
+ import type { Player, GameLike } from './types/game.js';
+ import * as AIEngine from './aiEngine.js';
+ import { confettiSystem } from './effects.js';
 
 /**
  * Animation für den Schach-Zustand.

@@ -5,6 +5,7 @@
 import { BOARD_SIZE, PHASES, PIECE_VALUES } from '../config.js';
 import { renderBoard } from './BoardRenderer.js';
 import { getOpeningName } from '../ai/OpeningDatabase.js';
+import { openingBookUI } from './OpeningBookUI.js';
 import type { Game, PieceWithMoved } from '../gameEngine.js';
 import type { Square } from '../types/game.js';
 
@@ -205,6 +206,12 @@ export function updateOpeningUI(game: Game): void {
     if (game.moveHistory.length > 15) {
       container.classList.add('hidden');
     }
+  }
+
+  // Also update the Opening Book UI if it's visible
+  if (openingBookUI.visible) {
+    openingBookUI.setGame(game);
+    openingBookUI.updateCurrentOpening();
   }
 }
 
