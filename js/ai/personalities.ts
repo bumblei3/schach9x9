@@ -3,8 +3,6 @@
  * Separate file to avoid circular imports
  */
 
-import { PHASES } from '../config';
-
 export interface AIPersonality {
   id: string;
   name: string;

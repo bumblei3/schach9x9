@@ -101,7 +101,7 @@ export function calculateTimeAllocation(params: TimeAllocationParams): TimeAlloc
   const personality = AI_PERSONALITIES[params.personality] || AI_PERSONALITIES.balanced;
   const timeFactor = personality.timeManagementFactor || 1.0;
   const aggression = personality.aggressionLevel || 1.0;
-  const riskTolerance = personality.riskTolerance || 0.5;
+  const _riskTolerance = personality.riskTolerance || 0.5;
   const myTime = params.isWhiteTurn ? params.whiteTime : params.blackTime;
   const myIncrement = params.isWhiteTurn ? params.whiteIncrement : params.blackIncrement;
   

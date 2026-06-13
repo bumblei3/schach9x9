@@ -38,7 +38,6 @@ import {
   SQUARE_COUNT, PIECE_NONE, PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP,
   PIECE_ROOK, PIECE_QUEEN, PIECE_KING, PIECE_ARCHBISHOP, PIECE_CHANCELLOR,
   PIECE_ANGEL, PIECE_NIGHTRIDER, COLOR_WHITE, COLOR_BLACK, TYPE_MASK, COLOR_MASK,
-  indexToRow, indexToCol,
 } from './ai/BoardDefinitions';
 import { getCurrentBoardShape } from './config';
 import type { Player, Square, Piece } from './types/game';
@@ -141,7 +140,7 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 
 const workerPendingRequests = new Map<string, { resolve: (data: unknown) => void; timer: number }>();
 
-function initAiWorker(): void {
+function _initAiWorker(): void {
   if (typeof Worker === 'undefined') return;
 }
 
