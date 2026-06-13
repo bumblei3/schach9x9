@@ -142,16 +142,7 @@ type PendingResolve = (data: SearchResult | SearchResult[] | null) => void;
 
 const workerPendingRequests = new Map<string, { resolve: PendingResolve; timer: number }>();
 
-function _initAiWorker(): void {
-  if (typeof Worker === 'undefined') return;
-  // Intentionally empty - stub for future worker initialization
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _workerGuard = typeof Worker;
-}
-
-export function terminateAiWorker(): void {
-  workerPendingRequests.clear();
-}
+// Worker initialization removed - not currently used
 
 function runWorkerSearch(
   board: IntBoard, turnColor: Player, maxDepth: number, personality: string, elo: number
@@ -254,8 +245,7 @@ export async function getBestMoveDetailed(
   // Calculate time allocation
   const personalityKey = config.personality || 'NORMAL';
   const personality = AI_PERSONALITIES[personalityKey] || AI_PERSONALITIES.balanced;
-  const _timeFactor = personality.timeManagementFactor || 1.0;
-  const _aggression = personality.aggressionLevel || 1.0;
+  // Time factor and aggression reserved for future use
 
   // Build time allocation params
   const timeAllocParams: TimeAllocationParams = {
@@ -459,10 +449,6 @@ export function see(uiBoard: UiBoard, from: Square, to: Square): number {
 }
 
 export function makeMove(uiBoard: UiBoard, move: { from: Square; to: Square }): UndoInfo | null {
-  const size = uiBoard.length;
-  const _fromIdx = move.from.r * size + move.from.c;
-  const _toIdx = move.to.r * size + move.to.c;
-  const _board = convertBoardToInt(uiBoard);
   const piece = uiBoard[move.from.r][move.from.c];
   const captured = uiBoard[move.to.r][move.to.c];
   uiBoard[move.to.r][move.to.c] = piece;

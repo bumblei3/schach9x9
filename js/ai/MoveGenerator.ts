@@ -78,7 +78,7 @@ const ROOK_OFFSETS = [-9, 9, -1, 1];
 /**
  * Generate all legal moves for position
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export function getPseudoLegalMoves(
   _board: BoardStorage,
   _r: number,

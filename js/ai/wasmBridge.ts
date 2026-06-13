@@ -36,7 +36,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
         const url = await import('url');
 
         // url module is dynamically imported; fileURLToPath is not typed
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const __dirname = path.dirname((url as unknown as { fileURLToPath: (u: unknown) => string }).fileURLToPath(import.meta.url));
         const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
         const wasmBuffer = fs.readFileSync(wasmPath);
@@ -121,7 +121,7 @@ export function resetWasmNodesEvaluated(): void {
   nodesEvaluated = 0;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function mapIntToPiece(val: number): string {
   const map: Record<number, string> = {
     1: 'p',
