@@ -19,88 +19,127 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Kampagnen-Modus**: Spiele durch verschiedene Level, sammle XP für deine Figuren und schalte mächtige Talente frei.
 - **Talentbaum**: Individualisiere deine Armee mit spezialisierten Fähigkeiten (z.B. Veteran, Plünderer, Unaufhaltsam).
 - **Setup-Phase & Upgrade-Modus**: Platziere deinen König strategisch und verbessere deine Armee dynamisch.
-- **Optimierte KI**: Leistungsstarker Gegner mit Alpha-Beta-Suche, Transposition Table und effizientem Move-Ordering.
+- **Optimierte KI mit adaptiver Zeitverwaltung**: 
+  - Alpha-Beta-Suche mit **LMR, Null-Move Pruning, ProbCut, Singular Extensions**
+  - **Transposition Table** mit depth-preferred Replacement
+  - **Move Ordering** mit MVV-LVA, Killer Moves, History Heuristic, **Threat Detection** (hängende Figuren, entdeckte Angriffe, X-Ray, Fesselungen, Königssicherheit)
+  - **5 KI-Persönlichkeiten** (Ausgewogen, Aggressiv, Defensiv, Positionell, Der Fallensteller) mit individuellen Eval-Gewichten und Suchverhalten
+  - **Adaptives Zeitmanagement**: dynamische Zeitallokation basierend auf Positions-Komplexität, Spielphase, Uhrzeit und Persönlichkeit
 - **Engine Analyse Modus**: Echtzeit-Evaluation mit vertikaler Bar, Top-Züge inkl. PV-Varianten und Engine-Statistiken.
 - **Zug-Qualitäts-Indikatoren**: Sofortiges Feedback auf Züge (Brilliant, Best, Blunder) mit visuellen Badges.
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
-- **PWA & Mobile Ready**: Installierbar und offline spielbar dank Service Worker.
+- **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices, Touch-Targets ≥ 44×44px.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
 - **TypeScript Strict Mode**: Das gesamte Projekt ist vollständig typisiert (0 `any`-Typen in Produktionscode).
 
 ## 🧠 Technische Highlights
 
-### KI-Engine (`js/aiEngine.js`)
+### KI-Engine (`js/aiEngine.ts`)
 
-- **Alpha-Beta Pruning**: Hocheffiziente Suche im Spielbaum.
-- **Transposition Table**: Depth-preferred Replacement-Strategie zur Minimierung redundanter Berechnungen.
-- **Move Ordering**: Optimiert durch Killer Moves, MVV-LVA (Most Valuable Victim - Least Valuable Attacker) und TT-Hits.
-- **Evaluation**: Nuancierte Stellungsbewertung inklusive Figurenwerten, Positionsboni und Königssicherheit.
-- **Opening Book**: Erweitertes Eröffnungsbuch mit PGN-Unterstützung und intelligenter Zugauswahl (Merge-Strategien, Gewichtung).
+- **Alpha-Beta Pruning** mit **LMR** (Late Move Reductions, log-Formel), **Null-Move Pruning** (R=2), **ProbCut** (depth≥5, β-150cp), **Singular Extensions** (depth≥6, margin=100cp)
+- **Iterative Deepening** mit **Aspiration Windows** + **IIR** (Internal Iterative Reduction, adaptive 0.5×–2.0× Fenster)
+- **Transposition Table** (Zobrist Hashing, 262k Einträge JS / 64k WASM)
+- **Move Ordering**: MVV-LVA + SEE, Killer Moves, History Heuristic, Counter Moves, **Threat-Bonus** (Checks, Angriffe, entdeckte Angriffe, X-Ray, Pin-Breaks, Königssicherheit)
+- **Quiescence Search** mit SEE-basiertem Capture-Sorting
+- **Opening Book** (PGN-Import, Merge-Strategien, Eröffnungsnamen-Anzeige)
+- **WASM Backend** (Rust, `engine-wasm/`) für maximale Performance
 
-### 3D Rendering (`js/battleChess3D.js`)
+### Persönlichkeiten (`js/ai/personalities.ts`)
 
-- **Transparent Overlay**: Nahtlose Integration der 3D-Ansicht über das neue "Deep Space" UI.
-- **Procedural Models**: Alle Schachfiguren werden prozedural generiert (`js/pieces3D.js`).
-- **Skin-System**: Unterstützung für verschiedene Ästhetiken (Classic, Infernale, Neon).
-- **Animationen**: Weiche Übergänge für Züge und Capture-Events durch integrierten `BattleAnimator`.
+| Name | Stil | Aggression | Zeit-Faktor | Risiko | WASM-Mapping |
+|------|------|-----------|------------|-------|-------------|
+| **Ausgewogen** | Universell | 1.0 | 1.0 | 0.5 | NORMAL |
+| **Aggressiv** | Taktisch, angriffslustig | 1.5 | 1.2 | 0.8 | AGGRESSIVE |
+| **Defensiv** | Solide, prophylaktisch | 0.6 | 1.1 | 0.2 | SOLID |
+| **Positionell** | Strategisch, langfristig | 0.8 | 1.0 | 0.3 | SOLID |
+| **Der Fallensteller** | Trickreich, opportunistisch | 1.3 | 1.3 | 0.9 | AGGRESSIVE |
+
+### Adaptives Zeitmanagement (`js/ai/timeManagement.ts`)
+
+- Dynamische Allokation basierend auf: Positions-Komplexität (Schläge, Checks, forcierte Züge), Spielphase (Eröffnung/Mittelspiel/Endspiel), Restzeit, Inkrement
+- Persönlichkeits-Faktor: Aggressiv = 20% mehr Zeit, Defensiv = sparsamer
+- **Notfall-Reserve** bei < 10s Restzeit (max 30% der Zeit, 1s Reserve)
+- Eröffnungsbuch-Phase (≤ Zug 20) = minimaler Search
+- Gegner-Zeitdruck: Schneller spielen wenn Gegner in Zeitnot
+
+### 3D Rendering (`js/battleChess3D.ts`)
+
+- **Transparent Overlay**: Nahtlose Integration der 3D-Ansicht
+- **Procedural Models**: Alle Schachfiguren werden prozedural generiert (`js/pieces3D.js`)
+- **Skin-System**: Classic, Infernale, Frost, Neon
+- **Animationen**: Weiche Übergänge, Capture-Effekte, Partikel-System
 
 ### Architektur (`js/App.ts`)
 
-- **Modulare Struktur**: Klare Trennung von Verantwortlichkeiten.
-  - **App**: Lifecycle-Management und Initialisierung.
-  - **Game** (`gameEngine.ts`): Zentrale Spiellogik, Board-State, Phasen.
-  - **GameController** (`gameController.ts`): Spiele-Steuerung, Setup, Shop, Clock.
-  - **MoveController** (`moveController.ts`): Zug-Ausführung, Validierung, Undo/Redo.
-  - **AIController** (`aiController.ts`): KI-Steuerung, Analyse-Modus.
-  - **DOMHandler** (`ui/DOMHandler.ts`): DOM-Zugriff und Event-Listener.
-  - **Vollständig typisiert**: 0 `any`-Typen im Produktionscode.
+- **Modulare Struktur**: Klare Trennung von Verantwortlichkeiten
+  - **App**: Lifecycle-Management und Initialisierung
+  - **Game** (`gameEngine.ts`): Zentrale Spiellogik, Board-State, Phasen
+  - **GameController** (`gameController.ts`): Spiele-Steuerung, Setup, Shop, Clock
+  - **MoveController** (`moveController.ts`): Zug-Ausführung, Validierung, Undo/Redo
+  - **AIController** (`aiController.ts`): KI-Steuerung, Analyse-Modus, Worker-Pool
+  - **DOMHandler** (`ui/DOMHandler.ts`): DOM-Zugriff und Event-Listener
+- **Vollständig typisiert**: 0 `any`-Typen im Produktionscode
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.500 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.850 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
 
-| Modul             | Coverage (Lines) | Beschreibung                                      |
-| ----------------- | ---------------- | ------------------------------------------------- |
-| **Global**        | **> 88%**        | Gesamtheitliche Codeabdeckung.                    |
-| **AI Engine**     | > 90%            | Validierung von Suchalgorithmen und Bewertung.    |
-| **3D Engine**     | > 95%            | PieceManager3D und SceneManager3D Abdeckung.      |
-| **Logic & Rules** | > 99%            | Spielregeln, Move-Validation und Game-State.      |
-| **UI Components** | > 95%            | AnalysisUI, ShopManager und PuzzleMenu Abdeckung. |
+| Modul | Coverage (Lines) | Beschreibung |
+|-------|------------------|--------------|
+| **Global** | **> 86%** | Gesamtheitliche Codeabdeckung |
+| **AI Engine** | > 90% | Validierung von Suchalgorithmen, Bewertung, Time Management |
+| **3D Engine** | > 95% | PieceManager3D und SceneManager3D |
+| **Logic & Rules** | > 99% | Spielregeln, Move-Validation, Game-State |
+| **UI Components** | > 95% | AnalysisUI, ShopManager, PuzzleMenu |
+
+Test-Suite Highlights:
+- 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
+- 1857 Tests gesamt, alle grün
+- Unit-, Integrations- und E2E-Tests (Playwright)
 
 ## 📁 Projektstruktur
 
+```
 schach9x9/
-├── css/ # Styling (Modularisiert nach Komponenten)
+├── css/                    # Styling (Modular: base, themes, layout, board, components…)
 ├── js/
-│   ├── ai/ # KI-Logik (Suche, Bewertung, Opening Book, WASM Bridge)
-│   ├── assets/ # Statische Assets (Figuren SVGs)
-│   ├── campaign/ # Kampagnen-System (Manager, BoardFactory)
-│   ├── input/ # Eingabe-Handler (KeyboardManager)
-│   ├── modes/ # Spielmodi-Strategien (Classic, Setup, Campaign)
-│   ├── move/ # Zugvalidierung und Ausführung
-│   ├── effects/ # Visuelle Effekte (Partikel, Animationen)
-│   ├── tutor/ # Tutor-System und Analyse
-│   ├── ui/ # UI-Komponenten und Renderer
-│   │   └── 3d/ # 3D-Engine Module (Scene, Piece, Input)
-│   ├── utils/ # Hilfsfunktionen (PGN, ErrorManager)
-│   ├── gameEngine.ts # Kern-Spiellogik (Game-Klasse)
-│   ├── gameController.ts # Spiele-Steuerung (Controller)
-│   ├── moveController.ts # Zug-Steuerung
-│   ├── aiController.ts # KI-Steuerung
-│   ├── App.ts # Hauptanwendungsklasse
-│   └── battleChess3D.ts # 3D-Fassade
-├── tests/ # Test-Suite (Unit & Integration)
-│   ├── ai/ KI-Tests
-│   ├── campaign/ # Kampagnen-Logik Tests
-│   ├── modes/ # Spielmodi Tests
-│   ├── ui/ # UI Tests
-│   └── ...
-├── engine-wasm/ # Rust KI-Engine Quellcode
-└── index.html # Einstiegspunkt
-
+│   ├── ai/                 # KI-Logik
+│   │   ├── personalities.ts    # Persönlichkeits-Definitionen (Shared)
+│   │   ├── timeManagement.ts   # Adaptives Zeitmanagement
+│   │   ├── OpeningBook.ts      # Eröffnungsbuch
+│   │   ├── transpositionTable.ts
+│   │   ├── MoveOrdering.ts     # Move-Ordering mit Threat-Detection
+│   │   ├── search.ts           # JS Alpha-Beta mit LMR, NMP, ProbCut…
+│   │   └── wasmBridge.ts       # WASM-Interface
+│   ├── assets/             # Statische Assets (Figuren SVGs)
+│   ├── campaign/           # Kampagnen-System
+│   ├── input/              # Eingabe-Handler
+│   ├── modes/              # Spielmodi-Strategien
+│   ├── move/               # Zugvalidierung und Ausführung
+│   ├── effects/            # Visuelle Effekte
+│   ├── tutor/              # Tutor-System und Analyse
+│   ├── ui/                 # UI-Komponenten
+│   │   ├── 3d/             # 3D-Engine
+│   │   └── BoardRenderer.ts    # Board-Rendering + Touch-Support
+│   ├── utils/              # Hilfsfunktionen (PGN, ErrorManager)
+│   ├── gameEngine.ts       # Kern-Spiellogik
+│   ├── gameController.ts   # Spiele-Steuerung
+│   ├── moveController.ts   # Zug-Steuerung
+│   ├── aiController.ts     # KI-Steuerung
+│   ├── App.ts              # Hauptanwendungsklasse
+│   └── evaluate.ts         # Zentrale Evaluation
+├── tests/                  # Test-Suite (Unit, Integration, E2E)
+├── engine-wasm/            # Rust KI-Engine
+│   ├── src/
+│   │   ├── search.rs       # WASM Search mit LMR, NMP, ProbCut, SE…
+│   │   ├── ordering.rs     # WASM Move-Ordering mit Threats
+│   │   ├── eval.rs         # WASM Evaluation mit Personalities
+│   │   └── lib.rs          # WASM Exports
+│   └── Cargo.toml
+└── index.html              # Einstiegspunkt
 ```
 
 ## 🚀 Installation & Start
@@ -124,11 +163,10 @@ schach9x9/
 Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 
 - **Tests ausführen:** `npm test`
-- **Linting (ESLint):** `npm run lint` (überprüft Code-Qualität)
-- **Formatting (Prettier):** `npm run format` (stellt konsistenten Stil sicher)
-- **CI-Check:** `npm run format:check` && `npm run lint` && `npm test`
+- **Linting (ESLint):** `npm run lint`
+- **Formatting (Prettier):** `npm run format`
+- **CI-Check:** `npm run format:check && npm run lint && npm test`
 
 ## 📄 Lizenz
 
 Dieses Projekt ist unter der MIT Lizenz veröffentlicht.
-```
