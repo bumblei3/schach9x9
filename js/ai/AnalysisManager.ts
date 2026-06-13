@@ -1,4 +1,6 @@
 import { logger } from '../logger.js';
+import { drawArrow, clearArrows } from '../ui/ArrowRenderer.js';
+import type { Square } from '../types/game.js';
 
 export interface RatedMove {
   moveNumber: number;
@@ -20,6 +22,8 @@ export interface AnalysisSummary {
 
 export class AnalysisManager {
   private game: any;
+  public showBestMove: boolean = false;
+  private bestMoveArrow: SVGSVGElement | null = null;
 
   constructor(game: any) {
     this.game = game;
@@ -70,5 +74,47 @@ export class AnalysisManager {
     } else {
       return 'Ein harter Kampf. Du solltest an deiner Taktik arbeiten und weniger voreilige Züge machen.';
     }
+  }
+
+  public toggleBestMove(): boolean {
+    this.showBestMove = !this.showBestMove;
+    this.updateArrows();
+    return this.showBestMove;
+  }
+
+  public updateArrows(): void {
+    // Remove existing best move arrow
+    if (this.bestMoveArrow) {
+      this.bestMoveArrow.remove();
+      this.bestMoveArrow = null;
+    }
+
+    // Get best move from AI analysis
+    const topMoves = this.game.aiController?.analysisUI?.topMovesContainer;
+    if (!this.showBestMove || !topMoves) return;
+
+    // Get best move from analysis panel's first top move
+    const firstTopMove = topMoves.querySelector('.top-move-item');
+    if (!firstTopMove) return;
+
+    const from = firstTopMove.dataset.from?.split(',').map(Number);
+    const to = firstTopMove.dataset.to?.split(',').map(Number);
+    if (!from || !to || from.length !== 2 || to.length !== 2) return;
+
+    const fromSquare: Square = { r: from[0], c: from[1] };
+    const toSquare: Square = { r: to[0], c: to[1] };
+
+    const boardContainer = document.getElementById('board-container');
+    if (!boardContainer) return;
+
+    // Blue arrow for best move suggestion
+    this.bestMoveArrow = drawArrow(boardContainer, {
+      from: fromSquare,
+      to: toSquare,
+      color: '#4f9cf9', // Blue color for best move
+      headSize: 16,
+      strokeWidth: 5,
+      animate: true,
+    });
   }
 }
