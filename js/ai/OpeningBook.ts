@@ -5,24 +5,7 @@
 
 import { logger } from '../logger.js';
 import type { Square, Piece } from '../gameEngine.js';
-import { Game } from '../gameEngine.js';
-import { makeMove } from './MoveGenerator.js';
 import { PieceType, Player } from '../types/game.js';
-import {
-  PIECE_PAWN,
-  PIECE_KNIGHT,
-  PIECE_BISHOP,
-  PIECE_ROOK,
-  PIECE_QUEEN,
-  PIECE_KING,
-  PIECE_ARCHBISHOP,
-  PIECE_CHANCELLOR,
-  PIECE_ANGEL,
-  PIECE_NIGHTRIDER,
-  COLOR_WHITE,
-  COLOR_BLACK,
-  coordsToIndex,
-} from './BoardDefinitions.js';
 
 interface BookMove {
   from: Square;
@@ -61,7 +44,7 @@ export class OpeningBook {
    * Query for a move from the opening book
    */
   getMove(board: (Piece | null)[][], turn: string): { from: Square; to: Square } | null {
-    if (!board || board.length === 0) return turn ? turn[0] : '';
+    if (!board || board.length === 0) return null;
 
     const hash = this.getBoardHash(board, turn);
 
@@ -165,7 +148,7 @@ export class OpeningBook {
    */
   getBoardHash(board: (Piece | null)[][], turn: string): string {
     const size = board ? board.length : 0;
-    if (size === 0) return turn ? turn[0] : '';
+    if (size === 0) return '';
 
     let hash = '';
     for (let r = 0; r < size; r++) {
@@ -189,40 +172,29 @@ export class OpeningBook {
     result: 'win' | 'loss' | 'draw',
     initialBoard: (Piece | null)[][]
   ): void {
-    // Helper: map piece char to internal piece number (without color)
-    const pieceCharToNum = (ch: PieceType): number => {
-      switch (ch) {
-        case 'p': return PIECE_PAWN;
-        case 'n': return PIECE_KNIGHT;
-        case 'b': return PIECE_BISHOP;
-        case 'r': return PIECE_ROOK;
-        case 'q': return PIECE_QUEEN;
-        case 'k': return PIECE_KING;
-        case 'a': return PIECE_ARCHBISHOP;
-        case 'c': return PIECE_CHANCELLOR;
-        case 'e': return PIECE_ANGEL;
-        case 'j': return PIECE_NIGHTRIDER;
-        default: return PIECE_NONE;
-      }
-    };
-
-    // Helper: create a piece number from char and color
-    const makePiece = (ch: PieceType, color: Player): number =>
-      pieceCharToNum(ch) | (color === 'white' ? COLOR_WHITE : COLOR_BLACK);
-
     // Deep copy board to avoid mutating original
     const board = initialBoard.map(row => [...row]);
+
+    // Helper: create a piece object from char and color
+    const makePiece = (ch: PieceType | undefined, color: Player): Piece => ({
+    type: (ch || 'p') as Piece['type'],
+    color,
+    hasMoved: false,
+    });
 
     for (let i = 0; i < moveHistory.length; i++) {
       const move = moveHistory[i];
       const moverColor = i % 2 === 0 ? 'white' : 'black';
 
-      // Calculate weight delta based on game result
+      // Calculate weight delta based on game result:
+      // - Winner's moves: +2
+      // - Loser's moves: -1
+      // - Draw: 0
       let delta = 0;
-      if (result === 'win' && moverColor === playerColor) {
-        delta = +2; // winning move gets bonus
-      } else if (result === 'loss' && moverColor !== playerColor) {
-        delta = -1; // losing move gets small penalty
+      if (result === 'win') {
+        delta = moverColor === playerColor ? +2 : -1;
+      } else if (result === 'loss') {
+        delta = moverColor === playerColor ? -1 : +2;
       }
       // draw: delta = 0
 

@@ -4,10 +4,8 @@
  */
 
 import { logger } from './logger.js';
-import type { Player, Piece, Square } from './types/game.js';
-import type { Phase, AIDifficulty, BoardShape } from './config.js';
 import { statisticsManager } from './statisticsManager.js';
-import { showToast } from './ui/OverlayManager.ts';
+import { showToast } from './ui/OverlayManager.js';
 
 export interface Achievement {
   id: string;

@@ -1,5 +1,5 @@
 import { logger } from '../logger.js';
-import { drawArrow, clearArrows } from '../ui/ArrowRenderer.js';
+import { drawArrow } from '../ui/ArrowRenderer.js';
 import type { Square } from '../types/game.js';
 
 export interface RatedMove {

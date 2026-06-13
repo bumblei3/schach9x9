@@ -24,7 +24,6 @@ import {
   isInCheck,
   see,
   getAllThreats,
-  getKingThreats,
   getXRayThreats,
   getDiscoveredAttackPotential,
 } from './MoveGenerator';
