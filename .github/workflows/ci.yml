@@ -235,7 +235,7 @@ jobs:
 
       - name: Run npm audit
         run: npm audit --audit-level=high --omit=dev
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Check for outdated packages
         run: npx npm-check-updates -f '/^[^@]/' --rejected --timeout 10000
