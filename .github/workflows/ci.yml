@@ -297,7 +297,7 @@ jobs:
           retention-days: 7
 
       - name: Lighthouse CI (Performance Budget)
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         if: github.event_name == 'pull_request'
         with:
           urls: |
