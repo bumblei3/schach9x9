@@ -5,6 +5,12 @@
  */
 
 import { logger } from './logger';
+import { AI_PERSONALITIES } from './ai/personalities';
+import {
+  calculateTimeAllocation,
+  detectTacticalComplexity,
+  type TimeAllocationParams,
+} from './ai/timeManagement';
 import {
   getBestMoveWasm,
   getWasmNodesEvaluated,
@@ -33,9 +39,9 @@ import {
   PIECE_ROOK, PIECE_QUEEN, PIECE_KING, PIECE_ARCHBISHOP, PIECE_CHANCELLOR,
   PIECE_ANGEL, PIECE_NIGHTRIDER, COLOR_WHITE, COLOR_BLACK, TYPE_MASK, COLOR_MASK,
   indexToRow, indexToCol,
-} from './ai/BoardDefinitions.js';
-import { getCurrentBoardShape } from './config.js';
-import type { Player, Square, Piece } from './types/game.js';
+} from './ai/BoardDefinitions';
+import { getCurrentBoardShape } from './config';
+import type { Player, Square, Piece } from './types/game';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 
 // Re-export evaluate module
@@ -59,6 +65,20 @@ export interface TimeParams {
   elo?: number;
   personality?: string;
   maxDepth?: number;
+  // Adaptive time management
+  whiteTime?: number;
+  blackTime?: number;
+  whiteIncrement?: number;
+  blackIncrement?: number;
+  maxTimeMs?: number;
+  // Search behavior (populated by adaptive time management)
+  searchParams?: {
+    aspirationMultiplier?: number;
+    probCutEnabled?: boolean;
+    lmrAggressiveness?: number;
+    singularExtensionsEnabled?: boolean;
+  };
+  timeLimitMs?: number;
 }
 
 export interface MoveResult {
@@ -74,6 +94,7 @@ export interface SearchResult {
   score: number;
   depth: number;
   nodes: number;
+  pv?: string;  // Principal variation as UCI move string
 }
 
 export interface UndoInfo {
@@ -206,13 +227,68 @@ export async function getBestMoveDetailed(
     maxDepth = config.maxDepth!;
   }
 
-  const personality = config.personality || 'NORMAL';
+  // --- ADAPTIVE TIME MANAGEMENT ---
+  // Extract clock info from config
+  const whiteTime = config.whiteTime ?? 300;
+  const blackTime = config.blackTime ?? 300;
+  const whiteIncrement = config.whiteIncrement ?? 0;
+  const blackIncrement = config.blackIncrement ?? 0;
+
+  // Detect tactical complexity for time allocation
+  const hasTacticalComplexity = detectTacticalComplexity(
+    board,
+    turnColor === 'white' ? 16 : 32,
+    genLegalInt,
+    isSquareAttackedInt
+  );
+
+  // Count pieces for game phase detection
+  const pieceCount = board.filter(p => p !== 0).length;
+
+  // Calculate time allocation
+  const personalityKey = config.personality || 'NORMAL';
+  const personality = AI_PERSONALITIES[personalityKey] || AI_PERSONALITIES.balanced;
+  const timeFactor = personality.timeManagementFactor || 1.0;
+  const aggression = personality.aggressionLevel || 1.0;
+
+  // Build time allocation params
+  const timeAllocParams: TimeAllocationParams = {
+    moveNumber: moveNumber ?? 1,
+    whiteTime,
+    blackTime,
+    whiteIncrement,
+    blackIncrement,
+    isWhiteTurn: turnColor === 'white',
+    pieceCount,
+    isInCheck: checkInt(board, turnColor === 'white' ? 16 : 32),
+    hasTacticalComplexity,
+    personality: personalityKey,
+    baseMaxDepth: maxDepth,
+    maxTimeMs: config.maxTimeMs ?? 30000,
+  };
+
+  const timeAllocResult = calculateTimeAllocation(timeAllocParams);
+  
+  // Use adaptive depth and time
+  const adaptiveMaxDepth = timeAllocResult.targetDepth;
+  const timeLimitMs = timeAllocResult.allocatedTimeMs;
+  
+  logger.debug(`[AiEngine] Adaptive time: ${timeLimitMs}ms, depth: ${adaptiveMaxDepth}, reason: ${timeAllocResult.timeBudgetInfo.reason}, emergency: ${timeAllocResult.timeBudgetInfo.emergencyReserve}`);
+
+  // Override maxDepth with adaptive value
+  maxDepth = adaptiveMaxDepth;
+
+  // Pass search behavior params to WASM via config
+  config.searchParams = timeAllocResult.searchParams;
+  config.timeLimitMs = timeLimitMs;
+
+  const personalityId = personality.wasmPersonality;
   const elo = config.elo || 2500;
   const boardShape = getCurrentBoardShape();
 
   if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
     try {
-      const result = await runWorkerSearch(board, turnColor, maxDepth, personality, elo);
+      const result = await runWorkerSearch(board, turnColor, maxDepth, personalityId, elo);
       if (result && result.move) {
         logger.debug('[AiEngine] Using Wasm Worker Result');
         return { ...result, move: convertMoveToResult(result.move as unknown as { from: number; to: number }) };
@@ -224,7 +300,7 @@ export async function getBestMoveDetailed(
 
   if (boardShape === 'standard') {
     try {
-      const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personality, elo);
+      const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personalityId, elo);
       if (wasmResult) return wasmResult;
     } catch (err) {
       logger.debug('[AiEngine] WASM fallback failed, using JS');
