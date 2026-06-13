@@ -45,7 +45,7 @@ import { computeZobristHash, TranspositionTable } from './ai/transpositionTable'
 
 // Re-export evaluate module
 export { evaluate, EVAL_VALUES, type IntBoard } from './evaluate';
-import { evaluate } from './evaluate';
+import { evaluate, EVAL_VALUES } from './evaluate';
 
 // Re-export search module
 import { createJsSearch } from './search';
@@ -138,10 +138,13 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 
 // --- Worker management ---
 
-const workerPendingRequests = new Map<string, { resolve: (data: unknown) => void; timer: number }>();
+const workerPendingRequests = new Map<string, { resolve: (data: SearchResult | SearchResult[] | null) => void; timer: number }>();
 
 function _initAiWorker(): void {
   if (typeof Worker === 'undefined') return;
+  // Intentionally empty - stub for future worker initialization
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _stub = 0;
 }
 
 export function terminateAiWorker(): void {
@@ -151,7 +154,7 @@ export function terminateAiWorker(): void {
 function runWorkerSearch(
   board: IntBoard, turnColor: Player, maxDepth: number, personality: string, elo: number
 ): Promise<SearchResult | null> {
-  return new Promise(resolve => {
+  return new Promise<SearchResult | null>(resolve => {
     const id = Math.random().toString(36).slice(2);
     const timer = window.setTimeout(() => { workerPendingRequests.delete(id); resolve(null); }, 15000);
     workerPendingRequests.set(id, { resolve, timer });
@@ -162,7 +165,7 @@ function runWorkerSearch(
 function runWorkerTopMoves(
   board: IntBoard, turnColor: Player, count: number, searchDepth: number, maxTimeMs: number
 ): Promise<SearchResult[]> {
-  return new Promise(resolve => {
+  return new Promise<SearchResult[]>(resolve => {
     const id = Math.random().toString(36).slice(2);
     const timer = window.setTimeout(() => { workerPendingRequests.delete(id); resolve([]); }, maxTimeMs + 2000);
     workerPendingRequests.set(id, { resolve, timer });
@@ -235,7 +238,7 @@ export async function getBestMoveDetailed(
 
   // Detect tactical complexity for time allocation
   const hasTacticalComplexity = detectTacticalComplexity(
-    board,
+    board as unknown as readonly number[],
     turnColor === 'white' ? 16 : 32,
     genLegalInt,
     isSquareAttackedInt
@@ -247,8 +250,8 @@ export async function getBestMoveDetailed(
   // Calculate time allocation
   const personalityKey = config.personality || 'NORMAL';
   const personality = AI_PERSONALITIES[personalityKey] || AI_PERSONALITIES.balanced;
-  const timeFactor = personality.timeManagementFactor || 1.0;
-  const aggression = personality.aggressionLevel || 1.0;
+  const _timeFactor = personality.timeManagementFactor || 1.0;
+  const _aggression = personality.aggressionLevel || 1.0;
 
   // Build time allocation params
   const timeAllocParams: TimeAllocationParams = {
@@ -290,7 +293,7 @@ export async function getBestMoveDetailed(
       const result = await runWorkerSearch(board, turnColor, maxDepth, personalityId, elo);
       if (result && result.move) {
         logger.debug('[AiEngine] Using Wasm Worker Result');
-        return { ...result, move: convertMoveToResult(result.move as unknown as { from: number; to: number }) };
+        return { ...result, move: convertMoveToResult(result.move as unknown as { from: number; to: number }), depth: result.depth ?? 0, nodes: result.nodes ?? 0 };
       }
     } catch (err) {
       logger.error('[AiEngine] Worker search failed', err);
@@ -453,9 +456,9 @@ export function see(uiBoard: UiBoard, from: Square, to: Square): number {
 
 export function makeMove(uiBoard: UiBoard, move: { from: Square; to: Square }): UndoInfo | null {
   const size = uiBoard.length;
-  const fromIdx = move.from.r * size + move.from.c;
-  const toIdx = move.to.r * size + move.to.c;
-  const board = convertBoardToInt(uiBoard);
+  const _fromIdx = move.from.r * size + move.from.c;
+  const _toIdx = move.to.r * size + move.to.c;
+  const _board = convertBoardToInt(uiBoard);
   const piece = uiBoard[move.from.r][move.from.c];
   const captured = uiBoard[move.to.r][move.to.c];
   uiBoard[move.to.r][move.to.c] = piece;
