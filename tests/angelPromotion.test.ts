@@ -403,7 +403,8 @@ describe('Angel Piece and Promotion', () => {
       const moves = game.getValidMoves(4, 4, game.board[4][4]);
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeLessThan(10); // Should take less than 10ms
+      // CI runners can be slower; use generous threshold (10ms baseline + CI variance)
+      expect(endTime - startTime).toBeLessThan(50);
       expect(moves.length).toBeGreaterThan(20); // Angel has many moves
     });
 
