@@ -488,12 +488,12 @@ jobs:
         uses: actions/deploy-pages@v5
 
       - name: Comment on deployment
-        if: github.event_name == 'push'
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v9
         with:
           script: |
             github.rest.issues.createComment({
-              issue_number: ${{ github.event.number || 0 }},
+              issue_number: ${{ github.event.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: '🚀 Deployment to GitHub Pages successful!\n\n**Live:** ${{ steps.deployment.outputs.page_url }}\n\n**Commit:** ${ github.sha }\n**Workflow:** ${ github.run_id }'
