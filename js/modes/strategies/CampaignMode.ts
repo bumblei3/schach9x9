@@ -68,6 +68,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     if (level.setupType === 'fixed') {
       game.phase = PHASES.PLAY;
+      game.captureInitialBoard();
       controller.startClock();
     } else {
       // Budget mode -> Setup Phase

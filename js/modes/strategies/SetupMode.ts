@@ -157,6 +157,7 @@ export class SetupModeStrategy implements GameModeStrategy {
 
   private startGame(game: GameExtended, controller: GameController): void {
     game.phase = PHASES.PLAY;
+    game.captureInitialBoard();
     controller.showShop(false);
 
     // Track game start time for statistics

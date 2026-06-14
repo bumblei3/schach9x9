@@ -111,6 +111,7 @@ describe('Coverage Boost Tests', () => {
       clockEnabled: true,
       gameStartTime: Date.now(),
       redoStack: [],
+      captureInitialBoard: vi.fn(),
     };
 
     document.body.innerHTML = `

@@ -63,6 +63,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
       aiSetupUpgrades: vi.fn(),
       selectedShopPiece: null,
       updateBestMoves: vi.fn(),
+      captureInitialBoard: vi.fn(),
     };
 
     controller = {

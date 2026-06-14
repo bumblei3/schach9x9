@@ -32,6 +32,7 @@ describe('ClassicModeStrategy', () => {
       phase: null,
       setupClassicBoard: vi.fn(),
       handlePlayClick: vi.fn(),
+      captureInitialBoard: vi.fn(),
     };
 
     controller = {

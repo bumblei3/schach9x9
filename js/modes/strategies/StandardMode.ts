@@ -89,6 +89,7 @@ export class StandardModeStrategy implements GameModeStrategy {
 
   private startGame(game: GameExtended, controller: GameController): void {
     game.phase = PHASES.PLAY as Phase;
+    game.captureInitialBoard();
     controller.showShop(false);
     controller.gameStartTime = Date.now();
 

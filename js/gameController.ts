@@ -35,6 +35,7 @@ import type { Player } from './types/game.js';
 import type { GameMode } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
+import { openingBook } from './ai/OpeningBook.js';
 
 import type { GameModeStrategy } from './modes/GameModeStrategy.js';
 import { SetupModeStrategy } from './modes/strategies/SetupMode.js';
@@ -817,6 +818,12 @@ export class GameController {
 
     this.saveGameToStatistics(result, saveColorArg);
 
+    // Determine result from player perspective (needed for achievements & opening book)
+    let playerResult: 'win' | 'loss' | 'draw' = 'draw';
+    if (result === 'win') {
+      playerResult = winnerColor === this.game.playerColor ? 'win' : 'loss';
+    }
+
     // Check achievements
     try {
       const moveCount = Math.ceil(this.game.stats?.totalMoves / 2) || 0;
@@ -824,15 +831,26 @@ export class GameController {
       // Check if player won with only king remaining
       const kingOnlyWin = this.checkKingOnlyWin(this.game.playerColor!);
 
-      // Determine result from player perspective
-      let playerResult: 'win' | 'loss' | 'draw' = 'draw';
-      if (result === 'win') {
-        playerResult = winnerColor === this.game.playerColor ? 'win' : 'loss';
-      }
-
       achievementsManager.checkAndUnlock(playerResult, moveCount, hasPromotion, kingOnlyWin);
     } catch (e) {
       logger.warn('[GameController] Achievement check failed:', e);
+    }
+
+    // Apply game result to opening book for learning
+    try {
+      if (this.game.initialBoard && this.game.moveHistory && this.game.moveHistory.length > 0) {
+        const moveHistory = this.game.moveHistory.map(m => ({
+          from: m.from,
+          to: m.to,
+          piece: m.piece?.type || 'p',
+          captured: m.captured?.type,
+          promotion: m.promotion as PieceWithMoved['type'] | undefined,
+        }));
+        openingBook.applyGameResult(moveHistory, this.game.playerColor, playerResult, this.game.initialBoard);
+        logger.debug('[GameController] Opening book updated with game result:', playerResult);
+      }
+    } catch (e) {
+      logger.warn('[GameController] Opening book learning failed:', e);
     }
 
     // Show post-game stats and analysis button (unless in campaign mode)

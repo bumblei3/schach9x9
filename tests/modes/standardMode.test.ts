@@ -69,6 +69,7 @@ describe('StandardModeStrategy', () => {
       log: vi.fn(),
       updateBestMoves: vi.fn(),
       handlePlayClick: vi.fn().mockResolvedValue(undefined),
+      captureInitialBoard: vi.fn(),
     };
 
     mockController = {

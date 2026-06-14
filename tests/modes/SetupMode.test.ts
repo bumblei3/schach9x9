@@ -47,6 +47,7 @@ describe('SetupModeStrategy', () => {
       log: vi.fn(),
       aiSetupPieces: vi.fn(),
       aiSetupUpgrades: vi.fn(),
+      captureInitialBoard: vi.fn(),
     };
 
     // minimal controller mock

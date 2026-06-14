@@ -8,6 +8,7 @@ export class ClassicModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController): void {
     game.phase = PHASES.PLAY as any;
     game.setupClassicBoard();
+    game.captureInitialBoard();
 
     // Show game controls immediately
     const infoTabsContainer = document.getElementById('info-tabs-container');

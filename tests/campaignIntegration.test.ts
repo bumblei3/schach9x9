@@ -134,6 +134,7 @@ describe('Campaign Integration', () => {
       calculateMaterialAdvantage: vi.fn(() => 0),
       applyState: vi.fn(),
       initGame: vi.fn(),
+      captureInitialBoard: vi.fn(),
     };
 
     // Instantiate controller

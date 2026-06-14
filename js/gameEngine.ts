@@ -117,6 +117,7 @@ export class Game {
   boardSize: number;
   boardShape: BoardShape;
   board: (PieceWithMoved | null)[][];
+  initialBoard: (PieceWithMoved | null)[][] | null;
   phase: Phase;
   turn: Player;
   points: number;
@@ -238,6 +239,8 @@ export class Game {
       .fill(null)
       .map(() => Array(this.boardSize).fill(null));
 
+    this.initialBoard = null;
+
     if (this.mode === 'classic') {
       this.phase = PHASES.PLAY;
       this.setupClassicBoard();
@@ -355,6 +358,14 @@ export class Game {
       this.board[0][c] = { type: pieces[c], color: 'black', hasMoved: false };
       this.board[7][c] = { type: pieces[c], color: 'white', hasMoved: false };
     }
+  }
+
+  /**
+   * Captures the current board state as the initial position for opening book learning.
+   * Should be called once when the game transitions to PLAY phase (after setup).
+   */
+  captureInitialBoard(): void {
+    this.initialBoard = this.board.map(row => [...row]);
   }
 
   log(message: string): void {

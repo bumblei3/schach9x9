@@ -118,6 +118,7 @@ describe('CampaignModeStrategy', () => {
       aiPersonality: null,
       playerColor: null,
       handlePlayClick: vi.fn().mockResolvedValue(undefined),
+      captureInitialBoard: vi.fn(),
     };
 
     mockController = {
