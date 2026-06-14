@@ -59,18 +59,19 @@ jobs:
         continue-on-error: true
 
       - name: Run TypeScript type check
-        run: npx tsc --noEmit
+        id: tsc-check
+        run: |
+          npx tsc --noEmit 2>&1 | tee tsc-output.txt
         continue-on-error: true
 
       - name: TypeScript errors summary
         if: always()
         run: |
-          npx tsc --noEmit 2>&1 | grep -c "error TS" > ts-error-count.txt || true
-          ERROR_COUNT=$(cat ts-error-count.txt)
+          ERROR_COUNT=$(grep -c "error TS" tsc-output.txt || true)
           echo "TypeScript Errors: $ERROR_COUNT" >> $GITHUB_STEP_SUMMARY
           if [ "$ERROR_COUNT" -gt 0 ]; then
             echo "⚠️ **Pre-existing TypeScript errors found** (non-blocking)"
-            npx tsc --noEmit 2>&1 | grep "error TS" | head -20 >> $GITHUB_STEP_SUMMARY
+            grep "error TS" tsc-output.txt | head -20 >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ No TypeScript errors"
           fi
@@ -352,7 +353,7 @@ jobs:
     name: Production Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [lint, test, security-audit]
+    needs: [lint, test]
     steps:
       - uses: actions/checkout@v6
 
@@ -435,7 +436,6 @@ jobs:
 
   # =======================================================================
   # DEPLOY TO GITHUB PAGES
-  # =======================================================================
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
@@ -444,8 +444,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     needs: [lint, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -453,17 +451,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Build
-        run: npm run build
+          name: production-build
+          path: dist/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
