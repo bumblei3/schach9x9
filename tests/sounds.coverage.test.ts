@@ -6,7 +6,7 @@
  * playSuccess, playError, AudioContext unlock, all skin variants
  */
 
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import { SoundManager } from '../js/sounds';
 
 // Mock Web Audio API

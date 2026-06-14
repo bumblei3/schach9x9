@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Game, PHASES } from '../js/gameEngine.js';
 import { GameController } from '../js/gameController.js';
 import { MoveController } from '../js/moveController.js';

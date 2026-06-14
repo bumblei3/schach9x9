@@ -422,7 +422,7 @@ describe('GameController', () => {
   });
 
   describe('Clock Management', () => {
-    it('should stop clock when not in PLAY phase', () => {
+    test('should stop clock when not in PLAY phase', () => {
       game.phase = PHASES.SETUP_WHITE_KING;
       (gameController.timeManager as any).clockInterval = setInterval(() => {}, 100);
       gameController.tickClock(); // Delegates to timeManager
