@@ -44,8 +44,8 @@ import type { Player, Square, Piece } from './types/game';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 
 // Re-export evaluate module
-export { evaluate, EVAL_VALUES, type IntBoard } from './evaluate';
-import { evaluate, EVAL_VALUES } from './evaluate';
+export { evaluate, EVAL_VALUES, type IntBoard, type EvalConfig } from './evaluate';
+import { evaluate, EVAL_VALUES, type EvalConfig } from './evaluate';
 
 // Re-export search module
 import { createJsSearch } from './search';
@@ -303,7 +303,7 @@ export async function getBestMoveDetailed(
   }
 
   logger.debug('[AiEngine] Using JS Fallback Search');
-  const jsResult = await runJsSearch(board, turnColor, maxDepth, elo);
+  const jsResult = await runJsSearch(board, turnColor, maxDepth, elo, personalityId);
   if (jsResult) {
     return { score: jsResult.score, move: convertMoveToResult(jsResult.move), nodes: jsResult.nodes, depth: jsResult.depth };
   }
@@ -320,9 +320,9 @@ interface JsSearchResult {
 }
 
 async function runJsSearch(
-  board: IntBoard, turnColor: Player, maxDepth: number, _elo: number
+  board: IntBoard, turnColor: Player, maxDepth: number, _elo: number, personality: string
 ): Promise<JsSearchResult> {
-  const jsSearch = createJsSearch();
+  const jsSearch = createJsSearch({ personality: personality as EvalConfig['personality'] });
   return jsSearch.run(board, turnColor, maxDepth);
 }
 

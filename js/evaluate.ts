@@ -1,7 +1,8 @@
 /**
  * Evaluation module for Schach 9x9 AI.
  * Handles static board evaluation including material, positional bonuses,
- * pawn structure, king safety, and tapered evaluation.
+ * pawn structure, king safety, mobility, and tapered evaluation.
+ * Supports personality-based weight adjustments.
  */
 
 import {
@@ -16,6 +17,7 @@ import {
   PIECE_ARCHBISHOP,
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
+  PIECE_NIGHTRIDER,
   TYPE_MASK,
   COLOR_MASK,
   COLOR_WHITE,
@@ -27,8 +29,64 @@ import {
 export type IntBoard = Int8Array;
 
 // =====================================================================
+// Personality configuration (ported from WASM eval.rs)
+// =====================================================================
+
+export type Personality = 'NORMAL' | 'AGGRESSIVE' | 'SOLID' | 'GENTLE';
+
+export interface EvalConfig {
+  personality: Personality;
+  elo?: number;
+}
+
+function getPersonalityWeights(personality: Personality): {
+  attackWeight: number;
+  pawnStructureWeight: number;
+  kingSafetyWeight: number;
+  materialWeight: number;
+  mobilityWeight: number;
+} {
+  switch (personality) {
+    case 'AGGRESSIVE':
+      return {
+        attackWeight: 1.4,
+        pawnStructureWeight: 0.7,
+        kingSafetyWeight: 0.8,
+        materialWeight: 1.0,
+        mobilityWeight: 1.3,
+      };
+    case 'SOLID':
+      return {
+        attackWeight: 0.7,
+        pawnStructureWeight: 1.3,
+        kingSafetyWeight: 1.4,
+        materialWeight: 1.0,
+        mobilityWeight: 0.9,
+      };
+    case 'GENTLE':
+      return {
+        attackWeight: 0.8,
+        pawnStructureWeight: 1.0,
+        kingSafetyWeight: 1.1,
+        materialWeight: 0.9,
+        mobilityWeight: 0.8,
+      };
+    case 'NORMAL':
+    default:
+      return {
+        attackWeight: 1.0,
+        pawnStructureWeight: 1.0,
+        kingSafetyWeight: 1.0,
+        materialWeight: 1.0,
+        mobilityWeight: 1.0,
+      };
+  }
+}
+
+// =====================================================================
 // Material values (centipawns)
 // =====================================================================
+
 export const EVAL_VALUES: Record<number, number> = {
   [PIECE_PAWN]: 100,
   [PIECE_KNIGHT]: 320,
@@ -180,10 +238,17 @@ const DOUBLED_PAWN_PENALTY = -15;
 const ISOLATED_PAWN_PENALTY = -20;
 
 // =====================================================================
+// Direction vectors for mobility calculation (9x9 board)
+// =====================================================================
+
+const BISHOP_DIRS = [-10, -8, 8, 10];
+const ROOK_DIRS = [-9, 9, -1, 1];
+
+// =====================================================================
 // Main evaluation function
 // =====================================================================
 
-export function evaluate(b: IntBoard, c: number): number {
+export function evaluate(b: IntBoard, c: number, evalConfig: EvalConfig = { personality: 'NORMAL' }): number {
   let mgScore = 0;
   let egScore = 0;
   let phase = 0;
@@ -196,7 +261,10 @@ export function evaluate(b: IntBoard, c: number): number {
   const whitePawnsPerFile: number[] = new Array(9).fill(0);
   const blackPawnsPerFile: number[] = new Array(9).fill(0);
 
-  // --- Pass 1: Material + Positional + Phase ---
+  // Personality weights
+  const weights = getPersonalityWeights(evalConfig.personality);
+
+  // --- Pass 1: Material + Positional + Phase + Mobility ---
   for (let i = 0; i < SQUARE_COUNT; i++) {
     const p = b[i];
     if (p === PIECE_NONE) continue;
@@ -268,10 +336,61 @@ export function evaluate(b: IntBoard, c: number): number {
         mgPos = ANGEL_TABLE[sqIdx];
         egPos = ANGEL_TABLE[sqIdx] * 0.95;
         break;
+      case PIECE_NIGHTRIDER:
+        mgPos = KNIGHT_TABLE[sqIdx]; // Re-use knight table
+        egPos = KNIGHT_TABLE[sqIdx] * 0.8;
+        break;
     }
 
     if (isUs) { mgScore += mgPos; egScore += egPos; }
     else { mgScore -= mgPos; egScore -= egPos; }
+
+    // --- Mobility (non-pawn, non-king pieces) ---
+    if (type !== PIECE_PAWN && type !== PIECE_KING) {
+      let mobility = 0;
+      const directions = type === PIECE_BISHOP || type === PIECE_ARCHBISHOP
+        ? BISHOP_DIRS
+        : type === PIECE_ROOK || type === PIECE_CHANCELLOR
+          ? ROOK_DIRS
+          : type === PIECE_QUEEN || type === PIECE_ANGEL
+            ? [...BISHOP_DIRS, ...ROOK_DIRS]
+            : type === PIECE_KNIGHT || type === PIECE_NIGHTRIDER
+              ? [] // Knight mobility handled separately if needed
+              : [];
+
+      if (directions.length > 0) {
+        mobility = countMobility(b, i, directions, pColor);
+      }
+      // Knight mobility: count legal knight moves
+      if (type === PIECE_KNIGHT || type === PIECE_NIGHTRIDER) {
+        mobility = countKnightMobility(b, i, pColor);
+      }
+
+      if (type === PIECE_ARCHBISHOP) {
+        // Archbiship = Bishop + Knight
+        mobility += countKnightMobility(b, i, pColor);
+      }
+      if (type === PIECE_CHANCELLOR) {
+        // Chancellor = Rook + Knight
+        mobility += countKnightMobility(b, i, pColor);
+      }
+      if (type === PIECE_ANGEL) {
+        // Angel = Queen + Knight
+        mobility += countKnightMobility(b, i, pColor);
+      }
+
+      // Weight: ~3-5 cp per square in MG, ~5-8 in EG
+      const mgMobWeight = 3 * weights.mobilityWeight;
+      const egMobWeight = 5 * weights.mobilityWeight;
+
+      if (isUs) {
+        mgScore += mobility * mgMobWeight;
+        egScore += mobility * egMobWeight;
+      } else {
+        mgScore -= mobility * mgMobWeight;
+        egScore -= mobility * egMobWeight;
+      }
+    }
   }
 
   // --- King positional (tapered) ---
@@ -319,8 +438,7 @@ export function evaluate(b: IntBoard, c: number): number {
     if (p === PIECE_NONE || (p & TYPE_MASK) !== PIECE_PAWN) continue;
     const pColor = p & COLOR_MASK;
     const row = indexToRow(i);
-    const col = indexToCol(c);
-    void col;
+    const col = indexToCol(i);
     if (pColor === c) {
       let passed = true;
       for (let r2 = row - 1; r2 >= 0; r2--) {
@@ -335,8 +453,8 @@ export function evaluate(b: IntBoard, c: number): number {
         if (!passed) break;
       }
       if (passed) {
-        mgScore += PASSED_PAWN_BONUS[row] * 0.8;
-        egScore += PASSED_PAWN_BONUS[row] * 1.5;
+        mgScore += PASSED_PAWN_BONUS[row] * 0.8 * weights.pawnStructureWeight;
+        egScore += PASSED_PAWN_BONUS[row] * 1.5 * weights.pawnStructureWeight;
       }
     } else {
       let passed = true;
@@ -352,42 +470,27 @@ export function evaluate(b: IntBoard, c: number): number {
         if (!passed) break;
       }
       if (passed) {
-        mgScore -= PASSED_PAWN_BONUS[8 - row] * 0.8;
-        egScore -= PASSED_PAWN_BONUS[8 - row] * 1.5;
+        mgScore -= PASSED_PAWN_BONUS[8 - row] * 0.8 * weights.pawnStructureWeight;
+        egScore -= PASSED_PAWN_BONUS[8 - row] * 1.5 * weights.pawnStructureWeight;
       }
     }
   }
 
-  // --- Pass 3: King safety ---
+  // --- Pass 3: King safety (pawn shield) ---
+  const shieldPenalty = 15 * weights.kingSafetyWeight;
   if (c === COLOR_WHITE && whiteKingSq >= 0) {
-    const wkr = indexToRow(whiteKingSq);
     const wkc = indexToCol(whiteKingSq);
-    let shield = 0;
-    for (let dc2 = -1; dc2 <= 1; dc2++) {
-      const cc = wkc + dc2;
-      if (cc < 0 || cc > 8) continue;
-      const r2 = wkr - 1;
-      if (r2 < 0 || r2 > 8) continue;
-      const t = b[r2 * 9 + cc];
-      if (t !== PIECE_NONE && (t & TYPE_MASK) === PIECE_PAWN && (t & COLOR_MASK) === COLOR_WHITE)
-        shield += 10;
+    if (whitePawnsPerFile[wkc] === 0) {
+      mgScore -= shieldPenalty;
+      egScore -= shieldPenalty * 0.5;
     }
-    mgScore += shield;
   }
   if (c === COLOR_BLACK && blackKingSq >= 0) {
-    const bkr = indexToRow(blackKingSq);
     const bkc = indexToCol(blackKingSq);
-    let shield = 0;
-    for (let dc2 = -1; dc2 <= 1; dc2++) {
-      const cc = bkc + dc2;
-      if (cc < 0 || cc > 8) continue;
-      const r2 = bkr + 1;
-      if (r2 < 0 || r2 > 8) continue;
-      const t = b[r2 * 9 + cc];
-      if (t !== PIECE_NONE && (t & TYPE_MASK) === PIECE_PAWN && (t & COLOR_MASK) === COLOR_BLACK)
-        shield += 10;
+    if (blackPawnsPerFile[bkc] === 0) {
+      mgScore += shieldPenalty;
+      egScore += shieldPenalty * 0.5;
     }
-    mgScore += shield;
   }
 
   // --- Tapered evaluation ---
@@ -405,4 +508,76 @@ export function evaluate(b: IntBoard, c: number): number {
   }
 
   return Math.round((mgScore * phase + egScore * (maxPhase - phase)) / maxPhase);
+}
+
+// =====================================================================
+// Mobility helper functions
+// =====================================================================
+
+function countMobility(board: IntBoard, square: number, offsets: number[], color: number): number {
+  let count = 0;
+  const r = indexToRow(square) as number;
+  const c = indexToCol(square) as number;
+
+  for (const offset of offsets) {
+    let curr = square;
+    while (true) {
+      curr += offset;
+      if (!isValidSquare(curr, board)) break;
+
+      const cr = indexToRow(curr);
+      const cc = indexToCol(curr);
+
+      // Diagonal wrap check
+      if (offset === 1 || offset === -1) {
+        if (cr !== r) break;
+      } else if (offset === 9 || offset === -9) {
+        if (cc !== c) break;
+      } else {
+        const prev = curr - offset;
+        const pr = indexToRow(prev);
+        const pc = indexToCol(prev);
+        if (Math.abs(cr - pr) !== 1 || Math.abs(cc - pc) !== 1) break;
+      }
+
+      const p = board[curr];
+      if (p === PIECE_NONE) {
+        count += 1;
+      } else {
+        if ((p & COLOR_MASK) !== color) count += 1;
+        break;
+      }
+    }
+  }
+  return count;
+}
+
+function countKnightMobility(board: IntBoard, square: number, color: number): number {
+  let count = 0;
+  const KNIGHT_OFFSETS = [-19, -17, -11, -7, 7, 11, 17, 19];
+  const r = indexToRow(square);
+  const c = indexToCol(square);
+
+  for (const offset of KNIGHT_OFFSETS) {
+    const target = square + offset;
+    if (!isValidSquare(target, board)) continue;
+
+    const tr = indexToRow(target);
+    const tc = indexToCol(target);
+
+    // Verify knight move is L-shaped
+    const dr = Math.abs(tr - r);
+    const dc = Math.abs(tc - c);
+    if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) continue;
+
+    const p = board[target];
+    if (p === PIECE_NONE || (p & COLOR_MASK) !== color) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function isValidSquare(square: number, board: IntBoard): boolean {
+  return square >= 0 && square < board.length;
 }

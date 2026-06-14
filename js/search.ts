@@ -29,7 +29,7 @@ import {
   getAllCaptureMoves,
   isInCheck as checkInt,
 } from './ai/MoveGenerator';
-import { evaluate } from './evaluate';
+import { evaluate, type EvalConfig } from './evaluate';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 import { progressCallback, type AIProgressData } from './aiEngine';
 import type { IntBoard } from './evaluate';
@@ -51,15 +51,16 @@ function quiesce(
   beta: number,
   c: number,
   start: number,
-  nodes: { count: number }
+  nodes: { count: number },
+  evalConfig: EvalConfig
 ): number {
   nodes.count++;
 
   if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
-    return evaluate(b, c);
+    return evaluate(b, c, evalConfig);
   }
 
-  const standPat = evaluate(b, c);
+  const standPat = evaluate(b, c, evalConfig);
   if (standPat >= beta) return beta;
   if (standPat > alpha) alpha = standPat;
 
@@ -74,7 +75,7 @@ function quiesce(
 
   for (const move of captures) {
     const undo = makeMoveInt(b, move);
-    const score = -quiesce(b, -beta, -alpha, c ^ COLOR_MASK, start, nodes);
+    const score = -quiesce(b, -beta, -alpha, c ^ COLOR_MASK, start, nodes, evalConfig);
     undoMoveInt(b, undo);
 
   if (score >= beta) return beta;
@@ -291,7 +292,7 @@ interface JsSearchResult {
   depth: number;
 }
 
-export function createJsSearch() {
+export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' }) {
   return {
     async run(
       board: IntBoard,
@@ -322,7 +323,7 @@ export function createJsSearch() {
       ): { score: number; bestMove: Move | null } {
         nodes++;
         if (nodes % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
-          return { score: evaluate(b, color), bestMove: null };
+          return { score: evaluate(b, color, evalConfig), bestMove: null };
         }
 
         const hash = computeZobristHash(b);
@@ -337,7 +338,7 @@ export function createJsSearch() {
         }
 
         if (d === 0) {
-          const qScore = quiesce(b, alpha, beta, color, start, { count: 0 });
+          const qScore = quiesce(b, alpha, beta, color, start, { count: 0 }, evalConfig);
           return { score: qScore, bestMove: null };
         }
 
@@ -360,16 +361,16 @@ export function createJsSearch() {
 
         // Futility / Razoring
         if (d <= 2 && d >= 1 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
-          const standPat = evaluate(b, color);
+          const standPat = evaluate(b, color, evalConfig);
           const margin = d === 2 ? RAZOR_MARGIN : FUTILITY_MARGIN;
           if (maximizing) {
             if (standPat + margin < alpha) {
-              const qScore = quiesce(b, alpha, beta, color, start, { count: 0 });
+              const qScore = quiesce(b, alpha, beta, color, start, { count: 0 }, evalConfig);
               return { score: qScore, bestMove: null };
             }
           } else {
             if (standPat - margin > beta) {
-              const qScore = quiesce(b, alpha, beta, color, start, { count: 0 });
+              const qScore = quiesce(b, alpha, beta, color, start, { count: 0 }, evalConfig);
               return { score: qScore, bestMove: null };
             }
           }
