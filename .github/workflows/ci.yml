@@ -75,13 +75,11 @@ jobs:
 
       - name: Run ESLint (with cache)
         run: npm run lint -- --cache
-        continue-on-error: true
 
       - name: Run TypeScript type check
         id: tsc-check
         run: |
           npx tsc --noEmit 2>&1 | tee tsc-output.txt
-        continue-on-error: true
 
       - name: TypeScript errors summary
         if: always()
