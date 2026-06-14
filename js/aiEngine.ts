@@ -206,7 +206,7 @@ export async function getBestMoveDetailed(
 ): Promise<SearchResult | null> {
   const board = convertBoardToInt(uiBoard);
 
-  if (moveNumber !== undefined && moveNumber < 22) {
+  if (moveNumber !== undefined && moveNumber < 25) {
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
     if (bookMove) {
       logger.info(`[AiEngine] Opening Book Move: ${bookMove.from.r},${bookMove.from.c} -> ${bookMove.to.r},${bookMove.to.c}`);
@@ -334,7 +334,7 @@ export async function getTopMoves(
 ): Promise<SearchResult[]> {
   const board = convertBoardToInt(uiBoard);
   const bookMoves: SearchResult[] = [];
-  if (moveNumber !== undefined && moveNumber < 22) {
+  if (moveNumber !== undefined && moveNumber < 25) {
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
     if (bookMove) {
       bookMoves.push({ move: bookMove, score: 50, depth: 0, nodes: 0 });
