@@ -51,11 +51,21 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Run ESLint (with cache)
+        run: npm run lint -- --cache
         continue-on-error: true
 
       - name: Run TypeScript type check
@@ -105,7 +115,17 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
       - name: Rebuild native bindings (fixes npm optional deps bug)
@@ -180,6 +200,15 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         id: playwright-cache
@@ -190,6 +219,7 @@ jobs:
             ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_CACHE_VERSION }}-
 
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
       - name: Rebuild native bindings (fixes npm optional deps bug)
@@ -326,8 +356,19 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
       - name: Rebuild native bindings (fixes npm optional deps bug)
@@ -380,8 +421,19 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
       - name: Rebuild native bindings (fixes npm optional deps bug)
@@ -454,12 +506,16 @@ jobs:
             https://bumblei3.github.io/schach9x9/
           budgetPath: .github/lighthouse-ci.json
           uploadArtifacts: true
-
   # =======================================================================
   # DEPLOY TO GITHUB PAGES
+  # =======================================================================
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
+    # Prevent parallel GitHub Pages deployments (queue instead of cancel)
+    concurrency:
+      group: 'deploy-github-pages'
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

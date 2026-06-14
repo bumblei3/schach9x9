@@ -6,52 +6,62 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:00"
+      time: "03:00"
       timezone: "Europe/Berlin"
     open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "npm"
+    groups:
+      dev-dependencies:
+        patterns:
+          - "@*"
+          - "eslint*"
+          - "typescript*"
+          - "vitest*"
+          - "playwright*"
+          - "prettier"
+          - "husky"
+        update-types:
+          - "patch"
+          - "minor"
+      prod-dependencies:
+        patterns:
+          - "three"
+        update-types:
+          - "patch"
+          - "minor"
+    # Auto-merge for patch/minor if CI passes
+    allow:
+      - dependency-type: "development"
+        update-type: "version-update:semver-patch"
+      - dependency-type: "development"
+        update-type: "version-update:semver-minor"
+      - dependency-type: "production"
+        update-type: "version-update:semver-patch"
+      - dependency-type: "production"
+        update-type: "version-update:semver-minor"
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
-      include: "scope"
-    groups:
-      development-dependencies:
-        patterns:
-          - "@*"
-          - "eslint*"
-          - "vitest*"
-          - "playwright*"
-          - "typescript*"
-          - "@typescript-eslint*"
-        update-types:
-          - "minor"
-          - "patch"
-      runtime-dependencies:
-        patterns:
-          - "*"
-        exclude-patterns:
-          - "@*"
-          - "eslint*"
-          - "vitest*"
-          - "playwright*"
-          - "typescript*"
-          - "@typescript-eslint*"
-        update-types:
-          - "minor"
-          - "patch"
-  
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:30"
+      time: "03:30"
       timezone: "Europe/Berlin"
-    labels:
-      - "dependencies"
-      - "github-actions"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
+    allow:
+      - dependency-type: "production"
+        update-type: "version-update:semver-patch"
+      - dependency-type: "production"
+        update-type: "version-update:semver-minor"
     commit-message:
-      prefix: "ci(deps)"
+      prefix: "chore(ci)"
