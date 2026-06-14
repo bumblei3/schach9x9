@@ -3,10 +3,10 @@ import { initBoardUI, getPieceSymbol as _getPieceSymbol } from '../js/ui/BoardRe
 import { PHASES } from '../js/config.js';
 
 // Mock PIECE_SVGS globally
-window.PIECE_SVGS = {
+(window as any).PIECE_SVGS = {
   white: { p: '<svg>white p</svg>' },
   black: { p: '<svg>black p</svg>' },
-} as any;
+};
 
 describe('BoardRenderer Touch Interactions', () => {
   let gameMock: any;

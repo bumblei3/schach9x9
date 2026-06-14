@@ -39,7 +39,7 @@ describe('OverlayManager', () => {
       </div>
     `;
 
-    window.PIECE_SVGS = {
+    const PIECE_SVGS = {
       white: {
         e: '<svg>we</svg>',
         q: '<svg>wq</svg>',
@@ -51,7 +51,7 @@ describe('OverlayManager', () => {
         k: '<svg>wk</svg>',
         p: '<svg>wp</svg>',
         j: '<svg>wj</svg>',
-      },
+      } as any,
       black: {
         e: '<svg>be</svg>',
         q: '<svg>bq</svg>',
@@ -63,8 +63,10 @@ describe('OverlayManager', () => {
         k: '<svg>bk</svg>',
         p: '<svg>bp</svg>',
         j: '<svg>bj</svg>',
-      },
+      } as any,
     };
+
+    (window as any).PIECE_SVGS = PIECE_SVGS;
 
     vi.clearAllMocks();
     vi.useFakeTimers();
