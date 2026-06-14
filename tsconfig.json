@@ -22,7 +22,9 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["node", "vitest"]
+    "types": ["node", "vitest"],
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["js/**/*", "tests/**/*", "e2e/**/*", "service-worker.ts"],
   "exclude": ["node_modules", "dist", "engine-wasm"]

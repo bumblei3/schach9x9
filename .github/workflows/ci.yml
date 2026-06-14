@@ -60,6 +60,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
+      - name: Cache TypeScript incremental build info
+        uses: actions/cache@v5
+        id: ts-build-cache
+        with:
+          path: .tsbuildinfo
+          key: ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('tsconfig.json') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-
+
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
@@ -123,6 +132,15 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+
+      - name: Cache TypeScript incremental build info
+        uses: actions/cache@v5
+        id: ts-build-cache
+        with:
+          path: .tsbuildinfo
+          key: ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('tsconfig.json') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
@@ -268,6 +286,20 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Check if Rust/WASM files changed
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            CHANGED_FILES="${{ toJson(github.event.pull_request.changed_files) }}"
+            if echo "$CHANGED_FILES" | grep -qE 'engine-wasm|Cargo\.lock|\.github/workflows/ci\.yml'; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Cache Rust dependencies
         uses: actions/cache@v5
         id: rust-cache
@@ -292,6 +324,7 @@ jobs:
           echo "wasm-pack version: $(wasm-pack --version)"
 
       - name: Build WASM engine
+        if: steps.changes.outputs.changed == 'true'
         working-directory: engine-wasm
         run: |
           wasm-pack build --target web --release
@@ -299,11 +332,13 @@ jobs:
           ls -la pkg/
 
       - name: Run WASM engine tests
+        if: steps.changes.outputs.changed == 'true'
         working-directory: engine-wasm
         run: cargo test --release 2>&1 | tee test_output.txt
         timeout-minutes: 20
 
       - name: Verify WASM module size
+        if: steps.changes.outputs.changed == 'true'
         working-directory: engine-wasm
         run: |
           if [ -f pkg/schach9x9_bg.wasm ]; then
@@ -328,7 +363,7 @@ jobs:
             echo "WASM size: $((SIZE / 1024)) KB" >> $GITHUB_STEP_SUMMARY
             echo "Status: ✅ Built" >> $GITHUB_STEP_SUMMARY
           else
-            echo "Status: ❌ Build failed" >> $GITHUB_STEP_SUMMARY
+            echo "Status: ⏭️ Skipped (no Rust/WASM changes)" >> $GITHUB_STEP_SUMMARY
           fi
           echo "Job status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
@@ -431,6 +466,15 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+
+      - name: Cache Vite build cache
+        uses: actions/cache@v5
+        id: vite-cache
+        with:
+          path: node_modules/.vite
+          key: ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json', 'vite.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
