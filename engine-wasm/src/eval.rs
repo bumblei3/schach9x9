@@ -346,7 +346,7 @@ pub fn evaluate_position(board: &Board, turn_color: i8, config: &EvalConfig) -> 
     total * perspective
 }
 
-fn count_mobility(board: &Board, square: usize, offsets: &[i32], color: i8) -> i32 {
+pub fn count_mobility(board: &Board, square: usize, offsets: &[i32], color: i8) -> i32 {
     let mut count = 0;
     let r = index_to_row(square) as i32;
     let c = index_to_col(square) as i32;
