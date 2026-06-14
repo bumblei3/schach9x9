@@ -108,6 +108,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Rebuild native bindings (fixes npm optional deps bug)
+        run: npm rebuild rolldown vite
+
       - name: Download WASM build artifact
         uses: actions/download-artifact@v4
         with:
@@ -188,6 +191,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Rebuild native bindings (fixes npm optional deps bug)
+        run: npm rebuild rolldown vite
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -324,6 +330,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Rebuild native bindings (fixes npm optional deps bug)
+        run: npm rebuild rolldown vite
+
       - name: Run npm audit
         id: npm-audit
         run: |
@@ -374,6 +383,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Rebuild native bindings (fixes npm optional deps bug)
+        run: npm rebuild rolldown vite
 
       - name: Build production bundle
         run: npm run build
