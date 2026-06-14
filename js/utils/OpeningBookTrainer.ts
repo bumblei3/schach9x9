@@ -7,16 +7,13 @@
 import { logger } from '../logger.js';
 import {
   getBestMoveDetailed,
-  convertBoardToInt,
   type MoveResult,
   type SearchResult,
-  type TimeParams
+  type TimeParams,
 } from '../aiEngine.js';
 import {
-  isInCheck,
   getAllLegalMoves,
-  makeMove,
-  undoMove,
+  isInCheck,
   COLOR_WHITE,
   COLOR_BLACK,
   PIECE_NONE,
@@ -31,8 +28,8 @@ import {
   PIECE_ANGEL,
   PIECE_NIGHTRIDER,
 } from '../ai/MoveGenerator.js';
-import { OpeningBook } from '../ai/OpeningBook.js';
 import { TYPE_MASK, COLOR_MASK } from '../ai/BoardDefinitions.js';
+import { OpeningBook } from '../ai/OpeningBook.js';
 import type { Square, Piece } from '../gameEngine.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -170,11 +167,11 @@ function applyMoveInt(board: IntBoard, move: MoveResult): void {
 
 function isTerminalInt(board: IntBoard, color: 'white' | 'black'): { terminal: boolean; result: 'win' | 'loss' | 'draw' | null } {
   const kingColor = color === 'white' ? COLOR_WHITE : COLOR_BLACK;
-  const inCheck = isInCheck(board, kingColor);
-  const legalMoves = getAllLegalMoves(board, color);
-  
+  const inCheckResult = isInCheck(board as any, kingColor);
+  const legalMoves = getAllLegalMoves(board as any, color);
+
   if (legalMoves.length === 0) {
-    return { terminal: true, result: inCheck ? (color === 'white' ? 'loss' : 'win') : 'draw' };
+    return { terminal: true, result: inCheckResult ? (color === 'white' ? 'loss' : 'win') : 'draw' };
   }
   return { terminal: false, result: null };
 }
@@ -243,7 +240,7 @@ async function getEngineMove(
 ): Promise<{ move: MoveResult | null; result: SearchResult | null }> {
   const uiBoard = boardToUi(board);
   const color = turn === 'white' ? 'white' : 'black';
-  
+
   const timeParams: TimeParams = {
     elo,
     personality,
@@ -324,7 +321,7 @@ export class OpeningBookTrainer {
         const eta = avgTime * (totalGames - gameNum);
         const etaStr = eta > 60 ? `${(eta / 60).toFixed(1)}m` : `${eta.toFixed(0)}s`;
         const pct = Math.floor((gameNum / totalGames) * 100);
-        const bar = '█'.repeat(Math.floor(pct / 2.5)) + '░'.repeat(40 - Math.floor(pct / 2.5));
+        const bar = '\u2588'.repeat(Math.floor(pct / 2.5)) + '\u2591'.repeat(40 - Math.floor(pct / 2.5));
         process.stdout.write(`\r   [${bar}] ${pct}% (${gameNum}/${totalGames}) ETA: ${etaStr}  `);
       }
     }
@@ -458,13 +455,13 @@ export class OpeningBookTrainer {
     for (const hash in this.book.data.positions) {
       const pos = this.book.data.positions[hash];
       if (pos.moves.length > 1) {
-        const totalWeight = pos.moves.reduce((sum, m) => sum + m.weight, 0);
+        const totalWeight = pos.moves.reduce((sum: number, m: BookMove) => sum + m.weight, 0);
         if (totalWeight > 0) {
-          pos.moves.forEach(m => {
+          pos.moves.forEach((m: BookMove) => {
             m.weight = Math.round((m.weight / totalWeight) * 100);
           });
         }
-        pos.moves.sort((a, b) => b.weight - a.weight);
+        pos.moves.sort((a: BookMove, b: BookMove) => b.weight - a.weight);
       }
     }
   }
@@ -518,7 +515,7 @@ export class OpeningBookTrainer {
   }
 
   private printStats(): void {
-    console.log(`\n📊 Training Complete:`);
+    console.log('\n\uD83D\uDCCA Training Complete:');
     console.log(`   Games: ${this.stats.totalGames}`);
     console.log(`   White wins: ${this.stats.whiteWins} (${(this.stats.whiteWins / this.stats.totalGames * 100).toFixed(1)}%)`);
     console.log(`   Black wins: ${this.stats.blackWins} (${(this.stats.blackWins / this.stats.totalGames * 100).toFixed(1)}%)`);
@@ -532,8 +529,8 @@ export class OpeningBookTrainer {
 // CLI Entry Point
 // ============================================================================
 
-async function main() {
-  console.log('\n🤖 Schach 9x9 Opening Book Trainer (Real Engine)');
+async function main(): Promise<void> {
+  console.log('\n\U0001F916 Schach 9x9 Opening Book Trainer (Real Engine)');
   console.log('===================================================\n');
 
   const args = process.argv.slice(2);
