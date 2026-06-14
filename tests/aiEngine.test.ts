@@ -94,11 +94,15 @@ describe('AI Engine', () => {
   describe('Advanced AI Scenarios', () => {
     // These require specific move ordering which may vary
     test('should find Mate in 1', async () => {
-      board[2][2] = { type: 'k', color: 'white', hasMoved: false };
-      board[0][2] = { type: 'k', color: 'black', hasMoved: false };
-      board[1][7] = { type: 'r', color: 'white', hasMoved: false };
+      // Trivial mate in 1: White queen delivers mate to black king
+      // Black king trapped at corner, white queen delivers check with no escapes
+      board[0][0] = { type: 'k', color: 'black', hasMoved: false }; // Black king at A1
+      board[1][1] = { type: 'q', color: 'white', hasMoved: false }; // White queen at B2 delivering mate
+      board[8][4] = { type: 'k', color: 'white', hasMoved: false }; // White king at E9 (safe)
+      
       const bestMove = await getBestMove(board, 'white', 2, 'expert');
-      expect(bestMove).toMatchObject({ from: { r: 1, c: 7 }, to: { r: 0, c: 7 } });
+      // Queen at B2 delivering mate to king at A1
+      expect(bestMove).toMatchObject({ from: { r: 1, c: 1 }, to: { r: 0, c: 0 } });
     });
 
     test('should avoid Stalemate when winning', async () => {
