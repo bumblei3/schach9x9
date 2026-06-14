@@ -9,7 +9,6 @@ import {
   clearArrows,
   updateLastMoveArrow,
 } from '../js/ui/ArrowRenderer.js';
-import type { Square } from '../js/types/game.js';
 
 // Helper to create mock DOM structure
 function createMockBoardContainer(): HTMLElement {
@@ -204,6 +203,7 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
+      expect(svg1).toBeDefined();
 
       // Draw second arrow
       const svg2 = drawArrow(boardContainer, {
@@ -212,6 +212,7 @@ describe('ArrowRenderer', () => {
         color: '#00ff00',
         animate: false,
       });
+      expect(svg2).toBeDefined();
 
       // Only one arrow should exist
       const arrows = boardContainer.querySelectorAll('.last-move-arrow');
@@ -333,6 +334,7 @@ describe('ArrowRenderer', () => {
       });
 
       const path = svg.querySelector('path');
+      expect(path).toBeDefined();
       expect(boardContainer.contains(svg)).toBe(true);
     });
   });
@@ -345,7 +347,7 @@ describe('ArrowRenderer', () => {
     test('should remove all arrow SVGs from container', () => {
       // Draw first arrow
       const svg1 = drawArrow(boardContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, color: '#ff0000', animate: false });
-
+      expect(svg1).toBeDefined();
       // Manually add a second one since drawArrow clears first
       const manualSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       manualSvg.classList.add('last-move-arrow');
@@ -462,7 +464,7 @@ describe('ArrowRenderer', () => {
         color: '#22c55e',
         animate: false,
       });
-
+      expect(svg1).toBeDefined();
       // Second arrow (different color)
       const svg2 = drawArrow(boardContainer, {
         from: { r: 7, c: 7 },
@@ -533,6 +535,7 @@ describe('ArrowRenderer', () => {
         animate: false,
       });
       const path2 = svg2.querySelector('path');
+      expect(path2).toBeDefined();
       expect(svg2).not.toBeNull();
     });
 

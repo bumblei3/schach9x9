@@ -109,3 +109,20 @@ export function pieceToString(piece: number): string {
   const char = TYPE_CHARS[type] || '?';
   return color === COLOR_WHITE ? char.toUpperCase() : char;
 }
+
+// Direction constants for move generation
+export const UP = -9;    // North (decrease row)
+export const DOWN = 9;   // South (increase row)
+export const LEFT = -1;  // West (decrease col)
+export const RIGHT = 1;  // East (increase col)
+
+// Diagonal directions
+export const UP_LEFT = -10;
+export const UP_RIGHT = -8;
+export const DOWN_LEFT = 8;
+export const DOWN_RIGHT = 10;
+
+// Knight moves (offsets on 9x9 board)
+export const KNIGHT_OFFSETS = [
+  -19, -17, -11, -7, 7, 11, 17, 19
+];
