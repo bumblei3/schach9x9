@@ -77,7 +77,7 @@ function quiesce(
     const score = -quiesce(b, -beta, -alpha, c ^ COLOR_MASK, start, nodes);
     undoMoveInt(b, undo);
 
-    if (score >= beta) return beta;
+  if (score >= beta) return beta;
     if (score > alpha) alpha = score;
   }
 
@@ -154,19 +154,21 @@ const PROBCUT_REDUCTION = 3;           // How much to reduce depth
 const PROBCUT_BETA_MARGIN = 150;       // Beta margin for probcut (beta - margin)
 
 function probcut(
-  b: IntBoard,
+  board: IntBoard,
   d: number,
   beta: number,
   maximizing: boolean,
   start: number,
-  nodes: { count: number }
+  nodes: { count: number },
+  color: number,
+  searchFn: (b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean) => { score: number; bestMove: Move | null }
 ): boolean {
   // Only apply probcut at sufficient depth
   if (d < PROBCUT_DEPTH) return false;
   
   // Don't probcut if in check (forced moves need full search)
   const activeColor = maximizing ? color : color ^ COLOR_MASK;
-  if (checkInt(b, activeColor)) return false;
+  if (checkInt(board, activeColor)) return false;
   
   // Probcut beta is stricter than normal beta
   const probcutBeta = beta - PROBCUT_BETA_MARGIN;
@@ -174,19 +176,19 @@ function probcut(
   
   // Generate captures and promotions only for probcut
   const activeColorStr = activeColor === COLOR_WHITE ? 'white' : 'black';
-  const legalMoves = genLegalInt(b, activeColorStr);
+  const legalMoves = genLegalInt(board, activeColorStr);
   
   // Filter: only captures, promotions, and TT-move likely to cause cutoffs
   const probcutMoves = legalMoves.filter(m => 
-    b[m.to] !== PIECE_NONE || (m.promotion !== undefined)
+    board[m.to] !== PIECE_NONE || (m.promotion !== undefined)
   );
   
   if (probcutMoves.length === 0) return false;
   
   // Order by capture value (MVV-LVA)
-  probcutMoves.sort((a, b) => {
-    const victimA = b[a.to] & TYPE_MASK;
-    const victimB = b[b.to] & TYPE_MASK;
+  probcutMoves.sort((m1, m2) => {
+    const victimA = board[m1.to] & TYPE_MASK;
+    const victimB = board[m2.to] & TYPE_MASK;
     const valA = EVAL_VALUES[victimA] || 0;
     const valB = EVAL_VALUES[victimB] || 0;
     return valB - valA;
@@ -196,16 +198,16 @@ function probcut(
   const maxTries = Math.min(probcutMoves.length, 3);
   for (let i = 0; i < maxTries; i++) {
     const move = probcutMoves[i];
-    const undo = makeMoveInt(b, move);
+    const undo = makeMoveInt(board, move);
     nodes.count++;
     if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
-      undoMoveInt(b, undo);
+      undoMoveInt(board, undo);
       return false;
     }
     
     // Reduced depth search with null window
-    const result = search(b, d - 1 - PROBCUT_REDUCTION, probcutBeta - 1, probcutBeta, !maximizing);
-    undoMoveInt(b, undo);
+    const result = searchFn(board, d - 1 - PROBCUT_REDUCTION, probcutBeta - 1, probcutBeta, !maximizing);
+    undoMoveInt(board, undo);
     
     // If reduced search returns >= probcutBeta, we cut off
     if (result.score >= probcutBeta) return true;
@@ -224,36 +226,38 @@ const SINGULAR_DEPTH = 6;           // Minimum depth for singular extensions
 const SINGULAR_MARGIN = 100;        // Margin to consider move singular
 
 function isSingularMove(
-  b: IntBoard,
+  board: IntBoard,
   d: number,
   bestMove: Move,
   bestScore: number,
-  alpha: number,
-  beta: number,
+  _alpha: number,
+  _beta: number,
   maximizing: boolean,
   start: number,
-  nodes: { count: number }
+  nodes: { count: number },
+  color: number,
+  searchFn: (b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean) => { score: number; bestMove: Move | null }
 ): boolean {
   if (d < SINGULAR_DEPTH) return false;
   if (!bestMove) return false;
   
   // Don't extend in check (already forced)
   const activeColor = maximizing ? color : color ^ COLOR_MASK;
-  if (checkInt(b, activeColor)) return false;
+  if (checkInt(board, activeColor)) return false;
   
   // Search all other moves with reduced depth and tight bounds
   // around bestScore to verify no alternative is close
   const activeColorStr = activeColor === COLOR_WHITE ? 'white' : 'black';
-  const legalMoves = genLegalInt(b, activeColorStr);
+  const legalMoves = genLegalInt(board, activeColorStr);
   
   for (const move of legalMoves) {
     // Skip the best move
     if (move.from === bestMove.from && move.to === bestMove.to) continue;
     
-    const undo = makeMoveInt(b, move);
+    const undo = makeMoveInt(board, move);
     nodes.count++;
     if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
-      undoMoveInt(b, undo);
+      undoMoveInt(board, undo);
       return false;
     }
     
@@ -262,8 +266,8 @@ function isSingularMove(
     const singularAlpha = bestScore - margin;
     const singularBeta = bestScore + margin;
     
-    const result = search(b, d - 1 - 2, singularAlpha, singularBeta, !maximizing);
-    undoMoveInt(b, undo);
+    const result = searchFn(board, d - 1 - 2, singularAlpha, singularBeta, !maximizing);
+    undoMoveInt(board, undo);
     
     // If any alternative is within margin, the move is NOT singular
     if (maximizing) {
@@ -393,7 +397,7 @@ export function createJsSearch() {
         // --- Probcut (before move loop, for both sides) ---
         let probcutCutoff = false;
         if (d >= PROBCUT_DEPTH && !inCheck) {
-          if (probcut(b, d, beta, maximizing, start, { count: nodes })) {
+          if (probcut(board, d, beta, maximizing, start, { count: nodes }, color, search)) {
             probcutCutoff = true;
           }
         }
@@ -442,7 +446,7 @@ export function createJsSearch() {
                 result = search(b, d - 1, alpha, beta, false);
               }
 
-              undoMoveInt(b, undo);
+              undoMoveInt(board, undo);
 
               if (result.score > bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
               alpha = Math.max(alpha, result.score);
@@ -462,11 +466,11 @@ export function createJsSearch() {
 
             // --- Singular Extension (after finding best move) ---
             if (d >= SINGULAR_DEPTH && bestMove && !inCheck) {
-              if (isSingularMove(b, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes })) {
+              if (isSingularMove(board, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes }, color, search)) {
                 // Re-search best move with depth + 1
-                const undo = makeMoveInt(b, bestMove);
-                const extResult = search(b, d, alpha, beta, false);
-                undoMoveInt(b, undo);
+                const undo = makeMoveInt(board, bestMove);
+                const extResult = search(board, d, alpha, beta, false);
+                undoMoveInt(board, undo);
                 // If extension improves score, use it
                 if (extResult.score > bestScore) {
                   bestScore = extResult.score;
@@ -517,7 +521,7 @@ export function createJsSearch() {
                 result = search(b, d - 1, alpha, beta, true);
               }
 
-              undoMoveInt(b, undo);
+              undoMoveInt(board, undo);
 
               if (result.score < bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
               beta = Math.min(beta, result.score);
@@ -537,11 +541,11 @@ export function createJsSearch() {
 
             // --- Singular Extension (after finding best move) ---
             if (d >= SINGULAR_DEPTH && bestMove && !inCheck) {
-              if (isSingularMove(b, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes })) {
+              if (isSingularMove(board, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes }, color, search)) {
                 // Re-search best move with depth + 1
-                const undo = makeMoveInt(b, bestMove);
-                const extResult = search(b, d, alpha, beta, true);
-                undoMoveInt(b, undo);
+                const undo = makeMoveInt(board, bestMove);
+                const extResult = search(board, d, alpha, beta, true);
+                undoMoveInt(board, undo);
                 if (extResult.score < bestScore) {
                   bestScore = extResult.score;
                   bestMove = extResult.bestMove || bestMove;
