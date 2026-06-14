@@ -89,7 +89,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [lint]
+    needs: [lint, wasm-build]
     strategy:
       matrix:
         node-version: ['20', '22']
@@ -106,6 +106,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Download WASM build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-build
+          path: engine-wasm/pkg/
 
       - name: Run unit tests with coverage
         run: npm run test:coverage
@@ -279,6 +285,14 @@ jobs:
             echo "Status: ❌ Build failed" >> $GITHUB_STEP_SUMMARY
           fi
           echo "Job status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload WASM build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-build
+          path: engine-wasm/pkg/
+          retention-days: 1
 
   # =======================================================================
   # SECURITY & DEPENDENCY AUDIT (Non-blocking)
