@@ -25,7 +25,7 @@ concurrency:
 
 env:
   # Pin Node.js version for reproducible builds
-  NODE_VERSION: '20.18.0'
+  NODE_VERSION: '20.19.0'
   # Cache versions for reproducibility
   NPM_CACHE_VERSION: '1'
   PLAYWRIGHT_CACHE_VERSION: '1'
