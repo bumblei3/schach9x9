@@ -1,0 +1,4 @@
+# Allow generated type declarations for TypeScript checking
+# These are needed before the WASM build runs
+!*.d.ts
+!package.json
