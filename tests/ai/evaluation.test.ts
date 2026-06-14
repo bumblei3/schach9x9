@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect } from 'vitest';
 import { evaluate } from '../../js/aiEngine.js';
 import {
   SQUARE_COUNT,
@@ -14,13 +14,7 @@ import {
   WHITE_ANGEL,
   BLACK_PAWN,
   BLACK_KNIGHT,
-  BLACK_BISHOP,
-  BLACK_ROOK,
-  BLACK_QUEEN,
   BLACK_KING,
-  BLACK_ARCHBISHOP,
-  BLACK_CHANCELLOR,
-  BLACK_ANGEL,
   COLOR_WHITE,
   COLOR_BLACK,
   coordsToIndex,

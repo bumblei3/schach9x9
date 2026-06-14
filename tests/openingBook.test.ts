@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { setOpeningBook, queryOpeningBook, OpeningBook } from '../js/ai/OpeningBook.js';
 import { logger } from '../js/logger.js';
 import { type Piece } from '../js/gameEngine.js';
-import { PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_QUEEN, PIECE_KING, COLOR_WHITE, COLOR_BLACK } from '../js/ai/BoardDefinitions.js';
 
 // Mock logger to avoid clutter
 vi.spyOn(logger, 'debug').mockImplementation(function () {});
@@ -449,7 +448,6 @@ describe('OpeningBook', () => {
         boardState[startRow - 2][startCol + i] = boardState[startRow][startCol + i];
         boardState[startRow][startCol + i] = null;
 
-        const hash = testBook.getBoardHash(boardState, 'white'); // Move index 1 would be black, but we only have 1 move
         // Wait - the hash is computed BEFORE the move is made, so turn is 'white' for move 0
         const hashBeforeMove = testBook.getBoardHash(initialBoard, 'white');
         const pos = testBook.data.positions[hashBeforeMove];

@@ -25,41 +25,31 @@ describe('AI Personality System', () => {
       placePiece(board, 0, 4, 'k', 'black');
     });
 
-    test('should accept config parameter', async () => {
-      const config = { personality: 'AGGRESSIVE' };
-      await expect(evaluatePosition(board as any, 'white', config)).resolves.not.toThrow();
-    });
-
-    test('should work without config (defaults)', async () => {
+    test('should work with basic board', async () => {
       await expect(evaluatePosition(board as any, 'white')).resolves.not.toThrow();
     });
 
-    test('should return different scores for different personalities', async () => {
-      // Add pieces to make evaluation meaningful and distinct for personalities
+    test('should return a score', async () => {
+      const score = await evaluatePosition(board as any, 'white');
+      expect(typeof score).toBe('number');
+    });
+
+    test('should work for both colors', async () => {
+      const whiteScore = await evaluatePosition(board as any, 'white');
+      const blackScore = await evaluatePosition(board as any, 'black');
+      expect(typeof whiteScore).toBe('number');
+      expect(typeof blackScore).toBe('number');
+    });
+
+    test('should work with more pieces on board', async () => {
       placePiece(board, 7, 0, 'r', 'white');
       placePiece(board, 7, 8, 'r', 'white');
       placePiece(board, 1, 0, 'r', 'black');
       placePiece(board, 6, 4, 'p', 'white');
       placePiece(board, 2, 4, 'p', 'black');
 
-      const normalScore = await evaluatePosition(board as any, 'white', { personality: 'NORMAL' });
-      const aggressiveScore = await evaluatePosition(board as any, 'white', {
-        personality: 'AGGRESSIVE',
-      });
-      const solidScore = await evaluatePosition(board as any, 'white', { personality: 'SOLID' });
-
-      // Check that they return numbers
-      expect(typeof normalScore).toBe('number');
-      expect(typeof aggressiveScore).toBe('number');
-      expect(typeof solidScore).toBe('number');
-    });
-
-    test('should handle valid personality strings', async () => {
-      const personalities = ['NORMAL', 'AGGRESSIVE', 'SOLID', 'GENTLE'];
-      for (const p of personalities) {
-        const score = await evaluatePosition(board as any, 'white', { personality: p });
-        expect(typeof score).toBe('number');
-      }
+      const score = await evaluatePosition(board as any, 'white');
+      expect(typeof score).toBe('number');
     });
   });
 });

@@ -3,24 +3,13 @@
  * Target: 85%+ branch coverage for js/ai/transpositionTable.ts
  */
 
-import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
 import { TranspositionTable, computeZobristHash } from '../../js/ai/transpositionTable.js';
-import { 
+import {
   SQUARE_COUNT,
   PIECE_NONE,
-  PIECE_PAWN,
-  PIECE_KNIGHT,
-  PIECE_BISHOP,
-  PIECE_ROOK,
-  PIECE_QUEEN,
-  PIECE_KING,
-  PIECE_ARCHBISHOP,
-  PIECE_CHANCELLOR,
-  PIECE_ANGEL,
   COLOR_WHITE,
   COLOR_BLACK,
-  TYPE_MASK,
-  COLOR_MASK,
 } from '../../js/ai/BoardDefinitions.js';
 
 describe('TranspositionTable - Branch Coverage', () => {

@@ -9,25 +9,6 @@ import * as AIEngine from '../js/aiEngine.js';
 import { createEmptyBoard } from '../js/gameEngine.js';
 import type { Board } from '../js/types/game.js';
 import { EVAL_VALUES } from '../js/evaluate.js';
-import {
-  PIECE_KING,
-  PIECE_QUEEN,
-  PIECE_ROOK,
-  PIECE_BISHOP,
-  PIECE_KNIGHT,
-  PIECE_PAWN,
-  PIECE_ARCHBISHOP,
-  PIECE_CHANCELLOR,
-  PIECE_ANGEL,
-  PIECE_NIGHTRIDER,
-  COLOR_WHITE,
-  COLOR_BLACK,
-  TYPE_MASK,
-  COLOR_MASK,
-  PIECE_NONE,
-  indexToRow,
-  indexToCol,
-} from '../js/ai/BoardDefinitions.js';
 
 // Make EVAL_VALUES available globally for quickEval in aiEngine.ts
 const originalEvalValues = globalThis.EVAL_VALUES;

@@ -6,58 +6,12 @@
 import { describe, expect, test, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { logger } from '../../js/logger.js';
 
-// Mock Worker class
-class MockWorker {
-  scriptUrl: string | URL;
-  onmessage: ((ev: MessageEvent) => any) | null = null;
-
-  constructor(scriptUrl: string | URL) {
-    this.scriptUrl = scriptUrl;
-    this.postMessage = this.postMessage.bind(this);
-  }
-
-  postMessage(data: any) {
-    setTimeout(() => {
-      if (data.type === 'SEARCH' || data.type === 'getBestMove') {
-        const { id } = data;
-        if (this.onmessage) {
-          this.onmessage({
-            data: {
-              type: 'SEARCH_RESULT',
-              id,
-              payload: {
-                move: { from: 1, to: 2, promotion: 0 },
-                score: 100,
-                nodes: 50,
-              },
-            },
-          } as MessageEvent);
-        }
-      }
-    }, 10);
-  }
-
-  terminate() {}
-  addEventListener() {}
-  removeEventListener() {}
-  dispatchEvent() { return true; }
-  onerror = null;
-  onmessageerror = null;
-}
-
 describe('AI Worker - Branch Coverage for Untested Paths', () => {
-  let originalWorker: any;
-  let originalWindow: any;
   let mockPostMessage: ReturnType<typeof vi.fn>;
   let mockSelf: any;
   let onmessageHandler: (e: MessageEvent) => Promise<void>;
 
   beforeAll(async () => {
-    originalWorker = (global as any).Worker;
-    originalWindow = (global as any).window;
-    (global as any).Worker = MockWorker;
-    (global as any).window = {};
-
     vi.spyOn(logger, 'info').mockImplementation(() => {});
     vi.spyOn(logger, 'debug').mockImplementation(() => {});
     vi.spyOn(logger, 'warn').mockImplementation(() => {});
