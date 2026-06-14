@@ -12,6 +12,7 @@ pub const PIECE_KING: i8 = 6;
 pub const PIECE_ARCHBISHOP: i8 = 7;
 pub const PIECE_CHANCELLOR: i8 = 8;
 pub const PIECE_ANGEL: i8 = 9;
+pub const PIECE_NIGHTRIDER: i8 = 10;
 
 // Colors
 pub const COLOR_WHITE: i8 = 16;

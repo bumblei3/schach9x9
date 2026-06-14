@@ -1,14 +1,15 @@
 use crate::definitions::*;
 
-const UP: i32 = -9;
-const DOWN: i32 = 9;
-const LEFT: i32 = -1;
-const RIGHT: i32 = 1;
+// Offsets for move generation
+pub const UP: i32 = -9;
+pub const DOWN: i32 = 9;
+pub const LEFT: i32 = -1;
+pub const RIGHT: i32 = 1;
 
-const KNIGHT_OFFSETS: [i32; 8] = [-19, -17, -11, -7, 7, 11, 17, 19];
-const KING_OFFSETS: [i32; 8] = [-10, -9, -8, -1, 1, 8, 9, 10];
-const BISHOP_OFFSETS: [i32; 4] = [-10, -8, 8, 10];
-const ROOK_OFFSETS: [i32; 4] = [-9, 9, -1, 1];
+pub const KNIGHT_OFFSETS: [i32; 8] = [-19, -17, -11, -7, 7, 11, 17, 19];
+pub const KING_OFFSETS: [i32; 8] = [-10, -9, -8, -1, 1, 8, 9, 10];
+pub const BISHOP_OFFSETS: [i32; 4] = [-10, -8, 8, 10];
+pub const ROOK_OFFSETS: [i32; 4] = [-9, 9, -1, 1];
 
 pub struct UndoInfo {
     pub move_obj: Move,

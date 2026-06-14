@@ -1,5 +1,5 @@
 use crate::definitions::*;
-use crate::move_gen::make_move;
+use crate::move_gen::{make_move, KNIGHT_OFFSETS, KING_OFFSETS, BISHOP_OFFSETS, ROOK_OFFSETS};
 
 const HASH_MOVE_SCORE: i32 = 3000000;
 const WINNING_CAPTURE_SCORE: i32 = 2000000;

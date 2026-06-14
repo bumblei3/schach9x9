@@ -148,7 +148,7 @@ pub fn search(board: &Board, depth: i8, color: i8, config: &EvalConfig) -> (Opti
         if elo < 1200 {
             let blunder_chance = ((1200 - elo) as f32 / 1000.0).min(0.4);
             let mut rng = rand::thread_rng();
-            if rng.gen::<f32>() < blunder_chance {
+            if rng.r#gen::<f32>() < blunder_chance {
                 let moves = get_all_legal_moves(board, color);
                 if moves.len() > 1 {
                     let random_idx = rng.gen_range(0..moves.len());
