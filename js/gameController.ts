@@ -34,6 +34,7 @@ import { confettiSystem } from './effects.js';
 import type { Player } from './types/game.js';
 import type { GameMode } from './config.js';
 import type { Level } from './campaign/types.js';
+import { achievementsManager } from './achievements.js';
 
 import type { GameModeStrategy } from './modes/GameModeStrategy.js';
 import { SetupModeStrategy } from './modes/strategies/SetupMode.js';
@@ -739,6 +740,25 @@ export class GameController {
   }
 
   /**
+   * Checks if the player won with only their king remaining on the board
+   */
+  private checkKingOnlyWin(playerColor: Player): boolean {
+    if (!this.game?.board) return false;
+
+    const ownPieces = [];
+    for (let r = 0; r < this.game.boardSize; r++) {
+      for (let c = 0; c < this.game.boardSize; c++) {
+        const piece = this.game.board[r][c];
+        if (piece && piece.color === playerColor) {
+          ownPieces.push(piece);
+        }
+      }
+    }
+    // Only king remaining (king is always present if game ended in win for that color)
+    return ownPieces.length === 1 && ownPieces[0]?.type === 'k';
+  }
+
+  /**
    * Saves completed game to statistics
    */
   saveGameToStatistics(result: string, losingColor: Player | null = null): void {
@@ -796,6 +816,24 @@ export class GameController {
     }
 
     this.saveGameToStatistics(result, saveColorArg);
+
+    // Check achievements
+    try {
+      const moveCount = Math.ceil(this.game.stats?.totalMoves / 2) || 0;
+      const hasPromotion = (this.game.stats?.promotions || 0) > 0;
+      // Check if player won with only king remaining
+      const kingOnlyWin = this.checkKingOnlyWin(this.game.playerColor!);
+
+      // Determine result from player perspective
+      let playerResult: 'win' | 'loss' | 'draw' = 'draw';
+      if (result === 'win') {
+        playerResult = winnerColor === this.game.playerColor ? 'win' : 'loss';
+      }
+
+      achievementsManager.checkAndUnlock(playerResult, moveCount, hasPromotion, kingOnlyWin);
+    } catch (e) {
+      logger.warn('[GameController] Achievement check failed:', e);
+    }
 
     // Show post-game stats and analysis button (unless in campaign mode)
     if (!this.game.campaignMode) {

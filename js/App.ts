@@ -71,6 +71,7 @@ export class App {
     const BC3D_MODULE = await import('./battleChess3D.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = await import('./ui.js');
+    await import('./ui/AchievementUI.js'); // Initialize achievements UI
     // Expose to window for legacy/debug access
     window.UI = UI_MODULE;
 
