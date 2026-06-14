@@ -5,11 +5,11 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SetupModeStrategy } from '../../js/modes/strategies/SetupMode';
-import { PHASES, AI_DELAY_MS } from '../../js/config';
+import { PHASES } from '../../js/config';
 import * as UI from '../../js/ui';
 import { soundManager } from '../../js/sounds';
 
-const mockLogger = vi.mock('../../js/logger', () => ({
+vi.mock('../../js/logger', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),
@@ -362,17 +362,17 @@ describe('SetupModeStrategy - Branch Coverage', () => {
     });
 
     it('should set phase to PLAY', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(game.phase).toBe(PHASES.PLAY);
     });
 
     it('should hide shop', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(controller.showShop).toHaveBeenCalledWith(false);
     });
 
     it('should set gameStartTime', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(controller.gameStartTime).toBeGreaterThan(0);
     });
 
@@ -381,7 +381,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
       cell.classList.add('cell', 'selectable-corridor');
       document.body.appendChild(cell);
 
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
 
       expect(cell.classList.contains('selectable-corridor')).toBe(false);
       document.body.removeChild(cell);
@@ -392,39 +392,39 @@ describe('SetupModeStrategy - Branch Coverage', () => {
       actionBar.classList.add('action-bar', 'hidden');
       document.body.appendChild(actionBar);
 
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
 
       expect(actionBar.classList.contains('hidden')).toBe(false);
       document.body.removeChild(actionBar);
     });
 
     it('should log game start', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(game.log).toHaveBeenCalledWith('Spiel beginnt! Weiß ist am Zug.');
     });
 
     it('should update best moves', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(game.updateBestMoves).toHaveBeenCalled();
     });
 
     it('should start clock', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(controller.startClock).toHaveBeenCalled();
     });
 
     it('should update statistics', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(UI.updateStatistics).toHaveBeenCalledWith(game);
     });
 
     it('should play game start sound', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(soundManager.playGameStart).toHaveBeenCalled();
     });
 
     it('should auto save', () => {
-      strategy.startGame(game, controller);
+      (strategy as any).startGame(game, controller);
       expect(controller.autoSave).toHaveBeenCalled();
     });
   });

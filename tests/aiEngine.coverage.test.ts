@@ -7,35 +7,32 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as AIEngine from '../js/aiEngine.js';
 import { createEmptyBoard } from '../js/gameEngine.js';
-import type { Board } from '../js/types/game.js';
+import type { Board, PieceType, Player } from '../js/types/game.js';
 import { EVAL_VALUES } from '../js/evaluate.js';
 
 // Make EVAL_VALUES available globally for quickEval in aiEngine.ts
-const originalEvalValues = globalThis.EVAL_VALUES;
-globalThis.EVAL_VALUES = EVAL_VALUES;
+const originalEvalValues = (globalThis as Record<string, unknown>).EVAL_VALUES;
+(globalThis as Record<string, unknown>).EVAL_VALUES = EVAL_VALUES;
 
 // Helper to create a minimal legal board
 function createMinimalBoard(): Board {
-  const board = createEmptyBoard();
-  board[8][4] = { type: 'k', color: 'white', hasMoved: false };
-  board[0][4] = { type: 'k', color: 'black', hasMoved: false };
-  return board;
+  const _board = createEmptyBoard();
+  _board[8][4] = { type: 'k', color: 'white', hasMoved: false };
+  _board[0][4] = { type: 'k', color: 'black', hasMoved: false };
+  return _board;
 }
 
 describe('AI Engine - Coverage for Untested Paths', () => {
-  let board: Board;
-
   beforeEach(() => {
-    board = createMinimalBoard();
     vi.useFakeTimers();
     // Ensure EVAL_VALUES is available
-    globalThis.EVAL_VALUES = EVAL_VALUES;
+    (globalThis as Record<string, unknown>).EVAL_VALUES = EVAL_VALUES;
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    globalThis.EVAL_VALUES = originalEvalValues;
+    (globalThis as Record<string, unknown>).EVAL_VALUES = originalEvalValues;
   });
 
   // ============================================================
@@ -60,7 +57,7 @@ describe('AI Engine - Coverage for Untested Paths', () => {
 
     test('getAllLegalMoves should map all piece types correctly', () => {
       const uiBoard = createMinimalBoard();
-      const pieces = [
+      const pieces: Array<{ type: Exclude<PieceType, null>; color: Player }> = [
         { type: 'p', color: 'white' }, { type: 'n', color: 'white' },
         { type: 'b', color: 'white' }, { type: 'r', color: 'white' },
         { type: 'q', color: 'white' }, { type: 'k', color: 'white' },
@@ -128,7 +125,7 @@ describe('AI Engine - Coverage for Untested Paths', () => {
       const spy = vi.spyOn(AIEngine, 'queryOpeningBook').mockReturnValue(null);
 
       const testBoard = createMinimalBoard();
-      const result = await AIEngine.getBestMoveDetailed(testBoard, 'white', 4, {}, 25);
+      await AIEngine.getBestMoveDetailed(testBoard, 'white', 4, {}, 25);
       expect(spy).not.toHaveBeenCalled();
     });
 
@@ -203,7 +200,7 @@ describe('AI Engine - Coverage for Untested Paths', () => {
     });
 
     test('setTTMaxSize should not throw', () => {
-      expect(() => AIEngine.setTTMaxSize(1000000)).not.toThrow();
+      expect(() => AIEngine.setTTMaxSize()).not.toThrow();
     });
 
     test('testStoreTT should not throw', () => {

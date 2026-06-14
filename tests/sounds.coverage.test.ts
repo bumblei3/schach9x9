@@ -61,11 +61,6 @@ const mockFilter = {
   } as unknown as MockAudioParam,
 };
 
-const mockPanner = {
-  pan: { value: 0 },
-  connect: vi.fn(),
-};
-
 // Mock AudioContext class
 class MockAudioContext {
   destination = {};
@@ -222,13 +217,10 @@ describe('SoundManager - Branch Coverage', () => {
   // ============================================================
 
   describe('playMove() - skin variants', () => {
-    let createOscSpy: ReturnType<typeof vi.spyOn>;
-    let createFilterSpy: ReturnType<typeof vi.spyOn>;
-
     beforeEach(() => {
       manager.enabled = true;
-      createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
-      createFilterSpy = vi.spyOn(MockAudioContext.prototype, 'createBiquadFilter');
+      vi.spyOn(MockAudioContext.prototype, 'createOscillator');
+      vi.spyOn(MockAudioContext.prototype, 'createBiquadFilter');
     });
 
     test('should use classic logic (triangle) for default skin', () => {
@@ -290,7 +282,7 @@ describe('SoundManager - Branch Coverage', () => {
       expect(() => manager.playMove()).not.toThrow();
       
       // Restore
-      MockAudioContext.prototype.createStereoPanner = (global.window as any).AudioContext.prototype.createStereoPanner;
+      MockAudioContext.prototype.createStereoPanner = originalCreateStereoPanner;
     });
   });
 
