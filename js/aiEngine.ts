@@ -156,14 +156,13 @@ function runWorkerSearch(
 }
 
 function runWorkerTopMoves(
-  board: IntBoard, turnColor: Player, count: number, searchDepth: number, maxTimeMs: number
+  board: IntBoard, _turnColor: Player, _count: number, _searchDepth: number, _maxTimeMs: number
 ): Promise<SearchResult[]> {
-  return new Promise<SearchResult[]>(resolve => {
-    const id = Math.random().toString(36).slice(2);
-    const timer = window.setTimeout(() => { workerPendingRequests.delete(id); resolve([]); }, maxTimeMs + 2000);
-    workerPendingRequests.set(id, { resolve: resolve as PendingResolve, timer });
-    void board; void turnColor; void count; void searchDepth;
-  });
+  // Worker not initialized in aiEngine - delegate to JS/WASM fallback
+  // This function is kept for API compatibility but the actual work
+  // is done by the JS fallback in getTopMoves() below
+  void board;
+  return Promise.resolve([]);
 }
 
 function convertMoveToResult(move: { from: number; to: number; promotion?: number } | null): MoveResult | null {
@@ -343,8 +342,13 @@ export async function getTopMoves(
     }
   }
   const boardShape = getCurrentBoardShape();
+  let workerResult: SearchResult[] | null = null;
   if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
-    try { return await runWorkerTopMoves(board, turnColor, count, searchDepth, maxTimeMs); } catch (err) { logger.error('[AiEngine] Worker getTopMoves failed', err); }
+    try { workerResult = await runWorkerTopMoves(board, turnColor, count, searchDepth, maxTimeMs); } catch (err) { logger.error('[AiEngine] Worker getTopMoves failed', err); }
+  }
+  // Use worker result if it has moves, otherwise fall through to JS/WASM fallback
+  if (workerResult && workerResult.length > 0) {
+    return workerResult;
   }
   // JS fallback: quick eval + WASM for top candidates
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;

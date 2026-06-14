@@ -8,12 +8,12 @@
   "description": "Ein Schachspiel auf einem 9x9 Brett mit neuen Figuren und Regeln.",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/schach9x9/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "/schach9x9/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
