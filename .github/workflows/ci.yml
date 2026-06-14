@@ -25,7 +25,7 @@ concurrency:
 
 env:
   # Pin Node.js version for reproducible builds
-  NODE_VERSION: '22.11.0'
+  NODE_VERSION: '20.18.0'
   # Cache versions for reproducibility
   NPM_CACHE_VERSION: '1'
   PLAYWRIGHT_CACHE_VERSION: '1'
@@ -113,6 +113,15 @@ jobs:
         with:
           name: wasm-build
           path: engine-wasm/pkg/
+
+      - name: Verify WASM build artifact
+        run: |
+          if [ ! -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
+            echo "❌ WASM artifact not found!"
+            ls -la engine-wasm/pkg/ || true
+            exit 1
+          fi
+          echo "✅ WASM artifact found: $(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm) bytes"
 
       - name: Run unit tests with coverage
         run: npm run test:coverage

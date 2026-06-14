@@ -12,7 +12,7 @@
     "train": "node opening-book-trainer-real.cjs",
     "train:fast": "node opening-book-trainer-real.cjs --games 50",
     "train:thorough": "node opening-book-trainer-real.cjs --games 500",
-    "wasm:build": "if command -v wasm-pack >/dev/null 2>&1; then wasm-pack build engine-wasm --target web; elif [ -f $HOME/.cargo/bin/wasm-pack ]; then $HOME/.cargo/bin/wasm-pack build engine-wasm --target web; else echo 'Warning: wasm-pack not found, skipping WASM build'; fi",
+    "wasm:build": "npx wasm-pack build engine-wasm --target web",
     "build": "npm run wasm:build && npx vite build",
     "start": "npx serve .",
     "dev": "npx vite",
@@ -20,7 +20,8 @@
     "typecheck:watch": "tsc --noEmit --watch",
     "test:visual": "npx playwright test --grep @visual",
     "test:visual:update": "npx playwright test --grep @visual --update-snapshots",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "postinstall": "npm rebuild rolldown vite || true"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
@@ -44,7 +45,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0",
     "vite": "^8.0.16",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.17",
+    "wasm-pack": "^0.13.0"
   },
   "dependencies": {
     "@axe-core/playwright": "^4.11.3",
