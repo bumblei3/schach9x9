@@ -1,14 +1,14 @@
 {
-  "name": "engine-wasm",
+  "name": "schach9x9",
   "type": "module",
   "version": "0.1.0",
   "files": [
-    "engine_wasm_bg.wasm",
-    "engine_wasm.js",
-    "engine_wasm.d.ts"
+    "schach9x9_bg.wasm",
+    "schach9x9.js",
+    "schach9x9.d.ts"
   ],
-  "main": "engine_wasm.js",
-  "types": "engine_wasm.d.ts",
+  "main": "schach9x9.js",
+  "types": "schach9x9.d.ts",
   "sideEffects": [
     "./snippets/*"
   ]

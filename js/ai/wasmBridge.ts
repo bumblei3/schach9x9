@@ -5,7 +5,7 @@
 import { logger } from '../logger.js';
 
 // Dynamic import for WASM module
-let wasmModule: typeof import('../../engine-wasm/pkg/engine_wasm.js') | null = null;
+let wasmModule: typeof import('../../engine-wasm/pkg/schach9x9.js') | null = null;
 let initPromise: Promise<boolean> | null = null;
 let nodesEvaluated = 0;
 
@@ -20,7 +20,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
   initPromise = (async () => {
     try {
       // Dynamic import of WASM module
-      const module = await import('../../engine-wasm/pkg/engine_wasm.js');
+      const module = await import('../../engine-wasm/pkg/schach9x9.js');
 
       // Check if we're in Node.js
       // @ts-ignore - Node.js globals only available at runtime
@@ -36,9 +36,9 @@ export async function ensureWasmInitialized(): Promise<boolean> {
         const url = await import('url');
 
         // url module is dynamically imported; fileURLToPath is not typed
-         
+        
         const __dirname = path.dirname((url as unknown as { fileURLToPath: (u: unknown) => string }).fileURLToPath(import.meta.url));
-        const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/engine_wasm_bg.wasm');
+        const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/schach9x9_bg.wasm');
         const wasmBuffer = fs.readFileSync(wasmPath);
 
         await module.default(wasmBuffer);

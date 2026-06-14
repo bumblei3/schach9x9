@@ -1,5 +1,5 @@
 [package]
-name = "engine-wasm"
+name = "schach9x9"
 version = "0.1.0"
 edition = "2024"
 

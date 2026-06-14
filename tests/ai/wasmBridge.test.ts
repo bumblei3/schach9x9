@@ -21,7 +21,7 @@ vi.mock('../../js/logger.js', () => ({
 }));
 
 // Mock the wasm module
-vi.mock('../../engine-wasm/pkg/engine_wasm.js', () => ({
+vi.mock('../../engine-wasm/pkg/schach9x9.js', () => ({
   default: vi.fn().mockResolvedValue(undefined),
   get_best_move_wasm: vi.fn(() =>
     JSON.stringify([{ from: 54, to: 36, promotion: null }, 50, 1000])
@@ -61,7 +61,7 @@ describe('wasmBridge', () => {
       const board = Array(81).fill(0);
       await getBestMoveWasm(board, 'white', 6, 'AGGRESSIVE', 1500);
 
-      const wasmModule = await import('../../engine-wasm/pkg/engine_wasm.js');
+      const wasmModule = await import('../../engine-wasm/pkg/schach9x9.js');
       expect(wasmModule.get_best_move_wasm).toHaveBeenCalledWith(
         expect.any(Int8Array),
         'white',
