@@ -381,11 +381,11 @@ describe('DOMHandler', () => {
     expect(app.game.kiMentorEnabled).toBe(true);
   });
 
-  test('should handle 3D toggle', () => {
+  test('should handle 3D toggle', async () => {
     const btn = document.getElementById('toggle-3d-btn')!;
     const container3D = document.getElementById('battle-chess-3d-container')!;
 
-    btn.click();
+    await btn.click();
 
     // Verify 3D was enabled
     expect(app.battleChess3D.enabled).toBe(true);
@@ -505,17 +505,17 @@ describe('DOMHandler', () => {
     expect(app.gameController.exitAnalysisMode).toHaveBeenCalled();
   });
 
-  test('should handle 3D toggle off after being enabled', () => {
+  test('should handle 3D toggle off after being enabled', async () => {
     vi.useFakeTimers();
     const btn = document.getElementById('toggle-3d-btn')!;
     const container3D = document.getElementById('battle-chess-3d-container')!;
 
     // Enable 3D
-    btn.click();
+    await btn.click();
     expect(app.battleChess3D.enabled).toBe(true);
 
     // Disable 3D
-    btn.click();
+    await btn.click();
     expect(app.battleChess3D.enabled).toBe(false);
     expect(container3D.classList.contains('active')).toBe(false);
 
@@ -524,13 +524,13 @@ describe('DOMHandler', () => {
     vi.useRealTimers();
   });
 
-  test('should handle 3D toggle when scene already exists', () => {
+  test('should handle 3D toggle when scene already exists', async () => {
     const btn = document.getElementById('toggle-3d-btn')!;
 
     // Simulate scene already existing
     app.battleChess3D.scene = {};
 
-    btn.click();
+    await btn.click();
 
     expect(app.battleChess3D.updateFromGameState).toHaveBeenCalled();
     expect(app.battleChess3D.onWindowResize).toHaveBeenCalled();
