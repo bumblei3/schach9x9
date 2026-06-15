@@ -9,6 +9,7 @@ export default tseslint.config(
       'node_modules/**',
       'engine-wasm/**',
       '*.cjs',
+      'commitlint.config.js',
       'tests/**',
       'scripts/**',
       'public/service-worker.js',
@@ -82,7 +83,13 @@ export default tseslint.config(
         },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
     },
