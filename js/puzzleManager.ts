@@ -8,6 +8,7 @@ export interface Puzzle {
   title: string;
   description: string;
   difficulty: string;
+  fen?: string;
   setupStr?: string;
   setup?: (_game: GameLike) => void;
   solution: MoveResult[];
@@ -33,6 +34,7 @@ export class PuzzleManager {
           'wk' +
           '..'.repeat(81 - 21) +
           'w',
+        fen: '',
         solution: [{ from: { r: 1, c: 7 }, to: { r: 0, c: 7 } }],
       },
       {
@@ -51,6 +53,7 @@ export class PuzzleManager {
           'wk' +
           '..'.repeat(13) +
           'w',
+        fen: '',
         solution: [{ from: { r: 7, c: 0 }, to: { r: 0, c: 0 } }],
       },
       {
@@ -59,6 +62,7 @@ export class PuzzleManager {
         description: 'Weiß zieht. Setze matt mit dem Erzbischof.',
         difficulty: 'Mittel',
         setupStr: '..'.repeat(3) + 'bk' + '..'.repeat(16) + 'wawk' + '..'.repeat(81 - 22) + 'w',
+        fen: '',
         solution: [{ from: { r: 2, c: 2 }, to: { r: 1, c: 4 } }],
       },
       {
@@ -68,6 +72,7 @@ export class PuzzleManager {
         difficulty: 'Einfach',
         setupStr:
           'bk' + '..'.repeat(13) + 'wq' + '..'.repeat(4) + 'wk' + '..'.repeat(81 - 20) + 'w',
+        fen: '',
         solution: [{ from: { r: 1, c: 5 }, to: { r: 1, c: 1 } }],
       },
       {
@@ -89,6 +94,7 @@ export class PuzzleManager {
           'wk' +
           '..'.repeat(81 - 38) +
           'w',
+        fen: '',
         solution: [
           { from: { r: 2, c: 0 }, to: { r: 1, c: 0 } }, // White Rook 1
           { from: { r: 0, c: 4 }, to: { r: 0, c: 3 } }, // Black King (Forced)
@@ -134,10 +140,13 @@ export class PuzzleManager {
     game.moveHistory = [];
     game._forceFullRender = true;
     game.puzzleState = {
+      id: puzzle.id,
       active: true,
       currentMoveIndex: 0,
       puzzleId: puzzle.id,
       solved: false,
+      failed: false,
+      solution: puzzle.solution as any,
     };
 
     // Apply setup from string or function

@@ -38,6 +38,8 @@ interface SetupTemplate {
   isRecommended?: boolean;
 }
 
+export type { SetupTemplate };
+
 /**
  * Gets tutor hints by calling the AI engine
  * @param _tutorController - Tutor controller (unused, kept for API consistency)

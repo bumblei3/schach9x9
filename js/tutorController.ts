@@ -21,6 +21,8 @@ import {
   checkBlunder,
   showBlunderWarning,
   analyzePlayerMovePreExecution,
+  type MoveInfo,
+  type MoveExplanation,
 } from './tutor/MoveAnalyzer.js';
 import {
   updateBestMoves,
@@ -32,13 +34,14 @@ import {
   placePiece,
 } from './tutor/HintGenerator.js';
 import type { Game } from './gameEngine.js';
-import type { MoveInfo, MoveExplanation, MoveRecord, SetupTemplate } from './tutor/MoveAnalyzer.js';
+import type { MoveRecord } from './tutor/MoveAnalyzer.js';
+import type { SetupTemplate } from './tutor/HintGenerator.js';
 
 interface TutorControllerLike {
-  showBlunderWarning(_analysis: MoveExplanation, _callback: () => void): void;
+  showBlunderWarning(_analysis: MoveExplanation): void;
   getSetupTemplates(): SetupTemplate[];
   handlePlayerMove(_from: { r: number; c: number }, _to: { r: number; c: number }): void;
-  analyzePlayerMovePreExecution(_move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<MoveInfo | null>;
+  analyzePlayerMovePreExecution(_move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<MoveExplanation | null>;
 }
 
 interface ScoreDescription {
@@ -169,11 +172,11 @@ export class TutorController implements TutorControllerLike {
     return checkBlunder(this.game, this, moveRecord as MoveRecord);
   }
 
-  public showBlunderWarning(analysis: unknown, callback: () => void): void {
-    return showBlunderWarning(this.game as Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis as MoveExplanation, callback);
+  public showBlunderWarning(analysis: MoveExplanation): void {
+    return showBlunderWarning(this.game as Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis);
   }
 
-  public getSetupTemplates(): unknown[] {
+  public getSetupTemplates(): SetupTemplate[] {
     return getSetupTemplates(this.game);
   }
 
@@ -188,7 +191,7 @@ export class TutorController implements TutorControllerLike {
   public analyzePlayerMovePreExecution(move: {
     from: { r: number; c: number };
     to: { r: number; c: number };
-  }): Promise<unknown> {
+  }): Promise<MoveExplanation | null> {
     return analyzePlayerMovePreExecution(this.game, move);
   }
 }

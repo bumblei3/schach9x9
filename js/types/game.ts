@@ -1,7 +1,6 @@
 /**
  * Core game type definitions for Schach 9x9
  */
-
 export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j' | null;
 
 export type Player = 'white' | 'black';
@@ -68,11 +67,13 @@ export interface CampaignLevel {
 
 export interface PuzzleState {
   id: string;
-  fen: string;
+  fen?: string;
   solution: Move[];
   currentMoveIndex: number;
   solved: boolean;
   failed: boolean;
+  active: boolean;
+  puzzleId?: string;
 }
 
 export interface Statistics {
@@ -117,9 +118,9 @@ export interface GameExtensions {
 export interface MoveRecord {
   from: Square;
   to: Square;
-  piece: PieceType;
-  captured?: PieceType;
-  promotion?: PieceType;
+  piece?: PieceType | Piece;
+  captured?: PieceType | Piece | null;
+  promotion?: PieceType | string;
 }
 
 /** Puzzle interface */
@@ -128,8 +129,8 @@ export interface Puzzle {
   title: string;
   description: string;
   difficulty: string;
-  fen: string;
-  solution: Move[];
+  fen?: string;
+  solution: Array<Move | { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }>;
 }
 
 /** Action button for modals */
@@ -172,6 +173,9 @@ export interface GameLike {
   bestMoves?: unknown[];
   tutorMode?: string;
   stats?: { accuracies: number[] };
+  // Puzzle-specific
+  capturedPieces?: { white: Piece[]; black: Piece[] };
+  puzzleState?: PuzzleState | null;
   getAllLegalMoves?: (_color: Player) => { from: Square; to: Square }[];
   // Internal rendering state (added by renderBoard)
   _previousBoardState?: (Piece | null)[][];

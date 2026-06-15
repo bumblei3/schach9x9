@@ -46,6 +46,13 @@ interface MoveRecord {
   evalScore?: number;
 }
 
+export interface MoveRecord {
+  from: Square;
+  to: Square;
+  piece: Piece;
+  evalScore?: number;
+}
+
 interface ThreatInfo {
   piece: Piece;
   pos: { r: number; c: number };
@@ -60,7 +67,7 @@ interface ThreatInfo {
 export async function analyzePlayerMovePreExecution(
   game: GameLike,
   move: { from: Square; to: Square }
-): Promise<unknown> {
+): Promise<MoveExplanation | null> {
   if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return Promise.resolve(null);
 
   const from = move.from;

@@ -25,7 +25,7 @@ import {
 } from './config.js';
 import { RulesEngine } from './RulesEngine.js';
 // import { makeMove } from './ai/MoveGenerator.js';
-import type { Player, Square, Piece } from './types/game.js';
+import type { Player, Square, Piece, PuzzleState } from './types/game.js';
 import type { GameController } from './gameController.js';
 import type { AIController } from './aiController.ts';
 import type { AnalysisManager } from './AnalysisManager.js';
@@ -94,14 +94,6 @@ export interface LastMoveInfo {
   to: Square;
   piece: Piece;
   isDoublePawnPush?: boolean;
-}
-
-export interface PuzzleState {
-  id: string;
-  solution: MoveHistoryEntry[];
-  currentMoveIndex: number;
-  solved: boolean;
-  failed: boolean;
 }
 
 export interface AnalysisVariation {

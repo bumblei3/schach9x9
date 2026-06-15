@@ -9,9 +9,9 @@ import {
   PHASES,
   AI_DELAY_MS,
   type Game,
-  type PuzzleState,
   type PieceWithMoved,
 } from './gameEngine.js';
+import type { PuzzleState } from './types/game.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';

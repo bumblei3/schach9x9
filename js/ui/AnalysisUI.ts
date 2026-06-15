@@ -6,6 +6,7 @@ import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
 import type { AIProgressData } from '../aiEngine';
 import type { MoveHistoryEntry } from '../gameEngine.js';
+import type { Piece, Square } from '../types/game.js';
 
 interface AnalysisResult {
   score?: number;
@@ -315,16 +316,11 @@ export class AnalysisUI {
     return states;
   }
 
-  undoMoveOnBoard(board: (Piece | null)[][], move: { from: Square; to: Square; piece: Piece; captured?: Piece | null; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }): void {
+  undoMoveOnBoard(board: (Piece | null)[][], move: { from: Square; to: Square; piece?: Piece; captured?: Piece | null; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }): void {
     
     const { from, to, piece, captured, specialMove } = move;
-
-    // Move piece back
-    board[from.r][from.c] = {
-      type: piece.type,
-      hasMoved: piece.hasMoved || false,
-      ...piece,
-    };
+    
+    if (!piece) return;
 
     // Handle special moves
     if (specialMove) {
