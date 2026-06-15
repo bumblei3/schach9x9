@@ -26,6 +26,6 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["js/**/*", "tests/**/*", "e2e/**/*", "service-worker.ts"],
+  "include": ["js/**/*", "tests/**/*", "service-worker.ts"],
   "exclude": ["node_modules", "dist", "engine-wasm"]
 }
