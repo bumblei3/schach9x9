@@ -64,6 +64,7 @@ describe('DOMHandler', () => {
     // Mock App and Game
     app = {
       init: vi.fn().mockResolvedValue(undefined),
+      init3D: vi.fn().mockResolvedValue(undefined),
       battleChess3D: {
         enabled: false,
         scene: null,
@@ -390,7 +391,7 @@ describe('DOMHandler', () => {
     // Verify 3D was enabled
     expect(app.battleChess3D.enabled).toBe(true);
     expect(container3D.classList.contains('hidden')).toBe(false);
-    expect(app.battleChess3D.init).toHaveBeenCalled();
+    expect(app.init3D).toHaveBeenCalled();
   });
 
   test('should handle personality selection', () => {
