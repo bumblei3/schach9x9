@@ -148,7 +148,7 @@ jobs:
         run: npm rebuild rolldown vite
 
       - name: Download WASM build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: wasm-build
           path: engine-wasm/pkg/
@@ -242,7 +242,7 @@ jobs:
         run: npm rebuild rolldown vite
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: production-build
           path: dist/
@@ -571,7 +571,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: production-build
           path: dist/
