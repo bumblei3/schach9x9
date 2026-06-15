@@ -301,7 +301,7 @@ export function renderEvalGraph(game: Game): void {
       if (!p) return;
       const idx = parseInt((p as HTMLElement).dataset.index || '0');
       if (idx >= 0 && (game.gameController as unknown as Record<string, unknown>)?.jumpToMove)
-        (game.gameController as unknown as Record<string, (idx: number) => void>).jumpToMove(idx);
+        (game.gameController as unknown as Record<string, (_idx: number) => void>).jumpToMove(idx);
       else if (
         idx === -1 &&
         (game.gameController as unknown as Record<string, unknown>)?.jumpToStart
@@ -344,8 +344,8 @@ export function updateStatistics(game: Game): void {
   const bestMovesEl = document.getElementById('stat-best-moves');
   if (bestMovesEl) bestMovesEl.textContent = String(game.stats.playerBestMoves);
 
-  if (g<(color?: string) => number>(game, 'calculateMaterialAdvantage')) {
-    const adv = g<(color?: string) => number>(game, 'calculateMaterialAdvantage')!(game.turn);
+  if (g<(_color?: string) => number>(game, 'calculateMaterialAdvantage')) {
+    const adv = g<(_color?: string) => number>(game, 'calculateMaterialAdvantage')!(game.turn);
     const materialEl = document.getElementById('stat-material');
     if (materialEl) {
       materialEl.textContent = adv > 0 ? '+' + adv : String(adv);

@@ -7,6 +7,8 @@
 
 import { debounce } from '../utils.js';
 import * as UI from '../ui.js';
+import { clearPieceCache } from '../ui/BoardRenderer.js';
+import { showToast } from '../ui/OverlayManager.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from '../utils/PGNGenerator.js';
 import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
@@ -699,7 +701,7 @@ export class DOMHandler {
         const target = e.target as HTMLSelectElement;
         const newSkin = target.value;
         setPieceSkin(newSkin);
-        if ((UI as any).clearPieceCache) (UI as any).clearPieceCache();
+        clearPieceCache();
         if (this.game) {
           this.game._forceFullRender = true;
           UI.renderBoard(this.game);
@@ -780,7 +782,7 @@ export class DOMHandler {
         if (level === 'STANDARD') msg = 'KI-Mentor: Standard (Patzer)';
         else if (level === 'STRICT') msg = 'KI-Mentor: Streng (Fehler & Patzer)';
 
-        (UI as any).showToast(msg, level !== 'OFF' ? 'success' : 'neutral');
+        showToast(msg, level !== 'OFF' ? 'success' : 'neutral');
       });
     }
   }

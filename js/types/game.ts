@@ -88,6 +88,7 @@ export interface Statistics {
   playerMoves?: number;
   playerBestMoves?: number;
   promotions?: number;
+  captures?: { white: number; black: number };
 }
 
 /**
@@ -96,15 +97,15 @@ export interface Statistics {
  */
 export interface GameExtensions {
   tutorController?: {
-    handlePlayerMove?: (from: Square, to: Square) => void;
-    analyzePlayerMovePreExecution?: (move: { from: Square; to: Square }) => Promise<unknown>;
-    showBlunderWarning?: (analysis: unknown, callback: () => void) => void;
+    handlePlayerMove?: (_from: Square, _to: Square) => void;
+    analyzePlayerMovePreExecution?: (_move: { from: Square; to: Square }) => Promise<unknown>;
+    showBlunderWarning?: (_analysis: unknown, _callback: () => void) => void;
   };
-  isTutorMove?: (move: Square) => boolean;
+  isTutorMove?: (_move: Square) => boolean;
   currentTheme?: string;
-  log?: (message: string) => void;
-  getValidMoves?: (r: number, c: number, piece: unknown) => Square[];
-  calculateMaterialAdvantage?: (color: Player) => number;
+  log?: (_message: string) => void;
+  getValidMoves?: (_r: number, _c: number, _piece: unknown) => Square[];
+  calculateMaterialAdvantage?: (_color: Player) => number;
 }
 
 /**
@@ -112,10 +113,37 @@ export interface GameExtensions {
  * Avoids `any` while not requiring the full Game class import.
  * All optional — modules only need a subset.
  */
+/** Move record for promotion UI */
+export interface MoveRecord {
+  from: Square;
+  to: Square;
+  piece: PieceType;
+  captured?: PieceType;
+  promotion?: PieceType;
+}
+
+/** Puzzle interface */
+export interface Puzzle {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  fen: string;
+  solution: Move[];
+}
+
+/** Action button for modals */
+export interface ModalAction {
+  text: string;
+  class?: string;
+  callback?: () => void;
+}
+
+/** Game interface used by UI components (avoids circular deps) */
 export interface GameLike {
   board: (Piece | null)[][];
   boardSize: number;
-  boardShape?: unknown;
+  boardShape: unknown;
   phase: string;
   turn: Player;
   isAI: boolean;
@@ -124,23 +152,30 @@ export interface GameLike {
   selectedSquare: Square | null;
   validMoves: Square[] | null;
   mode: string;
-  lastMoveHighlight: { from: Square; to: Square } | null;
-  isInCheck?(color: Player): boolean;
-  isSquareUnderAttack?: (r: number, c: number, color: Player) => boolean;
-  isTutorMove?: (move: Square) => boolean;
+  lastMoveHighlight: { from: Square; to: Square; piece?: Piece } | null;
+  isInCheck?(_color: Player): boolean;
+  isSquareUnderAttack?: (_r: number, _c: number, _color: Player) => boolean;
+  isTutorMove?: (_move: Square) => boolean;
   playerColor?: Player;
   whiteCorridor?: number | null;
   blackCorridor?: number | null;
-  handleCellClick?: (r: number, c: number) => void;
-  getValidMoves: (r: number, c: number, piece: Piece) => Square[];
-  log?: (message: string) => void;
+  handleCellClick?: (_r: number, _c: number) => void;
+  getValidMoves: (_r: number, _c: number, _piece: Piece) => Square[];
+  log?: (_message: string) => void;
+  points: number;
+  tutorPoints?: number;
+  moveHistory: Array<{ from: Square; to: Square; piece?: PieceType; captured?: PieceType | null; promotion?: PieceType }>;
   // Tutor-specific (used by MoveAnalyzer)
   kiMentorEnabled?: boolean;
   mentorLevel?: string;
   lastEval?: number;
   bestMoves?: unknown[];
   tutorMode?: string;
-  tutorPoints?: number;
   stats?: { accuracies: number[] };
-  getAllLegalMoves?: (color: Player) => { from: Square; to: Square }[];
+  getAllLegalMoves?: (_color: Player) => { from: Square; to: Square }[];
+  // Internal rendering state (added by renderBoard)
+  _previousBoardState?: (Piece | null)[][];
+  _forceFullRender?: boolean;
+  // Allow additional properties for dynamic extensions
+  [key: string]: unknown;
 }

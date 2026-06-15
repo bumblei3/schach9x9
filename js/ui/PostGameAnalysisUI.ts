@@ -3,12 +3,13 @@
  */
 import * as PostGameAnalyzerModule from '../tutor/PostGameAnalyzer.js';
 import { analyzeGame } from '../tutor/PostGameAnalyzer.js';
+import type { Move } from '../types/game.js';
 
 /**
  * Displays game stats and shows the "Nachspiel-Analyse" button
  */
 export function showPostGameStats(
-  game: { moveHistory: any[]; playerColor: 'white' | 'black' },
+  game: { moveHistory: Move[]; playerColor: 'white' | 'black' },
   _result: 'win' | 'draw',
   _winnerColor: 'white' | 'black' | null
 ): void {
@@ -83,12 +84,11 @@ export function showPostGameStats(
 /**
  * Triggers the full post-game analysis using AnalysisUI
  */
-async function showPostGameAnalysis(game: { moveHistory: any[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (n: number) => void } }): Promise<void> {
+async function showPostGameAnalysis(game: { moveHistory: Move[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } }): Promise<void> {
   // Import dynamically to avoid circular deps
   const mod = await import('./AnalysisUI.js');
 
   // Create a minimal app object that satisfies AnalysisUI's requirements
-  // Use `any` for the bridge since we only need moveHistory, playerColor, and gameController.jumpToMove
   const app = {
     game: {
       ...game,
@@ -98,13 +98,13 @@ async function showPostGameAnalysis(game: { moveHistory: any[]; playerColor: 'wh
         ? { ...game.gameController, jumpToMove: game.gameController.jumpToMove }
         : undefined
     }
-  } as any;
+  } as { game: { moveHistory: Move[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } } };
 
   const AnalysisUI = mod.AnalysisUI;
   const analysisUI = new AnalysisUI(app);
 
   // Use existing AnalysisUI method to show summary
-  const analysisUI_ = analysisUI as unknown as { showSummaryModal: (w: unknown, b: unknown) => void };
+  const analysisUI_ = analysisUI as unknown as { showSummaryModal: (_w: unknown, _b: unknown) => void };
 
   const { analyzeGame: analyzeGameLocal } = await import('../tutor/PostGameAnalyzer.js');
   const whiteStats = analyzeGameLocal(app.game.moveHistory, 'white');

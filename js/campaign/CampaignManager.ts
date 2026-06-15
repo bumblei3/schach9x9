@@ -10,6 +10,11 @@ export class CampaignManager {
     this.state = this.loadState();
   }
 
+  // Public getter for read-only access to state
+  public getState(): Readonly<CampaignState> {
+    return this.state;
+  }
+
   private loadState(): CampaignState {
     if (typeof localStorage === 'undefined') {
       return {

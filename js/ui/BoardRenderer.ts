@@ -6,7 +6,7 @@ import { BOARD_SIZE, PHASES, isBlockedCell } from '../config.js';
 import { debounce } from '../utils.js';
 import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js';
 import { updateLastMoveArrow, clearArrows } from './ArrowRenderer.js';
-import type { Piece, Player, PieceType, Square } from '../types/game.js';
+import type { Piece, Player, PieceType, Square, GameLike } from '../types/game.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
 import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
@@ -19,7 +19,7 @@ let touchDragValidMoves: Square[] = [];
 /**
  * Get effective board size (from game instance or fallback to BOARD_SIZE)
  */
-function getBoardSize(game: any): number {
+function getBoardSize(game: GameLike): number {
   return game && game.boardSize ? game.boardSize : BOARD_SIZE;
 }
 
@@ -89,7 +89,7 @@ export function getPieceText(piece: Piece | null): string {
  * Initialisiert das Schachbrett im DOM und fügt Event-Listener hinzu.
  * @param game - Die Game-Instanz
  */
-export function initBoardUI(game: any): void {
+export function initBoardUI(game: GameLike): void {
   const boardEl = document.getElementById('board');
   if (!boardEl) return;
   boardEl.innerHTML = '';
@@ -389,7 +389,7 @@ export function initBoardUI(game: any): void {
  * Rendert das Schachbrett und die Figuren im DOM.
  * @param game - Die Game-Instanz
  */
-export function renderBoard(game: any): void {
+export function renderBoard(game: GameLike): void {
   const size = getBoardSize(game);
 
   // Apply skin class
@@ -567,7 +567,7 @@ export function renderBoard(game: any): void {
         // RPG Highlights: Veteran / Elite / Champion
         if (game.mode === 'campaign' && p.color === game.playerColor) {
           const xp = campaignManager.getUnitXp(p.type);
-          const state = (campaignManager as any).state;
+          const state = campaignManager.getState();
 
           if (xp.level >= 2) cell.classList.add('piece-veteran');
           if (xp.level >= 3) cell.classList.add('piece-elite');
@@ -595,7 +595,7 @@ export function renderBoard(game: any): void {
  * @param piece - Die bewegte Figur
  */
 export async function animateMove(
-  game: any,
+  game: GameLike,
   from: Square,
   to: Square,
   piece: Piece
@@ -659,10 +659,10 @@ export async function animateMove(
 
       // RPG Hero Trail
       const xp =
-        (game as any).mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
+        game.mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
       const isChampion =
-        (game as any).mode === 'campaign' &&
-        (campaignManager as any).state.championType === piece.type;
+        game.mode === 'campaign' &&
+        campaignManager.getState().championType === piece.type;
 
       let color = isElite
         ? piece.color === 'white'
@@ -745,7 +745,7 @@ export async function animateMove(
  * @param move - {from, to}
  * @param category - 'brilliant', 'best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder'
  */
-export function showMoveQuality(_game: any, move: any, category: string): void {
+export function showMoveQuality(_game: GameLike, move: { from: Square; to: Square }, category: string): void {
   // Clear existing quality highlights
   document
     .querySelectorAll(

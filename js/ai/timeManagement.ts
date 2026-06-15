@@ -196,15 +196,15 @@ export function calculateTimeAllocation(params: TimeAllocationParams): TimeAlloc
 }
 
 /**
- * Helper: detect tactical complexity from position
- * Returns true if there are multiple captures, threats, or forcing moves
- */
-export function detectTacticalComplexity(
-  board: ReadonlyArray<number>,
-  color: number,
-  getAllLegalMoves: (b: ReadonlyArray<number>, c: string) => Array<{ from: number; to: number; promotion?: number }>,
-  isSquareAttacked: (b: ReadonlyArray<number>, sq: number, byColor: number) => boolean
-): boolean {
+ /**
+  * Returns true if there are multiple captures, threats, or forcing moves
+  */
+ export function detectTacticalComplexity(
+   board: ReadonlyArray<number>,
+   color: number,
+   getAllLegalMoves: (_board: ReadonlyArray<number>, _color: string) => Array<{ from: number; to: number; promotion?: number }>,
+   isSquareAttacked: (_board: ReadonlyArray<number>, _sq: number, _byColor: number) => boolean
+ ): boolean {
   const moves = getAllLegalMoves(board, color === 16 ? 'white' : 'black');
   let captureCount = 0;
   let checkCount = 0;

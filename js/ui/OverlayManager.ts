@@ -4,7 +4,8 @@
  */
 import { renderBoard } from './BoardRenderer.js';
 import { soundManager } from '../sounds.js';
-import type { Game, Player } from '../gameEngine.js';
+import type { Player, GameLike } from '../gameEngine.js';
+import type { MoveRecord, Puzzle, ModalAction } from '../types/game.js';
 
 /**
  * Zeigt ein modales Dialogfenster an.
@@ -70,11 +71,11 @@ export function closeModal(): void {
  * Nutzt ein 4-Spalten Grid mit empfohlenen Figuren, Sound und Keyboard-Support.
  */
 export function showPromotionUI(
-  game: Game,
+  game: GameLike,
   r: number,
   c: number,
   color: Player,
-  moveRecord: any,
+  moveRecord: MoveRecord,
   callback?: () => void
 ): void {
   const overlay = document.getElementById('promotion-overlay');
@@ -103,7 +104,7 @@ export function showPromotionUI(
   const selectPiece = (opt: typeof options[0]) => {
     const piece = game.board[r][c];
     if (piece) {
-      piece.type = opt.type as any;
+      piece.type = opt.type as Piece['type'];
       if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
       if (game.log) game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zu ${opt.name} befördert!`);
       soundManager.playPromotion();
@@ -126,7 +127,7 @@ export function showPromotionUI(
         btn.classList.add('recommended');
       }
 
-      const svgs = (window as any).PIECE_SVGS;
+      const svgs = window.PIECE_SVGS as Record<string, Record<string, string>> | undefined;
       if (!svgs || !svgs[color] || !svgs[color][opt.type]) {
         console.error(`[OverlayManager] Missing SVG for ${color} ${opt.type}`);
       }
@@ -162,7 +163,7 @@ export function showPromotionUI(
 /**
  * Zeigt das Overlay für Puzzles an.
  */
-export function showPuzzleOverlay(puzzle: any): void {
+export function showPuzzleOverlay(puzzle: Puzzle): void {
   const overlay = document.getElementById('puzzle-overlay');
   if (!overlay) return;
   const titleEl = document.getElementById('puzzle-title');
@@ -231,12 +232,12 @@ export function showToast(message: string, type: string = 'neutral'): void {
  * Zeigt einen speziellen Sieg-Bildschirm für die Kampagne.
  * @param {string} title - Level Titel
  * @param {number} stars - Anzahl der verdienten Sterne (1-3)
- * @param {Array} actions - Button-Aktionen
+ * @param {ModalAction[]} actions - Button-Aktionen
  */
 export async function showCampaignVictoryModal(
   title: string,
   stars: number,
-  actions: any[] = [],
+  actions: ModalAction[] = [],
   analysis?: { accuracy: number; advice: string }
 ): Promise<void> {
   let analysisHtml = '';

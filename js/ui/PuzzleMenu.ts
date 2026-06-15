@@ -1,10 +1,12 @@
 import { puzzleManager } from '../puzzleManager.js';
+import type { Puzzle } from '../puzzleManager.js';
+import type { GameControllerInterface } from '../TimeManager.js';
 
 export class PuzzleMenu {
-  gameController: any;
+  gameController: GameControllerInterface;
   overlay: HTMLElement | null;
 
-  constructor(gameController: any) {
+  constructor(gameController: GameControllerInterface) {
     this.gameController = gameController;
     this.overlay = document.getElementById('puzzle-menu-overlay');
 
@@ -32,10 +34,10 @@ export class PuzzleMenu {
     if (!container) return;
 
     container.innerHTML = '';
-    const puzzles = (puzzleManager as any).getPuzzles();
+    const puzzles = puzzleManager.getPuzzles();
 
-    puzzles.forEach((puzzle: any, index: number) => {
-      const isSolved = (puzzleManager as any).isSolved(puzzle.id);
+    puzzles.forEach((puzzle: Puzzle, index: number) => {
+      const isSolved = puzzleManager.isSolved(puzzle.id);
 
       const card = document.createElement('div');
       card.className = `puzzle-card ${isSolved ? 'solved' : ''}`;

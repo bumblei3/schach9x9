@@ -1,13 +1,14 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
-import { Level, Perk, UnitXp, CampaignState } from '../campaign/types.js';
+import { Level, Perk, UnitXp } from '../campaign/types.js';
 import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
 import { showToast } from './OverlayManager.js';
+import type { GameLike } from '../types/game.js';
 
 export class CampaignUI {
-  app: any;
+  app: GameLike;
   container: HTMLElement | null = null;
 
-  constructor(app: any) {
+  constructor(app: GameLike) {
     this.app = app;
     this.init();
   }
@@ -309,7 +310,7 @@ export class CampaignUI {
     };
     const icons: Record<string, string> = { p: '🛡️', n: '🐎', b: '✨', r: '🏰', q: '👑', k: '🔱' };
 
-    const state = (campaignManager as any).getState() as CampaignState;
+    const state = campaignManager.getState();
 
     unitTypes.forEach(type => {
       const xp: UnitXp = campaignManager.getUnitXp(type);

@@ -24,10 +24,10 @@ export function coordToAlgebraic(r: number, c: number): string {
 /**
  * Debounce a function to limit how often it can be called
  */
-export function debounce<T extends (...args: unknown[]) => void>( // eslint-disable-line space-before-function-paren
+export function debounce<T extends (..._args: unknown[]) => void>( // eslint-disable-line space-before-function-paren
   fn: T,
   delay: number = 150
-): (...args: Parameters<T>) => void {
+): (..._args: Parameters<T>) => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
   return (...args: Parameters<T>) => {
     clearTimeout(timer);

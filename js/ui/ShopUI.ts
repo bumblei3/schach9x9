@@ -4,7 +4,8 @@
  */
 import { PIECE_VALUES } from '../config.js';
 import { getPieceText } from './BoardRenderer.js';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+import type { GameLike } from '../types/game.js';
+
 // Removed top-level await preventing circular dependency
 // const { updateTutorRecommendations } = (await import('./TutorUI.js')) as any;
 
@@ -13,7 +14,7 @@ import { getPieceText } from './BoardRenderer.js';
  * @param game - Die Game-Instanz
  * @param show - Sichtbarkeit
  */
-export function showShop(game: any, show: boolean): void {
+export function showShop(game: GameLike, show: boolean): void {
   const panel = document.getElementById('shop-panel');
   if (!panel) return;
 
@@ -31,7 +32,7 @@ export function showShop(game: any, show: boolean): void {
  * Aktualisiert die Shop-Anzeige.
  * @param game - Die Game-Instanz
  */
-export function updateShopUI(game: any): void {
+export function updateShopUI(game: GameLike): void {
   const pointsDisplay = document.getElementById('points-display');
   if (pointsDisplay) pointsDisplay.textContent = game.points.toString();
 
@@ -93,16 +94,18 @@ export function updateShopUI(game: any): void {
   }
 
   // Check if UI module is available globally (from App.ts)
-  const globalUI = (window as any).UI;
-  if (globalUI && globalUI.updateTutorRecommendations) {
+  const globalUI = window.UI as { updateTutorRecommendations?: (..._args: unknown[]) => void } | undefined;
+  if (globalUI?.updateTutorRecommendations) {
     globalUI.updateTutorRecommendations(game);
-  } else if ((window as any).updateTutorRecommendations) {
-    // Legacy fallback
-    (window as any).updateTutorRecommendations(game);
   } else {
-    // Dynamic import fallback
-    import('./TutorUI.js').then((module: any) => {
-      if (module.updateTutorRecommendations) module.updateTutorRecommendations(game);
-    });
+    const legacyUpdate = window.updateTutorRecommendations as ((..._args: unknown[]) => void) | undefined;
+    if (legacyUpdate) {
+      legacyUpdate(game);
+    } else {
+      // Dynamic import fallback
+      import('./TutorUI.js').then((module: { updateTutorRecommendations?: (..._args: unknown[]) => void }) => {
+        if (module.updateTutorRecommendations) module.updateTutorRecommendations(game);
+      });
+    }
   }
 }

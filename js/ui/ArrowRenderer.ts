@@ -21,12 +21,12 @@ interface ArrowOptions {
  * Draws an arrow from one square to another on the board
  * @param boardContainer - The board container element (#board-container)
  * @param options - Arrow drawing options
- * @returns SVGElement that was created (for later removal)
+ * @returns SVGElement that was created (for later removal), or null if board not ready
  */
 export function drawArrow(
   boardContainer: HTMLElement,
   options: ArrowOptions
-): SVGSVGElement {
+): SVGSVGElement | null {
   const {
     from,
     to,
@@ -41,7 +41,7 @@ export function drawArrow(
 
   // Get board element for coordinate calculations
   const boardEl = boardContainer.querySelector('#board') as HTMLElement;
-  if (!boardEl) return null as any;
+  if (!boardEl) return null;
 
   // Get cell dimensions
   const fromCell = boardEl.querySelector(
@@ -51,7 +51,7 @@ export function drawArrow(
     `.cell[data-r="${to.r}"][data-c="${to.c}"]`
   ) as HTMLElement;
 
-  if (!fromCell || !toCell) return null as any;
+  if (!fromCell || !toCell) return null;
 
   // Calculate positions relative to board container
   const containerRect = boardContainer.getBoundingClientRect();

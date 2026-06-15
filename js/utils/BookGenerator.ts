@@ -60,7 +60,7 @@ async function generateBook(): Promise<void> {
         };
       }
       console.log(`Loaded existing book with ${Object.keys(bookData.positions).length} positions.`);
-    } catch (e) {
+    } catch (_e) {
       console.warn('Could not parse existing book, starting fresh.');
     }
   }

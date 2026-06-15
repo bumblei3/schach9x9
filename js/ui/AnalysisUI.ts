@@ -5,6 +5,7 @@ import { showModal, closeModal, updateMoveHistoryUI, renderEvalGraph } from '../
 import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
 import type { AIProgressData } from '../aiEngine';
+import type { Move } from '../types/game.js';
 
 interface AnalysisResult {
   score?: number;
@@ -22,8 +23,16 @@ interface PlayerStats {
   counts: Record<string, number>;
 }
 
+interface GameControllerMinimal {
+  jumpToMove: (_n: number) => void;
+}
+
 interface AppWithGame {
-  game: Partial<Game> & { moveHistory: unknown[]; playerColor: 'white' | 'black'; gameController?: any };
+  game: {
+    moveHistory: Move[];
+    playerColor: 'white' | 'black';
+    gameController?: GameControllerMinimal;
+  };
 }
 
 export class AnalysisUI {
@@ -306,11 +315,9 @@ export class AnalysisUI {
     return states;
   }
 
-  undoMoveOnBoard(board: unknown[][], move: unknown): void {
-     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const m = move as any;
-    const { from, to, piece, captured, specialMove } = m;
+  undoMoveOnBoard(board: (Piece | null)[][], move: { from: Square; to: Square; piece: Piece; captured?: Piece | null; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }): void {
+    
+    const { from, to, piece, captured, specialMove } = move;
 
     // Move piece back
     board[from.r][from.c] = {
