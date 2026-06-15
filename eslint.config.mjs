@@ -11,6 +11,7 @@ export default tseslint.config(
       '*.cjs',
       'commitlint.config.js',
       'tests/**',
+      'e2e/**',
       'scripts/**',
       'public/service-worker.js',
     ],
