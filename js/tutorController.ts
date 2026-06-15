@@ -32,7 +32,14 @@ import {
   placePiece,
 } from './tutor/HintGenerator.js';
 import type { Game } from './gameEngine.js';
-import type { MoveInfo } from './tutor/MoveAnalyzer.js';
+import type { MoveInfo, MoveExplanation, MoveRecord, SetupTemplate } from './tutor/MoveAnalyzer.js';
+
+interface TutorControllerLike {
+  showBlunderWarning(_analysis: MoveExplanation, _callback: () => void): void;
+  getSetupTemplates(): SetupTemplate[];
+  handlePlayerMove(_from: { r: number; c: number }, _to: { r: number; c: number }): void;
+  analyzePlayerMovePreExecution(_move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<MoveInfo | null>;
+}
 
 interface ScoreDescription {
   label: string;
@@ -43,7 +50,7 @@ interface ScoreDescription {
 /**
  * Orchestrator for tutor-related logic, delegating to specialized sub-modules.
  */
-export class TutorController {
+export class TutorController implements TutorControllerLike {
   public game: Game;
   public debouncedGetTutorHints: () => void;
 
@@ -159,11 +166,11 @@ export class TutorController {
   }
 
   public checkBlunder(moveRecord: unknown): Promise<void> {
-    return checkBlunder(this.game, this as any, moveRecord as any);
+    return checkBlunder(this.game, this, moveRecord as MoveRecord);
   }
 
   public showBlunderWarning(analysis: unknown, callback: () => void): void {
-    return showBlunderWarning(this.game, analysis as any, callback);
+    return showBlunderWarning(this.game as Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis as MoveExplanation, callback);
   }
 
   public getSetupTemplates(): unknown[] {
@@ -171,7 +178,7 @@ export class TutorController {
   }
 
   public applySetupTemplate(templateId: string): void {
-    return applySetupTemplate(this.game, this as any, templateId);
+    return applySetupTemplate(this.game, this, templateId);
   }
 
   public placePiece(r: number, c: number, type: string, isWhite: boolean): void {

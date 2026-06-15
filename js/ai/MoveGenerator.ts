@@ -78,15 +78,8 @@ const ROOK_OFFSETS = [-9, 9, -1, 1];
 /**
  * Generate all legal moves for position
  */
- 
-export function getPseudoLegalMoves(
-  _board: BoardStorage,
-  _r: number,
-  _c: number,
-  _piece: number,
-  _isCheck: boolean,
-  _lastMove: Move | null
-): Move[] {
+
+export function getPseudoLegalMoves(): Move[] {
   // Legacy stub for 8x8 tests compatibility
   return [];
 }

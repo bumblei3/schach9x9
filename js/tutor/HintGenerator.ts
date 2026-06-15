@@ -42,7 +42,6 @@ interface SetupTemplate {
  * Gets tutor hints by calling the AI engine
  * @param _tutorController - Tutor controller (unused, kept for API consistency)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getTutorHints(game: Game, _tutorController: unknown): Promise<TutorHint[]> {
   const turnColor = game.turn;
 
@@ -175,11 +174,10 @@ export function isTutorMove(game: Game, from: Square, to: Square): boolean {
 }
 
 /**
- * Updates the best moves and triggers UI update
+ * Updates best moves periodically
  * @param _game - Game instance (unused in current implementation)
  * @param _tutorController - Tutor controller (unused in current implementation)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function updateBestMoves(_game: Game, _tutorController: unknown): void {
   // User Request: Tutor info only on click.
   // We disable automatic background calculation to prevent "Thinking..." state from appearing automatically.
@@ -856,7 +854,9 @@ function createMockHints(game: Game, turnColor: 'white' | 'black'): TutorHint[] 
       promotion: move.promotion,
     },
     score: 100 - index * 20, // Decreasing scores
-    notation: (game as any).getTutorHints?.() ? getMoveNotation(game, move) : `${move.from.r},${move.from.c}→${move.to.r},${move.to.c}`,
+    notation: ((game as { getTutorHints?: () => unknown }).getTutorHints?.()
+      ? getMoveNotation(game, move)
+      : `${move.from.r},${move.from.c}→${move.to.r},${move.to.c}`),
     analysis: {
       move: { from: move.from, to: move.to },
       score: 100 - index * 20,

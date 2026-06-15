@@ -19,6 +19,17 @@ import {
 import { AI_PERSONALITIES } from './ai/personalities.js';
 import type { Piece } from './types/game.js';
 
+interface MoveRecord {
+  moveNumber: number;
+  color: string;
+  from: { r: number; c: number };
+  to: { r: number; c: number };
+  evalScore?: number;
+  depth?: number;
+  nodes?: number;
+  personality: string;
+}
+
 // ============================================================================
 // Helper: Convert internal number[][] board to UiBoard format
 // ============================================================================
@@ -203,7 +214,7 @@ export class EngineMatchRunner {
     
     const whiteStats = this.createEmptyStats();
     const blackStats = this.createEmptyStats();
-    const moveHistory: any[] = [];
+    const moveHistory: Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }> = [];
     let moveNumber = 1;
     let currentTurn: 'white' | 'black' = 'white';
 
@@ -342,12 +353,23 @@ export class EngineMatchRunner {
 
   private createInitialGameState(): number[][] {
     const board: number[][] = Array(9).fill(null).map(() => Array(9).fill(0));
-    // Simplified: using Int8Array conversion via engine
-    // This would be proper initial position
+    // 9x9 starting position (Capablanca chess): R N B Q K B N R A
+    // Black pieces (negative values) on row 0
+    // White pieces (positive values) on row 8
+    const backRankPieces = [
+      -4, -2, -3, -5, -6, -3, -2, -4, -7,  // Black: rook, knight, bishop, queen, king, bishop, knight, rook, archbishop
+      4, 2, 3, 5, 6, 3, 2, 4, 7             // White: rook, knight, bishop, queen, king, bishop, knight, rook, archbishop
+    ];
+    for (let c = 0; c < 9; c++) {
+      board[0][c] = backRankPieces[c];
+      board[1][c] = -1; // Black pawn
+      board[7][c] = 1;  // White pawn
+      board[8][c] = backRankPieces[c + 9];
+    }
     return board;
   }
 
-  private calculateAllocation(params: any): { allocatedTimeMs: number } {
+  private calculateAllocation(params: { maxTimePerMove: number; hasOpeningBook?: boolean }): { allocatedTimeMs: number } {
     // Simplified allocation
     const maxTime = Math.min(params.maxTimePerMove, params.hasOpeningBook ? 500 : 3000);
     return { allocatedTimeMs: Math.min(maxTime, params.maxTimePerMove) };
@@ -361,7 +383,7 @@ export class EngineMatchRunner {
     }
   }
 
-  private createMoveRecord(move: MoveResult, turn: string, moveNumber: number, result: SearchResult | null, personality: string): any {
+  private createMoveRecord(move: MoveResult, turn: string, moveNumber: number, result: SearchResult | null, personality: string): MoveRecord {
     return { moveNumber, color: turn, from: move.from, to: move.to, evalScore: result?.score, depth: result?.depth, nodes: result?.nodes, personality };
   }
 
@@ -378,7 +400,7 @@ export class EngineMatchRunner {
     gameNumber: number, whiteConfig: EngineConfig, blackConfig: EngineConfig,
     result: string, winner: GameResult['winner'], terminationReason: TerminationReason,
     moves: number, whiteStats: EngineGameStats, blackStats: EngineGameStats,
-    _moveHistory: any[], durationMs: number
+    _moveHistory: Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }>, durationMs: number
   ): GameResult {
     return {
       gameNumber, whiteEngine: whiteConfig.name, blackEngine: blackConfig.name,

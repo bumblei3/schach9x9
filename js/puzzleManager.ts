@@ -1,6 +1,7 @@
 import { PuzzleGenerator } from './puzzleGenerator.js';
 import { ProceduralGenerator } from './puzzle/ProceduralGenerator.js';
 import type { MoveResult } from './aiEngine.js';
+import type { GameLike } from './types/game.js';
 
 export interface Puzzle {
   id: string;
@@ -8,7 +9,7 @@ export interface Puzzle {
   description: string;
   difficulty: string;
   setupStr?: string;
-  setup?: (game: any) => void;
+  setup?: (_game: GameLike) => void;
   solution: MoveResult[];
 }
 
@@ -101,7 +102,7 @@ export class PuzzleManager {
     return this.puzzles.find(p => p.id === id);
   }
 
-  public loadPuzzle(game: any, index: number = 0): Puzzle | boolean {
+  public loadPuzzle(game: GameLike, index: number = 0): Puzzle | boolean {
     this.currentPuzzleIndex = index;
     let puzzle = this.puzzles[index];
 
@@ -151,7 +152,7 @@ export class PuzzleManager {
     return puzzle;
   }
 
-  public checkMove(game: any, move: MoveResult): 'solved' | 'continue' | 'wrong' | false {
+  public checkMove(game: GameLike, move: MoveResult): 'solved' | 'continue' | 'wrong' | false {
     if (!game.puzzleState || !game.puzzleState.active) return false;
 
     const puzzle = this.puzzles[this.currentPuzzleIndex];
@@ -178,12 +179,12 @@ export class PuzzleManager {
     }
   }
 
-  public nextPuzzle(game: any): Puzzle | boolean {
+  public nextPuzzle(game: GameLike): Puzzle | boolean {
     const nextIndex = this.currentPuzzleIndex + 1;
     return this.loadPuzzle(game, nextIndex);
   }
 
-  public generateAndLoad(game: any, depth: number = 2): Puzzle | boolean {
+  public generateAndLoad(game: GameLike, depth: number = 2): Puzzle | boolean {
     const solution = PuzzleGenerator.findMateSequence(game.board, game.turn, depth);
     if (!solution) return false;
 

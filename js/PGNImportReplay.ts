@@ -7,6 +7,18 @@ import { logger } from './logger.js';
 import { PGNParser, PGNGame, PGNHistoryEntry } from './utils/PGNParser.js';
 
 /**
+ * Minimal engine interface for PGN replay
+ */
+interface PgnEngine {
+  turn: string;
+  boardSize: number;
+  board: Array<Array<{ type: string; color: string; hasMoved: boolean } | null>>;
+  getAllLegalMoves: () => { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }[];
+  getBoardHash: () => string;
+  executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }) => void;
+}
+
+/**
  * Imports a PGN file/string and converts it to a replayable game state
  */
 export interface PGNImportResult {
@@ -75,7 +87,7 @@ export class PGNImportReplay {
   async importPGNFile(file: File): Promise<PGNImportResult> {
     return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
         const text = e.target?.result as string;
         resolve(this.importPGN(text));
       };
@@ -92,7 +104,7 @@ export class PGNImportReplay {
   /**
    * Creates a mock engine for PGN replay
    */
-  private createMockEngine() {
+  private createMockEngine(): PgnEngine {
     // Minimal engine that can replay moves
     type PieceWithHasMoved = { type: string; color: string; hasMoved: boolean } | null;
 
@@ -105,11 +117,10 @@ export class PGNImportReplay {
     const blackPawns = Array(9).fill('P');
 
     blackBack.forEach((piece: string, c: number) => { board[0][c] = { type: piece.toLowerCase(), color: 'black', hasMoved: false }; });
-    blackPawns.forEach((_: string, c: number) => { board[1][c] = { type: 'p', color: 'black', hasMoved: false }; });
+    blackPawns.forEach((_piece: string, c: number) => { board[1][c] = { type: 'p', color: 'black', hasMoved: false }; });
     whitePawns.forEach((piece: string, c: number) => { board[7][c] = { type: piece, color: 'white', hasMoved: false }; });
     whiteBack.forEach((piece: string, c: number) => { board[8][c] = { type: piece, color: 'white', hasMoved: false }; });
 
-    // Cast to satisfy PgnEngine interface
     return {
       turn: 'white',
       boardSize: 9,
@@ -122,7 +133,7 @@ export class PGNImportReplay {
       executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }): void => {
         // Simplified move execution
       }
-    } as any;
+    };
   }
 
   /**
@@ -308,7 +319,7 @@ export class PGNImportUI {
   private dropZone: HTMLElement | null = null;
   private replayControls: HTMLElement | null = null;
   private moveListContainer: HTMLElement | null = null;
-  private onPGNLoaded?: (importer: PGNImportReplay) => void;
+  private onPGNLoaded?: (_importer: PGNImportReplay) => void;
 
   constructor() {
     this.importer = new PGNImportReplay();
@@ -322,13 +333,13 @@ export class PGNImportUI {
     dropZoneId: string = 'pgn-drop-zone',
     replayControlsId: string = 'pgn-replay-controls',
     moveListId: string = 'pgn-move-list',
-    onPGNLoaded?: (importer: PGNImportReplay) => void
+    _onPGNLoaded?: (_importer: PGNImportReplay) => void
   ): void {
     this.fileInput = document.getElementById(fileInputId) as HTMLInputElement;
     this.dropZone = document.getElementById(dropZoneId);
     this.replayControls = document.getElementById(replayControlsId) as HTMLElement;
     this.moveListContainer = document.getElementById(moveListId) as HTMLElement;
-    this.onPGNLoaded = onPGNLoaded;
+    this.onPGNLoaded = _onPGNLoaded;
 
     if (this.fileInput) {
       this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));

@@ -37,7 +37,7 @@ export class AIController {
   public currentBookMode: string | null;
   public openingBookData: Record<string, unknown> | null;
   // Dynamic delegate methods set by App.applyDelegates()
-  public evaluatePosition?: (color: Player) => number;
+  public evaluatePosition?: (_color: Player) => number;
   public requestPositionAnalysis?: () => void;
   private _aiMoveStartTime: number;
 

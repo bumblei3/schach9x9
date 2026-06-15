@@ -233,7 +233,10 @@ export class StatisticsManager {
    */
   public importGames(jsonData: string, merge: boolean = true): boolean {
     try {
-      const importData = safeJSONParse(jsonData, null) as any;
+      interface ImportData {
+        data: { games: Array<{ id: string; [key: string]: unknown }> };
+      }
+      const importData = safeJSONParse(jsonData, null) as ImportData | null;
       if (!importData) throw new Error('Invalid JSON format');
 
       if (!importData.data || !importData.data.games) {
@@ -243,8 +246,8 @@ export class StatisticsManager {
       if (merge) {
         // Merge games (avoid duplicates by ID)
         const existingIds = new Set(this.data.games.map(g => g.id));
-        const newGames = (importData.data as { games: Array<{ id: string }> }).games.filter((g: any) => !existingIds.has(g.id));
-        this.data.games.push(...(newGames as any[]));
+        const newGames = importData.data.games.filter((g) => !existingIds.has(g.id));
+        this.data.games.push(...newGames);
 
         // Recalculate stats from all games
         this.recalculateStats();

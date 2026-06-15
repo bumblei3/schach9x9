@@ -37,81 +37,119 @@ export class SceneManager3D {
 
   /**
    * Initialize the 3D scene
-   */
-  async init(): Promise<boolean> {
-    try {
-      logger.info('Setting up 3D scene...');
+   /** Initialize the 3D scene */
+   async init(): Promise<boolean> {
+     try {
+       logger.info('Setting up 3D scene...');
 
-      if (!this.container) {
-        logger.error('3D container is null!');
-        return false;
-      }
+       if (!this.container) {
+         logger.error('3D container is null!');
+         return false;
+       }
 
-      const width = this.container.clientWidth;
-      const height = this.container.clientHeight;
+       // Wait for container to have dimensions (with retries)
+       let width = this.container.clientWidth;
+       let height = this.container.clientHeight;
+       let retries = 10;
+      
+       while ((width === 0 || height === 0) && retries > 0) {
+         logger.warn(`Container has zero dimensions, waiting... (${retries} retries left)`);
+         await new Promise(r => setTimeout(r, 100));
+         width = this.container.clientWidth;
+         height = this.container.clientHeight;
+         retries--;
+       }
 
-      if (width === 0 || height === 0) {
-        logger.error('Container has zero dimensions!');
-        return false;
-      }
+       if (width === 0 || height === 0) {
+         logger.error('Container has zero dimensions after retries!');
+         return false;
+       }
 
-      // Scene
-      this.scene = new THREE.Scene();
-      // this.scene.background = new THREE.Color(0x1a1d29); // Remove solid background for transparency
+       // Scene
+       this.scene = new THREE.Scene();
+      
+       // Camera
+       const aspect = width / height;
+       this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+       this.camera.position.set(0, 12, 12);
+       this.camera.lookAt(0, 0, 0);
 
-      // Camera
-      const aspect = width / height;
-      this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-      this.camera.position.set(0, 12, 12);
-      this.camera.lookAt(0, 0, 0);
+       // Renderer - with headless CI fallback
+       const canvas = document.createElement('canvas');
+       let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
+      
+       try {
+         gl = canvas.getContext('webgl2', { 
+           antialias: true, 
+           alpha: true,
+           preserveDrawingBuffer: true,
+           failIfMajorPerformanceCaveat: false 
+         }) || canvas.getContext('webgl', {
+           antialias: true,
+           alpha: true,
+           preserveDrawingBuffer: true,
+           failIfMajorPerformanceCaveat: false
+         });
+       } catch (e) {
+         logger.warn('WebGL context creation failed:', e);
+       }
 
-      // Renderer
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // Enable alpha
-      this.renderer.setSize(width, height);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.shadowMap.enabled = true;
-      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      this.renderer.setClearColor(0x000000, 0); // Transparent clear color
+       if (!gl) {
+         logger.error('WebGL context could not be created - falling back to software renderer');
+         return false;
+       }
 
-      // Clear container
-      while (this.container.firstChild) {
-        this.container.removeChild(this.container.firstChild);
-      }
+       this.renderer = new THREE.WebGLRenderer({ 
+         canvas,
+         antialias: true, 
+         alpha: true,
+         preserveDrawingBuffer: true 
+       });
+       this.renderer.setSize(width, height);
+       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+       this.renderer.shadowMap.enabled = true;
+       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+       this.renderer.setClearColor(0x000000, 0); // Transparent clear color
 
-      this.container.appendChild(this.renderer.domElement);
+       // Clear container
+       while (this.container.firstChild) {
+         this.container.removeChild(this.container.firstChild);
+       }
 
-      // Controls
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.05;
-      this.controls.maxPolarAngle = Math.PI / 2.2;
-      this.controls.minDistance = 8;
-      this.controls.maxDistance = 30;
-      this.controls.target.set(0, 0, 0);
+       this.container.appendChild(this.renderer.domElement);
 
-      // Lighting
-      this.setupLighting();
+       // Controls
+       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+       this.controls.enableDamping = true;
+       this.controls.dampingFactor = 0.05;
+       this.controls.maxPolarAngle = Math.PI / 2.2;
+       this.controls.minDistance = 8;
+       this.controls.maxDistance = 30;
+       this.controls.target.set(0, 0, 0);
 
-      // Create board
-      this.createBoard();
+       // Lighting
+       this.setupLighting();
 
-      // Handle window resize
-      window.addEventListener('resize', this.onWindowResize.bind(this));
+       // Create board
+       this.createBoard();
 
-      // Start loop
-      this.enabled = true;
-      this.animate();
+       // Handle window resize
+       window.addEventListener('resize', this.onWindowResize.bind(this));
 
-      // Force initial resize and render
-      this.onWindowResize();
-      this.renderer.render(this.scene, this.camera);
+       // Start loop
+       this.enabled = true;
+       this.animate();
 
-      return true;
-    } catch (error) {
-      logger.error('Failed to initialize 3D scene:', error);
-      return false;
-    }
-  }
+       // Force initial resize and render
+       this.onWindowResize();
+       this.renderer.render(this.scene, this.camera);
+
+       return true;
+     } catch (error) {
+       logger.error('Failed to initialize 3D scene:', error);
+       return false;
+     }
+   }
 
   setupLighting(): void {
     if (!this.scene) return;

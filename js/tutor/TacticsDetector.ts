@@ -5,7 +5,7 @@ import type { GameLike, Piece } from '../types/game.js';
 
 /** Minimal interface for analyzer (provides getPieceName) */
 export interface Analyzer {
-  getPieceName(type: string): string;
+  getPieceName(_type: string): string;
 }
 
 

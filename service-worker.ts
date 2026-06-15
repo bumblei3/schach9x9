@@ -1,21 +1,11 @@
 const CACHE_NAME = 'schach9x9-v8';
 
-// Types for Service Worker
-interface ExtendableEvent extends Event {
-  waitUntil(fn: Promise<any>): void;
-}
-
-interface FetchEvent extends Event {
-  request: Request;
-  respondWith(response: Promise<Response> | Response): void;
-}
-
 // @ts-ignore
 const swSelf = self as unknown as ServiceWorkerGlobalScope;
 
 // Fetch event: Network-First strategy
-swSelf.addEventListener('fetch', (event: any) => {
-  const fetchEvent = event as FetchEvent;
+swSelf.addEventListener('fetch', (_event: FetchEvent) => {
+  const fetchEvent = _event;
 
   // Skip cross-origin requests
   if (!fetchEvent.request.url.startsWith(swSelf.location.origin)) {

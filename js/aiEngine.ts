@@ -138,7 +138,7 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 
 // --- Worker management ---
 
-type PendingResolve = (data: SearchResult | SearchResult[] | null) => void;
+type PendingResolve = (_data: SearchResult | SearchResult[] | null) => void;
 
 const workerPendingRequests = new Map<string, { resolve: PendingResolve; timer: number }>();
 
@@ -297,7 +297,7 @@ export async function getBestMoveDetailed(
     try {
       const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personalityId, elo);
       if (wasmResult) return { ...wasmResult, depth: wasmResult.depth ?? 0, nodes: wasmResult.nodes ?? 0 };
-    } catch (err) {
+    } catch {
       logger.debug('[AiEngine] WASM fallback failed, using JS');
     }
   }
@@ -495,9 +495,9 @@ export interface AIProgressData {
   [key: string]: number | string | undefined;
 }
 
-export let progressCallback: ((progress: AIProgressData) => void) | null = null;
-export function setProgressCallback(cb: ((progress: AIProgressData) => void) | null): void {
-  progressCallback = cb || null;
+export let progressCallback: ((_progress: AIProgressData) => void) | null = null;
+export function setProgressCallback(_cb: ((_progress: AIProgressData) => void) | null): void {
+  progressCallback = _cb || null;
 }
 
 // Re-exports

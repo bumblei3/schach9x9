@@ -39,7 +39,7 @@ export class MoveController {
   public game: Game;
   public redoStack: MoveHistoryEntry[];
   // Dynamic delegate methods set by App.applyDelegates()
-  public autoSave?: (show: boolean) => void;
+  public autoSave?: (_show: boolean) => void;
 
   constructor(game: Game) {
     this.game = game;

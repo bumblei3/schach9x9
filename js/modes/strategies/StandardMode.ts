@@ -38,7 +38,7 @@ export class StandardModeStrategy implements GameModeStrategy {
       return true;
     }
 
-    if (game.phase === (PHASES.PLAY as Phase) || (game.phase as any) === 'ANALYSIS') {
+    if (game.phase === PHASES.PLAY || game.phase === PHASES.ANALYSIS) {
       if (game.handlePlayClick) {
         await game.handlePlayClick(r, c);
         return true;
@@ -49,8 +49,8 @@ export class StandardModeStrategy implements GameModeStrategy {
 
   onPhaseEnd(game: GameExtended, controller: GameController): void {
     const handleTransition = () => {
-      if (game.phase === (PHASES.SETUP_WHITE_UPGRADES as Phase)) {
-        game.phase = PHASES.SETUP_BLACK_UPGRADES as Phase;
+      if (game.phase === PHASES.SETUP_WHITE_UPGRADES) {
+        game.phase = PHASES.SETUP_BLACK_UPGRADES;
         game.points = game.initialPoints;
         game.log('Weiß fertig. Schwarz: Truppen-Upgrades möglich.');
 
@@ -58,7 +58,7 @@ export class StandardModeStrategy implements GameModeStrategy {
           setTimeout(() => controller.finishSetupPhase(), 500);
         }
         controller.autoSave();
-      } else if (game.phase === (PHASES.SETUP_BLACK_UPGRADES as Phase)) {
+      } else if (game.phase === PHASES.SETUP_BLACK_UPGRADES) {
         this.startGame(game, controller);
       }
       UI.updateStatus(game);
@@ -66,7 +66,7 @@ export class StandardModeStrategy implements GameModeStrategy {
     };
 
     if (game.points > 0) {
-      const isAIBlackSetup = game.isAI && game.phase === (PHASES.SETUP_BLACK_UPGRADES as Phase);
+      const isAIBlackSetup = game.isAI && game.phase === PHASES.SETUP_BLACK_UPGRADES;
 
       if (isAIBlackSetup) {
         handleTransition();
@@ -88,7 +88,7 @@ export class StandardModeStrategy implements GameModeStrategy {
   }
 
   private startGame(game: GameExtended, controller: GameController): void {
-    game.phase = PHASES.PLAY as Phase;
+    game.phase = PHASES.PLAY;
     game.captureInitialBoard();
     controller.showShop(false);
     controller.gameStartTime = Date.now();

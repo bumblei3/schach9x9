@@ -6,7 +6,7 @@ import { logger } from '../../logger.js';
 
 export class ClassicModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController): void {
-    game.phase = PHASES.PLAY as any;
+    game.phase = PHASES.PLAY;
     game.setupClassicBoard();
     game.captureInitialBoard();
 
@@ -28,7 +28,7 @@ export class ClassicModeStrategy implements GameModeStrategy {
     r: number,
     c: number
   ): Promise<boolean> {
-    if (game.phase === (PHASES.PLAY as any) || (game.phase as any) === 'ANALYSIS') {
+    if (game.phase === PHASES.PLAY || game.phase === PHASES.ANALYSIS) {
       if (game.handlePlayClick) {
         await game.handlePlayClick(r, c);
         return true;

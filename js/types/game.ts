@@ -164,7 +164,7 @@ export interface GameLike {
   log?: (_message: string) => void;
   points: number;
   tutorPoints?: number;
-  moveHistory: Array<{ from: Square; to: Square; piece?: PieceType; captured?: PieceType | null; promotion?: PieceType }>;
+  moveHistory: Move[];
   // Tutor-specific (used by MoveAnalyzer)
   kiMentorEnabled?: boolean;
   mentorLevel?: string;

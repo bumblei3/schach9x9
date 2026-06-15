@@ -12,7 +12,7 @@ export class InputHandler3D {
   public pieceManager: PieceManager3D;
   public raycaster: THREE.Raycaster;
   public mouse: THREE.Vector2;
-  public clickHandler: (event: MouseEvent) => void;
+  public clickHandler: (_event: MouseEvent) => void;
   public enabled: boolean;
 
   constructor(sceneManager: SceneManager3D, pieceManager: PieceManager3D) {

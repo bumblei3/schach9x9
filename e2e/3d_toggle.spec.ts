@@ -32,6 +32,7 @@ test.describe('3D Mode Toggle @3d', () => {
       if (window.app && typeof window.app.init3D === 'function') {
         return window.app.init3D();
       }
+      return Promise.resolve();
     });
 
     // Wait for canvas to exist (Three.js initialized) - longer timeout for CI
@@ -39,7 +40,7 @@ test.describe('3D Mode Toggle @3d', () => {
 
     // Wait for WebGL context to be ready (additional check)
     await page.waitForFunction(() => {
-      const canvas = document.querySelector('#battle-chess-3d-container canvas');
+      const canvas = document.querySelector<HTMLCanvasElement>('#battle-chess-3d-container canvas');
       return canvas && canvas.width > 0 && canvas.height > 0;
     }, { timeout: 30000 });
 

@@ -24,10 +24,10 @@ const LOG_STYLES: Record<LogLevelName, string> = {
 };
 
 export interface ContextLogger {
-  error: (...args: unknown[]) => void;
-  warn: (...args: unknown[]) => void;
-  info: (...args: unknown[]) => void;
-  debug: (...args: unknown[]) => void;
+  error: (..._args: unknown[]) => void;
+  warn: (..._args: unknown[]) => void;
+  info: (..._args: unknown[]) => void;
+  debug: (..._args: unknown[]) => void;
 }
 
 class Logger {

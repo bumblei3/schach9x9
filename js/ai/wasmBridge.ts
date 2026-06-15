@@ -37,7 +37,7 @@ export async function ensureWasmInitialized(): Promise<boolean> {
 
         // url module is dynamically imported; fileURLToPath is not typed
         
-        const __dirname = path.dirname((url as unknown as { fileURLToPath: (u: unknown) => string }).fileURLToPath(import.meta.url));
+        const __dirname = path.dirname((url as unknown as { fileURLToPath: (_u: unknown) => string }).fileURLToPath(import.meta.url));
         const wasmPath = path.join(__dirname, '../../engine-wasm/pkg/schach9x9_bg.wasm');
         const wasmBuffer = fs.readFileSync(wasmPath);
 

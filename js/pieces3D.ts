@@ -216,7 +216,7 @@ export function createPiece3D(
 
   // Make all pieces cast shadows
   pieceGroup.traverse(child => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     if ((child as THREE.Mesh).isMesh) {
       child.castShadow = true;
       child.receiveShadow = true;

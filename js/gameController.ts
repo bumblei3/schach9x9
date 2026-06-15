@@ -43,17 +43,16 @@ import { ClassicModeStrategy } from './modes/strategies/ClassicMode.js';
 import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 
-/** Type for the arrowRenderer field on Game, matching gameEngine.ts line 173 */
-type ArrowRendererType = {
+export interface ArrowRendererType {
   clearArrows: () => void;
-  addArrow?: (...args: unknown[]) => void;
-  highlightMoves?: (arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
-};
+  addArrow?: (..._args: unknown[]) => void;
+  highlightMoves?: (_arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
+}
 
 export interface GameExtended extends Game {
   campaignMode?: boolean;
   currentLevelId?: string;
-  handlePlayClick?: (r: number, c: number) => Promise<void>;
+  handlePlayClick?: (_r: number, _c: number) => Promise<void>;
   aiSetupKing?: () => void;
   aiSetupPieces?: () => void;
   aiSetupUpgrades?: () => void;
@@ -63,13 +62,13 @@ export interface GameExtended extends Game {
   arrowRenderer?: ArrowRendererType;
   puzzleMode?: boolean;
   currentPuzzle?: PuzzleState | null;
-  calculateMaterialAdvantage?: (color?: Player) => number;
+  calculateMaterialAdvantage?: (_color?: Player) => number;
   gameController?: GameController;
   aiController?: AIController;
   moveController?: {
     undoMove: () => void;
     redoMove: () => void;
-    reconstructBoardAtMove?: (moveIndex: number) => void;
+    reconstructBoardAtMove?: (_moveIndex: number) => void;
   };
   startClock?: () => void;
   stopClock?: () => void;

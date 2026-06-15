@@ -5,7 +5,7 @@ import type { Game } from './gameEngine.js';
 import type { GameController } from './gameController.js';
 import type * as UIImport from './ui.js';
 
-interface KeyboardManager {
+interface _KeyboardManager {
   performEmergencyRecovery?: () => void;
 }
 

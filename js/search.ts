@@ -162,7 +162,7 @@ function probcut(
   start: number,
   nodes: { count: number },
   color: number,
-  searchFn: (b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean) => { score: number; bestMove: Move | null }
+  searchFn: (_b: IntBoard, _d: number, _alpha: number, _beta: number, _maximizing: boolean) => { score: number; bestMove: Move | null }
 ): boolean {
   // Only apply probcut at sufficient depth
   if (d < PROBCUT_DEPTH) return false;
@@ -237,7 +237,7 @@ function isSingularMove(
   start: number,
   nodes: { count: number },
   color: number,
-  searchFn: (b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean) => { score: number; bestMove: Move | null }
+  searchFn: (_b: IntBoard, _d: number, _alpha: number, _beta: number, _maximizing: boolean) => { score: number; bestMove: Move | null }
 ): boolean {
   if (d < SINGULAR_DEPTH) return false;
   if (!bestMove) return false;

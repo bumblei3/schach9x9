@@ -20,12 +20,28 @@ export interface AnalysisSummary {
   keyMoments: RatedMove[];
 }
 
+interface GameStatsLike {
+  totalMoves: number;
+  captures?: { white: number; black: number } | number;
+}
+
+interface AnalysisUILike {
+  topMovesContainer?: HTMLElement | null;
+}
+
+interface GameWithStats {
+  stats: GameStatsLike;
+  aiController?: {
+    analysisUI?: AnalysisUILike | null;
+  };
+}
+
 export class AnalysisManager {
-  private game: any;
+  private game: GameWithStats;
   public showBestMove: boolean = false;
   private bestMoveArrow: SVGSVGElement | null = null;
 
-  constructor(game: any) {
+  constructor(game: GameWithStats) {
     this.game = game;
   }
 
@@ -44,9 +60,14 @@ export class AnalysisManager {
     };
   }
 
-  private calculateAccuracy(stats: any): number {
+  private calculateAccuracy(stats: GameStatsLike): number {
     const totalMoves = stats.totalMoves || 0;
-    const captures = stats.captures?.white || 0;
+    let captures = 0;
+    if (typeof stats.captures === 'object' && stats.captures !== null) {
+      captures = stats.captures.white || 0;
+    } else if (typeof stats.captures === 'number') {
+      captures = stats.captures;
+    }
 
     let base = 75;
     if (totalMoves > 0) {
@@ -94,7 +115,7 @@ export class AnalysisManager {
     if (!this.showBestMove || !topMoves) return;
 
     // Get best move from analysis panel's first top move
-    const firstTopMove = topMoves.querySelector('.top-move-item');
+    const firstTopMove = topMoves.querySelector('.top-move-item') as HTMLElement | null;
     if (!firstTopMove) return;
 
     const from = firstTopMove.dataset.from?.split(',').map(Number);

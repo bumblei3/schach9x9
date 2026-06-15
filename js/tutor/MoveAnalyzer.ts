@@ -449,7 +449,7 @@ export function handlePlayerMove(
  */
 export async function checkBlunder(
   game: GameLike,
-  tutorController: { showBlunderWarning: (analysis: MoveExplanation) => void },
+  tutorController: { showBlunderWarning: (_analysis: MoveExplanation) => void },
   moveRecord: MoveRecord
 ): Promise<void> {
   if (!moveRecord || game.mode === 'puzzle') return;

@@ -1,5 +1,6 @@
 import { logger } from '../logger.js';
 import type { Game } from '../gameEngine.js';
+import type { MoveHistoryEntry } from '../gameEngine.js';
 
 /**
  * Piece type to standard notation letter.
@@ -59,7 +60,7 @@ const QUALITY_SYMBOLS: Record<string, string> = {
  * @returns Algebraic notation string with optional annotations
  */
 export function moveToNotation(
-  move: any,
+  move: MoveHistoryEntry | null | undefined,
   _game: Game | null = null,
   includeEngineAnnotations: boolean = false
 ): string {
@@ -68,7 +69,7 @@ export function moveToNotation(
   }
 
   // Handle castling
-  const sm = (move as any).specialMove as Record<string, unknown> | undefined;
+  const sm = move.specialMove as Record<string, unknown> | undefined;
   if (sm?.type === 'castling') {
     return sm.isKingside ? 'O-O' : 'O-O-O';
   }
@@ -129,9 +130,10 @@ export function moveToNotation(
       annotations.push(`[%clk ${mins}:${secs.toString().padStart(2, '0')}]`);
     }
 
-    // Principal variation (if available in analysis)
-    if (move.pv && move.pv.length > 0) {
-      const pvMoves = move.pv.map((pvMove: any) => moveToNotation(pvMove));
+// Principal variation (if available in analysis)
+    const pvMove = move as MoveHistoryEntry & { pv?: MoveHistoryEntry[] };
+    if (pvMove.pv && pvMove.pv.length > 0) {
+      const pvMoves = pvMove.pv.map((pv) => moveToNotation(pv));
       annotations.push(`[%pv ${pvMoves.join(' ')}]`);
     }
 
@@ -168,7 +170,7 @@ export function generatePGN(
 
   // Result
   let result = '*'; // Ongoing
-  const g = game as any;
+  const g = game as Game & { winner?: 'white' | 'black' | 'draw' };
   if (g.winner === 'white') result = '1-0';
   else if (g.winner === 'black') result = '0-1';
   else if (g.winner === 'draw') result = '1/2-1/2';

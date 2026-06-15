@@ -19,9 +19,9 @@ interface PgnEngine {
   turn: string;
   boardSize: number;
   board: ({ type: string; color: string } | null)[][];
-  getAllLegalMoves(turn: string): { from: { r: number; c: number }; to: { r: number; c: number } }[];
+  getAllLegalMoves(_turn: string): { from: { r: number; c: number }; to: { r: number; c: number } }[];
   getBoardHash(): string;
-  executeMove(from: { r: number; c: number }, to: { r: number; c: number }): void;
+  executeMove(_from: { r: number; c: number }, _to: { r: number; c: number }): void;
 }
 
 export class PGNParser {

@@ -162,7 +162,7 @@ export class Game {
   aiPersonality: string;
   playerColor: Player;
   tutorController?: TutorController;
-  isTutorMove?: (move: Square) => boolean;
+  isTutorMove?: (_move: Square) => boolean;
   undoMove?: () => void;
   redoMove?: () => void;
   // Dynamic properties set at runtime by controllers
@@ -177,25 +177,25 @@ export class Game {
   analysisManager?: AnalysisManager;
   arrowRenderer?: {
     clearArrows: () => void;
-    drawArrow?: (fromR: number, fromC: number, toR: number, toC: number, color: string) => void;
-    addArrow?: (...args: unknown[]) => void;
-    highlightMoves?: (arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
+    drawArrow?: (_fromR: number, _fromC: number, _toR: number, _toC: number, _color: string) => void;
+    addArrow?: (..._args: unknown[]) => void;
+    highlightMoves?: (_arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
   };
-  evaluationBar?: { show: (visible: boolean) => void; update: (score: number) => void };
+  evaluationBar?: { show: (_visible: boolean) => void; update: (_score: number) => void };
   campaignMode?: boolean;
   currentTheme?: string;
   // AI setup delegation methods
-  placeKing?: (r: number, c: number, color: Player) => void;
-  placeShopPiece?: (r: number, c: number) => void;
+  placeKing?: (_r: number, _c: number, _color: Player) => void;
+  placeShopPiece?: (_r: number, _c: number) => void;
   finishSetupPhase?: () => void;
   // Game flow delegation methods
-  resign?: (color?: Player) => void;
-  offerDraw?: (color?: Player) => void;
+  resign?: (_color?: Player) => void;
+  offerDraw?: (_color?: Player) => void;
   acceptDraw?: () => void;
   declineDraw?: () => void;
   // Board analysis delegation methods
   isInsufficientMaterial?: () => boolean;
-  calculateMaterialAdvantage?: (color?: Player) => number;
+  calculateMaterialAdvantage?: (_color?: Player) => number;
   // Rendering
   renderBoard?: () => void;
   // Draw offer evaluation
@@ -208,15 +208,15 @@ export class Game {
   startClock?: () => void;
   stopClock?: () => void;
   // Shop delegation
-  selectShopPiece?: (type: string) => void;
+  selectShopPiece?: (_type: string) => void;
   // Tutor delegation
   tutorMode?: string;
   // Theme delegation
-  setTheme?: (value: string) => void;
+  setTheme?: (_value: string) => void;
   // AI evaluation delegation
-  evaluatePosition?: (color: Player) => number;
+  evaluatePosition?: (_color: Player) => number;
   // Auto-save delegation
-  autoSave?: (show: boolean) => void;
+  autoSave?: (_show: boolean) => void;
   // Analysis delegation
   requestPositionAnalysis?: () => void;
 

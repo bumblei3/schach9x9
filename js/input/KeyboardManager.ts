@@ -9,7 +9,7 @@ import type { Game } from '../gameEngine.js';
 
 export class KeyboardManager {
   private app: App;
-  private boundHandleKeyDown: (event: KeyboardEvent) => Promise<void>;
+  private boundHandleKeyDown: (_event: KeyboardEvent) => Promise<void>;
 
   constructor(app: App) {
     this.app = app;
@@ -133,8 +133,9 @@ export class KeyboardManager {
       closeModal();
 
       if (g.selectedSquare) {
-        if ((this.app.gameController as any).resetSelection) {
-          (this.app.gameController as any).resetSelection();
+        const gc = this.app.gameController as { resetSelection?: () => void } | null;
+        if (gc?.resetSelection) {
+          gc.resetSelection();
         } else {
           g.selectedSquare = null;
           g.validMoves = [];

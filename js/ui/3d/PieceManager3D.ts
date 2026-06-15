@@ -97,7 +97,7 @@ export class PieceManager3D {
       const rowStart = 6;
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {
-          zones.push({ r: r as any, c: c as any });
+          zones.push({ r, c });
         }
       }
       this.highlightZones(zones, 0x6366f1);
@@ -109,7 +109,7 @@ export class PieceManager3D {
       const rowStart = 0;
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {
-          zones.push({ r: r as any, c: c as any });
+          zones.push({ r, c });
         }
       }
       this.highlightZones(zones, 0xef4444); // Red for black (though usually we allow same color highlight)

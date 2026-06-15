@@ -8,7 +8,7 @@ use rand::Rng;
 // =====================================================================
 // Search Constants
 // =====================================================================
-const TT_SIZE: usize = 65536;
+const TT_SIZE: usize = 262144; // 256K entries (match JS TT size)
 const MATE_SCORE: i32 = 30000;
 const INFINITY: i32 = 30000;
 

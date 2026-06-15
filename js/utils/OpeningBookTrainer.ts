@@ -59,7 +59,7 @@ interface BookData {
     generatedAt: string;
     totalPositions: number;
     totalMoves: number;
-    config: any;
+    config: TrainerConfig;
   };
 }
 
@@ -167,8 +167,8 @@ function applyMoveInt(board: IntBoard, move: MoveResult): void {
 
 function isTerminalInt(board: IntBoard, color: 'white' | 'black'): { terminal: boolean; result: 'win' | 'loss' | 'draw' | null } {
   const kingColor = color === 'white' ? COLOR_WHITE : COLOR_BLACK;
-  const inCheckResult = isInCheck(board as any, kingColor);
-  const legalMoves = getAllLegalMoves(board as any, color);
+  const inCheckResult = isInCheck(board, kingColor);
+  const legalMoves = getAllLegalMoves(board, color);
 
   if (legalMoves.length === 0) {
     return { terminal: true, result: inCheckResult ? (color === 'white' ? 'loss' : 'win') : 'draw' };
@@ -545,7 +545,7 @@ async function main(): Promise<void> {
       case '--min-count': config.minPositionCount = parseInt(args[++i], 10); break;
       case '--max-moves': config.maxMovesPerPosition = parseInt(args[++i], 10); break;
       case '--elo': config.elo = parseInt(args[++i], 10); break;
-      case '--personality': config.personality = args[++i] as any; break;
+      case '--personality': config.personality = args[++i] as TrainerConfig['personality']; break;
       case '--input': config.inputBookPath = args[++i]; break;
       case '--output': config.outputBookPath = args[++i]; break;
       case '--no-alternate': config.alternateColors = false; break;

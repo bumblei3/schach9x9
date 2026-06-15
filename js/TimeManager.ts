@@ -14,7 +14,7 @@ export interface TimeControlMode {
 }
 
 export interface GameControllerInterface {
-  saveGameToStatistics?: (result: string, color: Player) => void;
+  saveGameToStatistics?: (_result: string, _color: Player) => void;
 }
 
 const TIME_CONTROLS: Record<string, TimeControlMode> = {
