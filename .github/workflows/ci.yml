@@ -155,12 +155,15 @@ jobs:
 
       - name: Verify WASM build artifact
         run: |
-          if [ ! -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
+          if [ -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
+            echo "✅ WASM artifact found (schach9x9): $(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm) bytes"
+          elif [ -f engine-wasm/pkg/engine_wasm_bg.wasm ]; then
+            echo "✅ WASM artifact found (engine_wasm): $(stat -c%s engine-wasm/pkg/engine_wasm_bg.wasm) bytes"
+          else
             echo "❌ WASM artifact not found!"
             ls -la engine-wasm/pkg/ || true
             exit 1
           fi
-          echo "✅ WASM artifact found: $(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm) bytes"
 
       - name: Run unit tests with coverage
         run: npm run test:coverage
