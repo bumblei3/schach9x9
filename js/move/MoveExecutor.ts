@@ -6,7 +6,8 @@ import { puzzleManager } from '../puzzleManager.js';
 import { evaluatePosition } from '../aiEngine.js';
 import * as MoveValidator from './MoveValidator.js';
 import { confettiSystem } from '../effects.js';
-import type { Square, PieceWithMoved, MoveHistoryEntry, Player, Piece } from '../gameEngine.js';
+import type { Square, Player, Piece, MoveRecord, MoveResult, PieceType } from '../types/game.js';
+import type { PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
@@ -275,12 +276,26 @@ export async function completeMoveExecution(
   // Blunder Detection
   if (game.tutorController?.checkBlunder) {
     // Fire and forget or await? Safer to await to ensure sequence
-    await game.tutorController.checkBlunder(moveRecord);
+    const moveRecordForTutor: MoveRecord = {
+      from: moveRecord.from,
+      to: moveRecord.to,
+      piece: (moveRecord.piece?.type as PieceType) ?? 'p',
+      evalScore: moveRecord.evalScore,
+    };
+    // Fire and forget or await? Safer to await to ensure sequence
+    await game.tutorController.checkBlunder(moveRecordForTutor);
   }
 
   // Puzzle Logic Check
   if (game.mode === 'puzzle') {
-    const result = puzzleManager.checkMove(game, moveRecord);
+    const moveRecordForPuzzle: MoveResult = {
+      from: moveRecord.from,
+      to: moveRecord.to,
+      piece: (moveRecord.piece?.type as PieceType) ?? 'p',
+      promotion: moveRecord.promotion ?? undefined,
+      score: moveRecord.evalScore,
+    };
+    const result = puzzleManager.checkMove(game, moveRecordForPuzzle);
     if (result === 'wrong') {
       setTimeout(() => {
         moveController.undoMove();

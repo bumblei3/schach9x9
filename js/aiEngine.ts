@@ -83,7 +83,7 @@ export interface TimeParams {
 export interface MoveResult {
   from: Square;
   to: Square;
-  promotion?: string;
+  promotion?: string | PieceType;
   capture?: boolean;
   score?: number;
   piece?: PieceType;

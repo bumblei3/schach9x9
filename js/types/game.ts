@@ -1,7 +1,8 @@
 /**
  * Core game type definitions for Schach 9x9
  */
-import type { MoveResult } from './aiEngine';
+import type { MoveResult } from '../aiEngine.js';
+export type { MoveResult } from '../aiEngine.js';
 
 export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j' | null;
 
@@ -123,6 +124,8 @@ export interface MoveRecord {
   piece?: PieceType | Piece;
   captured?: PieceType | Piece | null;
   promotion?: PieceType | string;
+  evalScore?: number;
+  score?: number;
 }
 
 /** Puzzle interface */
@@ -132,7 +135,7 @@ export interface Puzzle {
   description: string;
   difficulty: string;
   fen?: string;
-  solution: Array<Move | MoveResult | { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string | PieceType; piece: PieceType }>;
+  solution: Array<Move | MoveResult | { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: PieceType; piece: PieceType }>;
 }
 
 /** Action button for modals */

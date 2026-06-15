@@ -149,9 +149,9 @@ export class PuzzleManager {
       solution: puzzle.solution.map(m => ({ 
         from: m.from, 
         to: m.to, 
-        promotion: m.promotion as PieceType | undefined, 
+        promotion: undefined, 
         piece: m.piece ?? 'p' 
-      })) as Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string | PieceType; piece: PieceType }>,
+      })) as Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: PieceType; piece: PieceType }>,
     };
 
     // Apply setup from string or function

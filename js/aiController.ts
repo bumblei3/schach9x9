@@ -259,7 +259,7 @@ export class AIController {
       const allMoves = this.game.getAllLegalMoves('black');
       if (allMoves.length > 0) {
         const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
-        this.game.executeMove(randomMove.from, randomMove.to, false, randomMove.promotion);
+        this.game.executeMove(randomMove.from, randomMove.to, false, randomMove.promotion as string | undefined);
         if (this.game.renderBoard) this.game.renderBoard();
         if (spinner) spinner.classList.add('hidden');
         return;
@@ -307,7 +307,7 @@ export class AIController {
             bestResult.move.from,
             bestResult.move.to,
             false,
-            bestResult.move.promotion
+                        bestResult.move.promotion as string | undefined
           );
           if (this.game.renderBoard) this.game.renderBoard();
 

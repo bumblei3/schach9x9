@@ -449,7 +449,7 @@ export function handlePlayerMove(
  */
 export async function checkBlunder(
   game: GameLike,
-  tutorController: { showBlunderWarning: (_analysis: MoveExplanation) => void },
+  tutorController: { showBlunderWarning: (_analysis: MoveExplanation, _callback: () => void) => void },
   moveRecord: MoveRecord
 ): Promise<void> {
   if (!moveRecord || game.mode === 'puzzle') return;
@@ -477,7 +477,7 @@ export async function checkBlunder(
       currentEvalNum,
       turn === 'white' ? prevEval : -prevEval
     );
-    tutorController.showBlunderWarning(analysis);
+    tutorController.showBlunderWarning(analysis, () => {});
   }
 
   // Show quality highlight on the board
