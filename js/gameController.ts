@@ -601,7 +601,7 @@ export class GameController {
 
   loadPuzzle(index: number): void {
     const puzzle = puzzleManager.loadPuzzle(this.game, index);
-    if (puzzle) {
+    if (puzzle && typeof puzzle !== 'boolean') {
       this.game.currentPuzzle = puzzle as unknown as PuzzleState;
       UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
@@ -620,7 +620,7 @@ export class GameController {
 
   nextPuzzle(): void {
     const puzzle = puzzleManager.nextPuzzle(this.game);
-    if (puzzle) {
+    if (puzzle && typeof puzzle !== 'boolean') {
       UI.showPuzzleOverlay(puzzle);
       UI.renderBoard(this.game);
       UI.updateStatus(this.game);

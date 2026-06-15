@@ -1,7 +1,7 @@
 import { PuzzleGenerator } from './puzzleGenerator.js';
 import { ProceduralGenerator } from './puzzle/ProceduralGenerator.js';
 import type { MoveResult } from './aiEngine.js';
-import type { GameLike } from './types/game.js';
+import type { GameLike, PieceType } from './types/game.js';
 
 export interface Puzzle {
   id: string;
@@ -146,7 +146,12 @@ export class PuzzleManager {
       puzzleId: puzzle.id,
       solved: false,
       failed: false,
-      solution: puzzle.solution as unknown as Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }>,
+      solution: puzzle.solution.map(m => ({ 
+        from: m.from, 
+        to: m.to, 
+        promotion: m.promotion as PieceType | undefined, 
+        piece: m.piece ?? 'p' 
+      })) as Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string | PieceType; piece: PieceType }>,
     };
 
     // Apply setup from string or function

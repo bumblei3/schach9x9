@@ -1,6 +1,8 @@
 /**
  * Core game type definitions for Schach 9x9
  */
+import type { MoveResult } from './aiEngine';
+
 export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j' | null;
 
 export type Player = 'white' | 'black';
@@ -130,7 +132,7 @@ export interface Puzzle {
   description: string;
   difficulty: string;
   fen?: string;
-  solution: Array<Move | { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }>;
+  solution: Array<Move | MoveResult | { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string | PieceType; piece: PieceType }>;
 }
 
 /** Action button for modals */

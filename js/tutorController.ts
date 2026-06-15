@@ -38,7 +38,7 @@ import type { MoveRecord } from './tutor/MoveAnalyzer.js';
 import type { SetupTemplate } from './tutor/HintGenerator.js';
 
 interface TutorControllerLike {
-  showBlunderWarning(_analysis: MoveExplanation): void;
+  showBlunderWarning(_analysis: MoveExplanation, _callback: () => void): void;
   getSetupTemplates(): SetupTemplate[];
   handlePlayerMove(_from: { r: number; c: number }, _to: { r: number; c: number }): void;
   analyzePlayerMovePreExecution(_move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<MoveExplanation | null>;
@@ -172,8 +172,8 @@ export class TutorController implements TutorControllerLike {
     return checkBlunder(this.game, this, moveRecord as MoveRecord);
   }
 
-  public showBlunderWarning(analysis: MoveExplanation): void {
-    return showBlunderWarning(this.game as Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis);
+  public showBlunderWarning(analysis: MoveExplanation, callback: () => void): void {
+    return showBlunderWarning(this.game as Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis, callback);
   }
 
   public getSetupTemplates(): SetupTemplate[] {

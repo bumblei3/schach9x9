@@ -40,7 +40,7 @@ import {
   PIECE_ANGEL, PIECE_NIGHTRIDER, COLOR_WHITE, COLOR_BLACK, TYPE_MASK, COLOR_MASK,
 } from './ai/BoardDefinitions';
 import { getCurrentBoardShape } from './config';
-import type { Player, Square, Piece } from './types/game';
+import type { Player, Square, Piece, PieceType } from './types/game';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 
 // Re-export evaluate module
@@ -86,6 +86,7 @@ export interface MoveResult {
   promotion?: string;
   capture?: boolean;
   score?: number;
+  piece?: PieceType;
 }
 
 export interface SearchResult {
