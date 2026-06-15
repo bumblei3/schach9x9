@@ -15,6 +15,7 @@ import type { TutorController } from './tutorController.js';
 import type { AnalysisManager } from './AnalysisManager.js';
 import type { UIEffects } from './ui/ui_effects.js';
 import type { KeyboardManager } from './input/KeyboardManager.js';
+import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
 
 // Global variable for UI since it's used in many places but we want to avoid static import
@@ -30,9 +31,9 @@ export class App {
   public evaluationBar: EvaluationBar | null = null;
   public uiEffects: UIEffects | null = null;
   public keyboardManager: KeyboardManager | null = null;
-  public battleChess3D: any = null; // BattleChess3D instance (loaded lazily)
+  public battleChess3D: BattleChess3D | null = null; // BattleChess3D instance (loaded lazily)
   public domHandler: DOMHandler;
-  public battleChess3D_Class: any = null; // BattleChess3D constructor (loaded lazily)
+  public battleChess3D_Class: typeof BattleChess3D | null = null; // BattleChess3D constructor (loaded lazily)
   public Game_Class: typeof Game | null = null;
 
   constructor() {
@@ -84,8 +85,6 @@ export class App {
 
     this.game.moveController = new MoveController(this.game);
     this.game.aiController = new AIController(this.game);
-
-    this.battleChess3D_Class = BC3D_MODULE.BattleChess3D;
 
     // Make controllers accessible to each other (circular dependencies)
     this.aiController = this.game.aiController as AIController | null;
