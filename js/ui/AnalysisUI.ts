@@ -318,7 +318,7 @@ export class AnalysisUI {
 
   undoMoveOnBoard(board: (Piece | null)[][], move: { from: Square; to: Square; piece?: Piece; captured?: Piece | null; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }): void {
     
-    const { from, to, piece, captured, specialMove } = move;
+    const { from: _from, to, piece, captured, specialMove } = move;
     
     if (!piece) return;
 

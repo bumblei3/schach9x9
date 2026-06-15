@@ -146,7 +146,7 @@ export class PuzzleManager {
       puzzleId: puzzle.id,
       solved: false,
       failed: false,
-      solution: puzzle.solution as any,
+      solution: puzzle.solution as unknown as Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }>,
     };
 
     // Apply setup from string or function
