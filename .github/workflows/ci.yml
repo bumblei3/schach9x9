@@ -74,21 +74,25 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Run ESLint (with cache)
-        run: npm run lint -- --cache
+        run: npm run lint -- --cache --max-warnings=0
 
       - name: Run TypeScript type check
         id: tsc-check
-        run: |
-          npx tsc --noEmit 2>&1 | tee tsc-output.txt
+        run: npx tsc --noEmit 2>&1 | tee tsc-output.txt
 
       - name: TypeScript errors summary
         if: always()
         run: |
-          ERROR_COUNT=$(grep -c "error TS" tsc-output.txt || true)
+          if [ -f tsc-output.txt ]; then
+            ERROR_COUNT=$(grep -c "error TS" tsc-output.txt || true)
+          else
+            ERROR_COUNT=0
+          fi
           echo "TypeScript Errors: $ERROR_COUNT" >> $GITHUB_STEP_SUMMARY
           if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo "⚠️ **Pre-existing TypeScript errors found** (non-blocking)"
+            echo "❌ **TypeScript errors found** (blocking)"
             grep "error TS" tsc-output.txt | head -20 >> $GITHUB_STEP_SUMMARY
+            exit 1
           else
             echo "✅ No TypeScript errors"
           fi
