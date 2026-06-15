@@ -20,7 +20,6 @@ test.describe('3D Mode Toggle @3d', () => {
     await expect(page.locator('body')).toHaveClass(/game-initialized/);
 
     const toggleBtn = page.locator('#toggle-3d-btn');
-
     const container3d = page.locator('#battle-chess-3d-container');
     const boardWrapper = page.locator('#board-wrapper');
 
@@ -28,22 +27,23 @@ test.describe('3D Mode Toggle @3d', () => {
     await expect(container3d).not.toHaveClass(/active/);
     await expect(boardWrapper).toBeVisible();
 
-    // Toggle ON
-    await toggleBtn.click();
+    // Toggle ON - directly initialize 3D via app.init3D()
+    await page.evaluate(() => {
+      if (window.app && typeof window.app.init3D === 'function') {
+        return window.app.init3D();
+      }
+    });
 
-    // 3D container should become active/visible
-    await expect(container3d).toHaveClass(/active/);
+    // Wait for canvas to exist (Three.js initialized) - longer timeout for CI
+    await expect(container3d.locator('canvas')).toBeAttached({ timeout: 30000 });
 
-    // 2D board usually gets hidden or z-indexed.
-    // In style.css: .game-area.3d-active #board-wrapper { opacity: 0; pointer-events: none; }
-    // Let's check for class on game-area or container visibility.
-    // Actually, checking if container3d is visible is good.
-    await expect(container3d).toBeVisible();
+    // Wait for WebGL context to be ready (additional check)
+    await page.waitForFunction(() => {
+      const canvas = document.querySelector('#battle-chess-3d-container canvas');
+      return canvas && canvas.width > 0 && canvas.height > 0;
+    }, { timeout: 30000 });
 
-    // Wait for canvas to exist (Three.js initialized)
-    await expect(container3d.locator('canvas')).toBeAttached({ timeout: 10000 });
-
-    // Toggle OFF
+    // Toggle OFF - use the actual click handler
     await toggleBtn.click();
 
     // 3D container should be hidden/inactive

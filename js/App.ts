@@ -183,6 +183,8 @@ export class App {
       }
       if (this.battleChess3D) {
         window.battleChess3D = this.battleChess3D;
+        // Initialize the 3D scene (creates canvas, renderer, etc.)
+        await this.battleChess3D.init();
       }
 
       // Hook into Game methods for 3D updates if not handled by event listeners
