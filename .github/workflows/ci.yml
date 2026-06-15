@@ -27,7 +27,7 @@ env:
   # Pin Node.js version for reproducible builds
   NODE_VERSION: '20.19.0'
   # Cache versions for reproducibility
-  NPM_CACHE_VERSION: '1'
+  NPM_CACHE_VERSION: '3'
   PLAYWRIGHT_CACHE_VERSION: '1'
   RUST_CACHE_VERSION: '1'
 
@@ -148,19 +148,22 @@ jobs:
         run: npm rebuild rolldown vite
 
       - name: Download WASM build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: wasm-build
           path: engine-wasm/pkg/
 
       - name: Verify WASM build artifact
         run: |
-          if [ ! -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
+          if [ -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
+            echo "✅ WASM artifact found (schach9x9): $(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm) bytes"
+          elif [ -f engine-wasm/pkg/engine_wasm_bg.wasm ]; then
+            echo "✅ WASM artifact found (engine_wasm): $(stat -c%s engine-wasm/pkg/engine_wasm_bg.wasm) bytes"
+          else
             echo "❌ WASM artifact not found!"
             ls -la engine-wasm/pkg/ || true
             exit 1
           fi
-          echo "✅ WASM artifact found: $(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm) bytes"
 
       - name: Run unit tests with coverage
         run: npm run test:coverage
@@ -177,7 +180,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report-${{ matrix.node-version }}
@@ -242,7 +245,7 @@ jobs:
         run: npm rebuild rolldown vite
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: production-build
           path: dist/
@@ -266,7 +269,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -367,7 +370,7 @@ jobs:
 
       - name: Upload WASM build artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wasm-build
           path: engine-wasm/pkg/
@@ -428,7 +431,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Upload audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: security-audit-report
@@ -532,7 +535,7 @@ jobs:
           echo "✅ Bundle size within budget"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: production-build
@@ -568,16 +571,16 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: production-build
           path: dist/
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
 
