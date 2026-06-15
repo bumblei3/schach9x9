@@ -25,7 +25,7 @@ concurrency:
 
 env:
   # Pin Node.js version for reproducible builds
-  NODE_VERSION: '20.19.0'
+  NODE_VERSION: '24.0.0'
   # Cache versions for reproducibility
   NPM_CACHE_VERSION: '3'
   PLAYWRIGHT_CACHE_VERSION: '1'
@@ -110,7 +110,7 @@ jobs:
     needs: [lint, wasm-build]
     strategy:
       matrix:
-        node-version: ['20', '22']
+        node-version: ['22', '24']
       fail-fast: false
     steps:
       - uses: actions/checkout@v6
@@ -168,7 +168,7 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:coverage
         timeout-minutes: 25
-        continue-on-error: ${{ matrix.node-version == '22' }}
+        continue-on-error: ${{ matrix.node-version == '24' }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
@@ -207,8 +207,6 @@ jobs:
     timeout-minutes: 75
     continue-on-error: true
     needs: [build]
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v6
 
