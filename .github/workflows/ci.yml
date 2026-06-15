@@ -172,7 +172,6 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:coverage
         timeout-minutes: 25
-        continue-on-error: ${{ matrix.node-version == '24' }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
@@ -193,7 +192,6 @@ jobs:
 
       - name: Run fuzz tests
         run: npm test tests/fuzz/fuzz.test.ts
-        continue-on-error: true
 
       - name: Test summary
         if: always()
@@ -209,7 +207,6 @@ jobs:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 75
-    continue-on-error: true
     needs: [build]
     steps:
       - uses: actions/checkout@v6
@@ -268,7 +265,6 @@ jobs:
 
       - name: Run Visual Regression tests
         run: npm run test:visual
-        continue-on-error: true
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7
@@ -285,7 +281,6 @@ jobs:
     name: WASM Engine Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
 
@@ -385,7 +380,6 @@ jobs:
     name: Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
 
@@ -428,7 +422,6 @@ jobs:
       - name: Run Snyk security scan
         uses: snyk/actions/node@master
         if: env.SNYK_TOKEN != ''
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
