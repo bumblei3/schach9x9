@@ -316,42 +316,68 @@ export class AnalysisUI {
     return states;
   }
 
-  undoMoveOnBoard(board: (Piece | null)[][], move: { from: Square; to: Square; piece?: Piece; captured?: Piece | null; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }): void {
+  undoMoveOnBoard(board: (Piece | null)[][], move: { 
+    from: Square; 
+    to: Square; 
+    piece?: Piece; 
+    captured?: Piece | null; 
+    capturedPiece?: Piece | null;
+    specialMove?: { 
+      type: string; 
+      rookFrom?: Square; 
+      rookTo?: Square; 
+      rookHadMoved?: boolean; 
+      capturedPawnPos?: Square;
+      capturedPawn?: Piece;
+    }
+  }): void {
     
-    const { from: _from, to, piece, captured, specialMove } = move;
+    const { from, to, piece, captured, capturedPiece, specialMove } = move;
+    const actualCaptured = captured || capturedPiece || null;
     
-    if (!piece) return;
-
-    // Handle special moves
+    // Handle special moves first (castling, enPassant also need piece to restore)
     if (specialMove) {
       if (specialMove.type === 'castling') {
         const { rookFrom, rookTo } = specialMove;
-        const rook = board[rookTo.r][rookTo.c] as Record<string, unknown> | null;
+        const rook = board[rookTo?.r]?.[rookTo?.c] as { type: string; color: string; hasMoved?: boolean } | null;
         if (rook) {
           rook.hasMoved = specialMove.rookHadMoved || false;
         }
-        board[rookFrom.r][rookFrom.c] = rook;
-        board[rookTo.r][rookTo.c] = null;
-        if (to.r !== rookTo.r || to.c !== rookTo.c) {
+        if (rookFrom && rookTo) {
+          board[rookFrom.r][rookFrom.c] = rook;
+          board[rookTo.r][rookTo.c] = null;
+        }
+        if (to.r !== rookTo?.r || to.c !== rookTo?.c) {
           board[to.r][to.c] = null;
+        }
+        // Also restore the moved piece (king) to its original position
+        if (piece) {
+          board[from.r][from.c] = { ...piece, hasMoved: piece.hasMoved || false };
         }
       } else if (specialMove.type === 'enPassant') {
         const { capturedPawnPos, capturedPawn } = specialMove;
-        board[capturedPawnPos.r][capturedPawnPos.c] = {
-          type: 'p',
-          hasMoved: true,
-          ...capturedPawn,
-        };
+        if (capturedPawnPos) {
+          board[capturedPawnPos.r][capturedPawnPos.c] = {
+            type: 'p',
+            hasMoved: true,
+            ...capturedPawn,
+          };
+        }
+        board[to.r][to.c] = null;
+        // Also restore the moved piece (pawn) to its original position
+        if (piece) {
+          board[from.r][from.c] = { ...piece, hasMoved: piece.hasMoved || false };
+        }
+      }
+    } else if (piece) {
+      // Normal move: restore the moved piece to its original position
+      board[from.r][from.c] = { ...piece, hasMoved: piece.hasMoved || false };
+      // Handle captured piece restoration
+      if (actualCaptured) {
+        board[to.r][to.c] = { ...actualCaptured, hasMoved: true };
+      } else {
         board[to.r][to.c] = null;
       }
-    } else {
-      board[to.r][to.c] = captured
-        ? {
-            type: captured.type || 'p',
-            hasMoved: true,
-            ...captured,
-          }
-        : null;
     }
   }
 

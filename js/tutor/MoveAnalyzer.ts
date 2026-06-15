@@ -39,13 +39,6 @@ interface ScoreDescription {
   emoji: string;
 }
 
-interface MoveRecord {
-  from: Square;
-  to: Square;
-  piece: Piece;
-  evalScore?: number;
-}
-
 export interface MoveRecord {
   from: Square;
   to: Square;
