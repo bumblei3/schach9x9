@@ -356,7 +356,7 @@ export class DOMHandler {
     // Toggle 3D
     const toggle3D = document.getElementById('toggle-3d-btn');
     if (toggle3D) {
-      toggle3D.addEventListener('click', () => {
+      toggle3D.addEventListener('click', async () => {
         const container3D = document.getElementById('battle-chess-3d-container');
         const boardWrapper = document.getElementById('board-wrapper');
         if (!container3D || !boardWrapper) return;
@@ -373,9 +373,8 @@ export class DOMHandler {
             boardWrapper.style.opacity = '0'; // Hide 2D board
 
             if (!this.app.battleChess3D!.scene) {
-              this.app.battleChess3D!.init().then(() => {
-                this.app.battleChess3D!.updateFromGameState(this.game);
-              });
+              await this.app.init3D();
+              this.app.battleChess3D!.updateFromGameState(this.game);
             } else {
               this.app.battleChess3D!.updateFromGameState(this.game);
               this.app.battleChess3D!.onWindowResize();

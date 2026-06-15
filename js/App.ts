@@ -15,7 +15,6 @@ import type { TutorController } from './tutorController.js';
 import type { AnalysisManager } from './AnalysisManager.js';
 import type { UIEffects } from './ui/ui_effects.js';
 import type { KeyboardManager } from './input/KeyboardManager.js';
-import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
 
 // Global variable for UI since it's used in many places but we want to avoid static import
@@ -31,9 +30,9 @@ export class App {
   public evaluationBar: EvaluationBar | null = null;
   public uiEffects: UIEffects | null = null;
   public keyboardManager: KeyboardManager | null = null;
-  public battleChess3D: BattleChess3D | null = null;
+  public battleChess3D: any = null; // BattleChess3D instance (loaded lazily)
   public domHandler: DOMHandler;
-  public battleChess3D_Class: typeof BattleChess3D | null = null;
+  public battleChess3D_Class: any = null; // BattleChess3D constructor (loaded lazily)
   public Game_Class: typeof Game | null = null;
 
   constructor() {
@@ -68,7 +67,6 @@ export class App {
     const { EvaluationBar } = await import('./ui/EvaluationBar.js');
     const { UIEffects } = await import('./ui/ui_effects.js');
     const { KeyboardManager } = await import('./input/KeyboardManager.js');
-    const BC3D_MODULE = await import('./battleChess3D.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = await import('./ui.js');
     await import('./ui/AchievementUI.js'); // Initialize achievements UI
@@ -173,10 +171,14 @@ export class App {
     this.domHandler.initDOM();
   }
 
-  public init3D(): void {
+  public async init3D(): Promise<void> {
     const container3D = document.getElementById('battle-chess-3d-container');
     if (container3D && !this.battleChess3D) {
-      // battleChess3D_Class is loaded dynamically via import()
+      // Lazy-load battleChess3D only when 3D mode is first enabled
+      if (!this.battleChess3D_Class) {
+        const BC3D_MODULE = await import('./battleChess3D.js');
+        this.battleChess3D_Class = BC3D_MODULE.BattleChess3D;
+      }
       if (this.battleChess3D_Class) {
         this.battleChess3D = new this.battleChess3D_Class(container3D);
       }
