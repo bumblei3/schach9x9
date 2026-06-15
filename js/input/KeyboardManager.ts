@@ -139,7 +139,10 @@ export class KeyboardManager {
         } else {
           g.selectedSquare = null;
           g.validMoves = [];
-          renderBoard(this.app.game);
+          const game = this.app.game;
+          if (game) {
+            renderBoard(game);
+          }
         }
       }
       return;

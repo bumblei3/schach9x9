@@ -3,13 +3,13 @@
  */
 import * as PostGameAnalyzerModule from '../tutor/PostGameAnalyzer.js';
 import { analyzeGame } from '../tutor/PostGameAnalyzer.js';
-import type { Move } from '../types/game.js';
+import type { MoveHistoryEntry } from '../gameEngine.js';
 
 /**
  * Displays game stats and shows the "Nachspiel-Analyse" button
  */
 export function showPostGameStats(
-  game: { moveHistory: Move[]; playerColor: 'white' | 'black' },
+  game: { moveHistory: MoveHistoryEntry[]; playerColor: 'white' | 'black' },
   _result: 'win' | 'draw',
   _winnerColor: 'white' | 'black' | null
 ): void {
@@ -84,7 +84,7 @@ export function showPostGameStats(
 /**
  * Triggers the full post-game analysis using AnalysisUI
  */
-async function showPostGameAnalysis(game: { moveHistory: Move[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } }): Promise<void> {
+async function showPostGameAnalysis(game: { moveHistory: MoveHistoryEntry[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } }): Promise<void> {
   // Import dynamically to avoid circular deps
   const mod = await import('./AnalysisUI.js');
 
@@ -98,7 +98,7 @@ async function showPostGameAnalysis(game: { moveHistory: Move[]; playerColor: 'w
         ? { ...game.gameController, jumpToMove: game.gameController.jumpToMove }
         : undefined
     }
-  } as { game: { moveHistory: Move[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } } };
+  } as { game: { moveHistory: MoveHistoryEntry[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } } };
 
   const AnalysisUI = mod.AnalysisUI;
   const analysisUI = new AnalysisUI(app);

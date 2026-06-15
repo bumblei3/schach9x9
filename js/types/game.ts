@@ -164,7 +164,7 @@ export interface GameLike {
   log?: (_message: string) => void;
   points: number;
   tutorPoints?: number;
-  moveHistory: Move[];
+  moveHistory: Array<{ from: Square; to: Square; piece?: PieceType | Piece; captured?: PieceType | Piece | null; promotion?: PieceType | string; isCheck?: boolean; isCheckmate?: boolean; isCastling?: boolean; isEnPassant?: boolean; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }>;
   // Tutor-specific (used by MoveAnalyzer)
   kiMentorEnabled?: boolean;
   mentorLevel?: string;
@@ -177,5 +177,4 @@ export interface GameLike {
   _previousBoardState?: (Piece | null)[][];
   _forceFullRender?: boolean;
   // Allow additional properties for dynamic extensions
-  [key: string]: unknown;
 }

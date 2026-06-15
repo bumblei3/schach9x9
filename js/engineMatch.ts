@@ -369,7 +369,15 @@ export class EngineMatchRunner {
     return board;
   }
 
-  private calculateAllocation(params: { maxTimePerMove: number; hasOpeningBook?: boolean }): { allocatedTimeMs: number } {
+  private calculateAllocation(params: { 
+    maxTimePerMove: number; 
+    hasOpeningBook?: boolean;
+    currentTurn?: 'white' | 'black';
+    moveNumber?: number;
+    whiteTime?: number;
+    blackTime?: number;
+    increment?: number;
+  }): { allocatedTimeMs: number } {
     // Simplified allocation
     const maxTime = Math.min(params.maxTimePerMove, params.hasOpeningBook ? 500 : 3000);
     return { allocatedTimeMs: Math.min(maxTime, params.maxTimePerMove) };

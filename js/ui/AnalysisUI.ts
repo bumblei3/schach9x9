@@ -5,7 +5,7 @@ import { showModal, closeModal, updateMoveHistoryUI, renderEvalGraph } from '../
 import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
 import type { AIProgressData } from '../aiEngine';
-import type { Move } from '../types/game.js';
+import type { MoveHistoryEntry } from '../gameEngine.js';
 
 interface AnalysisResult {
   score?: number;
@@ -29,7 +29,7 @@ interface GameControllerMinimal {
 
 interface AppWithGame {
   game: {
-    moveHistory: Move[];
+    moveHistory: MoveHistoryEntry[];
     playerColor: 'white' | 'black';
     gameController?: GameControllerMinimal;
   };

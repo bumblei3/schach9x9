@@ -102,7 +102,7 @@ export class PuzzleManager {
     return this.puzzles.find(p => p.id === id);
   }
 
-  public loadPuzzle(game: GameLike, index: number = 0): Puzzle | boolean {
+  public loadPuzzle(game: GameLike, index: number = 0): Puzzle | null {
     this.currentPuzzleIndex = index;
     let puzzle = this.puzzles[index];
 
@@ -118,11 +118,11 @@ export class PuzzleManager {
         this.puzzles[index] = newPuzzle;
         puzzle = newPuzzle;
       } else {
-        return false;
+        return null;
       }
     }
 
-    if (!puzzle) return false;
+    if (!puzzle) return null;
 
     this.currentPuzzleIndex = index;
 
@@ -179,14 +179,14 @@ export class PuzzleManager {
     }
   }
 
-  public nextPuzzle(game: GameLike): Puzzle | boolean {
+  public nextPuzzle(game: GameLike): Puzzle | null {
     const nextIndex = this.currentPuzzleIndex + 1;
     return this.loadPuzzle(game, nextIndex);
   }
 
-  public generateAndLoad(game: GameLike, depth: number = 2): Puzzle | boolean {
+  public generateAndLoad(game: GameLike, depth: number = 2): Puzzle | null {
     const solution = PuzzleGenerator.findMateSequence(game.board, game.turn, depth);
-    if (!solution) return false;
+    if (!solution) return null;
 
     const puzzle: Puzzle = {
       id: 'gen-' + Date.now(),
