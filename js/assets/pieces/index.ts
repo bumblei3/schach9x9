@@ -28,7 +28,7 @@ let currentSkin = 'classic';
 export let PIECE_SVGS = PIECE_SETS[currentSkin];
 
 if (typeof window !== 'undefined') {
-  (window as any).PIECE_SVGS = PIECE_SVGS;
+  window.PIECE_SVGS = PIECE_SVGS;
 }
 
 export function setPieceSkin(skinName: string): boolean {
@@ -36,7 +36,7 @@ export function setPieceSkin(skinName: string): boolean {
     currentSkin = skinName;
     PIECE_SVGS = PIECE_SETS[skinName];
     if (typeof window !== 'undefined') {
-      (window as any).PIECE_SVGS = PIECE_SVGS;
+      window.PIECE_SVGS = PIECE_SVGS;
     }
     return true;
   }
