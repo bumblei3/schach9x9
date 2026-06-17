@@ -6,7 +6,7 @@ import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
 import type { Game } from '../gameEngine.js';
 import type { AIProgressData } from '../aiEngine';
 import type { MoveHistoryEntry } from '../gameEngine.js';
-import type { Piece, Square } from '../types/game.js';
+import type { Piece } from '../types/core.js';
 
 interface AnalysisResult {
   score?: number;
@@ -316,62 +316,51 @@ export class AnalysisUI {
     return states;
   }
 
-  undoMoveOnBoard(board: (Piece | null)[][], move: { 
-    from: Square; 
-    to: Square; 
-    piece?: Piece; 
-    captured?: Piece | null; 
-    capturedPiece?: Piece | null;
-    specialMove?: { 
-      type: string; 
-      rookFrom?: Square; 
-      rookTo?: Square; 
-      rookHadMoved?: boolean; 
-      capturedPawnPos?: Square;
-      capturedPawn?: Piece;
-    }
-  }): void {
-    
-    const { from, to, piece, captured, capturedPiece, specialMove } = move;
-    const actualCaptured = captured || capturedPiece || null;
-    
+  undoMoveOnBoard(board: (Piece | null)[][], move: MoveHistoryEntry): void {
+    const { from, to, piece, captured, specialMove } = move;
+    const actualCaptured = captured || null;
+
     // Handle special moves first (castling, enPassant also need piece to restore)
     if (specialMove) {
       if (specialMove.type === 'castling') {
-        const { rookFrom, rookTo } = specialMove;
-        const rook = board[rookTo?.r]?.[rookTo?.c] as { type: string; color: string; hasMoved?: boolean } | null;
-        if (rook) {
-          rook.hasMoved = specialMove.rookHadMoved || false;
+        const { rookFrom, rookTo, rookHadMoved } = specialMove;
+        let rook: Piece | null = null;
+        if (rookTo) {
+          rook = board[rookTo.r]?.[rookTo.c] as Piece | null;
+          if (rook) {
+            rook.hasMoved = rookHadMoved || false;
+          }
         }
-        if (rookFrom && rookTo) {
+        if (rookFrom && rookTo && rook) {
           board[rookFrom.r][rookFrom.c] = rook;
           board[rookTo.r][rookTo.c] = null;
         }
-        if (to.r !== rookTo?.r || to.c !== rookTo?.c) {
+        if (rookTo && (to.r !== rookTo.r || to.c !== rookTo.c)) {
           board[to.r][to.c] = null;
         }
         // Also restore the moved piece (king) to its original position
-        if (piece) {
-          board[from.r][from.c] = { ...piece, hasMoved: piece.hasMoved || false };
+        if (piece && from) {
+          board[from.r][from.c] = { ...piece as Piece, hasMoved: (piece as Piece).hasMoved || false };
         }
       } else if (specialMove.type === 'enPassant') {
         const { capturedPawnPos, capturedPawn } = specialMove;
         if (capturedPawnPos) {
+          const pawnColor = capturedPawn?.color || (this.game.turn === 'white' ? 'black' : 'white');
           board[capturedPawnPos.r][capturedPawnPos.c] = {
             type: 'p',
+            color: pawnColor,
             hasMoved: true,
-            ...capturedPawn,
-          };
+          } as Piece;
         }
         board[to.r][to.c] = null;
         // Also restore the moved piece (pawn) to its original position
-        if (piece) {
-          board[from.r][from.c] = { ...piece, hasMoved: piece.hasMoved || false };
+        if (piece && from) {
+          board[from.r][from.c] = { ...piece as Piece, hasMoved: (piece as Piece).hasMoved || false };
         }
       }
-    } else if (piece) {
+    } else if (piece && from) {
       // Normal move: restore the moved piece to its original position
-      board[from.r][from.c] = { ...piece, hasMoved: piece.hasMoved || false };
+      board[from.r][from.c] = { ...piece as Piece, hasMoved: (piece as Piece).hasMoved || false };
       // Handle captured piece restoration
       if (actualCaptured) {
         board[to.r][to.c] = { ...actualCaptured, hasMoved: true };

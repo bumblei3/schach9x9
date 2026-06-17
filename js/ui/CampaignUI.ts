@@ -2,14 +2,17 @@ import { campaignManager } from '../campaign/CampaignManager.js';
 import { Level, Perk, UnitXp } from '../campaign/types.js';
 import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
 import { showToast } from './OverlayManager.js';
-import type { GameLike } from '../types/game.js';
+
+interface CampaignUIHost {
+  startCampaignLevel?: (_levelId: string) => void;
+}
 
 export class CampaignUI {
-  app: GameLike;
+  host: CampaignUIHost;
   container: HTMLElement | null = null;
 
-  constructor(app: GameLike) {
-    this.app = app;
+  constructor(host: CampaignUIHost) {
+    this.host = host;
     this.init();
   }
 
@@ -194,8 +197,8 @@ export class CampaignUI {
         };
         btn.onclick = () => {
           this.hide();
-          if (this.app.startCampaignLevel) {
-            this.app.startCampaignLevel(level.id);
+          if (this.host.startCampaignLevel) {
+            this.host.startCampaignLevel(level.id);
           }
         };
       }

@@ -1,5 +1,5 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
-import type { GameLike, Piece } from '../types/game.js';
+import type { GameLike, Piece } from '../types/core.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
 import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './TacticsDetector.js';
 import type { Analyzer } from './TacticsDetector.js';

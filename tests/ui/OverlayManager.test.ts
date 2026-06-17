@@ -126,7 +126,7 @@ describe('OverlayManager', () => {
       game.board[0][0] = { type: 'p', color: 'white' };
 
       const callback = vi.fn();
-      OverlayManager.showPromotionUI(game as any, 0, 0, 'white', {}, callback);
+      OverlayManager.showPromotionUI(game as any, 0, 0, 'white', { from: { r: 0, c: 0 }, to: { r: 0, c: 0 } }, callback);
 
       const overlay = document.getElementById('promotion-overlay');
       expect(overlay!.classList.contains('hidden')).toBe(false);
@@ -143,7 +143,7 @@ describe('OverlayManager', () => {
         log: vi.fn(),
       };
       game.board[0][0] = { type: 'p', color: 'white' };
-      const moveRecord = {};
+      const moveRecord = { from: { r: 0, c: 0 }, to: { r: 0, c: 0 } };
       const callback = vi.fn();
 
       OverlayManager.showPromotionUI(game as any, 0, 0, 'white', moveRecord, callback);
@@ -163,13 +163,13 @@ describe('OverlayManager', () => {
 
     test('returns early if overlay missing', () => {
       document.body.innerHTML = '';
-      OverlayManager.showPromotionUI({} as any, 0, 0, 'white', {}, vi.fn()); // Should not throw
+      OverlayManager.showPromotionUI({} as any, 0, 0, 'white', { from: { r: 0, c: 0 }, to: { r: 0, c: 0 } }, vi.fn()); // Should not throw
     });
   });
 
   describe('Puzzle Overlay', () => {
     test('showPuzzleOverlay displays puzzle info', () => {
-      const puzzle = { title: 'Puzzle 1', description: 'Find the best move' };
+      const puzzle = { id: 'p1', title: 'Puzzle 1', description: 'Find the best move', difficulty: 'easy', solution: [] };
       OverlayManager.showPuzzleOverlay(puzzle);
 
       const overlay = document.getElementById('puzzle-overlay')!;
@@ -201,7 +201,7 @@ describe('OverlayManager', () => {
 
     test('showPuzzleOverlay returns early if overlay missing', () => {
       document.body.innerHTML = '';
-      OverlayManager.showPuzzleOverlay({ title: 'X', description: 'Y' }); // Should not throw
+      OverlayManager.showPuzzleOverlay({ id: 'x', title: 'X', description: 'Y', difficulty: 'easy', solution: [] }); // Should not throw
     });
   });
 

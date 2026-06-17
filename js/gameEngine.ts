@@ -76,6 +76,7 @@ export interface MoveHistoryEntry {
   positionHistoryLength?: number;
   evalScore?: number;
   classification?: string;
+  timeUsed?: number;
   specialMove?: {
     type: string;
     rookFrom?: Square;

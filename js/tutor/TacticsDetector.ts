@@ -1,7 +1,7 @@
 import { BOARD_SIZE } from '../gameEngine.js';
 import * as aiEngine from '../aiEngine.js';
 import { isBlockedCell, type BoardShape } from '../config.js';
-import type { GameLike, Piece } from '../types/game.js';
+import type { GameLike, Piece } from '../types/core.js';
 
 /** Minimal interface for analyzer (provides getPieceName) */
 export interface Analyzer {

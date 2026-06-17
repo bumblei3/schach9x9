@@ -143,10 +143,11 @@ describe('ArrowRenderer', () => {
 
       expect(svg).not.toBeNull();
       expect(svg).toBeInstanceOf(SVGSVGElement);
-      expect(svg.classList.contains('last-move-arrow')).toBe(true);
-      expect(svg.style.position).toBe('absolute');
-      expect(svg.style.zIndex).toBe('10');
-      expect(svg.style.pointerEvents).toBe('none');
+      const svgEl = svg as SVGSVGElement;
+      expect(svgEl.classList.contains('last-move-arrow')).toBe(true);
+      expect(svgEl.style.position).toBe('absolute');
+      expect(svgEl.style.zIndex).toBe('10');
+      expect(svgEl.style.pointerEvents).toBe('none');
     });
 
     test('should create path element with correct stroke attributes', () => {
@@ -158,7 +159,8 @@ describe('ArrowRenderer', () => {
         animate: false,
       });
 
-      const path = svg.querySelector('path');
+      const svgEl = svg as SVGSVGElement;
+      const path = svgEl.querySelector('path');
       expect(path).not.toBeNull();
       expect(path?.getAttribute('stroke')).toBe('#ef4444');
       expect(path?.getAttribute('stroke-width')).toBe('5');
@@ -174,8 +176,9 @@ describe('ArrowRenderer', () => {
         headSize: 12,
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const head = svg.querySelector('polygon');
+      const head = svgEl.querySelector('polygon');
       expect(head).not.toBeNull();
       expect(head?.getAttribute('fill')).toBe('#6366f1');
       // Points should be set (format: "x1,y1 x2,y2 x3,y3")
@@ -189,8 +192,9 @@ describe('ArrowRenderer', () => {
         color: '#6366f1',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       expect(path?.getAttribute('stroke')).toBe('#6366f1'); // default color
       expect(path?.getAttribute('stroke-width')).toBe('4'); // default strokeWidth
     });
@@ -229,10 +233,11 @@ describe('ArrowRenderer', () => {
         color: '#22c55e',
         animate: false, // Use false to avoid getTotalLength in JSDOM
       });
+      const svgEl = svg as SVGSVGElement;
 
       // Check that path and head are created (animation setup would add styles)
-      const path = svg.querySelector('path');
-      const head = svg.querySelector('polygon');
+      const path = svgEl.querySelector('path');
+      const head = svgEl.querySelector('polygon');
       expect(path).not.toBeNull();
       expect(head).not.toBeNull();
       // When animate=false, no dasharray/dashoffset should be set
@@ -247,9 +252,10 @@ describe('ArrowRenderer', () => {
         color: '#22c55e',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
-      const head = svg.querySelector('polygon');
+      const path = svgEl.querySelector('path');
+      const head = svgEl.querySelector('polygon');
 
       expect(path?.style.strokeDasharray).toBeFalsy();
       expect(path?.style.strokeDashoffset).toBeFalsy();
@@ -263,8 +269,9 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       const d = path?.getAttribute('d');
       expect(d).toContain('M ');
       expect(d).toContain(' L ');
@@ -277,8 +284,9 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       const d = path?.getAttribute('d');
       expect(d).toContain('M ');
       expect(d).toContain(' L ');
@@ -291,8 +299,9 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       const d = path?.getAttribute('d');
       expect(d).toContain('M ');
       expect(d).toContain(' L ');
@@ -305,9 +314,10 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      expect(svg).not.toBeNull();
-      const path = svg.querySelector('path');
+      expect(svgEl).not.toBeNull();
+      const path = svgEl.querySelector('path');
       expect(path).not.toBeNull();
     });
 
@@ -318,9 +328,10 @@ describe('ArrowRenderer', () => {
         color: '#6366f1',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
-      const head = svg.querySelector('polygon');
+      const path = svgEl.querySelector('path');
+      const head = svgEl.querySelector('polygon');
       expect(path?.style.filter).toContain('drop-shadow');
       expect(head?.style.filter).toContain('drop-shadow');
     });
@@ -332,10 +343,11 @@ describe('ArrowRenderer', () => {
         color: '#6366f1',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       expect(path).toBeDefined();
-      expect(boardContainer.contains(svg)).toBe(true);
+      expect(boardContainer.contains(svgEl)).toBe(true);
     });
   });
 
@@ -402,9 +414,10 @@ describe('ArrowRenderer', () => {
         color: '#22c55e',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      expect(svg).not.toBeNull();
-      const path = svg!.querySelector('path');
+      expect(svgEl).not.toBeNull();
+      const path = svgEl.querySelector('path');
       expect(path?.getAttribute('stroke')).toBe('#22c55e'); // Green for player
     });
 
@@ -415,9 +428,10 @@ describe('ArrowRenderer', () => {
         color: '#ef4444',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      expect(svg).not.toBeNull();
-      const path = svg!.querySelector('path');
+      expect(svgEl).not.toBeNull();
+      const path = svgEl.querySelector('path');
       expect(path?.getAttribute('stroke')).toBe('#ef4444'); // Red for AI
     });
 
@@ -428,8 +442,9 @@ describe('ArrowRenderer', () => {
         color: '#22c55e',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       expect(path?.getAttribute('stroke')).toBe('#22c55e');
     });
 
@@ -449,8 +464,9 @@ describe('ArrowRenderer', () => {
         color: '#6366f1',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
+      const path = svgEl.querySelector('path');
       expect(path).not.toBeNull();
       // Animation would add dasharray/dashoffset when animate=true
       // Here we just verify the arrow is drawn
@@ -464,7 +480,8 @@ describe('ArrowRenderer', () => {
         color: '#22c55e',
         animate: false,
       });
-      expect(svg1).toBeDefined();
+      const svg1El = svg1 as SVGSVGElement;
+      expect(svg1El).toBeDefined();
       // Second arrow (different color)
       const svg2 = drawArrow(boardContainer, {
         from: { r: 7, c: 7 },
@@ -472,11 +489,12 @@ describe('ArrowRenderer', () => {
         color: '#ef4444',
         animate: false,
       });
+      const svg2El = svg2 as SVGSVGElement;
 
       const arrows = boardContainer.querySelectorAll('.last-move-arrow');
       expect(arrows.length).toBe(1);
 
-      const path2 = svg2.querySelector('path');
+      const path2 = svg2El.querySelector('path');
       expect(path2?.getAttribute('stroke')).toBe('#ef4444'); // Second arrow color
     });
 
@@ -521,9 +539,10 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
+      const svgEl = svg as SVGSVGElement;
 
-      const path = svg.querySelector('path');
-      expect(svg).not.toBeNull();
+      const path = svgEl.querySelector('path');
+      expect(svgEl).not.toBeNull();
       expect(path).not.toBeNull();
 
       // Clear and test opposite corner
@@ -534,9 +553,10 @@ describe('ArrowRenderer', () => {
         color: '#ff0000',
         animate: false,
       });
-      const path2 = svg2.querySelector('path');
+      const svg2El = svg2 as SVGSVGElement;
+      const path2 = svg2El.querySelector('path');
       expect(path2).toBeDefined();
-      expect(svg2).not.toBeNull();
+      expect(svg2El).not.toBeNull();
     });
 
     test('should handle same from and to squares gracefully', () => {

@@ -27,6 +27,21 @@ describe('BoardRenderer Touch Isolation', () => {
       boardSize: 9,
       phase: 'play',
       turn: 'white' as const,
+      boardShape: 'standard' as const,
+      isAI: false,
+      isAnimating: false,
+      replayMode: false,
+      selectedSquare: null,
+      validMoves: null,
+      mode: 'classic',
+      lastMoveHighlight: null,
+      isInCheck: () => false,
+      getValidMoves: () => [],
+      log: vi.fn(),
+      points: 0,
+      moveHistory: [],
+      whiteCorridor: null,
+      blackCorridor: null,
     };
 
     // Place kings

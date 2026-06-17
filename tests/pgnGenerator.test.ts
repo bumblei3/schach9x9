@@ -11,7 +11,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 6, c: 4 },
         to: { r: 4, c: 4 },
-        piece: { type: 'p', color: 'white' },
+        piece: { type: 'p' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -25,13 +25,13 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 6, c: 4 },
         to: { r: 5, c: 5 },
-        piece: { type: 'p', color: 'white' },
-        captured: { type: 'p', color: 'black' },
+        piece: { type: 'p' as const, color: 'white' as const },
+        captured: { type: 'p' as const, color: 'black' as const },
       };
       const board = Array(9)
         .fill(null)
         .map(() => Array(9).fill(null));
-      board[5][5] = { type: 'p', color: 'black' } as any;
+      board[5][5] = { type: 'p' as const, color: 'black' as const } as any;
 
       const notation = moveToNotation(move, board as any);
       expect(notation).toContain('x');
@@ -41,7 +41,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 1 },
         to: { r: 5, c: 2 },
-        piece: { type: 'n', color: 'white' },
+        piece: { type: 'n' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -55,7 +55,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 4 },
         to: { r: 6, c: 4 },
-        piece: { type: 'k', color: 'white' },
+        piece: { type: 'k' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -69,7 +69,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 3 },
         to: { r: 3, c: 3 },
-        piece: { type: 'q', color: 'white' },
+        piece: { type: 'q' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -83,7 +83,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 0 },
         to: { r: 5, c: 0 },
-        piece: { type: 'r', color: 'white' },
+        piece: { type: 'r' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -97,7 +97,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 2 },
         to: { r: 5, c: 4 },
-        piece: { type: 'b', color: 'white' },
+        piece: { type: 'b' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -111,7 +111,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 2 },
         to: { r: 5, c: 4 },
-        piece: { type: 'a', color: 'white' },
+        piece: { type: 'a' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -125,7 +125,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 7, c: 6 },
         to: { r: 5, c: 6 },
-        piece: { type: 'c', color: 'white' },
+        piece: { type: 'c' as const, color: 'white' as const },
       };
       const board = Array(9)
         .fill(null)
@@ -139,7 +139,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 8, c: 4 },
         to: { r: 8, c: 6 },
-        piece: { type: 'k', color: 'white' },
+        piece: { type: 'k' as const, color: 'white' as const },
         specialMove: { type: 'castling', isKingside: true },
       };
       const board = Array(9)
@@ -154,7 +154,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 8, c: 4 },
         to: { r: 8, c: 2 },
-        piece: { type: 'k', color: 'white' },
+        piece: { type: 'k' as const, color: 'white' as const },
         specialMove: { type: 'castling', isKingside: false },
       };
       const board = Array(9)
@@ -169,7 +169,7 @@ describe('PGNGenerator', () => {
       const move = {
         from: { r: 1, c: 4 },
         to: { r: 0, c: 4 },
-        piece: { type: 'p', color: 'white' },
+        piece: { type: 'p' as const, color: 'white' as const },
         specialMove: { type: 'promotion', promotedTo: 'e' },
       };
       const board = Array(9)
@@ -213,12 +213,12 @@ describe('PGNGenerator', () => {
           {
             from: { r: 6, c: 4 },
             to: { r: 4, c: 4 },
-            piece: { type: 'p', color: 'white' },
+            piece: { type: 'p' as const, color: 'white' as const },
           },
           {
             from: { r: 1, c: 4 },
             to: { r: 3, c: 4 },
-            piece: { type: 'p', color: 'black' },
+            piece: { type: 'p' as const, color: 'black' as const },
           },
         ],
         turn: 'white',

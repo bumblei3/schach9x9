@@ -1,6 +1,6 @@
 import { puzzleManager } from '../puzzleManager.js';
 import type { Puzzle } from '../puzzleManager.js';
-import type { GameControllerInterface } from '../TimeManager.js';
+import type { GameControllerInterface } from '../types/core.js';
 
 export class PuzzleMenu {
   gameController: GameControllerInterface;
@@ -59,7 +59,7 @@ export class PuzzleMenu {
         this.hide();
         if (this.gameController.loadPuzzle) {
           this.gameController.loadPuzzle(index);
-        } else {
+        } else if (this.gameController.startPuzzleMode) {
           this.gameController.startPuzzleMode(index);
         }
       };

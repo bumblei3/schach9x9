@@ -4,7 +4,8 @@
  */
 import { PIECE_VALUES } from '../config.js';
 import { getPieceText } from './BoardRenderer.js';
-import type { GameLike } from '../types/game.js';
+import type { GameLike, PieceType } from '../types/core.js';
+import type { Game } from '../gameEngine.js';
 
 // Removed top-level await preventing circular dependency
 // const { updateTutorRecommendations } = (await import('./TutorUI.js')) as any;
@@ -86,7 +87,8 @@ export function updateShopUI(game: GameLike): void {
 
     if (statusDisplay) {
       if (game.selectedShopPiece) {
-        statusDisplay.textContent = `Platziere: ${getPieceText({ type: game.selectedShopPiece, color: game.turn })} (${PIECE_VALUES[game.selectedShopPiece as keyof typeof PIECE_VALUES]} Pkt)`;
+        const pieceType = game.selectedShopPiece as Exclude<PieceType, null>;
+        statusDisplay.textContent = `Platziere: ${getPieceText({ type: pieceType, color: game.turn })} (${PIECE_VALUES[pieceType as keyof typeof PIECE_VALUES]} Pkt)`;
       } else {
         statusDisplay.textContent = 'Wähle eine Figur zum Kaufen';
       }
@@ -94,17 +96,17 @@ export function updateShopUI(game: GameLike): void {
   }
 
   // Check if UI module is available globally (from App.ts)
-  const globalUI = window.UI as { updateTutorRecommendations?: (..._args: unknown[]) => void } | undefined;
+  const globalUI = window.UI as { updateTutorRecommendations?: (_game: unknown) => void } | undefined;
   if (globalUI?.updateTutorRecommendations) {
     globalUI.updateTutorRecommendations(game);
   } else {
-    const legacyUpdate = window.updateTutorRecommendations as ((..._args: unknown[]) => void) | undefined;
+    const legacyUpdate = window.updateTutorRecommendations as ((_game: unknown) => void) | undefined;
     if (legacyUpdate) {
       legacyUpdate(game);
     } else {
       // Dynamic import fallback
-      import('./TutorUI.js').then((module: { updateTutorRecommendations?: (..._args: unknown[]) => void }) => {
-        if (module.updateTutorRecommendations) module.updateTutorRecommendations(game);
+      import('./TutorUI.js').then((module: { updateTutorRecommendations?: (_game: Game) => void }) => {
+        if (module.updateTutorRecommendations) module.updateTutorRecommendations(game as unknown as Game);
       });
     }
   }

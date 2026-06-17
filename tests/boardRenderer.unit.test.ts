@@ -236,7 +236,8 @@ describe('BoardRenderer Full Coverage', () => {
     expect(cell00!.classList.contains('last-move')).toBe(true);
 
     game.validMoves = [{ r: 2, c: 2 }];
-    game.isTutorMove = vi.fn(() => true);
+    game.selectedSquare = { r: 1, c: 1 };
+    game.isTutorMove = vi.fn((_from, _to) => true);
     BoardRenderer.renderBoard(game);
     const cell22 = document.querySelector('.cell[data-r="2"][data-c="2"]');
     expect(cell22!.classList.contains('valid-move')).toBe(true);

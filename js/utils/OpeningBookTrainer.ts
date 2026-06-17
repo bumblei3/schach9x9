@@ -499,9 +499,16 @@ export class OpeningBookTrainer {
           depth: this.config.depth,
           timePerMoveMs: this.config.timePerMoveMs,
           openingMovesTracked: this.config.openingMovesTracked,
+          minPositionCount: this.config.minPositionCount,
+          maxMovesPerPosition: this.config.maxMovesPerPosition,
           elo: this.config.elo,
           personality: this.config.personality,
-        },
+          inputBookPath: this.config.inputBookPath,
+          outputBookPath: this.config.outputBookPath,
+          alternateColors: this.config.alternateColors,
+          drawMoveLimit: this.config.drawMoveLimit,
+          quiet: this.config.quiet,
+        } as TrainerConfig,
       },
     };
   }
