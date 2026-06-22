@@ -17,8 +17,6 @@ const NULL_MOVE_R: i8 = 2;
 const NULL_MOVE_MIN_DEPTH: i8 = 3;
 
 // Futility / Razoring
-const FUTILITY_MARGIN: i32 = 200;
-const RAZOR_MARGIN: i32 = 400;
 
 // Late Move Reductions (LMR)
 const LMR_BASE_DEPTH: i8 = 3;
