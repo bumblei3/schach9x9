@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Needed for commit message linting
 
@@ -117,7 +117,7 @@ jobs:
         node-version: ['22', '24']
       fail-fast: false
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
@@ -209,7 +209,7 @@ jobs:
     timeout-minutes: 75
     needs: [build]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -282,7 +282,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
+
+      - name: Check if Rust/WASM files changed
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            CHANGED_FILES="${{ toJson(github.event.pull_request.changed_files) }}"
+            if echo "$CHANGED_FILES" | grep -qE 'engine-wasm|Cargo\.lock|package-lock\.json|\.github/workflows/ci\.yml'; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
 
       - name: Cache Rust dependencies
         uses: actions/cache@v5
@@ -292,7 +306,7 @@ jobs:
             ~/.cargo/bin
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
-            ~/.cargo/git
+            engine-wasm/target
           key: ${{ runner.os }}-cargo-${{ env.RUST_CACHE_VERSION }}-${{ hashFiles('engine-wasm/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ env.RUST_CACHE_VERSION }}-
@@ -308,6 +322,7 @@ jobs:
           echo "wasm-pack version: $(wasm-pack --version)"
 
       - name: Build WASM engine
+        if: steps.changes.outputs.changed == 'true'
         working-directory: engine-wasm
         run: |
           wasm-pack build --target web --release
@@ -315,11 +330,13 @@ jobs:
           ls -la pkg/
 
       - name: Run WASM engine tests
+        if: steps.changes.outputs.changed == 'true'
         working-directory: engine-wasm
         run: cargo test --release 2>&1 | tee test_output.txt
         timeout-minutes: 20
 
       - name: Verify WASM module size
+        if: steps.changes.outputs.changed == 'true'
         working-directory: engine-wasm
         run: |
           if [ -f pkg/schach9x9_bg.wasm ]; then
@@ -344,12 +361,12 @@ jobs:
             echo "WASM size: $((SIZE / 1024)) KB" >> $GITHUB_STEP_SUMMARY
             echo "Status: ✅ Built" >> $GITHUB_STEP_SUMMARY
           else
-            echo "Status: ❌ Build failed" >> $GITHUB_STEP_SUMMARY
+            echo "Status: ⏭️ Skipped (no Rust/WASM changes)" >> $GITHUB_STEP_SUMMARY
           fi
           echo "Job status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload WASM build artifact
-        if: success() || failure()
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: wasm-build
@@ -364,7 +381,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -428,7 +445,7 @@ jobs:
     timeout-minutes: 15
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -491,7 +508,6 @@ jobs:
 
       - name: Bundle Size Diff (PR only)
         if: github.event_name == 'pull_request'
-        continue-on-error: true
         run: |
           echo "📦 Checking production bundle size..."
           TOTAL_SIZE=$(du -sb dist/ | cut -f1)
@@ -505,10 +521,10 @@ jobs:
           echo "CSS: $(($CSS_SIZE / 1024)) KB"
           echo "WASM: $(($WASM_SIZE / 1024)) KB"
           
-          # Budget check: 2500 KB total (JS bundles + CSS + WASM)
-          MAX_SIZE=$((2500 * 1024))
+          # Budget check: 1200 KB total (JS bundles + CSS + WASM)
+          MAX_SIZE=$((1200 * 1024))
           if [ $TOTAL_SIZE -gt $MAX_SIZE ]; then
-            echo "❌ Bundle exceeds 2500 KB budget!"
+            echo "❌ Bundle exceeds 1200 KB budget!"
             exit 1
           fi
           echo "✅ Bundle size within budget"
@@ -547,7 +563,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
