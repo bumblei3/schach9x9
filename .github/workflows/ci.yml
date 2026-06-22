@@ -291,7 +291,7 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             CHANGED_FILES="${{ toJson(github.event.pull_request.changed_files) }}"
-            if echo "$CHANGED_FILES" | grep -qE 'engine-wasm|Cargo\.lock|\.github/workflows/ci\.yml'; then
+            if echo "$CHANGED_FILES" | grep -qE 'engine-wasm|Cargo\.lock|package-lock\.json|\.github/workflows/ci\.yml'; then
               echo "changed=true" >> $GITHUB_OUTPUT
             else
               echo "changed=false" >> $GITHUB_OUTPUT
