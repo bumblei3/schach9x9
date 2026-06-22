@@ -292,7 +292,7 @@ jobs:
             ~/.cargo/bin
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
-            engine-wasm/target
+            ~/.cargo/git
           key: ${{ runner.os }}-cargo-${{ env.RUST_CACHE_VERSION }}-${{ hashFiles('engine-wasm/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ env.RUST_CACHE_VERSION }}-
