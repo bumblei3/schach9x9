@@ -5,9 +5,6 @@ const HASH_MOVE_SCORE: i32 = 3000000;
 const WINNING_CAPTURE_SCORE: i32 = 2000000;
 const KILLER_MOVE_1_SCORE: i32 = 900000;
 const KILLER_MOVE_2_SCORE: i32 = 800000;
-const COUNTER_MOVE_SCORE: i32 = 700000;
-const HISTORY_SCORE_MAX: i32 = 100000;
-const PROMOTION_SCORE: i32 = 1500000;
 const THREAT_CHECK_SCORE: i32 = 300000;
 
 // Threat scoring constants
@@ -17,7 +14,6 @@ const THREAT_CAPTURE_LOW_VALUE: i32 = 50000;        // Attacking Pawn
 const THREAT_XRAY_HIGH: i32 = 80000;                // Discovered attack on high-value piece
 const THREAT_XRAY_MID: i32 = 40000;                 // Discovered attack on mid-value piece
 const THREAT_DISCOVERED_CHECK: i32 = 150000;        // Moving blocker reveals check
-const THREAT_PIN_BREAK: i32 = 60000;                // Breaking a pin (freeing own piece)
 const THREAT_KING_SAFETY_PENALTY: i32 = -50000;     // Move exposes own king to threat
 const THREAT_HANGING_PIECE_BONUS: i32 = 100000;     // Capturing a hanging piece (not defended)
 
@@ -152,13 +148,13 @@ fn find_king(board: &Board, color: i8) -> Option<usize> {
 }
 
 /// Check if moving a piece creates a discovered attack (X-ray through own piece)
-fn is_discovered_attack(board: &Board, move_from: usize, move_to: usize, color: i8) -> Vec<(usize, i8)> {
+fn is_discovered_attack(board: &Board, move_from: usize, _move_to: usize, color: i8) -> Vec<(usize, i8)> {
     let mut discoveries = Vec::new();
-    let enemy_color = if color == COLOR_WHITE { COLOR_BLACK } else { COLOR_WHITE };
+    let _enemy_color = if color == COLOR_WHITE { COLOR_BLACK } else { COLOR_WHITE };
     
     // Check all rays from move_from to see if our piece was blocking an attack
     for offset in BISHOP_OFFSETS.iter().chain(ROOK_OFFSETS.iter()).chain(KNIGHT_OFFSETS.iter()) {
-        let mut curr = move_from as i32;
+        let mut curr;
         let mut found_our_piece = false;
         
         // Search in both directions
@@ -345,7 +341,7 @@ pub fn order_moves(board: &Board, moves: &mut [Move], tt_move: Option<Move>, kil
 
                 // 3. Discovered attacks / X-ray threats (moving piece was blocking an attack)
                 let discoveries = is_discovered_attack(board, m.from, m.to, side_to_move);
-                for (target_sq, target_type) in discoveries {
+                for (_target_sq, target_type) in discoveries {
                     let victim_val = PIECE_VALUES[target_type as usize];
                     if target_type == PIECE_KING {
                         score += THREAT_DISCOVERED_CHECK;
