@@ -233,7 +233,16 @@ export class AIController {
     }
 
     const spinner = document.getElementById('spinner-overlay');
-    if (spinner) spinner.classList.remove('hidden');
+    if (spinner) {
+      spinner.classList.remove('hidden');
+      let status = spinner.querySelector<HTMLSpanElement>('#ai-status');
+      if (!status) {
+        status = document.createElement('span');
+        status.id = 'ai-status';
+        spinner.appendChild(status);
+      }
+      status.textContent = 'KI rechnet...';
+    }
 
     // Initialize persistent worker pool if not exists
     if (!this.aiWorkers || this.aiWorkers.length === 0) {
@@ -264,7 +273,11 @@ export class AIController {
         const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
         this.game.executeMove(randomMove.from, randomMove.to, false, randomMove.promotion as string | undefined);
         if (this.game.renderBoard) this.game.renderBoard();
-        if (spinner) spinner.classList.add('hidden');
+        if (spinner) {
+          spinner.classList.add('hidden');
+          const status = spinner.querySelector<HTMLSpanElement>('#ai-status');
+          if (status) status.textContent = '';
+        }
         return;
       }
     } else if (isEasy && inaccuracyRoll < 0.1) {
@@ -289,7 +302,11 @@ export class AIController {
         const elapsed = Date.now() - this._aiMoveStartTime;
         logger.info(`[AI] Processing results after ${elapsed}ms`);
 
-        if (spinner) spinner.classList.add('hidden');
+        if (spinner) {
+          spinner.classList.add('hidden');
+          const status = spinner.querySelector<HTMLSpanElement>('#ai-status');
+          if (status) status.textContent = '';
+        }
 
         // Find best result
         const bestResult = workerResults.find(r => r && r.move);
@@ -346,7 +363,11 @@ export class AIController {
         if (!hasProcessed) {
           hasProcessed = true;
           logger.error('[AI] Worker timeout after 30 seconds! Making fallback move.');
-          if (spinner) spinner.classList.add('hidden');
+          if (spinner) {
+            spinner.classList.add('hidden');
+            const status = spinner.querySelector<HTMLSpanElement>('#ai-status');
+            if (status) status.textContent = '';
+          }
 
           // Make a random legal move as fallback
           const allMoves = this.game.getAllLegalMoves('black');
