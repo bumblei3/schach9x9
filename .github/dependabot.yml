@@ -9,35 +9,7 @@ updates:
       time: "03:00"
       timezone: "Europe/Berlin"
     open-pull-requests-limit: 10
-    groups:
-      dev-dependencies:
-        patterns:
-          - "@*"
-          - "eslint*"
-          - "typescript*"
-          - "vitest*"
-          - "playwright*"
-          - "prettier"
-          - "husky"
-        update-types:
-          - "patch"
-          - "minor"
-      prod-dependencies:
-        patterns:
-          - "three"
-        update-types:
-          - "patch"
-          - "minor"
-    # Auto-merge for patch/minor if CI passes
-    allow:
-      - dependency-type: "development"
-        update-type: "version-update:semver-patch"
-      - dependency-type: "development"
-        update-type: "version-update:semver-minor"
-      - dependency-type: "production"
-        update-type: "version-update:semver-patch"
-      - dependency-type: "production"
-        update-type: "version-update:semver-minor"
+    # Avoid large unreviewed bundles; prefer focused single-package PRs instead
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
