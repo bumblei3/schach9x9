@@ -517,6 +517,10 @@ export class AIController {
       this.initWorkerPool();
     }
 
+    if (this.aiWorkers.length === 0) {
+      return Promise.resolve(null);
+    }
+
     const boardInt = aiEngine.convertBoardToInt(this.game.board);
     const lastMove = this.game.lastMove;
     const workerResults: SearchResult[] = [];
