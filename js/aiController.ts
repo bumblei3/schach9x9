@@ -478,20 +478,28 @@ export class AIController {
       });
 
     for (let i = 0; i < numWorkers; i++) {
-      const worker = new AIWorker();
-      this.aiWorkers.push(worker);
+      try {
+        const worker = new AIWorker();
+        this.aiWorkers.push(worker);
 
-      // Dedicated message handler per worker
-      worker.onmessage = (e: MessageEvent) => this.handleWorkerMessage(e, i);
+        // Dedicated message handler per worker
+        worker.onmessage = (e: MessageEvent) => this.handleWorkerMessage(e, i);
 
-      // Send boardShape to worker immediately after creation
-      if (this.game.boardShape) {
-        worker.postMessage({ type: 'setBoardShape', data: { shape: this.game.boardShape } });
+        // Send boardShape to worker immediately after creation
+        if (this.game.boardShape) {
+          worker.postMessage({ type: 'setBoardShape', data: { shape: this.game.boardShape } });
+        }
+
+        if (this.openingBookData) {
+          worker.postMessage({ type: 'loadBook', data: { book: this.openingBookData } });
+        }
+      } catch (err) {
+        logger.error(`[AI] Failed to initialize worker ${i}:`, err);
       }
+    }
 
-      if (this.openingBookData) {
-        worker.postMessage({ type: 'loadBook', data: { book: this.openingBookData } });
-      }
+    if (this.aiWorkers.length === 0) {
+      logger.error('[AI] Worker pool initialization failed: no workers available. AI moves will not work.');
     }
   }
 
