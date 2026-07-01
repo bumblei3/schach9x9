@@ -355,6 +355,37 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
     });
   });
 
+  describe('heartbeat - getBestMove emits ticks', () => {
+    test('should emit heartbeat messages while searching', async () => {
+      const { getBestMoveDetailed } = await import('../../js/aiEngine.js');
+      (getBestMoveDetailed as any).mockImplementationOnce(async () => {
+        await new Promise(resolve => setTimeout(resolve, 1600));
+        return { move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 10 };
+      });
+
+      const board = Array(9).fill(null).map(() => Array(9).fill(null));
+
+      await onmessageHandler({
+        data: {
+          type: 'getBestMove',
+          id: 'test-heartbeat',
+          data: {
+            board,
+            color: 'white',
+            depth: 2,
+            config: { elo: 1200 },
+            personality: 'balanced',
+            moveNumber: 1,
+          },
+        },
+      } as MessageEvent);
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'heartbeat', id: 'test-heartbeat' })
+      );
+    });
+  });
+
   describe('analyze - missing depth/topMovesCount params', () => {
     test('should call analyzePosition without extra params', async () => {
       const { analyzePosition } = await import('../../js/aiEngine.js');

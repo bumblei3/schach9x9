@@ -17,6 +17,8 @@ import {
 
 const workerSelf: Worker = self as unknown as Worker;
 
+const workerHeartbeats: Record<string | number, number> = {};
+
 self.onmessage = async function (e: MessageEvent) {
   try {
     const { type, data, id } = e.data;
@@ -44,7 +46,13 @@ self.onmessage = async function (e: MessageEvent) {
       case 'getBestMove': {
         const { board, color, depth, config, personality, moveNumber } = data;
 
-        // Setup progress callback
+        if (id !== undefined) workerHeartbeats[id] = Date.now();
+
+        // Setup progress callback + heartbeat
+        const heartbeatInterval = setInterval(() => {
+          if (id !== undefined) workerSelf.postMessage({ type: 'heartbeat', id, data: { ts: Date.now() } });
+        }, 1000);
+
         setProgressCallback((progress: AIProgressData) => {
           workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
@@ -60,6 +68,8 @@ self.onmessage = async function (e: MessageEvent) {
         } catch (error) {
           logger.error('[AI Worker] getBestMove failed:', error);
           workerSelf.postMessage({ type: 'bestMove', id, data: null });
+        } finally {
+          clearInterval(heartbeatInterval);
         }
         break;
       }
@@ -90,7 +100,7 @@ self.onmessage = async function (e: MessageEvent) {
           workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
         // Use the new deep analysis function
-        const analysis = analyzePosition(board, color); // Removed unsupported args depth, topMovesCount for now
+        const analysis = analyzePosition(board, color);
 
         workerSelf.postMessage({
           type: 'analysis',
@@ -102,9 +112,12 @@ self.onmessage = async function (e: MessageEvent) {
 
       case 'search': {
         const { board, color, depth, personality } = data;
-        // setProgressCallback((progress: AIProgressData) => {
-        //   workerSelf.postMessage({ type: 'progress', id, data: progress });
-        // });
+
+        if (id !== undefined) workerHeartbeats[id] = Date.now();
+
+        const heartbeatInterval = setInterval(() => {
+          if (id !== undefined) workerSelf.postMessage({ type: 'heartbeat', id, data: { ts: Date.now() } });
+        }, 1000);
 
         try {
           const timeParams = {
@@ -118,6 +131,8 @@ self.onmessage = async function (e: MessageEvent) {
         } catch (error) {
           logger.error('[AI Worker] search failed:', error);
           workerSelf.postMessage({ type: 'bestMove', id, bestMove: null });
+        } finally {
+          clearInterval(heartbeatInterval);
         }
         break;
       }
