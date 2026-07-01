@@ -193,4 +193,11 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
     controller.aiSetupUpgrades();
     expect(game.gameController.shopManager.aiPerformUpgrades).toHaveBeenCalled();
   });
+
+  test('getHint - returns null when worker pool is empty', async () => {
+    controller.initWorkerPool = () => {};
+    controller.aiWorkers = [];
+    const result = await controller.getHint();
+    expect(result).toBeNull();
+  });
 });
