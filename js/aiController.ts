@@ -12,6 +12,9 @@ import {
   SHOP_PIECES,
   AI_DEPTH_CONFIG,
   AI_DIFFICULTIES,
+  AI_TIMEOUT_MS,
+  AI_CLASSIC_TIMEOUT_MS,
+  AI_DIFFICULTY_TIMEOUT_MS,
   isBlockedCell,
   type ShopPieceConfig,
 } from './config.js';
@@ -396,18 +399,11 @@ export class AIController {
         logger.debug(`[AI] Dispatching search to worker ${i}`);
 
         // Calculate Time Limit based on difficulty
-        let timeLimit = 5000;
+        let timeLimit = AI_TIMEOUT_MS;
         if (this.game.mode === 'standard8x8' || this.game.mode === 'classic') {
-          timeLimit = 8000;
+          timeLimit = AI_CLASSIC_TIMEOUT_MS;
         } else {
-          const timeMap: Record<string, number> = {
-            beginner: 2000,
-            easy: 3000,
-            medium: 4000,
-            hard: 5000,
-            expert: 8000,
-          };
-          timeLimit = timeMap[this.game.difficulty] || 5000;
+          timeLimit = AI_DIFFICULTY_TIMEOUT_MS[this.game.difficulty] || AI_TIMEOUT_MS;
         }
 
         const personalityConfig = AI_PERSONALITIES[this.game.aiPersonality || 'balanced'];

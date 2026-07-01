@@ -259,6 +259,19 @@ export const AI_DEPTH_CONFIG = {
  * Timing constants for game flow
  */
 export const AI_DELAY_MS = 1000; // Delay before AI makes a move
+export const AI_TIMEOUT_MS = 5000;
+export const AI_CLASSIC_TIMEOUT_MS = 8000;
+export const AI_DIFFICULTY_TIMEOUT_MS: Record<string, number> = {
+  beginner: 2000,
+  easy: 3000,
+  medium: 4000,
+  hard: 5000,
+  expert: 8000,
+};
+
+/**
+ * Auto-save interval
+ */
 export const AUTO_SAVE_INTERVAL = 5; // Auto-save every N moves
 
 /**
