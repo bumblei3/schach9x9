@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -61,7 +61,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache TypeScript incremental build info
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: ts-build-cache
         with:
           path: .tsbuildinfo
@@ -127,7 +127,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -136,7 +136,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache TypeScript incremental build info
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: ts-build-cache
         with:
           path: .tsbuildinfo
@@ -219,7 +219,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -228,7 +228,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -285,7 +285,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Cache Rust dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: rust-cache
         with:
           path: |
@@ -374,7 +374,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -438,7 +438,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -447,7 +447,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache Vite build cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: vite-cache
         with:
           path: node_modules/.vite
