@@ -24,14 +24,14 @@
     "postinstall": "npm rebuild rolldown vite || true"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.61.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.1.0",
     "@types/three": "^0.182.0",
-    "@typescript-eslint/eslint-plugin": "^8.61.0",
-    "@typescript-eslint/parser": "^8.61.0",
-    "@vitest/coverage-v8": "^4.1.8",
-    "eslint": "^10.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.62.1",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^10.6.0",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^17.6.0",
     "http-server": "^14.1.1",
@@ -43,13 +43,13 @@
     "prettier": "^3.0.0",
     "ts-jest": "^29.4.6",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0",
+    "typescript-eslint": "^8.62.1",
     "vite": "^8.0.16",
     "vitest": "^4.0.17",
     "wasm-pack": "^0.15.0"
   },
   "dependencies": {
-    "@axe-core/playwright": "^4.11.3",
+    "@axe-core/playwright": "^4.12.1",
     "three": "^0.184.0"
   }
 }
