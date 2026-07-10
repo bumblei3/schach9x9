@@ -25,6 +25,10 @@ Changes since `v1.0.0-stable`.
 - **ci:** consolidate Window global types into tracked js/global.d.ts (b30f022)
 - **deps:** pin vulnerable transitive deps via overrides (225bf9b)
 
+### Documentation
+
+- add CHANGELOG.md generated from conventional commits (62cd1e3)
+
 ### Refactoring
 
 - **ai:** remove WASM engine, fix JS search root move bug, clean up CI (8bc2a68)
