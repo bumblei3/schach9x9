@@ -310,7 +310,7 @@ describe('SoundManager - Branch Coverage', () => {
       manager.playCapture();
       
       // Verify no throw
-      expect(true).toBe(true);
+      expect(() => manager.playCapture()).not.toThrow();
     });
 
     test('should use frost capture (shattering, 4 oscillators)', () => {
@@ -320,7 +320,7 @@ describe('SoundManager - Branch Coverage', () => {
       manager.playCapture();
       
       // Verify no throw
-      expect(true).toBe(true);
+      expect(() => manager.playCapture()).not.toThrow();
     });
 
     test('should use neon capture (square wave)', () => {
@@ -562,9 +562,9 @@ describe('SoundManager - Branch Coverage', () => {
       // The parameter is toCol, not fromCol in current implementation
       // Use playMove with proper toCol
       manager.playMove(4, 4);
-      
+
       // Just verify no throw
-      expect(true).toBe(true);
+      expect(() => manager.playMove(4, 4)).not.toThrow();
     });
   });
 });

@@ -141,8 +141,8 @@ describe('PostGameAnalysisUI', () => {
       // Click the button
       btnEl.click();
 
-      // Should not throw
-      expect(true).toBe(true);
+      // Must not throw on a win result
+      expect(() => btnEl.click()).not.toThrow();
     });
 
     test('should handle game without gameController', () => {

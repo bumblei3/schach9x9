@@ -166,7 +166,10 @@ describe('CampaignUI', () => {
     levelBtn.dispatchEvent(new MouseEvent('mouseout'));
 
     // No errors means hover handlers work
-    expect(true).toBe(true);
+    expect(() => {
+      levelBtn.dispatchEvent(new MouseEvent('mouseover'));
+      levelBtn.dispatchEvent(new MouseEvent('mouseout'));
+    }).not.toThrow();
   });
 
   it('should show stars for completed levels', () => {

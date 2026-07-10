@@ -398,8 +398,12 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         const inCheck = checkInt(b, maximizing ? color : color ^ COLOR_MASK);
 
         // --- Probcut (before move loop, for both sides) ---
+        // Probcut must NOT run at the root: a root cutoff would skip the move
+        // loop entirely and leave bestMove === null, which the root is required
+        // to return. This caused the AI to emit no move (score: -30000) at
+        // depths >= PROBCUT_DEPTH for positions where probcut pruned.
         let probcutCutoff = false;
-        if (d >= PROBCUT_DEPTH && !inCheck) {
+        if (d >= PROBCUT_DEPTH && !inCheck && !isRoot) {
           if (probcut(board, d, beta, maximizing, start, { count: nodes }, color, search)) {
             probcutCutoff = true;
           }

@@ -57,6 +57,9 @@ describe('Debug Hash Compare', () => {
     boardStr += 'w';
     console.log('Test board hash:', boardStr);
     
-    expect(true).toBe(true); // Just for debug
+    // Debug test: the serialized board must be non-empty and include the
+    // appended side-to-move marker.
+    expect(boardStr.length).toBeGreaterThan(0);
+    expect(boardStr).toContain('w');
   });
 });

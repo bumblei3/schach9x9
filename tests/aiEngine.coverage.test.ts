@@ -149,15 +149,20 @@ describe('AI Engine - Coverage for Untested Paths', () => {
   // ============================================================
 
   describe('Progress Callback', () => {
-    test('setProgressCallback should store callback', () => {
+    test('setProgressCallback should store callback and receive progress', async () => {
       const callback = vi.fn();
       AIEngine.setProgressCallback(callback);
-      expect(true).toBe(true);
+      // A real search should invoke the progress callback at least once.
+      const board = Array(9).fill(null).map(() => Array(9).fill(null));
+      board[7][4] = { type: 'k', color: 'white' };
+      board[1][4] = { type: 'k', color: 'black' };
+      await AIEngine.getBestMoveDetailed(board, 'white', 2, { elo: 2500 });
+      expect(callback).toHaveBeenCalled();
+      AIEngine.setProgressCallback(null);
     });
 
     test('setProgressCallback with null should clear callback', () => {
-      AIEngine.setProgressCallback(null);
-      expect(true).toBe(true);
+      expect(() => AIEngine.setProgressCallback(null)).not.toThrow();
     });
 
     test('progressCallback should be called during JS search', async () => {

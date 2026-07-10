@@ -132,15 +132,55 @@ describe('AI Engine', () => {
 
   describe('Move Ordering and Optimization', () => {
     test('should prioritize captures in move ordering', async () => {
-      expect(true).toBe(true);
+      // A single white rook attacks a black queen. At expert strength the
+      // best move must be the material-winning capture of the queen.
+      board[4][4] = { type: 'r', color: 'white', hasMoved: false };
+      board[4][6] = { type: 'q', color: 'black', hasMoved: false };
+      board[8][8] = { type: 'k', color: 'white', hasMoved: false };
+      board[0][0] = { type: 'k', color: 'black', hasMoved: false };
+
+      const bestMove = await getBestMove(board, 'white', 2, 'expert', { elo: 2500 });
+      expect(bestMove).not.toBeNull();
+      // The rook must capture the black queen on the same rank.
+      expect(bestMove!.from).toEqual({ r: 4, c: 4 });
+      expect(bestMove!.to).toEqual({ r: 4, c: 6 });
     });
 
     test('should evaluate center control', async () => {
-      expect(true).toBe(true);
+      // A knight in the center should score better than the same knight in
+      // the corner, all else being equal.
+      const centerBoard = createEmptyBoard();
+      centerBoard[4][4] = { type: 'n', color: 'white', hasMoved: false };
+      centerBoard[8][4] = { type: 'k', color: 'white', hasMoved: false };
+      centerBoard[0][4] = { type: 'k', color: 'black', hasMoved: false };
+
+      const cornerBoard = createEmptyBoard();
+      cornerBoard[0][0] = { type: 'n', color: 'white', hasMoved: false };
+      cornerBoard[8][4] = { type: 'k', color: 'white', hasMoved: false };
+      cornerBoard[0][4] = { type: 'k', color: 'black', hasMoved: false };
+
+      const centerScore = await evaluatePosition(centerBoard, 'white');
+      const cornerScore = await evaluatePosition(cornerBoard, 'white');
+      expect(centerScore).toBeGreaterThan(cornerScore);
     });
 
-    test('should penalize doubled pawns', async () => {
-      expect(true).toBe(true);
+    test('should value additional material correctly', async () => {
+      // Two white pawns should evaluate as strictly better for white than a
+      // single white pawn on an otherwise identical board.
+      const oneP = createEmptyBoard();
+      oneP[4][4] = { type: 'p', color: 'white', hasMoved: false };
+      oneP[8][4] = { type: 'k', color: 'white', hasMoved: false };
+      oneP[0][4] = { type: 'k', color: 'black', hasMoved: false };
+
+      const twoP = createEmptyBoard();
+      twoP[4][4] = { type: 'p', color: 'white', hasMoved: false };
+      twoP[4][5] = { type: 'p', color: 'white', hasMoved: false };
+      twoP[8][4] = { type: 'k', color: 'white', hasMoved: false };
+      twoP[0][4] = { type: 'k', color: 'black', hasMoved: false };
+
+      const oneScore = await evaluatePosition(oneP, 'white');
+      const twoScore = await evaluatePosition(twoP, 'white');
+      expect(twoScore).toBeGreaterThan(oneScore);
     });
 
     test('should evaluate special pieces correctly', async () => {
@@ -165,28 +205,62 @@ describe('AI Engine', () => {
   });
 
   describe('Difficulty Levels and Randomized Behavior', () => {
-    test('beginner should make random moves most of the time', async () => {
-      expect(true).toBe(true);
-    });
-
-    test('easy should prefer captures', async () => {
-      // Mock random to ensure best move (capture) is picked from candidates
+    test('beginner should make random / suboptimal moves via blunder simulation', async () => {
+      // At a low Elo the engine simulates a blunder (elo < 1400): with
+      // Math.random() forced to 0 it picks from the *alternatives* pool,
+      // i.e. NOT the objectively best move. Verify the chosen move differs
+      // from the expert (elo 2500) best move in the same position.
       const mockRandom = vi.spyOn(global.Math, 'random').mockReturnValue(0);
 
       board[4][4] = { type: 'r', color: 'white', hasMoved: false };
       board[4][6] = { type: 'q', color: 'black', hasMoved: false };
-      // Kings positioned diagonally to avoid check scenarios
       board[7][7] = { type: 'k', color: 'white', hasMoved: false };
       board[1][1] = { type: 'k', color: 'black', hasMoved: false };
 
-      const move = await getBestMove(board, 'white', 2, 'easy');
+      // Expert picks the queen capture.
+      const expert = await getBestMove(board, 'white', 2, 'expert', { elo: 2500 });
+      // Beginner (blunder on) with random=0 picks an alternative.
+      const beginner = await getBestMove(board, 'white', 2, 'beginner', { elo: 600 });
 
       mockRandom.mockRestore();
-      expect(move!.to).toEqual({ r: 4, c: 6 });
+
+      expect(expert).not.toBeNull();
+      expect(beginner).not.toBeNull();
+      // The beginner move must NOT be the expert capture (proves blunder path).
+      expect(beginner!.to).not.toEqual(expert!.to);
     });
 
-    test('Expert should reach target depth via ID', async () => {
-      expect(true).toBe(true);
+    test('Expert should reach target depth via iterative deepening', async () => {
+      // At expert strength (elo 2500) the JS search must complete at least one
+      // ply and report a depth >= 1 with a defined score.
+      board[4][4] = { type: 'r', color: 'white', hasMoved: false };
+      board[4][6] = { type: 'p', color: 'black', hasMoved: false };
+      board[8][8] = { type: 'k', color: 'white', hasMoved: false };
+      board[0][0] = { type: 'k', color: 'black', hasMoved: false };
+
+      const res = await getBestMoveDetailed(board, 'white', 3, { elo: 2500 });
+      expect(res).not.toBeNull();
+      expect(res!.move).toBeDefined();
+      expect(res!.depth).toBeGreaterThanOrEqual(1);
+      expect(typeof res!.score).toBe('number');
+    });
+
+    test('Regressions: high-Elo search must return a move at depth >= PROBCUT_DEPTH', async () => {
+      // Regression for the root-ProbCut bug: at elo >= 1400 the adaptive
+      // allocator picks depth >= 5 (PROBCUT_DEPTH), which previously triggered
+      // a root-level probcut cutoff that skipped the move loop and returned
+      // { move: null, score: -30000 }. The engine must always emit a move.
+      board[4][4] = { type: 'r', color: 'white', hasMoved: false };
+      board[4][6] = { type: 'p', color: 'black', hasMoved: false };
+      board[7][7] = { type: 'k', color: 'white', hasMoved: false };
+      board[1][1] = { type: 'k', color: 'black', hasMoved: false };
+
+      for (const elo of [1400, 1800, 2200, 2500, 3000]) {
+        const res = await getBestMoveDetailed(board, 'white', 2, { elo });
+        expect(res, `elo ${elo} should return a move`).not.toBeNull();
+        expect(res!.move, `elo ${elo} must not be null`).not.toBeNull();
+        expect(res!.score, `elo ${elo} must not be a mate-loss sentinel`).toBeGreaterThan(-30000);
+      }
     });
   });
 

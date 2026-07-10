@@ -267,8 +267,10 @@ describe('GameController', () => {
 
     test('should skip statistics if gameStartTime not set', () => {
       gameController.gameStartTime = null;
-      gameController.saveGameToStatistics('win', 'black');
-      expect(true).toBe(true);
+      // Must not throw and must leave gameStartTime untouched when there is
+      // no game to record.
+      expect(() => gameController.saveGameToStatistics('win', 'black')).not.toThrow();
+      expect(gameController.gameStartTime).toBeNull();
     });
 
     test('should handle corridor placement calculation', () => {
@@ -339,15 +341,15 @@ describe('GameController', () => {
       game.isAnimating = true;
       game.phase = PHASES.PLAY;
       gameController.handleCellClick(4, 4);
-      // Validating blockage by absence of side effects is hard without working mocks
-      expect(true).toBe(true);
+      // Clicking a corridor cell in non-setup phase must not select anything.
+      expect(gameController.game.selectedSquare).toBeNull();
     });
 
     test('should block clicks in replay mode', () => {
       game.replayMode = true;
       game.phase = PHASES.PLAY;
       gameController.handleCellClick(4, 4);
-      expect(true).toBe(true);
+      expect(gameController.game.selectedSquare).toBeNull();
     });
   });
 
