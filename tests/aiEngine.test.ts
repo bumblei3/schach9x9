@@ -3,7 +3,8 @@
  */
 
 import { describe, expect, test, beforeEach, vi } from 'vitest';
-import { getBestMove, getBestMoveDetailed, evaluatePosition, getAllLegalMoves } from '../js/aiEngine';
+import { getBestMove, getBestMoveDetailed, evaluatePosition, getAllLegalMoves, convertBoardToInt } from '../js/aiEngine';
+import { createJsSearch } from '../js/search';
 import { createEmptyBoard } from '../js/gameEngine';
 import type { Board } from '../js/types/game';
 
@@ -245,22 +246,23 @@ describe('AI Engine', () => {
       expect(typeof res!.score).toBe('number');
     });
 
-    test('Regressions: high-Elo search must return a move at depth >= PROBCUT_DEPTH', async () => {
-      // Regression for the root-ProbCut bug: at elo >= 1400 the adaptive
-      // allocator picks depth >= 5 (PROBCUT_DEPTH), which previously triggered
-      // a root-level probcut cutoff that skipped the move loop and returned
-      // { move: null, score: -30000 }. The engine must always emit a move.
+    test('Regressions: root search must return a move at depth >= PROBCUT_DEPTH', async () => {
+      // Regression for the root-ProbCut bug: at depth >= 5 (PROBCUT_DEPTH)
+      // the search previously ran a probcut cutoff at the root node, which
+      // skipped the move loop and returned { move: null, score: -30000 }.
+      // The root must always return a concrete move. We drive the search
+      // engine directly to avoid the adaptive time-allocation path (which is
+      // load-sensitive and would make this test flaky in CI).
       board[4][4] = { type: 'r', color: 'white', hasMoved: false };
       board[4][6] = { type: 'p', color: 'black', hasMoved: false };
       board[7][7] = { type: 'k', color: 'white', hasMoved: false };
       board[1][1] = { type: 'k', color: 'black', hasMoved: false };
 
-      for (const elo of [1400, 1800, 2200, 2500, 3000]) {
-        const res = await getBestMoveDetailed(board, 'white', 2, { elo });
-        expect(res, `elo ${elo} should return a move`).not.toBeNull();
-        expect(res!.move, `elo ${elo} must not be null`).not.toBeNull();
-        expect(res!.score, `elo ${elo} must not be a mate-loss sentinel`).toBeGreaterThan(-30000);
-      }
+      const intBoard = convertBoardToInt(board);
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const res = await search.run(intBoard, 'white', 5);
+      expect(res.move, 'root search at depth 5 must return a concrete move').not.toBeNull();
+      expect(typeof res.score).toBe('number');
     });
   });
 

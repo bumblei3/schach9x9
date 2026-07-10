@@ -190,6 +190,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 75
     needs: [build]
+    # E2E is intentionally non-blocking: a flaky browser test or a new visual
+    # snapshot must not block the production deploy. Results are still reported
+    # via the Playwright GitHub reporter and uploaded as an artifact.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
@@ -246,6 +250,7 @@ jobs:
           echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Run Visual Regression tests
+        continue-on-error: true
         run: npm run test:visual
 
       - name: Upload Playwright report

@@ -16,9 +16,17 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       reportsDirectory: './coverage',
       exclude: ['node_modules/**', 'dist/**', 'tests/**', 'e2e/**'],
+      // Fail the CI run if coverage drops below these floors. Without this,
+      // coverage could silently regress to 0% and the job would still pass.
+      thresholds: {
+        lines: 85,
+        branches: 70,
+        functions: 80,
+        statements: 87,
+      },
     },
   },
 });
