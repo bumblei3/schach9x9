@@ -58,6 +58,7 @@ export class EvaluationBar {
    * @param score - Centipawns (positive for white, negative for black)
    */
   public update(score: number): void {
+    const prevScore = this.currentScore;
     this.currentScore = score;
 
     if (!this.scoreLabel || !this.fill) return;
@@ -80,7 +81,7 @@ export class EvaluationBar {
     this.updateStyle(score);
 
     // Subtle pulse on significant score changes (> 1.5 pawns)
-    this.maybePulse(score);
+    this.maybePulse(score, prevScore);
   }
 
   private scoreToPercentage(score: number): number {
@@ -137,18 +138,24 @@ export class EvaluationBar {
 
   /**
    * Adds a subtle pulse animation when score changes significantly
+   * @param score - new score (centipawns)
+   * @param prevScore - previous score, used to measure the magnitude of change
    */
-  private maybePulse(score: number): void {
+  private maybePulse(score: number, prevScore: number): void {
     if (!this.fill) return;
-    
-    const diff = Math.abs(score - this.currentScore);
-    
+
+    const diff = Math.abs(score - prevScore);
+
     // Only pulse on significant changes (> 150 centipawns = 1.5 pawns)
     if (diff > 150) {
       this.fill.style.animation = 'eval-pulse 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-      this.fill.addEventListener('animationend', () => {
-        this.fill!.style.animation = '';
-      }, { once: true });
+      this.fill.addEventListener(
+        'animationend',
+        () => {
+          this.fill!.style.animation = '';
+        },
+        { once: true }
+      );
     }
   }
 
