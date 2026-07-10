@@ -30,6 +30,7 @@ build/
 *.spec.js
 *.spec.d.ts
 *.spec.d.ts.map
+*.tsbuildinfo
 
 # Environment variables
 .env

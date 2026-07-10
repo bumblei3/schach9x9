@@ -319,7 +319,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const LMR_MAX_REDUCTION = 3;     // Max reduction
 
       function search(
-        b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean
+        b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean, isRoot: boolean = false
       ): { score: number; bestMove: Move | null } {
         nodes++;
         if (nodes % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
@@ -436,20 +436,20 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               if (reduction > 0) {
                 // Reduced search first
-                result = search(b, d - 1 - reduction, alpha, beta, false);
+                result = search(b, d - 1 - reduction, alpha, beta, false, false);
 
                 // If reduced search fails high (>= beta), re-search at full depth
                 if (result.score >= beta) {
-                  result = search(b, d - 1, alpha, beta, false);
+                  result = search(b, d - 1, alpha, beta, false, false);
                 }
               } else {
                 // Full depth search
-                result = search(b, d - 1, alpha, beta, false);
+                result = search(b, d - 1, alpha, beta, false, false);
               }
 
               undoMoveInt(board, undo);
 
-              if (result.score > bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
+              if (result.score > bestScore) { bestScore = result.score; bestMove = isRoot ? move : (result.bestMove || move); }
               alpha = Math.max(alpha, result.score);
               if (beta <= alpha) {
                 flag = 'lower';
@@ -475,7 +475,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 // If extension improves score, use it
                 if (extResult.score > bestScore) {
                   bestScore = extResult.score;
-                  bestMove = extResult.bestMove || bestMove;
+                  bestMove = isRoot ? bestMove : (extResult.bestMove || bestMove);
                 }
               }
             }
@@ -511,20 +511,20 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               if (reduction > 0) {
                 // Reduced search first
-                result = search(b, d - 1 - reduction, alpha, beta, true);
+                result = search(b, d - 1 - reduction, alpha, beta, true, false);
 
                 // If reduced search fails high (>= beta), re-search at full depth
                 if (result.score >= beta) {
-                  result = search(b, d - 1, alpha, beta, true);
+                  result = search(b, d - 1, alpha, beta, true, false);
                 }
               } else {
                 // Full depth search
-                result = search(b, d - 1, alpha, beta, true);
+                result = search(b, d - 1, alpha, beta, true, false);
               }
 
               undoMoveInt(board, undo);
 
-              if (result.score < bestScore) { bestScore = result.score; bestMove = result.bestMove || move; }
+              if (result.score < bestScore) { bestScore = result.score; bestMove = isRoot ? move : (result.bestMove || move); }
               beta = Math.min(beta, result.score);
               if (beta <= alpha) {
                 flag = 'upper';
@@ -545,11 +545,11 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               if (isSingularMove(board, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes }, color, search)) {
                 // Re-search best move with depth + 1
                 const undo = makeMoveInt(board, bestMove);
-                const extResult = search(board, d, alpha, beta, true);
+                const extResult = search(board, d, alpha, beta, true, false);
                 undoMoveInt(board, undo);
                 if (extResult.score < bestScore) {
                   bestScore = extResult.score;
-                  bestMove = extResult.bestMove || bestMove;
+                  bestMove = isRoot ? bestMove : (extResult.bestMove || bestMove);
                 }
               }
             }
@@ -597,16 +597,16 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
         let a = prevScore - ASPIRATION_WINDOW * aspirationMult;
         let be = prevScore + ASPIRATION_WINDOW * aspirationMult;
-        let result = search(board, d, a, be, true);
+        let result = search(board, d, a, be, true, true);
 
         if (result.score <= a) {
           a = prevScore - ASPIRATION_WINDOW * 10;
           if (a < -INFINITY + 100) a = -INFINITY + 100;
-          result = search(board, d, a, be, true);
+          result = search(board, d, a, be, true, true);
         } else if (result.score >= be) {
           be = prevScore + ASPIRATION_WINDOW * 10;
           if (be > INFINITY - 100) be = INFINITY - 100;
-          result = search(board, d, a, be, true);
+          result = search(board, d, a, be, true, true);
         }
 
         // Track scores for IIR

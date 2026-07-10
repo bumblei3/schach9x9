@@ -11,11 +11,6 @@ import {
   detectTacticalComplexity,
   type TimeAllocationParams,
 } from './ai/timeManagement';
-import {
-  getBestMoveWasm,
-  getWasmNodesEvaluated,
-  resetWasmNodesEvaluated,
-} from './ai/wasmBridge';
 import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook';
 import type { Move } from './ai/MoveGenerator';
 import {
@@ -39,7 +34,6 @@ import {
   PIECE_ROOK, PIECE_QUEEN, PIECE_KING, PIECE_ARCHBISHOP, PIECE_CHANCELLOR,
   PIECE_ANGEL, PIECE_NIGHTRIDER, COLOR_WHITE, COLOR_BLACK, TYPE_MASK, COLOR_MASK,
 } from './ai/BoardDefinitions';
-import { getCurrentBoardShape } from './config';
 import type { Player, Square, Piece, PieceType } from './types/game';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 
@@ -137,34 +131,7 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
   return board;
 }
 
-// --- Worker management ---
-
-type PendingResolve = (_data: SearchResult | SearchResult[] | null) => void;
-
-const workerPendingRequests = new Map<string, { resolve: PendingResolve; timer: number }>();
-
-// Worker initialization removed - not currently used
-
-function runWorkerSearch(
-  board: IntBoard, turnColor: Player, maxDepth: number, personality: string, elo: number
-): Promise<SearchResult | null> {
-  return new Promise<SearchResult | null>(resolve => {
-    const id = Math.random().toString(36).slice(2);
-    const timer = window.setTimeout(() => { workerPendingRequests.delete(id); resolve(null); }, 15000);
-    workerPendingRequests.set(id, { resolve: resolve as PendingResolve, timer });
-    void board; void turnColor; void maxDepth; void personality; void elo;
-  });
-}
-
-function runWorkerTopMoves(
-  board: IntBoard, _turnColor: Player, _count: number, _searchDepth: number, _maxTimeMs: number
-): Promise<SearchResult[]> {
-  // Worker not initialized in aiEngine - delegate to JS/WASM fallback
-  // This function is kept for API compatibility but the actual work
-  // is done by the JS fallback in getTopMoves() below
-  void board;
-  return Promise.resolve([]);
-}
+// --- Board conversion ---
 
 function convertMoveToResult(move: { from: number; to: number; promotion?: number } | null): MoveResult | null {
   if (!move) return null;
@@ -280,30 +247,8 @@ export async function getBestMoveDetailed(
 
   const personalityId = personality.wasmPersonality;
   const elo = config.elo || 2500;
-  const boardShape = getCurrentBoardShape();
 
-  if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
-    try {
-      const result = await runWorkerSearch(board, turnColor, maxDepth, personalityId, elo);
-      if (result && result.move) {
-        logger.debug('[AiEngine] Using Wasm Worker Result');
-        return { ...result, move: convertMoveToResult(result.move as unknown as { from: number; to: number }), depth: result.depth ?? 0, nodes: result.nodes ?? 0 };
-      }
-    } catch (err) {
-      logger.error('[AiEngine] Worker search failed', err);
-    }
-  }
-
-  if (boardShape === 'standard') {
-    try {
-      const wasmResult = await getBestMoveWasm(board, turnColor, maxDepth, personalityId, elo);
-      if (wasmResult) return { ...wasmResult, depth: wasmResult.depth ?? 0, nodes: wasmResult.nodes ?? 0 };
-    } catch {
-      logger.debug('[AiEngine] WASM fallback failed, using JS');
-    }
-  }
-
-  logger.debug('[AiEngine] Using JS Fallback Search');
+  logger.debug('[AiEngine] Using JS Search');
   const jsResult = await runJsSearch(board, turnColor, maxDepth, elo, personalityId);
   if (jsResult) {
     return { score: jsResult.score, move: convertMoveToResult(jsResult.move), nodes: jsResult.nodes, depth: jsResult.depth };
@@ -311,7 +256,9 @@ export async function getBestMoveDetailed(
   return null;
 }
 
-// --- JS Fallback Search ---
+// --- JS Search (primary engine, no WASM) ---
+// Global node counter so getNodesEvaluated()/resetNodesEvaluated() keep working.
+let jsNodesEvaluated = 0;
 
 interface JsSearchResult {
   move: { from: number; to: number; promotion?: number } | null;
@@ -324,7 +271,9 @@ async function runJsSearch(
   board: IntBoard, turnColor: Player, maxDepth: number, _elo: number, personality: string
 ): Promise<JsSearchResult> {
   const jsSearch = createJsSearch({ personality: personality as EvalConfig['personality'] });
-  return jsSearch.run(board, turnColor, maxDepth);
+  const result = await jsSearch.run(board, turnColor, maxDepth);
+  jsNodesEvaluated = result.nodes;
+  return result;
 }
 
 // --- Top Moves (tutor) ---
@@ -342,16 +291,6 @@ export async function getTopMoves(
       count = Math.max(1, count - 1);
     }
   }
-  const boardShape = getCurrentBoardShape();
-  let workerResult: SearchResult[] | null = null;
-  if (boardShape === 'standard' && typeof Worker !== 'undefined' && typeof window !== 'undefined') {
-    try { workerResult = await runWorkerTopMoves(board, turnColor, count, searchDepth, maxTimeMs); } catch (err) { logger.error('[AiEngine] Worker getTopMoves failed', err); }
-  }
-  // Use worker result if it has moves, otherwise fall through to JS/WASM fallback
-  if (workerResult && workerResult.length > 0) {
-    return workerResult;
-  }
-  // JS fallback: quick eval + WASM for top candidates
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const startTime = performance.now();
   const legalMoves = genLegalInt(board, turnColor);
@@ -383,8 +322,9 @@ export async function getTopMoves(
   for (const candidate of topCandidates) {
     if (performance.now() - startTime > maxTimeMs) break;
     try {
-      const wasmResult = await getBestMoveWasm(board, turnColor, loopDepth, 'NORMAL', 2500);
-      if (wasmResult) moveScores.push({ move: candidate.move, score: wasmResult.score });
+      const jsResult = await runJsSearch(board, turnColor, loopDepth, 2500, 'NORMAL');
+      if (jsResult) moveScores.push({ move: candidate.move, score: jsResult.score });
+      else moveScores.push({ move: candidate.move, score: candidate.score });
     } catch { moveScores.push({ move: candidate.move, score: candidate.score }); }
   }
   moveScores.sort((a, b) => b.score - a.score);
@@ -476,8 +416,8 @@ export function isInCheck(uiBoard: UiBoard, color: Player): boolean {
   return checkInt(board, c);
 }
 
-export function getNodesEvaluated(): number { return getWasmNodesEvaluated(); }
-export function resetNodesEvaluated(): void { resetWasmNodesEvaluated(); }
+export function getNodesEvaluated(): number { return jsNodesEvaluated; }
+export function resetNodesEvaluated(): void { jsNodesEvaluated = 0; }
 
 // --- Legacy stubs ---
 

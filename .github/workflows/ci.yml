@@ -29,7 +29,6 @@ env:
   # Cache versions for reproducibility
   NPM_CACHE_VERSION: '3'
   PLAYWRIGHT_CACHE_VERSION: '1'
-  RUST_CACHE_VERSION: '1'
 
 jobs:
   # =======================================================================
@@ -111,7 +110,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [lint, wasm-build]
+    needs: [lint]
     strategy:
       matrix:
         node-version: ['22', '24']
@@ -151,26 +150,8 @@ jobs:
       - name: Rebuild native bindings (fixes npm optional deps bug)
         run: npm rebuild rolldown vite
 
-      - name: Download WASM build artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: wasm-build
-          path: engine-wasm/pkg/
-
-      - name: Verify WASM build artifact
-        run: |
-          if [ -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
-            echo "✅ WASM artifact found (schach9x9): $(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm) bytes"
-          elif [ -f engine-wasm/pkg/engine_wasm_bg.wasm ]; then
-            echo "✅ WASM artifact found (engine_wasm): $(stat -c%s engine-wasm/pkg/engine_wasm_bg.wasm) bytes"
-          else
-            echo "❌ WASM artifact not found!"
-            ls -la engine-wasm/pkg/ || true
-            exit 1
-          fi
-
       - name: Run unit tests with coverage
-        run: npm run test:coverage
+        run: npm run test:coverage 2>&1 | tee test-output.txt
         timeout-minutes: 25
 
       - name: Upload coverage to Codecov
@@ -196,8 +177,9 @@ jobs:
       - name: Test summary
         if: always()
         run: |
+          TEST_COUNT=$(grep -oE 'Tests +[0-9]+ passed' test-output.txt 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "unknown")
           echo "## Test Summary (Node ${{ matrix.node-version }})" >> $GITHUB_STEP_SUMMARY
-          echo "Tests run: 1857" >> $GITHUB_STEP_SUMMARY
+          echo "Tests run: $TEST_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
   # =======================================================================
@@ -275,88 +257,6 @@ jobs:
           retention-days: 30
 
   # =======================================================================
-  # WASM ENGINE BUILD & TESTS (Non-blocking)
-  # =======================================================================
-  wasm-build:
-    name: WASM Engine Build & Test
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Cache Rust dependencies
-        uses: actions/cache@v6
-        id: rust-cache
-        with:
-          path: |
-            ~/.cargo/bin
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ env.RUST_CACHE_VERSION }}-${{ hashFiles('engine-wasm/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-${{ env.RUST_CACHE_VERSION }}-
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-
-      - name: Install wasm-pack
-        run: |
-          cargo install wasm-pack --locked --force
-          echo "wasm-pack version: $(wasm-pack --version)"
-
-      - name: Build WASM engine
-        working-directory: engine-wasm
-        run: |
-          wasm-pack build --target web --release
-          echo "Build completed successfully"
-          ls -la pkg/
-
-      - name: Run WASM engine tests
-        working-directory: engine-wasm
-        run: cargo test --release 2>&1 | tee test_output.txt
-        timeout-minutes: 20
-
-      - name: Verify WASM module size
-        working-directory: engine-wasm
-        run: |
-          if [ -f pkg/schach9x9_bg.wasm ]; then
-            SIZE=$(stat -c%s pkg/schach9x9_bg.wasm)
-            echo "WASM size: $SIZE bytes ($((SIZE / 1024)) KB)"
-            if [ $SIZE -gt 2000000 ]; then
-              echo "⚠️ WASM module exceeds 2MB!"
-              exit 1
-            fi
-            echo "✅ WASM size within budget"
-          else
-            echo "❌ WASM file not found"
-            exit 1
-          fi
-
-      - name: WASM build summary
-        if: always()
-        run: |
-          echo "## WASM Build Summary" >> $GITHUB_STEP_SUMMARY
-          if [ -f engine-wasm/pkg/schach9x9_bg.wasm ]; then
-            SIZE=$(stat -c%s engine-wasm/pkg/schach9x9_bg.wasm)
-            echo "WASM size: $((SIZE / 1024)) KB" >> $GITHUB_STEP_SUMMARY
-            echo "Status: ✅ Built" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Status: ❌ Build failed" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "Job status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload WASM build artifact
-        if: success() || failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: wasm-build
-          path: engine-wasm/pkg/
-          retention-days: 1
-
-  # =======================================================================
   # SECURITY & DEPENDENCY AUDIT (Non-blocking)
   # =======================================================================
   security-audit:
@@ -385,9 +285,6 @@ jobs:
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
-
-      - name: Rebuild native bindings (fixes npm optional deps bug)
-        run: npm rebuild rolldown vite
 
       - name: Run npm audit
         id: npm-audit
@@ -484,10 +381,8 @@ jobs:
           echo "Dist size: $(du -sh dist/)" >> $GITHUB_STEP_SUMMARY
           BUNDLE_JS=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
           BUNDLE_CSS=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
-          BUNDLE_WASM=$(find dist -name "*.wasm" -exec wc -c {} + | tail -1 | awk '{print $1}')
           echo "JS: $((BUNDLE_JS / 1024)) KB" >> $GITHUB_STEP_SUMMARY
           echo "CSS: $((BUNDLE_CSS / 1024)) KB" >> $GITHUB_STEP_SUMMARY
-          echo "WASM: $((BUNDLE_WASM / 1024)) KB" >> $GITHUB_STEP_SUMMARY
 
       - name: Bundle Size Diff (PR only)
         if: github.event_name == 'pull_request'
@@ -498,13 +393,11 @@ jobs:
           
           JS_SIZE=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
           CSS_SIZE=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
-          WASM_SIZE=$(find dist -name "*.wasm" -exec wc -c {} + | tail -1 | awk '{print $1}')
-          
+
           echo "JS bundle: $(($JS_SIZE / 1024)) KB"
           echo "CSS: $(($CSS_SIZE / 1024)) KB"
-          echo "WASM: $(($WASM_SIZE / 1024)) KB"
-          
-          # Budget check: 1200 KB total (JS bundles + CSS + WASM)
+
+          # Budget check: 1200 KB total (JS bundles + CSS)
           MAX_SIZE=$((1200 * 1024))
           if [ $TOTAL_SIZE -gt $MAX_SIZE ]; then
             echo "❌ Bundle exceeds 1200 KB budget!"

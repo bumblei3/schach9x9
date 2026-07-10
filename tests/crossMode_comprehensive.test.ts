@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   isBlockedSquare,
   isBlockedCell,
@@ -97,16 +97,16 @@ describe('Cross-Shaped Board Mode (Comprehensive)', () => {
     });
   });
 
-  describe('AI Engine WASM Bypass', () => {
-    it('should bypass WASM/Worker when board shape is CROSS', async () => {
+  describe('AI Engine (WASM-free)', () => {
+    it('should return a legal move when board shape is CROSS', async () => {
       setCurrentBoardShape(BOARD_SHAPES.CROSS);
       const game = new Game(15, 'cross');
       game.board[0][4] = { type: 'k', color: 'white', hasMoved: false };
       game.board[8][4] = { type: 'k', color: 'black', hasMoved: false };
 
-      const debugSpy = vi.spyOn(aiEngine.logger, 'debug');
-      await aiEngine.getBestMoveDetailed(game.board, 'white', 1, { elo: 1000 });
-      expect(debugSpy).toHaveBeenCalledWith('[AiEngine] Using JS Fallback Search');
+      const result = await aiEngine.getBestMoveDetailed(game.board, 'white', 1, { elo: 1000 });
+      expect(result).not.toBeNull();
+      expect(result?.move).toBeDefined();
     });
   });
 

@@ -80,5 +80,5 @@
     "beforeAll": "readonly",
     "afterAll": "readonly"
   },
-  "ignorePatterns": ["dist/**", "node_modules/**", "engine-wasm/**", "*.cjs"]
+  "ignorePatterns": ["dist/**", "node_modules/**", "*.cjs"]
 }
