@@ -72,14 +72,6 @@ jobs:
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
-      - name: Submit dependency graph snapshot
-        # Keeps GitHub's vulnerability dashboard in sync with the
-        # committed lockfile (overrides for undici/js-yaml). Without
-        # this, stale snapshots keep showing phantom vuln alerts.
-        uses: actions/dependency-submission@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
       - name: Run ESLint (with cache)
         run: npm run lint -- --cache --max-warnings=0
 
