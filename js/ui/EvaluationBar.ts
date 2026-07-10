@@ -128,7 +128,7 @@ export class EvaluationBar {
       gradient = `linear-gradient(to bottom, rgb(${r}, ${g}, ${b}), rgb(${Math.max(15, r - 20)}, ${Math.max(20, g - 30)}, ${Math.max(15, b - 20)}))`;
     } else {
       // Neutral
-      gradient = 'linear-gradient(to bottom, #1e293b, #0f172a)';
+      gradient = 'linear-gradient(to bottom, var(--bg-board-dark), var(--bg-app))';
     }
 
     this.fill.style.background = gradient;

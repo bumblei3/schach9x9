@@ -34,64 +34,20 @@
   }
 }
 
-/* --- Evaluation Bar --- */
-.evaluation-bar {
+#battle-chess-3d-container {
   position: absolute;
-  left: -32px;
   top: 0;
-  width: 12px;
-  height: calc(100% - 30px);
-  background: #222;
-  /* Black for opponent */
-  border-radius: 4px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  z-index: 15;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+  /* Let clicks pass if hidden */
+  opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.evaluation-bar.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#eval-fill {
-  width: 100%;
-  height: 50%;
-  /* Initial 0.0 */
-  background: #eee;
-  /* White for player */
-  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#eval-text {
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.6rem;
-  font-weight: 800;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-  pointer-events: none;
-  z-index: 2;
-}
-
-#eval-marker {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.5);
-  top: 50%;
-  z-index: 1;
-}
-
-#battle-chess-3d-container {
+#board-wrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -424,6 +380,6 @@ body.mode-3d #board-wrapper {
 
 #opening-name {
   font-weight: bold;
-  color: var(--accent, #4f9cf9);
+  color: var(--accent-primary);
   margin-left: 8px;
 }
