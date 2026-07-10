@@ -3,6 +3,14 @@ import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 
 // Mock dependencies
+vi.mock('../js/tutorial', () => ({
+  Tutorial: class {
+    static shouldAutoShow() {
+      return false; // don't instantiate real Tutorial during game-flow tests
+    }
+  },
+}));
+
 vi.mock('../js/ui.js', () => ({
   initBoardUI: vi.fn(),
   renderBoard: vi.fn(),

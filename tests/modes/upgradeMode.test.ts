@@ -82,7 +82,13 @@ vi.mock('../../js/TimeManager.js', () => ({
     stopClock() {}
   },
 }));
-vi.mock('../../js/tutorial.js', () => ({ Tutorial: class {} }));
+vi.mock('../../js/tutorial.js', () => ({
+  Tutorial: class {
+    static shouldAutoShow() {
+      return false;
+    }
+  },
+}));
 vi.mock('../../js/AnalysisController.js', () => ({
   AnalysisController: class {
     constructor() {}

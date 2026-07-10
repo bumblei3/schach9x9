@@ -52,11 +52,15 @@ vi.mock('../js/statisticsManager.js', () => ({
 }));
 
 vi.mock('../js/tutorial.js', () => ({
-  Tutorial: vi.fn().mockImplementation(function () {
-    return {
-      init: vi.fn(),
-    };
-  }),
+  Tutorial: class {
+    static shouldAutoShow() {
+      return false;
+    }
+    constructor() {
+      this.init = vi.fn();
+      this.show = vi.fn();
+    }
+  },
 }));
 
 vi.mock('../js/arrows.js', () => ({

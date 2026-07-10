@@ -158,7 +158,11 @@ export class GameController {
 
     // Initialize helpers common to all
     soundManager.init();
-    new Tutorial();
+    // Auto-show tutorial ONLY on first run; manual restart stays available
+    // via the "Tutorial" button (startTutorial -> new Tutorial().show()).
+    if (Tutorial.shouldAutoShow()) {
+      new Tutorial().show();
+    }
 
     const boardEl = document.querySelector('#board');
     const boardContainer = boardEl ? boardEl.parentElement : null;

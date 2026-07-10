@@ -7,8 +7,10 @@ interface Step {
 }
 
 export class Tutorial {
-  public currentStep: number;
-  public steps: Step[];
+  private static readonly SEEN_KEY = 'schach9x9_tutorial_seen';
+
+  public currentStep!: number;
+  public steps!: Step[];
   public overlay!: HTMLElement;
   public stepsContainer!: HTMLElement;
   public prevBtn!: HTMLButtonElement;
@@ -21,6 +23,24 @@ export class Tutorial {
     this.currentStep = 0;
     this.steps = this.createSteps();
     this.initUI();
+  }
+
+  /** Returns true when the tutorial has NOT been seen yet (first run). */
+  public static shouldAutoShow(): boolean {
+    try {
+      return localStorage.getItem(Tutorial.SEEN_KEY) !== '1';
+    } catch {
+      return true; // storage unavailable -> show anyway
+    }
+  }
+
+  /** Persist that the tutorial has been seen/closed. */
+  public static markSeen(): void {
+    try {
+      localStorage.setItem(Tutorial.SEEN_KEY, '1');
+    } catch {
+      /* ignore storage failures */
+    }
   }
 
   public createSteps(): Step[] {
@@ -442,6 +462,7 @@ export class Tutorial {
 
   public close(): void {
     this.overlay.classList.add('hidden');
+    Tutorial.markSeen();
   }
 
   public nextStep(): void {

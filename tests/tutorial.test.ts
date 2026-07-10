@@ -10,6 +10,8 @@ describe('Tutorial', () => {
   let tutorial: any;
 
   beforeEach(() => {
+    // Reset first-run flag so each test starts clean
+    localStorage.clear();
     // Setup complete DOM structure that tutorial.js expects
     document.body.innerHTML = `
       <div id="tutorial-overlay" class="hidden">

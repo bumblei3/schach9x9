@@ -40,9 +40,15 @@ vi.mock('../../js/campaign/CampaignManager', () => ({
 }));
 
 vi.mock('../../js/tutorial', () => ({
-  Tutorial: vi.fn().mockImplementation(function () {
-    return { show: vi.fn(), initUI: vi.fn() };
-  }),
+  Tutorial: class {
+    static shouldAutoShow() {
+      return false;
+    }
+    constructor() {
+      this.show = vi.fn();
+      this.initUI = vi.fn();
+    }
+  },
 }));
 
 vi.mock('../../js/statisticsManager', () => ({
