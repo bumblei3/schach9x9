@@ -229,7 +229,7 @@ const PIECE_VALUES: Record<string, number> = {
  * @param {string[]} pieces - Array of piece symbols
  * @returns {number} Total cost
  */
-function calculatePieceCost(pieces: string[]): number {
+export function calculatePieceCost(pieces: string[]): number {
   return pieces.reduce((sum, p) => sum + (PIECE_VALUES[p] || 0), 0);
 }
 
@@ -272,7 +272,7 @@ function createTemplate(
 /**
  * Calculates a score for placing a piece at a specific square
  */
-function getSquareScore(
+export function getSquareScore(
   r: number,
   c: number,
   pieceType: string,
@@ -360,7 +360,7 @@ function getSquareScore(
 /**
  * Finds the best empty square for a piece in the corridor
  */
-function getOptimalSquare(
+export function getOptimalSquare(
   game: Game & { availableKingPos?: { r: number; c: number } | null },
   pieceType: string,
   isWhite: boolean
