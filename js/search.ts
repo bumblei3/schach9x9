@@ -360,7 +360,9 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         }
 
         // Futility / Razoring
-        if (d <= 2 && d >= 1 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
+        // Skip at root: razoring returns bestMove: null, which would lose the
+        // actual move the root must report back to the caller.
+        if (!isRoot && d <= 2 && d >= 1 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
           const standPat = evaluate(b, color, evalConfig);
           const margin = d === 2 ? RAZOR_MARGIN : FUTILITY_MARGIN;
           if (maximizing) {

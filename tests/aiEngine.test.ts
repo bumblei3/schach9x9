@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, test, beforeEach, vi } from 'vitest';
-import { getBestMove, evaluatePosition, getAllLegalMoves } from '../js/aiEngine';
+import { getBestMove, getBestMoveDetailed, evaluatePosition, getAllLegalMoves } from '../js/aiEngine';
 import { createEmptyBoard } from '../js/gameEngine';
 import type { Board } from '../js/types/game';
 
@@ -94,15 +94,19 @@ describe('AI Engine', () => {
   describe('Advanced AI Scenarios', () => {
     // These require specific move ordering which may vary
     test('should find Mate in 1', async () => {
-      // Trivial mate in 1: White queen delivers mate to black king
-      // Black king trapped at corner, white queen delivers check with no escapes
+      // Real mate in 1: White rook on A9 (0,8) + queen on C2 (1,2) trap the
+      // black king in the corner A1 (0,0). Any checking move that the king
+      // cannot escape delivers mate.
       board[0][0] = { type: 'k', color: 'black', hasMoved: false }; // Black king at A1
-      board[1][1] = { type: 'q', color: 'white', hasMoved: false }; // White queen at B2 delivering mate
-      board[8][4] = { type: 'k', color: 'white', hasMoved: false }; // White king at E9 (safe)
-      
-      const bestMove = await getBestMove(board, 'white', 2, 'expert');
-      // Queen at B2 delivering mate to king at A1
-      expect(bestMove).toMatchObject({ from: { r: 1, c: 1 }, to: { r: 0, c: 0 } });
+      board[0][8] = { type: 'r', color: 'white', hasMoved: false }; // White rook on A9
+      board[1][2] = { type: 'q', color: 'white', hasMoved: false }; // White queen on C2
+      board[8][4] = { type: 'k', color: 'white', hasMoved: false }; // White king (safe)
+
+      const res = await getBestMoveDetailed(board, 'white', 3, { elo: 2500 });
+      expect(res).not.toBeNull();
+      expect(res!.move).toBeDefined();
+      // A mate-in-1 should produce a decisive (mate-range) score.
+      expect(res!.score).toBeGreaterThanOrEqual(19000);
     });
 
     test('should avoid Stalemate when winning', async () => {

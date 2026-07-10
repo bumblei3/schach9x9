@@ -251,7 +251,22 @@ export async function getBestMoveDetailed(
   logger.debug('[AiEngine] Using JS Search');
   const jsResult = await runJsSearch(board, turnColor, maxDepth, elo, personalityId);
   if (jsResult) {
-    return { score: jsResult.score, move: convertMoveToResult(jsResult.move), nodes: jsResult.nodes, depth: jsResult.depth };
+    let move = convertMoveToResult(jsResult.move);
+    // Elo-based blunder: at low Elo, occasionally pick a suboptimal move
+    // (was previously handled by the WASM search.rs blunder simulation).
+    if (elo && elo < 1400) {
+      const blunderChance = (1400 - elo) / 1400; // ~0.43 at 800, ~0.29 at 1000
+      if (Math.random() < blunderChance) {
+        const top = await getTopMoves(uiBoard, turnColor, 3, 1);
+        // Pick from candidates other than the best move (guaranteed suboptimal)
+        const alternatives = top.filter(t => t.move && !(t.move.from.r === move?.from.r && t.move.from.c === move?.from.c && t.move.to.r === move?.to.r && t.move.to.c === move?.to.c));
+        if (alternatives.length > 0) {
+          const pick = alternatives[Math.floor(Math.random() * alternatives.length)];
+          move = pick.move;
+        }
+      }
+    }
+    return { score: jsResult.score, move, nodes: jsResult.nodes, depth: jsResult.depth };
   }
   return null;
 }
