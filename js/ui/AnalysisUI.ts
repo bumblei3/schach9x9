@@ -168,8 +168,7 @@ export class AnalysisUI {
       this.liveScore.textContent = `${prefix}${score}`;
     }
     if (this.liveTime) {
-      const secs = progress.time ? (progress.time / 1000).toFixed(1) : '-';
-      this.liveTime.textContent = `${secs}s`;
+      this.liveTime.textContent = progress.time ? `${(progress.time / 1000).toFixed(1)}s` : '-';
     }
     if (this.livePV) {
       this.livePV.textContent = progress.pv || '-';
@@ -177,9 +176,9 @@ export class AnalysisUI {
   
     // Also update the engine info with live data
     if (this.engineInfo && progress.depth !== undefined) {
-      const secs = progress.time ? (progress.time / 1000).toFixed(1) : '-';
+      const secs = progress.time ? `${(progress.time / 1000).toFixed(1)}s` : '-';
       const nodesStr = progress.nodes?.toLocaleString() || '-';
-      this.engineInfo.textContent = 'Tiefe: ' + progress.depth + ' | Knoten: ' + nodesStr + ' | ' + secs + 's';
+      this.engineInfo.textContent = 'Tiefe: ' + progress.depth + ' | Knoten: ' + nodesStr + ' | ' + secs;
     }
     }
 
