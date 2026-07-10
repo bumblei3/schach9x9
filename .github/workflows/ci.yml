@@ -76,7 +76,7 @@ jobs:
         # Keeps GitHub's vulnerability dashboard in sync with the
         # committed lockfile (overrides for undici/js-yaml). Without
         # this, stale snapshots keep showing phantom vuln alerts.
-        uses: actions/dependency-submission@v4
+        uses: actions/dependency-submission@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
 
