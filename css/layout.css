@@ -306,16 +306,19 @@
   height: 48px;
   border-radius: 14px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 1px;
   cursor: pointer;
   transition: all var(--transition-bounce);
   position: relative;
+  padding: 2px;
 }
 
 .action-icon-btn:hover {
   background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-6px) scale(1.1);
+  transform: translateY(-4px) scale(1.06);
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -324,34 +327,100 @@
   background: var(--accent-gradient);
   color: white;
   box-shadow: 0 0 15px var(--accent-glow);
-  transform: translateY(-4px);
+  transform: translateY(-3px);
 }
 
 .action-icon-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   stroke-width: 2;
+  flex-shrink: 0;
 }
 
-.action-icon-btn::after {
-  content: attr(title);
-  /* Simple tooltip fallback */
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
+/* Action label + keyboard shortcut hint (desktop) */
+.action-label {
+  font-size: 0.56rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  max-width: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  color: inherit;
+  opacity: 0.85;
 }
 
-/* Hide fallback tooltip if global tooltip exists */
-/* .action-icon-btn:hover::after { opacity: 1; } */
+.action-shortcut {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 1px 3px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.action-icon-btn:hover .action-shortcut,
+.action-icon-btn:focus-visible .action-shortcut {
+  opacity: 1;
+}
+
+/* Touch devices: hide labels to keep the dock compact (icons only) */
+@media (pointer: coarse) {
+  .action-label {
+    display: none;
+  }
+  .action-shortcut {
+    display: none;
+  }
+  .action-icon-btn {
+    flex-direction: row;
+  }
+  .action-icon-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* --- Skin Selector Wrapper (icon-button styled) --- */
+.skin-selector-wrapper {
+  padding: 0;
+  overflow: visible;
+}
+
+.skin-selector-wrapper .action-label {
+  margin-top: -2px;
+}
+
+.skin-selector {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0;
+  /* Hide visual select, keep it clickable over the wrapper */
+}
+
+.skin-selector:focus {
+  outline: none;
+}
+
+.skin-selector option {
+  font-size: 0.85rem;
+  background-color: #0f172a;
+  color: white;
+}
 
 .close-icon-btn {
   background: none;

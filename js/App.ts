@@ -17,6 +17,9 @@ import type { UIEffects } from './ui/ui_effects.js';
 import type { KeyboardManager } from './input/KeyboardManager.js';
 import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
+// Side-effect import: TooltipManager is a module-level singleton that wires
+// up [data-tooltip] hints on construction (used by the action bar, etc.).
+import './ui/TooltipManager.js';
 
 // Global variable for UI since it's used in many places but we want to avoid static import
 let UI_MODULE: typeof UIImport | null = null;
@@ -168,6 +171,8 @@ export class App {
 
   public initDOM(): void {
     this.domHandler.initDOM();
+    // TooltipManager is a module-level singleton constructed on import,
+    // so importing it above is enough to wire up [data-tooltip] hints.
   }
 
   public async init3D(): Promise<void> {

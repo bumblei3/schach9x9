@@ -5,6 +5,7 @@
 export class TooltipManager {
   tooltipEl: HTMLElement | null = null;
   activeElement: HTMLElement | null = null;
+  private touchHideTimer = 0;
 
   constructor() {
     this.init();
@@ -19,6 +20,24 @@ export class TooltipManager {
 
     document.addEventListener('mouseover', e => this.handleMouseOver(e));
     document.addEventListener('mouseout', e => this.handleMouseOut(e));
+
+    // Touch fallback: tap an element to show its tooltip briefly (no hover on mobile)
+    document.addEventListener(
+      'pointerdown',
+      e => {
+        const target = (e.target as HTMLElement).closest(
+          '[data-tooltip]'
+        ) as HTMLElement | null;
+        if (!target) return;
+        const text = target.getAttribute('data-tooltip');
+        if (!text) return;
+        // Skip if this is an <a>/<button> with its own primary action handled elsewhere
+        this.show(text, target);
+        window.clearTimeout(this.touchHideTimer);
+        this.touchHideTimer = window.setTimeout(() => this.hide(), 1600);
+      },
+      { passive: true }
+    );
   }
 
   handleMouseOver(e: MouseEvent): void {

@@ -39,16 +39,16 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 - **Alpha-Beta Pruning** mit **LMR** (Late Move Reductions, log-Formel), **Null-Move Pruning** (R=2), **ProbCut** (depth≥5, β-150cp), **Singular Extensions** (depth≥6, margin=100cp)
 - **Iterative Deepening** mit **Aspiration Windows** + **IIR** (Internal Iterative Reduction, adaptive 0.5×–2.0× Fenster)
-- **Transposition Table** (Zobrist Hashing, 262k Einträge JS / 64k WASM)
+- **Transposition Table** (Zobrist Hashing, 262k Einträge)
 - **Move Ordering**: MVV-LVA + SEE, Killer Moves, History Heuristic, Counter Moves, **Threat-Bonus** (Checks, Angriffe, entdeckte Angriffe, X-Ray, Pin-Breaks, Königssicherheit)
 - **Quiescence Search** mit SEE-basiertem Capture-Sorting
 - **Opening Book** (PGN-Import, Merge-Strategien, Eröffnungsnamen-Anzeige)
-- **WASM Backend** (Rust, `engine-wasm/`) für maximale Performance
+- **JS-Suche als primäre Engine** (kein WASM-Backend nötig — läuft überall ohne native Build-Tools)
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
-| Name | Stil | Aggression | Zeit-Faktor | Risiko | WASM-Mapping |
-|------|------|-----------|------------|-------|-------------|
+| Name | Stil | Aggression | Zeit-Faktor | Risiko | Interner Typ |
+|------|------|-----------|------------|-------|--------------|
 | **Ausgewogen** | Universell | 1.0 | 1.0 | 0.5 | NORMAL |
 | **Aggressiv** | Taktisch, angriffslustig | 1.5 | 1.2 | 0.8 | AGGRESSIVE |
 | **Defensiv** | Solide, prophylaktisch | 0.6 | 1.1 | 0.2 | SOLID |
@@ -83,7 +83,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **1.850 automatisierten Tests** (Vitest) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.000 automatisierten Tests** (Vitest + Playwright) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
 
@@ -97,7 +97,7 @@ Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `
 
 Test-Suite Highlights:
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 1857 Tests gesamt, alle grün
+- > 2.000 Tests gesamt, alle grün
 - Unit-, Integrations- und E2E-Tests (Playwright)
 
 ## 📁 Projektstruktur
@@ -113,7 +113,7 @@ schach9x9/
 │   │   ├── transpositionTable.ts
 │   │   ├── MoveOrdering.ts     # Move-Ordering mit Threat-Detection
 │   │   ├── search.ts           # JS Alpha-Beta mit LMR, NMP, ProbCut…
-│   │   └── wasmBridge.ts       # WASM-Interface
+│   │   └── aiEngine.ts         # JS-Such-Engine (primär, kein WASM)
 │   ├── assets/             # Statische Assets (Figuren SVGs)
 │   ├── campaign/           # Kampagnen-System
 │   ├── input/              # Eingabe-Handler
@@ -132,13 +132,6 @@ schach9x9/
 │   ├── App.ts              # Hauptanwendungsklasse
 │   └── evaluate.ts         # Zentrale Evaluation
 ├── tests/                  # Test-Suite (Unit, Integration, E2E)
-├── engine-wasm/            # Rust KI-Engine
-│   ├── src/
-│   │   ├── search.rs       # WASM Search mit LMR, NMP, ProbCut, SE…
-│   │   ├── ordering.rs     # WASM Move-Ordering mit Threats
-│   │   ├── eval.rs         # WASM Evaluation mit Personalities
-│   │   └── lib.rs          # WASM Exports
-│   └── Cargo.toml
 └── index.html              # Einstiegspunkt
 ```
 
@@ -148,15 +141,13 @@ schach9x9/
 
 - Node.js (v18+)
 - NPM
-- **Rust & wasm-pack** (für KI-Engine Performance-Optimierung)
 
 ### Schritte
 
 1. **Repository klonen:** `git clone https://github.com/bumblei3/schach9x9.git`
 2. **Abhängigkeiten installieren:** `npm install`
 3. **Spiel starten:** `npm run dev` (Vite dev server)
-4. **Wasm Engine bauen (optional aber empfohlen):** `npm run wasm:build`
-5. **Build für Produktion:** `npm run build`
+4. **Build für Produktion:** `npm run build`
 
 ## 🛠️ Entwicklung & CI
 
