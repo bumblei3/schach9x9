@@ -20,6 +20,7 @@
     "test:visual": "npx playwright test --grep @visual",
     "test:visual:update": "npx playwright test --grep @visual --update-snapshots",
     "test:coverage": "vitest run --coverage",
+    "changelog": "node scripts/changelog.mjs",
     "postinstall": "npm rebuild rolldown vite || true"
   },
   "devDependencies": {
