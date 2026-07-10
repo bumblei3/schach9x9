@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0  # Needed for commit message linting
 
@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -61,7 +61,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache TypeScript incremental build info
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: ts-build-cache
         with:
           path: .tsbuildinfo
@@ -117,7 +117,7 @@ jobs:
         node-version: ['22', '24']
       fail-fast: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
@@ -127,7 +127,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -136,7 +136,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache TypeScript incremental build info
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: ts-build-cache
         with:
           path: .tsbuildinfo
@@ -209,7 +209,7 @@ jobs:
     timeout-minutes: 75
     needs: [build]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -219,7 +219,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -228,7 +228,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -282,10 +282,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Cache Rust dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: rust-cache
         with:
           path: |
@@ -364,7 +364,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -374,7 +374,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -428,7 +428,7 @@ jobs:
     timeout-minutes: 15
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -438,7 +438,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: node-modules-cache
         with:
           path: node_modules
@@ -447,7 +447,7 @@ jobs:
             ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
 
       - name: Cache Vite build cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: vite-cache
         with:
           path: node_modules/.vite
@@ -546,7 +546,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
