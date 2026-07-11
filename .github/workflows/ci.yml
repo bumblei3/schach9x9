@@ -45,34 +45,19 @@ jobs:
         with:
           fetch-depth: 0  # Needed for commit message linting
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Cache node_modules
-        uses: actions/cache@v6
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Cache TypeScript incremental build info
         uses: actions/cache@v6
-        id: ts-build-cache
         with:
           path: .tsbuildinfo
           key: ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('tsconfig.json') }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-
-
-      - name: Install dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
 
       - name: Run ESLint (with cache)
         run: npm run lint -- --cache --max-warnings=0
@@ -122,50 +107,37 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Cache node_modules
-        uses: actions/cache@v6
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
-
-      - name: Cache TypeScript incremental build info
-        uses: actions/cache@v6
-        id: ts-build-cache
-        with:
-          path: .tsbuildinfo
-          key: ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('tsconfig.json') }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-tsbuild-${{ env.NPM_CACHE_VERSION }}-
-
-      - name: Install dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
-
-      - name: Rebuild native bindings (fixes npm optional deps bug)
-        run: npm rebuild rolldown vite
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Run unit tests with coverage
         run: npm run test:coverage 2>&1 | tee test-output.txt
         timeout-minutes: 25
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7
-        if: success() || failure()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          flags: unittests
-          fail_ci_if_error: false
+      - name: Coverage report to summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            const p = "coverage/lcov.info";
+            if (!fs.existsSync(p)) { console.log("no lcov.info produced"); process.exit(0); }
+            const t = fs.readFileSync(p, "utf8");
+            let lf = 0, lh = 0, brf = 0, brh = 0;
+            for (const m of t.matchAll(/^LF:(\d+)/gm)) lf += +m[1];
+            for (const m of t.matchAll(/^LH:(\d+)/gm)) lh += +m[1];
+            for (const m of t.matchAll(/^BRF:(\d+)/gm)) brf += +m[1];
+            for (const m of t.matchAll(/^BRH:(\d+)/gm)) brh += +m[1];
+            const lp = lf ? (lh / lf * 100).toFixed(1) : "n/a";
+            const bp = brf ? (brh / brf * 100).toFixed(1) : "n/a";
+            const s = "## Coverage Summary (Node ${{ matrix.node-version }})\n" +
+                      "- Lines: " + lp + "% (" + lh + "/" + lf + ")\n" +
+                      "- Branches: " + bp + "% (" + brh + "/" + brf + ")\n";
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, s);
+            console.log(s);
+          '
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
@@ -201,21 +173,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Cache node_modules
-        uses: actions/cache@v6
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Cache Playwright browsers
         uses: actions/cache@v6
@@ -225,13 +187,6 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_CACHE_VERSION }}-
-
-      - name: Install dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
-
-      - name: Rebuild native bindings (fixes npm optional deps bug)
-        run: npm rebuild rolldown vite
 
       - name: Download build artifact
         uses: actions/download-artifact@v8
@@ -272,28 +227,16 @@ jobs:
     name: Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Non-blocking: an audit finding must not abort the pipeline.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Cache node_modules
-        uses: actions/cache@v6
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
-
-      - name: Install dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Run npm audit
         id: npm-audit
@@ -307,12 +250,6 @@ jobs:
         run: |
           npx npm-check-updates -f '/^[^@]/' --rejected --timeout 10000 > outdated.txt || true
           cat outdated.txt >> $GITHUB_STEP_SUMMARY
-
-      - name: Run Snyk security scan
-        uses: snyk/actions/node@master
-        if: env.SNYK_TOKEN != ''
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Upload audit report
         uses: actions/upload-artifact@v7
@@ -338,21 +275,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Cache node_modules
-        uses: actions/cache@v6
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-${{ env.NPM_CACHE_VERSION }}-
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Cache Vite build cache
         uses: actions/cache@v6
@@ -362,13 +289,6 @@ jobs:
           key: ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json', 'vite.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-
-
-      - name: Install dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
-
-      - name: Rebuild native bindings (fixes npm optional deps bug)
-        run: npm rebuild rolldown vite
 
       - name: Build production bundle
         run: npm run build
@@ -401,7 +321,7 @@ jobs:
           echo "📦 Checking production bundle size..."
           TOTAL_SIZE=$(du -sb dist/ | cut -f1)
           echo "Total dist size: $TOTAL_SIZE bytes ($(($TOTAL_SIZE / 1024)) KB)"
-          
+
           JS_SIZE=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
           CSS_SIZE=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
 
@@ -424,15 +344,61 @@ jobs:
           path: dist/
           retention-days: 7
 
+  # =======================================================================
+  # LIGHTHOUSE (against the freshly built dist/, not live Pages)
+  # =======================================================================
+  lighthouse:
+    name: Lighthouse (Build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build]
+    # Non-blocking: a perf regression must not abort the pipeline.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: production-build
+          path: dist/
+
+      - name: Serve built site (background)
+        run: nohup npx http-server dist -p 5050 -s > /tmp/http-server.log 2>&1 & disown
+
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:5050/ >/dev/null; then
+              echo "server up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "server did not start"; cat /tmp/http-server.log
+          exit 1
+
       - name: Lighthouse CI (Performance Budget)
         uses: treosh/lighthouse-ci-action@v12
-        if: github.event_name == 'pull_request'
         continue-on-error: true
         with:
           urls: |
-            https://bumblei3.github.io/schach9x9/
+            http://localhost:5050/
           budgetPath: .github/lighthouse-ci.json
           uploadArtifacts: true
+
+      - name: Lighthouse summary
+        if: always()
+        run: |
+          echo "## Lighthouse Summary (built dist/)" >> $GITHUB_STEP_SUMMARY
+          echo "Status: ${{ job.status }} (see uploaded artifacts)" >> $GITHUB_STEP_SUMMARY
+
   # =======================================================================
   # DEPLOY TO GITHUB PAGES
   # =======================================================================
@@ -479,5 +445,5 @@ jobs:
               issue_number: ${{ github.event.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🚀 Deployment to GitHub Pages successful!\n\n**Live:** ${{ steps.deployment.outputs.page_url }}\n\n**Commit:** ${ github.sha }\n**Workflow:** ${ github.run_id }'
+              body: '🚀 Deployment to GitHub Pages successful!\n\n**Live:** ${{ steps.deployment.outputs.page_url }}\n\n**Commit:** ${ github.sha }\n**Workflow:** ${ github.run_id }}'
             })

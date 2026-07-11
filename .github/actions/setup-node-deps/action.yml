@@ -1,0 +1,45 @@
+name: Setup Node & Dependencies
+description: >-
+  Checkout-free Node.js setup used across all CI jobs: pins the Node version,
+  restores a hashed node_modules cache, runs `npm ci` only on a cache miss,
+  and rebuilds the rolldown/vite native bindings (works around an npm
+  optional-deps bug). Centralizing this removes the duplicated setup block
+  that was copy-pasted into every job.
+
+inputs:
+  node-version:
+    description: Node.js version to install
+    required: false
+    default: '24.0.0'
+  cache-version:
+    description: Bump to invalidate all node_modules caches at once
+    required: false
+    default: '3'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+        cache-dependency-path: package-lock.json
+
+    - name: Cache node_modules
+      uses: actions/cache@v6
+      id: node-modules-cache
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-${{ inputs.cache-version }}-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-${{ inputs.cache-version }}-
+
+    - name: Install dependencies
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci --legacy-peer-deps
+
+    - name: Rebuild native bindings (fixes npm optional deps bug)
+      shell: bash
+      run: npm rebuild rolldown vite
