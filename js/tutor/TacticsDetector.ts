@@ -635,8 +635,8 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
     return Math.abs(dr) === Math.abs(dc) && dr !== 0;
   }
   if (type === 'q') {
-    // Queen: both
-    return true;
+    // Queen: both orthogonal and diagonal rays
+    return (dr !== 0 || dc !== 0);
   }
   return false;
 }
