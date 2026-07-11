@@ -27,5 +27,5 @@
     "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["js/**/*", "tests/**/*", "service-worker.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "tests/_repro"]
 }

@@ -131,7 +131,7 @@ describe('TacticsDetector - Additional Coverage', () => {
       mockGame.board[4][6] = { type: 'q', color: 'black' };
       mockGame.board[4][8] = { type: 'k', color: 'black' };
       
-      configMock.isBlockedCell.mockImplementation(() => true);
+      (configMock.isBlockedCell as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => true);
 
       const skewers = TacticsDetector.detectSkewers(mockGame, mockAnalyzer, { r: 4, c: 4 }, 'white');
       expect(skewers).toEqual([]);
@@ -309,7 +309,7 @@ describe('TacticsDetector - Additional Coverage', () => {
       mockGame.board[2][2] = { type: 'n', color: 'black' };
       mockGame.board[4][4] = { type: 'k', color: 'black' };
       
-      configMock.isBlockedCell.mockImplementation(() => true);
+      (configMock.isBlockedCell as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => true);
 
       const pins = TacticsDetector.detectPins(mockGame, mockAnalyzer, { r: 0, c: 0 }, 'white');
       expect(pins).toEqual([]);
@@ -611,7 +611,7 @@ describe('TacticsDetector - Additional Coverage', () => {
       mockGame.board[4][6] = { type: 'p', color: 'white' };
       mockGame.board[4][8] = { type: 'r', color: 'white' };
       
-      configMock.isBlockedCell.mockImplementation((r: number, c: number) => r === 4 && c === 6);
+      (configMock.isBlockedCell as unknown as ReturnType<typeof vi.fn>).mockImplementation((r: number, c: number) => r === 4 && c === 6);
 
       const batteries = TacticsDetector.detectBattery(mockGame, mockAnalyzer, { r: 4, c: 4 }, 'white');
       
