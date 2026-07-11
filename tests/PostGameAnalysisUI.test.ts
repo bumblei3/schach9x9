@@ -36,10 +36,11 @@ vi.mock('../js/tutor/PostGameAnalyzer.js', () => ({
   },
 }));
 
+const { showSummaryModalSpy } = vi.hoisted(() => ({ showSummaryModalSpy: vi.fn() }));
 vi.mock('../js/ui/AnalysisUI.js', () => ({
   AnalysisUI: class MockAnalysisUI {
     constructor(_app: unknown) {}
-    showSummaryModal = vi.fn();
+    showSummaryModal = showSummaryModalSpy;
   }
 }));
 
@@ -129,20 +130,27 @@ describe('PostGameAnalysisUI', () => {
       // The filter in code: .filter(q => counts[q] > 0)
     });
 
-    test('should wire button click to showPostGameAnalysis', () => {
+    test('should wire button click to showPostGameAnalysis', async () => {
       const game = {
         moveHistory: [],
         playerColor: 'white' as const,
         gameController: { jumpToMove: vi.fn() },
       };
 
+      showSummaryModalSpy.mockClear();
       showPostGameStats(game, 'win', 'white');
 
-      // Click the button
-      btnEl.click();
+      // Re-fetch the LIVE button (showPostGameStats clones & replaces it)
+      const liveBtn = document.getElementById('postgame-analysis-btn')!;
+      liveBtn.click();
 
-      // Must not throw on a win result
-      expect(() => btnEl.click()).not.toThrow();
+      // Flush the async showPostGameAnalysis (2 dynamic imports + call)
+      await vi.waitFor(() => expect(showSummaryModalSpy).toHaveBeenCalledTimes(1));
+
+      // showSummaryModal receives white + black analysis objects
+      const [whiteStats, blackStats] = showSummaryModalSpy.mock.calls[0];
+      expect(whiteStats).toMatchObject({ accuracy: 85, totalMoves: 20 });
+      expect(blackStats).toMatchObject({ accuracy: 85, totalMoves: 20 });
     });
 
     test('should handle game without gameController', () => {

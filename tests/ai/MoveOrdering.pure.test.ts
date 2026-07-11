@@ -164,10 +164,11 @@ describe('MoveOrdering helpers', () => {
   });
 
   test('updateCounterMove ignores null inputs without throwing', () => {
-    updateCounterMove(null, makeMove(1, 2));
-    updateCounterMove(makeMove(1, 2), null);
-    updateCounterMove(null, null);
-    expect(true).toBe(true);
+    expect(() => {
+      updateCounterMove(null, makeMove(1, 2));
+      updateCounterMove(makeMove(1, 2), null);
+      updateCounterMove(null, null);
+    }).not.toThrow();
   });
 
   test('side to move is inferred from the first non-empty piece on the board', () => {
