@@ -120,7 +120,7 @@ const BQ = PIECE_QUEEN | COLOR_BLACK;
 const BK = PIECE_KING | COLOR_BLACK;
 const BA = PIECE_ARCHBISHOP | COLOR_BLACK;
 
-function createInitialBoard(): IntBoard {
+export function createInitialBoard(): IntBoard {
   const board = new Int8Array(81).fill(PIECE_NONE);
   board[0] = BR; board[1] = BN; board[2] = BB; board[3] = BQ; board[4] = BK; board[5] = BB; board[6] = BN; board[7] = BR; board[8] = BA;
   for (let c = 0; c < 9; c++) board[9 + c] = BP;
@@ -129,7 +129,7 @@ function createInitialBoard(): IntBoard {
   return board;
 }
 
-function boardToUi(board: IntBoard): (Piece | null)[][] {
+export function boardToUi(board: IntBoard): (Piece | null)[][] {
   const ui: (Piece | null)[][] = Array(9).fill(null).map(() => Array(9).fill(null));
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
@@ -158,14 +158,14 @@ function boardToUi(board: IntBoard): (Piece | null)[][] {
   return ui;
 }
 
-function applyMoveInt(board: IntBoard, move: MoveResult): void {
+export function applyMoveInt(board: IntBoard, move: MoveResult): void {
   const from = move.from.r * 9 + move.from.c;
   const to = move.to.r * 9 + move.to.c;
   board[to] = board[from];
   board[from] = PIECE_NONE;
 }
 
-function isTerminalInt(board: IntBoard, color: 'white' | 'black'): { terminal: boolean; result: 'win' | 'loss' | 'draw' | null } {
+export function isTerminalInt(board: IntBoard, color: 'white' | 'black'): { terminal: boolean; result: 'win' | 'loss' | 'draw' | null } {
   const kingColor = color === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const inCheckResult = isInCheck(board, kingColor);
   const legalMoves = getAllLegalMoves(board, color);
@@ -176,7 +176,7 @@ function isTerminalInt(board: IntBoard, color: 'white' | 'black'): { terminal: b
   return { terminal: false, result: null };
 }
 
-function getBoardHashInt(board: IntBoard, turn: 'white' | 'black'): string {
+export function getBoardHashInt(board: IntBoard, turn: 'white' | 'black'): string {
   let hash = '';
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
