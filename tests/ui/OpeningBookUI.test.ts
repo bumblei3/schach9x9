@@ -160,4 +160,80 @@ describe('OpeningBookUI', () => {
     expect(fn({ r: 8, c: 0 })).toBe('a1');
     expect(fn({ r: 0, c: 8 })).toBe('i9');
   });
+
+  describe('event listeners + branch coverage', () => {
+    test('search input event triggers handleSearch', () => {
+      ui.show();
+      const input = document.getElementById('opening-search') as HTMLInputElement;
+      input.value = 'test';
+      input.dispatchEvent(new Event('input'));
+      expect(document.getElementById('opening-search-results')!.innerHTML).toContain(
+        'opening-entry'
+      );
+    });
+
+    test('category filter change event triggers handleCategoryFilter', () => {
+      ui.show();
+      const filter = document.getElementById('opening-category-filter') as HTMLSelectElement;
+      filter.innerHTML = '<option value="Test Category">Test Category</option>';
+      filter.value = 'Test Category';
+      filter.dispatchEvent(new Event('change'));
+      expect(document.getElementById('opening-search-results')!.innerHTML).toContain(
+        'Test Category'
+      );
+    });
+
+    test('updateCurrentOpening returns early when no game is set', () => {
+      // ui has no game -> should not throw and not reveal the panel
+      expect(() => ui.updateCurrentOpening()).not.toThrow();
+      expect(ui.visible).toBe(false);
+    });
+
+    test('updateBookMoves renders a book move when one exists', async () => {
+      const { openingBook } = await import('../../js/ai/OpeningBook.js');
+      const { getBoardHash } = await import('../../js/move/MoveValidator.js');
+      (getBoardHash as any).mockReturnValue('KNOWN_HASH');
+      (openingBook.getMove as any).mockReturnValueOnce({
+        from: { r: 6, c: 4 },
+        to: { r: 4, c: 4 },
+      });
+      const game = makeGame({ turn: 'white' });
+      ui.setGame(game as any);
+      ui.updateCurrentOpening(); // calls showCurrentOpening -> updateBookMoves
+      const list = document.getElementById('book-moves-list')!;
+      expect(list.innerHTML).toContain('Buchzug');
+      expect(list.innerHTML).toContain('e3e5');
+    });
+
+    test('handleCategoryFilter with "all" renders top openings', () => {
+      ui.show();
+      const top = document.getElementById('top-openings-list')!;
+      top.innerHTML = '';
+      (ui as any).handleCategoryFilter('all');
+      expect(top.innerHTML).toContain('opening-entry');
+    });
+
+    test('renderSearchResults shows a no-results message for empty results', async () => {
+      const { searchOpenings } = await import('../../js/ai/OpeningDatabase.js');
+      (searchOpenings as any).mockReturnValueOnce([]);
+      ui.show();
+      (ui as any).handleSearch('nonexistent');
+      expect(document.getElementById('opening-search-results')!.innerHTML).toContain(
+        'Keine Eröffnungen gefunden'
+      );
+    });
+
+    test('methods return early when their DOM elements are missing', () => {
+      document.body.innerHTML = ''; // no panel elements at all
+      const bare = new OpeningBookUI();
+      bare.setGame(makeGame() as any);
+      // None of these should throw despite missing elements
+      expect(() => bare.updateCurrentOpening()).not.toThrow();
+      expect(() => (bare as any).handleSearch('x')).not.toThrow();
+      expect(() => (bare as any).handleCategoryFilter('Cat')).not.toThrow();
+      expect(() => (bare as any).renderTopOpenings()).not.toThrow();
+      expect(() => (bare as any).populateCategoryFilter()).not.toThrow();
+      expect(() => bare.show()).not.toThrow();
+    });
+  });
 });
