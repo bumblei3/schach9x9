@@ -7,11 +7,14 @@ import {
   WHITE_KNIGHT,
   WHITE_ROOK,
   WHITE_KING,
+  WHITE_BISHOP,
+  WHITE_QUEEN,
   BLACK_PAWN,
   BLACK_ROOK,
   BLACK_QUEEN,
   BLACK_KING,
   BLACK_KNIGHT,
+  BLACK_BISHOP,
   BLACK_NIGHTRIDER,
 } from '../../js/ai/BoardDefinitions';
 import type { Move } from '../../js/ai/MoveGenerator';
@@ -228,5 +231,107 @@ describe('MoveOrdering.isSquareAttacked branches (via hanging-piece detection)',
     const moves = [makeMove(from, to)];
     const ordered = orderMoves(board, moves, null, null, null, null);
     expect(ordered).toEqual(moves);
+  });
+});
+
+describe('MoveOrdering.orderMoves — threat analysis (non-captures)', () => {
+  beforeEach(() => clearMoveOrdering());
+
+  // Robust pattern: a SINGLE mover with TWO of its own quiet moves. Exactly one
+  // of them creates a board threat (and therefore earns a bonus); the other is
+  // geometrically placed so it creates NO threat. Both moves are passed to
+  // orderMoves; the threat move must rank first. This isolates each threat
+  // branch without depending on an unrelated "control" piece.
+
+  test('a move that gives check outranks a quiet move of the same piece', () => {
+    const board = emptyBoard();
+    // White rook on (4,0), black king on (4,8) along an open rank.
+    board[coordsToIndex(4, 0)] = WHITE_ROOK;
+    board[coordsToIndex(4, 8)] = BLACK_KING;
+    const moves = [
+      makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)), // quiet: no threat
+      makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)), // discovers check on (4,8)
+    ];
+    const ordered = orderMoves(board, moves, null, null, null, null);
+    expect(ordered[0]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)));
+    expect(ordered[1]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)));
+  });
+
+  test('a move directly attacking a high-value enemy piece (rook) outranks a quiet move', () => {
+    const board = emptyBoard();
+    // White rook on (4,0) can slide to threaten the black rook on (4,6) (value 500).
+    board[coordsToIndex(4, 0)] = WHITE_ROOK;
+    board[coordsToIndex(4, 6)] = BLACK_ROOK;
+    board[coordsToIndex(8, 8)] = BLACK_KING; // ensure a real king so isInCheck is well-defined
+    const moves = [
+      makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)), // quiet: no threat
+      makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)), // threatens (4,6) rook
+    ];
+    const ordered = orderMoves(board, moves, null, null, null, null);
+    expect(ordered[0]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)));
+    expect(ordered[1]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)));
+  });
+
+  test('a move directly attacking a mid-value enemy piece (bishop) outranks a quiet move', () => {
+    const board = emptyBoard();
+    board[coordsToIndex(4, 0)] = WHITE_ROOK;
+    board[coordsToIndex(4, 6)] = BLACK_BISHOP; // value 330
+    board[coordsToIndex(8, 8)] = BLACK_KING;
+    const moves = [
+      makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)),
+      makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)), // threatens bishop on (4,6)
+    ];
+    const ordered = orderMoves(board, moves, null, null, null, null);
+    expect(ordered[0]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)));
+    expect(ordered[1]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)));
+  });
+
+  test('a move directly attacking a low-value enemy pawn outranks a quiet move', () => {
+    const board = emptyBoard();
+    board[coordsToIndex(4, 0)] = WHITE_ROOK;
+    board[coordsToIndex(4, 6)] = BLACK_PAWN; // value 100
+    board[coordsToIndex(8, 8)] = BLACK_KING;
+    const moves = [
+      makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)),
+      makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)), // threatens pawn on (4,6)
+    ];
+    const ordered = orderMoves(board, moves, null, null, null, null);
+    expect(ordered[0]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(4, 3)));
+    expect(ordered[1]).toEqual(makeMove(coordsToIndex(4, 0), coordsToIndex(0, 0)));
+  });
+
+  test('a move that breaks a pin on our own queen gets the pin-break bonus', () => {
+    const board = emptyBoard();
+    // White queen on (4,4); white bishop blocker (the mover) on (4,2);
+    // black rook on (4,0) attacks through the blocker to the queen.
+    board[coordsToIndex(4, 4)] = WHITE_QUEEN;
+    board[coordsToIndex(4, 2)] = WHITE_BISHOP; // mover
+    board[coordsToIndex(4, 0)] = BLACK_ROOK;
+    // Control mover: a white rook far away on an empty corner that creates NO threat.
+    board[coordsToIndex(0, 0)] = WHITE_ROOK;
+    const moves = [
+      makeMove(coordsToIndex(0, 0), coordsToIndex(1, 0)), // quiet control, no bonus
+      makeMove(coordsToIndex(4, 2), coordsToIndex(3, 1)), // unpins queen -> bonus
+    ];
+    const ordered = orderMoves(board, moves, null, null, null, null);
+    expect(ordered[0]).toEqual(makeMove(coordsToIndex(4, 2), coordsToIndex(3, 1)));
+    expect(ordered[1]).toEqual(makeMove(coordsToIndex(0, 0), coordsToIndex(1, 0)));
+  });
+
+  test('discovered-check bonus: unblocking a check on the enemy king outranks a quiet move', () => {
+    const board = emptyBoard();
+    // Black king on (4,8), white rook on (4,0), white bishop blocker (mover) on (4,2).
+    board[coordsToIndex(4, 8)] = BLACK_KING;
+    board[coordsToIndex(4, 0)] = WHITE_ROOK;
+    board[coordsToIndex(4, 2)] = WHITE_BISHOP; // mover
+    // Control mover far away, no threat.
+    board[coordsToIndex(0, 0)] = WHITE_ROOK;
+    const moves = [
+      makeMove(coordsToIndex(0, 0), coordsToIndex(1, 0)), // no bonus
+      makeMove(coordsToIndex(4, 2), coordsToIndex(3, 1)), // reveals rook check on king
+    ];
+    const ordered = orderMoves(board, moves, null, null, null, null);
+    expect(ordered[0]).toEqual(makeMove(coordsToIndex(4, 2), coordsToIndex(3, 1)));
+    expect(ordered[1]).toEqual(makeMove(coordsToIndex(0, 0), coordsToIndex(1, 0)));
   });
 });
