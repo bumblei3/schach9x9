@@ -98,6 +98,9 @@ body.mode-3d #board-wrapper {
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   z-index: 10;
+  /* Avoid the 300ms tap delay and double-tap zoom on touch devices; the
+     BoardRenderer touch-drag handlers still receive touchstart/move/end. */
+  touch-action: manipulation;
 }
 
 /* --- Coordinate Labels --- */

@@ -281,6 +281,18 @@
     padding: 0.625rem 1.25rem;
     gap: 0.375rem;
     z-index: var(--z-overlay);
+    /* 11 icon buttons don't fit on narrow screens — keep them in a single
+       scrollable row instead of overflowing off-screen. */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar (visual only; still scrollable) */
+    scrollbar-width: none;
+  }
+
+  .action-bar::-webkit-scrollbar {
+    display: none;
   }
 }
 
