@@ -35,6 +35,43 @@ vi.mock('../../js/utils/PGNGenerator.js', () => ({
   downloadPGN: vi.fn(),
 }));
 
+vi.mock('../../js/ui/CampaignUI.js', () => ({
+  CampaignUI: class {
+    show = vi.fn();
+  },
+}));
+
+vi.mock('../../js/ui/AnalysisUI.js', () => ({
+  AnalysisUI: class {
+    panel = document.createElement('div');
+    update = vi.fn();
+    updateLiveProgress = vi.fn();
+    togglePanel = vi.fn();
+  },
+}));
+
+vi.mock('../../js/ui/OpeningBookUI.js', () => ({
+  OpeningBookUI: class {
+    visible = false;
+    toggle = vi.fn(function (this: any) {
+      this.visible = !this.visible;
+    });
+    hide = vi.fn();
+    setGame = vi.fn();
+    updateCurrentOpening = vi.fn();
+  },
+}));
+
+vi.mock('../../js/ui/PostGameAnalysisUI.js', () => ({
+  hidePostGameStats: vi.fn(),
+}));
+
+vi.mock('../../js/tutorial.js', () => ({
+  Tutorial: class {
+    show = vi.fn();
+  },
+}));
+
 // Mock URL methods for JSDOM
 global.URL.createObjectURL = vi.fn(() => 'blob:mock');
 global.URL.revokeObjectURL = vi.fn();
@@ -90,7 +127,7 @@ describe('DOMHandler Comprehensive Coverage', () => {
       <button id="threats-btn"></button>
       <button id="opportunities-btn"></button>
       <button id="menu-btn"></button>
-      <button id="resume-game-btn"></button>
+      <button id="resume-game-btn" class="menu-tab-btn" data-tab="resume"></button>
       <select id="skin-selector">
         <option value="classic">Classic</option>
         <option value="fantasy">Fantasy</option>
@@ -101,6 +138,25 @@ describe('DOMHandler Comprehensive Coverage', () => {
       <button id="continuous-analysis-btn"></button>
       <button id="puzzle-exit-btn"></button>
       <button id="puzzle-next-btn"></button>
+      <div id="points-selection-overlay"></div>
+      <button class="points-btn" data-points="15"></button>
+      <button class="points-btn"></button>
+      <button id="standard-8x8-btn"></button>
+      <button id="upgrade-8x8-btn"></button>
+      <button id="classic-mode-btn"></button>
+      <button id="puzzle-start-btn"></button>
+      <button id="campaign-start-btn"></button>
+      <button id="start-tutorial-btn"></button>
+      <button id="toggle-opening-book-btn"></button>
+      <button id="close-opening-book-btn"></button>
+      <select id="tutor-mode-select"><option value="guided">Guided</option></select>
+      <select id="time-control-select"><option value="blitz">Blitz</option></select>
+      <select id="ai-personality-select"><option value="aggressive">Aggressive</option></select>
+      <button id="finish-setup-btn"></button>
+      <button id="close-game-over-btn"></button>
+      <div id="game-over-overlay"></div>
+      <button class="menu-tab-btn" data-tab="settings" id="tab-settings"></button>
+      <div class="menu-view" id="view-settings"></div>
     `;
 
     // Mock localStorage
@@ -274,5 +330,146 @@ describe('DOMHandler Comprehensive Coverage', () => {
     expect(localStorage.getItem('chess_skin')).toBe('fantasy');
     // We mocked setPieceSkin and UI.clearPieceCache via imports, let's verify if possible.
     // The test mock imports need to be spyable.
+  });
+
+  describe('Mode selection buttons', () => {
+    it('points button inits app with parsed points in setup mode', () => {
+      domHandler.init();
+      const overlay = document.getElementById('points-selection-overlay')!;
+      document.querySelector<HTMLElement>('.points-btn[data-points="15"]')!.click();
+      expect(app.init).toHaveBeenCalledWith(15, 'setup');
+      expect(overlay.classList.contains('hidden')).toBe(true);
+    });
+
+    it('points button without data-points does not init', () => {
+      domHandler.init();
+      app.init.mockClear();
+      // second .points-btn has no data-points
+      const btns = document.querySelectorAll<HTMLElement>('.points-btn');
+      btns[1].click();
+      expect(app.init).not.toHaveBeenCalled();
+    });
+
+    it('standard 8x8 button inits with 0 points', () => {
+      domHandler.init();
+      document.getElementById('standard-8x8-btn')!.click();
+      expect(app.init).toHaveBeenCalledWith(0, 'standard8x8');
+    });
+
+    it('upgrade 8x8 button inits with 5 points', () => {
+      domHandler.init();
+      document.getElementById('upgrade-8x8-btn')!.click();
+      expect(app.init).toHaveBeenCalledWith(5, 'standard8x8');
+    });
+
+    it('classic button inits classic mode', () => {
+      domHandler.init();
+      document.getElementById('classic-mode-btn')!.click();
+      expect(app.init).toHaveBeenCalledWith(0, 'classic');
+    });
+
+    it('puzzle button inits puzzle mode', () => {
+      domHandler.init();
+      document.getElementById('puzzle-start-btn')!.click();
+      expect(app.init).toHaveBeenCalledWith(0, 'puzzle');
+    });
+
+    it('campaign button hides main menu and shows campaign UI', () => {
+      domHandler.init();
+      const mainMenu = document.getElementById('main-menu')!;
+      mainMenu.classList.add('active');
+      expect(() => document.getElementById('campaign-start-btn')!.click()).not.toThrow();
+      expect(mainMenu.classList.contains('active')).toBe(false);
+    });
+
+    it('tutorial button hides menu and shows tutorial', () => {
+      domHandler.init();
+      const mainMenu = document.getElementById('main-menu')!;
+      mainMenu.classList.add('active');
+      expect(() => document.getElementById('start-tutorial-btn')!.click()).not.toThrow();
+      expect(mainMenu.classList.contains('active')).toBe(false);
+    });
+  });
+
+  describe('Opening book + selectors', () => {
+    it('opening book toggle shows book and wires the game', () => {
+      domHandler.init();
+      const btn = document.getElementById('toggle-opening-book-btn')!;
+      btn.click();
+      expect(btn.classList.contains('active')).toBe(true);
+    });
+
+    it('close opening book button hides it', () => {
+      domHandler.init();
+      const btn = document.getElementById('toggle-opening-book-btn')!;
+      btn.click(); // open
+      expect(() => document.getElementById('close-opening-book-btn')!.click()).not.toThrow();
+      expect(btn.classList.contains('active')).toBe(false);
+    });
+
+    it('ai personality select updates game.aiPersonality', () => {
+      domHandler.init();
+      const sel = document.getElementById('ai-personality-select') as HTMLSelectElement;
+      sel.value = 'aggressive';
+      sel.dispatchEvent(new Event('change'));
+      expect(app.game.aiPersonality).toBe('aggressive');
+    });
+
+    it('time control select delegates to gameController', () => {
+      app.gameController.setTimeControl = vi.fn();
+      domHandler.init();
+      const sel = document.getElementById('time-control-select') as HTMLSelectElement;
+      sel.value = 'blitz';
+      sel.dispatchEvent(new Event('change'));
+      expect(app.gameController.setTimeControl).toHaveBeenCalledWith('blitz');
+    });
+
+    it('tutor mode select updates game.tutorMode', () => {
+      domHandler.init();
+      const sel = document.getElementById('tutor-mode-select') as HTMLSelectElement;
+      sel.value = 'guided';
+      sel.dispatchEvent(new Event('change'));
+      expect(app.game.tutorMode).toBe('guided');
+    });
+  });
+
+  describe('Setup + game-over + tab handlers', () => {
+    it('finish-setup button delegates to gameController', () => {
+      app.gameController.finishSetupPhase = vi.fn();
+      domHandler.init();
+      document.getElementById('finish-setup-btn')!.click();
+      expect(app.gameController.finishSetupPhase).toHaveBeenCalled();
+    });
+
+    it('restart overlay button hides overlay and reloads', () => {
+      domHandler.init();
+      const overlay = document.getElementById('game-over-overlay')!;
+      document.getElementById('restart-btn-overlay')!.click();
+      expect(overlay.classList.contains('hidden')).toBe(true);
+      expect(location.reload).toHaveBeenCalled();
+    });
+
+    it('close game-over button hides overlay', () => {
+      domHandler.init();
+      const overlay = document.getElementById('game-over-overlay')!;
+      document.getElementById('close-game-over-btn')!.click();
+      expect(overlay.classList.contains('hidden')).toBe(true);
+    });
+
+    it('menu tab button switches active tab and view', () => {
+      domHandler.init();
+      const tab = document.getElementById('tab-settings')!;
+      tab.click();
+      expect(tab.classList.contains('active')).toBe(true);
+      expect(document.getElementById('view-settings')!.classList.contains('active')).toBe(true);
+    });
+
+    it('resume-game tab button closes main menu without switching views', () => {
+      domHandler.init();
+      const mainMenu = document.getElementById('main-menu')!;
+      mainMenu.classList.add('active');
+      document.getElementById('resume-game-btn')!.click();
+      expect(mainMenu.classList.contains('active')).toBe(false);
+    });
   });
 });
