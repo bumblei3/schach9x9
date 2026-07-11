@@ -252,8 +252,35 @@ export const AI_DEPTH_CONFIG = {
   [AI_DIFFICULTIES.MEDIUM]: 4,
   [AI_DIFFICULTIES.HARD]: 5,
   [AI_DIFFICULTIES.EXPERT]: 6,
-  // Note: Tutor depth is now dynamic (AI depth + 2)
+  // Note: Tutor depth is derived via getTutorDepth() below (always > opponent).
 } as const;
+
+/**
+ * How many extra plies the tutor searches beyond the opponent AI at the same
+ * difficulty. The tutor must always be strictly stronger than the opponent so
+ * its hints reliably beat the AI the player is fighting.
+ */
+export const TUTOR_DEPTH_BONUS = 2;
+
+/** Minimum tutor search depth (keeps hints useful even at low difficulties). */
+export const TUTOR_MIN_DEPTH = 6;
+
+/**
+ * Opponent-AI search depth for a difficulty (fallback 3 for unknown values).
+ */
+export function getOpponentDepth(difficulty: string): number {
+  return (AI_DEPTH_CONFIG[difficulty as keyof typeof AI_DEPTH_CONFIG] as number) || 3;
+}
+
+/**
+ * Tutor search depth for a difficulty. GUARANTEED to be strictly greater than
+ * getOpponentDepth(difficulty) so the tutor is always "smarter" than the
+ * opponent AI it is advising against.
+ */
+export function getTutorDepth(difficulty: string): number {
+  const opponent = getOpponentDepth(difficulty);
+  return Math.max(TUTOR_MIN_DEPTH, opponent + TUTOR_DEPTH_BONUS);
+}
 
 /**
  * Timing constants for game flow

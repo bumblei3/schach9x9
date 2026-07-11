@@ -1,7 +1,7 @@
 import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import type { MoveInfo } from './MoveAnalyzer.js';
-import { AI_DEPTH_CONFIG } from '../config.js';
+import { getTutorDepth } from '../config.js';
 import type { SearchResult, MoveResult } from '../aiEngine.js';
 import {
   setTutorLoading,
@@ -66,14 +66,12 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
     if (game.isAI && game.turn === 'black') {
       return []; // Don't give hints for AI
     }
-    // Calculate dynamic depth: AI depth + 2, but always at least 6 for strong hints
-    const aiDepth =
-      (AI_DEPTH_CONFIG[game.difficulty as keyof typeof AI_DEPTH_CONFIG] as number) || 4;
-    // In test environment, use very shallow depth for speed
-    const minTutorDepth = isTestEnv ? 2 : 6;
-    const tutorDepth = Math.max(minTutorDepth, aiDepth + 2);
-    // Short timeout in test env
-    const maxTimeMs = isTestEnv ? 1000 : 5000;
+    // Tutor depth is centrally guaranteed to exceed the opponent AI depth
+    // (see getTutorDepth in config.ts). In tests use a shallow depth for speed.
+    const tutorDepth = isTestEnv ? 2 : getTutorDepth(game.difficulty as string);
+    // Give the tutor at least as much time as the toughest opponent (expert
+    // uses 8000ms) so its deeper search can actually complete; short in tests.
+    const maxTimeMs = isTestEnv ? 1000 : 8000;
     const moveNumber = Math.floor(game.moveHistory.length / 2);
 
     const topMoves: SearchResult[] = await aiEngine.getTopMoves(

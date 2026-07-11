@@ -333,11 +333,18 @@ export async function getTopMoves(
   quickScores.sort((a, b) => b.score - a.score);
   const topCandidates = quickScores.slice(0, Math.min(8, quickScores.length));
   const moveScores: { move: Move; score: number }[] = [];
-  const loopDepth = Math.max(2, searchDepth - 3);
+  // Search each candidate at (almost) the full requested tutor depth. Previously
+  // this used `searchDepth - 3`, which silently made the tutor SHALLOWER than
+  // the opponent AI (e.g. expert opponent depth 6 vs tutor 5). We keep only a
+  // 1-ply reduction because several candidates are searched in sequence, but
+  // the tutor still ends up at least as deep as the opponent (bonus is +2).
+  const loopDepth = Math.max(2, searchDepth - 1);
+  // Per-candidate time budget scales with the overall budget across candidates.
+  const perCandidateMs = Math.max(2500, Math.floor(maxTimeMs / 2));
   for (const candidate of topCandidates) {
     if (performance.now() - startTime > maxTimeMs) break;
     try {
-      const jsResult = await runJsSearch(board, turnColor, loopDepth, 2500, 'NORMAL');
+      const jsResult = await runJsSearch(board, turnColor, loopDepth, perCandidateMs, 'NORMAL');
       if (jsResult) moveScores.push({ move: candidate.move, score: jsResult.score });
       else moveScores.push({ move: candidate.move, score: candidate.score });
     } catch { moveScores.push({ move: candidate.move, score: candidate.score }); }
