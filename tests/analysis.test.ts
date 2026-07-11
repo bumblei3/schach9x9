@@ -1,20 +1,21 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { AnalysisManager } from '../js/AnalysisManager.js';
 
+// Mock dependencies at module scope (Vitest hoists vi.mock, but nesting it
+// inside describe emits a deprecation warning that becomes an error later).
+vi.mock('../js/tutor/TacticsDetector.js', () => ({
+  getThreatenedPieces: vi.fn(),
+  countDefenders: vi.fn(),
+  detectTacticalPatterns: vi.fn(),
+}));
+
+vi.mock('../js/aiEngine.js', () => ({
+  see: vi.fn(),
+}));
+
 describe('AnalysisManager', () => {
   let mockGame: any;
   let analysisManager: any;
-
-  // Mock Dependencies
-  vi.mock('../js/tutor/TacticsDetector.js', () => ({
-    getThreatenedPieces: vi.fn(),
-    countDefenders: vi.fn(),
-    detectTacticalPatterns: vi.fn(),
-  }));
-
-  vi.mock('../js/aiEngine.js', () => ({
-    see: vi.fn(),
-  }));
 
   beforeEach(async () => {
     // Reset mocks

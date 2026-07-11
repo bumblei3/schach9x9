@@ -11,6 +11,18 @@ import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as TacticsDetector from '../../js/tutor/TacticsDetector.js';
 import * as aiEngine from '../../js/aiEngine.js';
 
+// Mock config at module scope. vi.mock is file-scoped and hoisted, so it MUST
+// live at the top level. Previously these mocks were nested inside individual
+// `it` blocks (deprecated + only the LAST one actually took effect, making two
+// of three tests run against the wrong stub). Now we expose vi.fn() stubs and
+// set the per-test implementation via mockImplementation inside each test.
+vi.mock('../../js/config.js', () => ({
+  isBlockedCell: vi.fn(),
+  getCurrentBoardShape: vi.fn(() => 'standard'),
+}));
+
+const configMock = await import('../../js/config.js');
+
 describe('TacticsDetector - Additional Coverage', () => {
   let mockGame: any;
   let mockAnalyzer: any;
@@ -119,10 +131,7 @@ describe('TacticsDetector - Additional Coverage', () => {
       mockGame.board[4][6] = { type: 'q', color: 'black' };
       mockGame.board[4][8] = { type: 'k', color: 'black' };
       
-      vi.mock('../../js/config.js', () => ({
-        isBlockedCell: vi.fn(() => true),
-        getCurrentBoardShape: vi.fn(() => 'standard'),
-      }));
+      configMock.isBlockedCell.mockImplementation(() => true);
 
       const skewers = TacticsDetector.detectSkewers(mockGame, mockAnalyzer, { r: 4, c: 4 }, 'white');
       expect(skewers).toEqual([]);
@@ -300,10 +309,7 @@ describe('TacticsDetector - Additional Coverage', () => {
       mockGame.board[2][2] = { type: 'n', color: 'black' };
       mockGame.board[4][4] = { type: 'k', color: 'black' };
       
-      vi.mock('../../js/config.js', () => ({
-        isBlockedCell: vi.fn(() => true),
-        getCurrentBoardShape: vi.fn(() => 'standard'),
-      }));
+      configMock.isBlockedCell.mockImplementation(() => true);
 
       const pins = TacticsDetector.detectPins(mockGame, mockAnalyzer, { r: 0, c: 0 }, 'white');
       expect(pins).toEqual([]);
@@ -605,10 +611,7 @@ describe('TacticsDetector - Additional Coverage', () => {
       mockGame.board[4][6] = { type: 'p', color: 'white' };
       mockGame.board[4][8] = { type: 'r', color: 'white' };
       
-      vi.mock('../../js/config.js', () => ({
-        isBlockedCell: vi.fn((r: number, c: number) => r === 4 && c === 6),
-        getCurrentBoardShape: vi.fn(() => 'standard'),
-      }));
+      configMock.isBlockedCell.mockImplementation((r: number, c: number) => r === 4 && c === 6);
 
       const batteries = TacticsDetector.detectBattery(mockGame, mockAnalyzer, { r: 4, c: 4 }, 'white');
       

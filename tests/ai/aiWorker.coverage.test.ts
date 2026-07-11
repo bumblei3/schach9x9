@@ -6,6 +6,44 @@
 import { describe, expect, test, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { logger } from '../../js/logger.js';
 
+// Mock worker dependencies at the top level (Vitest hoists vi.mock; nesting it
+// inside beforeAll still works but is deprecated and will become an error).
+vi.mock('../../js/aiEngine.js', () => ({
+  getBestMoveDetailed: vi.fn().mockResolvedValue({
+    move: { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } },
+    score: 50,
+  }),
+  getTopMoves: vi.fn().mockResolvedValue([
+    {
+      move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+      score: 100,
+    },
+  ]),
+  analyzePosition: vi.fn().mockResolvedValue({
+    bestMove: null,
+    score: 0,
+    threats: [],
+    opportunities: [],
+  }),
+  evaluatePosition: vi.fn().mockResolvedValue(25),
+  setOpeningBook: vi.fn(),
+  setProgressCallback: vi.fn(),
+}));
+
+vi.mock('../../js/config.js', () => ({
+  setCurrentBoardShape: vi.fn(),
+  getCurrentBoardShape: vi.fn(() => 'standard'),
+}));
+
+vi.mock('../../js/logger.js', () => ({
+  logger: {
+    info: vi.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 describe('AI Worker - Branch Coverage for Untested Paths', () => {
   let mockPostMessage: ReturnType<typeof vi.fn>;
   let mockSelf: any;
@@ -16,40 +54,6 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
     vi.spyOn(logger, 'debug').mockImplementation(() => {});
     vi.spyOn(logger, 'warn').mockImplementation(() => {});
     vi.spyOn(logger, 'error').mockImplementation(() => {});
-
-    vi.mock('../../js/aiEngine.js', () => ({
-      getBestMoveDetailed: vi.fn().mockResolvedValue({ 
-        move: { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }, 
-        score: 50 
-      }),
-      getTopMoves: vi.fn().mockResolvedValue([{ 
-        move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, 
-        score: 100 
-      }]),
-      analyzePosition: vi.fn().mockResolvedValue({ 
-        bestMove: null, 
-        score: 0, 
-        threats: [], 
-        opportunities: [] 
-      }),
-      evaluatePosition: vi.fn().mockResolvedValue(25),
-      setOpeningBook: vi.fn(),
-      setProgressCallback: vi.fn(),
-    }));
-
-    vi.mock('../../js/config.js', () => ({
-      setCurrentBoardShape: vi.fn(),
-      getCurrentBoardShape: vi.fn(() => 'standard'),
-    }));
-
-    vi.mock('../../js/logger.js', () => ({
-      logger: {
-        info: vi.fn(),
-        debug: vi.fn(),
-        warn: vi.fn(),
-        error: vi.fn(),
-      },
-    }));
 
     mockPostMessage = vi.fn();
     mockSelf = {

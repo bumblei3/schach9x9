@@ -2,6 +2,37 @@ import { describe, expect, test, beforeAll, afterAll, beforeEach, vi } from 'vit
 import { getBestMoveDetailed } from '../js/aiEngine.js';
 import { logger } from '../js/logger.js';
 
+// Mock worker dependencies at the top level (Vitest requires vi.mock to be
+// hoisted to module scope; nesting it inside beforeAll still works but emits a
+// deprecation warning that becomes an error in future versions).
+vi.mock('../js/aiEngine.js', () => ({
+  getBestMoveDetailed: vi
+    .fn()
+    .mockResolvedValue({ move: { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }, score: 50 }),
+  getTopMoves: vi
+    .fn()
+    .mockResolvedValue([{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 100 }]),
+  analyzePosition: vi
+    .fn()
+    .mockReturnValue({ bestMove: null, score: 0, threats: [], opportunities: [] }),
+  evaluatePosition: vi.fn().mockResolvedValue(25),
+  setOpeningBook: vi.fn(),
+  setProgressCallback: vi.fn(),
+}));
+
+vi.mock('../js/config.js', () => ({
+  setCurrentBoardShape: vi.fn(),
+}));
+
+vi.mock('../js/logger.js', () => ({
+  logger: {
+    info: vi.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 // Mock Worker class
 class MockWorker {
   scriptUrl: string | URL;
@@ -90,35 +121,7 @@ describe('AI Worker Message Handlers', () => {
   let onmessageHandler: (e: MessageEvent) => Promise<void>;
 
   beforeAll(async () => {
-    // Mock all aiEngine functions
-    vi.mock('../js/aiEngine.js', () => ({
-      getBestMoveDetailed: vi
-        .fn()
-        .mockResolvedValue({ move: { from: { r: 1, c: 1 }, to: { r: 2, c: 2 } }, score: 50 }),
-      getTopMoves: vi
-        .fn()
-        .mockResolvedValue([{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 100 }]),
-      analyzePosition: vi
-        .fn()
-        .mockReturnValue({ bestMove: null, score: 0, threats: [], opportunities: [] }),
-      evaluatePosition: vi.fn().mockResolvedValue(25),
-      setOpeningBook: vi.fn(),
-      setProgressCallback: vi.fn(),
-    }));
-
-    vi.mock('../js/config.js', () => ({
-      setCurrentBoardShape: vi.fn(),
-    }));
-
-    vi.mock('../js/logger.js', () => ({
-      logger: {
-        info: vi.fn(),
-        debug: vi.fn(),
-        warn: vi.fn(),
-        error: vi.fn(),
-      },
-    }));
-
+    // Dependencies are hoisted mocks (see top of file).
     // Setup mock self with postMessage
     mockPostMessage = vi.fn();
     mockSelf = {

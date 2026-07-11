@@ -13,6 +13,10 @@ export default defineConfig({
       '**/e2e/**',
       '**/browser/**',
       '**/*.spec.{js,ts}',
+      // Repro/debug scratch files: they document reproduced bugs but contain
+      // no assertions (always green). Keep them as reference, but don't let
+      // them count as tests or pollute coverage.
+      '**/_repro/**',
     ],
     coverage: {
       provider: 'v8',
