@@ -54,9 +54,11 @@
   width: 100%;
   height: 100%;
   z-index: 20;
-  pointer-events: none;
-  /* Let clicks pass if hidden */
-  opacity: 0;
+  /* Visible and clickable in 2D mode so board cells receive clicks.
+     In 3D mode, body.mode-3d #board-wrapper below hides it (opacity:0,
+     pointer-events:none) so the WebGL canvas receives input instead. */
+  pointer-events: auto;
+  opacity: 1;
   transition: opacity 0.3s ease;
 }
 
