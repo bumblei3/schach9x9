@@ -293,4 +293,140 @@ describe('GameController Comprehensive Coverage', () => {
       });
     });
   });
+
+  describe('Delegating methods', () => {
+    it('undoMove delegates to game.moveController.undoMove', () => {
+      const undo = vi.fn();
+      mockGame.moveController = { undoMove: undo, redoMove: vi.fn() };
+      controller.undoMove();
+      expect(undo).toHaveBeenCalled();
+    });
+
+    it('undoMove is a no-op when moveController is missing', () => {
+      mockGame.moveController = undefined;
+      expect(() => controller.undoMove()).not.toThrow();
+    });
+
+    it('redoMove delegates to game.moveController.redoMove', () => {
+      const redo = vi.fn();
+      mockGame.moveController = { undoMove: vi.fn(), redoMove: redo };
+      controller.redoMove();
+      expect(redo).toHaveBeenCalled();
+    });
+
+    it('redoMove is a no-op when moveController is missing', () => {
+      mockGame.moveController = undefined;
+      expect(() => controller.redoMove()).not.toThrow();
+    });
+
+    it('clock methods delegate to timeManager', () => {
+      const tm = (controller as any).timeManager;
+      const visSpy = vi.spyOn(tm, 'updateClockVisibility').mockImplementation(() => {});
+      const dispSpy = vi.spyOn(tm, 'updateClockDisplay').mockImplementation(() => {});
+      const uiSpy = vi.spyOn(tm, 'updateClockUI').mockImplementation(() => {});
+      const scSpy = vi.spyOn(tm, 'setTimeControl').mockImplementation(() => {});
+      controller.updateClockVisibility();
+      controller.updateClockDisplay();
+      controller.updateClockUI();
+      controller.setTimeControl('blitz');
+      expect(visSpy).toHaveBeenCalled();
+      expect(dispSpy).toHaveBeenCalled();
+      expect(uiSpy).toHaveBeenCalled();
+      expect(scSpy).toHaveBeenCalledWith('blitz');
+    });
+
+    it('requestPositionAnalysis delegates to analysisController', () => {
+      const ac = (controller as any).analysisController;
+      const spy = vi.spyOn(ac, 'requestPositionAnalysis').mockImplementation(() => {});
+      controller.requestPositionAnalysis();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('startTutorial constructs a Tutorial without throwing', () => {
+      expect(() => controller.startTutorial()).not.toThrow();
+    });
+
+    it('reloadPage calls location.reload', () => {
+      const reload = vi.fn();
+      vi.stubGlobal('location', { reload });
+      controller.reloadPage();
+      expect(reload).toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    });
+
+    it('exitPuzzleMode clears puzzle flag and reloads', () => {
+      const reloadSpy = vi.spyOn(controller, 'reloadPage').mockImplementation(() => {});
+      mockGame.puzzleMode = true;
+      controller.exitPuzzleMode();
+      expect(mockGame.puzzleMode).toBe(false);
+      expect(UI.hidePuzzleOverlay).toHaveBeenCalled();
+      expect(reloadSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('offerDraw branches', () => {
+    it('does nothing outside PLAY phase', () => {
+      mockGame.phase = PHASES.SETUP_WHITE_KING;
+      controller.offerDraw('white');
+      expect(mockGame.drawOffered).toBeFalsy();
+    });
+
+    it('rejects a second offer when one is already pending', () => {
+      mockGame.phase = PHASES.PLAY;
+      mockGame.drawOffered = true;
+      controller.offerDraw('white');
+      expect(mockGame.log).toHaveBeenCalledWith(
+        expect.stringContaining('bereits ein offenes Remis-Angebot')
+      );
+    });
+
+    it('shows the dialog to a human opponent', () => {
+      mockGame.phase = PHASES.PLAY;
+      mockGame.drawOffered = false;
+      mockGame.isAI = false;
+      controller.offerDraw('white');
+      expect(mockGame.drawOffered).toBe(true);
+      expect(document.getElementById('draw-offer-overlay')!.classList.contains('hidden')).toBe(
+        false
+      );
+    });
+  });
+
+  describe('requestHint guards', () => {
+    it('warns when not in PLAY phase', async () => {
+      const { notificationUI } = await import('../../js/ui/NotificationUI');
+      mockGame.phase = PHASES.GAME_OVER;
+      await controller.requestHint();
+      expect(notificationUI.show).toHaveBeenCalledWith(
+        expect.stringContaining('nur während des Spiels'),
+        'warning'
+      );
+    });
+
+    it('warns when it is the AI opponent turn', async () => {
+      const { notificationUI } = await import('../../js/ui/NotificationUI');
+      (notificationUI.show as any).mockClear();
+      mockGame.phase = PHASES.PLAY;
+      mockGame.isAI = true;
+      mockGame.playerColor = 'white';
+      mockGame.turn = 'black';
+      mockGame.tutorController = undefined;
+      await controller.requestHint();
+      expect(notificationUI.show).toHaveBeenCalledWith(
+        expect.stringContaining('wenn du am Zug bist'),
+        'info'
+      );
+    });
+
+    it('routes to tutorController.showHint when present', async () => {
+      mockGame.phase = PHASES.PLAY;
+      mockGame.isAI = true;
+      mockGame.playerColor = 'white';
+      mockGame.turn = 'white';
+      const showHint = vi.fn().mockResolvedValue(undefined);
+      mockGame.tutorController = { showHint };
+      await controller.requestHint();
+      expect(showHint).toHaveBeenCalled();
+    });
+  });
 });
