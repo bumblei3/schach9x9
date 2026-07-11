@@ -1,0 +1,91 @@
+name: Dependabot Auto-Merge
+
+# Validates Dependabot PRs and auto-merges only safe (patch-level) updates.
+# Minor/major bumps (e.g. eslint 10, typescript 6, vite 8) are left for
+# manual review because they can contain breaking changes.
+#
+# The validation job is intentionally BLOCKING (continue-on-error: false) for
+# Dependabot PRs only — it is the gate that decides whether a merge is safe.
+# This does not affect the non-blocking main CI pipeline used for normal dev.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write       # needed to merge the PR
+  pull-requests: write  # needed to read/merge the PR
+  checks: read
+
+jobs:
+  # ----------------------------------------------------------------------
+  # BLOCKING validation gate for Dependabot PRs only
+  # ----------------------------------------------------------------------
+  validate:
+    name: Validate Dependabot PR
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
+        with:
+          node-version: '24.0.0'
+          cache-version: '3'
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test -- --run
+
+  # ----------------------------------------------------------------------
+  # Auto-merge only patch-level updates that passed validation
+  # ----------------------------------------------------------------------
+  auto-merge:
+    name: Auto-merge safe updates
+    needs: validate
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Determine update level & merge if patch
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "PR #$PR_NUMBER: $PR_TITLE"
+          if ! echo "$PR_TITLE" | grep -qE 'from [0-9][0-9.]* to [0-9][0-9.]*'; then
+            echo "No semver bump detected in title — skipping auto-merge (manual review)."
+            exit 0
+          fi
+          OLD=$(echo "$PR_TITLE" | grep -oE 'from [0-9][0-9.]*' | grep -oE '[0-9][0-9.]*')
+          NEW=$(echo "$PR_TITLE" | grep -oE 'to [0-9][0-9.]*'   | grep -oE '[0-9][0-9.]*')
+          echo "Old: $OLD  New: $NEW"
+
+          IFS='.' read -ra O <<< "$OLD"
+          IFS='.' read -ra N <<< "$NEW"
+          LEVEL=none
+          for i in 0 1 2; do
+            o=${O[$i]:-0}; n=${N[$i]:-0}
+            if [ "$n" -gt "$o" ]; then
+              if   [ "$i" -eq 0 ]; then LEVEL=major
+              elif [ "$i" -eq 1 ]; then LEVEL=minor
+              else                      LEVEL=patch; fi
+              break
+            fi
+            if [ "$n" -lt "$o" ]; then LEVEL=downgrade; break; fi
+          done
+          echo "Update level: $LEVEL"
+
+          if [ "$LEVEL" != "patch" ]; then
+            echo "Not a patch-level update ($LEVEL) — leaving for manual review."
+            exit 0
+          fi
+
+          echo "Patch-level update with passing checks — merging."
+          gh pr merge --squash "$PR_NUMBER"
