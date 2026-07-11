@@ -70,9 +70,11 @@ export function estimatePositionComplexity(params: {
     reasons.push('opening');
   }
   
-  // Endgame can be very complex (king activity, pawn races)
+  // Endgame can be very complex (king activity, pawn races, zugzwang).
+  // Weighted slightly higher than midgame so that simplification into an
+  // endgame does not read as "less complex" than a crowded middlegame.
   if (params.pieceCount < 12) {
-    score += 0.2;
+    score += 0.35;
     reasons.push('endgame');
   }
 
