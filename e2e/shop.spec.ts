@@ -2,6 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Shop System @shop', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('schach9x9_tutorial_seen', '1');
+      localStorage.setItem('disable_animations', 'true');
+    });
     await page.goto('/');
     // Enter Setup Mode
     await page.click('.gamemode-card:has-text("Truppen anheuern")');

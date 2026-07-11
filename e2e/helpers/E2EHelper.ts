@@ -19,6 +19,9 @@ export class E2EHelper {
     });
     await this.page.addInitScript(() => {
       localStorage.setItem('disable_animations', 'true');
+      // Suppress the first-run tutorial overlay, which otherwise covers the
+      // board/shop and intercepts all pointer events in E2E runs.
+      localStorage.setItem('schach9x9_tutorial_seen', '1');
     });
     await this.page.goto('/?disable-sw');
     await this.page.waitForFunction(() => document.body.classList.contains('app-ready'));
