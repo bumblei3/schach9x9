@@ -41,6 +41,33 @@
   pointer-events: none;
 }
 
+/* On desktop/tablet (wider than the 600px app container) the shop must NOT cover
+   the board. Above 768px we dock it as a right-hand side panel so every board
+   cell (including the lower corridors) stays clickable during setup. */
+@media (min-width: 769px) {
+  .shop-panel {
+    left: auto;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    transform: none;
+    width: 380px;
+    max-width: 380px;
+    max-height: 100vh;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 20px;
+    border-top: var(--glass-border);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .shop-panel.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 .shop-header {
   display: flex;
   justify-content: space-between;
