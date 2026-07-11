@@ -192,7 +192,7 @@ export class ShopManager {
    */
   private getAvailableUpgrades(type: string): ShopPieceConfig[] {
     const upgrades: Record<string, string[]> = {
-      p: ['n', 'b', 'r', 'j', 'a', 'c', 'q'], // Pawn upgrades
+      p: ['n', 'b', 'r', 'j', 'a', 'c', 'q', 'e'], // Pawn upgrades (incl. Angel)
       q: ['e'], // Queen -> Angel
       r: ['c'], // Rook -> Chancellor
       b: ['a'], // Bishop -> Archbishop

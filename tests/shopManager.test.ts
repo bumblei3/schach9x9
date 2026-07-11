@@ -155,6 +155,16 @@ describe('ShopManager', () => {
       const hasNightrider = upgrades.some((u: any) => u.symbol === 'j');
       expect(hasNightrider).toBe(true);
     });
+
+    test('should allow Pawn -> Angel directly in upgrade mode', () => {
+      // Regression: pawn upgrades omitted 'e' (Angel), so a pawn could not be
+      // upgraded straight to an Angel even though Angel is always available in
+      // upgrade/upgrade8x8 modes.
+      mockGame.mode = 'upgrade';
+      const upgrades = (shopManager as any).getAvailableUpgrades('p');
+      const hasAngel = upgrades.some((u: any) => u.symbol === 'e');
+      expect(hasAngel).toBe(true);
+    });
   });
 
   describe('performUpgrade', () => {
