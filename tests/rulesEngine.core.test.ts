@@ -28,6 +28,11 @@ const P = (color: 'white' | 'black'): Piece => ({ type: 'p', color, hasMoved: tr
 const R = (color: 'white' | 'black'): Piece => ({ type: 'r', color, hasMoved: true });
 const B = (color: 'white' | 'black'): Piece => ({ type: 'b', color, hasMoved: true });
 const N = (color: 'white' | 'black'): Piece => ({ type: 'n', color, hasMoved: true });
+const Q = (color: 'white' | 'black'): Piece => ({ type: 'q', color, hasMoved: true });
+// 9x9 fairy pieces: a = archbishop (B+N), c = chancellor (R+N), e = angel (Q+N)
+const A = (color: 'white' | 'black'): Piece => ({ type: 'a', color, hasMoved: true });
+const C = (color: 'white' | 'black'): Piece => ({ type: 'c', color, hasMoved: true });
+const E = (color: 'white' | 'black'): Piece => ({ type: 'e', color, hasMoved: true });
 
 describe('RulesEngine.isSquareUnderAttack', () => {
   test('rook attacks along an open rank/file', () => {
@@ -149,5 +154,90 @@ describe('RulesEngine.getValidMoves legality', () => {
     const engine = new RulesEngine({ board });
     const moves = engine.getValidMoves(4, 4, board[4][4]!);
     expect(moves.some((m) => m.r === 4 && m.c === 5)).toBe(true);
+  });
+});
+
+describe('RulesEngine.getValidMoves — absolute pins', () => {
+  test('a rook pinned along a rank may only move along that rank', () => {
+    // White king (4,0) — white rook (4,4) — black rook (4,8), all on rank 4.
+    const board = emptyBoard();
+    put(board, 4, 0, K('white'));
+    put(board, 4, 4, R('white'));
+    put(board, 4, 8, R('black'));
+    put(board, 0, 8, K('black'));
+    const engine = new RulesEngine({ board });
+    const moves = engine.getValidMoves(4, 4, board[4][4]!);
+    // Every legal destination must stay on rank 4 (the pin line).
+    expect(moves.length).toBeGreaterThan(0);
+    for (const m of moves) expect(m.r).toBe(4);
+    // It may capture the pinning rook at (4,8) but never leave the rank.
+    expect(moves.some((m) => m.r === 4 && m.c === 8)).toBe(true);
+  });
+
+  test('a bishop pinned along a rank has no legal moves (cannot hold the line)', () => {
+    // A bishop only moves diagonally, so a rank-pin freezes it completely.
+    const board = emptyBoard();
+    put(board, 4, 0, K('white'));
+    put(board, 4, 4, B('white'));
+    put(board, 4, 8, R('black'));
+    put(board, 0, 8, K('black'));
+    const engine = new RulesEngine({ board });
+    expect(engine.getValidMoves(4, 4, board[4][4]!)).toHaveLength(0);
+  });
+
+  test('a knight pinned on a diagonal is frozen', () => {
+    // White king (0,0) — white knight (2,2) — black bishop (4,4) on the a1-h8 diagonal.
+    const board = emptyBoard();
+    put(board, 0, 0, K('white'));
+    put(board, 2, 2, N('white'));
+    put(board, 4, 4, B('black'));
+    put(board, 8, 8, K('black'));
+    const engine = new RulesEngine({ board });
+    expect(engine.getValidMoves(2, 2, board[2][2]!)).toHaveLength(0);
+  });
+});
+
+describe('RulesEngine.getValidMoves — 9x9 fairy pieces', () => {
+  // A friendly king at (1,0) sits off every line/diagonal through the center
+  // (4,4), so it never blocks or extends the tested piece's rays. The enemy
+  // king sits far away at (8,8).
+  function centerMoves(pieceFactory: (c: 'white' | 'black') => Piece): number {
+    const board = emptyBoard();
+    put(board, 1, 0, K('white'));
+    put(board, 8, 8, K('black'));
+    const piece = pieceFactory('white');
+    put(board, 4, 4, piece);
+    return new RulesEngine({ board }).getValidMoves(4, 4, piece).length;
+  }
+
+  test('archbishop (B+N) = 24, chancellor (R+N) = 24, angel (Q+N) = 40 from center', () => {
+    expect(centerMoves(A)).toBe(24);
+    expect(centerMoves(C)).toBe(24);
+    expect(centerMoves(E)).toBe(40);
+  });
+
+  test('compound identities: archbishop = bishop+knight, chancellor = rook+knight, angel = queen+knight', () => {
+    const b = centerMoves(B);
+    const r = centerMoves(R);
+    const n = centerMoves(N);
+    const q = centerMoves(Q);
+    expect(centerMoves(A)).toBe(b + n);
+    expect(centerMoves(C)).toBe(r + n);
+    expect(centerMoves(E)).toBe(q + n);
+  });
+
+  test('a pinned angel may still slide along the pin line', () => {
+    // Angel behaves like a queen for the pin: on rank 4 between king and rook
+    // it keeps its rank moves (including capturing the pinner) but no others.
+    const board = emptyBoard();
+    put(board, 4, 0, K('white'));
+    put(board, 4, 4, E('white'));
+    put(board, 4, 8, R('black'));
+    put(board, 0, 8, K('black'));
+    const engine = new RulesEngine({ board });
+    const moves = engine.getValidMoves(4, 4, board[4][4]!);
+    expect(moves.length).toBeGreaterThan(0);
+    for (const m of moves) expect(m.r).toBe(4); // knight jumps & diagonals are illegal here
+    expect(moves.some((m) => m.c === 8)).toBe(true); // can capture the pinning rook
   });
 });
