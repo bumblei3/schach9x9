@@ -255,17 +255,20 @@ describe('Coverage Boost Tests', () => {
       expect(modal.classList.contains('hidden')).toBe(true);
     });
 
-    test('showToast should create temporary element', () => {
+    test('showToast delegates to NotificationUI (XSS-safe, typed)', () => {
       vi.useFakeTimers();
       UI.showToast('Test Toast', 'success');
 
-      const toast = document.querySelector('.toast')!;
+      // Delegated to NotificationUI -> uses .toast-notification, not legacy .toast
+      const toast = document.querySelector('.toast-notification')!;
       expect(toast).not.toBeNull();
-      expect(toast.textContent).toContain('Test Toast');
-      expect(toast.classList.contains('success')).toBe(true);
+      expect(toast.classList.contains('toast-success')).toBe(true);
+      // Message rendered as text (no HTML injection)
+      expect(toast.querySelector('.toast-message')?.textContent).toBe('Test Toast');
 
-      vi.advanceTimersByTime(3500); // 3000ms + 300ms fade
-      expect(document.querySelector('.toast')).toBeNull();
+      vi.advanceTimersByTime(3100); // default 3000ms auto-close
+      // After auto-close the element gets the 'hiding' class (animationend removes it)
+      expect(toast.classList.contains('hiding')).toBe(true);
       vi.useRealTimers();
     });
   });

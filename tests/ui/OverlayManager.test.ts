@@ -212,28 +212,29 @@ describe('OverlayManager', () => {
       expect(document.getElementById('toast-container')).not.toBeNull();
     });
 
-    test('displays toast with correct type icon', () => {
+    test('displays toast with correct type via NotificationUI', () => {
       OverlayManager.showToast('Success!', 'success');
       const container = document.getElementById('toast-container')!;
-      const toast = container.querySelector('.toast');
-      expect(toast!.classList.contains('success')).toBe(true);
-      expect(toast!.innerHTML).toContain('✅');
+      const toast = container.querySelector('.toast-notification')!;
+      expect(toast.classList.contains('toast-success')).toBe(true);
+      // Icon lives in its own node; message is rendered as text
+      expect(toast.querySelector('.toast-message')?.textContent).toBe('Success!');
     });
 
-    test('toast fades out after timeout', () => {
-      OverlayManager.showToast('Fading...');
-      const container = document.getElementById('toast-container');
-      const toast = container!.querySelector('.toast');
+    test('maps legacy "neutral" type to info', () => {
+      OverlayManager.showToast('Neutral', 'neutral');
+      const toast = document.querySelector('.toast-notification')!;
+      expect(toast.classList.contains('toast-info')).toBe(true);
+    });
 
+    test('toast gets hiding class after timeout', () => {
+      OverlayManager.showToast('Fading...');
+      const toast = document.querySelector('.toast-notification')!;
       expect(toast).not.toBeNull();
 
-      // Advance 3000ms for fade-out class
+      // Default NotificationUI duration is 3000ms
       vi.advanceTimersByTime(3000);
-      expect(toast!.classList.contains('fade-out')).toBe(true);
-
-      // Advance 300ms for remove
-      vi.advanceTimersByTime(300);
-      expect(container!.querySelector('.toast')).toBeNull();
+      expect(toast.classList.contains('hiding')).toBe(true);
     });
   });
 });

@@ -4,6 +4,7 @@
  */
 import { renderBoard } from './BoardRenderer.js';
 import { soundManager } from '../sounds.js';
+import { notificationUI } from './NotificationUI.js';
 import type { Player, Piece } from '../types/core.js';
 import type { GameLike, MoveRecord, Puzzle, ModalAction } from '../types/core.js';
 
@@ -209,23 +210,14 @@ export function updatePuzzleStatus(status: string, message: string): void {
 
 /**
  * Zeigt eine Toast-Nachricht an.
+ * Delegates to the shared NotificationUI so all toasts share one
+ * XSS-safe, accessible, stacked implementation (see NotificationUI.show).
  */
 export function showToast(message: string, type: string = 'neutral'): void {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '💡';
-  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.add('fade-out');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  // Map the legacy 'neutral' (and any unknown) type to 'info'.
+  const mapped: 'success' | 'error' | 'warning' | 'info' =
+    type === 'success' || type === 'error' || type === 'warning' ? type : 'info';
+  notificationUI.show(message, mapped);
 }
 
 /**
