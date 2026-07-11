@@ -433,4 +433,148 @@ describe('AIController Coverage Boost', () => {
       expect(mockGame.bestMoves).toHaveLength(1);
     });
   });
+
+  describe('getHint', () => {
+    test('returns null when game is over', async () => {
+      mockGame.phase = PHASES.GAME_OVER;
+      const hint = await controller.getHint(4);
+      expect(hint).toBeNull();
+    });
+
+    test('returns null when no worker produces a move', async () => {
+      controller.initWorkerPool();
+      const workers = controller.aiWorkers as any[];
+      const promise = controller.getHint(4);
+      // Reply from every worker with an empty result (no move)
+      workers.forEach((w, i) =>
+        w.emit('message', { type: 'bestMove', id: i, bestMove: null, score: 0 })
+      );
+      expect(await promise).toBeNull();
+    });
+
+    test('resolves a hint with explanation for a strong capture move', async () => {
+      controller.initWorkerPool();
+      const workers = controller.aiWorkers as any[];
+      const promise = controller.getHint(4);
+      // First worker returns a winning capture; rest empty
+      workers.forEach((w, i) => {
+        if (i === 0) {
+          w.emit('message', {
+            type: 'bestMove',
+            id: 0,
+            bestMove: { from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, capture: true },
+            score: 500,
+          });
+        } else {
+          w.emit('message', { type: 'bestMove', id: i, bestMove: null, score: 0 });
+        }
+      });
+      const hint = await promise;
+      expect(hint).not.toBeNull();
+      expect(hint!.move).toMatchObject({ from: { r: 6, c: 4 } });
+      expect(hint!.explanation).toBe('Gewinnt deutlich Material.');
+    });
+
+    test('times out and resolves null when workers never respond', async () => {
+      vi.useFakeTimers();
+      controller.initWorkerPool();
+      const promise = controller.getHint(4);
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(await promise).toBeNull();
+      vi.useRealTimers();
+    });
+  });
+
+  describe('updateAnalysisUI', () => {
+    test('forwards data to analysisUI.update', () => {
+      const update = vi.fn();
+      controller.setAnalysisUI({ update } as any);
+      const data = { score: 42, depth: 5 };
+      controller.updateAnalysisUI(data);
+      expect(update).toHaveBeenCalledWith(data);
+    });
+
+    test('is a no-op when no analysisUI is set', () => {
+      controller.analysisUI = null;
+      expect(() => controller.updateAnalysisUI({ score: 1 })).not.toThrow();
+    });
+  });
+
+  describe('aiShouldResign branches', () => {
+    test('never resigns in campaign mode', async () => {
+      mockGame.campaignMode = true;
+      (mockEval as any).mockResolvedValue(-9999);
+      expect(await controller.aiShouldResign()).toBe(false);
+    });
+
+    test('upgrade mode only resigns when truly hopeless', async () => {
+      mockGame.campaignMode = false;
+      mockGame.mode = 'upgrade';
+      (mockEval as any).mockResolvedValue(-2000); // bad but not hopeless in upgrade
+      expect(await controller.aiShouldResign()).toBe(false);
+      (mockEval as any).mockResolvedValue(-3500);
+      expect(await controller.aiShouldResign()).toBe(true);
+    });
+
+    test('resigns on massive material deficit', async () => {
+      mockGame.campaignMode = false;
+      mockGame.mode = 'standard';
+      (mockEval as any).mockResolvedValue(0);
+      (mockGame.calculateMaterialAdvantage as any).mockReturnValue(20);
+      expect(await controller.aiShouldResign()).toBe(true);
+    });
+  });
+
+  describe('aiEvaluateDrawOffer extra branches', () => {
+    test('returns early when no draw is offered', async () => {
+      mockGame.drawOffered = false;
+      await controller.aiEvaluateDrawOffer();
+      expect(mockGame.gameController.acceptDraw).not.toHaveBeenCalled();
+      expect(mockGame.gameController.declineDraw).not.toHaveBeenCalled();
+    });
+
+    test('accepts when 50-move rule is near', async () => {
+      mockGame.drawOffered = true;
+      (mockEval as any).mockResolvedValue(300); // winning, but 50-move forces accept
+      mockGame.halfMoveClock = 200;
+      await controller.aiEvaluateDrawOffer();
+      expect(mockGame.gameController.acceptDraw).toHaveBeenCalled();
+    });
+  });
+
+  describe('aiMove early exits', () => {
+    test('skips entirely in puzzle mode', async () => {
+      mockGame.mode = 'puzzle';
+      await controller.aiMove();
+      expect(mockGame.executeMove).not.toHaveBeenCalled();
+    });
+
+    test('resigns instead of moving when position is hopeless', async () => {
+      mockGame.mode = 'standard';
+      mockGame.drawOffered = false;
+      (mockEval as any).mockResolvedValue(-2000); // triggers aiShouldResign
+      await controller.aiMove();
+      expect(mockGame.gameController.resign).toHaveBeenCalledWith('black');
+      expect(mockGame.executeMove).not.toHaveBeenCalled();
+    });
+
+    test('beginner blunder plays a random legal move and returns early', async () => {
+      mockGame.mode = 'standard';
+      mockGame.drawOffered = false;
+      mockGame.difficulty = 'beginner';
+      (mockEval as any).mockResolvedValue(0); // no resign / draw
+      mockGame.getAllLegalMoves = vi
+        .fn()
+        .mockReturnValue([{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, promotion: undefined }]);
+      const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.1); // < 0.25 -> blunder
+      await controller.aiMove();
+      expect(mockGame.executeMove).toHaveBeenCalledWith(
+        { r: 6, c: 4 },
+        { r: 4, c: 4 },
+        false,
+        undefined
+      );
+      randomSpy.mockRestore();
+    });
+  });
 });
