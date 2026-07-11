@@ -42,3 +42,7 @@ build/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+# Compiled Playwright spec artifacts (real specs live in e2e/*.spec.ts)
+**/*.spec.js
+**/*.spec.js.map
+**/*.spec.d.ts
