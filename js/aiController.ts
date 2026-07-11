@@ -427,7 +427,13 @@ export class AIController {
           timeLimit = AI_DIFFICULTY_TIMEOUT_MS[this.game.difficulty] || AI_TIMEOUT_MS;
         }
 
-        const personalityConfig = AI_PERSONALITIES[this.game.aiPersonality || 'balanced'];
+        // Fall back to the balanced profile if the configured personality has
+        // no entry in AI_PERSONALITIES (e.g. campaign level 'final_battle' uses
+        // 'expert', which is a valid Level type but not a runtime personality
+        // key). Without this, personalityConfig would be undefined and the
+        // worker message below would throw on personalityConfig.id.
+        const personalityConfig =
+          AI_PERSONALITIES[this.game.aiPersonality || 'balanced'] || AI_PERSONALITIES.balanced;
 
         // Send search request
         worker.postMessage({
