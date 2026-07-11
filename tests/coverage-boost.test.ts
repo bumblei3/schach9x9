@@ -49,16 +49,19 @@ vi.mock('../js/statisticsManager.js', () => ({
       getStats: vi.fn(() => ({})),
     };
   }),
+  statisticsManager: {
+    getStatistics: vi.fn(() => ({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0 })),
+    saveGame: vi.fn(),
+    loadGame: vi.fn(),
+  },
 }));
 
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
+    init = vi.fn();
+    show = vi.fn();
     static shouldAutoShow() {
       return false;
-    }
-    constructor() {
-      this.init = vi.fn();
-      this.show = vi.fn();
     }
   },
 }));

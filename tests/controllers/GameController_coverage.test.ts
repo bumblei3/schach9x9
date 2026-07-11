@@ -41,12 +41,10 @@ vi.mock('../../js/campaign/CampaignManager', () => ({
 
 vi.mock('../../js/tutorial', () => ({
   Tutorial: class {
+    show = vi.fn();
+    initUI = vi.fn();
     static shouldAutoShow() {
       return false;
-    }
-    constructor() {
-      this.show = vi.fn();
-      this.initUI = vi.fn();
     }
   },
 }));
@@ -55,6 +53,11 @@ vi.mock('../../js/statisticsManager', () => ({
   StatisticsManager: vi.fn().mockImplementation(function () {
     return { saveGame: vi.fn(), loadGame: vi.fn() };
   }),
+  statisticsManager: {
+    getStatistics: vi.fn(() => ({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0 })),
+    saveGame: vi.fn(),
+    loadGame: vi.fn(),
+  },
 }));
 
 vi.mock('../../js/shop/ShopManager', () => ({

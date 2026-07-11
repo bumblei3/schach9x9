@@ -27,12 +27,10 @@ vi.mock('../js/sounds.js', () => ({
 // Mock Tutorial
 vi.mock('../js/tutorial.js', () => ({
   Tutorial: class {
+    init = vi.fn();
+    show = vi.fn();
     static shouldAutoShow() {
       return false;
-    }
-    constructor() {
-      this.init = vi.fn();
-      this.show = vi.fn();
     }
   },
 }));
