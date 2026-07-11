@@ -27,16 +27,56 @@ describe('NotificationUI', () => {
 
     expect(toast).toBeTruthy();
     expect(toast?.classList.contains('toast-success')).toBe(true);
-    expect(toast?.innerHTML).toContain('Test Message');
-    expect(toast?.innerHTML).toContain('Success Title');
+    // Message + title rendered as text nodes, not innerHTML
+    expect(toast?.querySelector('.toast-message')?.textContent).toBe('Test Message');
+    expect(toast?.querySelector('.toast-title')?.textContent).toBe('Success Title');
   });
 
   it('should use default title and icon for info type', () => {
     notificationUI.show('Info Message', 'info');
     const toast = document.querySelector('.toast-notification');
 
-    expect(toast?.innerHTML).toContain('Info');
-    expect(toast?.innerHTML).toContain('ℹ️');
+    expect(toast?.querySelector('.toast-title')?.textContent).toBe('Info');
+    expect(toast?.querySelector('.toast-icon')?.textContent).toContain('ℹ️');
+  });
+
+  it('should escape user-supplied text (no HTML injection)', () => {
+    // A message containing markup must be rendered as literal text, not parsed.
+    const malicious = '<img src=x onerror=alert(1)>';
+    notificationUI.show(malicious, 'warning', 'XSS Test');
+    const toast = document.querySelector('.toast-notification');
+
+    expect(toast?.querySelector('.toast-message')?.textContent).toBe(malicious);
+    // No img element should have been created from the message
+    expect(toast?.querySelector('.toast-message img')).toBeNull();
+    expect(toast?.innerHTML).not.toContain('<img');
+  });
+
+  it('should set aria-live / role for screen readers (errors assertive)', () => {
+    notificationUI.show('Info text', 'info');
+    notificationUI.show('Error text', 'error');
+    const toasts = document.querySelectorAll('.toast-notification');
+    const infoToast = toasts[0] as HTMLElement;
+    const errorToast = toasts[1] as HTMLElement;
+
+    expect(infoToast.getAttribute('role')).toBe('status');
+    expect(infoToast.getAttribute('aria-live')).toBe('polite');
+    expect(errorToast.getAttribute('role')).toBe('alert');
+    expect(errorToast.getAttribute('aria-live')).toBe('assertive');
+  });
+
+  it('should cap the number of visible toasts and drop the oldest', () => {
+    for (let i = 1; i <= 6; i++) {
+      notificationUI.show(`Toast ${i}`, 'info');
+    }
+    // Only the 4 most recent remain *active*; the two oldest are dismissed
+    // (they keep the .hiding class until their fade-out animation ends).
+    const active = document.querySelectorAll('.toast-notification:not(.hiding)');
+    expect(active.length).toBe(4);
+    const messages = Array.from(active).map(
+      (t) => (t.querySelector('.toast-message') as HTMLElement).textContent
+    );
+    expect(messages).toEqual(['Toast 3', 'Toast 4', 'Toast 5', 'Toast 6']);
   });
 
   it('should auto-close after duration', () => {
