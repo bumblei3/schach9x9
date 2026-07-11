@@ -140,7 +140,7 @@ describe('PGNGenerator', () => {
         from: { r: 8, c: 4 },
         to: { r: 8, c: 6 },
         piece: { type: 'k' as const, color: 'white' as const },
-        specialMove: { type: 'castling', isKingside: true },
+        isCastling: true,
       };
       const board = Array(9)
         .fill(null)
@@ -155,7 +155,7 @@ describe('PGNGenerator', () => {
         from: { r: 8, c: 4 },
         to: { r: 8, c: 2 },
         piece: { type: 'k' as const, color: 'white' as const },
-        specialMove: { type: 'castling', isKingside: false },
+        isCastling: true,
       };
       const board = Array(9)
         .fill(null)
@@ -170,7 +170,7 @@ describe('PGNGenerator', () => {
         from: { r: 1, c: 4 },
         to: { r: 0, c: 4 },
         piece: { type: 'p' as const, color: 'white' as const },
-        specialMove: { type: 'promotion', promotedTo: 'e' },
+        promotion: 'e',
       };
       const board = Array(9)
         .fill(null)

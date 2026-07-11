@@ -1,6 +1,7 @@
 import { logger } from '../logger.js';
 import type { Game } from '../gameEngine.js';
 import type { MoveHistoryEntry } from '../gameEngine.js';
+type Piece = { type: string; color: 'white' | 'black'; hasMoved?: boolean };
 
 /**
  * Piece type to standard notation letter.
@@ -53,6 +54,64 @@ const QUALITY_SYMBOLS: Record<string, string> = {
 };
 
 /**
+ * Pieces of the same type+colour that could also legally reach `to` from their
+ * current square (ignoring whether the resulting position is legal — the same
+ * simplification the standard PGN disambiguation uses). Used to decide whether
+ * the moving piece's file/rank must be written out.
+ */
+function collectAmbiguousPieces(
+  game: Game,
+  pieceType: string,
+  move: MoveHistoryEntry,
+): { r: number; c: number }[] {
+  const board = (game as unknown as { board: (Piece | null)[][] }).board;
+  if (!board) return [];
+  const color = move.piece?.color;
+  const result: { r: number; c: number }[] = [];
+  const dest = move.to;
+
+  const isClear = (r0: number, c0: number, r1: number, c1: number): boolean => {
+    const dr = Math.sign(r1 - r0);
+    const dc = Math.sign(c1 - c0);
+    let r = r0 + dr;
+    let c = c0 + dc;
+    while (r !== r1 || c !== c1) {
+      if (board[r][c]) return false;
+      r += dr;
+      c += dc;
+    }
+    return true;
+  };
+
+  for (let r = 0; r < board.length; r++) {
+    for (let c = 0; c < board[r].length; c++) {
+      if (r === move.from.r && c === move.from.c) continue;
+      const p = board[r][c];
+      if (!p || p.type !== pieceType || p.color !== color) continue;
+
+      if (p.type === 'n') {
+        // Knight: one of the 8 L-jumps lands on dest.
+        const dr = Math.abs(dest.r - r);
+        const dc = Math.abs(dest.c - c);
+        if ((dr === 2 && dc === 1) || (dr === 1 && dc === 2)) result.push({ r, c });
+      } else if (p.type === 'k') {
+        if (Math.max(Math.abs(dest.r - r), Math.abs(dest.c - c)) === 1) result.push({ r, c });
+      } else {
+        // Sliding pieces (q/r/b/a/c/e): straight/diagonal, path clear.
+        const dr = dest.r - r;
+        const dc = dest.c - c;
+        const straight = dr === 0 || dc === 0;
+        const diagonal = Math.abs(dr) === Math.abs(dc);
+        const slides = ['q', 'r'].includes(p.type) && straight;
+        const glides = ['q', 'b', 'a', 'c', 'e'].includes(p.type) && diagonal;
+        if ((slides || glides) && isClear(r, c, dest.r, dest.c)) result.push({ r, c });
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * Convert a move record to algebraic notation with optional engine annotations.
  * @param move - Move record from game history
  * @param _game - Game instance (for disambiguation)
@@ -68,15 +127,16 @@ export function moveToNotation(
     return '??';
   }
 
-  // Handle castling
-  const sm = move.specialMove as Record<string, unknown> | undefined;
-  if (sm?.type === 'castling') {
-    return sm.isKingside ? 'O-O' : 'O-O-O';
+  // Handle castling (isCastling is a top-level flag on MoveHistoryEntry;
+  // it is NOT nested under specialMove.type, so read it directly).
+  if (move.isCastling) {
+    return move.to.c > move.from.c ? 'O-O' : 'O-O-O';
   }
 
   const pieceType = move.piece?.type || 'p';
   const pieceLetter = PIECE_NOTATION[pieceType] || '';
   const fromFile = colToFile(move.from.c);
+  const fromRank = rowToRank(move.from.r);
   const toFile = colToFile(move.to.c);
   const toRank = rowToRank(move.to.r);
 
@@ -87,8 +147,20 @@ export function moveToNotation(
     notation += pieceLetter;
   }
 
-  // Disambiguation (only for pawn captures)
-  if (!pieceLetter && move.captured) {
+  // Disambiguation: if another piece of the same type (and colour) could
+  // also move to the destination, the moving piece must be disambiguated.
+  // Prefer file, then rank, then both.
+  if (pieceLetter && _game) {
+    const others = collectAmbiguousPieces(_game, pieceType, move);
+    if (others.length > 0) {
+      const sameFile = others.some((o) => o.c === move.from.c);
+      const sameRank = others.some((o) => o.r === move.from.r);
+      if (!sameFile) notation += fromFile;
+      else if (!sameRank) notation += fromRank;
+      else notation += fromFile + fromRank;
+    }
+  } else if (!pieceLetter && move.captured) {
+    // Pawn captures are disambiguated by their source file.
     notation += fromFile;
   }
 
@@ -100,10 +172,17 @@ export function moveToNotation(
   // Destination
   notation += toFile + toRank;
 
-  // Promotion
-  if (sm?.type === 'promotion') {
-    const promotedTo = sm.promotedTo || 'q';
-    notation += '=' + (PIECE_NOTATION[promotedTo as string] || 'Q');
+  // Promotion (move.promotion is a top-level string on MoveHistoryEntry).
+  if (move.promotion) {
+    const promotedTo = move.promotion || 'q';
+    notation += '=' + (PIECE_NOTATION[promotedTo] || 'Q');
+  }
+
+  // Check / checkmate suffix.
+  if (move.isCheckmate) {
+    notation += '#';
+  } else if (move.isCheck) {
+    notation += '+';
   }
 
   // Engine annotations (Nag - Numeric Annotation Glyphs + eval)
