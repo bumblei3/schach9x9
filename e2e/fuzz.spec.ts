@@ -6,7 +6,7 @@ test.describe('Fuzz Testing / Stress Test', () => {
 
     // 1. Start a Classic 9x9 Game (simplest setup)
     await page.goto('/');
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]');
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be ready

@@ -23,7 +23,7 @@ test.describe('Tutor Button Functionality', () => {
     // We use the selector for the standard/classic card.
     // Based on index.html/CSS, likely .gamemode-card[data-mode="classic"] or similar if properly tagged.
     // If not, we can find it by text.
-    await page.locator('.gamemode-card', { hasText: 'Klassisches Schach' }).first().click();
+    await page.locator('.gamemode-card[data-mode="classic"]').first().click();
 
     // 2. Wait for game to be fully initialized and in PLAY phase
     await page.waitForFunction(() => {

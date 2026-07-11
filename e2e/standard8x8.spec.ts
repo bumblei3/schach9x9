@@ -8,8 +8,8 @@ test.describe('Standard 8x8 Mode', () => {
   });
 
   test('should start standard 8x8 chess', async ({ page }) => {
-    // Click "Standard (8x8)" card
-    const standardCard = page.locator('.gamemode-card').filter({ hasText: 'Standard 8x8' });
+    // Click "Standard (8x8)" card via the stable data-mode attribute
+    const standardCard = page.locator('.gamemode-card[data-mode="standard8x8"]');
 
     // Note: If the UI card doesn't exist, we might fail here.
     // Assuming standard 8x8 is available in the menu based on the codebase supporting it.

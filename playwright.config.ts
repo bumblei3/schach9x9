@@ -30,6 +30,13 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'http://localhost:3000',
 
+    /* Seed first-run-only state so E2E contexts don't get the auto-show
+       tutorial overlay (which covers the board and intercepts clicks) or
+       entrance animations. Without this, 26+ specs time out. Per-spec
+       addInitScript calls (ki_mentor_level etc.) still run after this and
+       layer on top. */
+    storageState: './e2e/.storageState.json',
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },

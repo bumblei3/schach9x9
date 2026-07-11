@@ -8,7 +8,7 @@ test.describe('Shop System @shop', () => {
     });
     await page.goto('/');
     // Enter Setup Mode
-    await page.click('.gamemode-card:has-text("Truppen anheuern")');
+    await page.click('.gamemode-card[data-mode="setup"]');
 
     // Wait for Game Init and Phase
     await page.waitForFunction(

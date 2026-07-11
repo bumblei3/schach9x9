@@ -36,7 +36,7 @@ test.describe('Visual Regression Tests @visual', () => {
 
   test('Shop Panel - 25 Points (Hire Mode)', async ({ page }) => {
     // 1. Select Hire Mode
-    const hireBtn = page.locator('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    const hireBtn = page.locator('.gamemode-card[data-mode="setup"]');
     await expect(hireBtn).toBeVisible();
     await hireBtn.click();
 
@@ -67,7 +67,7 @@ test.describe('Visual Regression Tests @visual', () => {
 
   test('Menu Overlay from Game', async ({ page }) => {
     // Start game first to enable menu button logic
-    await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    await page.click('.gamemode-card[data-mode="setup"]');
 
     // Click menu button (the burger menu in header)
     await page.click('#menu-btn');
@@ -90,7 +90,7 @@ test.describe('Visual Regression Tests @visual', () => {
     // Skip 3D tests as they are consistently flaky in headless environments due to WebGL context issues
     test.skip(true, 'Skipping 3D visual test due to headless WebGL inconsistencies');
 
-    await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    await page.click('.gamemode-card[data-mode="setup"]');
 
     // Wait for full game initialization before toggling 3D (wait for setup mode)
     await expect(page.locator('body')).toHaveClass(/setup-mode/);
@@ -125,7 +125,7 @@ test.describe('Visual Regression Tests @visual', () => {
     });
 
     // 1. Enter Hire Mode (Standard 9x9)
-    await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    await page.click('.gamemode-card[data-mode="setup"]');
     const mainMenu = page.locator('#main-menu');
     await expect(mainMenu).not.toHaveClass(/active/);
 

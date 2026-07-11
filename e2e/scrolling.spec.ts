@@ -15,7 +15,7 @@ test.describe('Scrolling Behavior', () => {
 
   test('Shop panel should be scrollable in setup mode', async ({ page }) => {
     // 1. Enter Setup Mode (click Hiring mode)
-    await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    await page.click('.gamemode-card[data-mode="setup"]');
 
     // 1b. Place White King
     await expect(page.locator('#board')).toBeVisible();

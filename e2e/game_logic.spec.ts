@@ -1,6 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Deep Game Logic @logic', () => {
+  // These specs inject pieces into a live game and assert async DOM repaints.
+  // Under parallel CI load the init/repaint can lag, so give them more headroom
+  // than the default 30s test timeout to avoid false flakes.
+  test.slow();
   test.beforeEach(async ({ page }) => {
     // Listen to browser console logs
     page.on('console', msg => console.log(`[Browser] ${msg.text()}`));
@@ -14,12 +18,28 @@ test.describe('Deep Game Logic @logic', () => {
   });
 
   async function setupPieceAndRender(page: any, r: number, c: number, pieceType: string) {
-    // Initialize 9x9 Classic
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    // Initialize 9x9 Classic. Use force because clicking the card tears down
+    // the main menu (which makes Playwright think the target is unstable).
+    await page.click('.gamemode-card[data-mode="classic"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
 
-    // Wait for game instance
-    await page.waitForFunction(() => (window as any).game !== undefined);
+    // Wait for game instance AND full initialization (board + PLAY phase must
+    // exist before we mutate the board; otherwise we race the async init under
+    // load). Match the explicit 'PLAY' phase rather than a truthy check so a
+    // transient 'SETUP'/'undefined' phase can't let us clobber the board early.
+    await page.waitForFunction(
+      () => {
+        const g = (window as any).game;
+        return (
+          g &&
+          g.board &&
+          Array.isArray(g.board) &&
+          g.board.length > 0 &&
+          g.phase === 'PLAY'
+        );
+      },
+      { timeout: 20000 }
+    );
 
     await page.evaluate(
       ({ r, c, pieceType }: { r: number; c: number; pieceType: string }) => {
@@ -45,8 +65,17 @@ test.describe('Deep Game Logic @logic', () => {
       { r, c, pieceType }
     );
 
-    // Wait a bit for render
+    // Wait for render to settle (cells + click handlers attached). Under heavy
+    // CI load rendering can lag, so the move-validation waits below use toPass.
     await page.waitForTimeout(500);
+  }
+
+  // Assert a cell shows a valid-move marker, retrying because the board may
+  // paint the markers a beat after the click under load.
+  async function expectValidMove(page: any, r: number, c: number) {
+    await expect(async () => {
+      await expect(page.locator(`.cell[data-r="${r}"][data-c="${c}"].valid-move`)).toBeVisible();
+    }).toPass({ timeout: 10000 });
   }
 
   test('Archbishop (a) movement: Bishop + Knight', async ({ page }) => {
@@ -54,12 +83,12 @@ test.describe('Deep Game Logic @logic', () => {
     await page.click('.cell[data-r="4"][data-c="4"]');
 
     // Bishop moves
-    await expect(page.locator('.cell[data-r="3"][data-c="3"].valid-move')).toBeVisible();
-    await expect(page.locator('.cell[data-r="6"][data-c="6"].valid-move')).toBeVisible();
+    await expectValidMove(page, 3, 3);
+    await expectValidMove(page, 6, 6);
 
     // Knight moves
-    await expect(page.locator('.cell[data-r="2"][data-c="5"].valid-move')).toBeVisible();
-    await expect(page.locator('.cell[data-r="6"][data-c="3"].valid-move')).toBeVisible();
+    await expectValidMove(page, 2, 5);
+    await expectValidMove(page, 6, 3);
   });
 
   test('Chancellor (c) movement: Rook + Knight', async ({ page }) => {
@@ -67,12 +96,12 @@ test.describe('Deep Game Logic @logic', () => {
     await page.click('.cell[data-r="4"][data-c="4"]');
 
     // Rook moves
-    await expect(page.locator('.cell[data-r="4"][data-c="0"].valid-move')).toBeVisible();
-    await expect(page.locator('.cell[data-r="8"][data-c="4"].valid-move')).toBeVisible();
+    await expectValidMove(page, 4, 0);
+    await expectValidMove(page, 8, 4);
 
     // Knight moves
-    await expect(page.locator('.cell[data-r="2"][data-c="5"].valid-move')).toBeVisible();
-    await expect(page.locator('.cell[data-r="6"][data-c="3"].valid-move')).toBeVisible();
+    await expectValidMove(page, 2, 5);
+    await expectValidMove(page, 6, 3);
   });
 
   test('Nightrider (j) movement: Sliding Knight', async ({ page }) => {
@@ -80,9 +109,9 @@ test.describe('Deep Game Logic @logic', () => {
     await page.click('.cell[data-r="4"][data-c="4"]');
 
     // 1st jump
-    await expect(page.locator('.cell[data-r="2"][data-c="5"].valid-move')).toBeVisible();
+    await expectValidMove(page, 2, 5);
     // 2nd jump (sliding)
-    await expect(page.locator('.cell[data-r="0"][data-c="6"].valid-move')).toBeVisible();
+    await expectValidMove(page, 0, 6);
   });
 
   test('Angel (e) movement: Queen + Knight', async ({ page }) => {
@@ -90,16 +119,16 @@ test.describe('Deep Game Logic @logic', () => {
     await page.click('.cell[data-r="4"][data-c="4"]');
 
     // Queen moves
-    await expect(page.locator('.cell[data-r="0"][data-c="0"].valid-move')).toBeVisible();
-    await expect(page.locator('.cell[data-r="4"][data-c="8"].valid-move')).toBeVisible();
+    await expectValidMove(page, 0, 0);
+    await expectValidMove(page, 4, 8);
 
     // Knight moves
-    await expect(page.locator('.cell[data-r="2"][data-c="5"].valid-move')).toBeVisible();
+    await expectValidMove(page, 2, 5);
   });
 
   test('Castling 9x9: King should reach correct square', async ({ page }) => {
-    // Initialize 9x9 Classic
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    // Initialize 9x9 Classic. Use force: clicking the card tears down the menu.
+    await page.click('.gamemode-card[data-mode="classic"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
 
@@ -132,7 +161,7 @@ test.describe('Deep Game Logic @logic', () => {
   test('En Passant 9x9', async ({ page }) => {
     test.slow(); // Firefox needs more time
 
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
     await page.waitForFunction(() => (window as any).game?.phase === 'PLAY', { timeout: 10000 });
@@ -224,7 +253,7 @@ test.describe('Deep Game Logic @logic', () => {
 
   test('Pawn Promotion 8x8', async ({ page }) => {
     // Start 8x8 game
-    await page.click('.gamemode-card:has-text("Standard 8x8")');
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be initialized
@@ -256,7 +285,7 @@ test.describe('Deep Game Logic @logic', () => {
 
   test('Pawn Promotion 9x9 to Angel (e)', async ({ page }) => {
     // Start 9x9 game
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be initialized
@@ -289,7 +318,7 @@ test.describe('Deep Game Logic @logic', () => {
   });
 
   test('Game Over: Checkmate', async ({ page }) => {
-    await page.click('.gamemode-card:has-text("Standard 8x8")');
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
 
@@ -322,7 +351,7 @@ test.describe('Deep Game Logic @logic', () => {
   });
 
   test('Game Over: Stalemate', async ({ page }) => {
-    await page.click('.gamemode-card:has-text("Standard 8x8")');
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
 

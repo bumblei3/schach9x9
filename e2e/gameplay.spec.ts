@@ -60,7 +60,7 @@ test.describe('Core Gameplay Loop', () => {
 
   test('should start a game and verify board setup', async ({ page }) => {
     // 1. Select Hiring Mode (25 Points)
-    const hiringCard = page.locator('.gamemode-card', { hasText: 'Truppen anheuern (9x9)' });
+    const hiringCard = page.locator('.gamemode-card[data-mode="setup"]');
     await hiringCard.click();
 
     // 2. Wait for Board & Setup Mode
@@ -85,7 +85,7 @@ test.describe('Core Gameplay Loop', () => {
 
   test('should verify Game Over (Checkmate) flow', async ({ page }) => {
     // 1. Start Standard Game to skip setup phase
-    await page.click('.gamemode-card:has-text("Standard 8x8")');
+    await page.click('.gamemode-card[data-mode="standard8x8"]');
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for Game to be fully initialized
@@ -163,7 +163,7 @@ test.describe('Core Gameplay Loop', () => {
 
   test('should handle Shop interaction and Piece Placement', async ({ page }) => {
     // 1. Enter Hire Mode
-    await page.click('.gamemode-card:has-text("Truppen anheuern (9x9)")');
+    await page.click('.gamemode-card[data-mode="setup"]');
 
     // Wait for setup mode to be active
     await expect(page.locator('body')).toHaveClass(/setup-mode/);
@@ -270,7 +270,7 @@ test.describe('Core Gameplay Loop', () => {
     test.slow();
 
     // 1. Start Classic 9x9 (directly in PLAY phase, no setup)
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]');
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be fully ready
@@ -334,7 +334,7 @@ test.describe('Core Gameplay Loop', () => {
     test.slow();
 
     // 1. Start Classic 9x9 Game (has better persistence support than 8x8)
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]');
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be ready

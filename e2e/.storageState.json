@@ -1,0 +1,12 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        { "name": "schach9x9_tutorial_seen", "value": "1" },
+        { "name": "disable_animations", "value": "true" }
+      ]
+    }
+  ]
+}

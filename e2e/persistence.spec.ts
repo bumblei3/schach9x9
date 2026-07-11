@@ -14,7 +14,7 @@ test.describe('Persistence & Recovery @persistence', () => {
     test.slow(); // Firefox needs more time
 
     // 1. Start a Classic 9x9 game
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]');
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be ready
@@ -68,7 +68,7 @@ test.describe('Persistence & Recovery @persistence', () => {
   test('should restore move history after page reload', async ({ page }) => {
     test.slow(); // Firefox needs more time
 
-    await page.click('.gamemode-card:has-text("Klassisch 9x9")');
+    await page.click('.gamemode-card[data-mode="classic"]');
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be ready

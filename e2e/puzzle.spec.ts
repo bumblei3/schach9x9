@@ -15,9 +15,8 @@ test.describe('Puzzle Mode @puzzle', () => {
   });
 
   test('should open puzzle menu from main menu', async ({ page }) => {
-    // In Main Menu, click "Puzzle-Modus" card
-    // The card has text "Puzzle-Modus" inside .card-title
-    const puzzleCard = page.locator('.gamemode-card').filter({ hasText: 'Puzzle-Modus' });
+    // In Main Menu, click "Puzzle-Modus" card (stable data-mode attribute)
+    const puzzleCard = page.locator('.gamemode-card[data-mode="puzzle"]');
     await expect(puzzleCard).toBeVisible();
     await puzzleCard.click();
 
@@ -31,7 +30,7 @@ test.describe('Puzzle Mode @puzzle', () => {
 
   test('should start first puzzle', async ({ page }) => {
     // Start via Main Menu
-    await page.locator('.gamemode-card').filter({ hasText: 'Puzzle-Modus' }).click();
+    await page.locator('.gamemode-card[data-mode="puzzle"]').click();
 
     // Wait for menu
     const puzzleMenu = page.locator('#puzzle-menu-overlay');
@@ -54,7 +53,7 @@ test.describe('Puzzle Mode @puzzle', () => {
 
   test('should solve puzzle 1 (correct move)', async ({ page }) => {
     // Start Puzzle 1
-    await page.locator('.gamemode-card').filter({ hasText: 'Puzzle-Modus' }).click();
+    await page.locator('.gamemode-card[data-mode="puzzle"]').click();
     await page.locator('.puzzle-card').first().click();
 
     await expect(page.locator('#puzzle-overlay')).toBeVisible();
@@ -83,7 +82,7 @@ test.describe('Puzzle Mode @puzzle', () => {
 
   test('should fail puzzle 1 (wrong move)', async ({ page }) => {
     // Start Puzzle 1
-    await page.locator('.gamemode-card').filter({ hasText: 'Puzzle-Modus' }).click();
+    await page.locator('.gamemode-card[data-mode="puzzle"]').click();
     await page.locator('.puzzle-card').first().click();
 
     // Wrong move: 1,7 to 1,6

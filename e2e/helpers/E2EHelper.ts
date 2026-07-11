@@ -30,22 +30,15 @@ export class E2EHelper {
 
   /**
    * Starts a game with the specified mode.
-   * @param modeOrText - Either the data-mode value or the visible text.
+   * @param modeOrText - A data-mode value (preferred) or a card-title substring.
+   *
+   * Prefers the stable `data-mode` attribute over brittle visible-text
+   * matching. Text selectors break whenever the card copy changes (e.g. the
+   * "(9x9)" suffix) and are case/whitespace sensitive.
    */
   async startGame(modeOrText: string) {
     console.log(`[E2EHelper] Starting game mode: ${modeOrText}`);
-    const cardByMode = this.page.locator(`.gamemode-card[data-mode="${modeOrText}"]`);
-    const cardByText = this.page.locator('.gamemode-card').filter({ hasText: modeOrText });
-
-    // Check which one exists
-    let card;
-    if ((await cardByMode.count()) > 0) {
-      card = cardByMode;
-    } else if ((await cardByText.count()) > 0) {
-      card = cardByText;
-    } else {
-      throw new Error(`[E2EHelper] Could not find gamemode card for: ${modeOrText}`);
-    }
+    const card = this.selectModeLocator(modeOrText);
 
     await expect(card).toBeVisible();
     await card.click();
@@ -58,6 +51,27 @@ export class E2EHelper {
     // Wait for board to appear
     await expect(this.page.locator('[data-testid="board"]')).toBeVisible({ timeout: 10000 });
     console.log('[E2EHelper] Board is now visible');
+  }
+
+  /**
+   * Returns a locator for a game-mode card, preferring the `data-mode`
+   * attribute. For modes without one (`upgrade8x8`, `campaign`) it matches the
+   * card title (or the campaign id) so a copy change elsewhere can't match.
+   *
+   * NOTE: `upgrade8x8` and `campaign` cards have NO `data-mode` attribute in
+   * index.html, so they are matched by exact title (`upgrade8x8`) or by the
+   * stable `id="campaign-start-btn"` (`campaign`).
+   */
+  selectModeLocator(modeOrText: string) {
+    // Modes WITHOUT a data-mode attribute -> match by title / id.
+    if (modeOrText === 'upgrade8x8') {
+      return this.page.locator('.gamemode-card').filter({ hasText: '8x8 + Upgrades' });
+    }
+    if (modeOrText === 'campaign') {
+      return this.page.locator('#campaign-start-btn');
+    }
+    // Everything else has a stable data-mode attribute -> prefer it.
+    return this.page.locator(`.gamemode-card[data-mode="${modeOrText}"]`);
   }
 
   /**
