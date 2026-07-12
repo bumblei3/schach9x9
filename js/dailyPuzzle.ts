@@ -24,15 +24,28 @@ function dailyKey(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+// Local-day index base: number of local calendar days since a fixed epoch.
+// Using local Y-M-D (via Date.UTC of the local components) keeps this on the
+// SAME basis as `dailyKey`, so the shown puzzle and the solved-tracking key can
+// never disagree across timezones (both rotate at local midnight).
+const LOCAL_EPOCH = Date.UTC(2000, 0, 1);
+
+function localDayIndex(date: Date): number {
+  const localEpochMs = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  return Math.floor((localEpochMs - LOCAL_EPOCH) / DAY_MS);
+}
+
 export class DailyPuzzleManager {
   /**
-   * Stable per-day index into `puzzleManager.puzzles`, rotating at local
-   * midnight. Same date always yields the same index.
+   * Stable per-day index into `puzzleManager.puzzles`, rotating at LOCAL
+   * midnight. Derived from the same local Y-M-D basis as `getDailyKey`, so the
+   * shown puzzle and the solved-tracking key stay consistent in every timezone.
+   * Same local date always yields the same index.
    */
   getDailyPuzzleIndex(date: Date = new Date()): number {
     const length = puzzleManager.puzzles.length;
     if (length === 0) return 0;
-    return Math.floor(date.getTime() / DAY_MS) % length;
+    return localDayIndex(date) % length;
   }
 
   /** Local `YYYY-MM-DD` key for the given date. */

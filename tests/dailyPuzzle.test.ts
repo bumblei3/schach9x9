@@ -119,8 +119,14 @@ describe('DailyPuzzleManager', () => {
     });
 
     test('returns null when there are no embedded puzzles', () => {
-      // Simulate empty set by checking the guard path via a faked length.
-      expect(dailyPuzzle.getTodaysPuzzle()).toBeTypeOf('object');
+      const original = puzzleManager.puzzles;
+      puzzleManager.puzzles = [];
+      try {
+        expect(dailyPuzzle.getTodaysPuzzle()).toBeNull();
+        expect(dailyPuzzle.getDailyPuzzleIndex()).toBe(0); // guard returns 0 for empty set
+      } finally {
+        puzzleManager.puzzles = original;
+      }
     });
   });
 });
