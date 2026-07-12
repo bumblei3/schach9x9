@@ -83,7 +83,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.000 automatisierten Tests** (Vitest + Playwright) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.600 automatisierten Tests** (Vitest + Playwright) in mehr als 200 Testdateien wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
 
@@ -98,7 +98,7 @@ Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- > 2.000 Tests gesamt, alle grün
+- > 2.600 Tests gesamt in > 200 Testdateien, alle grün
 - Unit-, Integrations- und E2E-Tests (Playwright)
 
 ## 📁 Projektstruktur
