@@ -35,15 +35,17 @@ export class OpeningTrainerModeStrategy implements GameModeStrategy {
     }
 
     // 1. No current selection: select an own piece if present.
+    // In any other case (empty/enemy first click) swallow the click so it
+    // never falls through to MoveController (which would select an enemy
+    // piece and break the trainer loop).
     if (!game.selectedSquare) {
       const piece = game.board[r][c];
       if (piece && piece.color === game.turn) {
         game.selectedSquare = { r, c };
         game.validMoves = game.getValidMoves(r, c, piece);
         UI.renderBoard(game);
-        return true;
       }
-      return false;
+      return true;
     }
 
     // 2. We already have a selection: is this click a valid target move?

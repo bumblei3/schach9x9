@@ -140,7 +140,6 @@ export class GameController {
       this.currentModeStrategy = null; // Puzzle handled ad-hoc or we adhere to legacy for now.
     } else if (mode === 'opening-trainer') {
       this.currentModeStrategy = null;
-      this.startOpeningTrainerMode();
     } else {
       // Fallback
       this.currentModeStrategy = new SetupModeStrategy();
@@ -158,6 +157,11 @@ export class GameController {
     // Initialize basic stuff common to all
     UI.initBoardUI(this.game);
     UI.updateStatus(this.game);
+
+    // Opening-trainer mode must render AFTER the board cells exist
+    if (mode === 'opening-trainer') {
+      this.startOpeningTrainerMode();
+    }
 
     // Delegate to Strategy
     if (this.currentModeStrategy) {
@@ -712,6 +716,9 @@ export class GameController {
     const { board, turn } = reconstructBoardFromHash(pos.hash);
     this.game.board = board as (PieceWithMoved | null)[][];
     this.game.turn = turn as Player;
+    // Clear any stale selection from a previous position (e.g. via Start button).
+    this.game.selectedSquare = null;
+    this.game.validMoves = null;
     UI.renderBoard(this.game);
     UI.updateStatus(this.game);
     if (window.battleChess3D && window.battleChess3D.enabled) {

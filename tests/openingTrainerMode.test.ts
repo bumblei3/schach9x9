@@ -109,6 +109,41 @@ describe('OpeningTrainerModeStrategy', () => {
     expect(controller.submitTrainerMove).not.toHaveBeenCalled();
   });
 
+  it('first click on empty/enemy square swallows the click (returns true, no fall-through)', async () => {
+    const strategy = new OpeningTrainerModeStrategy(controller as never);
+    // Click an empty square (2,2) — must NOT fall through to MoveController.
+    const handled = await strategy.handleInteraction(game as never, controller as never, 2, 2);
+
+    expect(handled).toBe(true);
+    expect(game.selectedSquare).toBeNull();
+    expect(controller.submitTrainerMove).not.toHaveBeenCalled();
+  });
+
+  it('wrong move reports correct=false via manager submitMove', () => {
+    const book = new OpeningBook({
+      positions: {
+        [serializeBoard()]: {
+          seenCount: 0,
+          moves: [{ from: { r: 6, c: 4 }, to: { r: 4, c: 4 }, weight: 1, games: 1 }],
+        },
+      },
+    });
+    const mgr = new OpeningTrainerManager(book, {
+      streak: 0,
+      attempts: 0,
+      correct: 0,
+      solvedHashes: [],
+    });
+    const pos = mgr.getNextPosition();
+    expect(pos).not.toBeNull();
+
+    // Submit a move that does NOT match the expected (6,4)->(4,4).
+    const res = mgr.submitMove(pos!, { from: { r: 6, c: 4 }, to: { r: 3, c: 3 } });
+    expect(res.correct).toBe(false);
+    expect(mgr.progress.streak).toBe(0);
+    expect(mgr.progress.attempts).toBe(1);
+  });
+
   it('ignores clicks when not in PLAY phase', async () => {
     game.phase = 'SETUP' as unknown;
     const strategy = new OpeningTrainerModeStrategy(controller as never);
