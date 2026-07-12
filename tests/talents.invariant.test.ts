@@ -12,7 +12,7 @@ import { describe, test, expect } from 'vitest';
 import { UNIT_TALENT_TREES, type TalentNode } from '../js/campaign/talents.js';
 
 const TREES = Object.values(UNIT_TALENT_TREES);
-const ALL_TALENTS: TalentNode[] = TREES.flatMap((t) => t.talents);
+const ALL_TALENTS: TalentNode[] = TREES.flatMap(t => t.talents);
 const ALLOWED_EFFECTS = ['passive_gold', 'stat_boost', 'mechanic', 'setup_bonus'];
 // All 9x9 piece types, including the fairy pieces a/c/e.
 const EXPECTED_UNITS = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e'];
@@ -32,7 +32,7 @@ describe('UNIT_TALENT_TREES structure', () => {
   });
 
   test('talent ids are globally unique', () => {
-    const ids = ALL_TALENTS.map((t) => t.id);
+    const ids = ALL_TALENTS.map(t => t.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -93,7 +93,7 @@ describe('progression monotonicity within a tree', () => {
 
   test('tiers within a tree are unique (no two talents share a tier)', () => {
     for (const tree of TREES) {
-      const tiers = tree.talents.map((t) => t.tier);
+      const tiers = tree.talents.map(t => t.tier);
       expect(new Set(tiers).size).toBe(tiers.length);
     }
   });

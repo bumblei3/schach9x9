@@ -51,9 +51,7 @@ describe('tutor vs opponent search depth', () => {
 
   test('opponent depth matches AI_DEPTH_CONFIG for known difficulties', () => {
     for (const d of ALL_DIFFICULTIES) {
-      expect(getOpponentDepth(d)).toBe(
-        AI_DEPTH_CONFIG[d as keyof typeof AI_DEPTH_CONFIG]
-      );
+      expect(getOpponentDepth(d)).toBe(AI_DEPTH_CONFIG[d as keyof typeof AI_DEPTH_CONFIG]);
     }
   });
 });

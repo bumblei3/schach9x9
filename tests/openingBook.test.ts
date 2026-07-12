@@ -148,8 +148,10 @@ describe('OpeningBook', () => {
     beforeEach(() => {
       book = new OpeningBook();
       // Standard 9x9 starting position
-      initialBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      initialBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       // Back rank pieces
       const pieceTypes = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'a'];
       pieceTypes.forEach((type, c) => {
@@ -166,11 +168,11 @@ describe('OpeningBook', () => {
     it('should add winning moves with increased weight for white win', () => {
       // White plays e4 (7,4 -> 5,4), black plays e5 (1,4 -> 3,4)
       const moveHistory = [
-        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const },      // White e4
-        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const },      // Black e5
-        { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' as const },      // White d4
-        { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' as const },      // Black d5
-        { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: 'p' as const },      // White e4xd5
+        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const }, // White e4
+        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const }, // Black e5
+        { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' as const }, // White d4
+        { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' as const }, // Black d5
+        { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: 'p' as const }, // White e4xd5
         { from: { r: 3, c: 3 }, to: { r: 4, c: 4 }, piece: 'p' as const, captured: 'p' as const }, // Black d5xe4
       ];
 
@@ -181,7 +183,9 @@ describe('OpeningBook', () => {
       let hash = book.getBoardHash(initialBoard, 'white');
       let pos = book.data.positions[hash];
       expect(pos).toBeDefined();
-      let move = pos!.moves.find(m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4);
+      let move = pos!.moves.find(
+        m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.weight).toBe(3); // base 1 + 2 for win = 3
       expect(move!.games).toBe(1);
@@ -189,8 +193,10 @@ describe('OpeningBook', () => {
       // Move 2: White d4
       // Need to simulate board after 2 moves (e4, e5)
       let board = initialBoard.map(row => [...row]);
-      board[5][4] = board[7][4]; board[7][4] = null; // White e4
-      board[3][4] = board[1][4]; board[1][4] = null; // Black e5
+      board[5][4] = board[7][4];
+      board[7][4] = null; // White e4
+      board[3][4] = board[1][4];
+      board[1][4] = null; // Black e5
       hash = book.getBoardHash(board, 'white');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -201,8 +207,10 @@ describe('OpeningBook', () => {
       // Move 4: White e4->e5
       // Board after moves 0-3 (e4, e5, d4, d5)
       board = board.map(row => [...row]);
-      board[5][3] = board[7][3]; board[7][3] = null; // White d4
-      board[3][3] = board[1][3]; board[1][3] = null; // Black d5
+      board[5][3] = board[7][3];
+      board[7][3] = null; // White d4
+      board[3][3] = board[1][3];
+      board[1][3] = null; // Black d5
       // Hash is computed BEFORE move 4, so use this board state
       hash = book.getBoardHash(board, 'white');
       pos = book.data.positions[hash];
@@ -214,10 +222,10 @@ describe('OpeningBook', () => {
 
     it('should add losing moves with decreased weight for white loss', () => {
       const moveHistory = [
-        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const },      // White e4 (move 0)
-        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const },      // Black e5 (move 1)
-        { from: { r: 7, c: 3 }, to: { r: 6, c: 3 }, piece: 'p' as const },      // White d3 (move 2, bad)
-        { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' as const },      // Black d5 (move 3)
+        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const }, // White e4 (move 0)
+        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const }, // Black e5 (move 1)
+        { from: { r: 7, c: 3 }, to: { r: 6, c: 3 }, piece: 'p' as const }, // White d3 (move 2, bad)
+        { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' as const }, // Black d5 (move 3)
       ];
 
       book.applyGameResult(moveHistory, 'white', 'loss', initialBoard);
@@ -226,13 +234,16 @@ describe('OpeningBook', () => {
       let hash = book.getBoardHash(initialBoard, 'white');
       let pos = book.data.positions[hash];
       expect(pos).toBeDefined();
-      let move = pos!.moves.find(m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4);
+      let move = pos!.moves.find(
+        m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.weight).toBe(0); // base 1 - 1 = 0 (white lost)
 
       // Move 1: Black e5 - hash after White e4, turn='black'
       let board = initialBoard.map(row => [...row]);
-      board[5][4] = board[7][4]; board[7][4] = null; // White e4
+      board[5][4] = board[7][4];
+      board[7][4] = null; // White e4
       hash = book.getBoardHash(board, 'black');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -242,7 +253,8 @@ describe('OpeningBook', () => {
 
       // Move 2: White d3 - hash after White e4, Black e5, turn='white'
       board = board.map(row => [...row]);
-      board[3][4] = board[1][4]; board[1][4] = null; // Black e5
+      board[3][4] = board[1][4];
+      board[1][4] = null; // Black e5
       hash = book.getBoardHash(board, 'white');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -252,7 +264,8 @@ describe('OpeningBook', () => {
 
       // Move 3: Black d5 - hash after White e4, Black e5, White d3, turn='black'
       board = board.map(row => [...row]);
-      board[6][3] = board[7][3]; board[7][3] = null; // White d3
+      board[6][3] = board[7][3];
+      board[7][3] = null; // White d3
       hash = book.getBoardHash(board, 'black');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -263,8 +276,8 @@ describe('OpeningBook', () => {
 
     it('should not change weights for drawn games', () => {
       const moveHistory = [
-        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const },      // White e4 (move 0)
-        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const },      // Black e5 (move 1)
+        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const }, // White e4 (move 0)
+        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const }, // Black e5 (move 1)
       ];
 
       book.applyGameResult(moveHistory, 'white', 'draw', initialBoard);
@@ -273,13 +286,16 @@ describe('OpeningBook', () => {
       let hash = book.getBoardHash(initialBoard, 'white');
       let pos = book.data.positions[hash];
       expect(pos).toBeDefined();
-      let move = pos!.moves.find(m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4);
+      let move = pos!.moves.find(
+        m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.weight).toBe(1); // base 1 + 0 = 1 (draw)
 
       // Move 1: Black e5 - hash after White e4, turn='black'
       const board = initialBoard.map(row => [...row]);
-      board[5][4] = board[7][4]; board[7][4] = null; // White e4
+      board[5][4] = board[7][4];
+      board[7][4] = null; // White e4
       hash = book.getBoardHash(board, 'black');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -308,20 +324,26 @@ describe('OpeningBook', () => {
       // Move 2: White e4->e5 (5,4->4,4) - forward, but e5 occupied? Illegal but recorded
       // Move 3: Black e5xe4 (3,4->4,4) - capture
       // Move 4: White e5->e8 promotion (4,4->0,4) with promotion to queen
-      
+
       // Board BEFORE move 4: after moves 0-3
       const board = initialBoard.map(row => [...row]);
-      board[5][4] = board[7][4]; board[7][4] = null; // White e4
-      board[3][4] = board[1][4]; board[1][4] = null; // Black e5
-      board[4][4] = board[5][4]; board[5][4] = null; // White e4->e5
-      board[4][4] = board[3][4]; board[3][4] = null; // Black captures on e5
-      
+      board[5][4] = board[7][4];
+      board[7][4] = null; // White e4
+      board[3][4] = board[1][4];
+      board[1][4] = null; // Black e5
+      board[4][4] = board[5][4];
+      board[5][4] = null; // White e4->e5
+      board[4][4] = board[3][4];
+      board[3][4] = null; // Black captures on e5
+
       // Hash for move 4 (promotion) with turn='white' (since move index 4 is even -> white)
       const hash = book.getBoardHash(board, 'white');
       const pos = book.data.positions[hash];
       expect(pos).toBeDefined();
       // Should have recorded the promotion move with win bonus
-      const move = pos!.moves.find(m => m.from.r === 4 && m.from.c === 4 && m.to.r === 0 && m.to.c === 4);
+      const move = pos!.moves.find(
+        m => m.from.r === 4 && m.from.c === 4 && m.to.r === 0 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.weight).toBe(3);
     });
@@ -329,8 +351,8 @@ describe('OpeningBook', () => {
     it('should increment games count for repeated moves', () => {
       // Same game played twice (white wins both)
       const moveHistory = [
-        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const },      // White e4 (move 0)
-        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const },      // Black e5 (move 1)
+        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const }, // White e4 (move 0)
+        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const }, // Black e5 (move 1)
       ];
 
       book.applyGameResult(moveHistory, 'white', 'win', initialBoard);
@@ -340,14 +362,17 @@ describe('OpeningBook', () => {
       let hash = book.getBoardHash(initialBoard, 'white');
       let pos = book.data.positions[hash];
       expect(pos).toBeDefined();
-      let move = pos!.moves.find(m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4);
+      let move = pos!.moves.find(
+        m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.games).toBe(2); // Played twice
       expect(move!.weight).toBe(5); // 1 + 2 + 2 = 5 (base + win + win)
 
       // Move 1: Black e5 - hash after White e4, turn='black'
       const board = initialBoard.map(row => [...row]);
-      board[5][4] = board[7][4]; board[7][4] = null; // White e4
+      board[5][4] = board[7][4];
+      board[7][4] = null; // White e4
       hash = book.getBoardHash(board, 'black');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -359,10 +384,10 @@ describe('OpeningBook', () => {
 
     it('should handle black win correctly (black moves get bonus)', () => {
       const moveHistory = [
-        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const },      // White e4 (move 0)
-        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const },      // Black e5 (move 1)
-        { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' as const },      // White d4 (move 2)
-        { from: { r: 1, c: 3 }, to: { r: 2, c: 3 }, piece: 'p' as const },      // Black d4 (move 3, winning move)
+        { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const }, // White e4 (move 0)
+        { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const }, // Black e5 (move 1)
+        { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' as const }, // White d4 (move 2)
+        { from: { r: 1, c: 3 }, to: { r: 2, c: 3 }, piece: 'p' as const }, // Black d4 (move 3, winning move)
       ];
 
       book.applyGameResult(moveHistory, 'black', 'win', initialBoard);
@@ -371,13 +396,16 @@ describe('OpeningBook', () => {
       let hash = book.getBoardHash(initialBoard, 'white');
       let pos = book.data.positions[hash];
       expect(pos).toBeDefined();
-      let move = pos!.moves.find(m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4);
+      let move = pos!.moves.find(
+        m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.weight).toBe(0); // base 1 - 1 = 0 (white lost)
 
       // Move 1: Black e5 - hash after White e4, turn='black' (black won -> +2)
       let board = initialBoard.map(row => [...row]);
-      board[5][4] = board[7][4]; board[7][4] = null; // White e4
+      board[5][4] = board[7][4];
+      board[7][4] = null; // White e4
       hash = book.getBoardHash(board, 'black');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -387,7 +415,8 @@ describe('OpeningBook', () => {
 
       // Move 2: White d4 - hash after White e4, Black e5, turn='white' (white lost -> -1)
       board = board.map(row => [...row]);
-      board[3][4] = board[1][4]; board[1][4] = null; // Black e5
+      board[3][4] = board[1][4];
+      board[1][4] = null; // Black e5
       hash = book.getBoardHash(board, 'white');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -397,7 +426,8 @@ describe('OpeningBook', () => {
 
       // Move 3: Black d4 - hash after White e4, Black e5, White d4, turn='black' (black won -> +2)
       board = board.map(row => [...row]);
-      board[5][3] = board[7][3]; board[7][3] = null; // White d4
+      board[5][3] = board[7][3];
+      board[7][3] = null; // White d4
       hash = book.getBoardHash(board, 'black');
       pos = book.data.positions[hash];
       expect(pos).toBeDefined();
@@ -421,7 +451,9 @@ describe('OpeningBook', () => {
       const hash = book.getBoardHash(initialBoard, 'white');
       const pos = book.data.positions[hash];
       expect(pos).toBeDefined();
-      const move = pos!.moves.find(m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4);
+      const move = pos!.moves.find(
+        m => m.from.r === 7 && m.from.c === 4 && m.to.r === 5 && m.to.c === 4
+      );
       expect(move).toBeDefined();
       expect(move!.weight).toBe(3);
       expect(move!.games).toBe(1);
@@ -439,7 +471,11 @@ describe('OpeningBook', () => {
       for (let i = 0; i < pieceTypes.length; i++) {
         const pieceType = pieceTypes[i];
         const moveHistory = [
-          { from: { r: startRow, c: startCol + i }, to: { r: startRow - 2, c: startCol + i }, piece: pieceType },
+          {
+            from: { r: startRow, c: startCol + i },
+            to: { r: startRow - 2, c: startCol + i },
+            piece: pieceType,
+          },
         ];
 
         testBook.applyGameResult(moveHistory, 'white', 'win', initialBoard);
@@ -451,12 +487,15 @@ describe('OpeningBook', () => {
         // Wait - the hash is computed BEFORE the move is made, so turn is 'white' for move 0
         const hashBeforeMove = testBook.getBoardHash(initialBoard, 'white');
         const pos = testBook.data.positions[hashBeforeMove];
-        
+
         expect(pos).toBeDefined();
         // The move should be recorded with weight 3 (base 1 + 2 for win)
         const move = pos!.moves.find(
-          m => m.from.r === startRow && m.from.c === startCol + i && 
-               m.to.r === startRow - 2 && m.to.c === startCol + i
+          m =>
+            m.from.r === startRow &&
+            m.from.c === startCol + i &&
+            m.to.r === startRow - 2 &&
+            m.to.c === startCol + i
         );
         expect(move).toBeDefined();
         expect(move!.weight).toBe(3);
@@ -473,15 +512,22 @@ describe('OpeningBook', () => {
         const moveHistory = [
           { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' as const }, // White e4
           { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' as const }, // Black e5
-          { from: { r: 7, c: 4 + i }, to: { r: 3, c: 4 + i }, piece: pieceType, captured: 'p' as const }, // Capture
+          {
+            from: { r: 7, c: 4 + i },
+            to: { r: 3, c: 4 + i },
+            piece: pieceType,
+            captured: 'p' as const,
+          }, // Capture
         ];
 
         testBook.applyGameResult(moveHistory, 'white', 'win', initialBoard);
 
         // Simulate board state before capture move (move index 2 = white)
         const board = initialBoard.map(row => [...row]);
-        board[5][4] = board[7][4]; board[7][4] = null; // White e4
-        board[3][4] = board[1][4]; board[1][4] = null; // Black e5
+        board[5][4] = board[7][4];
+        board[7][4] = null; // White e4
+        board[3][4] = board[1][4];
+        board[1][4] = null; // Black e5
 
         const hash = testBook.getBoardHash(board, 'white');
         const pos = testBook.data.positions[hash];
@@ -513,7 +559,12 @@ describe('OpeningBook', () => {
         promoBoard[6][4 + i] = null;
 
         const moveHistory = [
-          { from: { r: 1, c: 4 + i }, to: { r: 0, c: 4 + i }, piece: 'p' as const, promotion: promotionType },
+          {
+            from: { r: 1, c: 4 + i },
+            to: { r: 0, c: 4 + i },
+            piece: 'p' as const,
+            promotion: promotionType,
+          },
         ];
 
         testBook.applyGameResult(moveHistory, 'white', 'win', promoBoard);
@@ -528,7 +579,7 @@ describe('OpeningBook', () => {
         );
         expect(move).toBeDefined();
         expect(move!.weight).toBe(3); // Winner's move gets +2
-        
+
         // Verify the promoted piece was correctly created on the board
         // by checking the internal board state after applyGameResult
         // (we can't easily check the internal board, but the fact that it didn't throw is good)

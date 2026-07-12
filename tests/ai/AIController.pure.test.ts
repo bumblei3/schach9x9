@@ -34,7 +34,9 @@ Object.defineProperty(global.navigator, 'hardwareConcurrency', { value: 4, confi
 
 function makeGame(overrides: any = {}): any {
   return {
-    board: Array(9).fill(null).map(() => Array(9).fill(null)),
+    board: Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null)),
     phase: PHASES.PLAY,
     turn: 'black',
     difficulty: 'medium',
@@ -91,7 +93,9 @@ describe('AIController pure-method coverage', () => {
 
   // --- getAlgebraicNotation ---
   test('getAlgebraicNotation builds file-rank from r/c (board size 9)', () => {
-    expect(controller.getAlgebraicNotation({ from: { r: 8, c: 0 }, to: { r: 6, c: 4 } })).toBe('a1-e3');
+    expect(controller.getAlgebraicNotation({ from: { r: 8, c: 0 }, to: { r: 6, c: 4 } })).toBe(
+      'a1-e3'
+    );
   });
 
   test('getAlgebraicNotation returns ?? for null/partial move', () => {
@@ -129,8 +133,14 @@ describe('AIController pure-method coverage', () => {
     controller.aiWorker = main as any;
     controller.aiWorkers = [pool] as any;
     controller.setBoardShapeForWorkers('cross');
-    expect(main.postMessage).toHaveBeenCalledWith({ type: 'setBoardShape', data: { shape: 'cross' } });
-    expect(pool.postMessage).toHaveBeenCalledWith({ type: 'setBoardShape', data: { shape: 'cross' } });
+    expect(main.postMessage).toHaveBeenCalledWith({
+      type: 'setBoardShape',
+      data: { shape: 'cross' },
+    });
+    expect(pool.postMessage).toHaveBeenCalledWith({
+      type: 'setBoardShape',
+      data: { shape: 'cross' },
+    });
   });
 
   test('setBoardShapeForWorkers works with no workers', () => {
@@ -143,14 +153,20 @@ describe('AIController pure-method coverage', () => {
   test('handleWorkerMessage progress updates analysisUI live progress', () => {
     const analysisUI: any = { updateLiveProgress: vi.fn() };
     controller.analysisUI = analysisUI;
-    (controller as any).handleWorkerMessage({ data: { type: 'progress', data: { depth: 3, maxDepth: 9 } } } as any, 0);
+    (controller as any).handleWorkerMessage(
+      { data: { type: 'progress', data: { depth: 3, maxDepth: 9 } } } as any,
+      0
+    );
     expect(analysisUI.updateLiveProgress).toHaveBeenCalledWith({ depth: 3, maxDepth: 9 });
   });
 
   test('handleWorkerMessage progress updates analysisUI for any worker index', () => {
     const analysisUI: any = { updateLiveProgress: vi.fn() };
     controller.analysisUI = analysisUI;
-    (controller as any).handleWorkerMessage({ data: { type: 'progress', data: { depth: 1 } } } as any, 1);
+    (controller as any).handleWorkerMessage(
+      { data: { type: 'progress', data: { depth: 1 } } } as any,
+      1
+    );
     expect(analysisUI.updateLiveProgress).toHaveBeenCalled();
   });
 
@@ -164,7 +180,10 @@ describe('AIController pure-method coverage', () => {
     const analysisUI: any = { update: vi.fn() };
     controller.analysisUI = analysisUI;
     const payload = { score: 12, topMoves: [] };
-    (controller as any).handleWorkerMessage({ data: { type: 'analysis', data: payload } } as any, 0);
+    (controller as any).handleWorkerMessage(
+      { data: { type: 'analysis', data: payload } } as any,
+      0
+    );
     expect(analysisUI.update).toHaveBeenCalledWith(payload);
   });
 
@@ -173,7 +192,9 @@ describe('AIController pure-method coverage', () => {
     const evalUpdate = vi.fn();
     game.evaluationBar = { update: evalUpdate };
     game.analysisManager = { updateArrows: vi.fn() };
-    const topMoves = [{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 50, notation: 'e4' }];
+    const topMoves = [
+      { move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 50, notation: 'e4' },
+    ];
     (controller as any).handleAnalysisResult({ score: 50, topMoves });
     expect(game.bestMoves.length).toBe(1);
     expect(evalUpdate).toHaveBeenCalledWith(50);
@@ -182,7 +203,9 @@ describe('AIController pure-method coverage', () => {
 
   test('handleAnalysisResult without analysisUI still updates bestMoves', () => {
     controller.analysisUI = null;
-    const topMoves = [{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 5, notation: 'a1' }];
+    const topMoves = [
+      { move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 5, notation: 'a1' },
+    ];
     (controller as any).handleAnalysisResult({ score: 5, topMoves });
     expect(game.bestMoves.length).toBe(1);
   });
@@ -213,7 +236,11 @@ describe('AIController pure-method coverage', () => {
   test('updateAIProgress skips elements that are missing', () => {
     document.body.innerHTML = '';
     expect(() =>
-      controller.updateAIProgress({ depth: 1, nodes: 5, bestMove: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } } })
+      controller.updateAIProgress({
+        depth: 1,
+        nodes: 5,
+        bestMove: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+      })
     ).not.toThrow();
   });
 
@@ -243,8 +270,12 @@ describe('AIController pure-method coverage', () => {
       <div class="cell" data-r="3" data-c="6"></div>
     `;
     controller.highlightMove({ from: { r: 5, c: 2 }, to: { r: 3, c: 6 } });
-    expect(document.querySelector('.cell[data-r="5"][data-c="2"]')!.classList.contains('analysis-from')).toBe(true);
-    expect(document.querySelector('.cell[data-r="3"][data-c="6"]')!.classList.contains('analysis-to')).toBe(true);
+    expect(
+      document.querySelector('.cell[data-r="5"][data-c="2"]')!.classList.contains('analysis-from')
+    ).toBe(true);
+    expect(
+      document.querySelector('.cell[data-r="3"][data-c="6"]')!.classList.contains('analysis-to')
+    ).toBe(true);
     expect(game.arrowRenderer.drawArrow).toHaveBeenCalled();
   });
 
@@ -255,7 +286,9 @@ describe('AIController pure-method coverage', () => {
       <div class="cell" data-r="4" data-c="4"></div>
     `;
     controller.highlightMove({ from: { r: 2, c: 2 }, to: { r: 4, c: 4 } });
-    expect(document.querySelector('.cell[data-r="1"][data-c="1"]')!.classList.contains('analysis-from')).toBe(false);
+    expect(
+      document.querySelector('.cell[data-r="1"][data-c="1"]')!.classList.contains('analysis-from')
+    ).toBe(false);
   });
 
   test('highlightMove without arrowRenderer only toggles classes', () => {
@@ -264,19 +297,27 @@ describe('AIController pure-method coverage', () => {
       <div class="cell" data-r="5" data-c="2"></div>
       <div class="cell" data-r="3" data-c="6"></div>
     `;
-    expect(() => controller.highlightMove({ from: { r: 5, c: 2 }, to: { r: 3, c: 6 } })).not.toThrow();
-    expect(document.querySelector('.cell[data-r="5"][data-c="2"]')!.classList.contains('analysis-from')).toBe(true);
+    expect(() =>
+      controller.highlightMove({ from: { r: 5, c: 2 }, to: { r: 3, c: 6 } })
+    ).not.toThrow();
+    expect(
+      document.querySelector('.cell[data-r="5"][data-c="2"]')!.classList.contains('analysis-from')
+    ).toBe(true);
   });
 
   // --- updateAnalysisStats ---
   test('updateAnalysisStats writes engine info with de-DE number formatting', () => {
     controller.updateAnalysisStats({ depth: 3, maxDepth: 8, nodes: 1000 });
-    expect(document.getElementById('analysis-engine-info')!.textContent).toBe('Tiefe: 3/8 | Knoten: 1.000');
+    expect(document.getElementById('analysis-engine-info')!.textContent).toBe(
+      'Tiefe: 3/8 | Knoten: 1.000'
+    );
   });
 
   test('updateAnalysisStats handles missing nodes', () => {
     controller.updateAnalysisStats({ depth: 1, maxDepth: 2 });
-    expect(document.getElementById('analysis-engine-info')!.textContent).toBe('Tiefe: 1/2 | Knoten: 0');
+    expect(document.getElementById('analysis-engine-info')!.textContent).toBe(
+      'Tiefe: 1/2 | Knoten: 0'
+    );
   });
 
   // --- toggleAnalysisMode ---

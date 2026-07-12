@@ -160,14 +160,14 @@ export class ArrowRenderer {
   public highlightMoves(moves: ArrowData[]): void {
     this.lastArrows = moves;
     this.clearArrows();
-    moves.forEach((m) => this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey));
+    moves.forEach(m => this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey));
   }
 
   public redraw(): void {
     this.updateCellSize();
     if (this.lastArrows) {
       this.clearArrows();
-      this.lastArrows.forEach((m) =>
+      this.lastArrows.forEach(m =>
         this.drawArrow(m.fromR, m.fromC, m.toR, m.toC, m.colorKey || m.quality)
       );
     }

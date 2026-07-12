@@ -115,7 +115,9 @@ export function undoMove(game: Game, moveController: MoveController): void {
 
   // Update 3D board if active
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const battle3D = (window as any).battleChess3D as { enabled: boolean; updateFromGameState: (_g: Game) => void } | undefined;
+  const battle3D = (window as any).battleChess3D as
+    | { enabled: boolean; updateFromGameState: (_g: Game) => void }
+    | undefined;
   if (battle3D && battle3D.enabled) {
     battle3D.updateFromGameState(game);
   }

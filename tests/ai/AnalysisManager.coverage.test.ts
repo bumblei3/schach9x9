@@ -79,7 +79,9 @@ describe('AnalysisManager (post-game)', () => {
     });
 
     test('>90 excellent', () => {
-      expect(new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(95))).toContain('Hervorragend');
+      expect(
+        new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(95))
+      ).toContain('Hervorragend');
     });
     test('80-90 strong', () => {
       const advice = new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(85));
@@ -87,13 +89,19 @@ describe('AnalysisManager (post-game)', () => {
       expect(advice).not.toContain('Hervorragend');
     });
     test('65-80 solid', () => {
-      expect(new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(70))).toContain('solider Sieg');
+      expect(
+        new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(70))
+      ).toContain('solider Sieg');
     });
     test('50-65 warning', () => {
-      expect(new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(55))).toContain('brenzlige Momente');
+      expect(
+        new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(55))
+      ).toContain('brenzlige Momente');
     });
     test('<=50 harsh', () => {
-      expect(new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(40))).toContain('Taktik');
+      expect(
+        new AnalysisManager({ stats: { totalMoves: 0 } }).getMentorAdvice(summary(40))
+      ).toContain('Taktik');
     });
   });
 

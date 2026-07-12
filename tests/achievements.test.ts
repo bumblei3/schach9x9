@@ -28,9 +28,15 @@ function freshStorage() {
   const store: Record<string, string> = {};
   (globalThis as any).localStorage = {
     getItem: (k: string) => (k in store ? store[k] : null),
-    setItem: (k: string, v: string) => { store[k] = v; },
-    removeItem: (k: string) => { delete store[k]; },
-    clear: () => { for (const k of Object.keys(store)) delete store[k]; },
+    setItem: (k: string, v: string) => {
+      store[k] = v;
+    },
+    removeItem: (k: string) => {
+      delete store[k];
+    },
+    clear: () => {
+      for (const k of Object.keys(store)) delete store[k];
+    },
   };
 }
 
@@ -39,7 +45,13 @@ describe('AchievementsManager', () => {
 
   beforeEach(() => {
     freshStorage();
-    statistics.getStatistics.mockReturnValue({ wins: 0, losses: 0, draws: 0, currentStreak: 0, bestStreak: 0 });
+    statistics.getStatistics.mockReturnValue({
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+    });
     showToast.mockClear();
     logger.info.mockClear();
     logger.error.mockClear();
@@ -50,7 +62,12 @@ describe('AchievementsManager', () => {
     const all = mgr.getAll();
     expect(all.length).toBe(6);
     expect(all.map((a: any) => a.id)).toEqual([
-      'first_win', 'win_streak_5', 'ten_wins', 'checkmate_in_5', 'promote_pawn', 'win_with_king_only',
+      'first_win',
+      'win_streak_5',
+      'ten_wins',
+      'checkmate_in_5',
+      'promote_pawn',
+      'win_with_king_only',
     ]);
     expect(all.every((a: any) => a.unlocked === false)).toBe(true);
   });
@@ -74,7 +91,10 @@ describe('AchievementsManager', () => {
   });
 
   test('load falls back to empty when stored value is not an array', () => {
-    (globalThis as any).localStorage.setItem('schach9x9_achievements', JSON.stringify({ foo: 'bar' }));
+    (globalThis as any).localStorage.setItem(
+      'schach9x9_achievements',
+      JSON.stringify({ foo: 'bar' })
+    );
     const m = new AchievementsManager();
     // empty -> defaults initialized
     expect(m.getAll().length).toBe(6);
@@ -97,7 +117,9 @@ describe('AchievementsManager', () => {
   test('save handles storage write error gracefully', () => {
     mgr.unlock('first_win');
     // now make setItem throw
-    (globalThis as any).localStorage.setItem = () => { throw new Error('quota'); };
+    (globalThis as any).localStorage.setItem = () => {
+      throw new Error('quota');
+    };
     // trigger a save via checkAndUnlock
     mgr.checkAndUnlock('win', 10, false, false);
     expect(logger.error).toHaveBeenCalled();
@@ -131,14 +153,26 @@ describe('AchievementsManager', () => {
 
   // --- checkAndUnlock() branches ---
   test('win unlocks first_win and ten_wins when reaching target', () => {
-    statistics.getStatistics.mockReturnValue({ wins: 10, losses: 0, draws: 0, currentStreak: 0, bestStreak: 0 });
+    statistics.getStatistics.mockReturnValue({
+      wins: 10,
+      losses: 0,
+      draws: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+    });
     mgr.checkAndUnlock('win', 10, false, false);
     expect(mgr.isUnlocked('first_win')).toBe(true);
     expect(mgr.isUnlocked('ten_wins')).toBe(true);
   });
 
   test('win below ten_wins target only updates progress', () => {
-    statistics.getStatistics.mockReturnValue({ wins: 3, losses: 0, draws: 0, currentStreak: 0, bestStreak: 0 });
+    statistics.getStatistics.mockReturnValue({
+      wins: 3,
+      losses: 0,
+      draws: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+    });
     mgr.checkAndUnlock('win', 10, false, false);
     expect(mgr.isUnlocked('ten_wins')).toBe(false);
     const ten = mgr.getAll().find((a: any) => a.id === 'ten_wins');
@@ -156,13 +190,25 @@ describe('AchievementsManager', () => {
   });
 
   test('win within 5 moves unlocks checkmate_in_5', () => {
-    statistics.getStatistics.mockReturnValue({ wins: 1, losses: 0, draws: 0, currentStreak: 0, bestStreak: 0 });
+    statistics.getStatistics.mockReturnValue({
+      wins: 1,
+      losses: 0,
+      draws: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+    });
     mgr.checkAndUnlock('win', 5, false, false);
     expect(mgr.isUnlocked('checkmate_in_5')).toBe(true);
   });
 
   test('win with more than 5 moves does not unlock checkmate_in_5', () => {
-    statistics.getStatistics.mockReturnValue({ wins: 1, losses: 0, draws: 0, currentStreak: 0, bestStreak: 0 });
+    statistics.getStatistics.mockReturnValue({
+      wins: 1,
+      losses: 0,
+      draws: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+    });
     mgr.checkAndUnlock('win', 12, false, false);
     expect(mgr.isUnlocked('checkmate_in_5')).toBe(false);
   });

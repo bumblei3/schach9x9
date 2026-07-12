@@ -114,9 +114,9 @@ export function computeZobristHash(board: Int8Array, sideToMove?: number): numbe
  * Uses depth-preferred replacement: always replace if new depth >= stored depth.
  */
 export interface TTEntry {
-  hash: number;       // full 32-bit hash for collision detection
-  depth: number;      // search depth
-  score: number;      // evaluation score
+  hash: number; // full 32-bit hash for collision detection
+  depth: number; // search depth
+  score: number; // evaluation score
   flag: 'exact' | 'lower' | 'upper';
   bestMove: Move | null;
 }
@@ -172,7 +172,13 @@ export class TranspositionTable {
     return null;
   }
 
-  store(hash: number, depth: number, score: number, flag: 'exact' | 'lower' | 'upper', bestMove: Move | null): void {
+  store(
+    hash: number,
+    depth: number,
+    score: number,
+    flag: 'exact' | 'lower' | 'upper',
+    bestMove: Move | null
+  ): void {
     const idx = (hash >>> 0) & TT_MASK;
     // Depth-preferred replacement: replace if empty, same hash, or deeper search
     if (ttFlags[idx] === 0 || ttHashes[idx] === hash || depth >= ttDepths[idx]) {

@@ -16,7 +16,7 @@ import { describe, test, expect } from 'vitest';
 import { CAMPAIGN_LEVELS, CAMPAIGN_PERKS } from '../js/campaign/campaignData.js';
 import { AI_PERSONALITIES } from '../js/ai/personalities.js';
 
-const ids = CAMPAIGN_LEVELS.map((l) => l.id);
+const ids = CAMPAIGN_LEVELS.map(l => l.id);
 
 /** Resolve a personality the way the runtime must: with a balanced fallback. */
 function resolvePersonality(key: string | undefined) {
@@ -109,7 +109,7 @@ describe('opponentPersonality resolves to a valid runtime config (regression: fi
 
 describe('CAMPAIGN_PERKS structure', () => {
   test('each perk has a unique id, a name, and a positive cost', () => {
-    const perkIds = CAMPAIGN_PERKS.map((p) => p.id);
+    const perkIds = CAMPAIGN_PERKS.map(p => p.id);
     expect(new Set(perkIds).size).toBe(perkIds.length);
     for (const p of CAMPAIGN_PERKS) {
       expect(p.name.length).toBeGreaterThan(0);

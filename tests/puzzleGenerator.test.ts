@@ -38,29 +38,25 @@ describe('PuzzleGenerator', () => {
     });
   });
 
-  test(
-    'should find Mate in 2',
-    { timeout: 15000, retry: 2 },
-    () => {
-      // This is a 4-ply recursive search over a 9x9 board; under full-suite
-      // parallel CPU load it can exceed the default 5s timeout. A higher
-      // timeout + retry absorbs transient worker-pool contention so the test
-      // stays deterministic.
-      const board = createEmptyBoard();
-      // Mate in 2: White Rooks at 6,4 and 2,4. Black King at 0,4.
-      // Step 1: R(6,4)->R(1,4) Check.
-      // Step 2: Black King must move (if can) or blocked.
-      // If Black King at 0,4 is trapped by White King at 2,4.
+  test('should find Mate in 2', { timeout: 15000, retry: 2 }, () => {
+    // This is a 4-ply recursive search over a 9x9 board; under full-suite
+    // parallel CPU load it can exceed the default 5s timeout. A higher
+    // timeout + retry absorbs transient worker-pool contention so the test
+    // stays deterministic.
+    const board = createEmptyBoard();
+    // Mate in 2: White Rooks at 6,4 and 2,4. Black King at 0,4.
+    // Step 1: R(6,4)->R(1,4) Check.
+    // Step 2: Black King must move (if can) or blocked.
+    // If Black King at 0,4 is trapped by White King at 2,4.
 
-      board[2][4] = { type: 'k', color: 'white', hasMoved: true };
-      board[6][4] = { type: 'r', color: 'white', hasMoved: true };
-      board[0][4] = { type: 'k', color: 'black', hasMoved: true };
-      board[5][0] = { type: 'r', color: 'white', hasMoved: true }; // Extra piece to avoid draw
+    board[2][4] = { type: 'k', color: 'white', hasMoved: true };
+    board[6][4] = { type: 'r', color: 'white', hasMoved: true };
+    board[0][4] = { type: 'k', color: 'black', hasMoved: true };
+    board[5][0] = { type: 'r', color: 'white', hasMoved: true }; // Extra piece to avoid draw
 
-      const solution = PuzzleGenerator.findMateSequence(board, 'white', 2);
-      expect(solution).not.toBeNull();
-      // Mate in 2 means 3 plys: W1, B1, W2
-      expect(solution!.length).toBeGreaterThanOrEqual(1);
-    },
-  );
+    const solution = PuzzleGenerator.findMateSequence(board, 'white', 2);
+    expect(solution).not.toBeNull();
+    // Mate in 2 means 3 plys: W1, B1, W2
+    expect(solution!.length).toBeGreaterThanOrEqual(1);
+  });
 });

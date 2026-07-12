@@ -102,12 +102,13 @@ export function showPromotionUI(
 
   const recommended = new Set([options[0].type, options[1].type]);
 
-  const selectPiece = (opt: typeof options[0]) => {
+  const selectPiece = (opt: (typeof options)[0]) => {
     const piece = game.board[r][c];
     if (piece) {
       piece.type = opt.type as Piece['type'];
       if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
-      if (game.log) game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zu ${opt.name} befördert!`);
+      if (game.log)
+        game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zu ${opt.name} befördert!`);
       soundManager.playPromotion();
       overlay.classList.add('hidden');
       renderBoard(game);
@@ -141,7 +142,7 @@ export function showPromotionUI(
       `;
 
       btn.onclick = () => selectPiece(opt);
-      btn.onkeydown = (e) => {
+      btn.onkeydown = e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           selectPiece(opt);

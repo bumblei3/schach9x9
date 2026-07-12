@@ -107,7 +107,7 @@ describe('piece values are internally consistent', () => {
 
   test('AI values are strictly ordered by strength', () => {
     // Actual consistent ordering in AI_PIECE_VALUES:
-    // p(100) < n(320) < b(330) < r(500) < j(600) < a(650) < q(900) < c(850)... 
+    // p(100) < n(320) < b(330) < r(500) < j(600) < a(650) < q(900) < c(850)...
     // NOTE: c (chancellor 850) is intentionally below q (queen 900) but above a;
     // the verified invariant is strict monotonicity of the documented order.
     const order = ['p', 'n', 'b', 'r', 'j', 'a', 'c', 'q', 'e'] as const;

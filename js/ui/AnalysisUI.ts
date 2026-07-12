@@ -150,12 +150,12 @@ export class AnalysisUI {
     if (this.engineInfo) {
       this.engineInfo.textContent = `Tiefe: ${depth || '-'} | Knoten: ${nodes || '-'}`;
     }
-    }
+  }
 
-    // Live progress update during search
-    updateLiveProgress(progress: AIProgressData): void {
+  // Live progress update during search
+  updateLiveProgress(progress: AIProgressData): void {
     if (!this.isAnalyzing) return;
-  
+
     if (this.liveDepth) {
       this.liveDepth.textContent = progress.depth?.toString() || '-';
     }
@@ -173,17 +173,24 @@ export class AnalysisUI {
     if (this.livePV) {
       this.livePV.textContent = progress.pv || '-';
     }
-  
+
     // Also update the engine info with live data
     if (this.engineInfo && progress.depth !== undefined) {
       const secs = progress.time ? `${(progress.time / 1000).toFixed(1)}s` : '-';
       const nodesStr = progress.nodes?.toLocaleString() || '-';
-      this.engineInfo.textContent = 'Tiefe: ' + progress.depth + ' | Knoten: ' + nodesStr + ' | ' + secs;
+      this.engineInfo.textContent =
+        'Tiefe: ' + progress.depth + ' | Knoten: ' + nodesStr + ' | ' + secs;
     }
-    }
+  }
 
-    // Update engine info with live data (compat method)
-    updateAnalysisStats(data: { depth?: number; maxDepth?: number; nodes?: number; score?: number; time?: number }): void {
+  // Update engine info with live data (compat method)
+  updateAnalysisStats(data: {
+    depth?: number;
+    maxDepth?: number;
+    nodes?: number;
+    score?: number;
+    time?: number;
+  }): void {
     if (this.liveDepth) this.liveDepth.textContent = data.depth?.toString() || '-';
     if (this.liveNodes) this.liveNodes.textContent = data.nodes?.toLocaleString() || '-';
     if (this.liveTime && data.time) this.liveTime.textContent = `${(data.time / 1000).toFixed(1)}s`;
@@ -193,9 +200,16 @@ export class AnalysisUI {
     }
     if (this.engineInfo) {
       const secs = (data.time ?? 0) / 1000;
-      this.engineInfo.textContent = 'Tiefe: ' + (data.depth ?? '-') + ' | Knoten: ' + (data.nodes?.toLocaleString() ?? '-') + ' | ' + secs.toFixed(1) + 's';
+      this.engineInfo.textContent =
+        'Tiefe: ' +
+        (data.depth ?? '-') +
+        ' | Knoten: ' +
+        (data.nodes?.toLocaleString() ?? '-') +
+        ' | ' +
+        secs.toFixed(1) +
+        's';
     }
-    }
+  }
 
   togglePanel(): boolean {
     if (!this.panel) return false;
@@ -339,7 +353,10 @@ export class AnalysisUI {
         }
         // Also restore the moved piece (king) to its original position
         if (piece && from) {
-          board[from.r][from.c] = { ...piece as Piece, hasMoved: (piece as Piece).hasMoved || false };
+          board[from.r][from.c] = {
+            ...(piece as Piece),
+            hasMoved: (piece as Piece).hasMoved || false,
+          };
         }
       } else if (specialMove.type === 'enPassant') {
         const { capturedPawnPos, capturedPawn } = specialMove;
@@ -354,12 +371,15 @@ export class AnalysisUI {
         board[to.r][to.c] = null;
         // Also restore the moved piece (pawn) to its original position
         if (piece && from) {
-          board[from.r][from.c] = { ...piece as Piece, hasMoved: (piece as Piece).hasMoved || false };
+          board[from.r][from.c] = {
+            ...(piece as Piece),
+            hasMoved: (piece as Piece).hasMoved || false,
+          };
         }
       }
     } else if (piece && from) {
       // Normal move: restore the moved piece to its original position
-      board[from.r][from.c] = { ...piece as Piece, hasMoved: (piece as Piece).hasMoved || false };
+      board[from.r][from.c] = { ...(piece as Piece), hasMoved: (piece as Piece).hasMoved || false };
       // Handle captured piece restoration
       if (actualCaptured) {
         board[to.r][to.c] = { ...actualCaptured, hasMoved: true };
@@ -416,4 +436,3 @@ export class AnalysisUI {
       .join('');
   }
 }
-

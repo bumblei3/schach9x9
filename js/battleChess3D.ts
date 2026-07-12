@@ -100,7 +100,6 @@ export class BattleChess3D {
     this.pieceManager.highlights = value;
   }
 
-
   /**
    * Initialize the 3D scene
    */

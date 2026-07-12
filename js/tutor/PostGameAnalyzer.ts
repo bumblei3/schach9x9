@@ -39,7 +39,11 @@ export const QUALITY_METADATA: Record<MoveQuality, QualityMetadata> = {
 /**
  * Classifies a move based on evaluation change.
  */
-export function classifyMove(_prevEval: number, currentEval: number, bestEval: number): MoveQuality {
+export function classifyMove(
+  _prevEval: number,
+  currentEval: number,
+  bestEval: number
+): MoveQuality {
   const evalLoss = bestEval - currentEval;
 
   if (evalLoss <= 0) return MOVE_QUALITY.BEST;
@@ -109,7 +113,9 @@ export function analyzeGame(moveHistory: MoveHistoryEntry[], playerColor: string
 
   return {
     counts,
-    accuracy: calculateAccuracy(playerMoves.map((m: MoveHistoryEntry) => m.classification || MOVE_QUALITY.GOOD)),
+    accuracy: calculateAccuracy(
+      playerMoves.map((m: MoveHistoryEntry) => m.classification || MOVE_QUALITY.GOOD)
+    ),
     totalMoves: playerMoves.length,
   };
 }

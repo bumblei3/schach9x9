@@ -428,10 +428,7 @@ class SoundManager {
       osc.frequency.setValueAtTime(freq, this.audioContext.currentTime + i * 0.08);
 
       gain.gain.setValueAtTime(this.volume * 0.4, this.audioContext.currentTime + i * 0.08);
-      gain.gain.exponentialRampToValueAtTime(
-        0.01,
-        this.audioContext.currentTime + i * 0.08 + 0.15
-      );
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + i * 0.08 + 0.15);
 
       osc.start(this.audioContext.currentTime + i * 0.08);
       osc.stop(this.audioContext.currentTime + i * 0.08 + 0.15);
@@ -573,4 +570,3 @@ if (typeof window !== 'undefined') {
     window.addEventListener('keydown', unlock);
   });
 }
-

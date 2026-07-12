@@ -38,118 +38,120 @@ export class SceneManager3D {
   /**
    * Initialize the 3D scene
    /** Initialize the 3D scene */
-   async init(): Promise<boolean> {
-     try {
-       logger.info('Setting up 3D scene...');
+  async init(): Promise<boolean> {
+    try {
+      logger.info('Setting up 3D scene...');
 
-       if (!this.container) {
-         logger.error('3D container is null!');
-         return false;
-       }
+      if (!this.container) {
+        logger.error('3D container is null!');
+        return false;
+      }
 
-       // Wait for container to have dimensions (with retries)
-       let width = this.container.clientWidth;
-       let height = this.container.clientHeight;
-       let retries = 10;
-      
-       while ((width === 0 || height === 0) && retries > 0) {
-         logger.warn(`Container has zero dimensions, waiting... (${retries} retries left)`);
-         await new Promise(r => setTimeout(r, 100));
-         width = this.container.clientWidth;
-         height = this.container.clientHeight;
-         retries--;
-       }
+      // Wait for container to have dimensions (with retries)
+      let width = this.container.clientWidth;
+      let height = this.container.clientHeight;
+      let retries = 10;
 
-       if (width === 0 || height === 0) {
-         logger.error('Container has zero dimensions after retries!');
-         return false;
-       }
+      while ((width === 0 || height === 0) && retries > 0) {
+        logger.warn(`Container has zero dimensions, waiting... (${retries} retries left)`);
+        await new Promise(r => setTimeout(r, 100));
+        width = this.container.clientWidth;
+        height = this.container.clientHeight;
+        retries--;
+      }
 
-       // Scene
-       this.scene = new THREE.Scene();
-      
-       // Camera
-       const aspect = width / height;
-       this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-       this.camera.position.set(0, 12, 12);
-       this.camera.lookAt(0, 0, 0);
+      if (width === 0 || height === 0) {
+        logger.error('Container has zero dimensions after retries!');
+        return false;
+      }
 
-       // Renderer - with headless CI fallback
-       const canvas = document.createElement('canvas');
-       let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
-      
-       try {
-         gl = canvas.getContext('webgl2', { 
-           antialias: true, 
-           alpha: true,
-           preserveDrawingBuffer: true,
-           failIfMajorPerformanceCaveat: false 
-         }) || canvas.getContext('webgl', {
-           antialias: true,
-           alpha: true,
-           preserveDrawingBuffer: true,
-           failIfMajorPerformanceCaveat: false
-         });
-       } catch (e) {
-         logger.warn('WebGL context creation failed:', e);
-       }
+      // Scene
+      this.scene = new THREE.Scene();
 
-       if (!gl) {
-         logger.error('WebGL context could not be created - falling back to software renderer');
-         return false;
-       }
+      // Camera
+      const aspect = width / height;
+      this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+      this.camera.position.set(0, 12, 12);
+      this.camera.lookAt(0, 0, 0);
 
-       this.renderer = new THREE.WebGLRenderer({ 
-         canvas,
-         antialias: true, 
-         alpha: true,
-         preserveDrawingBuffer: true 
-       });
-       this.renderer.setSize(width, height);
-       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-       this.renderer.shadowMap.enabled = true;
-       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-       this.renderer.setClearColor(0x000000, 0); // Transparent clear color
+      // Renderer - with headless CI fallback
+      const canvas = document.createElement('canvas');
+      let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
 
-       // Clear container
-       while (this.container.firstChild) {
-         this.container.removeChild(this.container.firstChild);
-       }
+      try {
+        gl =
+          canvas.getContext('webgl2', {
+            antialias: true,
+            alpha: true,
+            preserveDrawingBuffer: true,
+            failIfMajorPerformanceCaveat: false,
+          }) ||
+          canvas.getContext('webgl', {
+            antialias: true,
+            alpha: true,
+            preserveDrawingBuffer: true,
+            failIfMajorPerformanceCaveat: false,
+          });
+      } catch (e) {
+        logger.warn('WebGL context creation failed:', e);
+      }
 
-       this.container.appendChild(this.renderer.domElement);
+      if (!gl) {
+        logger.error('WebGL context could not be created - falling back to software renderer');
+        return false;
+      }
 
-       // Controls
-       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-       this.controls.enableDamping = true;
-       this.controls.dampingFactor = 0.05;
-       this.controls.maxPolarAngle = Math.PI / 2.2;
-       this.controls.minDistance = 8;
-       this.controls.maxDistance = 30;
-       this.controls.target.set(0, 0, 0);
+      this.renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+      });
+      this.renderer.setSize(width, height);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      this.renderer.setClearColor(0x000000, 0); // Transparent clear color
 
-       // Lighting
-       this.setupLighting();
+      // Clear container
+      while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild);
+      }
 
-       // Create board
-       this.createBoard();
+      this.container.appendChild(this.renderer.domElement);
 
-       // Handle window resize
-       window.addEventListener('resize', this.onWindowResize.bind(this));
+      // Controls
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.maxPolarAngle = Math.PI / 2.2;
+      this.controls.minDistance = 8;
+      this.controls.maxDistance = 30;
+      this.controls.target.set(0, 0, 0);
 
-       // Start loop
-       this.enabled = true;
-       this.animate();
+      // Lighting
+      this.setupLighting();
 
-       // Force initial resize and render
-       this.onWindowResize();
-       this.renderer.render(this.scene, this.camera);
+      // Create board
+      this.createBoard();
 
-       return true;
-     } catch (error) {
-       logger.error('Failed to initialize 3D scene:', error);
-       return false;
-     }
-   }
+      // Handle window resize
+      window.addEventListener('resize', this.onWindowResize.bind(this));
+
+      // Start loop
+      this.enabled = true;
+      this.animate();
+
+      // Force initial resize and render
+      this.onWindowResize();
+      this.renderer.render(this.scene, this.camera);
+
+      return true;
+    } catch (error) {
+      logger.error('Failed to initialize 3D scene:', error);
+      return false;
+    }
+  }
 
   setupLighting(): void {
     if (!this.scene) return;

@@ -103,8 +103,12 @@ describe('logger — localStorage persistence', () => {
     const store: Record<string, string> = {};
     vi.stubGlobal('localStorage', {
       getItem: (k: string) => (k in store ? store[k] : null),
-      setItem: (k: string, v: string) => { store[k] = v; },
-      removeItem: (k: string) => { delete store[k]; },
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
     });
     vi.resetModules();
     const mod = await import('../js/logger.js');
@@ -116,8 +120,12 @@ describe('logger — localStorage persistence', () => {
     const store: Record<string, string> = {};
     vi.stubGlobal('localStorage', {
       getItem: (k: string) => (k in store ? store[k] : null),
-      setItem: (k: string, v: string) => { store[k] = v; },
-      removeItem: (k: string) => { delete store[k]; },
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
     });
     vi.resetModules();
     const mod = await import('../js/logger.js');

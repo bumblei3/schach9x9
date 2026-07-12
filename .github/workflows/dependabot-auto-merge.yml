@@ -13,8 +13,8 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write       # needed to merge the PR
-  pull-requests: write  # needed to read/merge the PR
+  contents: write # needed to merge the PR
+  pull-requests: write # needed to read/merge the PR
   checks: read
 
 jobs:

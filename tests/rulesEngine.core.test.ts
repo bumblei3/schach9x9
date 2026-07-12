@@ -153,7 +153,7 @@ describe('RulesEngine.getValidMoves legality', () => {
     put(board, 4, 5, R('black')); // rook right next to king, not defended
     const engine = new RulesEngine({ board });
     const moves = engine.getValidMoves(4, 4, board[4][4]!);
-    expect(moves.some((m) => m.r === 4 && m.c === 5)).toBe(true);
+    expect(moves.some(m => m.r === 4 && m.c === 5)).toBe(true);
   });
 });
 
@@ -171,7 +171,7 @@ describe('RulesEngine.getValidMoves — absolute pins', () => {
     expect(moves.length).toBeGreaterThan(0);
     for (const m of moves) expect(m.r).toBe(4);
     // It may capture the pinning rook at (4,8) but never leave the rank.
-    expect(moves.some((m) => m.r === 4 && m.c === 8)).toBe(true);
+    expect(moves.some(m => m.r === 4 && m.c === 8)).toBe(true);
   });
 
   test('a bishop pinned along a rank has no legal moves (cannot hold the line)', () => {
@@ -238,6 +238,6 @@ describe('RulesEngine.getValidMoves — 9x9 fairy pieces', () => {
     const moves = engine.getValidMoves(4, 4, board[4][4]!);
     expect(moves.length).toBeGreaterThan(0);
     for (const m of moves) expect(m.r).toBe(4); // knight jumps & diagonals are illegal here
-    expect(moves.some((m) => m.c === 8)).toBe(true); // can capture the pinning rook
+    expect(moves.some(m => m.c === 8)).toBe(true); // can capture the pinning rook
   });
 });

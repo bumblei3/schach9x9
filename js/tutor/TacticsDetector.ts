@@ -8,7 +8,6 @@ export interface Analyzer {
   getPieceName(_type: string): string;
 }
 
-
 /** A position on the board */
 export interface Pos {
   r: number;
@@ -636,7 +635,7 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
   }
   if (type === 'q') {
     // Queen: both orthogonal and diagonal rays
-    return (dr !== 0 || dc !== 0);
+    return dr !== 0 || dc !== 0;
   }
   return false;
 }
@@ -710,8 +709,8 @@ export function detectThreatsAfterMove(
         const isDiscovered = xrayAttacks.some(t => t.blockerSquare !== undefined);
 
         // Check if this is a PIN (our piece is blocking attack on king/queen behind it)
-        const pinThreats = allAttacksOnThisPiece.filter(t =>
-          t.xrayTargetType === aiEngine.PIECE_KING || t.xrayTargetType === aiEngine.PIECE_QUEEN
+        const pinThreats = allAttacksOnThisPiece.filter(
+          t => t.xrayTargetType === aiEngine.PIECE_KING || t.xrayTargetType === aiEngine.PIECE_QUEEN
         );
         const isPinned = pinThreats.length > 0;
 
@@ -721,7 +720,8 @@ export function detectThreatsAfterMove(
           const pieceName = analyzer.getPieceName(ownPiece.type);
 
           if (isPinned) {
-            const pinTargetType = pinThreats[0].xrayTargetType === aiEngine.PIECE_KING ? 'König' : 'Dame';
+            const pinTargetType =
+              pinThreats[0].xrayTargetType === aiEngine.PIECE_KING ? 'König' : 'Dame';
             warning = `📌 ${pieceName} ist GEFESSELT an ${pinTargetType}! Ziehen nicht erlaubt.`;
           } else if (isDiscovered) {
             warning = `🌟 ${pieceName} deckt Abzugsangriff auf! Gegner droht durch ${xrayAttacks[0].blockerSquare !== undefined ? 'Wegzug' : 'X-Ray'}.`;
@@ -751,7 +751,9 @@ export function detectThreatsAfterMove(
     if (kingPos) {
       const kingSq = kingPos.r * BOARD_SIZE + kingPos.c;
       const kingThreatsDirect = directThreats.filter(t => t.targetSquare === kingSq);
-      const kingThreatsXray = xrayThreats.filter(t => t.targetSquare === kingSq || t.xrayTargetSquare === kingSq);
+      const kingThreatsXray = xrayThreats.filter(
+        t => t.targetSquare === kingSq || t.xrayTargetSquare === kingSq
+      );
 
       if (kingThreatsDirect.length > 0) {
         threats.push({

@@ -5,17 +5,13 @@
  */
 
 import { logger } from './logger.js';
-import { 
+import {
   getBestMoveDetailed,
   convertBoardToInt,
   type MoveResult,
-  type SearchResult
+  type SearchResult,
 } from './aiEngine.js';
-import { 
-  isInCheck,
-  COLOR_WHITE,
-  COLOR_BLACK
-} from './ai/MoveGenerator.js';
+import { isInCheck, COLOR_WHITE, COLOR_BLACK } from './ai/MoveGenerator.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
 import type { Piece } from './types/game.js';
 
@@ -41,28 +37,49 @@ interface MoveRecord {
 function pieceCodeToPiece(code: number): Piece | null {
   switch (code) {
     // White pieces
-    case 1: return { type: 'p', color: 'white', hasMoved: false };
-    case 2: return { type: 'n', color: 'white', hasMoved: false };
-    case 3: return { type: 'b', color: 'white', hasMoved: false };
-    case 4: return { type: 'r', color: 'white', hasMoved: false };
-    case 5: return { type: 'q', color: 'white', hasMoved: false };
-    case 6: return { type: 'k', color: 'white', hasMoved: false };
-    case 7: return { type: 'a', color: 'white', hasMoved: false };
-    case 8: return { type: 'c', color: 'white', hasMoved: false };
-    case 9: return { type: 'e', color: 'white', hasMoved: false };
-    case 10: return { type: 'j', color: 'white', hasMoved: false };
+    case 1:
+      return { type: 'p', color: 'white', hasMoved: false };
+    case 2:
+      return { type: 'n', color: 'white', hasMoved: false };
+    case 3:
+      return { type: 'b', color: 'white', hasMoved: false };
+    case 4:
+      return { type: 'r', color: 'white', hasMoved: false };
+    case 5:
+      return { type: 'q', color: 'white', hasMoved: false };
+    case 6:
+      return { type: 'k', color: 'white', hasMoved: false };
+    case 7:
+      return { type: 'a', color: 'white', hasMoved: false };
+    case 8:
+      return { type: 'c', color: 'white', hasMoved: false };
+    case 9:
+      return { type: 'e', color: 'white', hasMoved: false };
+    case 10:
+      return { type: 'j', color: 'white', hasMoved: false };
     // Black pieces
-    case -1: return { type: 'p', color: 'black', hasMoved: false };
-    case -2: return { type: 'n', color: 'black', hasMoved: false };
-    case -3: return { type: 'b', color: 'black', hasMoved: false };
-    case -4: return { type: 'r', color: 'black', hasMoved: false };
-    case -5: return { type: 'q', color: 'black', hasMoved: false };
-    case -6: return { type: 'k', color: 'black', hasMoved: false };
-    case -7: return { type: 'a', color: 'black', hasMoved: false };
-    case -8: return { type: 'c', color: 'black', hasMoved: false };
-    case -9: return { type: 'e', color: 'black', hasMoved: false };
-    case -10: return { type: 'j', color: 'black', hasMoved: false };
-    default: return null;
+    case -1:
+      return { type: 'p', color: 'black', hasMoved: false };
+    case -2:
+      return { type: 'n', color: 'black', hasMoved: false };
+    case -3:
+      return { type: 'b', color: 'black', hasMoved: false };
+    case -4:
+      return { type: 'r', color: 'black', hasMoved: false };
+    case -5:
+      return { type: 'q', color: 'black', hasMoved: false };
+    case -6:
+      return { type: 'k', color: 'black', hasMoved: false };
+    case -7:
+      return { type: 'a', color: 'black', hasMoved: false };
+    case -8:
+      return { type: 'c', color: 'black', hasMoved: false };
+    case -9:
+      return { type: 'e', color: 'black', hasMoved: false };
+    case -10:
+      return { type: 'j', color: 'black', hasMoved: false };
+    default:
+      return null;
   }
 }
 
@@ -134,13 +151,13 @@ export interface EngineGameStats {
   bestMoves: number;
 }
 
-export type TerminationReason = 
-  | 'checkmate' 
-  | 'stalemate' 
-  | 'insufficient-material' 
-  | '50-move-rule' 
-  | 'threefold-repetition' 
-  | 'max-moves-reached' 
+export type TerminationReason =
+  | 'checkmate'
+  | 'stalemate'
+  | 'insufficient-material'
+  | '50-move-rule'
+  | 'threefold-repetition'
+  | 'max-moves-reached'
   | 'time-forfeit'
   | 'illegal-move'
   | 'engine-error';
@@ -173,19 +190,23 @@ export class EngineMatchRunner {
   async runAll(): Promise<GameResult[]> {
     this.results = [];
 
-    const totalGames = this.config.alternateColors 
-      ? this.config.numGames * 2 
+    const totalGames = this.config.alternateColors
+      ? this.config.numGames * 2
       : this.config.numGames;
 
     if (!this.config.quiet) {
       logger.info(`[EngineMatch] Starting ${totalGames} games`);
-      logger.info(`[EngineMatch] White: ${this.config.engineWhite.name} (${this.config.engineWhite.personality})`);
-      logger.info(`[EngineMatch] Black: ${this.config.engineBlack.name} (${this.config.engineBlack.personality})`);
+      logger.info(
+        `[EngineMatch] White: ${this.config.engineWhite.name} (${this.config.engineWhite.personality})`
+      );
+      logger.info(
+        `[EngineMatch] Black: ${this.config.engineBlack.name} (${this.config.engineBlack.personality})`
+      );
     }
 
     for (let i = 0; i < totalGames; i++) {
       const gameNum = i + 1;
-      
+
       if (this.config.alternateColors && i % 2 === 1) {
         await this.runSingleGame(this.config.engineBlack, this.config.engineWhite, gameNum);
       } else {
@@ -204,17 +225,21 @@ export class EngineMatchRunner {
   ): Promise<GameResult> {
     const startTime = Date.now();
     const gameState = this.createInitialGameState();
-    
+
     const baseTime = this.config.timeControl.baseTimeMs || 10000;
     const increment = this.config.timeControl.incrementMs || 0;
     const maxTimePerMove = this.config.timeControl.maxTimeMs || 10000;
-    
+
     let whiteTime = baseTime;
     let blackTime = baseTime;
-    
+
     const whiteStats = this.createEmptyStats();
     const blackStats = this.createEmptyStats();
-    const moveHistory: Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }> = [];
+    const moveHistory: Array<{
+      from: { r: number; c: number };
+      to: { r: number; c: number };
+      promotion?: string;
+    }> = [];
     let moveNumber = 1;
     let currentTurn: 'white' | 'black' = 'white';
 
@@ -227,12 +252,16 @@ export class EngineMatchRunner {
 
         if (timeRemaining <= 0) {
           return this.createResult(
-            gameNumber, whiteConfig, blackConfig,
+            gameNumber,
+            whiteConfig,
+            blackConfig,
             isWhiteTurn ? '0-1' : '1-0',
             isWhiteTurn ? 'black' : 'white',
             'time-forfeit',
             moveNumber - 1,
-            whiteStats, blackStats, moveHistory,
+            whiteStats,
+            blackStats,
+            moveHistory,
             Date.now() - startTime
           );
         }
@@ -253,15 +282,15 @@ export class EngineMatchRunner {
         const color = currentTurn === 'white' ? 'white' : 'black';
         const personality = AI_PERSONALITIES[engineConfig.personality]?.wasmPersonality || 'NORMAL';
         const elo = engineConfig.elo || 2500;
-        
+
         let engineResult: SearchResult | null = null;
         let move: MoveResult | null = null;
-        
+
         try {
           // Use WASM for speed
           const result = await getBestMoveDetailed(
-            uiBoard, 
-            color as 'white' | 'black', 
+            uiBoard,
+            color as 'white' | 'black',
             engineConfig.depth || 6,
             { elo, personality, maxTimeMs: timeAlloc.allocatedTimeMs },
             moveNumber
@@ -271,37 +300,70 @@ export class EngineMatchRunner {
         } catch (engineErr) {
           logger.error('[EngineMatch] Engine error:', engineErr);
           return this.createResult(
-            gameNumber, whiteConfig, blackConfig,
+            gameNumber,
+            whiteConfig,
+            blackConfig,
             isWhiteTurn ? '0-1' : '1-0',
             isWhiteTurn ? 'black' : 'white',
             'engine-error',
-            moveNumber - 1, whiteStats, blackStats, moveHistory,
+            moveNumber - 1,
+            whiteStats,
+            blackStats,
+            moveHistory,
             Date.now() - startTime
           );
         }
 
         if (!move) {
           // No legal moves
-          const inCheck = isInCheck(boardInt as number[] | Int8Array, isWhiteTurn ? COLOR_WHITE : COLOR_BLACK) as boolean;
+          const inCheck = isInCheck(
+            boardInt as number[] | Int8Array,
+            isWhiteTurn ? COLOR_WHITE : COLOR_BLACK
+          ) as boolean;
           if (inCheck) {
-            return this.createResult(gameNumber, whiteConfig, blackConfig,
+            return this.createResult(
+              gameNumber,
+              whiteConfig,
+              blackConfig,
               isWhiteTurn ? '0-1' : '1-0',
-              isWhiteTurn ? 'black' : 'white', 'checkmate',
-              moveNumber - 1, whiteStats, blackStats, moveHistory,
-              Date.now() - startTime);
+              isWhiteTurn ? 'black' : 'white',
+              'checkmate',
+              moveNumber - 1,
+              whiteStats,
+              blackStats,
+              moveHistory,
+              Date.now() - startTime
+            );
           } else {
-            return this.createResult(gameNumber, whiteConfig, blackConfig,
-              '1/2-1/2', 'draw', 'stalemate',
-              moveNumber - 1, whiteStats, blackStats, moveHistory,
-              Date.now() - startTime);
+            return this.createResult(
+              gameNumber,
+              whiteConfig,
+              blackConfig,
+              '1/2-1/2',
+              'draw',
+              'stalemate',
+              moveNumber - 1,
+              whiteStats,
+              blackStats,
+              moveHistory,
+              Date.now() - startTime
+            );
           }
         }
 
         // Apply move
         this.applyMove(gameState, move, currentTurn);
-        
+
         // Record move
-        moveHistory.push(this.createMoveRecord(move, currentTurn, moveNumber, engineResult, engineConfig.personality));
+        moveHistory.push(
+          this.createMoveRecord(
+            move,
+            currentTurn,
+            moveNumber,
+            engineResult,
+            engineConfig.personality
+          )
+        );
 
         // Update stats
         const moveTime = Date.now() - moveStartTime;
@@ -317,10 +379,19 @@ export class EngineMatchRunner {
 
         // Check draw
         if (moveHistory.length >= 100) {
-          return this.createResult(gameNumber, whiteConfig, blackConfig,
-            '1/2-1/2', 'draw', '50-move-rule',
-            moveNumber, whiteStats, blackStats, moveHistory,
-            Date.now() - startTime);
+          return this.createResult(
+            gameNumber,
+            whiteConfig,
+            blackConfig,
+            '1/2-1/2',
+            'draw',
+            '50-move-rule',
+            moveNumber,
+            whiteStats,
+            blackStats,
+            moveHistory,
+            Date.now() - startTime
+          );
         }
 
         // Switch turns
@@ -329,48 +400,90 @@ export class EngineMatchRunner {
       }
 
       // Max moves reached
-      return this.createResult(gameNumber, whiteConfig, blackConfig,
-        '1/2-1/2', 'draw', 'max-moves-reached',
-        moveNumber - 1, whiteStats, blackStats, moveHistory,
-        Date.now() - startTime);
-
+      return this.createResult(
+        gameNumber,
+        whiteConfig,
+        blackConfig,
+        '1/2-1/2',
+        'draw',
+        'max-moves-reached',
+        moveNumber - 1,
+        whiteStats,
+        blackStats,
+        moveHistory,
+        Date.now() - startTime
+      );
     } catch (err) {
       logger.error(`[EngineMatch] Game ${gameNumber} crashed:`, err);
       return this.createResult(
-        gameNumber, whiteConfig, blackConfig,
+        gameNumber,
+        whiteConfig,
+        blackConfig,
         currentTurn === 'white' ? '0-1' : '1-0',
         currentTurn === 'white' ? 'black' : 'white',
         'engine-error',
-        moveNumber - 1, whiteStats, blackStats, [],
+        moveNumber - 1,
+        whiteStats,
+        blackStats,
+        [],
         Date.now() - startTime
       );
     }
   }
 
   private createEmptyStats(): EngineGameStats {
-    return { avgDepth: 0, maxDepth: 0, totalNodes: 0, totalTimeMs: 0, nps: 0, avgTimePerMoveMs: 0, blunders: 0, mistakes: 0, inaccuracies: 0, bestMoves: 0 };
+    return {
+      avgDepth: 0,
+      maxDepth: 0,
+      totalNodes: 0,
+      totalTimeMs: 0,
+      nps: 0,
+      avgTimePerMoveMs: 0,
+      blunders: 0,
+      mistakes: 0,
+      inaccuracies: 0,
+      bestMoves: 0,
+    };
   }
 
   private createInitialGameState(): number[][] {
-    const board: number[][] = Array(9).fill(null).map(() => Array(9).fill(0));
+    const board: number[][] = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(0));
     // 9x9 starting position (Capablanca chess): R N B Q K B N R A
     // Black pieces (negative values) on row 0
     // White pieces (positive values) on row 8
     const backRankPieces = [
-      -4, -2, -3, -5, -6, -3, -2, -4, -7,  // Black: rook, knight, bishop, queen, king, bishop, knight, rook, archbishop
-      4, 2, 3, 5, 6, 3, 2, 4, 7             // White: rook, knight, bishop, queen, king, bishop, knight, rook, archbishop
+      -4,
+      -2,
+      -3,
+      -5,
+      -6,
+      -3,
+      -2,
+      -4,
+      -7, // Black: rook, knight, bishop, queen, king, bishop, knight, rook, archbishop
+      4,
+      2,
+      3,
+      5,
+      6,
+      3,
+      2,
+      4,
+      7, // White: rook, knight, bishop, queen, king, bishop, knight, rook, archbishop
     ];
     for (let c = 0; c < 9; c++) {
       board[0][c] = backRankPieces[c];
       board[1][c] = -1; // Black pawn
-      board[7][c] = 1;  // White pawn
+      board[7][c] = 1; // White pawn
       board[8][c] = backRankPieces[c + 9];
     }
     return board;
   }
 
-  private calculateAllocation(params: { 
-    maxTimePerMove: number; 
+  private calculateAllocation(params: {
+    maxTimePerMove: number;
     hasOpeningBook?: boolean;
     currentTurn?: 'white' | 'black';
     moveNumber?: number;
@@ -391,29 +504,68 @@ export class EngineMatchRunner {
     }
   }
 
-  private createMoveRecord(move: MoveResult, turn: string, moveNumber: number, result: SearchResult | null, personality: string): MoveRecord {
-    return { moveNumber, color: turn, from: move.from, to: move.to, evalScore: result?.score, depth: result?.depth, nodes: result?.nodes, personality };
+  private createMoveRecord(
+    move: MoveResult,
+    turn: string,
+    moveNumber: number,
+    result: SearchResult | null,
+    personality: string
+  ): MoveRecord {
+    return {
+      moveNumber,
+      color: turn,
+      from: move.from,
+      to: move.to,
+      evalScore: result?.score,
+      depth: result?.depth,
+      nodes: result?.nodes,
+      personality,
+    };
   }
 
-  private updateStats(stats: EngineGameStats, result: SearchResult | null, moveTimeMs: number): void {
+  private updateStats(
+    stats: EngineGameStats,
+    result: SearchResult | null,
+    moveTimeMs: number
+  ): void {
     if (!result) return;
     stats.totalNodes += result.nodes || 0;
     stats.totalTimeMs += moveTimeMs;
     stats.maxDepth = Math.max(stats.maxDepth, result.depth || 0);
     stats.avgDepth = (stats.avgDepth + (result.depth || 0)) / 2;
-    stats.nps = stats.totalTimeMs > 0 ? Math.round(stats.totalNodes / (stats.totalTimeMs / 1000)) : 0;
+    stats.nps =
+      stats.totalTimeMs > 0 ? Math.round(stats.totalNodes / (stats.totalTimeMs / 1000)) : 0;
   }
 
   private createResult(
-    gameNumber: number, whiteConfig: EngineConfig, blackConfig: EngineConfig,
-    result: string, winner: GameResult['winner'], terminationReason: TerminationReason,
-    moves: number, whiteStats: EngineGameStats, blackStats: EngineGameStats,
-    _moveHistory: Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }>, durationMs: number
+    gameNumber: number,
+    whiteConfig: EngineConfig,
+    blackConfig: EngineConfig,
+    result: string,
+    winner: GameResult['winner'],
+    terminationReason: TerminationReason,
+    moves: number,
+    whiteStats: EngineGameStats,
+    blackStats: EngineGameStats,
+    _moveHistory: Array<{
+      from: { r: number; c: number };
+      to: { r: number; c: number };
+      promotion?: string;
+    }>,
+    durationMs: number
   ): GameResult {
     return {
-      gameNumber, whiteEngine: whiteConfig.name, blackEngine: blackConfig.name,
-      result: result as '1-0' | '0-1' | '1/2-1/2' | '*', winner, moves,
-      durationMs, pgn: 'PGN placeholder', whiteStats, blackStats, terminationReason,
+      gameNumber,
+      whiteEngine: whiteConfig.name,
+      blackEngine: blackConfig.name,
+      result: result as '1-0' | '0-1' | '1/2-1/2' | '*',
+      winner,
+      moves,
+      durationMs,
+      pgn: 'PGN placeholder',
+      whiteStats,
+      blackStats,
+      terminationReason,
     };
   }
 
@@ -427,7 +579,7 @@ export class EngineMatchRunner {
     const avgMoves = this.results.reduce((sum, r) => sum + r.moves, 0) / this.results.length;
     console.log(`Avg moves: ${avgMoves.toFixed(1)}`);
     const avgNps = this.results.reduce((s, r) => s + r.whiteStats.nps, 0) / this.results.length;
-    console.log(`Avg NPS: ${(avgNps/1000).toFixed(1)}k`);
+    console.log(`Avg NPS: ${(avgNps / 1000).toFixed(1)}k`);
   }
 }
 
@@ -448,8 +600,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     numGames: 2,
     alternateColors: true,
     timeControl: { type: 'fixed-time', baseTimeMs: 3000, incrementMs: 100, maxTimeMs: 5000 },
-    savePgns: true, quiet: false,
+    savePgns: true,
+    quiet: false,
   };
-  
+
   await runEngineMatch(config);
 }

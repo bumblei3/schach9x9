@@ -86,11 +86,9 @@ describe('Tutorial - first-run gating', () => {
   });
 
   test('markSeen is resilient to a throwing localStorage', () => {
-    const spy = vi
-      .spyOn(localStorage, 'setItem')
-      .mockImplementation(() => {
-        throw new Error('blocked');
-      });
+    const spy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
     expect(() => Tutorial.markSeen()).not.toThrow();
     spy.mockRestore();
   });

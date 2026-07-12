@@ -6,7 +6,11 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**',
+      'build/**',
       'node_modules/**',
+      'coverage/**',
+      'docs/**',
+      'engine-wasm/pkg/**',
       '*.cjs',
       'commitlint.config.js',
       'tests/**',
@@ -118,5 +122,5 @@ export default tseslint.config(
         afterAll: 'readonly',
       },
     },
-  },
+  }
 );

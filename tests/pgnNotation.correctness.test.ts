@@ -60,7 +60,7 @@ describe('moveToNotation — castling', () => {
         piece: board[8][4]!,
         isCastling: true,
       }),
-      { board } as any,
+      { board } as any
     );
     expect(notation).toBe('O-O');
   });
@@ -75,7 +75,7 @@ describe('moveToNotation — castling', () => {
         piece: board[8][4]!,
         isCastling: true,
       }),
-      { board } as any,
+      { board } as any
     );
     expect(notation).toBe('O-O-O');
   });
@@ -93,7 +93,7 @@ describe('moveToNotation — promotion', () => {
         captured: { type: 'r', color: 'black' },
         promotion: 'q',
       }),
-      { board } as any,
+      { board } as any
     );
     expect(notation).toBe('axb9=Q');
   });
@@ -108,7 +108,7 @@ describe('moveToNotation — promotion', () => {
         piece: board[1][4]!,
         promotion: 'a',
       }),
-      { board } as any,
+      { board } as any
     );
     expect(notation).toBe('e9=A');
   });
@@ -125,7 +125,7 @@ describe('moveToNotation — check / checkmate suffixes', () => {
         piece: board[8][3]!,
         isCheck: true,
       }),
-      { board } as any,
+      { board } as any
     );
     expect(notation).toBe('Qd5+');
   });
@@ -140,7 +140,7 @@ describe('moveToNotation — check / checkmate suffixes', () => {
         piece: board[8][3]!,
         isCheckmate: true,
       }),
-      { board } as any,
+      { board } as any
     );
     expect(notation).toBe('Qd5#');
   });
@@ -151,14 +151,12 @@ describe('moveToNotation — disambiguation', () => {
     const board = emptyBoard();
     board[8][0] = { type: 'r', color: 'white', hasMoved: true }; // a1
     board[4][8] = { type: 'r', color: 'white', hasMoved: true }; // i5
-    const aRook = moveToNotation(
-      move({ from: [8, 0], to: [4, 0], piece: board[8][0]! }),
-      { board } as any,
-    );
-    const iRook = moveToNotation(
-      move({ from: [4, 8], to: [4, 0], piece: board[4][8]! }),
-      { board } as any,
-    );
+    const aRook = moveToNotation(move({ from: [8, 0], to: [4, 0], piece: board[8][0]! }), {
+      board,
+    } as any);
+    const iRook = moveToNotation(move({ from: [4, 8], to: [4, 0], piece: board[4][8]! }), {
+      board,
+    } as any);
     // both can reach a5; the moving rook's file is written out (Raa5 = rook
     // from file a to a5; Ria5 = rook from file i to a5).
     expect(aRook).toBe('Raa5');
@@ -169,14 +167,12 @@ describe('moveToNotation — disambiguation', () => {
     const board = emptyBoard();
     board[8][0] = { type: 'n', color: 'white', hasMoved: true }; // a1
     board[8][2] = { type: 'n', color: 'white', hasMoved: true }; // c1
-    const nA = moveToNotation(
-      move({ from: [8, 0], to: [6, 1], piece: board[8][0]! }),
-      { board } as any,
-    );
-    const nC = moveToNotation(
-      move({ from: [8, 2], to: [6, 1], piece: board[8][2]! }),
-      { board } as any,
-    );
+    const nA = moveToNotation(move({ from: [8, 0], to: [6, 1], piece: board[8][0]! }), {
+      board,
+    } as any);
+    const nC = moveToNotation(move({ from: [8, 2], to: [6, 1], piece: board[8][2]! }), {
+      board,
+    } as any);
     expect(nA).toBe('Nab3'); // a1 knight -> b3, file a
     expect(nC).toBe('Ncb3'); // c1 knight -> b3, file c
   });
@@ -185,14 +181,12 @@ describe('moveToNotation — disambiguation', () => {
     const board = emptyBoard();
     board[8][0] = { type: 'n', color: 'white', hasMoved: true }; // a1 (rank 1)
     board[4][0] = { type: 'n', color: 'white', hasMoved: true }; // a5 (rank 5)
-    const n1 = moveToNotation(
-      move({ from: [8, 0], to: [6, 1], piece: board[8][0]! }),
-      { board } as any,
-    );
-    const n5 = moveToNotation(
-      move({ from: [4, 0], to: [6, 1], piece: board[4][0]! }),
-      { board } as any,
-    );
+    const n1 = moveToNotation(move({ from: [8, 0], to: [6, 1], piece: board[8][0]! }), {
+      board,
+    } as any);
+    const n5 = moveToNotation(move({ from: [4, 0], to: [6, 1], piece: board[4][0]! }), {
+      board,
+    } as any);
     expect(n1).toBe('N1b3'); // a1 knight -> b3, rank 1
     expect(n5).toBe('N5b3'); // a5 knight -> b3, rank 5
   });

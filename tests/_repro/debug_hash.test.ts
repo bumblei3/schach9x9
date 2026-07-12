@@ -4,7 +4,9 @@ import type { Square, PieceType } from '../js/types/game.js';
 
 describe('Debug Hash', () => {
   it('should show hashes', () => {
-    const initialBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const initialBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     const pieceTypes = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'a'];
     pieceTypes.forEach((type, c) => {
       initialBoard[0][c] = { type: type, color: 'black', hasMoved: false };
@@ -17,12 +19,18 @@ describe('Debug Hash', () => {
 
     const book = new OpeningBook();
 
-    const moveHistory: { from: Square; to: Square; piece: PieceType; captured?: PieceType; promotion?: PieceType }[] = [
-      { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' },      // White e4
-      { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' },      // Black e5
-      { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' },      // White d4
-      { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' },      // Black d5
-      { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: 'p' },      // White e4->e5
+    const moveHistory: {
+      from: Square;
+      to: Square;
+      piece: PieceType;
+      captured?: PieceType;
+      promotion?: PieceType;
+    }[] = [
+      { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' }, // White e4
+      { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' }, // Black e5
+      { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' }, // White d4
+      { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' }, // Black d5
+      { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: 'p' }, // White e4->e5
       { from: { r: 3, c: 3 }, to: { r: 4, c: 4 }, piece: 'p', captured: 'p' }, // Black d5xe4
     ];
 

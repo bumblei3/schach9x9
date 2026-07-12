@@ -122,15 +122,33 @@ const BA = PIECE_ARCHBISHOP | COLOR_BLACK;
 
 export function createInitialBoard(): IntBoard {
   const board = new Int8Array(81).fill(PIECE_NONE);
-  board[0] = BR; board[1] = BN; board[2] = BB; board[3] = BQ; board[4] = BK; board[5] = BB; board[6] = BN; board[7] = BR; board[8] = BA;
+  board[0] = BR;
+  board[1] = BN;
+  board[2] = BB;
+  board[3] = BQ;
+  board[4] = BK;
+  board[5] = BB;
+  board[6] = BN;
+  board[7] = BR;
+  board[8] = BA;
   for (let c = 0; c < 9; c++) board[9 + c] = BP;
   for (let c = 0; c < 9; c++) board[63 + c] = WP;
-  board[72] = WR; board[73] = WN; board[74] = WB; board[75] = WQ; board[76] = WK; board[77] = WB; board[78] = WN; board[79] = WR; board[80] = WA;
+  board[72] = WR;
+  board[73] = WN;
+  board[74] = WB;
+  board[75] = WQ;
+  board[76] = WK;
+  board[77] = WB;
+  board[78] = WN;
+  board[79] = WR;
+  board[80] = WA;
   return board;
 }
 
 export function boardToUi(board: IntBoard): (Piece | null)[][] {
-  const ui: (Piece | null)[][] = Array(9).fill(null).map(() => Array(9).fill(null));
+  const ui: (Piece | null)[][] = Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(null));
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const p = board[r * 9 + c];
@@ -139,17 +157,38 @@ export function boardToUi(board: IntBoard): (Piece | null)[][] {
         const color = (p & COLOR_MASK) === COLOR_WHITE ? 'white' : 'black';
         let typeStr: Piece['type'];
         switch (type) {
-          case PIECE_PAWN: typeStr = 'p'; break;
-          case PIECE_KNIGHT: typeStr = 'n'; break;
-          case PIECE_BISHOP: typeStr = 'b'; break;
-          case PIECE_ROOK: typeStr = 'r'; break;
-          case PIECE_QUEEN: typeStr = 'q'; break;
-          case PIECE_KING: typeStr = 'k'; break;
-          case PIECE_ARCHBISHOP: typeStr = 'a'; break;
-          case PIECE_CHANCELLOR: typeStr = 'c'; break;
-          case PIECE_ANGEL: typeStr = 'e'; break;
-          case PIECE_NIGHTRIDER: typeStr = 'j'; break;
-          default: typeStr = 'p';
+          case PIECE_PAWN:
+            typeStr = 'p';
+            break;
+          case PIECE_KNIGHT:
+            typeStr = 'n';
+            break;
+          case PIECE_BISHOP:
+            typeStr = 'b';
+            break;
+          case PIECE_ROOK:
+            typeStr = 'r';
+            break;
+          case PIECE_QUEEN:
+            typeStr = 'q';
+            break;
+          case PIECE_KING:
+            typeStr = 'k';
+            break;
+          case PIECE_ARCHBISHOP:
+            typeStr = 'a';
+            break;
+          case PIECE_CHANCELLOR:
+            typeStr = 'c';
+            break;
+          case PIECE_ANGEL:
+            typeStr = 'e';
+            break;
+          case PIECE_NIGHTRIDER:
+            typeStr = 'j';
+            break;
+          default:
+            typeStr = 'p';
         }
         ui[r][c] = { type: typeStr, color, hasMoved: false };
       }
@@ -165,13 +204,19 @@ export function applyMoveInt(board: IntBoard, move: MoveResult): void {
   board[from] = PIECE_NONE;
 }
 
-export function isTerminalInt(board: IntBoard, color: 'white' | 'black'): { terminal: boolean; result: 'win' | 'loss' | 'draw' | null } {
+export function isTerminalInt(
+  board: IntBoard,
+  color: 'white' | 'black'
+): { terminal: boolean; result: 'win' | 'loss' | 'draw' | null } {
   const kingColor = color === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const inCheckResult = isInCheck(board, kingColor);
   const legalMoves = getAllLegalMoves(board, color);
 
   if (legalMoves.length === 0) {
-    return { terminal: true, result: inCheckResult ? (color === 'white' ? 'loss' : 'win') : 'draw' };
+    return {
+      terminal: true,
+      result: inCheckResult ? (color === 'white' ? 'loss' : 'win') : 'draw',
+    };
   }
   return { terminal: false, result: null };
 }
@@ -186,17 +231,38 @@ export function getBoardHashInt(board: IntBoard, turn: 'white' | 'black'): strin
         const colorChar = (p & COLOR_MASK) === COLOR_WHITE ? 'w' : 'b';
         let typeChar: string;
         switch (type) {
-          case PIECE_PAWN: typeChar = 'p'; break;
-          case PIECE_KNIGHT: typeChar = 'n'; break;
-          case PIECE_BISHOP: typeChar = 'b'; break;
-          case PIECE_ROOK: typeChar = 'r'; break;
-          case PIECE_QUEEN: typeChar = 'q'; break;
-          case PIECE_KING: typeChar = 'k'; break;
-          case PIECE_ARCHBISHOP: typeChar = 'a'; break;
-          case PIECE_CHANCELLOR: typeChar = 'c'; break;
-          case PIECE_ANGEL: typeChar = 'e'; break;
-          case PIECE_NIGHTRIDER: typeChar = 'j'; break;
-          default: typeChar = '?';
+          case PIECE_PAWN:
+            typeChar = 'p';
+            break;
+          case PIECE_KNIGHT:
+            typeChar = 'n';
+            break;
+          case PIECE_BISHOP:
+            typeChar = 'b';
+            break;
+          case PIECE_ROOK:
+            typeChar = 'r';
+            break;
+          case PIECE_QUEEN:
+            typeChar = 'q';
+            break;
+          case PIECE_KING:
+            typeChar = 'k';
+            break;
+          case PIECE_ARCHBISHOP:
+            typeChar = 'a';
+            break;
+          case PIECE_CHANCELLOR:
+            typeChar = 'c';
+            break;
+          case PIECE_ANGEL:
+            typeChar = 'e';
+            break;
+          case PIECE_NIGHTRIDER:
+            typeChar = 'j';
+            break;
+          default:
+            typeChar = '?';
         }
         hash += colorChar + typeChar;
       } else {
@@ -250,13 +316,7 @@ async function getEngineMove(
   };
 
   try {
-    const result = await getBestMoveDetailed(
-      uiBoard,
-      color,
-      depth,
-      timeParams,
-      moveNumber
-    );
+    const result = await getBestMoveDetailed(uiBoard, color, depth, timeParams, moveNumber);
     return { move: result?.move || null, result };
   } catch (err) {
     logger.error('[Trainer] Engine error:', err);
@@ -300,18 +360,22 @@ export class OpeningBookTrainer {
   async runTraining(): Promise<BookData> {
     await this.loadExistingBook();
 
-    const totalGames = this.config.alternateColors ? this.config.numGames * 2 : this.config.numGames;
+    const totalGames = this.config.alternateColors
+      ? this.config.numGames * 2
+      : this.config.numGames;
     const startTime = Date.now();
 
     if (!this.config.quiet) {
       logger.info(`[Trainer] Starting ${totalGames} training games`);
-      logger.info(`[Trainer] Depth: ${this.config.depth}, Time/move: ${this.config.timePerMoveMs}ms`);
+      logger.info(
+        `[Trainer] Depth: ${this.config.depth}, Time/move: ${this.config.timePerMoveMs}ms`
+      );
       logger.info(`[Trainer] Opening ply tracked: ${this.config.openingMovesTracked}`);
     }
 
     for (let i = 0; i < totalGames; i++) {
       const gameNum = i + 1;
-      const swapColors = this.config.alternateColors && (i % 2 === 1);
+      const swapColors = this.config.alternateColors && i % 2 === 1;
 
       await this.playTrainingGame(gameNum, swapColors);
 
@@ -321,7 +385,8 @@ export class OpeningBookTrainer {
         const eta = avgTime * (totalGames - gameNum);
         const etaStr = eta > 60 ? `${(eta / 60).toFixed(1)}m` : `${eta.toFixed(0)}s`;
         const pct = Math.floor((gameNum / totalGames) * 100);
-        const bar = '\u2588'.repeat(Math.floor(pct / 2.5)) + '\u2591'.repeat(40 - Math.floor(pct / 2.5));
+        const bar =
+          '\u2588'.repeat(Math.floor(pct / 2.5)) + '\u2591'.repeat(40 - Math.floor(pct / 2.5));
         process.stdout.write(`\r   [${bar}] ${pct}% (${gameNum}/${totalGames}) ETA: ${etaStr}  `);
       }
     }
@@ -393,7 +458,6 @@ export class OpeningBookTrainer {
       }
 
       this.recordGameResult(state, 'draw', swapColors);
-
     } catch (err) {
       logger.error(`[Trainer] Game ${gameNum} crashed:`, err);
     }
@@ -402,7 +466,11 @@ export class OpeningBookTrainer {
   private recordOpeningPosition(state: EngineState, moveIndex: number): void {
     const board = createInitialBoard();
     for (let i = 0; i <= moveIndex; i++) {
-      applyMoveInt(board, { from: state.moveHistory[i].from, to: state.moveHistory[i].to, capture: false });
+      applyMoveInt(board, {
+        from: state.moveHistory[i].from,
+        to: state.moveHistory[i].to,
+        capture: false,
+      });
     }
 
     const turn = state.moveHistory[moveIndex].color;
@@ -416,8 +484,11 @@ export class OpeningBookTrainer {
     pos.seenCount++;
 
     const existing = pos.moves.find(
-      (m: BookMove) => m.from.r === move.from.r && m.from.c === move.from.c &&
-                      m.to.r === move.to.r && m.to.c === move.to.c
+      (m: BookMove) =>
+        m.from.r === move.from.r &&
+        m.from.c === move.from.c &&
+        m.to.r === move.to.r &&
+        m.to.c === move.to.c
     );
 
     if (existing) {
@@ -432,8 +503,18 @@ export class OpeningBookTrainer {
     }
   }
 
-  private recordGameResult(state: EngineState, result: 'win' | 'loss' | 'draw', swapColors: boolean): void {
-    const gameWinner = swapColors ? (result === 'win' ? 'loss' : result === 'loss' ? 'win' : 'draw') : result;
+  private recordGameResult(
+    state: EngineState,
+    result: 'win' | 'loss' | 'draw',
+    swapColors: boolean
+  ): void {
+    const gameWinner = swapColors
+      ? result === 'win'
+        ? 'loss'
+        : result === 'loss'
+          ? 'win'
+          : 'draw'
+      : result;
 
     if (gameWinner === 'win') this.stats.whiteWins++;
     else if (gameWinner === 'loss') this.stats.blackWins++;
@@ -524,9 +605,15 @@ export class OpeningBookTrainer {
   private printStats(): void {
     console.log('\n\uD83D\uDCCA Training Complete:');
     console.log(`   Games: ${this.stats.totalGames}`);
-    console.log(`   White wins: ${this.stats.whiteWins} (${(this.stats.whiteWins / this.stats.totalGames * 100).toFixed(1)}%)`);
-    console.log(`   Black wins: ${this.stats.blackWins} (${(this.stats.blackWins / this.stats.totalGames * 100).toFixed(1)}%)`);
-    console.log(`   Draws: ${this.stats.draws} (${(this.stats.draws / this.stats.totalGames * 100).toFixed(1)}%)`);
+    console.log(
+      `   White wins: ${this.stats.whiteWins} (${((this.stats.whiteWins / this.stats.totalGames) * 100).toFixed(1)}%)`
+    );
+    console.log(
+      `   Black wins: ${this.stats.blackWins} (${((this.stats.blackWins / this.stats.totalGames) * 100).toFixed(1)}%)`
+    );
+    console.log(
+      `   Draws: ${this.stats.draws} (${((this.stats.draws / this.stats.totalGames) * 100).toFixed(1)}%)`
+    );
     console.log(`   Positions in book: ${this.stats.totalPositions}`);
     console.log(`   Total moves tracked: ${this.stats.totalMovesTracked}`);
   }
@@ -545,18 +632,42 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
-      case '--games': config.numGames = parseInt(args[++i], 10); break;
-      case '--depth': config.depth = parseInt(args[++i], 10); break;
-      case '--time': config.timePerMoveMs = parseInt(args[++i], 10); break;
-      case '--opening-plies': config.openingMovesTracked = parseInt(args[++i], 10); break;
-      case '--min-count': config.minPositionCount = parseInt(args[++i], 10); break;
-      case '--max-moves': config.maxMovesPerPosition = parseInt(args[++i], 10); break;
-      case '--elo': config.elo = parseInt(args[++i], 10); break;
-      case '--personality': config.personality = args[++i] as TrainerConfig['personality']; break;
-      case '--input': config.inputBookPath = args[++i]; break;
-      case '--output': config.outputBookPath = args[++i]; break;
-      case '--no-alternate': config.alternateColors = false; break;
-      case '--quiet': config.quiet = true; break;
+      case '--games':
+        config.numGames = parseInt(args[++i], 10);
+        break;
+      case '--depth':
+        config.depth = parseInt(args[++i], 10);
+        break;
+      case '--time':
+        config.timePerMoveMs = parseInt(args[++i], 10);
+        break;
+      case '--opening-plies':
+        config.openingMovesTracked = parseInt(args[++i], 10);
+        break;
+      case '--min-count':
+        config.minPositionCount = parseInt(args[++i], 10);
+        break;
+      case '--max-moves':
+        config.maxMovesPerPosition = parseInt(args[++i], 10);
+        break;
+      case '--elo':
+        config.elo = parseInt(args[++i], 10);
+        break;
+      case '--personality':
+        config.personality = args[++i] as TrainerConfig['personality'];
+        break;
+      case '--input':
+        config.inputBookPath = args[++i];
+        break;
+      case '--output':
+        config.outputBookPath = args[++i];
+        break;
+      case '--no-alternate':
+        config.alternateColors = false;
+        break;
+      case '--quiet':
+        config.quiet = true;
+        break;
       case '--help':
         console.log('\nUsage: npx tsx js/utils/OpeningBookTrainer.ts [options]\n');
         console.log('Options:');
@@ -567,10 +678,12 @@ async function main(): Promise<void> {
         console.log('  --min-count <n>          Min games per position (default: 2)');
         console.log('  --max-moves <n>          Max moves per position (default: 5)');
         console.log('  --elo <n>                Engine Elo (default: 2500)');
-        console.log('  --personality <name>     balanced|aggressive|solid|gentle (default: balanced)');
+        console.log(
+          '  --personality <name>     balanced|aggressive|solid|gentle (default: balanced)'
+        );
         console.log('  --input <file>           Existing book to extend');
         console.log('  --output <file>          Output book path (default: opening-book.json)');
-        console.log('  --no-alternate           Don\'t swap colors');
+        console.log("  --no-alternate           Don't swap colors");
         console.log('  --quiet                  Suppress progress output');
         console.log('  --help                   Show this help\n');
         process.exit(0);

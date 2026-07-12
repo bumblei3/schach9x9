@@ -25,7 +25,9 @@ import { OpeningBook } from '../js/ai/OpeningBook.js';
 import type { Piece } from '../js/gameEngine.js';
 
 function empty9(): (Piece | null)[][] {
-  return Array(9).fill(null).map(() => Array(9).fill(null) as (Piece | null)[]);
+  return Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(null) as (Piece | null)[]);
 }
 function pawn(color: 'white' | 'black', r: number, c: number): (Piece | null)[][] {
   const b = empty9();
@@ -71,7 +73,9 @@ describe('getBoardHash invariants', () => {
   test('empty board (no rows) => empty hash; all-null 9x9 is a fixed string', () => {
     expect(book.getBoardHash([], 'white')).toBe('');
     // a 9x9 board filled with nulls yields 81 '..' + turn suffix
-    const allNull = Array(9).fill(null).map(() => Array(9).fill(null));
+    const allNull = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     const h = book.getBoardHash(allNull, 'white');
     expect(h).toBe('..'.repeat(81) + 'w');
   });
@@ -84,7 +88,9 @@ describe('getBoardHash invariants', () => {
   test('ragged / short rows do not throw and still differ by content', () => {
     const ragged: (Piece | null)[][] = [
       [{ type: 'p', color: 'white', hasMoved: false }], // length 1
-      ...Array(8).fill(null).map(() => [] as (Piece | null)[]),
+      ...Array(8)
+        .fill(null)
+        .map(() => [] as (Piece | null)[]),
     ];
     const h1 = book.getBoardHash(ragged, 'white');
     ragged[0][0] = { type: 'r', color: 'white', hasMoved: false };
@@ -305,7 +311,9 @@ describe('applyGameResult invariants', () => {
   let initial: (Piece | null)[][];
   beforeEach(() => {
     book = new OpeningBook();
-    initial = Array(9).fill(null).map(() => Array(9).fill(null)) as (Piece | null)[][];
+    initial = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null)) as (Piece | null)[][];
     const back = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'a'];
     back.forEach((t, c) => {
       initial[0][c] = { type: t as Piece['type'], color: 'black', hasMoved: false };
@@ -340,7 +348,9 @@ describe('applyGameResult invariants', () => {
 
     const book2 = new OpeningBook();
     book2.applyGameResult(e4e5, 'white', 'loss', initial);
-    const lossWeight = book2.data.positions[h0].moves.find(m => m.to.r === 5 && m.to.c === 4)!.weight;
+    const lossWeight = book2.data.positions[h0].moves.find(
+      m => m.to.r === 5 && m.to.c === 4
+    )!.weight;
 
     // win: +2 (1 -> 3); loss: -1 (1 -> 0). Difference = 3.
     expect(winWeight - lossWeight).toBe(3);

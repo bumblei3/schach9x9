@@ -34,7 +34,9 @@ describe('TacticsDetector additional coverage', () => {
 
   beforeEach(() => {
     mockGame = {
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       getValidMoves: vi.fn().mockReturnValue([]),
       isSquareUnderAttack: vi.fn().mockReturnValue(false),
       isInCheck: vi.fn(),
@@ -47,7 +49,12 @@ describe('TacticsDetector additional coverage', () => {
 
   describe('getThreatenedPieces', () => {
     test('returns [] when no piece is on the square', () => {
-      const result = TacticsDetector.getThreatenedPieces(mockGame, mockAnalyzer, { r: 0, c: 0 }, 'white');
+      const result = TacticsDetector.getThreatenedPieces(
+        mockGame,
+        mockAnalyzer,
+        { r: 0, c: 0 },
+        'white'
+      );
       expect(result).toEqual([]);
     });
 
@@ -59,7 +66,12 @@ describe('TacticsDetector additional coverage', () => {
         { r: 4, c: 6 },
         { r: 6, c: 4 },
       ]);
-      const result = TacticsDetector.getThreatenedPieces(mockGame, mockAnalyzer, { r: 4, c: 4 }, 'white');
+      const result = TacticsDetector.getThreatenedPieces(
+        mockGame,
+        mockAnalyzer,
+        { r: 4, c: 4 },
+        'white'
+      );
       expect(result).toHaveLength(1);
       expect(result[0].pos).toEqual({ r: 4, c: 6 });
       expect(result[0].type).toBe('p');
@@ -68,7 +80,12 @@ describe('TacticsDetector additional coverage', () => {
 
   describe('getDefendedPieces', () => {
     test('returns [] when no piece is on the square', () => {
-      const result = TacticsDetector.getDefendedPieces(mockGame, mockAnalyzer, { r: 0, c: 0 }, 'white');
+      const result = TacticsDetector.getDefendedPieces(
+        mockGame,
+        mockAnalyzer,
+        { r: 0, c: 0 },
+        'white'
+      );
       expect(result).toEqual([]);
     });
 
@@ -80,8 +97,15 @@ describe('TacticsDetector additional coverage', () => {
         { r: 4, c: 6 },
         { r: 4, c: 2 },
       ]);
-      mockGame.isSquareUnderAttack.mockImplementation((r: number, _c: number, _color: string) => r === 4);
-      const result = TacticsDetector.getDefendedPieces(mockGame, mockAnalyzer, { r: 4, c: 4 }, 'white');
+      mockGame.isSquareUnderAttack.mockImplementation(
+        (r: number, _c: number, _color: string) => r === 4
+      );
+      const result = TacticsDetector.getDefendedPieces(
+        mockGame,
+        mockAnalyzer,
+        { r: 4, c: 4 },
+        'white'
+      );
       expect(result).toHaveLength(1);
       expect(result[0].pos).toEqual({ r: 4, c: 6 });
       expect(result[0].wasThreatened).toBe(true);
@@ -90,11 +114,10 @@ describe('TacticsDetector additional coverage', () => {
 
   describe('detectThreatsAfterMove', () => {
     test('returns [] when the from-square is empty', () => {
-      const result = TacticsDetector.detectThreatsAfterMove(
-        mockGame,
-        mockAnalyzer,
-        { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }
-      );
+      const result = TacticsDetector.detectThreatsAfterMove(mockGame, mockAnalyzer, {
+        from: { r: 0, c: 0 },
+        to: { r: 1, c: 1 },
+      });
       expect(result).toEqual([]);
     });
 
@@ -104,11 +127,10 @@ describe('TacticsDetector additional coverage', () => {
         { isDirect: true, sq: 40, type: 'p' },
         { isDirect: false, sq: 20, type: 'q' }, // x-ray
       ]);
-      const result = TacticsDetector.detectThreatsAfterMove(
-        mockGame,
-        mockAnalyzer,
-        { from: { r: 4, c: 4 }, to: { r: 4, c: 6 } }
-      );
+      const result = TacticsDetector.detectThreatsAfterMove(mockGame, mockAnalyzer, {
+        from: { r: 4, c: 4 },
+        to: { r: 4, c: 6 },
+      });
       // The board must be restored after simulation.
       expect(mockGame.board[4][4]).toEqual({ type: 'r', color: 'white', hasMoved: false });
       expect(mockGame.board[4][6]).toBeNull();

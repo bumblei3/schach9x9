@@ -246,10 +246,10 @@ export function initBoardUI(game: GameLike): void {
           }
 
           // Store origin and valid moves for touchend
-          touchDragOrigin = { 
-            r, 
-            c, 
-            cellSize: cell.offsetWidth 
+          touchDragOrigin = {
+            r,
+            c,
+            cellSize: cell.offsetWidth,
           };
           touchDragValidMoves = game.getValidMoves(r, c, piece);
           touchDragValidMoves.forEach((move: Square) => {
@@ -302,12 +302,8 @@ export function initBoardUI(game: GameLike): void {
         document
           .querySelectorAll('.cell.drag-target')
           .forEach(c => c.classList.remove('drag-target'));
-        document
-          .querySelectorAll('.cell.drag-over')
-          .forEach(c => c.classList.remove('drag-over'));
-        document
-          .querySelectorAll('.cell.dragging')
-          .forEach(c => c.classList.remove('dragging'));
+        document.querySelectorAll('.cell.drag-over').forEach(c => c.classList.remove('drag-over'));
+        document.querySelectorAll('.cell.dragging').forEach(c => c.classList.remove('dragging'));
 
         // Handle drop
         const touch = e.changedTouches[0];
@@ -537,7 +533,11 @@ export function renderBoard(game: GameLike): void {
         const move = game.validMoves.find((m: Square) => m.r === r && m.c === c);
         if (move) {
           cell.classList.add('valid-move');
-          if (game.isTutorMove && game.selectedSquare && game.isTutorMove(game.selectedSquare, { r, c }))
+          if (
+            game.isTutorMove &&
+            game.selectedSquare &&
+            game.isTutorMove(game.selectedSquare, { r, c })
+          )
             cell.classList.add('tutor-move');
         }
       }
@@ -658,11 +658,9 @@ export async function animateMove(
       const isElite = ['j', 'a', 'c', 'e', 'q'].includes(piece.type);
 
       // RPG Hero Trail
-      const xp =
-        game.mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
+      const xp = game.mode === 'campaign' ? campaignManager.getUnitXp(piece.type) : { level: 1 };
       const isChampion =
-        game.mode === 'campaign' &&
-        campaignManager.getState().championType === piece.type;
+        game.mode === 'campaign' && campaignManager.getState().championType === piece.type;
 
       let color = isElite
         ? piece.color === 'white'
@@ -745,7 +743,11 @@ export async function animateMove(
  * @param move - {from, to}
  * @param category - 'brilliant', 'best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder'
  */
-export function showMoveQuality(_game: GameLike, move: { from: Square; to: Square }, category: string): void {
+export function showMoveQuality(
+  _game: GameLike,
+  move: { from: Square; to: Square },
+  category: string
+): void {
   // Clear existing quality highlights
   document
     .querySelectorAll(

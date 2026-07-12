@@ -271,7 +271,12 @@ export class AIController {
       const allMoves = this.game.getAllLegalMoves('black');
       if (allMoves.length > 0) {
         const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
-        this.game.executeMove(randomMove.from, randomMove.to, false, randomMove.promotion as string | undefined);
+        this.game.executeMove(
+          randomMove.from,
+          randomMove.to,
+          false,
+          randomMove.promotion as string | undefined
+        );
         if (this.game.renderBoard) this.game.renderBoard();
         if (spinner) {
           spinner.classList.add('hidden');
@@ -327,7 +332,7 @@ export class AIController {
             bestResult.move.from,
             bestResult.move.to,
             false,
-                        bestResult.move.promotion as string | undefined
+            bestResult.move.promotion as string | undefined
           );
           if (this.game.renderBoard) this.game.renderBoard();
 
@@ -505,7 +510,9 @@ export class AIController {
     }
 
     if (this.aiWorkers.length === 0) {
-      logger.error('[AI] Worker pool initialization failed: no workers available. AI moves will not work.');
+      logger.error(
+        '[AI] Worker pool initialization failed: no workers available. AI moves will not work.'
+      );
     }
   }
 
@@ -745,7 +752,10 @@ export class AIController {
     }
 
     // Accept if position is roughly equal and many moves have been played
-    if (Math.abs(score) < DRAW_ACCEPT_SCORE_MAX && this.game.moveHistory.length > DRAW_ACCEPT_MOVES_MIN) {
+    if (
+      Math.abs(score) < DRAW_ACCEPT_SCORE_MAX &&
+      this.game.moveHistory.length > DRAW_ACCEPT_MOVES_MIN
+    ) {
       shouldAccept = true;
       this.game.log('KI akzeptiert: Ausgeglichene Position nach vielen Zügen.');
     }
@@ -771,7 +781,11 @@ export class AIController {
     const score = await aiEngine.evaluatePosition(this.game.board, aiColor);
 
     // Offer draw if position is bad but not hopeless
-    if (score >= DRAW_OFFER_THRESHOLD_LOW && score <= DRAW_OFFER_THRESHOLD_HIGH && this.game.moveHistory.length > DRAW_OFFER_MIN_MOVES) {
+    if (
+      score >= DRAW_OFFER_THRESHOLD_LOW &&
+      score <= DRAW_OFFER_THRESHOLD_HIGH &&
+      this.game.moveHistory.length > DRAW_OFFER_MIN_MOVES
+    ) {
       this.game.log('KI bietet Remis an (schlechte Position).');
       return true;
     }

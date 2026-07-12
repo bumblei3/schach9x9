@@ -216,7 +216,6 @@ export function createPiece3D(
 
   // Make all pieces cast shadows
   pieceGroup.traverse(child => {
-     
     if ((child as THREE.Mesh).isMesh) {
       child.castShadow = true;
       child.receiveShadow = true;

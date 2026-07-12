@@ -50,15 +50,15 @@ function isValidSquare(idx: number): boolean {
 }
 
 // Threat scoring constants
-const THREAT_CAPTURE_HIGH_VALUE = 200000;      // Attacking Queen/Rook/Archbishop/etc (value >= 500)
-const THREAT_CAPTURE_MID_VALUE = 100000;       // Attacking Knight/Bishop (value >= 300)
-const THREAT_CAPTURE_LOW_VALUE = 50000;        // Attacking Pawn
-const THREAT_XRAY_HIGH = 80000;                // Discovered attack on high-value piece
-const THREAT_XRAY_MID = 40000;                 // Discovered attack on mid-value piece
-const THREAT_DISCOVERED_CHECK = 150000;        // Moving blocker reveals check
-const THREAT_PIN_BREAK = 60000;                // Breaking a pin (freeing own piece)
-const THREAT_KING_SAFETY_PENALTY = -50000;     // Move exposes own king to threat
-const THREAT_HANGING_PIECE_BONUS = 100000;     // Capturing a hanging piece (not defended)
+const THREAT_CAPTURE_HIGH_VALUE = 200000; // Attacking Queen/Rook/Archbishop/etc (value >= 500)
+const THREAT_CAPTURE_MID_VALUE = 100000; // Attacking Knight/Bishop (value >= 300)
+const THREAT_CAPTURE_LOW_VALUE = 50000; // Attacking Pawn
+const THREAT_XRAY_HIGH = 80000; // Discovered attack on high-value piece
+const THREAT_XRAY_MID = 40000; // Discovered attack on mid-value piece
+const THREAT_DISCOVERED_CHECK = 150000; // Moving blocker reveals check
+const THREAT_PIN_BREAK = 60000; // Breaking a pin (freeing own piece)
+const THREAT_KING_SAFETY_PENALTY = -50000; // Move exposes own king to threat
+const THREAT_HANGING_PIECE_BONUS = 100000; // Capturing a hanging piece (not defended)
 
 // Piece values for threat evaluation
 const PIECE_VALUES: Record<number, number> = {
@@ -283,7 +283,12 @@ function isSquareAttacked(board: BoardStorage, square: number, byColor: number):
     const p = board[from];
     if (p !== PIECE_NONE && (p & COLOR_MASK) === byColor) {
       const type = p & TYPE_MASK;
-      if (type === PIECE_KNIGHT || type === PIECE_ARCHBISHOP || type === PIECE_CHANCELLOR || type === PIECE_ANGEL) {
+      if (
+        type === PIECE_KNIGHT ||
+        type === PIECE_ARCHBISHOP ||
+        type === PIECE_CHANCELLOR ||
+        type === PIECE_ANGEL
+      ) {
         return true;
       }
     }
@@ -307,8 +312,11 @@ function isSquareAttacked(board: BoardStorage, square: number, byColor: number):
     for (;;) {
       curr += offset;
       if (!isValidSquare(curr)) break;
-      if (Math.abs(indexToRow(curr) - indexToRow(curr - offset)) > 1 ||
-          Math.abs(indexToCol(curr) - indexToCol(curr - offset)) > 1) break;
+      if (
+        Math.abs(indexToRow(curr) - indexToRow(curr - offset)) > 1 ||
+        Math.abs(indexToCol(curr) - indexToCol(curr - offset)) > 1
+      )
+        break;
 
       const shape = getCurrentBoardShape();
       if (shape !== 'standard' && isBlockedSquare(curr, shape)) break;
@@ -318,11 +326,23 @@ function isSquareAttacked(board: BoardStorage, square: number, byColor: number):
       if ((p & COLOR_MASK) === byColor) {
         const type = p & TYPE_MASK;
         // Bishop-like
-        if (BISHOP_OFFSETS.includes(offset) && (type === PIECE_BISHOP || type === PIECE_QUEEN || type === PIECE_ARCHBISHOP || type === PIECE_ANGEL)) {
+        if (
+          BISHOP_OFFSETS.includes(offset) &&
+          (type === PIECE_BISHOP ||
+            type === PIECE_QUEEN ||
+            type === PIECE_ARCHBISHOP ||
+            type === PIECE_ANGEL)
+        ) {
           return true;
         }
         // Rook-like
-        if (ROOK_OFFSETS.includes(offset) && (type === PIECE_ROOK || type === PIECE_QUEEN || type === PIECE_CHANCELLOR || type === PIECE_ANGEL)) {
+        if (
+          ROOK_OFFSETS.includes(offset) &&
+          (type === PIECE_ROOK ||
+            type === PIECE_QUEEN ||
+            type === PIECE_CHANCELLOR ||
+            type === PIECE_ANGEL)
+        ) {
           return true;
         }
       }

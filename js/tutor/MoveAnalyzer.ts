@@ -112,7 +112,9 @@ export async function analyzePlayerMovePreExecution(
   // 4. Calculate drop from perspective of moving player
   const drop = turn === 'white' ? currentEval - newEval : newEval - currentEval;
 
-  const currentLevel = game.mentorLevel ? (MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD) : MENTOR_LEVELS.STANDARD;
+  const currentLevel = game.mentorLevel
+    ? MENTOR_LEVELS[game.mentorLevel] || MENTOR_LEVELS.STANDARD
+    : MENTOR_LEVELS.STANDARD;
   const threshold = currentLevel.threshold;
 
   if (drop >= threshold) {
@@ -427,7 +429,7 @@ export function handlePlayerMove(
     const bestMoves = game.bestMoves || [];
     if (bestMoves.length > 0) {
       const isBest = (bestMoves as { move: MoveInfo }[]).some(
-        (hint) =>
+        hint =>
           hint.move.from.r === from.r &&
           hint.move.from.c === from.c &&
           hint.move.to.r === to.r &&
@@ -449,7 +451,9 @@ export function handlePlayerMove(
  */
 export async function checkBlunder(
   game: GameLike,
-  tutorController: { showBlunderWarning: (_analysis: MoveExplanation, _callback: () => void) => void },
+  tutorController: {
+    showBlunderWarning: (_analysis: MoveExplanation, _callback: () => void) => void;
+  },
   moveRecord: MoveRecord
 ): Promise<void> {
   if (!moveRecord || game.mode === 'puzzle') return;

@@ -84,7 +84,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
   describe('setBoardShape - missing branches', () => {
     test('should skip setting board shape when data is null', async () => {
       const { setCurrentBoardShape } = await import('../../js/config.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'setBoardShape',
@@ -98,7 +98,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
     test('should skip setting board shape when data.shape is undefined', async () => {
       const { setCurrentBoardShape } = await import('../../js/config.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'setBoardShape',
@@ -112,7 +112,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
     test('should skip setting board shape when data.shape is empty string', async () => {
       const { setCurrentBoardShape } = await import('../../js/config.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'setBoardShape',
@@ -130,8 +130,10 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
       const { getBestMoveDetailed } = await import('../../js/aiEngine.js');
       (getBestMoveDetailed as any).mockRejectedValueOnce(new Error('Worker search failed'));
 
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'getBestMove',
@@ -147,11 +149,13 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         },
       } as MessageEvent);
 
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'bestMove',
-        id: 'test-getbestmove-error',
-        data: null,
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'bestMove',
+          id: 'test-getbestmove-error',
+          data: null,
+        })
+      );
     });
   });
 
@@ -160,8 +164,10 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
       const { getTopMoves } = await import('../../js/aiEngine.js');
       (getTopMoves as any).mockRejectedValueOnce(new Error('Top moves failed'));
 
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'getTopMoves',
@@ -177,11 +183,13 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         },
       } as MessageEvent);
 
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'topMoves',
-        id: 'test-gettopmoves-error',
-        data: [],
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'topMoves',
+          id: 'test-gettopmoves-error',
+          data: [],
+        })
+      );
     });
   });
 
@@ -190,8 +198,10 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
       const { getBestMoveDetailed } = await import('../../js/aiEngine.js');
       (getBestMoveDetailed as any).mockRejectedValueOnce(new Error('Search failed'));
 
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'search',
@@ -205,26 +215,30 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         },
       } as MessageEvent);
 
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'bestMove',
-        id: 'test-search-error',
-        bestMove: null,
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'bestMove',
+          id: 'test-search-error',
+          bestMove: null,
+        })
+      );
     });
   });
 
   describe('analyze - success path', () => {
     test('should call setProgressCallback and analyzePosition', async () => {
       const { analyzePosition, setProgressCallback } = await import('../../js/aiEngine.js');
-      (analyzePosition as any).mockResolvedValueOnce({ 
-        bestMove: { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } }, 
-        score: 75, 
-        threats: [], 
-        opportunities: [] 
+      (analyzePosition as any).mockResolvedValueOnce({
+        bestMove: { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } },
+        score: 75,
+        threats: [],
+        opportunities: [],
       });
 
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'analyze',
@@ -235,17 +249,21 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
       expect(setProgressCallback).toHaveBeenCalled();
       expect(analyzePosition).toHaveBeenCalledWith(mockBoard, 'white');
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'analysis',
-        id: 'test-analyze-success',
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'analysis',
+          id: 'test-analyze-success',
+        })
+      );
     });
   });
 
   describe('legacy SEARCH protocol - all branches', () => {
     test('should handle legacy SEARCH with all fields', async () => {
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'SEARCH',
@@ -260,18 +278,20 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         },
       } as MessageEvent);
 
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'SEARCH_RESULT',
-        id: 'test-legacy-full',
-        payload: expect.any(Object),
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'SEARCH_RESULT',
+          id: 'test-legacy-full',
+          payload: expect.any(Object),
+        })
+      );
     });
   });
 
   describe('default case - unknown message type', () => {
     test('should warn for unknown message type', async () => {
       const { logger } = await import('../../js/logger.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'completelyUnknownType123',
@@ -287,7 +307,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
   describe('loadBook - edge cases', () => {
     test('should warn when data is undefined', async () => {
       const { logger } = await import('../../js/logger.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'loadBook',
@@ -301,7 +321,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
     test('should warn when data.book is undefined', async () => {
       const { logger } = await import('../../js/logger.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'loadBook',
@@ -319,8 +339,10 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
       const { evaluatePosition } = await import('../../js/aiEngine.js');
       (evaluatePosition as any).mockResolvedValueOnce(150);
 
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'evaluatePosition',
@@ -329,24 +351,28 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         },
       } as MessageEvent);
 
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'positionScore',
-        id: 'test-eval-score',
-        data: 150,
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'positionScore',
+          id: 'test-eval-score',
+          data: 150,
+        })
+      );
     });
   });
 
   describe('progress callback - getBestMove', () => {
     test('should call progress callback during getBestMove', async () => {
       const { setProgressCallback } = await import('../../js/aiEngine.js');
-      
+
       await onmessageHandler({
         data: {
           type: 'getBestMove',
           id: 'test-progress',
           data: {
-            board: Array(9).fill(null).map(() => Array(9).fill(null)),
+            board: Array(9)
+              .fill(null)
+              .map(() => Array(9).fill(null)),
             color: 'white',
             depth: 2,
             config: { elo: 1200 },
@@ -367,7 +393,9 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         return { move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 10 };
       });
 
-      const board = Array(9).fill(null).map(() => Array(9).fill(null));
+      const board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
 
       await onmessageHandler({
         data: {
@@ -393,15 +421,17 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
   describe('analyze - missing depth/topMovesCount params', () => {
     test('should call analyzePosition without extra params', async () => {
       const { analyzePosition } = await import('../../js/aiEngine.js');
-      (analyzePosition as any).mockResolvedValueOnce({ 
-        bestMove: null, 
-        score: 0, 
-        threats: [], 
-        opportunities: [] 
+      (analyzePosition as any).mockResolvedValueOnce({
+        bestMove: null,
+        score: 0,
+        threats: [],
+        opportunities: [],
       });
 
-      const mockBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-      
+      const mockBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
+
       await onmessageHandler({
         data: {
           type: 'analyze',
@@ -411,11 +441,12 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
       } as MessageEvent);
 
       expect(analyzePosition).toHaveBeenCalledWith(mockBoard, 'white');
-      expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'analysis',
-        id: 'test-analyze-simple',
-      }));
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'analysis',
+          id: 'test-analyze-simple',
+        })
+      );
     });
   });
 });
-

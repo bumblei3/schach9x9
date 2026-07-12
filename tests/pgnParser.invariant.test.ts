@@ -32,15 +32,19 @@ function makePiece(type: string, color: string) {
 
 // Minimal PgnEngine stub: a tiny board with a few pieces so notation generation
 // has something to inspect. getAllLegalMoves returns whatever we configure.
-function makeStubEngine(opts: {
-  board?: ({ type: string; color: string } | null)[][];
-  turn?: string;
-  legalMoves?: { from: { r: number; c: number }; to: { r: number; c: number } }[];
-} = {}): any {
+function makeStubEngine(
+  opts: {
+    board?: ({ type: string; color: string } | null)[][];
+    turn?: string;
+    legalMoves?: { from: { r: number; c: number }; to: { r: number; c: number } }[];
+  } = {}
+): any {
   const size = 9;
   const board =
     opts.board ||
-    Array(size).fill(null).map(() => Array(size).fill(null) as ({ type: string; color: string } | null)[]);
+    Array(size)
+      .fill(null)
+      .map(() => Array(size).fill(null) as ({ type: string; color: string } | null)[]);
   const moves = opts.legalMoves || [];
   return {
     turn: opts.turn || 'white',
@@ -200,7 +204,9 @@ describe('generateNotationForCheck() purity & shape', () => {
   test('pure: identical inputs yield identical notation', () => {
     const engine = makeStubEngine({
       board: (() => {
-        const b = Array(9).fill(null).map(() => Array(9).fill(null));
+        const b = Array(9)
+          .fill(null)
+          .map(() => Array(9).fill(null));
         b[7][4] = makePiece('p', 'white');
         return b;
       })(),
@@ -212,7 +218,9 @@ describe('generateNotationForCheck() purity & shape', () => {
   });
 
   test('pawn move notation ends in a valid destination square', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[7][4] = makePiece('p', 'white');
     const engine = makeStubEngine({ board });
     const notation = parser.generateNotationForCheck(
@@ -225,7 +233,9 @@ describe('generateNotationForCheck() purity & shape', () => {
   });
 
   test('piece notation includes the piece letter and a valid destination', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[7][1] = makePiece('n', 'white');
     const engine = makeStubEngine({ board });
     const notation = parser.generateNotationForCheck(
@@ -238,7 +248,9 @@ describe('generateNotationForCheck() purity & shape', () => {
   });
 
   test('castling is exactly O-O / O-O-O', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[8][4] = makePiece('k', 'white');
     const engine = makeStubEngine({ board });
     expect(
@@ -250,7 +262,9 @@ describe('generateNotationForCheck() purity & shape', () => {
   });
 
   test('empty source square yields empty notation', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     const engine = makeStubEngine({ board });
     const notation = parser.generateNotationForCheck(
       { from: { r: 4, c: 4 }, to: { r: 3, c: 3 } },
@@ -261,7 +275,9 @@ describe('generateNotationForCheck() purity & shape', () => {
   });
 
   test('capture notation includes the x between from-file and destination', () => {
-    const board = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     board[4][4] = makePiece('p', 'white');
     board[3][5] = makePiece('p', 'black');
     const engine = makeStubEngine({ board });

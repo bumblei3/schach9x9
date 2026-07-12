@@ -37,10 +37,19 @@ describe('OpeningBookTrainer.boardToUi — packed-piece decoding', () => {
     const b = emptyInt();
     // place one of every white type on the first rank
     const codes = [
-      WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN,
-      WHITE_KING, WHITE_ARCHBISHOP, WHITE_CHANCELLOR, WHITE_ANGEL,
+      WHITE_PAWN,
+      WHITE_KNIGHT,
+      WHITE_BISHOP,
+      WHITE_ROOK,
+      WHITE_QUEEN,
+      WHITE_KING,
+      WHITE_ARCHBISHOP,
+      WHITE_CHANCELLOR,
+      WHITE_ANGEL,
     ];
-    codes.forEach((code, c) => { b[c] = code; });
+    codes.forEach((code, c) => {
+      b[c] = code;
+    });
     // also a nightrider on an extra square
     b[10] = WHITE_NIGHTRIDER;
 

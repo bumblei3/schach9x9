@@ -123,7 +123,8 @@ describe('getOpeningEntry invariants', () => {
   test('prefix match resolves a long real key by its first 50 chars', () => {
     // Build a hash that shares the Grundstellung prefix but diverges later.
     const prefix = START_HASH.slice(0, 50);
-    const probe = prefix + 'ZZZZZZZZZZ' + 'x'.repeat(Math.max(0, START_HASH.length - prefix.length - 10));
+    const probe =
+      prefix + 'ZZZZZZZZZZ' + 'x'.repeat(Math.max(0, START_HASH.length - prefix.length - 10));
     const e = getOpeningEntry(probe);
     expect(e).not.toBeNull();
     expect(e!.name).toBe('Grundstellung');
@@ -210,9 +211,13 @@ describe('searchOpenings invariants', () => {
 
   test('matches across name, eco and category fields (case-insensitive)', () => {
     expect(searchOpenings('B20').some(e => e.eco === 'B20')).toBe(true);
-    expect(searchOpenings('gambit').some(e => e.category.toLowerCase().includes('gambit'))).toBe(true);
+    expect(searchOpenings('gambit').some(e => e.category.toLowerCase().includes('gambit'))).toBe(
+      true
+    );
     // name match, case-insensitive
-    expect(searchOpenings('sizilianisch').some(e => e.name === 'Sizilianische Verteidigung')).toBe(true);
+    expect(searchOpenings('sizilianisch').some(e => e.name === 'Sizilianische Verteidigung')).toBe(
+      true
+    );
   });
 
   test('no match returns empty array', () => {

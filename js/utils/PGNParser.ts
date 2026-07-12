@@ -19,7 +19,9 @@ interface PgnEngine {
   turn: string;
   boardSize: number;
   board: ({ type: string; color: string } | null)[][];
-  getAllLegalMoves(_turn: string): { from: { r: number; c: number }; to: { r: number; c: number } }[];
+  getAllLegalMoves(
+    _turn: string
+  ): { from: { r: number; c: number }; to: { r: number; c: number } }[];
   getBoardHash(): string;
   executeMove(_from: { r: number; c: number }, _to: { r: number; c: number }): void;
 }
@@ -90,7 +92,8 @@ export class PGNParser {
 
     for (const san of movesSan) {
       const legalMoves = engine.getAllLegalMoves(engine.turn);
-      let matchedMove: { from: { r: number; c: number }; to: { r: number; c: number } } | null = null;
+      let matchedMove: { from: { r: number; c: number }; to: { r: number; c: number } } | null =
+        null;
 
       for (const move of legalMoves) {
         const notation = this.generateNotationForCheck(move, engine, legalMoves);

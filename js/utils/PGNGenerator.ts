@@ -62,7 +62,7 @@ const QUALITY_SYMBOLS: Record<string, string> = {
 function collectAmbiguousPieces(
   game: Game,
   pieceType: string,
-  move: MoveHistoryEntry,
+  move: MoveHistoryEntry
 ): { r: number; c: number }[] {
   const board = (game as unknown as { board: (Piece | null)[][] }).board;
   if (!board) return [];
@@ -153,8 +153,8 @@ export function moveToNotation(
   if (pieceLetter && _game) {
     const others = collectAmbiguousPieces(_game, pieceType, move);
     if (others.length > 0) {
-      const sameFile = others.some((o) => o.c === move.from.c);
-      const sameRank = others.some((o) => o.r === move.from.r);
+      const sameFile = others.some(o => o.c === move.from.c);
+      const sameRank = others.some(o => o.r === move.from.r);
       if (!sameFile) notation += fromFile;
       else if (!sameRank) notation += fromRank;
       else notation += fromFile + fromRank;
@@ -209,10 +209,10 @@ export function moveToNotation(
       annotations.push(`[%clk ${mins}:${secs.toString().padStart(2, '0')}]`);
     }
 
-// Principal variation (if available in analysis)
+    // Principal variation (if available in analysis)
     const pvMove = move as MoveHistoryEntry & { pv?: MoveHistoryEntry[] };
     if (pvMove.pv && pvMove.pv.length > 0) {
-      const pvMoves = pvMove.pv.map((pv) => moveToNotation(pv));
+      const pvMoves = pvMove.pv.map(pv => moveToNotation(pv));
       annotations.push(`[%pv ${pvMoves.join(' ')}]`);
     }
 
@@ -326,4 +326,3 @@ export function downloadPGN(pgn: string, filename: string = 'game.pgn'): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-

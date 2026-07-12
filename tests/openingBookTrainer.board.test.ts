@@ -72,7 +72,17 @@ describe('createInitialBoard — 9x9 starting position', () => {
   test('back-rank layout: R N B Q K B N R A for both colours', () => {
     const b = createInitialBoard();
     const expectBackRank = (rank: number, color: 'white' | 'black') => {
-      const want = [PIECE_ROOK, PIECE_KNIGHT, PIECE_BISHOP, PIECE_QUEEN, PIECE_KING, PIECE_BISHOP, PIECE_KNIGHT, PIECE_ROOK, PIECE_ARCHBISHOP];
+      const want = [
+        PIECE_ROOK,
+        PIECE_KNIGHT,
+        PIECE_BISHOP,
+        PIECE_QUEEN,
+        PIECE_KING,
+        PIECE_BISHOP,
+        PIECE_KNIGHT,
+        PIECE_ROOK,
+        PIECE_ARCHBISHOP,
+      ];
       for (let c = 0; c < 9; c++) {
         expect(typeOf(b, rank, c)).toBe(want[c]);
         expect(colorOf(b, rank, c)).toBe(color);

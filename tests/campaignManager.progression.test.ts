@@ -15,7 +15,12 @@ describe('CampaignManager — progression invariants', () => {
     // Reset persisted progression state through public APIs so tests
     // stay isolated (the singleton otherwise carries state across files).
     const cm = campaignManager as unknown as {
-      state: { unlockedPerks: string[]; gold: number; levelStars: Record<string, number>; unitXp: Record<string, unknown> };
+      state: {
+        unlockedPerks: string[];
+        gold: number;
+        levelStars: Record<string, number>;
+        unitXp: Record<string, unknown>;
+      };
     };
     cm.state.unlockedPerks = [];
     cm.state.gold = 0;
@@ -36,7 +41,7 @@ describe('CampaignManager — progression invariants', () => {
       // isPerkUnlocked uses Array.includes, so a duplicate would still
       // report true — assert the underlying list has exactly one entry.
       const state = (campaignManager as unknown as { state: { unlockedPerks: string[] } }).state;
-      expect(state.unlockedPerks.filter((p) => p === 'stabile_bauern')).toHaveLength(1);
+      expect(state.unlockedPerks.filter(p => p === 'stabile_bauern')).toHaveLength(1);
     });
   });
 

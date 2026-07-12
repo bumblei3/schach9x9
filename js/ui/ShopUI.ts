@@ -96,18 +96,25 @@ export function updateShopUI(game: GameLike): void {
   }
 
   // Check if UI module is available globally (from App.ts)
-  const globalUI = window.UI as { updateTutorRecommendations?: (_game: unknown) => void } | undefined;
+  const globalUI = window.UI as
+    | { updateTutorRecommendations?: (_game: unknown) => void }
+    | undefined;
   if (globalUI?.updateTutorRecommendations) {
     globalUI.updateTutorRecommendations(game);
   } else {
-    const legacyUpdate = window.updateTutorRecommendations as ((_game: unknown) => void) | undefined;
+    const legacyUpdate = window.updateTutorRecommendations as
+      | ((_game: unknown) => void)
+      | undefined;
     if (legacyUpdate) {
       legacyUpdate(game);
     } else {
       // Dynamic import fallback
-      import('./TutorUI.js').then((module: { updateTutorRecommendations?: (_game: Game) => void }) => {
-        if (module.updateTutorRecommendations) module.updateTutorRecommendations(game as unknown as Game);
-      });
+      import('./TutorUI.js').then(
+        (module: { updateTutorRecommendations?: (_game: Game) => void }) => {
+          if (module.updateTutorRecommendations)
+            module.updateTutorRecommendations(game as unknown as Game);
+        }
+      );
     }
   }
 }

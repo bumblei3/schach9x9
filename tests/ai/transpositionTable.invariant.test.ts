@@ -217,7 +217,7 @@ describe('TranspositionTable — depth-preferred replacement rule', () => {
   });
 
   test('a shallower re-store with the SAME hash replaces anyway (same-hash always wins)', () => {
-    const h = 0xABCDE;
+    const h = 0xabcde;
     tt.store(h, 9, 100, 'exact', { from: 1, to: 2 });
     tt.store(h, 3, 999, 'lower', { from: 5, to: 6 });
     // Implementation replaces unconditionally for matching hash.

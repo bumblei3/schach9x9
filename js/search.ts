@@ -78,7 +78,7 @@ function quiesce(
     const score = -quiesce(b, -beta, -alpha, c ^ COLOR_MASK, start, nodes, evalConfig);
     undoMoveInt(b, undo);
 
-  if (score >= beta) return beta;
+    if (score >= beta) return beta;
     if (score > alpha) alpha = score;
   }
 
@@ -97,9 +97,15 @@ function orderMoves(
   history: Int32Array
 ): Move[] {
   const PIECE_VALS: Record<number, number> = {
-    [PIECE_PAWN]: 100, [PIECE_KNIGHT]: 320, [PIECE_BISHOP]: 330,
-    [PIECE_ROOK]: 500, [PIECE_QUEEN]: 900, [PIECE_KING]: 20000,
-    [PIECE_ARCHBISHOP]: 600, [PIECE_CHANCELLOR]: 700, [PIECE_ANGEL]: 1000,
+    [PIECE_PAWN]: 100,
+    [PIECE_KNIGHT]: 320,
+    [PIECE_BISHOP]: 330,
+    [PIECE_ROOK]: 500,
+    [PIECE_QUEEN]: 900,
+    [PIECE_KING]: 20000,
+    [PIECE_ARCHBISHOP]: 600,
+    [PIECE_CHANCELLOR]: 700,
+    [PIECE_ANGEL]: 1000,
   };
 
   return moves
@@ -138,9 +144,15 @@ function orderMoves(
 
 // EVAL_VALUES needed for quiesce sort
 const EVAL_VALUES: Record<number, number> = {
-  [PIECE_PAWN]: 100, [PIECE_KNIGHT]: 320, [PIECE_BISHOP]: 330,
-  [PIECE_ROOK]: 500, [PIECE_QUEEN]: 900, [PIECE_KING]: 20000,
-  [PIECE_ARCHBISHOP]: 650, [PIECE_CHANCELLOR]: 850, [PIECE_ANGEL]: 1220,
+  [PIECE_PAWN]: 100,
+  [PIECE_KNIGHT]: 320,
+  [PIECE_BISHOP]: 330,
+  [PIECE_ROOK]: 500,
+  [PIECE_QUEEN]: 900,
+  [PIECE_KING]: 20000,
+  [PIECE_ARCHBISHOP]: 650,
+  [PIECE_CHANCELLOR]: 850,
+  [PIECE_ANGEL]: 1220,
 };
 
 // =====================================================================
@@ -151,8 +163,8 @@ const EVAL_VALUES: Record<number, number> = {
 // Only applied when depth >= PROBCUT_DEPTH and score is near beta.
 
 const PROBCUT_DEPTH = 5;
-const PROBCUT_REDUCTION = 3;           // How much to reduce depth
-const PROBCUT_BETA_MARGIN = 150;       // Beta margin for probcut (beta - margin)
+const PROBCUT_REDUCTION = 3; // How much to reduce depth
+const PROBCUT_BETA_MARGIN = 150; // Beta margin for probcut (beta - margin)
 
 function probcut(
   board: IntBoard,
@@ -162,30 +174,36 @@ function probcut(
   start: number,
   nodes: { count: number },
   color: number,
-  searchFn: (_b: IntBoard, _d: number, _alpha: number, _beta: number, _maximizing: boolean) => { score: number; bestMove: Move | null }
+  searchFn: (
+    _b: IntBoard,
+    _d: number,
+    _alpha: number,
+    _beta: number,
+    _maximizing: boolean
+  ) => { score: number; bestMove: Move | null }
 ): boolean {
   // Only apply probcut at sufficient depth
   if (d < PROBCUT_DEPTH) return false;
-  
+
   // Don't probcut if in check (forced moves need full search)
   const activeColor = maximizing ? color : color ^ COLOR_MASK;
   if (checkInt(board, activeColor)) return false;
-  
+
   // Probcut beta is stricter than normal beta
   const probcutBeta = beta - PROBCUT_BETA_MARGIN;
   if (probcutBeta < -INFINITY) return false;
-  
+
   // Generate captures and promotions only for probcut
   const activeColorStr = activeColor === COLOR_WHITE ? 'white' : 'black';
   const legalMoves = genLegalInt(board, activeColorStr);
-  
+
   // Filter: only captures, promotions, and TT-move likely to cause cutoffs
-  const probcutMoves = legalMoves.filter(m => 
-    board[m.to] !== PIECE_NONE || (m.promotion !== undefined)
+  const probcutMoves = legalMoves.filter(
+    m => board[m.to] !== PIECE_NONE || m.promotion !== undefined
   );
-  
+
   if (probcutMoves.length === 0) return false;
-  
+
   // Order by capture value (MVV-LVA)
   probcutMoves.sort((m1, m2) => {
     const victimA = board[m1.to] & TYPE_MASK;
@@ -194,7 +212,7 @@ function probcut(
     const valB = EVAL_VALUES[victimB] || 0;
     return valB - valA;
   });
-  
+
   // Try probcut on top few moves
   const maxTries = Math.min(probcutMoves.length, 3);
   for (let i = 0; i < maxTries; i++) {
@@ -205,15 +223,21 @@ function probcut(
       undoMoveInt(board, undo);
       return false;
     }
-    
+
     // Reduced depth search with null window
-    const result = searchFn(board, d - 1 - PROBCUT_REDUCTION, probcutBeta - 1, probcutBeta, !maximizing);
+    const result = searchFn(
+      board,
+      d - 1 - PROBCUT_REDUCTION,
+      probcutBeta - 1,
+      probcutBeta,
+      !maximizing
+    );
     undoMoveInt(board, undo);
-    
+
     // If reduced search returns >= probcutBeta, we cut off
     if (result.score >= probcutBeta) return true;
   }
-  
+
   return false;
 }
 
@@ -223,8 +247,8 @@ function probcut(
 // A singular move is one where all alternatives fail significantly
 // lower than the best move. We search it one ply deeper.
 
-const SINGULAR_DEPTH = 6;           // Minimum depth for singular extensions
-const SINGULAR_MARGIN = 100;        // Margin to consider move singular
+const SINGULAR_DEPTH = 6; // Minimum depth for singular extensions
+const SINGULAR_MARGIN = 100; // Margin to consider move singular
 
 function isSingularMove(
   board: IntBoard,
@@ -237,39 +261,45 @@ function isSingularMove(
   start: number,
   nodes: { count: number },
   color: number,
-  searchFn: (_b: IntBoard, _d: number, _alpha: number, _beta: number, _maximizing: boolean) => { score: number; bestMove: Move | null }
+  searchFn: (
+    _b: IntBoard,
+    _d: number,
+    _alpha: number,
+    _beta: number,
+    _maximizing: boolean
+  ) => { score: number; bestMove: Move | null }
 ): boolean {
   if (d < SINGULAR_DEPTH) return false;
   if (!bestMove) return false;
-  
+
   // Don't extend in check (already forced)
   const activeColor = maximizing ? color : color ^ COLOR_MASK;
   if (checkInt(board, activeColor)) return false;
-  
+
   // Search all other moves with reduced depth and tight bounds
   // around bestScore to verify no alternative is close
   const activeColorStr = activeColor === COLOR_WHITE ? 'white' : 'black';
   const legalMoves = genLegalInt(board, activeColorStr);
-  
+
   for (const move of legalMoves) {
     // Skip the best move
     if (move.from === bestMove.from && move.to === bestMove.to) continue;
-    
+
     const undo = makeMoveInt(board, move);
     nodes.count++;
     if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
       undoMoveInt(board, undo);
       return false;
     }
-    
+
     // Search with reduced depth and tight window
     const margin = SINGULAR_MARGIN;
     const singularAlpha = bestScore - margin;
     const singularBeta = bestScore + margin;
-    
+
     const result = searchFn(board, d - 1 - 2, singularAlpha, singularBeta, !maximizing);
     undoMoveInt(board, undo);
-    
+
     // If any alternative is within margin, the move is NOT singular
     if (maximizing) {
       if (result.score >= singularAlpha) return false;
@@ -277,7 +307,7 @@ function isSingularMove(
       if (result.score <= singularBeta) return false;
     }
   }
-  
+
   return true;
 }
 
@@ -314,12 +344,17 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const ASPIRATION_WINDOW = 50;
 
       // Late Move Reductions (LMR) constants
-      const LMR_BASE_DEPTH = 3;        // Minimum depth for LMR
-      const LMR_MOVE_COUNT = 3;        // First N moves not reduced
-      const LMR_MAX_REDUCTION = 3;     // Max reduction
+      const LMR_BASE_DEPTH = 3; // Minimum depth for LMR
+      const LMR_MOVE_COUNT = 3; // First N moves not reduced
+      const LMR_MAX_REDUCTION = 3; // Max reduction
 
       function search(
-        b: IntBoard, d: number, alpha: number, beta: number, maximizing: boolean, isRoot: boolean = false
+        b: IntBoard,
+        d: number,
+        alpha: number,
+        beta: number,
+        maximizing: boolean,
+        isRoot: boolean = false
       ): { score: number; bestMove: Move | null } {
         nodes++;
         if (nodes % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
@@ -333,8 +368,10 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         if (ttEntry && ttEntry.depth >= d) {
           ttBest = ttEntry.bestMove;
           if (ttEntry.flag === 'exact') return { score: ttEntry.score, bestMove: ttEntry.bestMove };
-          if (ttEntry.flag === 'lower' && ttEntry.score >= beta) return { score: ttEntry.score, bestMove: ttEntry.bestMove };
-          if (ttEntry.flag === 'upper' && ttEntry.score <= alpha) return { score: ttEntry.score, bestMove: ttEntry.bestMove };
+          if (ttEntry.flag === 'lower' && ttEntry.score >= beta)
+            return { score: ttEntry.score, bestMove: ttEntry.bestMove };
+          if (ttEntry.flag === 'upper' && ttEntry.score <= alpha)
+            return { score: ttEntry.score, bestMove: ttEntry.bestMove };
         }
 
         if (d === 0) {
@@ -350,7 +387,10 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
             const p = b[i];
             if (p !== PIECE_NONE && (p & COLOR_MASK) === activeColor) {
               const tp = p & TYPE_MASK;
-              if (tp !== PIECE_PAWN && tp !== PIECE_KING) { hasMaterial = true; break; }
+              if (tp !== PIECE_PAWN && tp !== PIECE_KING) {
+                hasMaterial = true;
+                break;
+              }
             }
           }
           if (hasMaterial) {
@@ -378,7 +418,8 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           }
         }
 
-        const activeColorStr = (maximizing ? color : color ^ COLOR_MASK) === COLOR_WHITE ? 'white' : 'black';
+        const activeColorStr =
+          (maximizing ? color : color ^ COLOR_MASK) === COLOR_WHITE ? 'white' : 'black';
         const legalMoves = genLegalInt(b, activeColorStr);
 
         if (legalMoves.length === 0) {
@@ -433,7 +474,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 // Standard LMR formula: reduction = log(depth) * log(movesSearched) / scale
                 const depthLog = Math.log(d);
                 const moveLog = Math.log(movesSearched);
-                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 1.75));
                 reduction = Math.max(1, reduction); // At least 1 ply reduction
               }
 
@@ -455,14 +496,18 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               undoMoveInt(board, undo);
 
-              if (result.score > bestScore) { bestScore = result.score; bestMove = isRoot ? move : (result.bestMove || move); }
+              if (result.score > bestScore) {
+                bestScore = result.score;
+                bestMove = isRoot ? move : result.bestMove || move;
+              }
               alpha = Math.max(alpha, result.score);
               if (beta <= alpha) {
                 flag = 'lower';
                 if (b[move.to] === PIECE_NONE) {
                   const k = killers[d];
                   if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
-                    k[1] = k[0]; k[0] = move;
+                    k[1] = k[0];
+                    k[0] = move;
                   }
                   history[move.from * 81 + move.to] += d * d;
                 }
@@ -473,7 +518,21 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
             // --- Singular Extension (after finding best move) ---
             if (d >= SINGULAR_DEPTH && bestMove && !inCheck) {
-              if (isSingularMove(board, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes }, color, search)) {
+              if (
+                isSingularMove(
+                  board,
+                  d,
+                  bestMove,
+                  bestScore,
+                  alpha,
+                  beta,
+                  maximizing,
+                  start,
+                  { count: nodes },
+                  color,
+                  search
+                )
+              ) {
                 // Re-search best move with depth + 1
                 const undo = makeMoveInt(board, bestMove);
                 const extResult = search(board, d, alpha, beta, false);
@@ -481,11 +540,10 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 // If extension improves score, use it
                 if (extResult.score > bestScore) {
                   bestScore = extResult.score;
-                  bestMove = isRoot ? bestMove : (extResult.bestMove || bestMove);
+                  bestMove = isRoot ? bestMove : extResult.bestMove || bestMove;
                 }
               }
             }
-
           } else {
             let movesSearched = 0;
             for (const move of ordered) {
@@ -508,7 +566,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               ) {
                 const depthLog = Math.log(d);
                 const moveLog = Math.log(movesSearched);
-                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor(depthLog * moveLog / 1.75));
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 1.75));
                 reduction = Math.max(1, reduction);
               }
 
@@ -530,14 +588,18 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               undoMoveInt(board, undo);
 
-              if (result.score < bestScore) { bestScore = result.score; bestMove = isRoot ? move : (result.bestMove || move); }
+              if (result.score < bestScore) {
+                bestScore = result.score;
+                bestMove = isRoot ? move : result.bestMove || move;
+              }
               beta = Math.min(beta, result.score);
               if (beta <= alpha) {
                 flag = 'upper';
                 if (b[move.to] === PIECE_NONE) {
                   const k = killers[d];
                   if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
-                    k[1] = k[0]; k[0] = move;
+                    k[1] = k[0];
+                    k[0] = move;
                   }
                   history[move.from * 81 + move.to] += d * d;
                 }
@@ -548,14 +610,28 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
             // --- Singular Extension (after finding best move) ---
             if (d >= SINGULAR_DEPTH && bestMove && !inCheck) {
-              if (isSingularMove(board, d, bestMove, bestScore, alpha, beta, maximizing, start, { count: nodes }, color, search)) {
+              if (
+                isSingularMove(
+                  board,
+                  d,
+                  bestMove,
+                  bestScore,
+                  alpha,
+                  beta,
+                  maximizing,
+                  start,
+                  { count: nodes },
+                  color,
+                  search
+                )
+              ) {
                 // Re-search best move with depth + 1
                 const undo = makeMoveInt(board, bestMove);
                 const extResult = search(board, d, alpha, beta, true, false);
                 undoMoveInt(board, undo);
                 if (extResult.score < bestScore) {
                   bestScore = extResult.score;
-                  bestMove = isRoot ? bestMove : (extResult.bestMove || bestMove);
+                  bestMove = isRoot ? bestMove : extResult.bestMove || bestMove;
                 }
               }
             }
@@ -564,15 +640,14 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
         tt.store(hash, d, bestScore, flag, bestMove);
         return { score: bestScore, bestMove };
-        }
-
+      }
 
       // Iterative Deepening with Aspiration Windows + Internal Iterative Reduction (IIR)
       let bestResult: { score: number; bestMove: Move | null } = { score: 0, bestMove: null };
-      
+
       // IIR State tracking
       const lastScores: number[] = [];
-      const IIR_WINDOW = 3;           // Number of iterations to track for stability
+      const IIR_WINDOW = 3; // Number of iterations to track for stability
       const IIR_STABILITY_THRESHOLD = 50; // Score delta considered "stable" (centipawns)
       let iirStableCount = 0;
       let iirUnstableCount = 0;
@@ -587,7 +662,9 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         // Adjust aspiration window based on score stability
         let aspirationMult = 1;
         if (lastScores.length >= 2) {
-          const delta = Math.abs(lastScores[lastScores.length - 1] - lastScores[lastScores.length - 2]);
+          const delta = Math.abs(
+            lastScores[lastScores.length - 1] - lastScores[lastScores.length - 2]
+          );
           if (delta <= IIR_STABILITY_THRESHOLD) {
             iirStableCount++;
             iirUnstableCount = 0;
@@ -621,11 +698,12 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
         // IIR: Skip depth if score is extremely stable (diminishing returns)
         // Only skip if we have enough data and time permits next depth
-        const shouldSkipDepth = d >= 4 && 
+        const shouldSkipDepth =
+          d >= 4 &&
           lastScores.length >= 3 &&
           Math.abs(lastScores[lastScores.length - 1] - lastScores[lastScores.length - 2]) < 10 &&
           Math.abs(lastScores[lastScores.length - 2] - lastScores[lastScores.length - 3]) < 10 &&
-          (performance.now() - start) < MAX_SEARCH_TIME * 0.5;
+          performance.now() - start < MAX_SEARCH_TIME * 0.5;
 
         if (performance.now() - start <= MAX_SEARCH_TIME) bestResult = result;
 
@@ -641,7 +719,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         }
 
         if (Math.abs(result.score) > MATE_SCORE - 100) break;
-        
+
         // Optional: Early exit if IIR suggests depth increase won't help
         if (shouldSkipDepth && d + 1 <= maxDepth) {
           // Still do one more iteration for safety, but could break here
@@ -649,6 +727,6 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       }
 
       return { move: bestResult.bestMove, score: bestResult.score, nodes, depth: maxDepth };
-    }
+    },
   };
 }

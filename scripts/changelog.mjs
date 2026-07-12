@@ -69,7 +69,7 @@ function collectCommits(range) {
   // %H %s  -> hash + subject
   const raw = run(['log', '--no-merges', '--pretty=format:%H %s', range]);
   if (!raw) return [];
-  return raw.split('\n').map((l) => {
+  return raw.split('\n').map(l => {
     const sp = l.indexOf(' ');
     const hash = l.slice(0, sp);
     const subject = l.slice(sp + 1);
@@ -80,7 +80,7 @@ function collectCommits(range) {
 function buildSection(entries) {
   return entries
     .sort((a, b) => (a.scope || '').localeCompare(b.scope || ''))
-    .map((e) => {
+    .map(e => {
       const scope = e.scope ? `**${e.scope}:** ` : '';
       return `- ${scope}${e.subject} (${e.hash.slice(0, 7)})`;
     })
@@ -103,7 +103,7 @@ function generate({ version, prevTag, entries, date }) {
   });
 
   const body = sectionKeys
-    .map((k) => `### ${TYPE_LABEL.get(k) || 'Chores'}\n\n${buildSection(grouped.get(k))}`)
+    .map(k => `### ${TYPE_LABEL.get(k) || 'Chores'}\n\n${buildSection(grouped.get(k))}`)
     .join('\n\n');
 
   const rangeNote = prevTag ? `Changes since \`${prevTag}\`.` : 'Initial changelog.';

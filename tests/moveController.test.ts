@@ -29,17 +29,16 @@ type MockUI = {
 
 // Extended Game interface for testing to include mocked methods and properties
 // Uses a permissive type for isTutorMove to allow both mocks and real implementations
-interface TestGame
-  extends Omit<
-    Game,
-    | 'moveController'
-    | 'log'
-    | 'stopClock'
-    | 'startClock'
-    | 'updateBestMoves'
-    | 'isTutorMove'
-    | 'aiMove'
-  > {
+interface TestGame extends Omit<
+  Game,
+  | 'moveController'
+  | 'log'
+  | 'stopClock'
+  | 'startClock'
+  | 'updateBestMoves'
+  | 'isTutorMove'
+  | 'aiMove'
+> {
   moveController?: MoveController;
   log: MockInstance;
   stopClock: MockInstance;

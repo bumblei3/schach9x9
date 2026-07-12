@@ -47,7 +47,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
-    
+
     strategy = new SetupModeStrategy();
 
     game = {
@@ -55,7 +55,9 @@ describe('SetupModeStrategy - Branch Coverage', () => {
       phase: PHASES.SETUP_WHITE_KING,
       points: 20,
       initialPoints: 20,
-      board: Array(9).fill(null).map(() => Array(9).fill(null)),
+      board: Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null)),
       isAI: false,
       campaignMode: false,
       log: vi.fn(),
@@ -186,7 +188,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
     it('should return false if no handlePlayClick in PLAY phase', async () => {
       game.phase = PHASES.PLAY;
       delete game.handlePlayClick;
-      
+
       const result = await strategy.handleInteraction(game, controller, 4, 4);
       expect(result).toBe(false);
     });
@@ -205,7 +207,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
 
     it('should transition BLACK_PIECES -> BLACK_UPGRADES', () => {
       game.phase = PHASES.SETUP_BLACK_PIECES;
-      
+
       strategy.onPhaseEnd(game, controller);
 
       expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
@@ -228,7 +230,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
 
     it('should transition BLACK_UPGRADES -> PLAY', () => {
       game.phase = PHASES.SETUP_BLACK_UPGRADES;
-      
+
       strategy.onPhaseEnd(game, controller);
 
       expect(game.phase).toBe(PHASES.PLAY);
@@ -450,7 +452,9 @@ describe('SetupModeStrategy - Branch Coverage', () => {
   describe('handleInteraction() - edge cases', () => {
     it('should handle SETUP_WHITE_KING with controller error', async () => {
       game.phase = PHASES.SETUP_WHITE_KING;
-      controller.placeKing.mockImplementation(() => { throw new Error('King placement failed'); });
+      controller.placeKing.mockImplementation(() => {
+        throw new Error('King placement failed');
+      });
 
       await expect(strategy.handleInteraction(game, controller, 8, 4)).rejects.toThrow();
     });

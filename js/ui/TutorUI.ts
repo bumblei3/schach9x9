@@ -246,9 +246,14 @@ export async function showTutorSuggestions(
         // Instead of an alert, we could show a toast or just a log
         console.log('[TutorUI] No hints available yet.');
         // Show user-friendly toast
-        import('../ui.js').then(ui => {
-          ui.showToast('Keine Vorschläge verfügbar. Möglicherweise ist die KI noch am Denken oder es gibt keine legalen Züge.', 'info');
-        }).catch(() => {});
+        import('../ui.js')
+          .then(ui => {
+            ui.showToast(
+              'Keine Vorschläge verfügbar. Möglicherweise ist die KI noch am Denken oder es gibt keine legalen Züge.',
+              'info'
+            );
+          })
+          .catch(() => {});
         return;
       }
 
@@ -583,9 +588,7 @@ export async function showTutorSuggestions(
       const fromCell = document.querySelector(
         `.cell[data-r="${move.from.r}"][data-c="${move.from.c}"]`
       );
-      const toCell = document.querySelector(
-        `.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`
-      );
+      const toCell = document.querySelector(`.cell[data-r="${move.to.r}"][data-c="${move.to.c}"]`);
       if (fromCell) fromCell.classList.add('suggestion-highlight');
       if (toCell) toCell.classList.add('suggestion-highlight');
     });

@@ -44,8 +44,12 @@ describe('MoveGenerator - New Threat Detection Functions', () => {
 
       expect(threats.length).toBe(2);
       expect(threats.every(t => t.isDirect)).toBe(true);
-      expect(threats.some(t => t.targetSquare === rowCol(5, 3) && t.targetType === PIECE_PAWN)).toBe(true);
-      expect(threats.some(t => t.targetSquare === rowCol(5, 5) && t.targetType === PIECE_KNIGHT)).toBe(true);
+      expect(
+        threats.some(t => t.targetSquare === rowCol(5, 3) && t.targetType === PIECE_PAWN)
+      ).toBe(true);
+      expect(
+        threats.some(t => t.targetSquare === rowCol(5, 5) && t.targetType === PIECE_KNIGHT)
+      ).toBe(true);
     });
 
     it('should detect direct knight attacks', () => {
@@ -106,9 +110,9 @@ describe('MoveGenerator - New Threat Detection Functions', () => {
       // White bishop at c1, white pawn at d2, black king at e3
       // Pawn blocks bishop but is a discovered check if it moves
       place(rowCol(7, 2), PIECE_BISHOP, COLOR_WHITE); // c1 = row 7, col 2
-      place(rowCol(6, 3), PIECE_PAWN, COLOR_WHITE);   // d2 = row 6, col 3
-      place(rowCol(5, 4), PIECE_KING, COLOR_BLACK);   // e3 = row 5, col 4
-      place(rowCol(7, 5), PIECE_KING, COLOR_WHITE);   // White king
+      place(rowCol(6, 3), PIECE_PAWN, COLOR_WHITE); // d2 = row 6, col 3
+      place(rowCol(5, 4), PIECE_KING, COLOR_BLACK); // e3 = row 5, col 4
+      place(rowCol(7, 5), PIECE_KING, COLOR_WHITE); // White king
 
       const threats = getKingThreats(board, COLOR_WHITE);
 
@@ -132,8 +136,8 @@ describe('MoveGenerator - New Threat Detection Functions', () => {
     it('should work for black checking white king', () => {
       // Black rook at f8 checking white king at f1
       place(rowCol(7, 5), PIECE_ROOK, COLOR_BLACK); // f8
-      place(rowCol(0, 5), PIECE_KING, COLOR_WHITE);  // f1
-      place(rowCol(7, 0), PIECE_KING, COLOR_BLACK);  // Black king
+      place(rowCol(0, 5), PIECE_KING, COLOR_WHITE); // f1
+      place(rowCol(7, 0), PIECE_KING, COLOR_BLACK); // Black king
 
       const threats = getKingThreats(board, COLOR_BLACK);
 
@@ -253,14 +257,14 @@ describe('MoveGenerator - New Threat Detection Functions', () => {
     it('should correctly categorize threats in a complex position', () => {
       // Complex position with multiple threat types
       // White pieces
-      place(rowCol(0, 0), PIECE_ROOK, COLOR_WHITE);   // a1
-      place(rowCol(1, 0), PIECE_PAWN, COLOR_WHITE);   // a2 (blocker)
-      place(rowCol(3, 0), PIECE_QUEEN, COLOR_BLACK);  // a4 (X-ray target)
+      place(rowCol(0, 0), PIECE_ROOK, COLOR_WHITE); // a1
+      place(rowCol(1, 0), PIECE_PAWN, COLOR_WHITE); // a2 (blocker)
+      place(rowCol(3, 0), PIECE_QUEEN, COLOR_BLACK); // a4 (X-ray target)
       place(rowCol(7, 2), PIECE_BISHOP, COLOR_WHITE); // c1
       place(rowCol(6, 3), PIECE_KNIGHT, COLOR_WHITE); // d2 (blocker)
-      place(rowCol(5, 4), PIECE_KING, COLOR_BLACK);   // e3 (king - discovered check!)
-      place(rowCol(0, 8), PIECE_KING, COLOR_WHITE);   // White king
-      place(rowCol(7, 7), PIECE_KING, COLOR_BLACK);   // Black king (h8)
+      place(rowCol(5, 4), PIECE_KING, COLOR_BLACK); // e3 (king - discovered check!)
+      place(rowCol(0, 8), PIECE_KING, COLOR_WHITE); // White king
+      place(rowCol(7, 7), PIECE_KING, COLOR_BLACK); // Black king (h8)
 
       const allThreats = getAllThreats(board, COLOR_WHITE);
       const kingThreats = getKingThreats(board, COLOR_WHITE);
@@ -281,30 +285,32 @@ describe('MoveGenerator - New Threat Detection Functions', () => {
       expect(discCheck).toBeDefined();
 
       // All threats should be present in allThreats
-      expect(allThreats.length).toBeGreaterThanOrEqual(
-        kingThreats.length + xrayThreats.length
-      );
+      expect(allThreats.length).toBeGreaterThanOrEqual(kingThreats.length + xrayThreats.length);
     });
 
     it('should detect nightrider X-ray attacks', () => {
       // Nightrider moves like knight but continues in same direction
       place(rowCol(4, 4), PIECE_NIGHTRIDER, COLOR_WHITE); // e4
-      place(rowCol(2, 3), PIECE_PAWN, COLOR_WHITE);       // c5 - blocker on first nightrider step
-      place(rowCol(0, 2), PIECE_ROOK, COLOR_BLACK);       // c7 - X-ray target
+      place(rowCol(2, 3), PIECE_PAWN, COLOR_WHITE); // c5 - blocker on first nightrider step
+      place(rowCol(0, 2), PIECE_ROOK, COLOR_BLACK); // c7 - X-ray target
       place(rowCol(7, 7), PIECE_KING, COLOR_WHITE);
       place(rowCol(0, 7), PIECE_KING, COLOR_BLACK);
 
       const threats = getXRayThreats(board, COLOR_WHITE);
 
       expect(threats.length).toBeGreaterThanOrEqual(1);
-      expect(threats.some(t => t.attackerType === PIECE_NIGHTRIDER && t.xrayTargetSquare === rowCol(0, 2))).toBe(true);
+      expect(
+        threats.some(
+          t => t.attackerType === PIECE_NIGHTRIDER && t.xrayTargetSquare === rowCol(0, 2)
+        )
+      ).toBe(true);
     });
 
     it('should detect archbishop/chancellor/angel X-ray attacks', () => {
       // Archbishop (bishop + knight)
       place(rowCol(7, 2), PIECE_ARCHBISHOP, COLOR_WHITE); // c1
-      place(rowCol(6, 3), PIECE_PAWN, COLOR_WHITE);       // d2 blocker
-      place(rowCol(4, 5), PIECE_QUEEN, COLOR_BLACK);      // f4 X-ray target (diagonal)
+      place(rowCol(6, 3), PIECE_PAWN, COLOR_WHITE); // d2 blocker
+      place(rowCol(4, 5), PIECE_QUEEN, COLOR_BLACK); // f4 X-ray target (diagonal)
       place(rowCol(7, 5), PIECE_KING, COLOR_WHITE);
       place(rowCol(0, 4), PIECE_KING, COLOR_BLACK);
 

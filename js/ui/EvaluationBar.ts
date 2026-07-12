@@ -110,7 +110,7 @@ export class EvaluationBar {
     if (!this.fill) return;
 
     const normalized = Math.max(-1, Math.min(1, score / 1000)); // Clamp to [-1, 1]
-    
+
     // Interpolate between red (black winning) -> neutral -> green (white winning)
     let gradient: string;
     if (normalized > 0) {
@@ -133,7 +133,8 @@ export class EvaluationBar {
     }
 
     this.fill.style.background = gradient;
-    this.fill.style.transition = 'background 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+    this.fill.style.transition =
+      'background 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
   }
 
   /**

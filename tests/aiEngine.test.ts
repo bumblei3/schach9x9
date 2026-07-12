@@ -3,7 +3,13 @@
  */
 
 import { describe, expect, test, beforeEach, vi } from 'vitest';
-import { getBestMove, getBestMoveDetailed, evaluatePosition, getAllLegalMoves, convertBoardToInt } from '../js/aiEngine';
+import {
+  getBestMove,
+  getBestMoveDetailed,
+  evaluatePosition,
+  getAllLegalMoves,
+  convertBoardToInt,
+} from '../js/aiEngine';
 import { createJsSearch } from '../js/search';
 import { createEmptyBoard } from '../js/gameEngine';
 import type { Board } from '../js/types/game';

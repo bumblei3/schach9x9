@@ -34,7 +34,11 @@ describe('ErrorManager.handleError', () => {
 
   test('stringifies non-Error values for the toast', () => {
     errorManager.handleError('a plain string failure', { context: 'App' });
-    expect((notificationUI as any).show).toHaveBeenCalledWith('a plain string failure', 'error', 'Fehler (App)');
+    expect((notificationUI as any).show).toHaveBeenCalledWith(
+      'a plain string failure',
+      'error',
+      'Fehler (App)'
+    );
   });
 
   test('routes critical errors to showCriticalError (no toast)', () => {
@@ -58,12 +62,20 @@ describe('ErrorManager.warning', () => {
   test('logs a warning and shows a warning toast', () => {
     errorManager.warning('careful now', 'Load');
     expect((loggerMod as any).logger.warn).toHaveBeenCalled();
-    expect((notificationUI as any).show).toHaveBeenCalledWith('careful now', 'warning', 'Warnung (Load)');
+    expect((notificationUI as any).show).toHaveBeenCalledWith(
+      'careful now',
+      'warning',
+      'Warnung (Load)'
+    );
   });
 
   test('defaults the context to "App"', () => {
     errorManager.warning('default ctx');
-    expect((notificationUI as any).show).toHaveBeenCalledWith('default ctx', 'warning', 'Warnung (App)');
+    expect((notificationUI as any).show).toHaveBeenCalledWith(
+      'default ctx',
+      'warning',
+      'Warnung (App)'
+    );
   });
 });
 

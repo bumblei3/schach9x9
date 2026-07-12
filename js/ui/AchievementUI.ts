@@ -17,12 +17,13 @@ function createAchievementCard(ach: Achievement): HTMLElement {
   card.className = `achievement-card ${ach.unlocked ? 'unlocked' : 'locked'}`;
   card.dataset.achievementId = ach.id;
 
-  const progressBar = ach.progress !== undefined && ach.target !== undefined
-    ? `<div class="achievement-progress">
+  const progressBar =
+    ach.progress !== undefined && ach.target !== undefined
+      ? `<div class="achievement-progress">
          <div class="achievement-progress-bar" style="width: ${Math.min(100, (ach.progress / ach.target) * 100)}%"></div>
          <span class="achievement-progress-text">${ach.progress}/${ach.target}</span>
        </div>`
-    : '';
+      : '';
 
   card.innerHTML = `
     <div class="achievement-icon">${getAchievementIcon(ach.id)}</div>
@@ -44,12 +45,12 @@ function createAchievementCard(ach: Achievement): HTMLElement {
  */
 function getAchievementIcon(id: string): string {
   const icons: Record<string, string> = {
-    'first_win': '🏆',
-    'win_streak_5': '🔥',
-    'ten_wins': '⭐',
-    'checkmate_in_5': '⚡',
-    'promote_pawn': '♟️',
-    'win_with_king_only': '👑',
+    first_win: '🏆',
+    win_streak_5: '🔥',
+    ten_wins: '⭐',
+    checkmate_in_5: '⚡',
+    promote_pawn: '♟️',
+    win_with_king_only: '👑',
   };
   return icons[id] || '🏅';
 }
@@ -149,14 +150,14 @@ function initializeAchievementsUI(): void {
   }
 
   // Close on backdrop click
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', e => {
     if (e.target === modal) {
       hideAchievementsPanel();
     }
   });
 
   // ESC key to close
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
       hideAchievementsPanel();
     }

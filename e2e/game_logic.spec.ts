@@ -30,13 +30,7 @@ test.describe('Deep Game Logic @logic', () => {
     await page.waitForFunction(
       () => {
         const g = (window as any).game;
-        return (
-          g &&
-          g.board &&
-          Array.isArray(g.board) &&
-          g.board.length > 0 &&
-          g.phase === 'PLAY'
-        );
+        return g && g.board && Array.isArray(g.board) && g.board.length > 0 && g.phase === 'PLAY';
       },
       { timeout: 20000 }
     );

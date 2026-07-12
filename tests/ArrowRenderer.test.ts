@@ -4,11 +4,7 @@
  */
 
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
-import {
-  drawArrow,
-  clearArrows,
-  updateLastMoveArrow,
-} from '../js/ui/ArrowRenderer.js';
+import { drawArrow, clearArrows, updateLastMoveArrow } from '../js/ui/ArrowRenderer.js';
 
 // Helper to create mock DOM structure
 function createMockBoardContainer(): HTMLElement {
@@ -44,7 +40,13 @@ function createMockBoardContainer(): HTMLElement {
   document.body.appendChild(container);
 
   // Mock getBoundingClientRect for container and cells
-  const mockRect = (el: HTMLElement, left: number, top: number, width: number = 50, height: number = 50) => {
+  const mockRect = (
+    el: HTMLElement,
+    left: number,
+    top: number,
+    width: number = 50,
+    height: number = 50
+  ) => {
     el.getBoundingClientRect = vi.fn(() => ({
       left,
       top,
@@ -78,7 +80,7 @@ describe('ArrowRenderer', () => {
     if (typeof SVGPathElement !== 'undefined') {
       SVGPathElement.prototype.getTotalLength = vi.fn(() => 100);
     }
-    
+
     boardContainer = createMockBoardContainer();
     vi.useFakeTimers();
     // Mock requestAnimationFrame
@@ -358,7 +360,12 @@ describe('ArrowRenderer', () => {
   describe('clearArrows', () => {
     test('should remove all arrow SVGs from container', () => {
       // Draw first arrow
-      const svg1 = drawArrow(boardContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, color: '#ff0000', animate: false });
+      const svg1 = drawArrow(boardContainer, {
+        from: { r: 0, c: 0 },
+        to: { r: 1, c: 1 },
+        color: '#ff0000',
+        animate: false,
+      });
       expect(svg1).toBeDefined();
       // Manually add a second one since drawArrow clears first
       const manualSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -393,7 +400,12 @@ describe('ArrowRenderer', () => {
 
   describe('updateLastMoveArrow', () => {
     test('should clear arrows when lastMove is null', () => {
-      drawArrow(boardContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, color: '#ff0000', animate: false });
+      drawArrow(boardContainer, {
+        from: { r: 0, c: 0 },
+        to: { r: 1, c: 1 },
+        color: '#ff0000',
+        animate: false,
+      });
       expect(boardContainer.querySelectorAll('.last-move-arrow').length).toBe(1);
 
       updateLastMoveArrow(boardContainer, null);
@@ -401,7 +413,12 @@ describe('ArrowRenderer', () => {
     });
 
     test('should clear arrows when lastMove is undefined', () => {
-      drawArrow(boardContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, color: '#ff0000', animate: false });
+      drawArrow(boardContainer, {
+        from: { r: 0, c: 0 },
+        to: { r: 1, c: 1 },
+        color: '#ff0000',
+        animate: false,
+      });
       updateLastMoveArrow(boardContainer, undefined as any);
       expect(boardContainer.querySelectorAll('.last-move-arrow').length).toBe(0);
     });
@@ -449,12 +466,16 @@ describe('ArrowRenderer', () => {
     });
 
     test('should handle null boardContainer gracefully', () => {
-      expect(() => updateLastMoveArrow(null, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })).not.toThrow();
+      expect(() =>
+        updateLastMoveArrow(null, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })
+      ).not.toThrow();
     });
 
     test('should handle container without querySelectorAll', () => {
       const fakeContainer = {} as any;
-      expect(() => updateLastMoveArrow(fakeContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })).not.toThrow();
+      expect(() =>
+        updateLastMoveArrow(fakeContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })
+      ).not.toThrow();
     });
 
     test('should animate by default', () => {
@@ -505,8 +526,12 @@ describe('ArrowRenderer', () => {
       document.body.appendChild(minimalContainer);
 
       // No board element - should fail gracefully
-      expect(() => updateLastMoveArrow(minimalContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })).not.toThrow();
-      expect(() => drawArrow(minimalContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, color: '#ff0000' })).not.toThrow();
+      expect(() =>
+        updateLastMoveArrow(minimalContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })
+      ).not.toThrow();
+      expect(() =>
+        drawArrow(minimalContainer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, color: '#ff0000' })
+      ).not.toThrow();
 
       document.body.removeChild(minimalContainer);
     });
@@ -560,12 +585,14 @@ describe('ArrowRenderer', () => {
     });
 
     test('should handle same from and to squares gracefully', () => {
-      expect(() => drawArrow(boardContainer, {
-        from: { r: 4, c: 4 },
-        to: { r: 4, c: 4 },
-        color: '#ff0000',
-        animate: false,
-      })).not.toThrow();
+      expect(() =>
+        drawArrow(boardContainer, {
+          from: { r: 4, c: 4 },
+          to: { r: 4, c: 4 },
+          color: '#ff0000',
+          animate: false,
+        })
+      ).not.toThrow();
     });
   });
 });

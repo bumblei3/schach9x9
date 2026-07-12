@@ -247,7 +247,9 @@ export class StatisticsManager {
         // Merge games (avoid duplicates by ID)
         const existingIds = new Set(this.data.games.map(g => g.id));
         const rawGames = importData.data.games as unknown;
-        const newGames = (rawGames as Array<{ id: string; [key: string]: unknown }>).filter((g) => !existingIds.has((g as { id: string }).id)) as unknown as GameRecord[];
+        const newGames = (rawGames as Array<{ id: string; [key: string]: unknown }>).filter(
+          g => !existingIds.has((g as { id: string }).id)
+        ) as unknown as GameRecord[];
         this.data.games.push(...newGames);
 
         // Recalculate stats from all games
@@ -255,7 +257,17 @@ export class StatisticsManager {
         logger.info(`Imported ${newGames.length} new games (merged)`);
       } else {
         // Replace all data
-        const importDataRaw = importData.data as unknown as { games: unknown; stats?: { totalGames: number; wins: number; losses: number; draws: number; winRate: number }; tutorPoints?: number };
+        const importDataRaw = importData.data as unknown as {
+          games: unknown;
+          stats?: {
+            totalGames: number;
+            wins: number;
+            losses: number;
+            draws: number;
+            winRate: number;
+          };
+          tutorPoints?: number;
+        };
         this.data = {
           games: importDataRaw.games as unknown as GameRecord[],
           stats: importDataRaw.stats || { totalGames: 0, wins: 0, losses: 0, draws: 0, winRate: 0 },

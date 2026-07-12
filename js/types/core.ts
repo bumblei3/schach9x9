@@ -12,18 +12,11 @@ import type { TimeParams } from '../aiEngine.js';
 
 export type Player = 'white' | 'black';
 
-export type PieceType =
-  | 'k' | 'q' | 'r' | 'b' | 'n' | 'p'
-  | 'e' | 'a' | 'c' | 'j' | null;
+export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j' | null;
 
 export type GamePhase = 'SETUP' | 'PLAY' | 'END';
 
-export type GameMode =
-  | 'setup'
-  | 'classic'
-  | 'puzzle'
-  | 'campaign'
-  | 'standard8x8';
+export type GameMode = 'setup' | 'classic' | 'puzzle' | 'campaign' | 'standard8x8';
 
 export type BoardShape = 'standard' | 'cross';
 
@@ -352,12 +345,7 @@ export interface GameControllerInterface {
 // AI Types
 // ============================================================================
 
-export type AIPersonality =
-  | 'balanced'
-  | 'aggressive'
-  | 'defensive'
-  | 'tactical'
-  | 'positional';
+export type AIPersonality = 'balanced' | 'aggressive' | 'defensive' | 'tactical' | 'positional';
 
 export interface AIConfig {
   depth: number;
@@ -555,10 +543,7 @@ export interface ModalAction {
 }
 
 // Re-export commonly used types
-export type {
-  MoveResult,
-  TimeParams,
-};
+export type { MoveResult, TimeParams };
 
 // Global Window extensions
 declare global {
