@@ -79,6 +79,24 @@ export class OpeningTrainerMenu {
     return readout;
   }
 
+  /**
+   * Re-render only the progress readout from the current manager state.
+   * Called by the controller after a submitted move updates progress.
+   */
+  updateProgress(): void {
+    if (!this.root) {
+      this.render();
+      return;
+    }
+    const old = this.root.querySelector('.opening-trainer-progress');
+    const next = this.buildProgressReadout();
+    if (old && old.parentNode) {
+      old.parentNode.replaceChild(next, old);
+    } else {
+      this.root.appendChild(next);
+    }
+  }
+
   destroy(): void {
     if (this.startButton && this.handleStart) {
       this.startButton.removeEventListener('click', this.handleStart);

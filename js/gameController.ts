@@ -34,15 +34,19 @@ import { openingBook } from './ai/OpeningBook.js';
 import {
   OpeningTrainerManager,
   loadTrainerProgress,
+  saveTrainerProgress,
   reconstructBoardFromHash,
+  type TrainerPosition,
 } from './openingTrainer.js';
 import { OpeningTrainerMenu } from './ui/OpeningTrainerMenu.js';
+import type { Square } from './gameEngine.js';
 
 import type { GameModeStrategy } from './modes/GameModeStrategy.js';
 import { SetupModeStrategy } from './modes/strategies/SetupMode.js';
 import { ClassicModeStrategy } from './modes/strategies/ClassicMode.js';
 import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
+import { OpeningTrainerModeStrategy } from './modes/strategies/OpeningTrainerMode.js';
 
 export interface ArrowRendererType {
   clearArrows: () => void;
@@ -90,6 +94,7 @@ export class GameController {
   currentModeStrategy: GameModeStrategy | null = null;
   openingTrainerManager: OpeningTrainerManager | null = null;
   openingTrainerMenu: OpeningTrainerMenu | null = null;
+  currentTrainerPosition: TrainerPosition | null = null;
 
   constructor(game: GameExtended) {
     this.game = game;
@@ -135,7 +140,6 @@ export class GameController {
       this.currentModeStrategy = null; // Puzzle handled ad-hoc or we adhere to legacy for now.
     } else if (mode === 'opening-trainer') {
       this.currentModeStrategy = null;
-      this.startOpeningTrainerMode();
     } else {
       // Fallback
       this.currentModeStrategy = new SetupModeStrategy();
@@ -153,6 +157,11 @@ export class GameController {
     // Initialize basic stuff common to all
     UI.initBoardUI(this.game);
     UI.updateStatus(this.game);
+
+    // Opening-trainer mode must render AFTER the board cells exist
+    if (mode === 'opening-trainer') {
+      this.startOpeningTrainerMode();
+    }
 
     // Delegate to Strategy
     if (this.currentModeStrategy) {
@@ -669,22 +678,6 @@ export class GameController {
     const manager = new OpeningTrainerManager(openingBook, loadTrainerProgress());
     this.openingTrainerManager = manager;
 
-    const loadPosition = (): void => {
-      const pos = manager.getNextPosition();
-      if (!pos) {
-        notificationUI.show('Keine Eröffnungs-Stellungen im Buch gefunden.', 'info');
-        return;
-      }
-      const { board, turn } = reconstructBoardFromHash(pos.hash);
-      this.game.board = board as (PieceWithMoved | null)[][];
-      this.game.turn = turn as Player;
-      UI.renderBoard(this.game);
-      UI.updateStatus(this.game);
-      if (window.battleChess3D && window.battleChess3D.enabled) {
-        window.battleChess3D.updateFromGameState(this.game);
-      }
-    };
-
     const container = document.getElementById('opening-trainer-container');
     if (this.openingTrainerMenu) {
       this.openingTrainerMenu.destroy();
@@ -693,10 +686,71 @@ export class GameController {
       container.innerHTML = '';
     }
     this.openingTrainerMenu = new OpeningTrainerMenu(container ?? document.body, manager, () =>
-      loadPosition()
+      this.loadTrainerPosition()
     );
 
-    loadPosition();
+    // Wire the play-loop strategy: board clicks now go through the trainer.
+    this.currentModeStrategy = new OpeningTrainerModeStrategy(this);
+
+    this.loadTrainerPosition();
+  }
+
+  /**
+   * Load the next opening-book position onto the board. Reconstructs the board
+   * + turn from the position hash and renders it. Does NOT mutate game state
+   * beyond the displayed board (the trainer only checks moves, never plays them).
+   */
+  private loadTrainerPosition(): void {
+    const manager = this.openingTrainerManager;
+    if (!manager) {
+      return;
+    }
+    const pos = manager.getNextPosition();
+    if (!pos) {
+      notificationUI.show('Keine Eröffnungs-Stellungen im Buch gefunden.', 'info');
+      this.currentTrainerPosition = null;
+      return;
+    }
+    this.currentTrainerPosition = pos;
+
+    const { board, turn } = reconstructBoardFromHash(pos.hash);
+    this.game.board = board as (PieceWithMoved | null)[][];
+    this.game.turn = turn as Player;
+    // Clear any stale selection from a previous position (e.g. via Start button).
+    this.game.selectedSquare = null;
+    this.game.validMoves = null;
+    UI.renderBoard(this.game);
+    UI.updateStatus(this.game);
+    if (window.battleChess3D && window.battleChess3D.enabled) {
+      window.battleChess3D.updateFromGameState(this.game);
+    }
+  }
+
+  /**
+   * Handle a move submitted by the player during opening-trainer play.
+   * Checks the move against the book, shows feedback, persists progress,
+   * and advances to the next position.
+   */
+  submitTrainerMove(move: { from: Square; to: Square }): void {
+    const manager = this.openingTrainerManager;
+    const pos = this.currentTrainerPosition;
+    if (!manager || !pos) {
+      return;
+    }
+
+    const result = manager.submitMove(pos, move);
+    const expected = result.expected;
+    const expectedStr = `(${expected.from.r},${expected.from.c})→(${expected.to.r},${expected.to.c})`;
+
+    if (result.correct) {
+      notificationUI.show('Richtig!', 'success');
+    } else {
+      notificationUI.show('Falsch — erwartet: ' + expectedStr, 'error');
+    }
+
+    saveTrainerProgress(manager.progress);
+    this.openingTrainerMenu?.updateProgress();
+    this.loadTrainerPosition();
   }
 
   reloadPage(): void {

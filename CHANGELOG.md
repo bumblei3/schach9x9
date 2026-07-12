@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.1.1] – 2026-07-12
+
+Bugfix-Release für den Eröffnungs-Trainer (v1.1.0): der Play-Loop ließ sich
+nicht korrekt bedienen.
+
+### Fixes
+
+- **Erste Stellung wurde nicht gerendert:** `startOpeningTrainerMode` lief vor
+  `UI.initBoardUI`, sodass das erste Brett leer blieb. Render jetzt nach dem
+  Board-Setup.
+- **Klick-Fallthrough:** Ein Klick auf ein leeres/gegnerisches Feld fiel an
+  `MoveController` durch und selektierte fremde Figuren. Der Trainer schluckt
+  nun jeden In-Phase-Klick.
+- **Stale Selektion:** `loadTrainerPosition` setzt `selectedSquare`/`validMoves`
+  beim Laden einer neuen Stellung zurück (betraf den „Start"-Button-Pfad).
+
+### Tests / Coverage
+
+- Play-Loop-Tests von 7 auf 9 erweitert (Fehler-Zug-Feedback, Klick-Verschlucken).
+- Gesamte Testsuite: 2654 Tests, 0 Regressionen.
+
 ## [1.1.0] – 2026-07-12
 
 Neues Feature: **Eröffnungs-Trainer** (Solo-Spielmodus). Trainiere Eröffnungen aus dem
