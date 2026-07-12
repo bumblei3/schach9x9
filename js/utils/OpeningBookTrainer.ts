@@ -81,6 +81,7 @@ export interface TrainerConfig {
   alternateColors: boolean;
   drawMoveLimit: number;
   quiet: boolean;
+  help: boolean;
 }
 
 const DEFAULT_CONFIG: TrainerConfig = {
@@ -96,6 +97,7 @@ const DEFAULT_CONFIG: TrainerConfig = {
   alternateColors: true,
   drawMoveLimit: 200,
   quiet: false,
+  help: false,
 };
 
 // ============================================================================
@@ -620,14 +622,14 @@ export class OpeningBookTrainer {
 }
 
 // ============================================================================
-// CLI Entry Point
+// CLI Argument Parsing (pure, testable)
 // ============================================================================
 
-async function main(): Promise<void> {
-  console.log('\n\U0001F916 Schach 9x9 Opening Book Trainer (Real Engine)');
-  console.log('===================================================\n');
-
-  const args = process.argv.slice(2);
+/**
+ * Parse CLI arguments into a partial TrainerConfig.
+ * Pure function (no I/O) so it can be unit-tested in isolation from `main`.
+ */
+export function parseCliArgs(args: string[]): Partial<TrainerConfig> {
   const config: Partial<TrainerConfig> = { ...DEFAULT_CONFIG };
 
   for (let i = 0; i < args.length; i++) {
@@ -669,25 +671,42 @@ async function main(): Promise<void> {
         config.quiet = true;
         break;
       case '--help':
-        console.log('\nUsage: npx tsx js/utils/OpeningBookTrainer.ts [options]\n');
-        console.log('Options:');
-        console.log('  --games <n>              Number of games per color (default: 100)');
-        console.log('  --depth <n>              Search depth (default: 8)');
-        console.log('  --time <ms>              Time per move in ms (default: 2000)');
-        console.log('  --opening-plies <n>      Ply to track in opening (default: 25)');
-        console.log('  --min-count <n>          Min games per position (default: 2)');
-        console.log('  --max-moves <n>          Max moves per position (default: 5)');
-        console.log('  --elo <n>                Engine Elo (default: 2500)');
-        console.log(
-          '  --personality <name>     balanced|aggressive|solid|gentle (default: balanced)'
-        );
-        console.log('  --input <file>           Existing book to extend');
-        console.log('  --output <file>          Output book path (default: opening-book.json)');
-        console.log("  --no-alternate           Don't swap colors");
-        console.log('  --quiet                  Suppress progress output');
-        console.log('  --help                   Show this help\n');
-        process.exit(0);
+        config.help = true;
+        break;
     }
+  }
+
+  return config;
+}
+
+// ============================================================================
+// CLI Entry Point
+// ============================================================================
+
+async function main(): Promise<void> {
+  console.log('\n🤖 Schach 9x9 Opening Book Trainer (Real Engine)');
+  console.log('===================================================\n');
+
+  const args = process.argv.slice(2);
+  const config = parseCliArgs(args);
+
+  if (config.help) {
+    console.log('\nUsage: npx tsx js/utils/OpeningBookTrainer.ts [options]\n');
+    console.log('Options:');
+    console.log('  --games <n>              Number of games per color (default: 100)');
+    console.log('  --depth <n>              Search depth (default: 8)');
+    console.log('  --time <ms>              Time per move in ms (default: 2000)');
+    console.log('  --opening-plies <n>      Ply to track in opening (default: 25)');
+    console.log('  --min-count <n>          Min games per position (default: 2)');
+    console.log('  --max-moves <n>          Max moves per position (default: 5)');
+    console.log('  --elo <n>                Engine Elo (default: 2500)');
+    console.log('  --personality <name>     balanced|aggressive|solid|gentle (default: balanced)');
+    console.log('  --input <file>           Existing book to extend');
+    console.log('  --output <file>          Output book path (default: opening-book.json)');
+    console.log("  --no-alternate           Don't swap colors");
+    console.log('  --quiet                  Suppress progress output');
+    console.log('  --help                   Show this help\n');
+    process.exit(0);
   }
 
   const trainer = new OpeningBookTrainer(config);
