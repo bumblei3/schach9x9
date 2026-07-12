@@ -33,17 +33,8 @@ import type { TutorController } from './tutorController.js';
 export type { Player, Square, Piece };
 
 export { BOARD_SIZE, PHASES, PIECE_VALUES, AI_DELAY_MS };
-
-export type GameMode =
-  | 'setup'
-  | 'classic'
-  | 'standard8x8'
-  | 'puzzle'
-  | 'campaign'
-  | 'upgrade'
-  | 'upgrade8x8'
-  | 'cross'
-  | 'opening-trainer';
+import type { GameMode } from './types/gameMode.js';
+export type { GameMode };
 
 export interface PieceWithMoved extends Piece {
   hasMoved: boolean;

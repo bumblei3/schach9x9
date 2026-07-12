@@ -16,7 +16,8 @@ export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j
 
 export type GamePhase = 'SETUP' | 'PLAY' | 'END';
 
-export type GameMode = 'setup' | 'classic' | 'puzzle' | 'campaign' | 'standard8x8';
+import type { GameMode } from './gameMode.js';
+export type { GameMode };
 
 export type BoardShape = 'standard' | 'cross';
 
