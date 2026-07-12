@@ -155,7 +155,7 @@ export const GAME_MODES = {
   OPENING_TRAINER: 'opening-trainer', // Opening trainer drill mode
 } as const;
 
-export type GameMode = (typeof GAME_MODES)[keyof typeof GAME_MODES];
+export type { GameMode } from './types/gameMode.js';
 
 /**
  * Materialwerte für die KI-Bewertung
