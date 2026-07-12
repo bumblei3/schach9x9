@@ -42,7 +42,8 @@ export type GameMode =
   | 'campaign'
   | 'upgrade'
   | 'upgrade8x8'
-  | 'cross';
+  | 'cross'
+  | 'opening-trainer';
 
 export interface PieceWithMoved extends Piece {
   hasMoved: boolean;
