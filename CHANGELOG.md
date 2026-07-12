@@ -3,6 +3,22 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.0.3] – 2026-07-12
+
+Qualitäts-Release: Typsicherheit im Produktivcode geschärft. Keine neuen Features,
+keine Breaking Changes.
+
+### Refactoring / Typsicherheit
+
+- **types:** neues `SavedGameState`-Interface; `savedGameState: unknown` → typisiert (#72)
+- **GameStateManager:** 3 unterdrückte `as any`-Casts entfernt
+  (`window.battleChess3D` bereits typisiert, `savedGameState`-Zugriff mit Null-Guard) (#72)
+- **PieceManager3D:** `game as any` entfernt — `whiteCorridor`/`blackCorridor` sind
+  echte `Game`-Properties (#72)
+- **MoveExecutor:** `defenderData` `as any` → `as Piece` (konsistent mit `attackerData`) (#72)
+- **eslint:** `@typescript-eslint/no-explicit-any` im src von `warn` → `error` gehärtet;
+  verhindert künftige unbemerkte `any`-Einführung (#72)
+
 ## [1.0.2] – 2026-07-12
 
 Wartungs-Release: Fokus auf Code-Qualität (ESLint/Prettier-Bereinigung, tests/
