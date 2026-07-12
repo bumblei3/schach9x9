@@ -3,6 +3,35 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.1.0] – 2026-07-12
+
+Neues Feature: **Eröffnungs-Trainer** (Solo-Spielmodus). Trainiere Eröffnungen aus dem
+trainierten Eröffnungsbuch — eine Stellung wird auf das Brett gelegt, du findest den
+buch-gelisteten Zug, bekommst sofortiges Feedback und dein Fortschritt (Trefferquote,
+Streak, gelöste Linien) wird lokal gespeichert.
+
+### Features
+
+- **Eröffnungs-Trainer-Modus** (`js/openingTrainer.ts`): `OpeningTrainerManager` lädt
+  das `OpeningBook`, wählt eine trainierbare Stellung, prüft den eingereichten Zug
+  gegen den Buch-Zug und führt Streak/Accuracy/Trefferstatistik.
+- **Stellungs-Rekonstruktion:** Buch-Positionen (Hash) werden via
+  `reconstructBoardFromHash` zurück in ein renderbares Brett + Zugrecht gewandelt.
+- **Fortschritt persistiert:** `localStorage` (Key `openingTrainer.progress`),
+  isoliert vom Spiel-Autosave — auto-geladen beim Start, speicherbar nach jeder Runde.
+- **Menü-Shell** (`js/ui/OpeningTrainerMenu.ts`): dünne DOM-Schicht mit Start-Button
+  und Fortschrittsanzeige.
+- **Modus-Verdrahtung:** `GameController.startOpeningTrainerMode()`, `GameMode`
+  um `'opening-trainer'` erweitert, Hauptmenü-Karte + `#opening-trainer-container`
+  in `index.html`.
+
+### Tests / Coverage
+
+- Neue Test-Suite `tests/openingTrainer*.test.ts` (21 Tests): Manager-Logik,
+  Hash-Rekonstruktion (weiß/schwarz, multi-figurig), Persistence (Edge-Cases
+  inkl. korruptem/partiellem JSON), Menü-Shell und Modus-Verdrahtung.
+- Gesamte Testsuite: 2645 Tests, 0 Regressionen.
+
 ## [1.0.4] – 2026-07-12
 
 Qualitäts-Release: Test-Basis für den Eröffnungs-Trainer geschärft. Keine neuen
