@@ -27,10 +27,15 @@ import {
   PIECE_QUEEN,
   PIECE_KING,
   PIECE_ARCHBISHOP,
+  PIECE_CHANCELLOR,
+  PIECE_ANGEL,
+  PIECE_NIGHTRIDER,
   PIECE_PAWN,
   TYPE_MASK,
   COLOR_MASK,
 } from '../js/ai/BoardDefinitions.js';
+
+const makePiece = (type: number, color: number) => type | color;
 
 const rc = (r: number, c: number) => r * 9 + c;
 const typeOf = (b: Int8Array, r: number, c: number) => b[rc(r, c)] & TYPE_MASK;
@@ -196,4 +201,37 @@ describe('getBoardHashInt — position identity', () => {
   test('hash length encodes 81 squares x 2 chars plus the turn char', () => {
     expect(getBoardHashInt(createInitialBoard(), 'white').length).toBe(81 * 2 + 1);
   });
+});
+
+describe('boardToUi / getBoardHashInt — special pieces (a/c/e/j)', () => {
+  // The 9x9 variant adds Archbishop, Chancellor, Angel and Nightrider on top
+  // of the standard set. Their Int->UI/char mappings were untested branches.
+  const cases: { type: number; char: string }[] = [
+    { type: PIECE_ARCHBISHOP, char: 'a' },
+    { type: PIECE_CHANCELLOR, char: 'c' },
+    { type: PIECE_ANGEL, char: 'e' },
+    { type: PIECE_NIGHTRIDER, char: 'j' },
+  ];
+
+  for (const { type, char } of cases) {
+    for (const color of ['white', 'black'] as const) {
+      const colorMask = color === 'white' ? COLOR_WHITE : COLOR_BLACK;
+
+      test(`${char} (${color}) round-trips through boardToUi`, () => {
+        const b = createInitialBoard();
+        b[rc(4, 4)] = makePiece(type, colorMask);
+        const ui = boardToUi(b);
+        expect(ui[4][4]?.type).toBe(char);
+        expect(ui[4][4]?.color).toBe(color);
+      });
+
+      test(`${char} (${color}) round-trips through getBoardHashInt`, () => {
+        const b = createInitialBoard();
+        b[rc(4, 4)] = makePiece(type, colorMask);
+        const h = getBoardHashInt(b, 'white');
+        // position 4*9+4 = 40 -> color-char then type-char at index 80..81
+        expect(h.slice(80, 82)).toBe((color === 'white' ? 'w' : 'b') + char);
+      });
+    }
+  }
 });
