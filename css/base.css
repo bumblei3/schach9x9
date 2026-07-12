@@ -71,6 +71,12 @@
   --z-overlay: 100;
   --z-modal: 200;
   --z-tooltip: 300;
+
+  /* Dynamic viewport units (mobile address-bar safe). Fall back to vh where
+     dvh is unsupported. Use via calc(var(--vh, 1vh) * 100) pattern if needed,
+     but prefer the shorthand below. */
+  --vh-100: 100vh; /* static fallback */
+  --dvh-100: 100vh;
 }
 
 /* --- Reset --- */
@@ -86,9 +92,12 @@
   * {
     touch-action: manipulation;
   }
-  
+
   /* Disable text selection on touch devices for game elements */
-  #board, .cell, .piece-svg, .promotion-option {
+  #board,
+  .cell,
+  .piece-svg,
+  .promotion-option {
     -webkit-user-select: none;
     user-select: none;
   }
@@ -104,7 +113,9 @@
 
 /* Mobile: Prevent zoom on input focus (iOS) */
 @media screen and (max-width: 768px) {
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -120,7 +131,8 @@ body {
     radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
   background-attachment: fixed;
   color: var(--text-main);
-  height: 100vh;
+  height: 100vh; /* fallback for browsers without dvh */
+  height: 100dvh; /* dynamic: accounts for mobile browser chrome */
   margin: 0;
   overflow: hidden;
   display: flex;
@@ -178,6 +190,12 @@ body::before {
 
 /* Buttons / interactive icon controls get a glow instead of a hard outline */
 button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+[tabindex]:not([tabindex='-1']):focus-visible,
+.skin-selector:focus-visible,
 .action-icon-btn:focus-visible,
 .menu-item:focus-visible,
 .menu-tab-btn:focus-visible,
@@ -190,6 +208,53 @@ button:focus-visible,
     0 0 0 2px var(--bg-app),
     0 0 0 4px var(--accent-primary),
     0 0 12px var(--accent-glow);
+}
+
+/* High-contrast mode: thicker, opaque focus ring + stronger borders */
+@media (prefers-contrast: more) {
+  :focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible,
+  input:focus-visible,
+  .action-icon-btn:focus-visible,
+  .icon-btn:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px #000000;
+  }
+
+  .status-pill,
+  .stat-pill {
+    border-color: #ffffff;
+  }
+}
+
+/* Touch devices: enforce a minimum 44x44px hit target on interactive controls
+   (WCAG 2.5.5). The action bar already sizes these at >=44px on small screens;
+   this guards every other interactive element too. */
+@media (pointer: coarse) {
+  button,
+  a,
+  select,
+  input,
+  summary,
+  [tabindex]:not([tabindex='-1']),
+  .menu-item,
+  .shop-item,
+  .gamemode-card,
+  .tab-btn,
+  .icon-btn,
+  .promotion-option {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* But keep the compact icon-only action bar from growing (icons are fine) */
+  .action-icon-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
