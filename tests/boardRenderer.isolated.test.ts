@@ -18,8 +18,11 @@ const { renderBoard } = await import('../js/ui/BoardRenderer.js');
 describe('BoardRenderer Touch Isolation', () => {
   test('renderBoard renders without error', () => {
     document.body.innerHTML = '<div id="board"></div>';
-    (window as any).PIECE_SVGS = { white: { p: '<svg></svg>', k: '<svg></svg>' }, black: { p: '<svg></svg>', k: '<svg></svg>' } };
-    
+    (window as any).PIECE_SVGS = {
+      white: { p: '<svg></svg>', k: '<svg></svg>' },
+      black: { p: '<svg></svg>', k: '<svg></svg>' },
+    };
+
     const game = {
       board: Array(9)
         .fill(null)
@@ -50,7 +53,7 @@ describe('BoardRenderer Touch Isolation', () => {
 
     // Just verify renderBoard runs without throwing
     expect(() => renderBoard(game)).not.toThrow();
-    
+
     // Verify board element exists
     const board = document.getElementById('board');
     expect(board).toBeDefined();

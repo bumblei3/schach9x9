@@ -33,7 +33,14 @@ describe('accounting identity — wins + losses + draws === totalGames', () => {
 
   test('holds after a mixed sequence of saves', () => {
     const results: GameDataInput['result'][] = [
-      'win', 'loss', 'draw', 'win', 'draw', 'win', 'loss', 'win',
+      'win',
+      'loss',
+      'draw',
+      'win',
+      'draw',
+      'win',
+      'loss',
+      'win',
     ];
     for (const r of results) m.saveGame(makeGame({ result: r, opponent: `O-${r}` }));
 
@@ -48,7 +55,7 @@ describe('accounting identity — wins + losses + draws === totalGames', () => {
   test('holds through 200 random results (fuzz)', () => {
     const rng = (() => {
       let x = 0x9e3779b9 >>> 0;
-      return () => ((x = (x * 1664525 + 1013904223) >>> 0) / 0xffffffff);
+      return () => (x = (x * 1664525 + 1013904223) >>> 0) / 0xffffffff;
     })();
     const pool: GameDataInput['result'][] = ['win', 'loss', 'draw'];
     for (let i = 0; i < 200; i++) {
@@ -179,7 +186,9 @@ describe('getStatsByOpponent() partitions the whole history', () => {
     m = new StatisticsManager();
   });
 
-  function sum(opp: Record<string, { wins: number; losses: number; draws: number; totalGames: number }>) {
+  function sum(
+    opp: Record<string, { wins: number; losses: number; draws: number; totalGames: number }>
+  ) {
     const acc = { wins: 0, losses: 0, draws: 0, totalGames: 0 };
     for (const k of Object.keys(opp)) {
       acc.wins += opp[k].wins;
@@ -335,7 +344,10 @@ describe('saveGame applies documented defaults', () => {
   });
 
   test('moves count equals moveHistory length', () => {
-    const history = [{ from: 'a1', to: 'a2' }, { from: 'b1', to: 'b2' }] as unknown as GameRecord['moveHistory'];
+    const history = [
+      { from: 'a1', to: 'a2' },
+      { from: 'b1', to: 'b2' },
+    ] as unknown as GameRecord['moveHistory'];
     m.saveGame(makeGame({ moveHistory: history }));
     const g = m.getGameHistory()[0];
     expect(g.moves).toBe(2);

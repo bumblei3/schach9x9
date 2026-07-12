@@ -4,9 +4,15 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 // methods run end-to-end (exercising every skin branch) instead of early-returning.
 class FakeParam {
   value = 0;
-  setValueAtTime() { return this; }
-  linearRampToValueAtTime() { return this; }
-  exponentialRampToValueAtTime() { return this; }
+  setValueAtTime() {
+    return this;
+  }
+  linearRampToValueAtTime() {
+    return this;
+  }
+  exponentialRampToValueAtTime() {
+    return this;
+  }
 }
 function makeNode() {
   return {
@@ -22,10 +28,18 @@ function makeNode() {
 class FakeAudioContext {
   currentTime = 0;
   destination = {};
-  createOscillator() { return makeNode(); }
-  createGain() { return makeNode(); }
-  createStereoPanner() { return makeNode(); }
-  createBiquadFilter() { return makeNode(); }
+  createOscillator() {
+    return makeNode();
+  }
+  createGain() {
+    return makeNode();
+  }
+  createStereoPanner() {
+    return makeNode();
+  }
+  createBiquadFilter() {
+    return makeNode();
+  }
   constructor() {}
 }
 
@@ -46,7 +60,10 @@ describe('SoundManager — settings persistence', () => {
     // The constructor clears persisted settings by design, so seed storage
     // *after* construction, then invoke loadSettings explicitly.
     const sm = new SoundManager();
-    localStorage.setItem('chess9x9-sound-settings', JSON.stringify({ enabled: false, volume: 0.7 }));
+    localStorage.setItem(
+      'chess9x9-sound-settings',
+      JSON.stringify({ enabled: false, volume: 0.7 })
+    );
     sm.loadSettings();
     expect(sm.enabled).toBe(false);
     expect(sm.volume).toBeCloseTo(0.7);

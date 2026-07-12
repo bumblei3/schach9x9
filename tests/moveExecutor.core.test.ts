@@ -45,7 +45,7 @@ vi.mock('../js/campaign/CampaignManager.js', () => ({
     isTalentUnlocked: vi.fn(() => false),
     addGold: vi.fn(),
     addUnitXp: vi.fn(),
-    getUnitXp: vi.fn(() => ({ level: 1 } as any)),
+    getUnitXp: vi.fn(() => ({ level: 1 }) as any),
   },
 }));
 

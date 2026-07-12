@@ -28,7 +28,11 @@ describe('MoveController.getMaterialValue — base, RPG & champion', () => {
     // Reset the campaignManager singleton's state so tests are isolated
     // (it persists across tests otherwise). `state` is private, accessed
     // via an intentional any-cast for test isolation.
-    (campaignManager as unknown as { state: { unitXp: Record<string, unknown>; championType: string | null } }).state = {
+    (
+      campaignManager as unknown as {
+        state: { unitXp: Record<string, unknown>; championType: string | null };
+      }
+    ).state = {
       unitXp: {},
       championType: null,
     };

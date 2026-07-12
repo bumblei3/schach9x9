@@ -1,4 +1,11 @@
-import { PHASES, type Player, type Square, type PieceWithMoved, type MoveHistoryEntry, type LastMoveInfo } from './gameEngine.js';
+import {
+  PHASES,
+  type Player,
+  type Square,
+  type PieceWithMoved,
+  type MoveHistoryEntry,
+  type LastMoveInfo,
+} from './gameEngine.js';
 import type { GameController, GameExtended } from './gameController.js';
 import * as UI from './ui.js';
 
@@ -99,9 +106,7 @@ export class AnalysisController {
       this.game.moveHistory = [...saved.moveHistory];
       this.game.redoStack = [...saved.redoStack];
       this.game.lastMove = saved.lastMove ? { ...saved.lastMove } : null;
-      this.game.lastMoveHighlight = saved.lastMoveHighlight
-        ? { ...saved.lastMoveHighlight }
-        : null;
+      this.game.lastMoveHighlight = saved.lastMoveHighlight ? { ...saved.lastMoveHighlight } : null;
       this.game.selectedSquare = saved.selectedSquare;
       this.game.validMoves = saved.validMoves;
       this.game.halfMoveClock = saved.halfMoveClock;

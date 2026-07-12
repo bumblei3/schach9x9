@@ -192,7 +192,7 @@ describe('BoardRenderer Full Coverage', () => {
 
     const cell = document.querySelector('.cell[data-r="0"][data-c="0"]') as HTMLElement;
     cell.innerHTML = '<div class="piece-svg"></div>';
-    
+
     // Mock cell dimensions for touch drag calculations
     Object.defineProperty(cell, 'offsetWidth', { value: 64, configurable: true });
     Object.defineProperty(cell, 'offsetHeight', { value: 64, configurable: true });

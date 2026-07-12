@@ -13,9 +13,9 @@ export interface AIPersonality {
   centerControlWeight: number;
   attackWeight: number;
   // Search behavior modifiers
-  aggressionLevel: number;        // 0.5-2.0: affects aspiration windows, pruning thresholds
-  timeManagementFactor: number;   // 0.5-2.0: multiplies allocated time per move
-  riskTolerance: number;          // 0.0-1.0: willingness to play sharp/complex lines
+  aggressionLevel: number; // 0.5-2.0: affects aspiration windows, pruning thresholds
+  timeManagementFactor: number; // 0.5-2.0: multiplies allocated time per move
+  riskTolerance: number; // 0.0-1.0: willingness to play sharp/complex lines
   // Maps to WASM Personality enum
   wasmPersonality: 'AGGRESSIVE' | 'SOLID' | 'GENTLE' | 'NORMAL';
 }
@@ -87,5 +87,3 @@ export const AI_PERSONALITIES: Record<string, AIPersonality> = {
     wasmPersonality: 'AGGRESSIVE',
   },
 };
-
-

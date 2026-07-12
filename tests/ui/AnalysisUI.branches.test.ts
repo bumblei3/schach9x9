@@ -120,7 +120,9 @@ describe('AnalysisUI branch coverage', () => {
   test('updatePanel skips top-moves render when container missing', () => {
     analysisUI.togglePanel();
     analysisUI.topMovesContainer = null;
-    expect(() => analysisUI.updatePanel(100, [{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } } }], 1, 1)).not.toThrow();
+    expect(() =>
+      analysisUI.updatePanel(100, [{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } } }], 1, 1)
+    ).not.toThrow();
   });
 
   test('updatePanel skips engine-info when element missing', () => {
@@ -186,7 +188,9 @@ describe('AnalysisUI branch coverage', () => {
     analysisUI.liveTime = null;
     analysisUI.liveScore = null;
     analysisUI.engineInfo = null;
-    expect(() => analysisUI.updateAnalysisStats({ depth: 1, nodes: 1, score: 1, time: 1 })).not.toThrow();
+    expect(() =>
+      analysisUI.updateAnalysisStats({ depth: 1, nodes: 1, score: 1, time: 1 })
+    ).not.toThrow();
   });
 
   // --- showAnalysisPrompt ---
@@ -316,7 +320,10 @@ describe('AnalysisUI branch coverage', () => {
   test('showSummaryModal opens modal and wires "durchsehen" callback', () => {
     const jumpToMove = vi.fn();
     analysisUI.app.game = { gameController: { jumpToMove } };
-    analysisUI.showSummaryModal({ accuracy: 90, counts: { best: 2 } }, { accuracy: 50, counts: { blunder: 1 } });
+    analysisUI.showSummaryModal(
+      { accuracy: 90, counts: { best: 2 } },
+      { accuracy: 50, counts: { blunder: 1 } }
+    );
     expect(ui.showModal).toHaveBeenCalled();
     const content = (ui.showModal as any).mock.calls[0][1];
     expect(content).toContain('90%');
@@ -328,14 +335,31 @@ describe('AnalysisUI branch coverage', () => {
   });
 
   test('showSummaryModal accuracy class thresholds', () => {
-    const high = analysisUI.showSummaryModal({ accuracy: 90, counts: {} }, { accuracy: 70, counts: {} });
-    const mid = analysisUI.showSummaryModal({ accuracy: 70, counts: {} }, { accuracy: 40, counts: {} });
-    const low = analysisUI.showSummaryModal({ accuracy: 40, counts: {} }, { accuracy: 10, counts: {} });
-    void high; void mid; void low;
+    const high = analysisUI.showSummaryModal(
+      { accuracy: 90, counts: {} },
+      { accuracy: 70, counts: {} }
+    );
+    const mid = analysisUI.showSummaryModal(
+      { accuracy: 70, counts: {} },
+      { accuracy: 40, counts: {} }
+    );
+    const low = analysisUI.showSummaryModal(
+      { accuracy: 40, counts: {} },
+      { accuracy: 10, counts: {} }
+    );
+    void high;
+    void mid;
+    void low;
     // assert the right accuracy classes appear
-    expect((ui.showModal as any).mock.calls.some((c: any) => c[1].includes('accuracy-high'))).toBe(true);
-    expect((ui.showModal as any).mock.calls.some((c: any) => c[1].includes('accuracy-mid'))).toBe(true);
-    expect((ui.showModal as any).mock.calls.some((c: any) => c[1].includes('accuracy-low'))).toBe(true);
+    expect((ui.showModal as any).mock.calls.some((c: any) => c[1].includes('accuracy-high'))).toBe(
+      true
+    );
+    expect((ui.showModal as any).mock.calls.some((c: any) => c[1].includes('accuracy-mid'))).toBe(
+      true
+    );
+    expect((ui.showModal as any).mock.calls.some((c: any) => c[1].includes('accuracy-low'))).toBe(
+      true
+    );
   });
 
   // --- startFullAnalysis ---
@@ -351,7 +375,9 @@ describe('AnalysisUI branch coverage', () => {
     analysisUI.app.game = {
       board,
       turn: 'white',
-      moveHistory: [{ from: { r: 8, c: 4 }, to: { r: 7, c: 4 }, piece: { type: 'k', color: 'white' } }],
+      moveHistory: [
+        { from: { r: 8, c: 4 }, to: { r: 7, c: 4 }, piece: { type: 'k', color: 'white' } },
+      ],
     } as any;
     // no aiController -> no worker -> returns early without driving UI
     await analysisUI.startFullAnalysis();
@@ -371,11 +397,16 @@ describe('AnalysisUI branch coverage', () => {
         handlerRef.fn?.({
           data: {
             type: 'analysis',
-            data: { score: 10, topMoves: [{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 10 }] },
+            data: {
+              score: 10,
+              topMoves: [{ move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 10 }],
+            },
           },
         });
       },
-      addEventListener: (_type: string, fn: any) => { handlerRef.fn = fn; },
+      addEventListener: (_type: string, fn: any) => {
+        handlerRef.fn = fn;
+      },
       removeEventListener: vi.fn(),
     };
     analysisUI.app.game.aiController = { aiWorkers: [worker] };

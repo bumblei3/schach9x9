@@ -136,5 +136,3 @@ describe('ErrorManager', () => {
     (window as any).onunhandledrejection = originalOnUnhandledRejection;
   });
 });
-
-

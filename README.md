@@ -19,7 +19,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Kampagnen-Modus**: Spiele durch verschiedene Level, sammle XP für deine Figuren und schalte mächtige Talente frei.
 - **Talentbaum**: Individualisiere deine Armee mit spezialisierten Fähigkeiten (z.B. Veteran, Plünderer, Unaufhaltsam).
 - **Setup-Phase & Upgrade-Modus**: Platziere deinen König strategisch und verbessere deine Armee dynamisch.
-- **Optimierte KI mit adaptiver Zeitverwaltung**: 
+- **Optimierte KI mit adaptiver Zeitverwaltung**:
   - Alpha-Beta-Suche mit **LMR, Null-Move Pruning, ProbCut, Singular Extensions**
   - **Transposition Table** mit depth-preferred Replacement
   - **Move Ordering** mit MVV-LVA, Killer Moves, History Heuristic, **Threat Detection** (hängende Figuren, entdeckte Angriffe, X-Ray, Fesselungen, Königssicherheit)
@@ -47,13 +47,13 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
-| Name | Stil | Aggression | Zeit-Faktor | Risiko | Interner Typ |
-|------|------|-----------|------------|-------|--------------|
-| **Ausgewogen** | Universell | 1.0 | 1.0 | 0.5 | NORMAL |
-| **Aggressiv** | Taktisch, angriffslustig | 1.5 | 1.2 | 0.8 | AGGRESSIVE |
-| **Defensiv** | Solide, prophylaktisch | 0.6 | 1.1 | 0.2 | SOLID |
-| **Positionell** | Strategisch, langfristig | 0.8 | 1.0 | 0.3 | SOLID |
-| **Der Fallensteller** | Trickreich, opportunistisch | 1.3 | 1.3 | 0.9 | AGGRESSIVE |
+| Name                  | Stil                        | Aggression | Zeit-Faktor | Risiko | Interner Typ |
+| --------------------- | --------------------------- | ---------- | ----------- | ------ | ------------ |
+| **Ausgewogen**        | Universell                  | 1.0        | 1.0         | 0.5    | NORMAL       |
+| **Aggressiv**         | Taktisch, angriffslustig    | 1.5        | 1.2         | 0.8    | AGGRESSIVE   |
+| **Defensiv**          | Solide, prophylaktisch      | 0.6        | 1.1         | 0.2    | SOLID        |
+| **Positionell**       | Strategisch, langfristig    | 0.8        | 1.0         | 0.3    | SOLID        |
+| **Der Fallensteller** | Trickreich, opportunistisch | 1.3        | 1.3         | 0.9    | AGGRESSIVE   |
 
 ### Adaptives Zeitmanagement (`js/ai/timeManagement.ts`)
 
@@ -87,15 +87,16 @@ Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.000 
 
 Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
 
-| Modul | Coverage (Lines) | Beschreibung |
-|-------|------------------|--------------|
-| **Global** | **> 86%** | Gesamtheitliche Codeabdeckung |
-| **AI Engine** | > 90% | Validierung von Suchalgorithmen, Bewertung, Time Management |
-| **3D Engine** | > 95% | PieceManager3D und SceneManager3D |
-| **Logic & Rules** | > 99% | Spielregeln, Move-Validation, Game-State |
-| **UI Components** | > 95% | AnalysisUI, ShopManager, PuzzleMenu |
+| Modul             | Coverage (Lines) | Beschreibung                                                |
+| ----------------- | ---------------- | ----------------------------------------------------------- |
+| **Global**        | **> 86%**        | Gesamtheitliche Codeabdeckung                               |
+| **AI Engine**     | > 90%            | Validierung von Suchalgorithmen, Bewertung, Time Management |
+| **3D Engine**     | > 95%            | PieceManager3D und SceneManager3D                           |
+| **Logic & Rules** | > 99%            | Spielregeln, Move-Validation, Game-State                    |
+| **UI Components** | > 95%            | AnalysisUI, ShopManager, PuzzleMenu                         |
 
 Test-Suite Highlights:
+
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
 - > 2.000 Tests gesamt, alle grün
 - Unit-, Integrations- und E2E-Tests (Playwright)

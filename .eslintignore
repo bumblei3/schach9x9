@@ -1,7 +1,0 @@
-engine-wasm/pkg/
-coverage/
-docs/
-node_modules/
-dist/
-build/
-scripts/

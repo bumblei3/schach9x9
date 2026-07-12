@@ -49,10 +49,13 @@ test.describe('AI Opponent Move', () => {
     await helper.clickCell(6, 4);
 
     // Wait for AI to respond (iterative deepening can take up to 8s)
-    await page.waitForFunction(() => {
-      const app = (window as any).app;
-      return app && app.game && app.game.moveHistory.length >= 2;
-    }, { timeout: 15000 });
+    await page.waitForFunction(
+      () => {
+        const app = (window as any).app;
+        return app && app.game && app.game.moveHistory.length >= 2;
+      },
+      { timeout: 15000 }
+    );
 
     // Second move: white pawn again (after AI moved)
     await helper.clickCell(7, 3);
@@ -60,10 +63,13 @@ test.describe('AI Opponent Move', () => {
     await helper.clickCell(6, 3);
 
     // Wait for second AI response
-    await page.waitForFunction(() => {
-      const app = (window as any).app;
-      return app && app.game && app.game.moveHistory.length >= 4;
-    }, { timeout: 15000 });
+    await page.waitForFunction(
+      () => {
+        const app = (window as any).app;
+        return app && app.game && app.game.moveHistory.length >= 4;
+      },
+      { timeout: 15000 }
+    );
 
     const finalState = await page.evaluate(() => {
       const app = (window as any).app;

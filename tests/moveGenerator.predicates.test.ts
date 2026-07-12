@@ -11,12 +11,7 @@
  */
 
 import { describe, test, expect } from 'vitest';
-import {
-  getAllLegalMoves,
-  isSquareAttacked,
-  isInCheck,
-  findKing,
-} from '../js/ai/MoveGenerator.js';
+import { getAllLegalMoves, isSquareAttacked, isInCheck, findKing } from '../js/ai/MoveGenerator.js';
 import {
   SQUARE_COUNT,
   PIECE_NONE,
@@ -63,14 +58,14 @@ describe('isSquareAttacked — per piece type', () => {
     // blocker stops the ray
     b[rc(4, 2)] = BLACK_ROOK;
     expect(isSquareAttacked(b, rc(4, 0), COLOR_WHITE)).toBe(false); // blocked at (4,2)
-    expect(isSquareAttacked(b, rc(4, 2), COLOR_WHITE)).toBe(true);  // the blocker itself is attacked
+    expect(isSquareAttacked(b, rc(4, 2), COLOR_WHITE)).toBe(true); // the blocker itself is attacked
   });
 
   test('a bishop attacks diagonally only', () => {
     const b = emptyBoard();
     b[rc(4, 4)] = WHITE_BISHOP;
-    expect(isSquareAttacked(b, rc(6, 6), COLOR_WHITE)).toBe(true);  // diagonal
-    expect(isSquareAttacked(b, rc(1, 1), COLOR_WHITE)).toBe(true);  // diagonal other way
+    expect(isSquareAttacked(b, rc(6, 6), COLOR_WHITE)).toBe(true); // diagonal
+    expect(isSquareAttacked(b, rc(1, 1), COLOR_WHITE)).toBe(true); // diagonal other way
     expect(isSquareAttacked(b, rc(4, 0), COLOR_WHITE)).toBe(false); // rank — no
     expect(isSquareAttacked(b, rc(0, 4), COLOR_WHITE)).toBe(false); // file — no
   });
@@ -78,8 +73,8 @@ describe('isSquareAttacked — per piece type', () => {
   test('a knight attacks in its L-pattern, ignoring blockers', () => {
     const b = emptyBoard();
     b[rc(4, 4)] = WHITE_KNIGHT;
-    expect(isSquareAttacked(b, rc(6, 5), COLOR_WHITE)).toBe(true);  // (+2,+1)
-    expect(isSquareAttacked(b, rc(2, 3), COLOR_WHITE)).toBe(true);  // (-2,-1)
+    expect(isSquareAttacked(b, rc(6, 5), COLOR_WHITE)).toBe(true); // (+2,+1)
+    expect(isSquareAttacked(b, rc(2, 3), COLOR_WHITE)).toBe(true); // (-2,-1)
     expect(isSquareAttacked(b, rc(5, 5), COLOR_WHITE)).toBe(false); // diagonal neighbor — no
     expect(isSquareAttacked(b, rc(4, 6), COLOR_WHITE)).toBe(false); // same rank — no
   });

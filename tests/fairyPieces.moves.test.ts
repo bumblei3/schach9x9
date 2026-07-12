@@ -97,8 +97,12 @@ describe('compound-piece identities (derived from move generation)', () => {
 
   test('angel is the strongest piece (most moves) at the center', () => {
     const others = [
-      WHITE_BISHOP, WHITE_ROOK, WHITE_KNIGHT, WHITE_QUEEN,
-      WHITE_ARCHBISHOP, WHITE_CHANCELLOR,
+      WHITE_BISHOP,
+      WHITE_ROOK,
+      WHITE_KNIGHT,
+      WHITE_QUEEN,
+      WHITE_ARCHBISHOP,
+      WHITE_CHANCELLOR,
     ].map(pieceMoves);
     const angel = pieceMoves(WHITE_ANGEL);
     for (const n of others) expect(angel).toBeGreaterThan(n);

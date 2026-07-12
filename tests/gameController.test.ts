@@ -150,8 +150,10 @@ vi.mock('../js/gameEngine.js', () => {
 // Import after mocks
 import { soundManager } from '../js/sounds';
 
-interface TestGame
-  extends Omit<Game, 'log' | 'handlePlayClick' | 'getValidMoves' | 'selectedShopPiece'> {
+interface TestGame extends Omit<
+  Game,
+  'log' | 'handlePlayClick' | 'getValidMoves' | 'selectedShopPiece'
+> {
   log: MockInstance;
   handlePlayClick: MockInstance;
   getValidMoves: MockInstance;

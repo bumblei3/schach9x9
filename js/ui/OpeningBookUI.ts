@@ -2,7 +2,13 @@
  * Opening Book UI Component for Schach 9x9
  * Displays detailed opening database information, statistics, and book moves
  */
-import { getOpeningEntry, getOpeningsByCategory, getTopOpenings, searchOpenings, OPENING_DATABASE } from '../ai/OpeningDatabase.js';
+import {
+  getOpeningEntry,
+  getOpeningsByCategory,
+  getTopOpenings,
+  searchOpenings,
+  OPENING_DATABASE,
+} from '../ai/OpeningDatabase.js';
 import { getBoardHash } from '../move/MoveValidator.js';
 import type { Game } from '../gameEngine.js';
 import { PHASES } from '../config.js';
@@ -63,20 +69,22 @@ export class OpeningBookUI {
       topOpeningsList: document.getElementById('top-openings-list'),
       searchInput: document.getElementById('opening-search') as HTMLInputElement | null,
       searchResults: document.getElementById('opening-search-results'),
-      categoryFilter: document.getElementById('opening-category-filter') as HTMLSelectElement | null,
+      categoryFilter: document.getElementById(
+        'opening-category-filter'
+      ) as HTMLSelectElement | null,
     };
   }
 
   private bindEvents(): void {
     if (this.elements.searchInput) {
-      this.elements.searchInput.addEventListener('input', (e) => {
+      this.elements.searchInput.addEventListener('input', e => {
         const query = (e.target as HTMLInputElement).value.trim();
         this.handleSearch(query);
       });
     }
 
     if (this.elements.categoryFilter) {
-      this.elements.categoryFilter.addEventListener('change', (e) => {
+      this.elements.categoryFilter.addEventListener('change', e => {
         const category = (e.target as HTMLSelectElement).value;
         this.handleCategoryFilter(category);
       });
@@ -167,7 +175,8 @@ export class OpeningBookUI {
         </div>
       `;
     } else {
-      this.elements.bookMovesList.innerHTML = '<div class="no-book-moves">Kein Buchzug für diese Stellung</div>';
+      this.elements.bookMovesList.innerHTML =
+        '<div class="no-book-moves">Kein Buchzug für diese Stellung</div>';
     }
   }
 
@@ -200,7 +209,8 @@ export class OpeningBookUI {
     if (!this.elements.searchResults) return;
 
     if (entries.length === 0) {
-      this.elements.searchResults.innerHTML = '<div class="no-results">Keine Eröffnungen gefunden</div>';
+      this.elements.searchResults.innerHTML =
+        '<div class="no-results">Keine Eröffnungen gefunden</div>';
       return;
     }
 
@@ -219,10 +229,17 @@ export class OpeningBookUI {
       .join('');
   }
 
-  private renderOpeningEntry(entry: NonNullable<ReturnType<typeof getOpeningEntry>>, compact = false): string {
-    const winRateColor = entry.whiteWinRate > entry.blackWinRate ? 'white' : 
-                         entry.blackWinRate > entry.whiteWinRate ? 'black' : 'draw';
-    
+  private renderOpeningEntry(
+    entry: NonNullable<ReturnType<typeof getOpeningEntry>>,
+    compact = false
+  ): string {
+    const winRateColor =
+      entry.whiteWinRate > entry.blackWinRate
+        ? 'white'
+        : entry.blackWinRate > entry.whiteWinRate
+          ? 'black'
+          : 'draw';
+
     return `
       <div class="opening-entry${compact ? ' compact' : ''}" data-eco="${entry.eco}" data-name="${entry.name}">
         <div class="opening-entry-header">
@@ -263,20 +280,21 @@ export class OpeningBookUI {
   }
 
   toggle(): void {
-    if (this.isVisible) this.hide(); else this.show();
+    if (this.isVisible) this.hide();
+    else this.show();
   }
 
   private populateCategoryFilter(): void {
     if (!this.elements.categoryFilter) return;
 
     const categories = new Set<string>();
-    
+
     Object.values(OPENING_DATABASE).forEach(entry => {
       categories.add(entry.category);
     });
 
     const sortedCategories = Array.from(categories).sort();
-    
+
     this.elements.categoryFilter.innerHTML = `
       <option value="all">Alle Kategorien</option>
       ${sortedCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}

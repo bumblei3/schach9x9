@@ -74,7 +74,7 @@ describe('NotificationUI', () => {
     const active = document.querySelectorAll('.toast-notification:not(.hiding)');
     expect(active.length).toBe(4);
     const messages = Array.from(active).map(
-      (t) => (t.querySelector('.toast-message') as HTMLElement).textContent
+      t => (t.querySelector('.toast-message') as HTMLElement).textContent
     );
     expect(messages).toEqual(['Toast 3', 'Toast 4', 'Toast 5', 'Toast 6']);
   });

@@ -48,7 +48,9 @@ describe('AI Engine - Coverage for Untested Paths', () => {
     });
 
     test('getAllLegalMoves should handle 8x8 board (classic)', () => {
-      const uiBoard = Array(8).fill(null).map(() => Array(8).fill(null));
+      const uiBoard = Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(null));
       uiBoard[7][4] = { type: 'k', color: 'white', hasMoved: false };
       uiBoard[0][4] = { type: 'k', color: 'black', hasMoved: false };
       const moves = AIEngine.getAllLegalMoves(uiBoard as any, 'white');
@@ -58,11 +60,16 @@ describe('AI Engine - Coverage for Untested Paths', () => {
     test('getAllLegalMoves should map all piece types correctly', () => {
       const uiBoard = createMinimalBoard();
       const pieces: Array<{ type: Exclude<PieceType, null>; color: Player }> = [
-        { type: 'p', color: 'white' }, { type: 'n', color: 'white' },
-        { type: 'b', color: 'white' }, { type: 'r', color: 'white' },
-        { type: 'q', color: 'white' }, { type: 'k', color: 'white' },
-        { type: 'a', color: 'white' }, { type: 'c', color: 'white' },
-        { type: 'e', color: 'white' }, { type: 'j', color: 'white' },
+        { type: 'p', color: 'white' },
+        { type: 'n', color: 'white' },
+        { type: 'b', color: 'white' },
+        { type: 'r', color: 'white' },
+        { type: 'q', color: 'white' },
+        { type: 'k', color: 'white' },
+        { type: 'a', color: 'white' },
+        { type: 'c', color: 'white' },
+        { type: 'e', color: 'white' },
+        { type: 'j', color: 'white' },
       ];
       pieces.forEach((p, i) => {
         uiBoard[4][i] = { ...p, hasMoved: false };
@@ -153,7 +160,9 @@ describe('AI Engine - Coverage for Untested Paths', () => {
       const callback = vi.fn();
       AIEngine.setProgressCallback(callback);
       // A real search should invoke the progress callback at least once.
-      const board = Array(9).fill(null).map(() => Array(9).fill(null));
+      const board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       board[7][4] = { type: 'k', color: 'white' };
       board[1][4] = { type: 'k', color: 'black' };
       await AIEngine.getBestMoveDetailed(board, 'white', 2, { elo: 2500 });
@@ -457,7 +466,9 @@ describe('AI Engine - Coverage for Untested Paths', () => {
 
   describe('Cross Board Shape', () => {
     test('getAllLegalMoves should work with blocked corners', () => {
-      const testBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+      const testBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(null));
       testBoard[8][4] = { type: 'k', color: 'white', hasMoved: false };
       testBoard[0][4] = { type: 'k', color: 'black', hasMoved: false };
       testBoard[4][4] = { type: 'b', color: 'white', hasMoved: false };
@@ -467,5 +478,3 @@ describe('AI Engine - Coverage for Untested Paths', () => {
     });
   });
 });
-
-

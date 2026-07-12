@@ -405,7 +405,14 @@ export class App {
     GP.evaluatePosition = function (color: Player) {
       return app.aiController!.evaluatePosition?.(color);
     };
-    GP.updateAIProgress = function (data: { depth?: number; maxDepth?: number; nodes?: number; bestMove?: { from: { r: number; c: number }; to: { r: number; c: number } } } | null) {
+    GP.updateAIProgress = function (
+      data: {
+        depth?: number;
+        maxDepth?: number;
+        nodes?: number;
+        bestMove?: { from: { r: number; c: number }; to: { r: number; c: number } };
+      } | null
+    ) {
       return app.aiController!.updateAIProgress(data);
     };
     GP.aiEvaluateDrawOffer = function () {
@@ -452,7 +459,11 @@ export class App {
     GP.getScoreDescription = function (score: number) {
       return app.tutorController!.getScoreDescription(score);
     };
-    GP.analyzeMoveWithExplanation = function (move: { from: Square; to: Square }, score: number, best: number) {
+    GP.analyzeMoveWithExplanation = function (
+      move: { from: Square; to: Square },
+      score: number,
+      best: number
+    ) {
       return app.tutorController!.analyzeMoveWithExplanation(move, score, best);
     };
 

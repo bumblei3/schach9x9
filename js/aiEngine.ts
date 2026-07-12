@@ -30,9 +30,22 @@ import {
   // Note: Piece constants (PIECE_*, COLOR_*) are re-exported from BoardDefinitions below
 } from './ai/MoveGenerator';
 import {
-  SQUARE_COUNT, PIECE_NONE, PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP,
-  PIECE_ROOK, PIECE_QUEEN, PIECE_KING, PIECE_ARCHBISHOP, PIECE_CHANCELLOR,
-  PIECE_ANGEL, PIECE_NIGHTRIDER, COLOR_WHITE, COLOR_BLACK, TYPE_MASK, COLOR_MASK,
+  SQUARE_COUNT,
+  PIECE_NONE,
+  PIECE_PAWN,
+  PIECE_KNIGHT,
+  PIECE_BISHOP,
+  PIECE_ROOK,
+  PIECE_QUEEN,
+  PIECE_KING,
+  PIECE_ARCHBISHOP,
+  PIECE_CHANCELLOR,
+  PIECE_ANGEL,
+  PIECE_NIGHTRIDER,
+  COLOR_WHITE,
+  COLOR_BLACK,
+  TYPE_MASK,
+  COLOR_MASK,
 } from './ai/BoardDefinitions';
 import type { Player, Square, Piece, PieceType } from './types/game';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
@@ -88,7 +101,7 @@ export interface SearchResult {
   score: number;
   depth: number;
   nodes: number;
-  pv?: string;  // Principal variation as UCI move string
+  pv?: string; // Principal variation as UCI move string
 }
 
 export interface UndoInfo {
@@ -103,15 +116,29 @@ type IntBoard = Int8Array;
 // --- Board conversion ---
 
 const TYPE_MAP_TO_INT: Record<string, number> = {
-  p: PIECE_PAWN, n: PIECE_KNIGHT, b: PIECE_BISHOP, r: PIECE_ROOK,
-  q: PIECE_QUEEN, k: PIECE_KING, a: PIECE_ARCHBISHOP, c: PIECE_CHANCELLOR,
-  e: PIECE_ANGEL, j: PIECE_NIGHTRIDER,
+  p: PIECE_PAWN,
+  n: PIECE_KNIGHT,
+  b: PIECE_BISHOP,
+  r: PIECE_ROOK,
+  q: PIECE_QUEEN,
+  k: PIECE_KING,
+  a: PIECE_ARCHBISHOP,
+  c: PIECE_CHANCELLOR,
+  e: PIECE_ANGEL,
+  j: PIECE_NIGHTRIDER,
 };
 
 const TYPE_INT_TO_STR: Record<number, string> = {
-  [PIECE_PAWN]: 'p', [PIECE_KNIGHT]: 'n', [PIECE_BISHOP]: 'b', [PIECE_ROOK]: 'r',
-  [PIECE_QUEEN]: 'q', [PIECE_KING]: 'k', [PIECE_ARCHBISHOP]: 'a', [PIECE_CHANCELLOR]: 'c',
-  [PIECE_ANGEL]: 'e', [PIECE_NIGHTRIDER]: 'j',
+  [PIECE_PAWN]: 'p',
+  [PIECE_KNIGHT]: 'n',
+  [PIECE_BISHOP]: 'b',
+  [PIECE_ROOK]: 'r',
+  [PIECE_QUEEN]: 'q',
+  [PIECE_KING]: 'k',
+  [PIECE_ARCHBISHOP]: 'a',
+  [PIECE_CHANCELLOR]: 'c',
+  [PIECE_ANGEL]: 'e',
+  [PIECE_NIGHTRIDER]: 'j',
 };
 
 export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
@@ -133,7 +160,9 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 
 // --- Board conversion ---
 
-function convertMoveToResult(move: { from: number; to: number; promotion?: number } | null): MoveResult | null {
+function convertMoveToResult(
+  move: { from: number; to: number; promotion?: number } | null
+): MoveResult | null {
   if (!move) return null;
   const size = 9;
   return {
@@ -158,8 +187,11 @@ export function getParamsForElo(elo: number): EloParams {
 // --- Public API ---
 
 export async function getBestMove(
-  uiBoard: UiBoard, turnColor: Player, maxDepth: number = 4,
-  _difficulty: string = 'expert', timeParams: TimeParams = {}
+  uiBoard: UiBoard,
+  turnColor: Player,
+  maxDepth: number = 4,
+  _difficulty: string = 'expert',
+  timeParams: TimeParams = {}
 ): Promise<MoveResult | null> {
   const result = await getBestMoveDetailed(uiBoard, turnColor, maxDepth, timeParams);
   if (!result || !result.move) return null;
@@ -169,15 +201,20 @@ export async function getBestMove(
 }
 
 export async function getBestMoveDetailed(
-  uiBoard: UiBoard, turnColor: Player, maxDepth: number = 4,
-  timeParams: TimeParams = {}, moveNumber?: number
+  uiBoard: UiBoard,
+  turnColor: Player,
+  maxDepth: number = 4,
+  timeParams: TimeParams = {},
+  moveNumber?: number
 ): Promise<SearchResult | null> {
   const board = convertBoardToInt(uiBoard);
 
   if (moveNumber !== undefined && moveNumber < 25) {
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
     if (bookMove) {
-      logger.info(`[AiEngine] Opening Book Move: ${bookMove.from.r},${bookMove.from.c} -> ${bookMove.to.r},${bookMove.to.c}`);
+      logger.info(
+        `[AiEngine] Opening Book Move: ${bookMove.from.r},${bookMove.from.c} -> ${bookMove.to.r},${bookMove.to.c}`
+      );
       return { move: bookMove, score: 0, depth: 0, nodes: 0 };
     }
   }
@@ -203,7 +240,8 @@ export async function getBestMoveDetailed(
     tacticalBoard as unknown as ReadonlyArray<number>,
     turnColor === 'white' ? 16 : 32,
     (b: ReadonlyArray<number>, c: string) => genLegalInt(b as unknown as IntBoard, c as Player),
-    (b: ReadonlyArray<number>, sq: number, byColor: number) => isSquareAttackedInt(b as unknown as IntBoard, sq, byColor)
+    (b: ReadonlyArray<number>, sq: number, byColor: number) =>
+      isSquareAttackedInt(b as unknown as IntBoard, sq, byColor)
   );
 
   // Count pieces for game phase detection
@@ -231,12 +269,14 @@ export async function getBestMoveDetailed(
   };
 
   const timeAllocResult = calculateTimeAllocation(timeAllocParams);
-  
+
   // Use adaptive depth and time
   const adaptiveMaxDepth = timeAllocResult.targetDepth;
   const timeLimitMs = timeAllocResult.allocatedTimeMs;
-  
-  logger.debug(`[AiEngine] Adaptive time: ${timeLimitMs}ms, depth: ${adaptiveMaxDepth}, reason: ${timeAllocResult.timeBudgetInfo.reason}, emergency: ${timeAllocResult.timeBudgetInfo.emergencyReserve}`);
+
+  logger.debug(
+    `[AiEngine] Adaptive time: ${timeLimitMs}ms, depth: ${adaptiveMaxDepth}, reason: ${timeAllocResult.timeBudgetInfo.reason}, emergency: ${timeAllocResult.timeBudgetInfo.emergencyReserve}`
+  );
 
   // Override maxDepth with adaptive value
   maxDepth = adaptiveMaxDepth;
@@ -259,7 +299,16 @@ export async function getBestMoveDetailed(
       if (Math.random() < blunderChance) {
         const top = await getTopMoves(uiBoard, turnColor, 3, 1);
         // Pick from candidates other than the best move (guaranteed suboptimal)
-        const alternatives = top.filter(t => t.move && !(t.move.from.r === move?.from.r && t.move.from.c === move?.from.c && t.move.to.r === move?.to.r && t.move.to.c === move?.to.c));
+        const alternatives = top.filter(
+          t =>
+            t.move &&
+            !(
+              t.move.from.r === move?.from.r &&
+              t.move.from.c === move?.from.c &&
+              t.move.to.r === move?.to.r &&
+              t.move.to.c === move?.to.c
+            )
+        );
         if (alternatives.length > 0) {
           const pick = alternatives[Math.floor(Math.random() * alternatives.length)];
           move = pick.move;
@@ -283,7 +332,11 @@ interface JsSearchResult {
 }
 
 async function runJsSearch(
-  board: IntBoard, turnColor: Player, maxDepth: number, _elo: number, personality: string
+  board: IntBoard,
+  turnColor: Player,
+  maxDepth: number,
+  _elo: number,
+  personality: string
 ): Promise<JsSearchResult> {
   const jsSearch = createJsSearch({ personality: personality as EvalConfig['personality'] });
   const result = await jsSearch.run(board, turnColor, maxDepth);
@@ -294,8 +347,12 @@ async function runJsSearch(
 // --- Top Moves (tutor) ---
 
 export async function getTopMoves(
-  uiBoard: UiBoard, turnColor: Player, count: number = 3,
-  searchDepth: number = 2, maxTimeMs: number = 5000, moveNumber?: number
+  uiBoard: UiBoard,
+  turnColor: Player,
+  count: number = 3,
+  searchDepth: number = 2,
+  maxTimeMs: number = 5000,
+  moveNumber?: number
 ): Promise<SearchResult[]> {
   const board = convertBoardToInt(uiBoard);
   const bookMoves: SearchResult[] = [];
@@ -315,11 +372,14 @@ export async function getTopMoves(
     for (let i = 0; i < SQUARE_COUNT; i++) {
       const p = b[i];
       if (p !== PIECE_NONE) {
-        const type = p & TYPE_MASK, pColor = p & COLOR_MASK;
+        const type = p & TYPE_MASK,
+          pColor = p & COLOR_MASK;
         const val = EVAL_VALUES[type] || 0;
-        const row = Math.floor(i / 9), col = i % 9;
+        const row = Math.floor(i / 9),
+          col = i % 9;
         const cb = 4 - Math.abs(row - 4) + (4 - Math.abs(col - 4));
-        if (pColor === color) s += val + cb * 5; else s -= val + cb * 5;
+        if (pColor === color) s += val + cb * 5;
+        else s -= val + cb * 5;
       }
     }
     return s;
@@ -347,7 +407,9 @@ export async function getTopMoves(
       const jsResult = await runJsSearch(board, turnColor, loopDepth, perCandidateMs, 'NORMAL');
       if (jsResult) moveScores.push({ move: candidate.move, score: jsResult.score });
       else moveScores.push({ move: candidate.move, score: candidate.score });
-    } catch { moveScores.push({ move: candidate.move, score: candidate.score }); }
+    } catch {
+      moveScores.push({ move: candidate.move, score: candidate.score });
+    }
   }
   moveScores.sort((a, b) => b.score - a.score);
 
@@ -363,15 +425,23 @@ export async function getTopMoves(
     moveScores.sort((a, b) => b.score - a.score);
   }
 
-  return [...bookMoves, ...moveScores.slice(0, count).map(ms => ({
-    move: convertMoveToResult(ms.move as unknown as { from: number; to: number }),
-    score: ms.score, depth: loopDepth, nodes: 0,
-  }))];
+  return [
+    ...bookMoves,
+    ...moveScores.slice(0, count).map(ms => ({
+      move: convertMoveToResult(ms.move as unknown as { from: number; to: number }),
+      score: ms.score,
+      depth: loopDepth,
+      nodes: 0,
+    })),
+  ];
 }
 
 // --- Position Analysis ---
 
-export async function analyzePosition(uiBoard: UiBoard, turnColor: Player): Promise<SearchResult | null> {
+export async function analyzePosition(
+  uiBoard: UiBoard,
+  turnColor: Player
+): Promise<SearchResult | null> {
   return getBestMoveDetailed(uiBoard, turnColor, 4, {});
 }
 
@@ -390,12 +460,12 @@ export function extractPV(_uiBoard: UiBoard, _turnColor: Player): MoveResult[] {
 export function getAllLegalMoves(uiBoard: UiBoard, turnColor: Player): MoveResult[] {
   const board = convertBoardToInt(uiBoard);
   const intMoves = genLegalInt(board, turnColor);
-  return intMoves.map(m => convertMoveToResult(m as unknown as { from: number; to: number })).filter(Boolean) as MoveResult[];
+  return intMoves
+    .map(m => convertMoveToResult(m as unknown as { from: number; to: number }))
+    .filter(Boolean) as MoveResult[];
 }
 
-export function isSquareAttacked(
-  uiBoard: UiBoard, r: number, c: number, color: Player
-): boolean {
+export function isSquareAttacked(uiBoard: UiBoard, r: number, c: number, color: Player): boolean {
   const board = convertBoardToInt(uiBoard);
   const size = uiBoard.length;
   return isSquareAttackedInt(board, r * size + c, color === 'white' ? COLOR_WHITE : COLOR_BLACK);
@@ -438,23 +508,35 @@ export function isInCheck(uiBoard: UiBoard, color: Player): boolean {
   return checkInt(board, c);
 }
 
-export function getNodesEvaluated(): number { return jsNodesEvaluated; }
-export function resetNodesEvaluated(): void { jsNodesEvaluated = 0; }
+export function getNodesEvaluated(): number {
+  return jsNodesEvaluated;
+}
+export function resetNodesEvaluated(): void {
+  jsNodesEvaluated = 0;
+}
 
 // --- Legacy stubs ---
 
 export const PST: Record<string, number[]> = { p: [], n: [], b: [], r: [], q: [], k: [] };
 export function storeTT(): void {}
 export function probeTT(): void {}
-export function getTTMove(): null { return null; }
+export function getTTMove(): null {
+  return null;
+}
 export function clearTT(): void {}
-export function getTTSize(): number { return 0; }
+export function getTTSize(): number {
+  return 0;
+}
 export function setTTMaxSize(): void {}
 export function testStoreTT(): void {}
 export function testProbeTT(): void {}
 
 export interface AIProgressData {
-  depth?: number; nodes?: number; time?: number; score?: number; pv?: string;
+  depth?: number;
+  nodes?: number;
+  time?: number;
+  score?: number;
+  pv?: string;
   [key: string]: number | string | undefined;
 }
 
@@ -464,6 +546,27 @@ export function setProgressCallback(_cb: ((_progress: AIProgressData) => void) |
 }
 
 // Re-exports
-export { logger, setOpeningBook, queryOpeningBook, getAllCaptureMoves, getAllThreats, getKingThreats, getXRayThreats, getDiscoveredAttackPotential, type ThreatInfo, PIECE_KING, PIECE_QUEEN, COLOR_WHITE, COLOR_BLACK, PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_ARCHBISHOP, PIECE_CHANCELLOR, PIECE_ANGEL, PIECE_NIGHTRIDER, PIECE_NONE };
-
-
+export {
+  logger,
+  setOpeningBook,
+  queryOpeningBook,
+  getAllCaptureMoves,
+  getAllThreats,
+  getKingThreats,
+  getXRayThreats,
+  getDiscoveredAttackPotential,
+  type ThreatInfo,
+  PIECE_KING,
+  PIECE_QUEEN,
+  COLOR_WHITE,
+  COLOR_BLACK,
+  PIECE_PAWN,
+  PIECE_KNIGHT,
+  PIECE_BISHOP,
+  PIECE_ROOK,
+  PIECE_ARCHBISHOP,
+  PIECE_CHANCELLOR,
+  PIECE_ANGEL,
+  PIECE_NIGHTRIDER,
+  PIECE_NONE,
+};

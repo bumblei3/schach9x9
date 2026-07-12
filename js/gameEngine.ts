@@ -170,9 +170,17 @@ export class Game {
   analysisManager?: AnalysisManager;
   arrowRenderer?: {
     clearArrows: () => void;
-    drawArrow?: (_fromR: number, _fromC: number, _toR: number, _toC: number, _color: string) => void;
+    drawArrow?: (
+      _fromR: number,
+      _fromC: number,
+      _toR: number,
+      _toC: number,
+      _color: string
+    ) => void;
     addArrow?: (..._args: unknown[]) => void;
-    highlightMoves?: (_arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
+    highlightMoves?: (
+      _arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]
+    ) => void;
   };
   evaluationBar?: { show: (_visible: boolean) => void; update: (_score: number) => void };
   campaignMode?: boolean;

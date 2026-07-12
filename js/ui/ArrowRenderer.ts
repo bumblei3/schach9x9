@@ -27,14 +27,7 @@ export function drawArrow(
   boardContainer: HTMLElement,
   options: ArrowOptions
 ): SVGSVGElement | null {
-  const {
-    from,
-    to,
-    color = '#6366f1',
-    headSize = 14,
-    strokeWidth = 4,
-    animate = true,
-  } = options;
+  const { from, to, color = '#6366f1', headSize = 14, strokeWidth = 4, animate = true } = options;
 
   // Remove existing arrows first
   clearArrows(boardContainer);
@@ -47,9 +40,7 @@ export function drawArrow(
   const fromCell = boardEl.querySelector(
     `.cell[data-r="${from.r}"][data-c="${from.c}"]`
   ) as HTMLElement;
-  const toCell = boardEl.querySelector(
-    `.cell[data-r="${to.r}"][data-c="${to.c}"]`
-  ) as HTMLElement;
+  const toCell = boardEl.querySelector(`.cell[data-r="${to.r}"][data-c="${to.c}"]`) as HTMLElement;
 
   if (!fromCell || !toCell) return null;
 
@@ -148,7 +139,7 @@ export function drawArrow(
 export function clearArrows(boardContainer: HTMLElement | null): void {
   if (!boardContainer || typeof boardContainer.querySelectorAll !== 'function') return;
   const arrows = boardContainer.querySelectorAll('.last-move-arrow');
-  arrows.forEach((arrow) => arrow.remove());
+  arrows.forEach(arrow => arrow.remove());
 }
 
 /**

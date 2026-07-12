@@ -4,7 +4,9 @@ import type { Square, PieceType } from '../js/types/game.js';
 
 describe('Debug Hash Compare', () => {
   it('should compare hashes', () => {
-    const initialBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const initialBoard = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     const pieceTypes = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'a'];
     pieceTypes.forEach((type, c) => {
       initialBoard[0][c] = { type: type, color: 'black', hasMoved: false };
@@ -17,12 +19,18 @@ describe('Debug Hash Compare', () => {
 
     const book = new OpeningBook();
 
-    const moveHistory: { from: Square; to: Square; piece: PieceType; captured?: PieceType; promotion?: PieceType }[] = [
-      { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' },      // White e4
-      { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' },      // Black e5
-      { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' },      // White d4
-      { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' },      // Black d5
-      { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: 'p' },      // White e4->e5
+    const moveHistory: {
+      from: Square;
+      to: Square;
+      piece: PieceType;
+      captured?: PieceType;
+      promotion?: PieceType;
+    }[] = [
+      { from: { r: 7, c: 4 }, to: { r: 5, c: 4 }, piece: 'p' }, // White e4
+      { from: { r: 1, c: 4 }, to: { r: 3, c: 4 }, piece: 'p' }, // Black e5
+      { from: { r: 7, c: 3 }, to: { r: 5, c: 3 }, piece: 'p' }, // White d4
+      { from: { r: 1, c: 3 }, to: { r: 3, c: 3 }, piece: 'p' }, // Black d5
+      { from: { r: 5, c: 4 }, to: { r: 4, c: 4 }, piece: 'p' }, // White e4->e5
       { from: { r: 3, c: 3 }, to: { r: 4, c: 4 }, piece: 'p', captured: 'p' }, // Black d5xe4
     ];
 
@@ -30,12 +38,14 @@ describe('Debug Hash Compare', () => {
 
     // Now check what hash my test simulation produces for move 2
     const board = initialBoard.map(row => [...row]);
-    board[5][4] = board[7][4]; board[7][4] = null; // White e4
-    board[3][4] = board[1][4]; board[1][4] = null; // Black e5
-    
+    board[5][4] = board[7][4];
+    board[7][4] = null; // White e4
+    board[3][4] = board[1][4];
+    board[1][4] = null; // Black e5
+
     const testHash = book.getBoardHash(board, 'white');
     console.log('Test hash for move 2:', testHash);
-    
+
     // Check stored hashes
     console.log('Stored hashes:');
     for (const hash of Object.keys(book.data.positions)) {
@@ -56,7 +66,7 @@ describe('Debug Hash Compare', () => {
     }
     boardStr += 'w';
     console.log('Test board hash:', boardStr);
-    
+
     // Debug test: the serialized board must be non-empty and include the
     // appended side-to-move marker.
     expect(boardStr.length).toBeGreaterThan(0);

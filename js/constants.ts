@@ -13,8 +13,8 @@ export const DRAW_OFFER_THRESHOLD_HIGH = -100;
 export const DRAW_OFFER_MIN_MOVES = 20;
 
 /** Schwellenwerte für KI-Remis-Akzeptanz */
-export const DRAW_ACCEPT_SCORE_MAX = 50;       // Math.abs(score) < 50
-export const DRAW_ACCEPT_MOVES_MIN = 40;       // moveHistory.length > 40
+export const DRAW_ACCEPT_SCORE_MAX = 50; // Math.abs(score) < 50
+export const DRAW_ACCEPT_MOVES_MIN = 40; // moveHistory.length > 40
 
 /** Half-Move-Clock Wert, ab dem KI Remis akzeptiert (50-Züge-Regel) */
 export const HALF_MOVE_CLOCK_NEAR_50 = 80;

@@ -41,7 +41,10 @@ class ErrorManager {
    * @param error
    * @param options
    */
-  handleError(error: unknown, options: { context?: string; critical?: boolean; meta?: Record<string, unknown> } = {}): void {
+  handleError(
+    error: unknown,
+    options: { context?: string; critical?: boolean; meta?: Record<string, unknown> } = {}
+  ): void {
     const context = options.context || 'App';
     const isCritical = options.critical || false;
 

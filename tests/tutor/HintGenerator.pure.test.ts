@@ -21,10 +21,19 @@ vi.mock('../../js/aiEngine.js', () => ({
   getKingThreats: vi.fn(() => []),
   getXRayThreats: vi.fn(() => []),
   getDiscoveredAttackPotential: vi.fn(() => []),
-  PIECE_PAWN: 1, PIECE_KNIGHT: 2, PIECE_BISHOP: 3, PIECE_ROOK: 4,
-  PIECE_QUEEN: 5, PIECE_KING: 6, PIECE_ARCHBISHOP: 7, PIECE_CHANCELLOR: 8,
-  PIECE_ANGEL: 9, PIECE_NIGHTRIDER: 10, PIECE_NONE: 0,
-  COLOR_WHITE: 16, COLOR_BLACK: 32,
+  PIECE_PAWN: 1,
+  PIECE_KNIGHT: 2,
+  PIECE_BISHOP: 3,
+  PIECE_ROOK: 4,
+  PIECE_QUEEN: 5,
+  PIECE_KING: 6,
+  PIECE_ARCHBISHOP: 7,
+  PIECE_CHANCELLOR: 8,
+  PIECE_ANGEL: 9,
+  PIECE_NIGHTRIDER: 10,
+  PIECE_NONE: 0,
+  COLOR_WHITE: 16,
+  COLOR_BLACK: 32,
 }));
 
 const UI = await import('../../js/ui.js');
@@ -41,7 +50,9 @@ const {
 // Minimal Game stub covering only what the pure helpers touch.
 function makeGame(overrides: any = {}): any {
   const g: any = {
-    board: Array(9).fill(null).map(() => Array(9).fill(null)),
+    board: Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null)),
     rulesEngine: { findKing: vi.fn(() => ({ r: 8, c: 4 })) },
     whiteCorridor: 3,
     blackCorridor: 3,
@@ -71,7 +82,10 @@ describe('HintGenerator.getSquareScore — per piece-type heuristics', () => {
   const base = makeGame();
 
   test('pawn in front row scores highest, more with a king nearby', () => {
-    const noKing = getSquareScore(6, 4, 'p', true, { ...base, rulesEngine: { findKing: () => null } });
+    const noKing = getSquareScore(6, 4, 'p', true, {
+      ...base,
+      rulesEngine: { findKing: () => null },
+    });
     const withKingFront = getSquareScore(7, 4, 'p', true, base); // king at (8,4) -> in front
     expect(withKingFront).toBeGreaterThan(noKing);
     // middle row (7) = 20, king at (8,4) in front (+50) -> 70
@@ -107,12 +121,19 @@ describe('HintGenerator.getSquareScore — per piece-type heuristics', () => {
 
   test('black orientation maps rows symmetrically', () => {
     // black back row is 0, front row is 2
-    const blackPawnFront = getSquareScore(2, 4, 'p', false, { ...base, rulesEngine: { findKing: () => ({ r: 0, c: 4 }) } });
+    const blackPawnFront = getSquareScore(2, 4, 'p', false, {
+      ...base,
+      rulesEngine: { findKing: () => ({ r: 0, c: 4 }) },
+    });
     expect(blackPawnFront).toBe(40); // front row only (king at row 0 is 2 away, no bonus)
   });
 
   test('uses provided availableKingPos over rulesEngine lookup', () => {
-    const g = { ...base, availableKingPos: { r: 7, c: 4 }, rulesEngine: { findKing: vi.fn(() => null) } };
+    const g = {
+      ...base,
+      availableKingPos: { r: 7, c: 4 },
+      rulesEngine: { findKing: vi.fn(() => null) },
+    };
     const score = getSquareScore(8, 4, 'p', true, g); // pawn back row, king at (7,4) -> diag front (+30)
     expect(score).toBe(50);
   });
@@ -235,7 +256,9 @@ describe('HintGenerator.applySetupTemplate — guards', () => {
 
   test('returns early when corridor is not a number', () => {
     const g = makeGame({ phase: 'SETUP_WHITE_PIECES', whiteCorridor: undefined });
-    const ctrl = { getSetupTemplates: () => [{ id: 'x', name: 'x', description: '', pieces: ['r'], cost: 5 }] };
+    const ctrl = {
+      getSetupTemplates: () => [{ id: 'x', name: 'x', description: '', pieces: ['r'], cost: 5 }],
+    };
     applySetupTemplate(g, ctrl, 'x');
     expect(UI.renderBoard).not.toHaveBeenCalled();
   });
@@ -244,7 +267,9 @@ describe('HintGenerator.applySetupTemplate — guards', () => {
     const g = makeGame({ phase: 'SETUP_WHITE_PIECES', initialPoints: 12 });
     applySetupTemplate(g, {}, 'fortress_12');
     // fortress_12 places a rook -> something landed in the white corridor
-    const placed = [6, 7, 8].some(r => [3, 4, 5].some(c => g.board[r][c] && g.board[r][c].type === 'r'));
+    const placed = [6, 7, 8].some(r =>
+      [3, 4, 5].some(c => g.board[r][c] && g.board[r][c].type === 'r')
+    );
     expect(placed).toBe(true);
     expect(UI.renderBoard).toHaveBeenCalled();
   });

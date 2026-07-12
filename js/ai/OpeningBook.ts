@@ -167,7 +167,13 @@ export class OpeningBook {
    * Called after each game to reinforce moves that led to victory.
    */
   applyGameResult(
-    moveHistory: { from: Square; to: Square; piece: PieceType; captured?: PieceType; promotion?: PieceType }[],
+    moveHistory: {
+      from: Square;
+      to: Square;
+      piece: PieceType;
+      captured?: PieceType;
+      promotion?: PieceType;
+    }[],
     playerColor: Player,
     result: 'win' | 'loss' | 'draw',
     initialBoard: (Piece | null)[][]
@@ -177,9 +183,9 @@ export class OpeningBook {
 
     // Helper: create a piece object from char and color
     const makePiece = (ch: PieceType | undefined, color: Player): Piece => ({
-    type: (ch || 'p') as Piece['type'],
-    color,
-    hasMoved: false,
+      type: (ch || 'p') as Piece['type'],
+      color,
+      hasMoved: false,
     });
 
     for (let i = 0; i < moveHistory.length; i++) {
@@ -214,7 +220,7 @@ export class OpeningBook {
 
       // Find existing move in book
       const existing = pos.moves.find(
-        (m) =>
+        m =>
           m.from.r === moveFrom.r &&
           m.from.c === moveFrom.c &&
           m.to.r === moveTo.r &&

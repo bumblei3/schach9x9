@@ -129,4 +129,3 @@ export class TimeManager {
     UI.updateClockUI(this.game);
   }
 }
-

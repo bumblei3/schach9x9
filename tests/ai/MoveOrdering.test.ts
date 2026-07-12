@@ -192,11 +192,11 @@ describe('MoveOrdering - Comprehensive Tests', () => {
     it('should prioritize non-captures that attack high-value enemy pieces', () => {
       // White queen on e4 (4*9+4=40), black rook on e7 (7*9+4=67) - queen attacks rook along file
       board[40] = PIECE_QUEEN | COLOR_WHITE; // e4
-      board[67] = PIECE_ROOK | COLOR_BLACK;  // e7
+      board[67] = PIECE_ROOK | COLOR_BLACK; // e7
 
       const moves = [
         { from: 40, to: 49 }, // Qe4-e5 (attacks rook on e7 along file)
-        { from: 1, to: 2 },   // random quiet move
+        { from: 1, to: 2 }, // random quiet move
       ];
 
       const ordered = orderMoves(board, moves, null, null, null, null);
@@ -207,9 +207,9 @@ describe('MoveOrdering - Comprehensive Tests', () => {
     it('should prioritize moves giving check', () => {
       // White queen on h5 (5*9+7=52), black king on g8 (0*9+6=6) - Qh5-g6# gives check
       board[52] = PIECE_QUEEN | COLOR_WHITE; // h5
-      board[6] = PIECE_KING | COLOR_BLACK;   // g8 (row 0, col 6)
+      board[6] = PIECE_KING | COLOR_BLACK; // g8 (row 0, col 6)
       // Queen on h5 attacks g6 (4*9+6=42) which gives check to king on g8
-      board[15] = PIECE_PAWN | COLOR_WHITE;  // f2 pawn (not necessary but safe)
+      board[15] = PIECE_PAWN | COLOR_WHITE; // f2 pawn (not necessary but safe)
 
       const moves = [
         { from: 15, to: 24 }, // f2-f3 (quiet)
@@ -223,11 +223,11 @@ describe('MoveOrdering - Comprehensive Tests', () => {
     it('should prioritize captures of hanging (undefended) pieces', () => {
       // White knight on d4 (4*9+3=39), black queen on e5 (5*9+4=49) - queen is undefended
       board[39] = PIECE_KNIGHT | COLOR_WHITE; // d4
-      board[49] = PIECE_QUEEN | COLOR_BLACK;  // e5
+      board[49] = PIECE_QUEEN | COLOR_BLACK; // e5
 
       const moves = [
         { from: 39, to: 49 }, // Nd4xe5 (capture hanging queen)
-        { from: 1, to: 2 },   // random quiet move
+        { from: 1, to: 2 }, // random quiet move
       ];
 
       const ordered = orderMoves(board, moves, null, null, null, null);
@@ -239,12 +239,12 @@ describe('MoveOrdering - Comprehensive Tests', () => {
       // White bishop on e2 (7*9+4=67) blocks rook's attack on king
       // Moving bishop from e2 to f3 exposes king to check
       board[76] = PIECE_KING | COLOR_WHITE; // e1
-      board[13] = PIECE_ROOK | COLOR_BLACK;  // e8
+      board[13] = PIECE_ROOK | COLOR_BLACK; // e8
       board[67] = PIECE_BISHOP | COLOR_WHITE; // e2
 
       const moves = [
         { from: 67, to: 59 }, // Be2-f3 (exposes king on e1 to rook on e8)
-        { from: 1, to: 2 },   // random quiet move
+        { from: 1, to: 2 }, // random quiet move
       ];
 
       const ordered = orderMoves(board, moves, null, null, null, null);
@@ -257,11 +257,11 @@ describe('MoveOrdering - Comprehensive Tests', () => {
       // Moving bishop from b2 discovers rook's attack on queen along diagonal
       board[72] = PIECE_ROOK | COLOR_WHITE; // a1
       board[64] = PIECE_BISHOP | COLOR_WHITE; // b2
-      board[56] = PIECE_QUEEN | COLOR_BLACK;  // c3
+      board[56] = PIECE_QUEEN | COLOR_BLACK; // c3
 
       const moves = [
         { from: 64, to: 55 }, // Bb2-a3 (discovers Ra1-c3 attack on queen)
-        { from: 1, to: 2 },   // random quiet move
+        { from: 1, to: 2 }, // random quiet move
       ];
 
       const ordered = orderMoves(board, moves, null, null, null, null);

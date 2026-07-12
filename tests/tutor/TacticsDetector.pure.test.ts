@@ -25,7 +25,9 @@ function gameWith(board: any, extra: any = {}) {
 }
 
 function emptyBoard() {
-  return Array(9).fill(null).map(() => Array(9).fill(null));
+  return Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(null));
 }
 
 describe('TacticsDetector.canPieceMove', () => {
@@ -68,9 +70,7 @@ describe('TacticsDetector.detectRemovingGuard (covers canPieceAttackSquare)', ()
     const g = gameWith(board, {
       isSquareUnderAttack: vi.fn().mockReturnValue(true),
       // black rook at (4,4) attacks the white queen at (4,6) -> attackersNow = 1 > defendersNow = 0
-      getValidMoves: vi.fn((r: number, c: number) =>
-        r === 4 && c === 4 ? [{ r: 4, c: 6 }] : []
-      ),
+      getValidMoves: vi.fn((r: number, c: number) => (r === 4 && c === 4 ? [{ r: 4, c: 6 }] : [])),
     });
     // capturedPiece (white rook) at (4,4) could attack (4,6): rook along rank -> true
     const res = detectRemovingGuard(g, analyzer, { r: 4, c: 4 }, { type: 'r', color: 'white' });
@@ -105,9 +105,7 @@ describe('TacticsDetector.detectSkewers', () => {
     board[4][6] = { type: 'q', color: 'black', hasMoved: false }; // front (valuable)
     board[4][8] = { type: 'p', color: 'black', hasMoved: false }; // behind (less)
     const g = gameWith(board, {
-      getValidMoves: vi.fn((r: number, c: number) =>
-        r === 4 && c === 4 ? [{ r: 4, c: 6 }] : []
-      ),
+      getValidMoves: vi.fn((r: number, c: number) => (r === 4 && c === 4 ? [{ r: 4, c: 6 }] : [])),
     });
     const sk = detectSkewers(g, analyzer, { r: 4, c: 4 }, 'white');
     expect(sk.length).toBe(1);
@@ -121,9 +119,7 @@ describe('TacticsDetector.detectSkewers', () => {
     board[4][6] = { type: 'p', color: 'black', hasMoved: false }; // front (less)
     board[4][8] = { type: 'q', color: 'black', hasMoved: false }; // behind (more)
     const g = gameWith(board, {
-      getValidMoves: vi.fn((r: number, c: number) =>
-        r === 4 && c === 4 ? [{ r: 4, c: 6 }] : []
-      ),
+      getValidMoves: vi.fn((r: number, c: number) => (r === 4 && c === 4 ? [{ r: 4, c: 6 }] : [])),
     });
     expect(detectSkewers(g, analyzer, { r: 4, c: 4 }, 'white')).toEqual([]);
   });
@@ -166,9 +162,7 @@ describe('TacticsDetector.detectPins', () => {
     board[4][6] = { type: 'n', color: 'black', hasMoved: false }; // pinned piece
     board[4][8] = { type: 'k', color: 'black', hasMoved: false }; // king behind
     const g = gameWith(board, {
-      getValidMoves: vi.fn((r: number, c: number) =>
-        r === 4 && c === 4 ? [{ r: 4, c: 6 }] : []
-      ),
+      getValidMoves: vi.fn((r: number, c: number) => (r === 4 && c === 4 ? [{ r: 4, c: 6 }] : [])),
     });
     const pins = detectPins(g, analyzer, { r: 4, c: 4 }, 'white');
     expect(pins.length).toBe(1);
@@ -196,7 +190,9 @@ describe('TacticsDetector.detectDiscoveredAttacks', () => {
     board[2][2] = { type: 'q', color: 'black', hasMoved: false };
     // enemy not on the rook's line through `from` -> no discovered attack
     const g = gameWith(board);
-    expect(detectDiscoveredAttacks(g, analyzer, { r: 0, c: 1 }, { r: 0, c: 0 }, 'white')).toEqual([]);
+    expect(detectDiscoveredAttacks(g, analyzer, { r: 0, c: 1 }, { r: 0, c: 0 }, 'white')).toEqual(
+      []
+    );
   });
 });
 
@@ -237,14 +233,19 @@ describe('TacticsDetector.detectTacticalPatterns guards', () => {
 
   test('returns [] when there is no piece at from', () => {
     const g = gameWith(emptyBoard());
-    expect(detectTacticalPatterns(g, analyzer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })).toEqual([]);
+    expect(
+      detectTacticalPatterns(g, analyzer, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } })
+    ).toEqual([]);
   });
 
   test('capture pattern is produced for a capturing move', () => {
     const board = emptyBoard();
     board[4][4] = { type: 'r', color: 'white', hasMoved: false };
     board[4][6] = { type: 'p', color: 'black', hasMoved: false };
-    const patterns = detectTacticalPatterns(gameWith(board), analyzer, { from: { r: 4, c: 4 }, to: { r: 4, c: 6 } });
+    const patterns = detectTacticalPatterns(gameWith(board), analyzer, {
+      from: { r: 4, c: 4 },
+      to: { r: 4, c: 6 },
+    });
     expect(patterns.some((p: any) => p.type === 'capture')).toBe(true);
   });
 
@@ -254,7 +255,10 @@ describe('TacticsDetector.detectTacticalPatterns guards', () => {
     board[4][6] = { type: 'k', color: 'black', hasMoved: false };
     const g = gameWith(board, { isInCheck: vi.fn().mockReturnValue(true) });
     board[4][6] = null; // remove king so the scan finds none
-    const patterns = detectTacticalPatterns(g, analyzer, { from: { r: 4, c: 4 }, to: { r: 4, c: 6 } });
+    const patterns = detectTacticalPatterns(g, analyzer, {
+      from: { r: 4, c: 4 },
+      to: { r: 4, c: 6 },
+    });
     const check = patterns.find((p: any) => p.type === 'check');
     expect(check).toBeTruthy();
     expect(check!.targets).toEqual([]);

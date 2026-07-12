@@ -25,13 +25,23 @@ export function showPostGameStats(
   // Build stats HTML
   const renderCounts = (counts: Record<string, number>): string => {
     const order: string[] = [
-      'brilliant', 'great', 'best', 'excellent', 'good',
-      'inaccuracy', 'mistake', 'blunder', 'book'
+      'brilliant',
+      'great',
+      'best',
+      'excellent',
+      'good',
+      'inaccuracy',
+      'mistake',
+      'blunder',
+      'book',
     ];
     return order
       .filter(q => counts[q] > 0)
       .map(q => {
-        const meta = PostGameAnalyzerModule.QUALITY_METADATA[q as keyof typeof PostGameAnalyzerModule.QUALITY_METADATA];
+        const meta =
+          PostGameAnalyzerModule.QUALITY_METADATA[
+            q as keyof typeof PostGameAnalyzerModule.QUALITY_METADATA
+          ];
         if (!meta) return '';
         return `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 6px;padding:2px 8px;border-radius:4px;background:${meta.color}22;border:1px solid ${meta.color}44;color:${meta.color};font-size:0.75rem;font-weight:600;">
           ${meta.symbol} ${meta.label}: ${counts[q]}
@@ -84,7 +94,11 @@ export function showPostGameStats(
 /**
  * Triggers the full post-game analysis using AnalysisUI
  */
-async function showPostGameAnalysis(game: { moveHistory: MoveHistoryEntry[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } }): Promise<void> {
+async function showPostGameAnalysis(game: {
+  moveHistory: MoveHistoryEntry[];
+  playerColor: 'white' | 'black';
+  gameController?: { jumpToMove: (_n: number) => void };
+}): Promise<void> {
   // Import dynamically to avoid circular deps
   const mod = await import('./AnalysisUI.js');
 
@@ -96,15 +110,23 @@ async function showPostGameAnalysis(game: { moveHistory: MoveHistoryEntry[]; pla
       playerColor: game.playerColor,
       gameController: game.gameController
         ? { ...game.gameController, jumpToMove: game.gameController.jumpToMove }
-        : undefined
-    }
-  } as { game: { moveHistory: MoveHistoryEntry[]; playerColor: 'white' | 'black'; gameController?: { jumpToMove: (_n: number) => void } } };
+        : undefined,
+    },
+  } as {
+    game: {
+      moveHistory: MoveHistoryEntry[];
+      playerColor: 'white' | 'black';
+      gameController?: { jumpToMove: (_n: number) => void };
+    };
+  };
 
   const AnalysisUI = mod.AnalysisUI;
   const analysisUI = new AnalysisUI(app);
 
   // Use existing AnalysisUI method to show summary
-  const analysisUI_ = analysisUI as unknown as { showSummaryModal: (_w: unknown, _b: unknown) => void };
+  const analysisUI_ = analysisUI as unknown as {
+    showSummaryModal: (_w: unknown, _b: unknown) => void;
+  };
 
   const { analyzeGame: analyzeGameLocal } = await import('../tutor/PostGameAnalyzer.js');
   const whiteStats = analyzeGameLocal(app.game.moveHistory, 'white');

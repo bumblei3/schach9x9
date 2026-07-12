@@ -14,11 +14,25 @@
 import { describe, test, expect } from 'vitest';
 import { evaluate, EVAL_VALUES } from '../js/evaluate.js';
 import {
-  WHITE_PAWN, WHITE_ROOK, WHITE_QUEEN, WHITE_KING, WHITE_KNIGHT,
-  BLACK_PAWN, BLACK_ROOK, BLACK_KING, BLACK_KNIGHT,
-  COLOR_WHITE, COLOR_BLACK,
-  PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_QUEEN, PIECE_KING,
-  PIECE_NONE, TYPE_MASK,
+  WHITE_PAWN,
+  WHITE_ROOK,
+  WHITE_QUEEN,
+  WHITE_KING,
+  WHITE_KNIGHT,
+  BLACK_PAWN,
+  BLACK_ROOK,
+  BLACK_KING,
+  BLACK_KNIGHT,
+  COLOR_WHITE,
+  COLOR_BLACK,
+  PIECE_PAWN,
+  PIECE_KNIGHT,
+  PIECE_BISHOP,
+  PIECE_ROOK,
+  PIECE_QUEEN,
+  PIECE_KING,
+  PIECE_NONE,
+  TYPE_MASK,
 } from '../js/ai/BoardDefinitions.js';
 
 const idx = (r: number, c: number) => r * 9 + c;
@@ -62,10 +76,14 @@ describe('evaluate — symmetric position is balanced', () => {
     const b = emptyBoard();
     // Mirror: white piece at (r,c) and identical black piece at (8-r, 8-c).
     const pieces: Array<[number, number, number]> = [
-      [4, 4, WHITE_KING], [4, 0, BLACK_KING],
-      [6, 1, WHITE_PAWN], [2, 7, BLACK_PAWN],
-      [3, 3, WHITE_KNIGHT], [5, 5, BLACK_KNIGHT],
-      [1, 2, WHITE_ROOK], [7, 6, BLACK_ROOK],
+      [4, 4, WHITE_KING],
+      [4, 0, BLACK_KING],
+      [6, 1, WHITE_PAWN],
+      [2, 7, BLACK_PAWN],
+      [3, 3, WHITE_KNIGHT],
+      [5, 5, BLACK_KNIGHT],
+      [1, 2, WHITE_ROOK],
+      [7, 6, BLACK_ROOK],
     ];
     for (const [r, c, p] of pieces) b[idx(r, c)] = p;
 
@@ -96,12 +114,14 @@ describe('evaluate — piece-square table effects', () => {
 
   test('a pawn on the promotion rank (row 0) is worth more than on row 6', () => {
     const b1 = emptyBoard();
-    b1[idx(4, 4)] = WHITE_KING; b1[idx(4, 0)] = BLACK_KING;
+    b1[idx(4, 4)] = WHITE_KING;
+    b1[idx(4, 0)] = BLACK_KING;
     b1[idx(0, 4)] = WHITE_PAWN;
     const s1 = evaluate(b1, COLOR_WHITE);
 
     const b2 = emptyBoard();
-    b2[idx(4, 4)] = WHITE_KING; b2[idx(4, 0)] = BLACK_KING;
+    b2[idx(4, 4)] = WHITE_KING;
+    b2[idx(4, 0)] = BLACK_KING;
     b2[idx(6, 4)] = WHITE_PAWN;
     const s2 = evaluate(b2, COLOR_WHITE);
 
@@ -128,8 +148,10 @@ describe('evaluate — king placement / safety signal', () => {
 describe('evaluate — personality weights', () => {
   test('evaluation is deterministic and stable for a fixed position', () => {
     const b = emptyBoard();
-    b[idx(4, 4)] = WHITE_KING; b[idx(4, 0)] = BLACK_KING;
-    b[idx(2, 2)] = WHITE_ROOK; b[idx(6, 6)] = BLACK_ROOK;
+    b[idx(4, 4)] = WHITE_KING;
+    b[idx(4, 0)] = BLACK_KING;
+    b[idx(2, 2)] = WHITE_ROOK;
+    b[idx(6, 6)] = BLACK_ROOK;
     const a = evaluate(b, COLOR_WHITE);
     const c = evaluate(b, COLOR_WHITE);
     expect(c).toBe(a);
@@ -140,8 +162,10 @@ describe('evaluate — personality weights', () => {
     // observable contract: identical material but a position with an exposed
     // enemy king should differ between AGGRESSIVE (rewards attack) and SOLID.
     const b = emptyBoard();
-    b[idx(4, 4)] = WHITE_KING; b[idx(0, 0)] = BLACK_KING; // black king exposed
-    b[idx(2, 2)] = WHITE_ROOK; b[idx(6, 6)] = BLACK_ROOK;
+    b[idx(4, 4)] = WHITE_KING;
+    b[idx(0, 0)] = BLACK_KING; // black king exposed
+    b[idx(2, 2)] = WHITE_ROOK;
+    b[idx(6, 6)] = BLACK_ROOK;
 
     const aggressive = evaluate(b, COLOR_WHITE, { personality: 'AGGRESSIVE' });
     const solid = evaluate(b, COLOR_WHITE, { personality: 'SOLID' });
@@ -155,7 +179,14 @@ describe('evaluate — personality weights', () => {
 
 describe('EVAL_VALUES consistency', () => {
   test('values are strictly ordered by nominal piece strength', () => {
-    const order = [PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_QUEEN, PIECE_KING] as const;
+    const order = [
+      PIECE_PAWN,
+      PIECE_KNIGHT,
+      PIECE_BISHOP,
+      PIECE_ROOK,
+      PIECE_QUEEN,
+      PIECE_KING,
+    ] as const;
     for (let i = 1; i < order.length; i++) {
       expect(EVAL_VALUES[order[i]]).toBeGreaterThan(EVAL_VALUES[order[i - 1]]);
     }
@@ -172,7 +203,7 @@ describe('EVAL_VALUES consistency', () => {
     for (const t of types) {
       expect(EVAL_VALUES[t]).toBeGreaterThan(0);
       // Sanity: TYPE_MASK extract produces a valid key.
-      expect((t & TYPE_MASK)).toBe(t);
+      expect(t & TYPE_MASK).toBe(t);
     }
   });
 });

@@ -39,10 +39,15 @@ test.describe('3D Mode Toggle @3d', () => {
     await expect(container3d.locator('canvas')).toBeAttached({ timeout: 30000 });
 
     // Wait for WebGL context to be ready (additional check)
-    await page.waitForFunction(() => {
-      const canvas = document.querySelector<HTMLCanvasElement>('#battle-chess-3d-container canvas');
-      return canvas && canvas.width > 0 && canvas.height > 0;
-    }, { timeout: 30000 });
+    await page.waitForFunction(
+      () => {
+        const canvas = document.querySelector<HTMLCanvasElement>(
+          '#battle-chess-3d-container canvas'
+        );
+        return canvas && canvas.width > 0 && canvas.height > 0;
+      },
+      { timeout: 30000 }
+    );
 
     // Toggle OFF - use the actual click handler
     await toggleBtn.click();

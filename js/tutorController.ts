@@ -41,7 +41,10 @@ interface TutorControllerLike {
   showBlunderWarning(_analysis: MoveExplanation, _callback: () => void): void;
   getSetupTemplates(): SetupTemplate[];
   handlePlayerMove(_from: { r: number; c: number }, _to: { r: number; c: number }): void;
-  analyzePlayerMovePreExecution(_move: { from: { r: number; c: number }; to: { r: number; c: number } }): Promise<MoveExplanation | null>;
+  analyzePlayerMovePreExecution(_move: {
+    from: { r: number; c: number };
+    to: { r: number; c: number };
+  }): Promise<MoveExplanation | null>;
 }
 
 interface ScoreDescription {
@@ -173,7 +176,15 @@ export class TutorController implements TutorControllerLike {
   }
 
   public showBlunderWarning(analysis: MoveExplanation, callback: () => void): void {
-    return showBlunderWarning(this.game as Game & { moveController?: { undoMove: () => void }; undoMove?: () => void; lastEval?: number }, analysis, callback);
+    return showBlunderWarning(
+      this.game as Game & {
+        moveController?: { undoMove: () => void };
+        undoMove?: () => void;
+        lastEval?: number;
+      },
+      analysis,
+      callback
+    );
   }
 
   public getSetupTemplates(): SetupTemplate[] {

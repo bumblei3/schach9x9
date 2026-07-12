@@ -91,9 +91,22 @@ describe('Full AI Flow - player move triggers AI move execution', () => {
     game.finishMove = () => moveController.finishMove();
 
     gameController.moveController = moveController;
-    gameController.shopManager = { updateShopUI: vi.fn(), selectShopPiece: vi.fn(), placeShopPiece: vi.fn() };
+    gameController.shopManager = {
+      updateShopUI: vi.fn(),
+      selectShopPiece: vi.fn(),
+      placeShopPiece: vi.fn(),
+    };
     gameController.statisticsManager = { updateStats: vi.fn(), recordGameStart: vi.fn() };
-    gameController.timeManager = { startClock: vi.fn(), stopClock: vi.fn(), switchTurn: vi.fn(), setTimeControl: vi.fn(), updateClockVisibility: vi.fn(), tickClock: vi.fn(), updateClockDisplay: vi.fn(), updateClockUI: vi.fn() };
+    gameController.timeManager = {
+      startClock: vi.fn(),
+      stopClock: vi.fn(),
+      switchTurn: vi.fn(),
+      setTimeControl: vi.fn(),
+      updateClockVisibility: vi.fn(),
+      tickClock: vi.fn(),
+      updateClockDisplay: vi.fn(),
+      updateClockUI: vi.fn(),
+    };
 
     gameController.initGame(10, 'classic');
   });

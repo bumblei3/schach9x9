@@ -146,12 +146,17 @@ export class PuzzleManager {
       puzzleId: puzzle.id,
       solved: false,
       failed: false,
-      solution: puzzle.solution.map(m => ({ 
-        from: m.from, 
-        to: m.to, 
-        promotion: undefined, 
-        piece: m.piece ?? 'p' 
-      })) as Array<{ from: { r: number; c: number }; to: { r: number; c: number }; promotion?: PieceType; piece: PieceType }>,
+      solution: puzzle.solution.map(m => ({
+        from: m.from,
+        to: m.to,
+        promotion: undefined,
+        piece: m.piece ?? 'p',
+      })) as Array<{
+        from: { r: number; c: number };
+        to: { r: number; c: number };
+        promotion?: PieceType;
+        piece: PieceType;
+      }>,
     };
 
     // Apply setup from string or function

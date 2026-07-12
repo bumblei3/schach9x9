@@ -96,7 +96,7 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
         moveNumber,
         phase: game.phase,
         isAI: game.isAI,
-        boardSize: game.board.length
+        boardSize: game.board.length,
       });
       return [];
     }
@@ -854,9 +854,9 @@ function createMockHints(game: Game, turnColor: 'white' | 'black'): TutorHint[] 
       promotion: move.promotion,
     },
     score: 100 - index * 20, // Decreasing scores
-    notation: ((game as { getTutorHints?: () => unknown }).getTutorHints?.()
+    notation: (game as { getTutorHints?: () => unknown }).getTutorHints?.()
       ? getMoveNotation(game, move)
-      : `${move.from.r},${move.from.c}→${move.to.r},${move.to.c}`),
+      : `${move.from.r},${move.from.c}→${move.to.r},${move.to.c}`,
     analysis: {
       move: { from: move.from, to: move.to },
       score: 100 - index * 20,

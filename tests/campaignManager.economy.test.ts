@@ -104,7 +104,8 @@ describe('CampaignManager unlock idempotency', () => {
   test('unlockLevel is idempotent (no duplicate entries)', () => {
     manager.unlockLevel('level_2');
     manager.unlockLevel('level_2');
-    const unlocked = (manager as unknown as { state: { unlockedLevels: string[] } }).state.unlockedLevels;
+    const unlocked = (manager as unknown as { state: { unlockedLevels: string[] } }).state
+      .unlockedLevels;
     const count = unlocked.filter((id: string) => id === 'level_2').length;
     expect(count).toBe(1);
     expect(manager.isLevelUnlocked('level_2')).toBe(true);

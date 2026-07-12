@@ -25,9 +25,7 @@ export class TooltipManager {
     document.addEventListener(
       'pointerdown',
       e => {
-        const target = (e.target as HTMLElement).closest(
-          '[data-tooltip]'
-        ) as HTMLElement | null;
+        const target = (e.target as HTMLElement).closest('[data-tooltip]') as HTMLElement | null;
         if (!target) return;
         const text = target.getAttribute('data-tooltip');
         if (!text) return;

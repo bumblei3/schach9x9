@@ -491,8 +491,7 @@ export class Tutorial {
 
     // Update navigation
     this.prevBtn.disabled = this.currentStep === 0;
-    this.nextBtn.textContent =
-      this.currentStep === this.steps.length - 1 ? 'Fertig ✓' : 'Weiter ▶';
+    this.nextBtn.textContent = this.currentStep === this.steps.length - 1 ? 'Fertig ✓' : 'Weiter ▶';
     this.currentStepEl.textContent = (this.currentStep + 1).toString();
   }
 }

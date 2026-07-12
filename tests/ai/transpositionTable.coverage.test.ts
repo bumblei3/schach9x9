@@ -49,45 +49,45 @@ describe('TranspositionTable - Branch Coverage', () => {
       const board2 = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
       board1[0] = 1 | 16; // white pawn at 0
       board2[0] = 1 | 32; // black pawn at 0
-      
+
       const hash1 = computeZobristHash(board1);
       const hash2 = computeZobristHash(board2);
-      
+
       expect(hash1).not.toBe(hash2);
     });
 
     test('should include sideToMove in hash when provided', () => {
       const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
       board[0] = 1 | 16; // white pawn at 0
-      
+
       const hashWhite = computeZobristHash(board, COLOR_WHITE);
       const hashBlack = computeZobristHash(board, COLOR_BLACK);
-      
+
       expect(hashWhite).not.toBe(hashBlack);
     });
 
     test('should handle all piece types in hash computation', () => {
       const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
-      
+
       // Place all piece types at different squares
       const pieces = [
-        { type: 1, color: COLOR_WHITE },   // pawn
-        { type: 2, color: COLOR_WHITE },   // knight
-        { type: 3, color: COLOR_WHITE },   // bishop
-        { type: 4, color: COLOR_WHITE },   // rook
-        { type: 5, color: COLOR_WHITE },   // queen
-        { type: 6, color: COLOR_WHITE },   // king
-        { type: 7, color: COLOR_WHITE },   // archbishop
-        { type: 8, color: COLOR_WHITE },   // chancellor
-        { type: 9, color: COLOR_WHITE },   // angel
+        { type: 1, color: COLOR_WHITE }, // pawn
+        { type: 2, color: COLOR_WHITE }, // knight
+        { type: 3, color: COLOR_WHITE }, // bishop
+        { type: 4, color: COLOR_WHITE }, // rook
+        { type: 5, color: COLOR_WHITE }, // queen
+        { type: 6, color: COLOR_WHITE }, // king
+        { type: 7, color: COLOR_WHITE }, // archbishop
+        { type: 8, color: COLOR_WHITE }, // chancellor
+        { type: 9, color: COLOR_WHITE }, // angel
       ];
-      
+
       pieces.forEach((p, i) => {
         if (i < SQUARE_COUNT) {
           board[i] = p.type | p.color;
         }
       });
-      
+
       const hash = computeZobristHash(board, COLOR_WHITE);
       expect(typeof hash).toBe('number');
     });
@@ -95,7 +95,7 @@ describe('TranspositionTable - Branch Coverage', () => {
     test('should handle black pieces correctly', () => {
       const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
       board[0] = 1 | COLOR_BLACK; // black pawn
-      
+
       const hash = computeZobristHash(board, COLOR_WHITE);
       expect(typeof hash).toBe('number');
     });
@@ -104,10 +104,10 @@ describe('TranspositionTable - Branch Coverage', () => {
       const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
       board[0] = 1 | 16; // white pawn
       board[10] = 1 | 32; // black pawn
-      
+
       const hash1 = computeZobristHash(board, COLOR_WHITE);
       const hash2 = computeZobristHash(board, COLOR_WHITE);
-      
+
       expect(hash1).toBe(hash2);
     });
   });
@@ -121,13 +121,13 @@ describe('TranspositionTable - Branch Coverage', () => {
       // Store something first
       const hash = 12345;
       tt.store(hash, 5, 100, 'exact', null);
-      
+
       // Clear
       tt.clear();
-      
+
       // Verify entry count is 0
       expect(tt.size()).toBe(0);
-      
+
       // Probe should return null
       expect(tt.probe(12345, 1)).toBeNull();
     });
@@ -138,7 +138,7 @@ describe('TranspositionTable - Branch Coverage', () => {
         tt.store(i * 100, 5, 100, 'exact', null);
       }
       expect(tt.size()).toBeGreaterThan(0);
-      
+
       tt.clear();
       expect(tt.size()).toBe(0);
     });
@@ -184,12 +184,12 @@ describe('TranspositionTable - Branch Coverage', () => {
       tt.store(100, 5, 100, 'exact', null);
       const result = tt.probe(100, 1);
       expect(result!.flag).toBe('exact');
-      
+
       tt.clear();
       tt.store(200, 5, 50, 'lower', null);
       const result2 = tt.probe(200, 1);
       expect(result2!.flag).toBe('lower');
-      
+
       tt.clear();
       tt.store(300, 5, -50, 'upper', null);
       const result3 = tt.probe(300, 1);
@@ -260,10 +260,10 @@ describe('TranspositionTable - Branch Coverage', () => {
       // Store with depth 3
       tt.store(100, 3, 100, 'exact', { from: 1, to: 2 });
       expect(tt.size()).toBe(1);
-      
+
       // Store with depth 5 (greater) - should replace
       tt.store(100, 5, 200, 'lower', { from: 3, to: 4 });
-      
+
       const result = tt.probe(100, 1);
       expect(result).not.toBeNull();
       expect(result!.depth).toBe(5);
@@ -272,10 +272,10 @@ describe('TranspositionTable - Branch Coverage', () => {
 
     test('should replace when depth is equal', () => {
       tt.store(100, 5, 100, 'exact', { from: 1, to: 2 });
-      
+
       // Store with same depth - should replace
       tt.store(100, 5, 999, 'upper', { from: 3, to: 4 });
-      
+
       const result = tt.probe(100, 1);
       expect(result!.score).toBe(999);
       expect(result!.bestMove).toEqual({ from: 3, to: 4 });
@@ -285,10 +285,10 @@ describe('TranspositionTable - Branch Coverage', () => {
       // Same hash always replaces regardless of depth (per implementation)
       const hash = 0x200007;
       tt.store(hash, 7, 100, 'exact', { from: 1, to: 2 });
-      
+
       // Even with lower depth, same hash replaces
       tt.store(hash, 3, 999, 'lower', { from: 3, to: 4 });
-      
+
       const result = tt.probe(hash, 1);
       expect(result!.depth).toBe(3); // replaced with lower depth
       expect(result!.score).toBe(999);
@@ -315,7 +315,7 @@ describe('TranspositionTable - Branch Coverage', () => {
     test('should store bestMove with from/to', () => {
       const bestMove = { from: 42, to: 52 };
       tt.store(100, 5, 100, 'exact', bestMove);
-      
+
       const result = tt.probe(100, 1);
       expect(result!.bestMove).toEqual(bestMove);
     });
@@ -351,10 +351,10 @@ describe('TranspositionTable - Branch Coverage', () => {
       // TT_MASK is 1<<18 - 1, so hashes with same lower 18 bits collide
       const hash1 = 0x00001;
       const hash2 = 0x40001; // same lower 18 bits
-      
+
       tt.store(hash1, 5, 100, 'exact', { from: 1, to: 2 });
       tt.store(hash2, 5, 200, 'exact', { from: 3, to: 4 });
-      
+
       // Second store should replace first (same index, different hash but depth >=)
       const result = tt.probe(hash2, 1);
       // Which one survives depends on replacement logic - depth is equal so replace
@@ -398,11 +398,11 @@ describe('TranspositionTable - Branch Coverage', () => {
   describe('Edge Cases', () => {
     test('should handle multiple probes without mutations', () => {
       tt.store(100, 5, 100, 'exact', { from: 1, to: 2 });
-      
+
       const r1 = tt.probe(100, 1);
       const r2 = tt.probe(100, 1);
       const r3 = tt.probe(100, 3);
-      
+
       expect(r1).toEqual(r2);
       expect(r3).toEqual(r2);
     });
@@ -411,10 +411,10 @@ describe('TranspositionTable - Branch Coverage', () => {
       const board = new Int8Array(SQUARE_COUNT).fill(PIECE_NONE);
       board[0] = 1 | COLOR_WHITE; // white pawn at 0
       board[10] = 1 | COLOR_BLACK; // black pawn at 10
-      
+
       const hash = computeZobristHash(board, COLOR_WHITE);
       tt.store(hash, 5, 100, 'exact', null);
-      
+
       const probed = tt.probe(hash, 1);
       expect(probed).not.toBeNull();
     });
@@ -429,9 +429,9 @@ describe('TranspositionTable - Branch Coverage', () => {
     test('should not increment counter when depth < stored depth', () => {
       tt.store(100, 10, 100, 'exact', null);
       const initialSize = tt.size();
-      
+
       tt.store(100, 5, 999, 'lower', null); // should not replace
-      
+
       expect(tt.size()).toBe(initialSize);
     });
   });

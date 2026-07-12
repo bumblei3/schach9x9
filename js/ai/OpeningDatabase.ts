@@ -1,13 +1,13 @@
 /**
  * Database of board hashes mapped to opening names with ECO codes and statistics.
- * 
+ *
  * ECO Codes (Encyclopaedia of Chess Openings):
  * A00-A99: Flank Openings (English, Reti, etc.)
  * B00-B99: Semi-Open Games (Sicilian, Caro-Kann, etc.)
  * C00-C99: Open Games (Italian, Ruy Lopez, etc.)
  * D00-D99: Closed Games (Queen's Gambit, etc.)
  * E00-E99: Indian Systems (King's Indian, Nimzo, etc.)
- * 
+ *
  * For 9x9: Extended with custom opening patterns
  */
 
@@ -15,66 +15,69 @@ export interface OpeningEntry {
   name: string;
   eco: string;
   category: string;
-  popularity: number;    // 0-100 relative popularity
-  whiteWinRate: number;  // 0-100
-  blackWinRate: number;  // 0-100
-  drawRate: number;      // 0-100
-  avgElo: number;        // Average Elo of players using this
-  moves: string[];       // First few moves in algebraic notation
-  description: string;   // Short description
+  popularity: number; // 0-100 relative popularity
+  whiteWinRate: number; // 0-100
+  blackWinRate: number; // 0-100
+  drawRate: number; // 0-100
+  avgElo: number; // Average Elo of players using this
+  moves: string[]; // First few moves in algebraic notation
+  description: string; // Short description
 }
 
 export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   // ==========================================
   // STARTING POSITION
   // ==========================================
-  'brbnbbbqbkbbbbnbbrbpbpbpbpbpbpbpbpbp................................................................................wpwpwpwpwpwpwpwpwrwnwbwqwkwbwnwrww': {
-    name: 'Grundstellung',
-    eco: 'A00',
-    category: 'Starting Position',
-    popularity: 100,
-    whiteWinRate: 38,
-    blackWinRate: 32,
-    drawRate: 30,
-    avgElo: 2500,
-    moves: ['1. e4', '1. d4', '1. Nf3', '1. c4'],
-    description: 'Ausgangsposition. Weiß hat die Initiative.',
-  },
+  'brbnbbbqbkbbbbnbbrbpbpbpbpbpbpbpbpbp................................................................................wpwpwpwpwpwpwpwpwrwnwbwqwkwbwnwrww':
+    {
+      name: 'Grundstellung',
+      eco: 'A00',
+      category: 'Starting Position',
+      popularity: 100,
+      whiteWinRate: 38,
+      blackWinRate: 32,
+      drawRate: 30,
+      avgElo: 2500,
+      moves: ['1. e4', '1. d4', '1. Nf3', '1. c4'],
+      description: 'Ausgangsposition. Weiß hat die Initiative.',
+    },
 
   // ==========================================
   // OPEN GAMES (C00-C99) - 1. e4 e5
   // ==========================================
   // Italian Game (1. e4 e5 2. Nf3 Nc6 3. Bc4) - C50-C59
-  'br.bqbkbbbbnbbrbpbpbp..bpbpbpbpbp....bn..................wb......wp..........wpwpwp..wpwpwpwpwr.n.wqwkwbwnwrww': {
-    name: 'Italienische Partie',
-    eco: 'C50',
-    category: 'Open Game',
-    popularity: 85,
-    whiteWinRate: 36,
-    blackWinRate: 34,
-    drawRate: 30,
-    avgElo: 2400,
-    moves: ['1. e4 e5', '2. Nf3 Nc6', '3. Bc4'],
-    description: 'Klassisch und prinzipientreu. Weiß entwickelt schnell und zielt auf f7.',
-  },
+  'br.bqbkbbbbnbbrbpbpbp..bpbpbpbpbp....bn..................wb......wp..........wpwpwp..wpwpwpwpwr.n.wqwkwbwnwrww':
+    {
+      name: 'Italienische Partie',
+      eco: 'C50',
+      category: 'Open Game',
+      popularity: 85,
+      whiteWinRate: 36,
+      blackWinRate: 34,
+      drawRate: 30,
+      avgElo: 2400,
+      moves: ['1. e4 e5', '2. Nf3 Nc6', '3. Bc4'],
+      description: 'Klassisch und prinzipientreu. Weiß entwickelt schnell und zielt auf f7.',
+    },
 
   // Giuoco Piano (1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5) - C50
   // Using placeholder hash for position after 3...Bc5
-  'br.bqbkbbbbnbbrbpbpbp..bpbpbpbpbp....bn..................wb......wp..........wpwpwp..wpwpwpwpwr.n.wqwkwbwnwrwwBc5': {
-    name: 'Giuoco Piano',
-    eco: 'C50',
-    category: 'Open Game',
-    popularity: 45,
-    whiteWinRate: 35,
-    blackWinRate: 35,
-    drawRate: 30,
-    avgElo: 2300,
-    moves: ['1. e4 e5', '2. Nf3 Nc6', '3. Bc4 Bc5'],
-    description: 'Friedliche Entwicklung. Harmonie und Strategie über Taktik.',
-  },
+  'br.bqbkbbbbnbbrbpbpbp..bpbpbpbpbp....bn..................wb......wp..........wpwpwp..wpwpwpwpwr.n.wqwkwbwnwrwwBc5':
+    {
+      name: 'Giuoco Piano',
+      eco: 'C50',
+      category: 'Open Game',
+      popularity: 45,
+      whiteWinRate: 35,
+      blackWinRate: 35,
+      drawRate: 30,
+      avgElo: 2300,
+      moves: ['1. e4 e5', '2. Nf3 Nc6', '3. Bc4 Bc5'],
+      description: 'Friedliche Entwicklung. Harmonie und Strategie über Taktik.',
+    },
 
   // Evans Gambit (1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4) - C51-C52
-  'PLACEHOLDER_EVANS_GAMBIT': {
+  PLACEHOLDER_EVANS_GAMBIT: {
     name: 'Evans-Gambit',
     eco: 'C51',
     category: 'Gambit',
@@ -88,7 +91,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Two Knights Defense (1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6) - C55-C59
-  'PLACEHOLDER_TWO_KNIGHTS': {
+  PLACEHOLDER_TWO_KNIGHTS: {
     name: 'Zweispringerspiel',
     eco: 'C57',
     category: 'Open Game',
@@ -102,7 +105,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Ruy Lopez (Spanish Game) - C60-C99
-  'PLACEHOLDER_RUY_LOPEZ': {
+  PLACEHOLDER_RUY_LOPEZ: {
     name: 'Spanische Partie (Ruy Lopez)',
     eco: 'C70',
     category: 'Open Game',
@@ -116,7 +119,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Berlin Defense (1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6) - C67
-  'PLACEHOLDER_BERLIN': {
+  PLACEHOLDER_BERLIN: {
     name: 'Berliner Verteidigung',
     eco: 'C67',
     category: 'Open Game',
@@ -130,7 +133,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Scotch Game (1. e4 e5 2. Nf3 Nc6 3. d4) - C45
-  'PLACEHOLDER_SCOTCH': {
+  PLACEHOLDER_SCOTCH: {
     name: 'Schottische Partie',
     eco: 'C45',
     category: 'Open Game',
@@ -144,7 +147,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Four Knights Game (1. e4 e5 2. Nf3 Nc6 3. Nc3 Nf6) - C47-C49
-  'PLACEHOLDER_FOUR_KNIGHTS': {
+  PLACEHOLDER_FOUR_KNIGHTS: {
     name: 'Vierspringerspiel',
     eco: 'C47',
     category: 'Open Game',
@@ -158,7 +161,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // King's Gambit (1. e4 e5 2. f4) - C30-C39
-  'PLACEHOLDER_KINGS_GAMBIT': {
+  PLACEHOLDER_KINGS_GAMBIT: {
     name: 'Königsgambit',
     eco: 'C33',
     category: 'Gambit',
@@ -172,7 +175,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Vienna Game (1. e4 e5 2. Nc3) - C25-C29
-  'PLACEHOLDER_VIENNA': {
+  PLACEHOLDER_VIENNA: {
     name: 'Wiener Partie',
     eco: 'C25',
     category: 'Open Game',
@@ -189,21 +192,22 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   // SEMI-OPEN GAMES (B00-B99) - 1. e4 without 1... e5
   // ==========================================
   // Sicilian Defense (1. e4 c5) - B20-B99
-  'brbnbbbqbkbbbbnbbrbpbpbpbpbp..bpbpbp....................wp..................wpwpwp..wpwpwpwpwrwnwbwqwkwbwnwrwb': {
-    name: 'Sizilianische Verteidigung',
-    eco: 'B20',
-    category: 'Semi-Open Game',
-    popularity: 95,
-    whiteWinRate: 36,
-    blackWinRate: 38,
-    drawRate: 26,
-    avgElo: 2650,
-    moves: ['1. e4 c5'],
-    description: 'Beste Gewinnchancen für Schwarz. Asymmetrisch und konterreich.',
-  },
+  'brbnbbbqbkbbbbnbbrbpbpbpbpbp..bpbpbp....................wp..................wpwpwp..wpwpwpwpwrwnwbwqwkwbwnwrwb':
+    {
+      name: 'Sizilianische Verteidigung',
+      eco: 'B20',
+      category: 'Semi-Open Game',
+      popularity: 95,
+      whiteWinRate: 36,
+      blackWinRate: 38,
+      drawRate: 26,
+      avgElo: 2650,
+      moves: ['1. e4 c5'],
+      description: 'Beste Gewinnchancen für Schwarz. Asymmetrisch und konterreich.',
+    },
 
   // Najdorf Variation (1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nf3 Nf6 5. Nc3 a6) - B90-B99
-  'PLACEHOLDER_NAJDORF': {
+  PLACEHOLDER_NAJDORF: {
     name: 'Najdorf-Variante',
     eco: 'B90',
     category: 'Sicilian Defense',
@@ -217,7 +221,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Dragon Variation (1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nf3 Nf6 5. Nc3 g6) - B70-B79
-  'PLACEHOLDER_DRAGON': {
+  PLACEHOLDER_DRAGON: {
     name: 'Drachenvariante',
     eco: 'B70',
     category: 'Sicilian Defense',
@@ -231,21 +235,22 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // French Defense (1. e4 e6) - C00-C19
-  'brbnbbbqbkbbbbnbbrbpbpbp..bpbpbpbpbp....................wp..................wpwpwp..wpwpwpwpwrwnwbwqwkwbwnwrwb': {
-    name: 'Französische Verteidigung',
-    eco: 'C00',
-    category: 'Semi-Open Game',
-    popularity: 80,
-    whiteWinRate: 34,
-    blackWinRate: 36,
-    drawRate: 30,
-    avgElo: 2500,
-    moves: ['1. e4 e6'],
-    description: 'Solide mit …d5-Brecher. Strukturell reich.',
-  },
+  'brbnbbbqbkbbbbnbbrbpbpbp..bpbpbpbpbp....................wp..................wpwpwp..wpwpwpwpwrwnwbwqwkwbwnwrwb':
+    {
+      name: 'Französische Verteidigung',
+      eco: 'C00',
+      category: 'Semi-Open Game',
+      popularity: 80,
+      whiteWinRate: 34,
+      blackWinRate: 36,
+      drawRate: 30,
+      avgElo: 2500,
+      moves: ['1. e4 e6'],
+      description: 'Solide mit …d5-Brecher. Strukturell reich.',
+    },
 
   // Winawer Variation (1. e4 e6 2. d4 d5 3. Nc3 Bb4) - C15-C19
-  'PLACEHOLDER_WINAWER': {
+  PLACEHOLDER_WINAWER: {
     name: 'Winawer-Variante',
     eco: 'C18',
     category: 'French Defense',
@@ -259,7 +264,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Caro-Kann Defense (1. e4 c6) - B10-B19
-  'PLACEHOLDER_CARO_KANN': {
+  PLACEHOLDER_CARO_KANN: {
     name: 'Caro-Kann-Verteidigung',
     eco: 'B10',
     category: 'Semi-Open Game',
@@ -273,7 +278,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Pirc/Modern Defense (1. e4 d6/g6) - B06-B09
-  'PLACEHOLDER_PIRC': {
+  PLACEHOLDER_PIRC: {
     name: 'Pirc-Verteidigung',
     eco: 'B07',
     category: 'Semi-Open Game',
@@ -290,7 +295,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   // CLOSED GAMES (D00-D99) - 1. d4 d5
   // ==========================================
   // Queen's Gambit Declined (1. d4 d5 2. c4 e6) - D30-D69
-  'PLACEHOLDER_QGD': {
+  PLACEHOLDER_QGD: {
     name: 'Abgelehntes Damengambit',
     eco: 'D30',
     category: 'Closed Game',
@@ -304,7 +309,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Queen's Gambit Accepted (1. d4 d5 2. c4 dxc4) - D20-D29
-  'PLACEHOLDER_QGA': {
+  PLACEHOLDER_QGA: {
     name: 'Angenommenes Damengambit',
     eco: 'D20',
     category: 'Closed Game',
@@ -318,7 +323,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Slav Defense (1. d4 d5 2. c4 c6) - D10-D19
-  'PLACEHOLDER_SLAV': {
+  PLACEHOLDER_SLAV: {
     name: 'Slawische Verteidigung',
     eco: 'D10',
     category: 'Closed Game',
@@ -332,7 +337,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Semi-Slav (1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6) - D43-D49
-  'PLACEHOLDER_SEMI_SLAV': {
+  PLACEHOLDER_SEMI_SLAV: {
     name: 'Halbslawisch',
     eco: 'D45',
     category: 'Closed Game',
@@ -346,7 +351,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Nimzo-Indian (1. d4 Nf6 2. c4 e6 3. Nc3 Bb4) - E20-E59
-  'PLACEHOLDER_NIMZO': {
+  PLACEHOLDER_NIMZO: {
     name: 'Nimzo-Indisch',
     eco: 'E20',
     category: 'Indian System',
@@ -360,7 +365,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // King's Indian Defense (1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6) - E60-E99
-  'PLACEHOLDER_KID': {
+  PLACEHOLDER_KID: {
     name: 'Königsindisch',
     eco: 'E60',
     category: 'Indian System',
@@ -374,7 +379,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Grünfeld Defense (1. d4 Nf6 2. c4 g6 3. Nc3 d5) - D70-D99
-  'PLACEHOLDER_GRUNFELD': {
+  PLACEHOLDER_GRUNFELD: {
     name: 'Grünfeld-Verteidigung',
     eco: 'D85',
     category: 'Indian System',
@@ -388,7 +393,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // English Opening (1. c4) - A10-A39
-  'PLACEHOLDER_ENGLISH': {
+  PLACEHOLDER_ENGLISH: {
     name: 'Englische Eröffnung',
     eco: 'A10',
     category: 'Flank Opening',
@@ -402,7 +407,7 @@ export const OPENING_DATABASE: Record<string, OpeningEntry> = {
   },
 
   // Reti Opening (1. Nf3) - A04-A09
-  'PLACEHOLDER_RETI': {
+  PLACEHOLDER_RETI: {
     name: 'Retieröffnung',
     eco: 'A04',
     category: 'Flank Opening',
@@ -507,10 +512,11 @@ export function getOpeningName(hash: string): string | null {
  */
 export function searchOpenings(query: string): OpeningEntry[] {
   const lowerQuery = query.toLowerCase();
-  return Object.values(OPENING_DATABASE).filter(entry =>
-    entry.name.toLowerCase().includes(lowerQuery) ||
-    entry.eco.toLowerCase().includes(lowerQuery) ||
-    entry.category.toLowerCase().includes(lowerQuery)
+  return Object.values(OPENING_DATABASE).filter(
+    entry =>
+      entry.name.toLowerCase().includes(lowerQuery) ||
+      entry.eco.toLowerCase().includes(lowerQuery) ||
+      entry.category.toLowerCase().includes(lowerQuery)
   );
 }
 
@@ -520,9 +526,7 @@ export function searchOpenings(query: string): OpeningEntry[] {
  * @returns {OpeningEntry[]} Entries in that category
  */
 export function getOpeningsByCategory(category: string): OpeningEntry[] {
-  return Object.values(OPENING_DATABASE).filter(entry =>
-    entry.category === category
-  );
+  return Object.values(OPENING_DATABASE).filter(entry => entry.category === category);
 }
 
 /**

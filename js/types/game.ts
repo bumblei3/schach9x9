@@ -135,7 +135,16 @@ export interface Puzzle {
   description: string;
   difficulty: string;
   fen?: string;
-  solution: Array<Move | MoveResult | { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: PieceType; piece: PieceType }>;
+  solution: Array<
+    | Move
+    | MoveResult
+    | {
+        from: { r: number; c: number };
+        to: { r: number; c: number };
+        promotion?: PieceType;
+        piece: PieceType;
+      }
+  >;
 }
 
 /** Action button for modals */
@@ -170,7 +179,24 @@ export interface GameLike {
   log?: (_message: string) => void;
   points: number;
   tutorPoints?: number;
-  moveHistory: Array<{ from: Square; to: Square; piece?: PieceType | Piece; captured?: PieceType | Piece | null; promotion?: PieceType | string; isCheck?: boolean; isCheckmate?: boolean; isCastling?: boolean; isEnPassant?: boolean; specialMove?: { type: string; rookFrom?: Square; rookTo?: Square; rookHadMoved?: boolean; capturedPawnPos?: Square } }>;
+  moveHistory: Array<{
+    from: Square;
+    to: Square;
+    piece?: PieceType | Piece;
+    captured?: PieceType | Piece | null;
+    promotion?: PieceType | string;
+    isCheck?: boolean;
+    isCheckmate?: boolean;
+    isCastling?: boolean;
+    isEnPassant?: boolean;
+    specialMove?: {
+      type: string;
+      rookFrom?: Square;
+      rookTo?: Square;
+      rookHadMoved?: boolean;
+      capturedPawnPos?: Square;
+    };
+  }>;
   // Tutor-specific (used by MoveAnalyzer)
   kiMentorEnabled?: boolean;
   mentorLevel?: string;

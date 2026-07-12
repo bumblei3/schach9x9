@@ -13,7 +13,11 @@ interface PgnEngine {
   turn: string;
   boardSize: number;
   board: Array<Array<{ type: string; color: string; hasMoved: boolean } | null>>;
-  getAllLegalMoves: () => { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }[];
+  getAllLegalMoves: () => {
+    from: { r: number; c: number };
+    to: { r: number; c: number };
+    promotion?: string;
+  }[];
   getBoardHash: () => string;
   executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }) => void;
 }
@@ -66,7 +70,7 @@ export class PGNImportReplay {
       return {
         success: true,
         game: this.currentGame,
-        history: this.history
+        history: this.history,
       };
     } catch (err) {
       logger.error('[PGNImportReplay] Import failed:', err);
@@ -74,7 +78,7 @@ export class PGNImportReplay {
         success: false,
         game: null,
         history: [],
-        error: err instanceof Error ? err.message : 'Unknown error'
+        error: err instanceof Error ? err.message : 'Unknown error',
       };
     }
   }
@@ -85,18 +89,19 @@ export class PGNImportReplay {
    * @returns Promise with import result
    */
   async importPGNFile(file: File): Promise<PGNImportResult> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const text = e.target?.result as string;
         resolve(this.importPGN(text));
       };
-      reader.onerror = () => resolve({
-        success: false,
-        game: null,
-        history: [],
-        error: 'Failed to read file'
-      });
+      reader.onerror = () =>
+        resolve({
+          success: false,
+          game: null,
+          history: [],
+          error: 'Failed to read file',
+        });
       reader.readAsText(file);
     });
   }
@@ -108,7 +113,9 @@ export class PGNImportReplay {
     // Minimal engine that can replay moves
     type PieceWithHasMoved = { type: string; color: string; hasMoved: boolean } | null;
 
-    const board: PieceWithHasMoved[][] = Array(9).fill(null).map(() => Array(9).fill(null));
+    const board: PieceWithHasMoved[][] = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
 
     // Setup initial position
     const whiteBack = ['r', 'n', 'b', 'a', 'k', 'c', 'b', 'n', 'r'];
@@ -116,23 +123,35 @@ export class PGNImportReplay {
     const blackBack = ['R', 'N', 'B', 'A', 'K', 'C', 'B', 'N', 'R'];
     const blackPawns = Array(9).fill('P');
 
-    blackBack.forEach((piece: string, c: number) => { board[0][c] = { type: piece.toLowerCase(), color: 'black', hasMoved: false }; });
-    blackPawns.forEach((_piece: string, c: number) => { board[1][c] = { type: 'p', color: 'black', hasMoved: false }; });
-    whitePawns.forEach((piece: string, c: number) => { board[7][c] = { type: piece, color: 'white', hasMoved: false }; });
-    whiteBack.forEach((piece: string, c: number) => { board[8][c] = { type: piece, color: 'white', hasMoved: false }; });
+    blackBack.forEach((piece: string, c: number) => {
+      board[0][c] = { type: piece.toLowerCase(), color: 'black', hasMoved: false };
+    });
+    blackPawns.forEach((_piece: string, c: number) => {
+      board[1][c] = { type: 'p', color: 'black', hasMoved: false };
+    });
+    whitePawns.forEach((piece: string, c: number) => {
+      board[7][c] = { type: piece, color: 'white', hasMoved: false };
+    });
+    whiteBack.forEach((piece: string, c: number) => {
+      board[8][c] = { type: piece, color: 'white', hasMoved: false };
+    });
 
     return {
       turn: 'white',
       boardSize: 9,
       board,
-      getAllLegalMoves: (): { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string }[] => {
+      getAllLegalMoves: (): {
+        from: { r: number; c: number };
+        to: { r: number; c: number };
+        promotion?: string;
+      }[] => {
         // Simplified - just return all possible moves for basic replay
         return [];
       },
       getBoardHash: (): string => '',
       executeMove: (_from: { r: number; c: number }, _to: { r: number; c: number }): void => {
         // Simplified move execution
-      }
+      },
     };
   }
 
@@ -184,35 +203,59 @@ export class PGNImportReplay {
       currentIndex: this.currentMoveIndex,
       totalMoves: this.history.length,
       canGoNext: this.currentMoveIndex < this.history.length - 1,
-      canGoPrev: this.currentMoveIndex >= 0
+      canGoPrev: this.currentMoveIndex >= 0,
     };
   }
 
   /**
    * Go to first move
    */
-  goToFirst(): { history: PGNHistoryEntry[]; currentIndex: number; totalMoves: number; canGoNext: boolean; canGoPrev: boolean } {
+  goToFirst(): {
+    history: PGNHistoryEntry[];
+    currentIndex: number;
+    totalMoves: number;
+    canGoNext: boolean;
+    canGoPrev: boolean;
+  } {
     return this.goToMove(0);
   }
 
   /**
    * Go to last move
    */
-  goToLast(): { history: PGNHistoryEntry[]; currentIndex: number; totalMoves: number; canGoNext: boolean; canGoPrev: boolean } {
+  goToLast(): {
+    history: PGNHistoryEntry[];
+    currentIndex: number;
+    totalMoves: number;
+    canGoNext: boolean;
+    canGoPrev: boolean;
+  } {
     return this.goToMove(this.history.length - 1);
   }
 
   /**
    * Go to next move
    */
-  goToNext(): { history: PGNHistoryEntry[]; currentIndex: number; totalMoves: number; canGoNext: boolean; canGoPrev: boolean } {
+  goToNext(): {
+    history: PGNHistoryEntry[];
+    currentIndex: number;
+    totalMoves: number;
+    canGoNext: boolean;
+    canGoPrev: boolean;
+  } {
     return this.goToMove(this.currentMoveIndex + 1);
   }
 
   /**
    * Go to previous move
    */
-  goToPrev(): { history: PGNHistoryEntry[]; currentIndex: number; totalMoves: number; canGoNext: boolean; canGoPrev: boolean } {
+  goToPrev(): {
+    history: PGNHistoryEntry[];
+    currentIndex: number;
+    totalMoves: number;
+    canGoNext: boolean;
+    canGoPrev: boolean;
+  } {
     return this.goToMove(this.currentMoveIndex - 1);
   }
 
@@ -258,7 +301,7 @@ export class PGNImportReplay {
           moveNumber: moveNumber++,
           white: san,
           black: '',
-          annotations: {}
+          annotations: {},
         });
       } else {
         if (moves.length > 0) {
@@ -342,13 +385,13 @@ export class PGNImportUI {
     this.onPGNLoaded = _onPGNLoaded;
 
     if (this.fileInput) {
-      this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+      this.fileInput.addEventListener('change', e => this.handleFileSelect(e));
     }
 
     if (this.dropZone) {
-      this.dropZone.addEventListener('dragover', (e) => this.handleDragOver(e));
-      this.dropZone.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-      this.dropZone.addEventListener('drop', (e) => this.handleDrop(e));
+      this.dropZone.addEventListener('dragover', e => this.handleDragOver(e));
+      this.dropZone.addEventListener('dragleave', e => this.handleDragLeave(e));
+      this.dropZone.addEventListener('drop', e => this.handleDrop(e));
     }
 
     this.setupReplayControls();
@@ -430,7 +473,7 @@ export class PGNImportUI {
       if (!isNaN(moveNum)) this.goToMove(moveNum);
     });
 
-    moveInput?.addEventListener('keypress', (e) => {
+    moveInput?.addEventListener('keypress', e => {
       if (e.key === 'Enter') {
         const moveNum = parseInt(moveInput.value);
         if (!isNaN(moveNum)) this.goToMove(moveNum);
@@ -491,13 +534,17 @@ export class PGNImportUI {
 
     const moveList = this.importer.getMoveListWithAnnotations();
 
-    this.moveListContainer!.innerHTML = moveList.map((m, index) => `
+    this.moveListContainer!.innerHTML = moveList
+      .map(
+        (m, index) => `
       <div class="pgn-move-item" data-index="${index}" style="padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 1rem;">
         <span class="move-number" style="font-weight: bold; min-width: 3rem;">${m.moveNumber}.</span>
         <span class="white-move" style="flex: 1;">${m.white}</span>
         <span class="black-move" style="flex: 1;">${m.black}</span>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Add click handlers
     this.moveListContainer?.querySelectorAll('.pgn-move-item').forEach((item, index) => {
@@ -510,14 +557,16 @@ export class PGNImportUI {
   }
 
   private updateMoveListHighlight(activeIndex: number): void {
-    this.moveListContainer?.querySelectorAll<HTMLElement>('.pgn-move-item').forEach((item, index) => {
-      if (index === activeIndex) {
-        item.classList.add('active');
-        item.style.background = 'rgba(99, 102, 241, 0.2)';
-      } else {
-        item.classList.remove('active');
-        item.style.background = '';
-      }
-    });
+    this.moveListContainer
+      ?.querySelectorAll<HTMLElement>('.pgn-move-item')
+      .forEach((item, index) => {
+        if (index === activeIndex) {
+          item.classList.add('active');
+          item.style.background = 'rgba(99, 102, 241, 0.2)';
+        } else {
+          item.classList.remove('active');
+          item.style.background = '';
+        }
+      });
   }
 }

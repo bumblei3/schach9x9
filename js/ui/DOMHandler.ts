@@ -39,7 +39,9 @@ export class DOMHandler {
    */
   constructor(app: App) {
     this.app = app;
-    this.analysisUI = new AnalysisUI(app as unknown as { game: Game; gameController: GameController | null });
+    this.analysisUI = new AnalysisUI(
+      app as unknown as { game: Game; gameController: GameController | null }
+    );
     this.openingBookUI = new OpeningBookUI();
     if (app.game && app.game.aiController) {
       app.game.aiController.setAnalysisUI(this.analysisUI);

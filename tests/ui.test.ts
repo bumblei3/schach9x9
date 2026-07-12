@@ -110,7 +110,14 @@ describe('UI Module', () => {
     test('should show promotion UI and handle choice', () => {
       const callback = vi.fn();
       game.board[0][4] = { type: 'p', color: 'white' };
-      UI.showPromotionUI(game, 0, 4, 'white', { from: { r: 0, c: 4 }, to: { r: 0, c: 4 } }, callback);
+      UI.showPromotionUI(
+        game,
+        0,
+        4,
+        'white',
+        { from: { r: 0, c: 4 }, to: { r: 0, c: 4 } },
+        callback
+      );
       const overlay = document.getElementById('promotion-overlay');
       expect(overlay!.classList.contains('hidden')).toBe(false);
 

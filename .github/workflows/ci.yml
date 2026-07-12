@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0  # Needed for commit message linting
+          fetch-depth: 0 # Needed for commit message linting
 
       - name: Setup Node.js & dependencies
         uses: ./.github/actions/setup-node-deps

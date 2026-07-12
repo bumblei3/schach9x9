@@ -4,8 +4,16 @@ exports[`Visual DOM Snapshot Tests > Game over overlay snapshot 1`] = `
 "
             <div class="modal-content">
               <h2 id="winner-text">Weiß gewinnt!</h2>
-              <div id="game-over-stats" class="game-over-stats" style="margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;"></div>
-              <button id="postgame-analysis-btn" class="btn-primary" style="margin-top: 0.5rem; display: none;">📊 Nachspiel-Analyse</button>
+              <div id="game-over-stats" class="game-over-stats" style="
+                  margin: 1rem 0;
+                  padding: 1rem;
+                  background: rgba(255, 255, 255, 0.05);
+                  border-radius: 8px;
+                  display: none;
+                "></div>
+              <button id="postgame-analysis-btn" class="btn-primary" style="margin-top: 0.5rem; display: none">
+                📊 Nachspiel-Analyse
+              </button>
               <button id="restart-btn-overlay" class="btn-primary">Neues Spiel</button>
               <button id="close-game-over-btn" class="btn-secondary">Schließen</button>
             </div>
@@ -324,20 +332,31 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   🔄 Kontinuierlich
                 </button>
               </div>
-              
+
               <!-- Live Search Progress -->
-              <div class="live-search-progress" style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 0.85rem;">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 0.5rem;">
+              <div class="live-search-progress" style="
+                  margin-top: 1rem;
+                  padding: 0.75rem;
+                  background: rgba(0, 0, 0, 0.2);
+                  border-radius: 8px;
+                  font-size: 0.85rem;
+                ">
+                <div style="
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 0.5rem;
+                    margin-bottom: 0.5rem;
+                  ">
                   <div><strong>Tiefe:</strong> <span id="live-depth">-</span></div>
                   <div><strong>Knoten:</strong> <span id="live-nodes">-</span></div>
                   <div><strong>Bewertung:</strong> <span id="live-score">-</span></div>
                   <div><strong>Zeit:</strong> <span id="live-time">-</span></div>
                 </div>
-                <div style="margin-top: 0.5rem;">
-                  <strong>Hauptvariante:</strong> <span id="live-pv" style="color: var(--accent-primary); font-family: monospace;">-</span>
+                <div style="margin-top: 0.5rem">
+                  <strong>Hauptvariante:</strong>
+                  <span id="live-pv" style="color: var(--accent-primary); font-family: monospace">-</span>
                 </div>
               </div>
-              
             </div>
           </div>
 
@@ -580,8 +599,16 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           <div id="game-over-overlay" class="modal-overlay hidden">
             <div class="modal-content">
               <h2 id="winner-text">Spiel beendet</h2>
-              <div id="game-over-stats" class="game-over-stats" style="margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;"></div>
-              <button id="postgame-analysis-btn" class="btn-primary" style="margin-top: 0.5rem; display: none;">📊 Nachspiel-Analyse</button>
+              <div id="game-over-stats" class="game-over-stats" style="
+                  margin: 1rem 0;
+                  padding: 1rem;
+                  background: rgba(255, 255, 255, 0.05);
+                  border-radius: 8px;
+                  display: none;
+                "></div>
+              <button id="postgame-analysis-btn" class="btn-primary" style="margin-top: 0.5rem; display: none">
+                📊 Nachspiel-Analyse
+              </button>
               <button id="restart-btn-overlay" class="btn-primary">Neues Spiel</button>
               <button id="close-game-over-btn" class="btn-secondary">Schließen</button>
             </div>
@@ -795,7 +822,10 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <!-- 9x9 Classic -->
-                  <div class="gamemode-card" data-mode="classic" onclick="window.app.init(0, 'classic'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" data-mode="classic" onclick="
+                      window.app.init(0, 'classic');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <div class="card-icon">🏰</div>
                     <div class="card-title">Klassisch 9x9</div>
                     <div class="card-desc">
@@ -804,7 +834,10 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <!-- Truppen anheuern aka Upgrade Mode 9x9 -->
-                  <div class="gamemode-card" data-mode="setup" onclick="window.app.init(25, 'setup'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" data-mode="setup" onclick="
+                      window.app.init(25, 'setup');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <div class="card-icon">💰</div>
                     <div class="card-title">Truppen anheuern (9x9)</div>
                     <div class="card-desc">
@@ -813,7 +846,10 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <!-- 9x9 Classic Upgrade -->
-                  <div class="gamemode-card" data-mode="upgrade" onclick="window.app.init(25, 'upgrade'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" data-mode="upgrade" onclick="
+                      window.app.init(25, 'upgrade');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <span class="card-tag tag-hot">Neu</span>
                     <div class="card-icon">👑</div>
                     <div class="card-title">Klassisch 9x9 + Upgrades</div>
@@ -823,7 +859,10 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <!-- 8x8 Upgrades -->
-                  <div class="gamemode-card" onclick="window.app.init(15, 'upgrade8x8'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" onclick="
+                      window.app.init(15, 'upgrade8x8');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <span class="card-tag tag-hot">Beliebt</span>
                     <div class="card-icon">💎</div>
                     <div class="card-title">8x8 + Upgrades</div>
@@ -833,7 +872,10 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <!-- Cross-shaped Board (Kreuz-Modus) -->
-                  <div class="gamemode-card" data-mode="cross" onclick="window.app.init(15, 'cross'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" data-mode="cross" onclick="
+                      window.app.init(15, 'cross');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <span class="card-tag tag-hot">Neu</span>
                     <div class="card-icon">✝️</div>
                     <div class="card-title">Kreuz-Modus (Mid-Only)</div>
@@ -843,14 +885,20 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <!-- 8x8 Standard -->
-                  <div class="gamemode-card" data-mode="standard8x8" onclick="window.app.init(0, 'standard8x8'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" data-mode="standard8x8" onclick="
+                      window.app.init(0, 'standard8x8');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <div class="card-icon">♟️</div>
                     <div class="card-title">Standard 8x8</div>
                     <div class="card-desc">Klassisches Schachbrett, aber mit 9x9 Regeln.</div>
                   </div>
 
                   <!-- Puzzle -->
-                  <div class="gamemode-card" data-mode="puzzle" onclick="window.app.init(0, 'puzzle'); document.getElementById('main-menu').classList.remove('active');">
+                  <div class="gamemode-card" data-mode="puzzle" onclick="
+                      window.app.init(0, 'puzzle');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
                     <span class="card-tag tag-pro">Training</span>
                     <div class="card-icon">🧩</div>
                     <div class="card-title">Puzzle-Modus</div>
@@ -891,7 +939,12 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>Figuren-Skin</label>
-                      <select id="skin-selector-menu" class="menu-select" onchange="document.getElementById('skin-selector').value = this.value; document.getElementById('skin-selector').dispatchEvent(new Event('change'));">
+                      <select id="skin-selector-menu" class="menu-select" onchange="
+                          document.getElementById('skin-selector').value = this.value;
+                          document
+                            .getElementById('skin-selector')
+                            .dispatchEvent(new Event('change'));
+                        ">
                         <option value="classic">Klassisch</option>
                         <option value="modern">Modern</option>
                         <option value="pixel">Pixel</option>

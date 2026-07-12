@@ -5,12 +5,7 @@
  * and coordinating between game engine, shop, UI, and AI.
  */
 
-import {
-  PHASES,
-  AI_DELAY_MS,
-  type Game,
-  type PieceWithMoved,
-} from './gameEngine.js';
+import { PHASES, AI_DELAY_MS, type Game, type PieceWithMoved } from './gameEngine.js';
 import type { PuzzleState } from './types/game.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
@@ -46,7 +41,9 @@ import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 export interface ArrowRendererType {
   clearArrows: () => void;
   addArrow?: (..._args: unknown[]) => void;
-  highlightMoves?: (_arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]) => void;
+  highlightMoves?: (
+    _arrows: { fromR: number; fromC: number; toR: number; toC: number; colorKey: string }[]
+  ) => void;
 }
 
 export interface GameExtended extends Game {
@@ -849,7 +846,12 @@ export class GameController {
           captured: m.captured?.type,
           promotion: m.promotion as PieceWithMoved['type'] | undefined,
         }));
-        openingBook.applyGameResult(moveHistory, this.game.playerColor, playerResult, this.game.initialBoard);
+        openingBook.applyGameResult(
+          moveHistory,
+          this.game.playerColor,
+          playerResult,
+          this.game.initialBoard
+        );
         logger.debug('[GameController] Opening book updated with game result:', playerResult);
       }
     } catch (e) {

@@ -44,7 +44,7 @@ describe('AI_PERSONALITIES completeness', () => {
   });
 
   test('personality ids are unique', () => {
-    const ids = ALL.map((p) => p.id);
+    const ids = ALL.map(p => p.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
@@ -88,7 +88,7 @@ describe('AI_PERSONALITIES documented value ranges', () => {
 });
 
 describe('AI_PERSONALITIES semantic consistency (labels match numbers)', () => {
-  const byId = Object.fromEntries(ALL.map((p) => [p.id, p]));
+  const byId = Object.fromEntries(ALL.map(p => [p.id, p]));
 
   test('a balanced profile exists with all evaluation weights at 1.0', () => {
     const bal = byId['BALANCED'];

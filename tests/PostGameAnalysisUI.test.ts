@@ -41,7 +41,7 @@ vi.mock('../js/ui/AnalysisUI.js', () => ({
   AnalysisUI: class MockAnalysisUI {
     constructor(_app: unknown) {}
     showSummaryModal = showSummaryModalSpy;
-  }
+  },
 }));
 
 describe('PostGameAnalysisUI', () => {
@@ -73,12 +73,16 @@ describe('PostGameAnalysisUI', () => {
   describe('showPostGameStats', () => {
     test('should return early if stats element not found', () => {
       document.body.innerHTML = '';
-      expect(() => showPostGameStats({ moveHistory: [], playerColor: 'white' }, 'win', 'white')).not.toThrow();
+      expect(() =>
+        showPostGameStats({ moveHistory: [], playerColor: 'white' }, 'win', 'white')
+      ).not.toThrow();
     });
 
     test('should return early if button element not found', () => {
       document.body.innerHTML = '<div id="game-over-stats"></div>';
-      expect(() => showPostGameStats({ moveHistory: [], playerColor: 'white' }, 'win', 'white')).not.toThrow();
+      expect(() =>
+        showPostGameStats({ moveHistory: [], playerColor: 'white' }, 'win', 'white')
+      ).not.toThrow();
     });
 
     test('should display stats for both players', () => {
@@ -242,8 +246,14 @@ describe('PostGameAnalysisUI', () => {
       // Our mock has: brilliant: 1, great: 2, best: 3, excellent: 4, good: 5, inaccuracy: 2, mistake: 1, blunder: 0, book: 3
       // blunder is filtered out (count 0), so it won't appear
       const counts = [
-        'Brilliant', 'Great', 'Best', 'Excellent', 'Good',
-        'Inaccuracy', 'Mistake', 'Book'
+        'Brilliant',
+        'Great',
+        'Best',
+        'Excellent',
+        'Good',
+        'Inaccuracy',
+        'Mistake',
+        'Book',
       ];
       counts.forEach(q => expect(statsEl.innerHTML).toContain(q));
     });

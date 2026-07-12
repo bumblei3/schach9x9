@@ -57,7 +57,9 @@ function makeGame(overrides: Partial<any> = {}): any {
   return {
     phase: 'PLAY',
     turn: 'white',
-    board: Array(9).fill(null).map(() => Array(9).fill(null)),
+    board: Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null)),
     ...overrides,
   };
 }

@@ -81,7 +81,9 @@
   border: var(--glass-border);
   min-width: 40px;
   text-align: center;
-  transition: color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .eval-bar-score.win-white {
@@ -546,7 +548,9 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-md);
   padding: 12px;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .opening-entry:hover {

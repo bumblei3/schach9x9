@@ -171,9 +171,9 @@ describe('SoundManager - Branch Coverage', () => {
 
     test('should handle localStorage parse error gracefully', () => {
       localStorage.setItem('chess9x9-sound-settings', '{invalid}');
-      
+
       const manager = new SoundManager();
-      
+
       expect(manager.enabled).toBe(true);
       expect(manager.volume).toBe(0.3);
     });
@@ -191,7 +191,7 @@ describe('SoundManager - Branch Coverage', () => {
 
       const stored = localStorage.getItem('chess9x9-sound-settings');
       expect(stored).not.toBeNull();
-      
+
       const parsed = JSON.parse(stored!);
       expect(parsed.enabled).toBe(false);
       expect(parsed.volume).toBe(0.8);
@@ -204,7 +204,7 @@ describe('SoundManager - Branch Coverage', () => {
 
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const manager = new SoundManager();
-      
+
       // saveSettings is called by setEnabled internally
       expect(() => manager.setEnabled(false)).not.toThrow();
       // Note: The warning may not be called if the error is caught silently
@@ -226,9 +226,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use classic logic (triangle) for default skin', () => {
       localStorage.setItem('chess_skin', 'classic');
       manager.enabled = true;
-      
+
       manager.playMove();
-      
+
       const oscResult = vi.spyOn(MockAudioContext.prototype, 'createOscillator').mock.results[0];
       if (oscResult?.value) {
         expect(oscResult.value.type).toBe('triangle');
@@ -238,9 +238,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use infernale logic (triangle, low freq) for infernale skin', () => {
       localStorage.setItem('chess_skin', 'infernale');
       manager.enabled = true;
-      
+
       manager.playMove();
-      
+
       const oscResult = vi.spyOn(MockAudioContext.prototype, 'createOscillator').mock.results[0];
       if (oscResult?.value) {
         expect(oscResult.value.type).toBe('triangle');
@@ -250,9 +250,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use frost logic (sine, high freq) for frost skin', () => {
       localStorage.setItem('chess_skin', 'frost');
       manager.enabled = true;
-      
+
       manager.playMove();
-      
+
       const oscResult = vi.spyOn(MockAudioContext.prototype, 'createOscillator').mock.results[0];
       if (oscResult?.value) {
         expect(oscResult.value.type).toBe('sine');
@@ -262,9 +262,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use neon logic (sawtooth + filter) for neon skin', () => {
       localStorage.setItem('chess_skin', 'neon');
       manager.enabled = true;
-      
+
       manager.playMove();
-      
+
       const oscResult = vi.spyOn(MockAudioContext.prototype, 'createOscillator').mock.results[0];
       if (oscResult?.value) {
         expect(oscResult.value.type).toBe('sawtooth');
@@ -275,12 +275,12 @@ describe('SoundManager - Branch Coverage', () => {
       // Temporarily remove createStereoPanner
       const originalCreateStereoPanner = MockAudioContext.prototype.createStereoPanner;
       MockAudioContext.prototype.createStereoPanner = undefined as any;
-      
+
       const manager = new SoundManager();
       manager.enabled = true;
-      
+
       expect(() => manager.playMove()).not.toThrow();
-      
+
       // Restore
       MockAudioContext.prototype.createStereoPanner = originalCreateStereoPanner;
     });
@@ -294,9 +294,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use classic capture (square wave)', () => {
       localStorage.setItem('chess_skin', 'classic');
       manager.enabled = true;
-      
+
       manager.playCapture();
-      
+
       const oscResult = vi.spyOn(MockAudioContext.prototype, 'createOscillator').mock.results[0];
       if (oscResult?.value) {
         expect(oscResult.value.type).toBe('square');
@@ -306,9 +306,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use infernale capture (dual oscillator + filter)', () => {
       localStorage.setItem('chess_skin', 'infernale');
       manager.enabled = true;
-      
+
       manager.playCapture();
-      
+
       // Verify no throw
       expect(() => manager.playCapture()).not.toThrow();
     });
@@ -316,9 +316,9 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use frost capture (shattering, 4 oscillators)', () => {
       localStorage.setItem('chess_skin', 'frost');
       manager.enabled = true;
-      
+
       manager.playCapture();
-      
+
       // Verify no throw
       expect(() => manager.playCapture()).not.toThrow();
     });
@@ -326,7 +326,7 @@ describe('SoundManager - Branch Coverage', () => {
     test('should use neon capture (square wave)', () => {
       localStorage.setItem('chess_skin', 'neon');
       manager.enabled = true;
-      
+
       expect(() => manager.playCapture()).not.toThrow();
     });
   });
@@ -345,16 +345,16 @@ describe('SoundManager - Branch Coverage', () => {
     test('should return early when audioContext is null', () => {
       manager.enabled = true;
       manager.audioContext = null;
-      
+
       expect(() => manager.playCheck()).not.toThrow();
     });
 
     test('should play two-tone warning sound', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playCheck();
-      
+
       // Should create 2 oscillators (times array has 2 elements)
       expect(createOscSpy).toHaveBeenCalledTimes(2);
     });
@@ -374,16 +374,16 @@ describe('SoundManager - Branch Coverage', () => {
     test('should return early when audioContext is null', () => {
       manager.enabled = true;
       manager.audioContext = null;
-      
+
       expect(() => manager.playPromotion()).not.toThrow();
     });
 
     test('should play ascending arpeggio with 4 notes', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playPromotion();
-      
+
       // 4 notes in arpeggio (C-E-G-C)
       expect(createOscSpy).toHaveBeenCalledTimes(4);
     });
@@ -403,16 +403,16 @@ describe('SoundManager - Branch Coverage', () => {
     test('should return early when audioContext is null', () => {
       manager.enabled = true;
       manager.audioContext = null;
-      
+
       expect(() => manager.playGameStart()).not.toThrow();
     });
 
     test('should play 3-note ascending arpeggio', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playGameStart();
-      
+
       // 3 notes (C, E, G)
       expect(createOscSpy).toHaveBeenCalledTimes(3);
     });
@@ -432,29 +432,29 @@ describe('SoundManager - Branch Coverage', () => {
     test('should return early when audioContext is null', () => {
       manager.enabled = true;
       manager.audioContext = null;
-      
+
       expect(() => manager.playGameOver(true)).not.toThrow();
     });
 
     test('should play victory fanfare (4 notes) for win', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playGameOver(true);
-      
+
       // Victory: 4 notes (C, E, G, C)
       expect(createOscSpy).toHaveBeenCalledTimes(4);
     });
 
     test('should play defeat sound (sawtooth, descending) for loss', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playGameOver(false);
-      
+
       // Defeat: 1 sawtooth oscillator
       expect(createOscSpy).toHaveBeenCalledTimes(1);
-      
+
       const osc = createOscSpy.mock.results[0].value;
       expect(osc.type).toBe('sawtooth');
     });
@@ -474,18 +474,18 @@ describe('SoundManager - Branch Coverage', () => {
     test('should return early when audioContext is null', () => {
       manager.enabled = true;
       manager.audioContext = null;
-      
+
       expect(() => manager.playSuccess()).not.toThrow();
     });
 
     test('should play high-pitched bell-like sound', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playSuccess();
-      
+
       expect(createOscSpy).toHaveBeenCalledTimes(1);
-      
+
       const osc = createOscSpy.mock.results[0].value;
       // Frequency should start at 880 (A5) and ramp to 1320 (E6)
       expect(osc.frequency.setValueAtTime).toHaveBeenCalled();
@@ -507,18 +507,18 @@ describe('SoundManager - Branch Coverage', () => {
     test('should return early when audioContext is null', () => {
       manager.enabled = true;
       manager.audioContext = null;
-      
+
       expect(() => manager.playError()).not.toThrow();
     });
 
     test('should play low-pitched sawtooth buzzer', () => {
       manager.enabled = true;
-      
+
       const createOscSpy = vi.spyOn(MockAudioContext.prototype, 'createOscillator');
       manager.playError();
-      
+
       expect(createOscSpy).toHaveBeenCalledTimes(1);
-      
+
       const osc = createOscSpy.mock.results[0].value;
       expect(osc.type).toBe('sawtooth');
       expect(osc.frequency.setValueAtTime).toHaveBeenCalled();
@@ -535,7 +535,7 @@ describe('SoundManager - Branch Coverage', () => {
       const result = manager.toggle();
       expect(result).toBe(false);
       expect(manager.enabled).toBe(false);
-      
+
       const stored = JSON.parse(localStorage.getItem('chess9x9-sound-settings')!);
       expect(stored.enabled).toBe(false);
     });
@@ -543,7 +543,7 @@ describe('SoundManager - Branch Coverage', () => {
     test('setEnabled() should set enabled and save', () => {
       manager.setEnabled(false);
       expect(manager.enabled).toBe(false);
-      
+
       const stored = JSON.parse(localStorage.getItem('chess9x9-sound-settings')!);
       expect(stored.enabled).toBe(false);
     });
@@ -551,14 +551,14 @@ describe('SoundManager - Branch Coverage', () => {
     test('setVolume() should set volume and save', () => {
       manager.setVolume(50);
       expect(manager.volume).toBe(0.5);
-      
+
       const stored = JSON.parse(localStorage.getItem('chess9x9-sound-settings')!);
       expect(stored.volume).toBe(0.5);
     });
 
     test('playMove should respect toCol parameter for panning', () => {
       manager.enabled = true;
-      
+
       // The parameter is toCol, not fromCol in current implementation
       // Use playMove with proper toCol
       manager.playMove(4, 4);

@@ -53,13 +53,19 @@ function makeGame(over: Record<string, unknown> = {}): any {
       { from: { r: 1, c: 1 }, to: { r: 3, c: 1 } },
       { from: { r: 7, c: 0 }, to: { r: 5, c: 0 } },
     ],
-    capturedPieces: { white: [{ type: 'p', color: 'black' }], black: [{ type: 'n', color: 'white' }] },
+    capturedPieces: {
+      white: [{ type: 'p', color: 'black' }],
+      black: [{ type: 'n', color: 'white' }],
+    },
     whiteTime: 123,
     blackTime: 456,
     clockEnabled: false,
     lastMove: { from: { r: 1, c: 1 }, to: { r: 3, c: 1 }, piece: { type: 'p', color: 'white' } },
     selectedSquare: { r: 3, c: 1 },
-    validMoves: [{ r: 4, c: 1 }, { r: 5, c: 1 }],
+    validMoves: [
+      { r: 4, c: 1 },
+      { r: 5, c: 1 },
+    ],
     ...over,
   };
 }

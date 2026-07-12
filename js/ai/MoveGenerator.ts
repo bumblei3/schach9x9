@@ -884,13 +884,13 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
     // Knight/King/Stepping pieces - no X-ray
     const steppingOffsets =
       type === PIECE_KNIGHT ||
-        type === PIECE_ARCHBISHOP ||
-        type === PIECE_CHANCELLOR ||
-        type === PIECE_ANGEL
+      type === PIECE_ARCHBISHOP ||
+      type === PIECE_CHANCELLOR ||
+      type === PIECE_ANGEL
         ? KNIGHT_OFFSETS
         : type === PIECE_KING
-        ? KING_OFFSETS
-        : null;
+          ? KING_OFFSETS
+          : null;
 
     if (steppingOffsets) {
       const r = indexToRow(from);
@@ -1113,7 +1113,10 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
               if (beyondPiece !== PIECE_NONE) {
                 const beyondColor = beyondPiece & COLOR_MASK;
                 const beyondType = beyondPiece & TYPE_MASK;
-                if (beyondColor === enemyColor && (beyondType === PIECE_KING || beyondType === PIECE_QUEEN)) {
+                if (
+                  beyondColor === enemyColor &&
+                  (beyondType === PIECE_KING || beyondType === PIECE_QUEEN)
+                ) {
                   // PIN THREAT: Our blocker is PINNED to the enemy king/queen behind!
                   const blockerPiece = board[ourBlockerSquare];
                   const blockerType = blockerPiece !== PIECE_NONE ? blockerPiece & TYPE_MASK : 0;
@@ -1167,7 +1170,9 @@ export function getKingThreats(board: BoardStorage, color: number): ThreatInfo[]
   if (enemyKingSquare === -1) return [];
 
   const allThreats = getAllThreats(board, color);
-  return allThreats.filter(t => t.targetSquare === enemyKingSquare || t.xrayTargetSquare === enemyKingSquare);
+  return allThreats.filter(
+    t => t.targetSquare === enemyKingSquare || t.xrayTargetSquare === enemyKingSquare
+  );
 }
 
 /**

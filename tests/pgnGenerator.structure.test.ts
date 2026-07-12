@@ -14,14 +14,12 @@ type Piece = { type: string; color: 'white' | 'black'; hasMoved?: boolean };
 type Board = (Piece | null)[][];
 
 function emptyBoard(): Board {
-  return Array(9).fill(null).map(() => Array(9).fill(null));
+  return Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(null));
 }
 
-function move(
-  f: [number, number],
-  t: [number, number],
-  extra: Record<string, unknown> = {},
-) {
+function move(f: [number, number], t: [number, number], extra: Record<string, unknown> = {}) {
   return {
     from: { r: f[0], c: f[1] },
     to: { r: t[0], c: t[1] },
@@ -59,7 +57,15 @@ describe('PGNGenerator.moveToNotation — capture & fairy letters', () => {
 
   test('all fairy piece letters map (R N B Q K A C E J)', () => {
     const letters: Record<string, string> = {
-      r: 'R', n: 'N', b: 'B', q: 'Q', k: 'K', a: 'A', c: 'C', e: 'E', j: 'J',
+      r: 'R',
+      n: 'N',
+      b: 'B',
+      q: 'Q',
+      k: 'K',
+      a: 'A',
+      c: 'C',
+      e: 'E',
+      j: 'J',
     };
     for (const [type, letter] of Object.entries(letters)) {
       const board = emptyBoard();

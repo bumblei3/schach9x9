@@ -13,13 +13,22 @@
 
 import { describe, test, expect } from 'vitest';
 import { createJsSearch } from '../js/search.js';
+import { getAllLegalMoves, type Move } from '../js/ai/MoveGenerator.js';
 import {
-  getAllLegalMoves,
-  type Move,
-} from '../js/ai/MoveGenerator.js';
-import {
-  WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN, WHITE_KING, WHITE_ARCHBISHOP,
-  BLACK_PAWN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_QUEEN, BLACK_KING, BLACK_ARCHBISHOP,
+  WHITE_PAWN,
+  WHITE_KNIGHT,
+  WHITE_BISHOP,
+  WHITE_ROOK,
+  WHITE_QUEEN,
+  WHITE_KING,
+  WHITE_ARCHBISHOP,
+  BLACK_PAWN,
+  BLACK_KNIGHT,
+  BLACK_BISHOP,
+  BLACK_ROOK,
+  BLACK_QUEEN,
+  BLACK_KING,
+  BLACK_ARCHBISHOP,
   COLOR_WHITE,
   PIECE_KING,
   TYPE_MASK,
@@ -37,10 +46,26 @@ function emptyBoard(): Int8Array {
 function startingBoard(): Int8Array {
   const b = emptyBoard();
   const back = [
-    WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK, WHITE_ARCHBISHOP,
+    WHITE_ROOK,
+    WHITE_KNIGHT,
+    WHITE_BISHOP,
+    WHITE_QUEEN,
+    WHITE_KING,
+    WHITE_BISHOP,
+    WHITE_KNIGHT,
+    WHITE_ROOK,
+    WHITE_ARCHBISHOP,
   ];
   const backB = [
-    BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK, BLACK_ARCHBISHOP,
+    BLACK_ROOK,
+    BLACK_KNIGHT,
+    BLACK_BISHOP,
+    BLACK_QUEEN,
+    BLACK_KING,
+    BLACK_BISHOP,
+    BLACK_KNIGHT,
+    BLACK_ROOK,
+    BLACK_ARCHBISHOP,
   ];
   for (let c = 0; c < 9; c++) {
     b[idx(0, c)] = backB[c];

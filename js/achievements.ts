@@ -1,4 +1,4 @@
-/** 
+/**
  * Achievement Manager for Schach 9x9
  * Tracks and unlocks achievements based on game statistics.
  */
@@ -13,7 +13,7 @@ export interface Achievement {
   description: string;
   unlocked: boolean;
   progress?: number; // current progress
-  target?: number;   // needed to unlock
+  target?: number; // needed to unlock
 }
 
 export class AchievementsManager {
@@ -34,7 +34,7 @@ export class AchievementsManager {
           id: 'first_win',
           name: 'Erster Sieg',
           description: 'Gewinne dein erstes Spiel',
-          unlocked: false
+          unlocked: false,
         },
         {
           id: 'win_streak_5',
@@ -42,7 +42,7 @@ export class AchievementsManager {
           description: 'Gewinne 5 Spiele in Folge',
           unlocked: false,
           progress: 0,
-          target: 5
+          target: 5,
         },
         {
           id: 'ten_wins',
@@ -50,26 +50,26 @@ export class AchievementsManager {
           description: 'Gewinne insgesamt 10 Spiele',
           unlocked: false,
           progress: 0,
-          target: 10
+          target: 10,
         },
         {
           id: 'checkmate_in_5',
           name: 'Schneller Matt',
           description: 'Erziehe ein Matt in 5 Zügen oder weniger',
-          unlocked: false
+          unlocked: false,
         },
         {
           id: 'promote_pawn',
           name: 'Bauernbeförderung',
           description: 'Förgere einen Bauern zu einer höheren Figur',
-          unlocked: false
+          unlocked: false,
         },
         {
           id: 'win_with_king_only',
           name: 'König allein',
           description: 'Gewinne ein Spiel mit nur deinem König übrig',
-          unlocked: false
-        }
+          unlocked: false,
+        },
       ];
       this.save();
     }
@@ -124,7 +124,12 @@ export class AchievementsManager {
   }
 
   /** Call after each game to evaluate achievements */
-  public checkAndUnlock(gameResult: 'win' | 'loss' | 'draw', moveCount: number, hasPromotion: boolean, kingOnlyWin: boolean): void {
+  public checkAndUnlock(
+    gameResult: 'win' | 'loss' | 'draw',
+    moveCount: number,
+    hasPromotion: boolean,
+    kingOnlyWin: boolean
+  ): void {
     // Update progress-based achievements
     const stats = statisticsManager.getStatistics();
     // Ten wins

@@ -50,7 +50,8 @@ self.onmessage = async function (e: MessageEvent) {
 
         // Setup progress callback + heartbeat
         const heartbeatInterval = setInterval(() => {
-          if (id !== undefined) workerSelf.postMessage({ type: 'heartbeat', id, data: { ts: Date.now() } });
+          if (id !== undefined)
+            workerSelf.postMessage({ type: 'heartbeat', id, data: { ts: Date.now() } });
         }, 1000);
 
         setProgressCallback((progress: AIProgressData) => {
@@ -116,7 +117,8 @@ self.onmessage = async function (e: MessageEvent) {
         if (id !== undefined) workerHeartbeats[id] = Date.now();
 
         const heartbeatInterval = setInterval(() => {
-          if (id !== undefined) workerSelf.postMessage({ type: 'heartbeat', id, data: { ts: Date.now() } });
+          if (id !== undefined)
+            workerSelf.postMessage({ type: 'heartbeat', id, data: { ts: Date.now() } });
         }, 1000);
 
         try {
