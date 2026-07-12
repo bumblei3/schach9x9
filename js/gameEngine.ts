@@ -103,6 +103,19 @@ export interface AnalysisVariation {
 }
 
 /**
+ * Snapshot of mutable game state saved when entering replay mode,
+ * restored when leaving it. Shape mirrors the object built in
+ * GameStateManager.enterReplayMode().
+ */
+export interface SavedGameState {
+  board: (PieceWithMoved | null)[][];
+  turn: Player;
+  selectedSquare: Square | null;
+  validMoves: Square[] | null;
+  lastMoveHighlight: { from: Square; to: Square } | null;
+}
+
+/**
  * Hauptklasse für die Spiellogik und den Spielzustand von Schach9x9
  */
 export class Game {
@@ -139,7 +152,7 @@ export class Game {
   _forceFullRender?: boolean;
   replayMode: boolean;
   replayPosition: number;
-  savedGameState: unknown;
+  savedGameState: SavedGameState | null;
   isAnimating: boolean;
   bestMoves: unknown[];
   drawOffered: boolean;

@@ -223,7 +223,9 @@ export class App {
   private applyDelegates(): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const app = this;
-    // Game prototype for delegate methods (dynamically patched)
+    // Game prototype for delegate methods (dynamically patched at runtime).
+    // `any` is required here: 75+ methods are attached dynamically and their
+    // `this` binds to a real Game instance at call time — not statically typeable.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const GP = (this.Game_Class as typeof Game).prototype as any;
 

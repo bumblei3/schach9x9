@@ -114,10 +114,7 @@ export function undoMove(game: Game, moveController: MoveController): void {
   }
 
   // Update 3D board if active
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const battle3D = (window as any).battleChess3D as
-    | { enabled: boolean; updateFromGameState: (_g: Game) => void }
-    | undefined;
+  const battle3D = window.battleChess3D;
   if (battle3D && battle3D.enabled) {
     battle3D.updateFromGameState(game);
   }
@@ -179,9 +176,8 @@ export function enterReplayMode(game: Game, moveController: MoveController): voi
 export function exitReplayMode(game: Game): void {
   if (!game.replayMode) return;
 
-  // savedGameState has a dynamic shape (board, turn, selectedSquare, etc.)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const saved = game.savedGameState as any;
+  const saved = game.savedGameState;
+  if (!saved) return;
   game.board = saved.board;
   game.turn = saved.turn;
   game.selectedSquare = saved.selectedSquare;
@@ -216,9 +212,7 @@ export function exitReplayMode(game: Game): void {
  */
 export function reconstructBoardAtMove(game: Game, moveIndex: number): void {
   if (game.savedGameState) {
-    // savedGameState has a dynamic shape (board, turn, selectedSquare, etc.)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    game.board = JSON.parse(JSON.stringify((game.savedGameState as any).board));
+    game.board = JSON.parse(JSON.stringify(game.savedGameState.board));
     for (let i = game.moveHistory.length - 1; i > moveIndex; i--) {
       const move = game.moveHistory[i];
       undoMoveForReplay(game, move);

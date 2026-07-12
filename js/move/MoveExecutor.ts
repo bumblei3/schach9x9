@@ -437,9 +437,9 @@ export function finishMove(game: Game, lastTo?: Square): void {
         color: piece.color,
         hasMoved: piece.hasMoved,
       } as Piece;
-      // defenderData may be a partial Piece (e.g. capturedPawn only has color)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const defenderData = (targetPiece || lastMove.specialMove?.capturedPawn || null) as any;
+      // defenderData may be a partial Piece (e.g. capturedPawn only has color);
+      // the 3D battle animation is best-effort and guarded by `if (captured)`.
+      const defenderData = (targetPiece || lastMove.specialMove?.capturedPawn || null) as Piece;
       window.battleChess3D.playBattleSequence(attackerData, defenderData, from, to).then(() => {
         window.battleChess3D!.removePiece(to.r, to.c);
         window.battleChess3D!.animateMove(from.r, from.c, to.r, to.c);
