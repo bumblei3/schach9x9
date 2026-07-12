@@ -3,6 +3,7 @@ import type { Phase } from '../config.js';
 import * as UI from '../ui.js';
 import { soundManager } from '../sounds.js';
 import { puzzleManager } from '../puzzleManager.js';
+import { dailyPuzzle } from '../dailyPuzzle.js';
 import { evaluatePosition } from '../aiEngine.js';
 import * as MoveValidator from './MoveValidator.js';
 import { confettiSystem } from '../effects.js';
@@ -287,7 +288,7 @@ export async function completeMoveExecution(
   }
 
   // Puzzle Logic Check
-  if (game.mode === 'puzzle') {
+  if (game.mode === 'puzzle' || game.mode === 'daily-puzzle') {
     const moveRecordForPuzzle: MoveResult = {
       from: moveRecord.from,
       to: moveRecord.to,
@@ -305,6 +306,14 @@ export async function completeMoveExecution(
     } else if (result === 'solved') {
       UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
       soundManager.playSuccess();
+      if (game.mode === 'daily-puzzle') {
+        dailyPuzzle.markSolvedToday();
+        // Reflect the "Heute gelöst" badge immediately (next app load would
+        // also pick it up via App.refreshDailyPuzzleBadge, but live feedback
+        // is better UX).
+        const badge = document.getElementById('daily-puzzle-badge');
+        if (badge) badge.style.display = 'inline-block';
+      }
     } else {
       UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');
 

@@ -12,4 +12,5 @@ export type GameMode =
   | 'upgrade'
   | 'upgrade8x8'
   | 'cross'
-  | 'opening-trainer';
+  | 'opening-trainer'
+  | 'daily-puzzle';

@@ -920,6 +920,20 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                       Trainiere Eröffnungen aus dem Buch – finde den richtigen Zug.
                     </div>
                   </div>
+
+                  <!-- Daily Puzzle -->
+                  <div class="gamemode-card" data-mode="daily-puzzle" onclick="
+                      window.app.init(0, 'daily-puzzle');
+                      document.getElementById('main-menu').classList.remove('active');
+                    ">
+                    <span class="card-tag tag-pro">Täglich</span>
+                    <div class="card-icon">📅</div>
+                    <div class="card-title">Tägliches Puzzle</div>
+                    <div class="card-desc">
+                      Ein neues Puzzle jeden Tag – baue deine Siegesserie auf.
+                    </div>
+                    <span class="daily-badge" id="daily-puzzle-badge" style="display: none">Heute gelöst ✓</span>
+                  </div>
                 </div>
               </div>
 
