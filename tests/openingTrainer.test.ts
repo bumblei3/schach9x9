@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { OpeningTrainerManager } from '../js/openingTrainer.js';
+import { OpeningTrainerManager, loadTrainerProgress } from '../js/openingTrainer.js';
 import type { TrainerProgress } from '../js/openingTrainer.js';
 import { OpeningBook } from '../js/ai/OpeningBook.js';
 import type { Piece } from '../js/gameEngine.js';
@@ -232,5 +232,42 @@ describe('OpeningTrainerManager storage', () => {
     const saved = JSON.parse(raw!) as TrainerProgress;
     expect(saved.streak).toBe(1);
     expect(saved.correct).toBe(1);
+  });
+
+  test('constructor uses provided progress override instead of localStorage', () => {
+    localStorage.setItem(
+      'openingTrainer.progress',
+      JSON.stringify({ streak: 9, attempts: 9, correct: 9, solvedHashes: ['x'] })
+    );
+    const book = new OpeningBook();
+    book.load({
+      positions: {
+        h1: {
+          moves: [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, weight: 100, games: 10 }],
+          seenCount: 1,
+        },
+      },
+    });
+    const override = { streak: 2, attempts: 4, correct: 3, solvedHashes: ['h1', 'h2'] };
+    const mgr = new OpeningTrainerManager(book, override);
+    expect(mgr.progress).toEqual(override);
+  });
+
+  test('loadTrainerProgress returns zero object on corrupt JSON', () => {
+    localStorage.setItem('openingTrainer.progress', 'not-json{');
+    const progress = loadTrainerProgress();
+    expect(progress).toEqual({ streak: 0, attempts: 0, correct: 0, solvedHashes: [] });
+  });
+
+  test('loadTrainerProgress coerces partial JSON and guards non-array solvedHashes', () => {
+    localStorage.setItem(
+      'openingTrainer.progress',
+      JSON.stringify({ streak: 5, solvedHashes: 'oops' })
+    );
+    const progress = loadTrainerProgress();
+    expect(progress.streak).toBe(5);
+    expect(progress.attempts).toBe(0);
+    expect(Array.isArray(progress.solvedHashes)).toBe(true);
+    expect(progress.solvedHashes).toEqual([]);
   });
 });

@@ -36,7 +36,7 @@ export function loadTrainerProgress(): TrainerProgress {
       streak: parsed.streak ?? 0,
       attempts: parsed.attempts ?? 0,
       correct: parsed.correct ?? 0,
-      solvedHashes: parsed.solvedHashes ?? [],
+      solvedHashes: Array.isArray(parsed.solvedHashes) ? parsed.solvedHashes : [],
     };
   } catch {
     return { streak: 0, attempts: 0, correct: 0, solvedHashes: [] };
