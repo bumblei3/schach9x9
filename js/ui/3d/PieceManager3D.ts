@@ -86,14 +86,9 @@ export class PieceManager3D {
       return;
     }
 
-    // Check for specific setup phase corridors if typed appropriately in Game
-    // Assuming game might have custom properties or we inspect logic
-    // For now, based on legacy code:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const g = game as any;
-
-    if (game.phase === PHASES.SETUP_WHITE_PIECES && typeof g.whiteCorridor === 'number') {
-      const colStart = g.whiteCorridor;
+    // whiteCorridor / blackCorridor are optional setup-phase properties on Game.
+    if (game.phase === PHASES.SETUP_WHITE_PIECES && typeof game.whiteCorridor === 'number') {
+      const colStart = game.whiteCorridor;
       const rowStart = 6;
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {
@@ -104,8 +99,8 @@ export class PieceManager3D {
       return;
     }
 
-    if (game.phase === PHASES.SETUP_BLACK_PIECES && typeof g.blackCorridor === 'number') {
-      const colStart = g.blackCorridor;
+    if (game.phase === PHASES.SETUP_BLACK_PIECES && typeof game.blackCorridor === 'number') {
+      const colStart = game.blackCorridor;
       const rowStart = 0;
       for (let r = rowStart; r < rowStart + 3; r++) {
         for (let c = colStart; c < colStart + 3; c++) {

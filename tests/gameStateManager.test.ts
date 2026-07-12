@@ -355,7 +355,7 @@ describe('GameStateManager', () => {
         board: Array(9)
           .fill(null)
           .map(() => Array(9).fill(null)),
-      };
+      } as any;
       game.moveHistory = [
         { from: { r: 0, c: 0 }, to: { r: 1, c: 0 }, piece: { type: 'p' } } as any,
         { from: { r: 1, c: 0 }, to: { r: 2, c: 0 }, piece: { type: 'p' } } as any,
