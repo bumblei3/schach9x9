@@ -65,4 +65,43 @@ describe('OpeningTrainerManager', () => {
     const next = mgr.getNextPosition()!;
     expect(all).toContainEqual(next);
   });
+
+  test('correct move increments streak and accuracy', () => {
+    const book = new OpeningBook();
+    book.load({
+      positions: {
+        h1: {
+          moves: [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, weight: 100, games: 10 }],
+          seenCount: 1,
+        },
+      },
+    });
+    const mgr = new OpeningTrainerManager(book);
+    const pos = mgr.getNextPosition()!;
+    const res = mgr.submitMove(pos, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
+    expect(res.correct).toBe(true);
+    expect(mgr.progress.streak).toBe(1);
+    expect(mgr.progress.correct).toBe(1);
+    expect(mgr.accuracy).toBe(1);
+  });
+
+  test('wrong move resets streak but records attempt', () => {
+    const book = new OpeningBook();
+    book.load({
+      positions: {
+        h1: {
+          moves: [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, weight: 100, games: 10 }],
+          seenCount: 1,
+        },
+      },
+    });
+    const mgr = new OpeningTrainerManager(book);
+    const pos = mgr.getNextPosition()!;
+    const res = mgr.submitMove(pos, { from: { r: 2, c: 2 }, to: { r: 3, c: 3 } });
+    expect(res.correct).toBe(false);
+    expect(res.expected).toEqual({ from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
+    expect(mgr.progress.streak).toBe(0);
+    expect(mgr.progress.attempts).toBe(1);
+    expect(mgr.accuracy).toBe(0);
+  });
 });

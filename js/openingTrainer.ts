@@ -19,6 +19,12 @@ export interface TrainerPosition {
   seenCount: number;
 }
 
+export interface MoveResult {
+  correct: boolean;
+  expected: { from: Square; to: Square };
+  progress: TrainerProgress;
+}
+
 export class OpeningTrainerManager {
   progress: TrainerProgress = {
     streak: 0,
@@ -56,5 +62,28 @@ export class OpeningTrainerManager {
     if (positions.length === 0) return null;
     const index = Math.floor(Math.random() * positions.length);
     return positions[index];
+  }
+
+  submitMove(pos: TrainerPosition, move: { from: Square; to: Square }): MoveResult {
+    const correct =
+      pos.expectedMove.from.r === move.from.r &&
+      pos.expectedMove.from.c === move.from.c &&
+      pos.expectedMove.to.r === move.to.r &&
+      pos.expectedMove.to.c === move.to.c;
+    this.progress.attempts++;
+    if (correct) {
+      this.progress.streak++;
+      this.progress.correct++;
+      if (!this.progress.solvedHashes.includes(pos.hash)) {
+        this.progress.solvedHashes.push(pos.hash);
+      }
+    } else {
+      this.progress.streak = 0;
+    }
+    return { correct, expected: pos.expectedMove, progress: { ...this.progress } };
+  }
+
+  get accuracy(): number {
+    return this.progress.attempts === 0 ? 0 : this.progress.correct / this.progress.attempts;
   }
 }
