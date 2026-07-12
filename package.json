@@ -1,6 +1,6 @@
 {
   "name": "schach9x9",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Schach 9x9 Spiel",
   "type": "module",
   "scripts": {

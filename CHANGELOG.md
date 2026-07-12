@@ -3,6 +3,63 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.0.1] – 2026-07-12
+
+Maintenance-Release nach `v1.0.0-stable`. Schwerpunkt: umfangreiche
+Test-Invarianten-Suiten (Coverage der Kernmodule deutlich erhöht), CI-Stabilität
+und gezielte Bugfixes/UX-Verbesserungen. Keine neuen Features, keine Breaking Changes.
+
+### Bug Fixes
+
+- **PGNGenerator:** korrekte Rochaden-/Beförderungs-/Schach-/Disambiguierungs-Notation (#47)
+- **aiController:** ausgewogener Fallback für unbekannte Gegner-Persönlichkeiten (#46)
+- **tutor:** KI-Tutor tatsächlich stärker als die Gegner-KI machen (#36)
+- **ai:** Root-Level-ProbCut deaktiviert, der KI-Züge ab Elo >= 1400 fallen ließ
+- **ai:** JS-Search-Bugs nach WASM-Entfernung behoben
+- **ui:** mobile Action-Bar-Overflow + Board-Tap-Verhalten
+- **ui:** NotificationUI XSS-sicher, barrierefrei, gestapelt
+- **ui:** 2D-Board sichtbar und klickbar (board-wrapper Opacity/Pointer-Events)
+- **ui:** Shop-Panel am Desktop rechts angedockt (verdeckt das Brett nicht mehr)
+- **ui:** PWN->Engel-Direkt-Upgrade in Upgrade-Modi erlaubt
+- **e2e:** Tutorial-Seen-Flag seeden, damit First-Run-Overlay Klicks nicht blockiert
+
+### Features
+
+- **aiController:** `null` zurückgeben, wenn Hint-Worker-Pool leer ist
+- **aiController:** Worker-Pool-Init mit Fallback-Fehlerbehandlung gehärtet
+- **aiWorker:** Heartbeat-Selbstüberwachung gegen Deadlocks
+- **ui:** AI-Denkzustand im Spinner-Overlay anzeigen
+- **ui:** Tutorial nur beim ersten Start (localStorage) + fehlendes `show()` bei Auto-Start
+
+### UX / Accessibility
+
+- dynamische Viewport-Units, erweitertes focus-visible, High-Contrast- +
+  Touch-Target-Guards (#60)
+
+### Refactoring
+
+- **ai:** WASM-Engine entfernt, JS-Search-Root-Move-Bug behoben, CI aufgeräumt
+- **AI:** AI-Timeout-Konstanten in config.ts zentralisiert
+
+### Tests
+
+- Uber 40 neue fokussierte Invarianten-Suiten fur Kernmodule (u.a. MoveGenerator,
+  RulesEngine, Evaluate, MoveController, MoveValidator, MoveExecutor, TranspositionTable,
+  AIController, CampaignManager, StatisticsManager, PGN-Generator/-Parser,
+  OpeningBook(…), PuzzleManager, TacticsDetector, MoveAnalyzer, OpeningBookTrainer,
+  PostGameAnalyzer, HintGenerator, ErrorManager/logger, DOMHandler, TooltipManager,
+  EvaluationBar, GameController, OpeningBookUI). Gesamt-Coverage: stmts ~92% /
+  fn ~91% / br ~81%.
+
+### CI / Automation
+
+- WASM-Build-Trigger für Dependabot-PRs repariert (Rust-Cache, Change-Detection)
+- E2E nicht-blockierend gemacht, Coverage-Thresholds erzwungen
+- Bundle-Budget angehoben + Chunk-Breakdown-Report
+- Dependabot-Auto-Merge + Dependency-Graph-Snapshot
+
+[1.0.1]: https://github.com/bumblei3/schach9x9/compare/v1.0.0-stable...v1.0.1
+
 ## [1.0.0] – 2026-07-10
 
 Changes since `v1.0.0-stable`.
