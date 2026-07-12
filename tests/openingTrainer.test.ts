@@ -1,9 +1,12 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
 import { OpeningTrainerManager } from '../js/openingTrainer.js';
+import type { TrainerProgress } from '../js/openingTrainer.js';
 import { OpeningBook } from '../js/ai/OpeningBook.js';
 import type { Piece } from '../js/gameEngine.js';
 
 describe('OpeningTrainerManager', () => {
+  beforeEach(() => localStorage.clear());
+
   test('loads book data and exposes at least one trainable position', () => {
     const book = new OpeningBook();
     book.load({
@@ -185,5 +188,49 @@ describe('OpeningTrainerManager', () => {
     expect((recon.board[8][0] as Piece).color).toBe('black');
     expect((recon.board[4][4] as Piece).type).toBe('q');
     expect(recon.board[3][3]).toBeNull();
+  });
+});
+
+describe('OpeningTrainerManager storage', () => {
+  beforeEach(() => localStorage.clear());
+
+  test('manager auto-loads persisted progress from localStorage', () => {
+    localStorage.setItem(
+      'openingTrainer.progress',
+      JSON.stringify({ streak: 3, attempts: 5, correct: 4, solvedHashes: ['h1'] })
+    );
+    const book = new OpeningBook();
+    book.load({
+      positions: {
+        h1: {
+          moves: [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, weight: 100, games: 10 }],
+          seenCount: 1,
+        },
+      },
+    });
+    const mgr = new OpeningTrainerManager(book);
+    expect(mgr.progress.streak).toBe(3);
+    expect(mgr.progress.solvedHashes).toEqual(['h1']);
+  });
+
+  test('saveProgress persists current progress to localStorage', () => {
+    const book = new OpeningBook();
+    book.load({
+      positions: {
+        h1: {
+          moves: [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, weight: 100, games: 10 }],
+          seenCount: 1,
+        },
+      },
+    });
+    const mgr = new OpeningTrainerManager(book);
+    const pos = mgr.getNextPosition()!;
+    mgr.submitMove(pos, { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
+    mgr.saveProgress();
+    const raw = localStorage.getItem('openingTrainer.progress');
+    expect(raw).not.toBeNull();
+    const saved = JSON.parse(raw!) as TrainerProgress;
+    expect(saved.streak).toBe(1);
+    expect(saved.correct).toBe(1);
   });
 });

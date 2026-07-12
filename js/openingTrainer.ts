@@ -25,18 +25,44 @@ export interface MoveResult {
   progress: TrainerProgress;
 }
 
+const TRAINER_STORAGE_KEY = 'openingTrainer.progress';
+
+export function loadTrainerProgress(): TrainerProgress {
+  try {
+    const raw = localStorage.getItem(TRAINER_STORAGE_KEY);
+    if (!raw) return { streak: 0, attempts: 0, correct: 0, solvedHashes: [] };
+    const parsed = JSON.parse(raw) as Partial<TrainerProgress>;
+    return {
+      streak: parsed.streak ?? 0,
+      attempts: parsed.attempts ?? 0,
+      correct: parsed.correct ?? 0,
+      solvedHashes: parsed.solvedHashes ?? [],
+    };
+  } catch {
+    return { streak: 0, attempts: 0, correct: 0, solvedHashes: [] };
+  }
+}
+
+export function saveTrainerProgress(progress: TrainerProgress): void {
+  try {
+    localStorage.setItem(TRAINER_STORAGE_KEY, JSON.stringify(progress));
+  } catch {
+    // storage unavailable / quota — fail silently, progress is non-critical
+  }
+}
+
 export class OpeningTrainerManager {
-  progress: TrainerProgress = {
-    streak: 0,
-    attempts: 0,
-    correct: 0,
-    solvedHashes: [],
-  };
+  progress: TrainerProgress;
 
   private book: OpeningBook;
 
-  constructor(book: OpeningBook) {
+  constructor(book: OpeningBook, progress?: TrainerProgress) {
     this.book = book;
+    this.progress = progress ?? loadTrainerProgress();
+  }
+
+  saveProgress(): void {
+    saveTrainerProgress(this.progress);
   }
 
   listPositions(): TrainerPosition[] {
