@@ -9,6 +9,7 @@ import type { EvaluationBar } from './ui/EvaluationBar.js';
 import type { Player, Square, Piece, GameMode } from './types/game.js';
 import type { Game, MoveHistoryEntry, PieceWithMoved } from './gameEngine.js';
 import type { GameController } from './gameController.js';
+import { dailyPuzzle } from './dailyPuzzle.js';
 import type { MoveController } from './moveController.js';
 import type { AIController } from './aiController.js';
 import type { TutorController } from './tutorController.js';
@@ -133,6 +134,9 @@ export class App {
     // Initialize DOM Handler (Menu handlers, etc.)
     this.domHandler.init();
 
+    // Reflect the daily-puzzle solved badge on the main menu (if already solved today)
+    this.refreshDailyPuzzleBadge();
+
     // Apply delegates (monkey-patching Game prototype for legacy support)
     this.applyDelegates();
 
@@ -173,6 +177,17 @@ export class App {
     this.domHandler.initDOM();
     // TooltipManager is a module-level singleton constructed on import,
     // so importing it above is enough to wire up [data-tooltip] hints.
+  }
+
+  /** Show/hide the "Heute gelöst" badge on the daily-puzzle menu card. */
+  private refreshDailyPuzzleBadge(): void {
+    const badge = document.getElementById('daily-puzzle-badge');
+    if (!badge) return;
+    if (dailyPuzzle.isSolvedToday()) {
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
   }
 
   public async init3D(): Promise<void> {

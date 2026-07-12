@@ -15,6 +15,7 @@ import { Tutorial } from './tutorial.js';
 import { ArrowRenderer } from './arrows.js';
 import { StatisticsManager } from './statisticsManager.js';
 import { puzzleManager } from './puzzleManager.js';
+import { dailyPuzzle } from './dailyPuzzle.js';
 import { TimeManager } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
@@ -139,6 +140,9 @@ export class GameController {
       // Wait, the plan said "Missing Coverage: Puzzle Mode", and "New E2E Tests: puzzle.spec.ts".
       // Plan didn't explicitly say Implement PuzzleStrategy, just Classic, Setup, Standard, Campaign.
       this.currentModeStrategy = null; // Puzzle handled ad-hoc or we adhere to legacy for now.
+    } else if (mode === 'daily-puzzle') {
+      // Daily puzzle reuses the legacy puzzle pipeline with a day-rotating index.
+      this.currentModeStrategy = null;
     } else if (mode === 'opening-trainer') {
       this.currentModeStrategy = null;
     } else {
@@ -172,6 +176,8 @@ export class GameController {
       this.puzzleMenu.show();
       this.game.mode = 'puzzle';
       UI.renderBoard(this.game);
+    } else if (mode === 'daily-puzzle') {
+      this.startDailyPuzzleMode();
     }
 
     // Initialize helpers common to all
@@ -653,6 +659,23 @@ export class GameController {
     } else {
       UI.updatePuzzleStatus('success', 'Alle Puzzles gelöst!');
     }
+  }
+
+  /**
+   * Daily Puzzle mode: load the day-rotating puzzle through the shared
+   * `puzzleManager` pipeline. `loadPuzzle` resets `game.mode = 'puzzle'`, so we
+   * restore `'daily-puzzle'` afterward to keep this mode distinguishable.
+   */
+  startDailyPuzzleMode(): void {
+    this.game.mode = 'daily-puzzle';
+    this.game.phase = PHASES.PLAY;
+    UI.hidePuzzleOverlay();
+    const idx = dailyPuzzle.getDailyPuzzleIndex();
+    puzzleManager.loadPuzzle(this.game, idx);
+    this.game.mode = 'daily-puzzle';
+    this.puzzleMenu.show();
+    UI.renderBoard(this.game);
+    UI.updateStatus(this.game);
   }
 
   exitPuzzleMode(): void {

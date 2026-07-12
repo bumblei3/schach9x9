@@ -3,6 +3,33 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.2.0] – 2026-07-12
+
+Neues Feature: **Tägliches Puzzle** — ein jeden Tag rotierendes Schachtaktik-Puzzle
+(Solo, kein Multiplayer). Reuse der bestehenden `puzzleManager`-Infrastruktur.
+
+### Feature
+- `DailyPuzzleManager` (`js/dailyPuzzle.ts`): wählt deterministisch ein Puzzle pro
+  Kalendertag (rotiert um lokale Mitternacht), trackt "heute gelöst" pro Tag
+  (`localStorage['dailyPuzzle.solved.YYYY-MM-DD']`) und eine Siegesserie
+  (`getStreak`, aufeinanderfolgende gelöste Tage).
+- Neue Main-Menu-Karte "Tägliches Puzzle" (`data-mode="daily-puzzle"`) mit
+  "Heute gelöst ✓"-Badge (aktualisiert beim App-Start + live nach dem Lösen).
+- `gameController.startDailyPuzzleMode()` lädt das Tages-Puzzle über die
+  bestehende `puzzleManager.loadPuzzle`-Pipeline; der Solve-Hook in
+  `MoveExecutor` markiert den Tages-Status.
+- `GameMode`-Union um `'daily-puzzle'` erweitert (inkl. `GAME_MODES.DAILY_PUZZLE`).
+
+### Fixes (aus Code-Review)
+- Puzzle-Index und Solved-Key nun beide auf lokaler Tagesbasis (zuvor rotierte
+  der Index UTC-mitternachts → falscher "schon gelöst"-Status westlich von UTC).
+- `getTodaysPuzzle`-Null-Guard für leere Puzzle-Sets korrekt getestet.
+
+### Tests / Coverage
+- Neue `tests/dailyPuzzle.test.ts` (15 Tests): Index-Determinismus, lokales
+  Datum-Format, Solved-Round-Trip, Streak, leeres Set.
+- Gesamte Unit-Suite: 2672 Tests, 0 Regressionen (209 Dateien).
+
 ## [1.1.2] – 2026-07-12
 
 Bugfix-Release für den Eröffnungs-Trainer. Ein E2E-Browser-Check nach
