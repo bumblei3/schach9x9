@@ -3,6 +3,22 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.0.4] – 2026-07-12
+
+Qualitäts-Release: Test-Basis für den Eröffnungs-Trainer geschärft. Keine neuen
+Features, keine Breaking Changes.
+
+### Tests / Coverage
+
+- **coverage:** `js/chess-pieces.ts` (reines Re-Export-Barrel) aus dem Coverage-
+  Report ausgeschlossen — v8 meldete fälschlich 0%, während das Zielmodul voll
+  getestet ist. Gesamt-Coverage dadurch leicht gestiegen (#74)
+- **OpeningBookTrainer:** Coverage von 67% → 81% Lines (Branch 69% → 80%) (#75)
+  - CLI-Argument-Parser aus `main()` in exportierte pure Funktion `parseCliArgs()`
+    extrahiert (testbar, ohne Laufzeitverhalten zu ändern)
+  - neue Tests: CLI-Parser (8), `printStats()`-Ausgabe, Spezialfiguren-Mappings
+    (Erzbischof/Chancellor/Engel/Nightrider) in `boardToUi` + `getBoardHashInt`
+
 ## [1.0.3] – 2026-07-12
 
 Qualitäts-Release: Typsicherheit im Produktivcode geschärft. Keine neuen Features,
