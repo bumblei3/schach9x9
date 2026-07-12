@@ -152,6 +152,7 @@ export const GAME_MODES = {
   CAMPAIGN: 'campaign', // Story Mode
   UPGRADE: 'upgrade', // Troop Upgrade Mode
   UPGRADE_8X8: 'upgrade8x8', // 8x8 Upgrade Mode
+  OPENING_TRAINER: 'opening-trainer', // Opening trainer drill mode
 } as const;
 
 export type GameMode = (typeof GAME_MODES)[keyof typeof GAME_MODES];

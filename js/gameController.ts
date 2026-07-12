@@ -31,6 +31,12 @@ import type { GameMode } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
 import { openingBook } from './ai/OpeningBook.js';
+import {
+  OpeningTrainerManager,
+  loadTrainerProgress,
+  reconstructBoardFromHash,
+} from './openingTrainer.js';
+import { OpeningTrainerMenu } from './ui/OpeningTrainerMenu.js';
 
 import type { GameModeStrategy } from './modes/GameModeStrategy.js';
 import { SetupModeStrategy } from './modes/strategies/SetupMode.js';
@@ -82,6 +88,8 @@ export class GameController {
   moveExecutor: unknown;
   gameStartTime: number | null;
   currentModeStrategy: GameModeStrategy | null = null;
+  openingTrainerManager: OpeningTrainerManager | null = null;
+  openingTrainerMenu: OpeningTrainerMenu | null = null;
 
   constructor(game: GameExtended) {
     this.game = game;
@@ -125,6 +133,9 @@ export class GameController {
       // Wait, the plan said "Missing Coverage: Puzzle Mode", and "New E2E Tests: puzzle.spec.ts".
       // Plan didn't explicitly say Implement PuzzleStrategy, just Classic, Setup, Standard, Campaign.
       this.currentModeStrategy = null; // Puzzle handled ad-hoc or we adhere to legacy for now.
+    } else if (mode === 'opening-trainer') {
+      this.currentModeStrategy = null;
+      this.startOpeningTrainerMode();
     } else {
       // Fallback
       this.currentModeStrategy = new SetupModeStrategy();
@@ -639,6 +650,52 @@ export class GameController {
     UI.hidePuzzleOverlay();
     // Return to main menu or restart
     this.reloadPage();
+  }
+
+  // ===== OPENING TRAINER MODE =====
+
+  /**
+   * Start the opening-trainer mode: load a book position onto the board and
+   * show the trainer menu. The menu's "Start" button advances to the next
+   * position. Logic lives in OpeningTrainerManager; this method only wires
+   * the existing board-render pipeline to it.
+   */
+  startOpeningTrainerMode(): void {
+    this.game.mode = 'opening-trainer';
+    UI.hidePuzzleOverlay();
+    this.showShop(false);
+
+    const manager = new OpeningTrainerManager(openingBook, loadTrainerProgress());
+    this.openingTrainerManager = manager;
+
+    const loadPosition = (): void => {
+      const pos = manager.getNextPosition();
+      if (!pos) {
+        notificationUI.show('Keine Eröffnungs-Stellungen im Buch gefunden.', 'info');
+        return;
+      }
+      const { board, turn } = reconstructBoardFromHash(pos.hash);
+      this.game.board = board as (PieceWithMoved | null)[][];
+      this.game.turn = turn as Player;
+      UI.renderBoard(this.game);
+      UI.updateStatus(this.game);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.updateFromGameState(this.game);
+      }
+    };
+
+    const container = document.getElementById('opening-trainer-container');
+    if (this.openingTrainerMenu) {
+      this.openingTrainerMenu.destroy();
+    }
+    if (container) {
+      container.innerHTML = '';
+    }
+    this.openingTrainerMenu = new OpeningTrainerMenu(container ?? document.body, manager, () =>
+      loadPosition()
+    );
+
+    loadPosition();
   }
 
   reloadPage(): void {
