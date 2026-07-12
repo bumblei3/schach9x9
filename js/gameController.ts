@@ -662,6 +662,7 @@ export class GameController {
    */
   startOpeningTrainerMode(): void {
     this.game.mode = 'opening-trainer';
+    this.game.phase = PHASES.PLAY;
     UI.hidePuzzleOverlay();
     this.showShop(false);
 

@@ -647,18 +647,6 @@ export class DOMHandler {
       });
     }
 
-    const openingTrainerBtn = document.getElementById('opening-trainer-mode-btn');
-    if (openingTrainerBtn) {
-      openingTrainerBtn.addEventListener('click', () => {
-        if (this.gameController && this.gameController.startOpeningTrainerMode) {
-          this.gameController.startOpeningTrainerMode();
-          if (mainMenu) {
-            mainMenu.classList.remove('active');
-          }
-        }
-      });
-    }
-
     const helpBtn = document.getElementById('help-btn');
     const helpOverlay = document.getElementById('help-overlay');
     const closeHelpBtn = document.getElementById('close-help-btn');
