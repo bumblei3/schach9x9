@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { OpeningTrainerManager } from '../js/openingTrainer.js';
 import { OpeningBook } from '../js/ai/OpeningBook.js';
+import type { Piece } from '../js/gameEngine.js';
 
 describe('OpeningTrainerManager', () => {
   test('loads book data and exposes at least one trainable position', () => {
@@ -103,5 +104,31 @@ describe('OpeningTrainerManager', () => {
     expect(mgr.progress.streak).toBe(0);
     expect(mgr.progress.attempts).toBe(1);
     expect(mgr.accuracy).toBe(0);
+  });
+
+  test('reconstructBoard turns a hash back into a renderable board + turn', () => {
+    const book = new OpeningBook();
+    const board: (Piece | null)[][] = Array.from({ length: 9 }, () =>
+      Array.from({ length: 9 }, () => null)
+    );
+    board[0][0] = { type: 'p', color: 'white', hasMoved: false };
+    const hash = book.getBoardHash(board, 'white');
+    book.load({
+      positions: {
+        [hash]: {
+          moves: [{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, weight: 100, games: 10 }],
+          seenCount: 1,
+        },
+      },
+    });
+    const mgr = new OpeningTrainerManager(book);
+    const pos = mgr.getNextPosition()!;
+    const recon = mgr.reconstructBoard(pos.hash);
+    expect(recon.board.length).toBe(9);
+    expect(recon.turn).toBe('white');
+    expect(recon.board[0][0]).not.toBeNull();
+    expect((recon.board[0][0] as Piece).type).toBe('p');
+    expect((recon.board[0][0] as Piece).color).toBe('white');
+    expect(recon.board[1][1]).toBeNull();
   });
 });
