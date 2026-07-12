@@ -3,6 +3,17 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [Unreleased]
+
+### Chores / Code-Qualität
+
+- **eslint:** generierten `coverage/`-Ordner + `docs/`, `engine-wasm/pkg/`, `build/`
+  in die Flat-Config-`ignores` aufgenommen (behebt 7 False-Positive-Parse-Errors) (#68)
+- **eslint:** veraltete `.eslintignore` entfernt (von Flat Config nicht unterstützt),
+  Inhalte in `eslint.config.mjs` migriert (#68)
+- **prettier:** gesamtes Repository durchformatiert (`prettier --write .`) (#68)
+- **docs:** Testzahlen in README aktualisiert (> 2.600 Tests / > 200 Testdateien)
+
 ## [1.0.1] – 2026-07-12
 
 Maintenance-Release nach `v1.0.0-stable`. Schwerpunkt: umfangreiche
