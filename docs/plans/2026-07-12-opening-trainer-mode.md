@@ -265,8 +265,12 @@ it can be rendered on the existing board. The stored hash is produced by
 ```ts
 test('reconstructBoard turns a hash back into a renderable board + turn', () => {
   const book = new OpeningBook();
-  const board = createInitialBoard(); // from OpeningBookTrainer, or build minimal
-  const hash = getBoardHash(board, 'white');
+  // Build a minimal 9x9 board with one white pawn at (0,0).
+  const board: (Piece | null)[][] = Array.from({ length: 9 }, () =>
+    Array.from({ length: 9 }, () => null)
+  );
+  board[0][0] = { type: 'p', color: 'white', hasMoved: false };
+  const hash = book.getBoardHash(board, 'white'); // OpeningBook encoding
   book.load({
     positions: {
       [hash]: {
@@ -281,8 +285,16 @@ test('reconstructBoard turns a hash back into a renderable board + turn', () => 
   expect(recon.board.length).toBe(9);
   expect(recon.turn).toBe('white');
   expect(recon.board[0][0]).not.toBeNull();
+  expect((recon.board[0][0] as Piece).type).toBe('p');
+  expect((recon.board[0][0] as Piece).color).toBe('white');
 });
 ```
+
+**Note on hash encoding (verified against source):** `OpeningBook.getBoardHash`
+(js/ai/OpeningBook.ts:149) encodes each square as 2 chars: `color[0]` (`w`/`b`) then
+the piece `type` char (`p,n,b,r,q,k,a,c,e,j`); empty square is `..`. The final char is
+`turn[0]` (`w`/`b`). For a 9x9 board that is 81×2 + 1 = 163 chars. Do NOT use
+`MoveValidator.getBoardHash` — it uses a different (coordinate+semicolon) encoding.
 
 **Step 2: Run to verify failure**
 Run: `npx vitest run tests/openingTrainer.test.ts`
