@@ -22,7 +22,18 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      exclude: ['node_modules/**', 'dist/**', 'tests/**', 'e2e/**'],
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        'tests/**',
+        'e2e/**',
+        // Pure barrel re-export (`export * from './assets/pieces/index.js'`):
+        // contains no testable logic. v8 reports it as 0% because the re-export
+        // line is never "executed" directly, though the underlying module
+        // (js/assets/pieces/index.ts) is fully tested. Excluding avoids the
+        // artificial 0% dragging down the report.
+        'js/chess-pieces.ts',
+      ],
       // Fail the CI run if coverage drops below these floors. Without this,
       // coverage could silently regress to 0% and the job would still pass.
       thresholds: {
