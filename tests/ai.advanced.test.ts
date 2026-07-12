@@ -1,5 +1,4 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-/* eslint-disable no-undef */
 
 (global as any).BOARD_SIZE = 9;
 

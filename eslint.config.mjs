@@ -12,8 +12,9 @@ export default tseslint.config(
       'docs/**',
       'engine-wasm/pkg/**',
       '*.cjs',
+      '**/*.cjs',
       'commitlint.config.js',
-      'tests/**',
+      'tests/_repro/**',
       'e2e/**',
       'scripts/**',
       'public/service-worker.js',
@@ -104,6 +105,27 @@ export default tseslint.config(
       parserOptions: {
         project: null,
       },
+    },
+  },
+  {
+    // Test files: `any` is legitimate in mocks/spies/private-access, so allow it.
+    // Real bugs (unused vars, quote style) stay enforced.
+    files: ['tests/**/*.ts', 'tests/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      // Core rule mishandles TS constructs (this-params, type-signature params);
+      // use only the TS-aware version.
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrors: 'none',
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
   {

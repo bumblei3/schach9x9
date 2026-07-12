@@ -124,7 +124,7 @@ describe('ErrorManager.showCriticalError — DOM overlay branches', () => {
   });
 
   test('returns early when the overlay has no inner <div> container', () => {
-    document.body.innerHTML = `<div id="error-overlay" class="hidden"></div>`;
+    document.body.innerHTML = '<div id="error-overlay" class="hidden"></div>';
     // Should not throw even though querySelector('div') is null
     expect(() => errorManager.showCriticalError(new Error('x'))).not.toThrow();
   });
