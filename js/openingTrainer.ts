@@ -80,7 +80,11 @@ export class OpeningTrainerManager {
     } else {
       this.progress.streak = 0;
     }
-    return { correct, expected: pos.expectedMove, progress: { ...this.progress } };
+    return {
+      correct,
+      expected: pos.expectedMove,
+      progress: { ...this.progress, solvedHashes: [...this.progress.solvedHashes] },
+    };
   }
 
   get accuracy(): number {
