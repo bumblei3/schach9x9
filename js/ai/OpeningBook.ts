@@ -270,6 +270,32 @@ export function setOpeningBook(bookData: BookData): void {
 }
 
 /**
+ * Idempotently loads the default opening book into the main-thread singleton.
+ *
+ * The opening book data only lives in the worker context (aiWorker.ts calls
+ * setOpeningBook after the AIController posts the book to it). The main-thread
+ * `openingBook` is therefore empty unless something explicitly loads it — which
+ * the opening-trainer mode (no AI workers) relies on. This loads `opening-book.json`
+ * from the served static assets exactly once (only if still empty) and populates
+ * the singleton via setOpeningBook. Safe to call repeatedly; no-op once loaded.
+ */
+export async function ensureOpeningBookLoaded(bookFile = 'opening-book.json'): Promise<void> {
+  if (Object.keys(openingBook.data.positions).length > 0) {
+    return;
+  }
+  try {
+    const res = await fetch(bookFile);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const book = (await res.json()) as BookData;
+    setOpeningBook(book);
+  } catch (err) {
+    logger.error('[OpeningBook] could not load default opening book:', err);
+  }
+}
+
+/**
  * Legacy function for backward compatibility
  */
 export function queryOpeningBook(

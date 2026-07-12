@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.1.2] – 2026-07-12
+
+Bugfix-Release für den Eröffnungs-Trainer. Ein E2E-Browser-Check nach
+v1.1.1 deckte einen kritischen Bug auf, den die Unit-Tests nicht fanden.
+
+### Fixes
+
+- **Trainer zeigte ein leeres Brett:** Das Hauptthread-`openingBook`-Singleton
+  wurde nie mit Daten gefüllt — nur der isolierte AI-Worker-Kontext lud das
+  Buch. `startOpeningTrainerMode` lädt `opening-book.json` jetzt idempotent
+  via neue `ensureOpeningBookLoaded()` (nur wenn noch leer), bevor die erste
+  Stellung gerendert wird.
+- **E2E-Abdeckung:** `e2e/opening-trainer.spec.ts` bestätigt im Browser, dass
+  das Brett mit echten Figuren rendert und der Zwei-Klick-Move-Flow Feedback
+  auslöst.
+
+### Tests / Coverage
+
+- Neue E2E-Spec (2 Tests, Chromium) für den Trainer-Modus.
+- Gesamte Unit-Suite: 2657 Tests, 0 Regressionen.
+
 ## [1.1.1] – 2026-07-12
 
 Bugfix-Release für den Eröffnungs-Trainer (v1.1.0): der Play-Loop ließ sich

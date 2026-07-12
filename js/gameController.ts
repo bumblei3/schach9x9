@@ -31,6 +31,7 @@ import type { GameMode } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
 import { openingBook } from './ai/OpeningBook.js';
+import { ensureOpeningBookLoaded } from './ai/OpeningBook.js';
 import {
   OpeningTrainerManager,
   loadTrainerProgress,
@@ -669,11 +670,16 @@ export class GameController {
    * position. Logic lives in OpeningTrainerManager; this method only wires
    * the existing board-render pipeline to it.
    */
-  startOpeningTrainerMode(): void {
+  async startOpeningTrainerMode(): Promise<void> {
     this.game.mode = 'opening-trainer';
     this.game.phase = PHASES.PLAY;
     UI.hidePuzzleOverlay();
     this.showShop(false);
+
+    // The main-thread opening book is empty unless the AI loaded it (worker
+    // context). Without this, the trainer has no positions to show. Load it
+    // idempotently before building the manager / first position.
+    await ensureOpeningBookLoaded();
 
     const manager = new OpeningTrainerManager(openingBook, loadTrainerProgress());
     this.openingTrainerManager = manager;
