@@ -71,4 +71,21 @@ describe('OpeningTrainerMenu', () => {
     button.click();
     expect(called).toBe(false);
   });
+
+  test('updateProgress re-renders when root is missing', () => {
+    const mgr = makeManager(2);
+    // Build a detached menu (root never attached to container).
+    const menu = new OpeningTrainerMenu(document.createElement('div'), mgr, () => {});
+    // updateProgress with no root must not throw and must fall back to render.
+    expect(() => menu.updateProgress()).not.toThrow();
+  });
+
+  test('updateProgress appends when no existing progress node', () => {
+    const mgr = makeManager(4);
+    const menu = new OpeningTrainerMenu(container, mgr, () => {});
+    // Remove the progress node to force the appendChild branch.
+    container.querySelector('.opening-trainer-progress')?.remove();
+    expect(() => menu.updateProgress()).not.toThrow();
+    expect(container.textContent).toContain('Streak: 4');
+  });
 });

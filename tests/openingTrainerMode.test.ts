@@ -144,6 +144,11 @@ describe('OpeningTrainerModeStrategy', () => {
     expect(mgr.progress.attempts).toBe(1);
   });
 
+  it('onPhaseEnd is a safe no-op', () => {
+    const strategy = new OpeningTrainerModeStrategy(controller as never);
+    expect(() => strategy.onPhaseEnd(game as never, controller as never)).not.toThrow();
+  });
+
   it('ignores clicks when not in PLAY phase', async () => {
     game.phase = 'SETUP' as unknown;
     const strategy = new OpeningTrainerModeStrategy(controller as never);
