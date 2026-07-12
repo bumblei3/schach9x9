@@ -159,6 +159,13 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Formatting (Prettier):** `npm run format`
 - **CI-Check:** `npm run format:check && npm run lint && npm test`
 
+## 🗺️ Roadmap / In Arbeit
+
+- **Eröffnungs-Trainer (v1.1.0):** Neuer Solo-Spielmodus — eine Stellung aus dem
+  trainierten Eröffnungsbuch wird gezeigt, der Spieler soll den engine-bewerteten
+  Buch-Zug finden; Streak + Trefferquote werden gespeichert. Detaillierter
+  Umsetzungsplan: [`docs/plans/2026-07-12-opening-trainer-mode.md`](docs/plans/2026-07-12-opening-trainer-mode.md).
+
 ## 📄 Lizenz
 
 Dieses Projekt ist unter der MIT Lizenz veröffentlicht.
