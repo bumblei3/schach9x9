@@ -51,15 +51,18 @@ beforeEach(() => {
   posted.length = 0;
   vi.clearAllMocks();
   // Re-arm default resolved values after clearAllMocks.
-  aiEngine.getBestMoveDetailed.mockResolvedValue({
+  // The aiEngine namespace import resolves to the auto-mock; cast to any so the
+  // vitest mock helpers (mockResolvedValue etc.) type-check against tsc.
+  const ai = aiEngine as any;
+  ai.getBestMoveDetailed.mockResolvedValue({
     bestMove: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
     score: 123,
   });
-  aiEngine.evaluatePosition.mockResolvedValue(42);
-  aiEngine.getTopMoves.mockResolvedValue([{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, score: 1 }]);
-  aiEngine.analyzePosition.mockReturnValue({ summary: 'ok' });
+  ai.evaluatePosition.mockResolvedValue(42);
+  ai.getTopMoves.mockResolvedValue([{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, score: 1 }]);
+  ai.analyzePosition.mockReturnValue({ summary: 'ok' });
   // Exercise the progress callbacks registered inside the handlers.
-  aiEngine.setProgressCallback.mockImplementation((cb: (p: any) => void) => {
+  ai.setProgressCallback.mockImplementation((cb: (p: any) => void) => {
     cb({ depth: 1, score: 0 });
   });
 });
@@ -104,7 +107,7 @@ describe('aiWorker protocol', () => {
   });
 
   test('getBestMove posts null on engine failure', async () => {
-    aiEngine.getBestMoveDetailed.mockRejectedValueOnce(new Error('boom'));
+    (aiEngine as any).getBestMoveDetailed.mockRejectedValueOnce(new Error('boom'));
     const logger = (await import('../../js/logger.js')).logger;
     await send('getBestMove', { board: [], color: 'white', depth: 1 });
     expect(logger.error).toHaveBeenCalled();
@@ -119,7 +122,7 @@ describe('aiWorker protocol', () => {
   });
 
   test('getTopMoves posts empty array on failure', async () => {
-    aiEngine.getTopMoves.mockRejectedValueOnce(new Error('boom'));
+    (aiEngine as any).getTopMoves.mockRejectedValueOnce(new Error('boom'));
     await send('getTopMoves', { board: [], color: 'white', count: 1, depth: 2 });
     const top = posted.find(m => m.type === 'topMoves');
     expect(top.data).toEqual([]);

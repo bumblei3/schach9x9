@@ -34,7 +34,7 @@ vi.stubGlobal('localStorage', mem);
 
 const { DailyPuzzleManager } = await import('../js/dailyPuzzle.js');
 
-function dpm(): DailyPuzzleManager {
+function dpm(): InstanceType<typeof DailyPuzzleManager> {
   return new DailyPuzzleManager();
 }
 

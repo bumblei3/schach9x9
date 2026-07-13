@@ -27,19 +27,19 @@ const { COLOR_WHITE, COLOR_BLACK, PIECE_KING, PIECE_QUEEN, PIECE_PAWN, PIECE_KNI
   boardDefs;
 
 // Build an empty IntBoard (all PIECE_NONE = 0).
-function emptyBoard(): number[] {
-  return new Array(BOARD_SIZE * BOARD_SIZE).fill(0);
+function emptyBoard(): Int8Array {
+  return new Int8Array(BOARD_SIZE * BOARD_SIZE).fill(0);
 }
 
 // place a piece: value = color | type
-function place(b: number[], r: number, c: number, color: number, type: number): void {
+function place(b: Int8Array, r: number, c: number, color: number, type: number): void {
   b[r * BOARD_SIZE + c] = color | type;
 }
 
 // Both kings + a white knight that has clear L-jumps (no own pieces in the
 // way, kings far apart -> no self-check risk). Guarantees legal moves exist
 // so the search actually visits nodes.
-function knightBoard(): number[] {
+function knightBoard(): Int8Array {
   const b = emptyBoard();
   place(b, 6, 0, COLOR_WHITE, PIECE_KING);
   place(b, 8, 8, COLOR_BLACK, PIECE_KING);
@@ -48,7 +48,7 @@ function knightBoard(): number[] {
 }
 
 // White queen vs bare black king — white to move, decisively winning.
-function whiteWinningBoard(): number[] {
+function whiteWinningBoard(): Int8Array {
   const b = emptyBoard();
   place(b, 6, 4, COLOR_WHITE, PIECE_KING);
   place(b, 8, 4, COLOR_BLACK, PIECE_KING);
@@ -57,7 +57,7 @@ function whiteWinningBoard(): number[] {
 }
 
 // Same position but the winning queen belongs to black and black is to move.
-function blackWinningBoard(): number[] {
+function blackWinningBoard(): Int8Array {
   const b = emptyBoard();
   place(b, 6, 4, COLOR_WHITE, PIECE_KING);
   place(b, 8, 4, COLOR_BLACK, PIECE_KING);

@@ -18,9 +18,8 @@ const { UNIT_TALENT_TREES } = await import('../../js/campaign/talents.js');
 // Ensure no localStorage in the test env so every instance starts from the
 // deterministic default state (loadState's `typeof localStorage === 'undefined'` branch).
 beforeEach(() => {
-  // @ts-expect-error - intentionally remove localStorage for a clean default-state instance
+  // Intentionally remove localStorage/window for a clean default-state instance.
   delete (globalThis as any).localStorage;
-  // @ts-expect-error - remove window too (saveGame guards on it indirectly via localStorage)
   delete (globalThis as any).window;
 });
 

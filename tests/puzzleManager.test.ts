@@ -20,7 +20,7 @@ vi.stubGlobal('localStorage', {
   getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
   setItem: (k: string, v: string) => store.set(k, v),
   removeItem: (k: string) => store.delete(k),
-} as Storage);
+} as unknown as Storage);
 
 const { PuzzleManager } = await import('../js/puzzleManager.js');
 

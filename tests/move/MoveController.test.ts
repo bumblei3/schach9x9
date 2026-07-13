@@ -3,7 +3,8 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 // --- Mocks ---------------------------------------------------------------
 
 // campaignManager is used only by getMaterialValue(); mock its XP/champion API.
-const campaignMock = {
+// Typed as any so the vitest mock helpers (mockReturnValue etc.) type-check.
+const campaignMock: any = {
   getUnitXp: vi.fn(() => ({ xp: 0, level: 1, captures: 0 })),
   getChampion: vi.fn(() => null),
 };
