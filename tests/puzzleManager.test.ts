@@ -57,7 +57,10 @@ describe('PuzzleManager.loadPuzzle', () => {
     expect(game.puzzleState.active).toBe(true);
     expect(game.puzzleState.currentMoveIndex).toBe(0);
     expect(game.puzzleState.solution.length).toBe(1);
-    expect(game.puzzleState.solution[0]).toMatchObject({ from: { r: 1, c: 7 }, to: { r: 0, c: 7 } });
+    expect(game.puzzleState.solution[0]).toMatchObject({
+      from: { r: 1, c: 7 },
+      to: { r: 0, c: 7 },
+    });
     expect(game.phase).toBe('PLAY');
     expect(game.mode).toBe('puzzle');
   });
@@ -71,7 +74,9 @@ describe('PuzzleManager.loadPuzzle', () => {
       description: 'x',
       difficulty: 'Einfach',
       setup: (g: any) => {
-        g.board = Array(9).fill(null).map(() => Array(9).fill(null));
+        g.board = Array(9)
+          .fill(null)
+          .map(() => Array(9).fill(null));
         g.board[4][4] = { type: 'q', color: 'white' };
         g.turn = 'white';
       },
@@ -139,7 +144,9 @@ describe('PuzzleManager.generateAndLoad', () => {
   test('returns false when no mate sequence can be found', () => {
     // A board with only two lone kings cannot produce a forced mate.
     const game = makeGame();
-    game.board = Array(9).fill(null).map(() => Array(9).fill(null));
+    game.board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
     game.board[0][0] = { type: 'k', color: 'white' };
     game.board[8][8] = { type: 'k', color: 'black' };
     game.turn = 'white';

@@ -16,7 +16,8 @@ vi.mock('../js/logger.js', () => ({
   logger: { debug: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
-const { OpeningBook, openingBook, ensureOpeningBookLoaded, queryOpeningBook } = await import('../../js/ai/OpeningBook.js');
+const { OpeningBook, openingBook, ensureOpeningBookLoaded, queryOpeningBook } =
+  await import('../../js/ai/OpeningBook.js');
 
 // A 9x9 empty board (Piece | null)[][].
 function emptyBoard(): any[][] {
@@ -252,7 +253,10 @@ describe('ensureOpeningBookLoaded + queryOpeningBook (singleton)', () => {
   test('loads the book exactly once, then is a no-op (idempotent)', async () => {
     const json = JSON.stringify({
       positions: {
-        posX: { moves: [{ from: { r: 7, c: 4 }, to: { r: 6, c: 4 }, weight: 1, games: 1 }], seenCount: 1 },
+        posX: {
+          moves: [{ from: { r: 7, c: 4 }, to: { r: 6, c: 4 }, weight: 1, games: 1 }],
+          seenCount: 1,
+        },
       },
     });
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => JSON.parse(json) });
