@@ -18,10 +18,11 @@ permissions:
   checks: write
   pull-requests: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress
+# Allow only one concurrent run per ref/workflow; do NOT cancel an
+# in-progress run when a new push arrives — let it finish, queue the rest.
 concurrency:
   group: 'ci-${{ github.ref }}-${{ github.workflow }}'
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   # Pin Node.js version for reproducible builds
