@@ -23,13 +23,9 @@ updates:
       time: '03:30'
       timezone: 'Europe/Berlin'
     open-pull-requests-limit: 5
-    groups:
-      github-actions:
-        patterns:
-          - '*'
-        update-types:
-          - 'patch'
-          - 'minor'
+    # No groups: keep focused single-package PRs (matches npm section philosophy).
+    # Pairing `groups` with `commit-message.prefix` causes a doubled prefix
+    # (e.g. "chore(ci)(ci):") in PR titles, so we keep the prefix only.
     allow:
       - dependency-type: 'production'
         update-type: 'version-update:semver-patch'
