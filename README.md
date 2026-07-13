@@ -83,7 +83,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.600 automatisierten Tests** (Vitest + Playwright) in mehr als 200 Testdateien wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.650 automatisierten Tests** (Vitest Unit/Integration + Playwright E2E) in 218 Unit-Testdateien plus 24 E2E-Specs wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
 
@@ -98,8 +98,8 @@ Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- > 2.600 Tests gesamt in > 200 Testdateien, alle grün
-- Unit-, Integrations- und E2E-Tests (Playwright)
+- > 2.650 Tests gesamt (2672 Unit/Integration via Vitest in 218 Dateien + 24 E2E-Specs via Playwright), alle grün
+- Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
 
@@ -161,10 +161,22 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 
 ## 🗺️ Roadmap / In Arbeit
 
-- **Eröffnungs-Trainer (v1.1.0):** Neuer Solo-Spielmodus — eine Stellung aus dem
+- **Tägliches Puzzle (v1.2.0):** Solo-Spielmodus — ein jeden Tag rotierendes
+  Schachtaktik-Puzzle (wiederverwendet die `puzzleManager`-Infrastruktur).
+  Deterministic pro Kalendertag, "heute gelöst"-Badge, Siegesserie (Streak).
+- **Post-Game-Analyse (E2E):** Browser-Spec verifiziert Blunder/Accuracy-
+  Auswertung im echten Browser (`e2e/post-game-analysis.spec.ts`).
+- **Eröffnungs-Trainer (v1.1.0):** Solo-Spielmodus — eine Stellung aus dem
   trainierten Eröffnungsbuch wird gezeigt, der Spieler soll den engine-bewerteten
   Buch-Zug finden; Streak + Trefferquote werden gespeichert. Detaillierter
   Umsetzungsplan: [`docs/plans/2026-07-12-opening-trainer-mode.md`](docs/plans/2026-07-12-opening-trainer-mode.md).
+
+## 📌 Bekannte Einschränkungen / Offen
+
+- **TypeScript 7:** aktuell auf `^6.0.3` fixiert — `typescript-eslint` v8
+  (latest) unterstützt nur `typescript <6.1.0`. TS 7 erst nach Release von
+  `typescript-eslint` v9 einsetzen.
+- **Multiplayer:** bewusst nicht geplant (Solo-Fokus).
 
 ## 📄 Lizenz
 

@@ -3,6 +3,35 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+> Hinweis: Dieser Abschnitt wird von Hand gepflegt (nicht via
+> `npm run changelog`, da dieses Skript die gesamte Datei überschreibt
+> und die Historie zerstören würde).
+
+## [Unreleased]
+
+### E2E-Tests (Playwright, Browser-Specs)
+- #84 `test/e2e-cross-daily`: Cross-Modus + Tägliches-Puzzle Browser-Specs
+- #85 `test/e2e-post-game-analysis`: Post-Game-Analyse (Blunder/Accuracy)
+  Browser-Spec — verifiziert die Analyse-Ergebnisse im echten Browser
+- Gesamte Unit-Suite: **2672 Tests, 0 Regressionen** (218 Testdateien,
+  Vitest) + 24 E2E-Specs (Playwright, Chromium)
+
+### Dependencies (Maintenance)
+- #86 `chore(deps)`: development-dependencies group — 9 Updates
+  (u.a. eslint 10.5→10.7, @typescript-eslint 8.61→8.63, globals 17.6→17.7)
+- #87/#89 `chore(deps)`: runtime-dependencies group — 4 Updates
+  (three 0.184→0.185.1, @types/three 0.182→0.185.1, vite 8.0.16→8.1.4,
+  prettier 3.8.4→3.9.5). Ursprünglicher Dependabot-PR #87 hatte einen
+  Merge-Konflikt mit #86; sauber als #89 neu aufgesetzt.
+- #88/#90→#91 `typescript`: Major-Bump 6.0.3→7.0.2 (#90) brach die
+  Lint-Stufe — `typescript-eslint` v8 kennt TS 7 nicht
+  (`TypeError: ... reading 'Cjs'` in typescript-estree). Revertiert auf
+  `^6.0.3` (#91). TS 7 erst wieder anfassen, wenn `typescript-eslint` v9
+  (mit TS-7-Support) released ist.
+- Lockfile via `npm install --legacy-peer-deps` regeneriert (CI nutzt
+  `npm ci --legacy-peer-deps`; der eslint-plugin-import ↔ eslint 10
+  Peer-Konflikt ist bewusst toleriert).
+
 ## [1.2.0] – 2026-07-12
 
 Neues Feature: **Tägliches Puzzle** — ein jeden Tag rotierendes Schachtaktik-Puzzle
