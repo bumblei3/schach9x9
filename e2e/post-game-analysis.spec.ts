@@ -16,11 +16,14 @@ test.describe('Post-Game Analysis (Blunder/Accuracy)', () => {
     // game-over overlay (same path a real finished game takes). Wait for the
     // controller to be ready (App.init is async).
     await page.waitForFunction(
-      () => (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
+      () =>
+        (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
       { timeout: 10000 }
     );
     await page.evaluate(() => {
-      const app = (window as unknown as { app: { gameController: { resign: (c: string) => void } } }).app;
+      const app = (
+        window as unknown as { app: { gameController: { resign: (c: string) => void } } }
+      ).app;
       app.gameController.resign('white');
     });
 
@@ -41,11 +44,14 @@ test.describe('Post-Game Analysis (Blunder/Accuracy)', () => {
     await helper.startGame('classic');
 
     await page.waitForFunction(
-      () => (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
+      () =>
+        (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
       { timeout: 10000 }
     );
     await page.evaluate(() => {
-      const app = (window as unknown as { app: { gameController: { resign: (c: string) => void } } }).app;
+      const app = (
+        window as unknown as { app: { gameController: { resign: (c: string) => void } } }
+      ).app;
       app.gameController.resign('white');
     });
     await expect(page.locator('#postgame-analysis-btn')).toBeVisible({ timeout: 10000 });
@@ -58,6 +64,8 @@ test.describe('Post-Game Analysis (Blunder/Accuracy)', () => {
     await expect(page.locator('.analysis-summary, #modal-overlay')).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.locator('body')).toContainText(/%|Blunder|Genauigkeit|Accuracy|Analyse abgeschlossen/i);
+    await expect(page.locator('body')).toContainText(
+      /%|Blunder|Genauigkeit|Accuracy|Analyse abgeschlossen/i
+    );
   });
 });

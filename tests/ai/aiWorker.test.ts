@@ -84,7 +84,7 @@ describe('aiWorker protocol', () => {
   test('evaluatePosition posts the computed score', async () => {
     await send('evaluatePosition', { board: [], forColor: 'white' });
     expect(aiEngine.evaluatePosition).toHaveBeenCalledWith([], 'white');
-    expect(posted.some((m) => m.type === 'positionScore' && m.data === 42)).toBe(true);
+    expect(posted.some(m => m.type === 'positionScore' && m.data === 42)).toBe(true);
   });
 
   test('getBestMove posts a bestMove result from the engine', async () => {
@@ -97,7 +97,7 @@ describe('aiWorker protocol', () => {
       moveNumber: 1,
     });
     expect(aiEngine.getBestMoveDetailed).toHaveBeenCalled();
-    const best = posted.find((m) => m.type === 'bestMove');
+    const best = posted.find(m => m.type === 'bestMove');
     expect(best).toBeDefined();
     expect(best.id).toBe('req-1');
     expect(best.data.bestMove).toEqual({ from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
@@ -108,27 +108,27 @@ describe('aiWorker protocol', () => {
     const logger = (await import('../../js/logger.js')).logger;
     await send('getBestMove', { board: [], color: 'white', depth: 1 });
     expect(logger.error).toHaveBeenCalled();
-    const best = posted.find((m) => m.type === 'bestMove');
+    const best = posted.find(m => m.type === 'bestMove');
     expect(best.data).toBeNull();
   });
 
   test('getTopMoves posts top moves from the engine', async () => {
     await send('getTopMoves', { board: [], color: 'white', count: 1, depth: 2 });
     expect(aiEngine.getTopMoves).toHaveBeenCalled();
-    expect(posted.some((m) => m.type === 'topMoves')).toBe(true);
+    expect(posted.some(m => m.type === 'topMoves')).toBe(true);
   });
 
   test('getTopMoves posts empty array on failure', async () => {
     aiEngine.getTopMoves.mockRejectedValueOnce(new Error('boom'));
     await send('getTopMoves', { board: [], color: 'white', count: 1, depth: 2 });
-    const top = posted.find((m) => m.type === 'topMoves');
+    const top = posted.find(m => m.type === 'topMoves');
     expect(top.data).toEqual([]);
   });
 
   test('analyze posts the analysis result', async () => {
     await send('analyze', { board: [], color: 'white' });
     expect(aiEngine.analyzePosition).toHaveBeenCalledWith([], 'white');
-    const analysis = posted.find((m) => m.type === 'analysis');
+    const analysis = posted.find(m => m.type === 'analysis');
     expect(analysis).toBeDefined();
     expect(analysis.data).toEqual({ summary: 'ok' });
   });
@@ -136,7 +136,7 @@ describe('aiWorker protocol', () => {
   test('search posts a bestMove result (legacy shape, spread into message)', async () => {
     await send('search', { board: [], color: 'white', depth: 2, personality: 'NORMAL' });
     expect(aiEngine.getBestMoveDetailed).toHaveBeenCalled();
-    const best = posted.find((m) => m.type === 'bestMove');
+    const best = posted.find(m => m.type === 'bestMove');
     expect(best).toBeDefined();
   });
 

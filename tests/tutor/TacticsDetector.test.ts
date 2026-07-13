@@ -31,7 +31,10 @@ function emptyBoard(): (any | null)[][] {
 }
 
 // A GameLike stub: board + a configurable getValidMoves mock.
-function gameStub(board: (any | null)[][], validMoves: (r: number, c: number, piece: any) => { r: number; c: number }[]) {
+function gameStub(
+  board: (any | null)[][],
+  validMoves: (r: number, c: number, piece: any) => { r: number; c: number }[]
+) {
   return {
     board,
     getValidMoves: (r: number, c: number, piece: any) => validMoves(r, c, piece),
