@@ -140,7 +140,7 @@ describe('completeLevel — stars + gold + progression', () => {
   });
 
   test('first completion awards the level gold reward, repeat does not', () => {
-    const first = cm.completeLevel('peasant_revolt', 3);
+    cm.completeLevel('peasant_revolt', 3);
     const goldAfterFirst = cm.getGold();
     expect(goldAfterFirst).toBeGreaterThan(0);
     // Completing again (same stars) should not re-award base gold.
