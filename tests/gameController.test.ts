@@ -13,7 +13,11 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
 // --- Mock all heavy / IO dependencies of the controller -------------------
-vi.mock('../js/statisticsManager.js', () => ({ StatisticsManager: class { constructor() {} } }));
+vi.mock('../js/statisticsManager.js', () => ({
+  StatisticsManager: class {
+    constructor() {}
+  },
+}));
 vi.mock('../js/TimeManager.js', () => ({
   TimeManager: class {
     constructor() {}
@@ -22,10 +26,26 @@ vi.mock('../js/TimeManager.js', () => ({
     tickClock() {}
   },
 }));
-vi.mock('../js/shop/ShopManager.js', () => ({ ShopManager: class { constructor() {} } }));
-vi.mock('../js/AnalysisController.js', () => ({ AnalysisController: class { constructor() {} } }));
-vi.mock('../js/ui/AnalysisUI.js', () => ({ AnalysisUI: class { constructor() {} } }));
-vi.mock('../js/ui/PuzzleMenu.js', () => ({ PuzzleMenu: class { constructor() {} } }));
+vi.mock('../js/shop/ShopManager.js', () => ({
+  ShopManager: class {
+    constructor() {}
+  },
+}));
+vi.mock('../js/AnalysisController.js', () => ({
+  AnalysisController: class {
+    constructor() {}
+  },
+}));
+vi.mock('../js/ui/AnalysisUI.js', () => ({
+  AnalysisUI: class {
+    constructor() {}
+  },
+}));
+vi.mock('../js/ui/PuzzleMenu.js', () => ({
+  PuzzleMenu: class {
+    constructor() {}
+  },
+}));
 vi.mock('../js/ui.js', () => ({
   renderBoard: vi.fn(),
   updateStatus: vi.fn(),
@@ -33,7 +53,9 @@ vi.mock('../js/ui.js', () => ({
   showShop: vi.fn(),
   showModal: vi.fn(),
 }));
-vi.mock('../js/sounds.js', () => ({ soundManager: { playGameOver: vi.fn(), playGameStart: vi.fn() } }));
+vi.mock('../js/sounds.js', () => ({
+  soundManager: { playGameOver: vi.fn(), playGameStart: vi.fn() },
+}));
 vi.mock('../js/effects.js', () => ({ confettiSystem: { spawn: vi.fn() } }));
 vi.mock('../js/logger.js', () => ({
   logger: {

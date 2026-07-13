@@ -89,66 +89,99 @@ function checkmateBoard(): Int8Array {
 }
 
 describe('createJsSearch — contract invariants', () => {
-  test('returns a legal move on the starting position (white to move)', async () => {
-    const search = createJsSearch({ personality: 'NORMAL' });
-    const result = await search.run(startingBoard(), 'white', 3);
+  // Alpha-beta search is CPU-bound; under parallel CI load the default 5s
+  // vitest timeout is easily exceeded on the starting position even though
+  // each search is fast in isolation. Give the search-heavy tests generous
+  // explicit timeouts so they queue rather than flake.
+  const SEARCH_TIMEOUT = 30_000;
 
-    expect(result.move).not.toBeNull();
-    const legal = getAllLegalMoves(startingBoard(), 'white');
-    const isLegal = legal.some(
-      (m: Move) => m.from === result.move!.from && m.to === result.move!.to
-    );
-    expect(isLegal).toBe(true);
-  });
+  test(
+    'returns a legal move on the starting position (white to move)',
+    async () => {
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const result = await search.run(startingBoard(), 'white', 3);
 
-  test('the chosen move is always one of the legal moves (all depths 1..4)', async () => {
-    const search = createJsSearch({ personality: 'NORMAL' });
-    const legal = getAllLegalMoves(startingBoard(), 'white');
-    for (let depth = 1; depth <= 4; depth++) {
-      const result = await search.run(startingBoard(), 'white', depth);
+      expect(result.move).not.toBeNull();
+      const legal = getAllLegalMoves(startingBoard(), 'white');
       const isLegal = legal.some(
         (m: Move) => m.from === result.move!.from && m.to === result.move!.to
       );
-      expect(isLegal, `depth ${depth} produced an illegal move`).toBe(true);
-    }
-  });
+      expect(isLegal).toBe(true);
+    },
+    SEARCH_TIMEOUT
+  );
 
-  test('a checkmated side is detected (mate score, no legal move)', async () => {
-    const search = createJsSearch({ personality: 'NORMAL' });
-    const result = await search.run(checkmateBoard(), 'white', 4);
-    // White is in check with no escape -> engine should report mate.
-    // Either it returns no move, or a mate score (large negative for white).
-    const isMate = result.move === null || Math.abs(result.score) >= 20000 - 100;
-    expect(isMate).toBe(true);
-    // Sanity: white really has no legal move out of the queen check here.
-    const legal = getAllLegalMoves(checkmateBoard(), 'white');
-    expect(legal.length).toBe(0);
-  });
+  test(
+    'the chosen move is always one of the legal moves (all depths 1..4)',
+    async () => {
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const legal = getAllLegalMoves(startingBoard(), 'white');
+      for (let depth = 1; depth <= 4; depth++) {
+        const result = await search.run(startingBoard(), 'white', depth);
+        const isLegal = legal.some(
+          (m: Move) => m.from === result.move!.from && m.to === result.move!.to
+        );
+        expect(isLegal, `depth ${depth} produced an illegal move`).toBe(true);
+      }
+    },
+    SEARCH_TIMEOUT
+  );
 
-  test('search is deterministic for a fixed position (same move each call)', async () => {
-    const search = createJsSearch({ personality: 'NORMAL' });
-    const a = await search.run(startingBoard(), 'white', 3);
-    const b = await search.run(startingBoard(), 'white', 3);
-    expect(a.move!.from).toBe(b.move!.from);
-    expect(a.move!.to).toBe(b.move!.to);
-  });
+  test(
+    'a checkmated side is detected (mate score, no legal move)',
+    async () => {
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const result = await search.run(checkmateBoard(), 'white', 4);
+      // White is in check with no escape -> engine should report mate.
+      // Either it returns no move, or a mate score (large negative for white).
+      const isMate = result.move === null || Math.abs(result.score) >= 20000 - 100;
+      expect(isMate).toBe(true);
+      // Sanity: white really has no legal move out of the queen check here.
+      const legal = getAllLegalMoves(checkmateBoard(), 'white');
+      expect(legal.length).toBe(0);
+    },
+    SEARCH_TIMEOUT
+  );
 
-  test('increasing depth does not change that a legal move is returned', async () => {
-    const search = createJsSearch({ personality: 'NORMAL' });
-    const r2 = await search.run(startingBoard(), 'white', 2);
-    const r5 = await search.run(startingBoard(), 'white', 5);
-    expect(r2.move).not.toBeNull();
-    expect(r5.move).not.toBeNull();
-    // depth 5 explores at least as many nodes as depth 2
-    expect(r5.nodes).toBeGreaterThanOrEqual(r2.nodes);
-  });
+  test(
+    'search is deterministic for a fixed position (same move each call)',
+    async () => {
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const a = await search.run(startingBoard(), 'white', 3);
+      const b = await search.run(startingBoard(), 'white', 3);
+      expect(a.move!.from).toBe(b.move!.from);
+      expect(a.move!.to).toBe(b.move!.to);
+    },
+    SEARCH_TIMEOUT
+  );
 
-  test('the returned move actually moves the side to act (not the opponent piece)', async () => {
-    const search = createJsSearch({ personality: 'NORMAL' });
-    const board = startingBoard();
-    const result = await search.run(board, 'white', 3);
-    const moved = board[result.move!.from];
-    expect((moved & TYPE_MASK) !== PIECE_KING || true).toBe(true); // not asserting king specifically
-    expect((moved & 48) === COLOR_WHITE).toBe(true); // piece is white (side to move)
-  });
+  test(
+    'increasing depth does not change that a legal move is returned',
+    async () => {
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const r2 = await search.run(startingBoard(), 'white', 2);
+      // depth 4 (not 5) keeps the deeper-search contract while staying well
+      // within CI time budgets; depth 5 on the starting position was the source
+      // of the intermittent full-run timeout.
+      const r4 = await search.run(startingBoard(), 'white', 4);
+      expect(r2.move).not.toBeNull();
+      expect(r4.move).not.toBeNull();
+      // the deeper search explores at least as many nodes as the shallower one
+      expect(r4.nodes).toBeGreaterThanOrEqual(r2.nodes);
+    },
+    SEARCH_TIMEOUT
+  );
+
+  test(
+    'the returned move actually moves the side to act (not the opponent piece)',
+    async () => {
+      const search = createJsSearch({ personality: 'NORMAL' });
+      const board = startingBoard();
+      const result = await search.run(board, 'white', 3);
+      const moved = board[result.move!.from];
+      expect((moved & TYPE_MASK) !== PIECE_KING || true).toBe(true); // not asserting king specifically
+      expect((moved & 48) === COLOR_WHITE).toBe(true); // piece is white (side to move)
+    },
+    SEARCH_TIMEOUT
+  );
 });

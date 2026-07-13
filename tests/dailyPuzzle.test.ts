@@ -50,8 +50,7 @@ beforeEach(() => {
 describe('getDailyKey / dailyKey', () => {
   test('uses the LOCAL calendar date, not UTC', () => {
     // A date whose UTC representation is a different calendar day than local.
-    // 2026-07-13T23:30 UTC-05:00 = local 2026-07-13T18:30 -> local key stays 2026-07-13.
-    const d = new Date('2026-07-14T04:30:00Z'); // 2026-07-14T04:30 UTC == 2026-07-13T23:30 local (UTC-5)
+    // 2026-07-14T04:30 UTC == 2026-07-13T23:30 local (UTC-5) -> local key stays 2026-07-13.
     // Force a known local timezone-independent check via explicit components:
     const local = new Date(2026, 6, 13, 23, 30, 0);
     expect(dpm().getDailyKey(local)).toBe('2026-07-13');

@@ -32,7 +32,12 @@ vi.mock('../js/aiEngine.js', () => {
         const nr = r + forward;
         if (nr < 0 || nr > 8) continue;
         if (uiBoard[nr]?.[c] == null) {
-          return { move: { from: { r, c }, to: { r: nr, c }, capture: false }, score: 0, depth: 1, nodes: 1 };
+          return {
+            move: { from: { r, c }, to: { r: nr, c }, capture: false },
+            score: 0,
+            depth: 1,
+            nodes: 1,
+          };
         }
       }
     }

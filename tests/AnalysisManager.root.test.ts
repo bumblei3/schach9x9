@@ -12,7 +12,9 @@
 
 import { describe, test, expect, vi } from 'vitest';
 
-vi.mock('../js/logger.js', () => ({ logger: { context: () => ({ debug: vi.fn(), warn: vi.fn(), info: vi.fn() }) } }));
+vi.mock('../js/logger.js', () => ({
+  logger: { context: () => ({ debug: vi.fn(), warn: vi.fn(), info: vi.fn() }) },
+}));
 
 const { AnalysisManager } = await import('../js/AnalysisManager.js');
 

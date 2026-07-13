@@ -23,7 +23,8 @@ import { describe, test, expect } from 'vitest';
 const searchMod = await import('../js/search.js');
 const boardDefs = await import('../js/ai/BoardDefinitions.js');
 
-const { COLOR_WHITE, COLOR_BLACK, PIECE_KING, PIECE_QUEEN, PIECE_PAWN, PIECE_KNIGHT, BOARD_SIZE } = boardDefs;
+const { COLOR_WHITE, COLOR_BLACK, PIECE_KING, PIECE_QUEEN, PIECE_PAWN, PIECE_KNIGHT, BOARD_SIZE } =
+  boardDefs;
 
 // Build an empty IntBoard (all PIECE_NONE = 0).
 function emptyBoard(): number[] {

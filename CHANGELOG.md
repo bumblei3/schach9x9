@@ -10,6 +10,7 @@ Generiert aus den Git-Commits via `npm run changelog`.
 ## [Unreleased]
 
 ### E2E-Tests (Playwright, Browser-Specs)
+
 - #84 `test/e2e-cross-daily`: Cross-Modus + Tägliches-Puzzle Browser-Specs
 - #85 `test/e2e-post-game-analysis`: Post-Game-Analyse (Blunder/Accuracy)
   Browser-Spec — verifiziert die Analyse-Ergebnisse im echten Browser
@@ -17,6 +18,7 @@ Generiert aus den Git-Commits via `npm run changelog`.
   Vitest) + 24 E2E-Specs (Playwright, Chromium)
 
 ### Dependencies (Maintenance)
+
 - #86 `chore(deps)`: development-dependencies group — 9 Updates
   (u.a. eslint 10.5→10.7, @typescript-eslint 8.61→8.63, globals 17.6→17.7)
 - #87/#89 `chore(deps)`: runtime-dependencies group — 4 Updates
@@ -38,6 +40,7 @@ Neues Feature: **Tägliches Puzzle** — ein jeden Tag rotierendes Schachtaktik-
 (Solo, kein Multiplayer). Reuse der bestehenden `puzzleManager`-Infrastruktur.
 
 ### Feature
+
 - `DailyPuzzleManager` (`js/dailyPuzzle.ts`): wählt deterministisch ein Puzzle pro
   Kalendertag (rotiert um lokale Mitternacht), trackt "heute gelöst" pro Tag
   (`localStorage['dailyPuzzle.solved.YYYY-MM-DD']`) und eine Siegesserie
@@ -50,11 +53,13 @@ Neues Feature: **Tägliches Puzzle** — ein jeden Tag rotierendes Schachtaktik-
 - `GameMode`-Union um `'daily-puzzle'` erweitert (inkl. `GAME_MODES.DAILY_PUZZLE`).
 
 ### Fixes (aus Code-Review)
+
 - Puzzle-Index und Solved-Key nun beide auf lokaler Tagesbasis (zuvor rotierte
   der Index UTC-mitternachts → falscher "schon gelöst"-Status westlich von UTC).
 - `getTodaysPuzzle`-Null-Guard für leere Puzzle-Sets korrekt getestet.
 
 ### Tests / Coverage
+
 - Neue `tests/dailyPuzzle.test.ts` (15 Tests): Index-Determinismus, lokales
   Datum-Format, Solved-Round-Trip, Streak, leeres Set.
 - Gesamte Unit-Suite: 2672 Tests, 0 Regressionen (209 Dateien).

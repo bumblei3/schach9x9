@@ -58,10 +58,14 @@ describe('moveToNotation — basic piece moves', () => {
 
 describe('moveToNotation — castling', () => {
   test('kingside castling (to.c > from.c) is O-O', () => {
-    expect(moveToNotation(mv({ isCastling: true, from: { r: 8, c: 4 }, to: { r: 8, c: 6 } }), null)).toBe('O-O');
+    expect(
+      moveToNotation(mv({ isCastling: true, from: { r: 8, c: 4 }, to: { r: 8, c: 6 } }), null)
+    ).toBe('O-O');
   });
   test('queenside castling (to.c < from.c) is O-O-O', () => {
-    expect(moveToNotation(mv({ isCastling: true, from: { r: 8, c: 4 }, to: { r: 8, c: 2 } }), null)).toBe('O-O-O');
+    expect(
+      moveToNotation(mv({ isCastling: true, from: { r: 8, c: 4 }, to: { r: 8, c: 2 } }), null)
+    ).toBe('O-O-O');
   });
 });
 
@@ -195,7 +199,9 @@ describe('generatePGN — headers + result + move numbering', () => {
     const pgn = generatePGN(game, {}, false);
     expect(pgn).toContain('[Variant "Cross"]');
     expect(pgn).toContain('[SetUp "1"]');
-    expect(pgn).toContain('[FEN "3pp3/3pp3/3pp3/pppppppp/pppkpppb/pppppppp/3pp3/3pp3/3pp3 w - - 0 1"]');
+    expect(pgn).toContain(
+      '[FEN "3pp3/3pp3/3pp3/pppppppp/pppkpppb/pppppppp/3pp3/3pp3/3pp3 w - - 0 1"]'
+    );
   });
 
   test('custom options override default headers', () => {
@@ -207,7 +213,10 @@ describe('generatePGN — headers + result + move numbering', () => {
   });
 
   test('engine annotations in move text when enabled', () => {
-    const game = baseGame({ moveHistory: [mv({ classification: 'blunder' })], boardShape: 'square' });
+    const game = baseGame({
+      moveHistory: [mv({ classification: 'blunder' })],
+      boardShape: 'square',
+    });
     const pgn = generatePGN(game, {}, true);
     expect(pgn).toContain('[Annotator "Schach9x9 Engine"]');
     expect(pgn).toContain('1. e3 ??');
