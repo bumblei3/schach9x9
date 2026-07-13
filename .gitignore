@@ -20,6 +20,7 @@ coverage/
 coverage_*.txt
 coverage_full.txt
 coverage_output.txt
+.eslintcache
 
 # Build output
 dist/
