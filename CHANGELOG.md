@@ -7,20 +7,46 @@ Generiert aus den Git-Commits via `npm run changelog`.
 > `npm run changelog`, da dieses Skript die gesamte Datei überschreibt
 > und die Historie zerstören würde).
 
-## [Unreleased]
+## [1.3.0] – 2026-07-14
+
+Qualitäts- und Foundation-Release: schließt die Foundation-first-Härtungsrunde
+ab (alle kritischen Logik-Module jetzt mit echten Assertions abgedeckt) und
+rüstet die E2E-Abdeckung auf 25 Browser-Specs aus. Keine neuen Spielfeatures,
+keine Breaking Changes — reines Robustheits- und Wartungs-Release.
+
+### Foundation-Tests (Vitest, Logik-Module mit echten Assertions)
+
+- #92 `chore(foundation)`: Stale Debug-Artefakte entfernt, E2E im echten
+  Browser verifiziert.
+- #93–#95 `test`: Foundation-Coverage-Lücken geschlossen — `MoveExecutor`
+  (Turn-Wechsel, Promotion, Castling, En-Passant, Game-Over) +
+  `OpeningBookTrainer` (CLI-Parser, Stats, Special-Piece-Mappings).
+- #97 `test`: `AnalysisManager` (root) Piece-Values + Arrow-Guard.
+- #98 `test`: Engine-Smoke-Tests für `search.ts` (Alpha-Beta-Kern).
+- #99 `test`: `DailyPuzzle` Index-Rotation, Streak, Solved-Tracking.
+- #100 `test`: `TacticsDetector`-Primitiven (`canPieceMove`, Threat/Defence).
+- #101 `test`: `gameController` Game-End-State-Machine + `placeKing`.
+- #102 `test`: `aiWorker` Message-Protokoll (`self.onmessage`-Handler).
+- #103 `test`: `MoveExecutor` Kern (Turn-Switch, Promotion, Castling,
+  En-Passant, Game-Over).
+- #104 `test(e2e)`: schnelle Smoke-Suite für App-Boot + Board-Render pro Modus.
+- #105 `chore`: Tech-Debt-Sweep — flaky Search-Invariant, eslint, prettier.
+- #106 `test`: `MoveController` Kern (Material-Value, Play-Click, Redo/Undo-UI).
 
 ### E2E-Tests (Playwright, Browser-Specs)
 
-- #84 `test/e2e-cross-daily`: Cross-Modus + Tägliches-Puzzle Browser-Specs
-- #85 `test/e2e-post-game-analysis`: Post-Game-Analyse (Blunder/Accuracy)
-  Browser-Spec — verifiziert die Analyse-Ergebnisse im echten Browser
-- Gesamte Unit-Suite: **2672 Tests, 0 Regressionen** (218 Testdateien,
-  Vitest) + 24 E2E-Specs (Playwright, Chromium)
+- #84 `e2e/cross` + `e2e/daily-puzzle`: Cross-Modus + Tägliches-Puzzle Specs.
+- #85 `e2e/post-game-analysis`: Post-Game-Analyse (Blunder/Accuracy) verifiziert
+  im echten Browser.
+- #104 `e2e/smoke`: App-Boot + Per-Mode-Board-Render.
+- Gesamte E2E-Suite: **25 Specs** (Playwright, Chromium) — u.a. neu:
+  `3d_toggle`, `accessibility`, `shop`, `standard8x8`, `tutorial`,
+  `upgrade_modes`.
 
 ### Dependencies (Maintenance)
 
 - #86 `chore(deps)`: development-dependencies group — 9 Updates
-  (u.a. eslint 10.5→10.7, @typescript-eslint 8.61→8.63, globals 17.6→17.7)
+  (u.a. eslint 10.5→10.7, @typescript-eslint 8.61→8.63, globals 17.6→17.7).
 - #87/#89 `chore(deps)`: runtime-dependencies group — 4 Updates
   (three 0.184→0.185.1, @types/three 0.182→0.185.1, vite 8.0.16→8.1.4,
   prettier 3.8.4→3.9.5). Ursprünglicher Dependabot-PR #87 hatte einen
@@ -30,9 +56,21 @@ Generiert aus den Git-Commits via `npm run changelog`.
   (`TypeError: ... reading 'Cjs'` in typescript-estree). Revertiert auf
   `^6.0.3` (#91). TS 7 erst wieder anfassen, wenn `typescript-eslint` v9
   (mit TS-7-Support) released ist.
+- #107 `fix`: TS1149 Casing-Collision + alle restlichen `tsc`-Type-Errors in
+  Tests bereinigt (`tsc --noEmit` → 0 Errors).
+- #108 `chore`: Dependabot Auto-Merge abgestellt — künftige Dependency-PRs
+  brauchen manuellen Review/Merge.
 - Lockfile via `npm install --legacy-peer-deps` regeneriert (CI nutzt
   `npm ci --legacy-peer-deps`; der eslint-plugin-import ↔ eslint 10
   Peer-Konflikt ist bewusst toleriert).
+
+### Tests / Coverage
+
+- Neue `tests/dailyPuzzle.test.ts` (15 Tests): Index-Determinismus, lokales
+  Datum-Format, Solved-Round-Trip, Streak, leeres Set.
+- Gesamte Unit-Suite: **2818 Tests, 0 Regressionen** (222 Testdateien,
+  Vitest) + 25 E2E-Specs (Playwright, Chromium).
+- Coverage-Gate: **Lines 92.63% | Branches 82.12% | Functions 91.84%**.
 
 ## [1.2.0] – 2026-07-12
 
