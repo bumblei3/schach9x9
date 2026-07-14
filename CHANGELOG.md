@@ -7,6 +7,36 @@ Generiert aus den Git-Commits via `npm run changelog`.
 > `npm run changelog`, da dieses Skript die gesamte Datei überschreibt
 > und die Historie zerstören würde).
 
+## [1.4.0] – 2026-07-14
+
+Engine-Stärkung (Solo-Gegner) + Tooling. Keine neuen Spielfeatures,
+keine Breaking Changes.
+
+### Suche / Performance
+
+- `search.ts`: IIR-Tiefen-Skip aktiviert (war toter Code) — bei extrem
+  stabilen Bewertungen wird eine Tiefe übersprungen, um Budget für
+  tiefere/wichtigere Stellungen zu sparen.
+- `search.ts`: LMR-Skala 1.75 → 2.0 — präzisere Spätzug-Reduktionen
+  (weniger zu aggressive Reduktion späterer Züge).
+
+### Tools
+
+- `engineMatch.ts`: Bugfix — Spielergebnisse wurden nicht in `this.results`
+  gesammelt, die Summary zeigte immer 0 Games. Jetzt korrekt gepusht.
+- `tools/match-harness.ts` (neu): Headless-Regression-Harness für
+  Engine-vs-Engine-Matches (konfigurierbare Persönlichkeiten/Anzahl),
+  nutzt `engineMatch.runEngineMatch`.
+
+### Bekannt / Offen
+
+- **Asymmetrie-Bug bei längerer Suche:** Erhöhung von `MAX_SEARCH_TIME`
+  (aktuell 3000ms) über ~5s triggert bei Engine-vs-Engine-Matches
+  asymmetrisches Verhalten (Schwarz dominiert 20:3 bei identischen
+  Engines + alternierenden Farben). Ursache unklar (vermutet: TT/Eval-
+  Farbenfehler bei tiefen Linien). **H3 (Zeit-Erhöhung) daher bewusst
+  NICHT in diesem Release** — wird als eigenes Foundation-Thema verfolgt.
+
 ## [1.3.0] – 2026-07-14
 
 Qualitäts- und Foundation-Release: schließt die Foundation-first-Härtungsrunde
