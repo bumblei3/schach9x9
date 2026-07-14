@@ -119,16 +119,30 @@ function applyMove(board: number[][], move: NonNullable<NodeResponse['move']>): 
  * PNBRQKAC (A=archbishop, C=chancellor). Turn is 'w' or 'b'.
  */
 const TACTICAL_FENS: string[] = [
-  // Back-rank check: white to move, Q on rank 8, black king trapped -> mate tactic
+  // 1. Queen checkmate threat: Q on 8th, black king on c8 (trapped) -> mate in 1
   '8/8/8/8/8/8/8/3q4/2k4K w - - 0 1',
-  // Hanging rook: black rook on c4 attacked by white knight -> who grabs it
-  '8/8/8/2n5/2r5/8/8/K6k b - - 0 1',
-  // Fork: white knight can fork king + rook
-  '8/8/8/8/8/2r5/8/2N4k/K7 w - - 0 1',
-  // Promotion race with check
+  // 2. Knight fork: N can fork king (h8) + rook (c4) -> wins material
+  '8/8/8/8/8/2r5/8/7N/6kK w - - 0 1',
+  // 3. Hanging rook: black R on c4, white N on c5 attacks it -> grab wins
+  '8/8/8/2N5/2r5/8/8/K6k b - - 0 1',
+  // 4. Promotion with check: pawn one step from promotion, promotes with check
   '8/8/8/8/8/8/4P3/4k2K/7k w - - 0 1',
-  // Discovered check setup
+  // 5. Discovered check: bishop on a8, rook behind on d1 -> Rxd1 discovered check
   '8/8/8/8/8/8/8/b6k/K2R4 w - - 0 1',
+  // 6. Back-rank: black king trapped on 8th, white Q delivers mate
+  '8/8/8/8/8/8/8/3q4/k1K5 w - - 0 1',
+  // 7. Skewer: white rook on a1, king + queen on same rank -> wins queen
+  '8/8/8/8/8/8/8/8/R2qk2K w - - 0 1',
+  // 8. Pin break: black bishop pins rook, white can win bishop with knight
+  '8/8/8/8/8/8/8/2n5/1b1rk2K w - - 0 1',
+  // 9. Double attack: white queen attacks rook + bishop simultaneously
+  '8/8/8/8/8/8/8/3q4/1r2b2K w - - 0 1',
+  // 10. En prise rook: black R on e5, white pawn can capture with tempo
+  '8/8/8/8/4r3/4P3/8/6kK/8 w - - 0 1',
+  // 11. Fork queen+king: white knight forks -> wins queen
+  '8/8/8/8/8/8/8/2N5/2q2k1K w - - 0 1',
+  // 12. Trapped king escape: black king on h8, white Q checks, must find mate
+  '8/8/8/8/8/8/8/7q/6kK w - - 0 1',
 ];
 
 async function playGame(
@@ -150,10 +164,41 @@ async function playGame(
     firstFen = undefined; // only the first move uses the FEN; rest is board state
     if (res.error || !res.move) return 'draw'; // crash/illegal -> draw, flagged
     applyMove(board, res.move);
-    if (moveNumber >= 100) return 'draw';
+    if (moveNumber >= 100) break; // no mate -> decide by material
     turn = turn === 'white' ? 'black' : 'white';
     if (turn === 'white') moveNumber++;
   }
+  // No mate within move limit: decide by material on the board.
+  // NEW plays white when newIsWhite, so its material is the side it owns.
+  return materialWinner(board, newIsWhite);
+}
+
+/** Piece values (9x9: A=archbishop, C=chancellor, E=angel rank above queen). */
+const PIECE_VALUE: Record<number, number> = {
+  1: 100, 2: 320, 3: 330, 4: 500, 5: 900, 6: 20000, 7: 950, 8: 950, 9: 1100, 10: 1100,
+};
+
+/** NEW=white side (newIsWhite=true) material vs OLD=black side. NEW wins if it has more material. */
+function materialWinner(board: number[][], newIsWhite: boolean): 'new' | 'old' | 'draw' {
+  let newMat = 0;
+  let oldMat = 0;
+  for (const row of board) {
+    for (const cell of row) {
+      if (cell === 0) continue;
+      const value = PIECE_VALUE[Math.abs(cell)] ?? 0;
+      if (cell > 0) {
+        // white piece
+        if (newIsWhite) newMat += value;
+        else oldMat += value;
+      } else {
+        // black piece
+        if (newIsWhite) oldMat += value;
+        else newMat += value;
+      }
+    }
+  }
+  if (newMat > oldMat) return 'new';
+  if (oldMat > newMat) return 'old';
   return 'draw';
 }
 
