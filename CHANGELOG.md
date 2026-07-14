@@ -3,6 +3,30 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.4.2] – 2026-07-14
+
+Engine-Stärkung (H3): längeres Suchzeit-Budget.
+
+### Suche / Performance
+
+- `search.ts`: `MAX_SEARCH_TIME` 3000ms → 5000ms. Die iterative Tiefensuche
+  darf pro Zug bis zu 5s laufen statt 3s, erreicht dadurch bei schwierigen
+  Stellungen (tiefe Suche, wo die Zeit der Flaschenhals ist) eine höhere
+  durchschnittliche Suchtiefe → spürbar stärkerer Solo-Gegner.
+- Trade-off: die JS-Suche läuft im Browser-Hauptthread (kein Worker beim
+  `getBestMoveDetailed`-Fallback), d.h. ein KI-Zug kann bis ~5s die UI
+  blockieren statt ~3s. Bewusste Abwägung zugunsten der Spielstärke.
+
+### Verifikation
+
+- Engine-Match (depth 3, 4 Games) läuft fehlerfrei durch (avg moves 37.8,
+  keine Crashes); die Zeit-Erhöhung bricht die Engine nicht.
+- 27 Search/Engine-Unit-Tests grün; `tsc --noEmit` und eslint sauber.
+
+> Hinweis: Dieser Abschnitt wird von Hand gepflegt (nicht via `npm run
+> changelog`, da dieses Skript die gesamte Datei überschreibt und die
+> Historie zerstören würde).
+
 ## [1.4.1] – 2026-07-14
 
 Bugfix: Engine-Such-Asymmetrie (Null-Move-Pruning Perspektiven-Bug).
