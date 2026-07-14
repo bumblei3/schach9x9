@@ -379,8 +379,11 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           return { score: qScore, bestMove: null };
         }
 
-        // Null-move pruning
-        if (d >= 3 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
+        // Null-move pruning (never at the root: a null-move cutoff returns
+        // bestMove === null, but the root is contractually required to return
+        // a real move. A root null-move fail-high would otherwise leak a
+        // null move up to the caller — see the move:null KI bug at high ELO.)
+        if (!isRoot && d >= 3 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
           let hasMaterial = false;
           const activeColor = maximizing ? color : color ^ COLOR_MASK;
           for (let i = 0; i < SQUARE_COUNT; i++) {
@@ -705,7 +708,12 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           Math.abs(lastScores[lastScores.length - 2] - lastScores[lastScores.length - 3]) < 10 &&
           performance.now() - start < MAX_SEARCH_TIME * 0.5;
 
-        if (performance.now() - start <= MAX_SEARCH_TIME) bestResult = result;
+        // Only promote a result that actually carries a move. A null-move or
+        // time-abort cutoff at the root can return bestMove === null; never let
+        // that clobber a previously good (move-bearing) iteration.
+        if (result.bestMove && performance.now() - start <= MAX_SEARCH_TIME) {
+          bestResult = result;
+        }
 
         // Report progress at each depth iteration
         if (progressCallback) {
