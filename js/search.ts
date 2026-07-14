@@ -361,7 +361,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           return { score: evaluate(b, color, evalConfig), bestMove: null };
         }
 
-        const hash = computeZobristHash(b);
+        const hash = computeZobristHash(b, maximizing ? color : color ^ COLOR_MASK);
         const ttEntry = tt.probe(hash, d);
         let ttBest: Move | null = null;
 
@@ -394,7 +394,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
             }
           }
           if (hasMaterial) {
-            const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, maximizing);
+            const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing);
             if (nullScore.score >= beta) return { score: beta, bestMove: null };
           }
         }
