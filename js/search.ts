@@ -474,7 +474,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 // Standard LMR formula: reduction = log(depth) * log(movesSearched) / scale
                 const depthLog = Math.log(d);
                 const moveLog = Math.log(movesSearched);
-                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 1.75));
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 2.0));
                 reduction = Math.max(1, reduction); // At least 1 ply reduction
               }
 
@@ -566,7 +566,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               ) {
                 const depthLog = Math.log(d);
                 const moveLog = Math.log(movesSearched);
-                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 1.75));
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 2.0));
                 reduction = Math.max(1, reduction);
               }
 
