@@ -72,15 +72,24 @@ function quiesce(
   if (standPat + QSEARCH_DELTA < alpha) return alpha;
 
   const activeColorStr = c === COLOR_WHITE ? 'white' : 'black';
-  const captures = getAllCaptureMoves(b, activeColorStr);
+  const inCheck = checkInt(b, c);
 
-  captures.sort((_, mv) => {
-    const victim = b[mv.to] & TYPE_MASK;
-    const attacker = b[mv.from] & TYPE_MASK;
-    return (EVAL_VALUES[victim] || 0) - (EVAL_VALUES[attacker] || 0);
-  });
+  // Check extension: when the side to move is in check, quiescence must
+  // consider ALL evasion moves (not just captures), otherwise a forced
+  // check sequence is cut off at the horizon and misevaluated.
+  const moves = inCheck
+    ? genLegalInt(b, activeColorStr)
+    : getAllCaptureMoves(b, activeColorStr);
 
-  for (const move of captures) {
+  if (!inCheck) {
+    moves.sort((_, mv) => {
+      const victim = b[mv.to] & TYPE_MASK;
+      const attacker = b[mv.from] & TYPE_MASK;
+      return (EVAL_VALUES[victim] || 0) - (EVAL_VALUES[attacker] || 0);
+    });
+  }
+
+  for (const move of moves) {
     const undo = makeMoveInt(b, move);
     const score = -quiesce(b, -beta, -alpha, c ^ COLOR_MASK, start, nodes, evalConfig);
     undoMoveInt(b, undo);
