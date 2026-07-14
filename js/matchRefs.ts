@@ -164,10 +164,41 @@ async function playGame(
     firstFen = undefined; // only the first move uses the FEN; rest is board state
     if (res.error || !res.move) return 'draw'; // crash/illegal -> draw, flagged
     applyMove(board, res.move);
-    if (moveNumber >= 100) return 'draw';
+    if (moveNumber >= 100) break; // no mate -> decide by material
     turn = turn === 'white' ? 'black' : 'white';
     if (turn === 'white') moveNumber++;
   }
+  // No mate within move limit: decide by material on the board.
+  // NEW plays white when newIsWhite, so its material is the side it owns.
+  return materialWinner(board, newIsWhite);
+}
+
+/** Piece values (9x9: A=archbishop, C=chancellor, E=angel rank above queen). */
+const PIECE_VALUE: Record<number, number> = {
+  1: 100, 2: 320, 3: 330, 4: 500, 5: 900, 6: 20000, 7: 950, 8: 950, 9: 1100, 10: 1100,
+};
+
+/** NEW=white side (newIsWhite=true) material vs OLD=black side. NEW wins if it has more material. */
+function materialWinner(board: number[][], newIsWhite: boolean): 'new' | 'old' | 'draw' {
+  let newMat = 0;
+  let oldMat = 0;
+  for (const row of board) {
+    for (const cell of row) {
+      if (cell === 0) continue;
+      const value = PIECE_VALUE[Math.abs(cell)] ?? 0;
+      if (cell > 0) {
+        // white piece
+        if (newIsWhite) newMat += value;
+        else oldMat += value;
+      } else {
+        // black piece
+        if (newIsWhite) oldMat += value;
+        else newMat += value;
+      }
+    }
+  }
+  if (newMat > oldMat) return 'new';
+  if (oldMat > newMat) return 'old';
   return 'draw';
 }
 
