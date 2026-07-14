@@ -3,6 +3,37 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.5.0] – 2026-07-14
+
+Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
+
+### Suche / Quiescence
+- `search.ts` `quiesce()`: Delta-Pruning (H-Q1, sound). Wenn `standPat +
+  2000 < alpha`, wird der QSearch-Zweig abgeschnitten — selbst das
+  wertvollste nicht-königliche Capture + Beförderung kann den Score nicht
+  über `alpha` heben. Kein Stärkeverlust möglich, spart aussichtslose
+  QSearch-Tiefe.
+- `search.ts` `quiesce()`: Check-Extension (H-Q2). Steht die Seite am Zug
+  im Schach, werden ALLE Legal-Moves (1 Ply) statt nur Captures durchsucht,
+  um den Horizon-Effekt bei erzwungenen Schachsequenzen zu vermeiden.
+
+### Tooling (Regression-Gates)
+- `js/asymmetryProbe.ts`: balanced-vs-balanced Self-Play mit alternierenden
+  Farben. Erkennt Color-Bias in TT/Eval/QSearch (eine Farbe >60% = Bug).
+- `js/engineNode.ts` + `js/matchRefs.ts`: echter Stärke-Gate für die
+  deterministische Engine — NEW_REF vs OLD_REF über zwei git-Worktrees
+  (Self-Play ist wertlos, da beide Seiten identische Spiele replayen).
+
+### Verifikation
+- Asymmetrie-Probe (16 Partien): VERDICT SYMMETRIC, 0 crashes.
+- `npx vitest run`: 223 Files / 2819 Tests passed (keine Regression).
+- `npx tsc --noEmit` + eslint sauber.
+- Ref-Match (neu H-Q1+H-Q2 vs alt IIR-Stand, 8 Partien, elo 1600):
+  NEW 0 / OLD 0 / Draw 8 — equal, keine OLD-Wins (kein Stärkeverlust).
+  Hinweis: bei elo 1600 enden beide Engines sehr solide (viele Remis);
+  der Match ist nicht sensitiv genug, um den H-Q2-Gewinn zu quantifizieren.
+  Beide Hebel sind per Konstruktion sound.
+
 ## [1.4.2] – 2026-07-14
 
 Engine-Stärkung (H3): längeres Suchzeit-Budget.
