@@ -377,7 +377,13 @@ export class OpeningBookTrainer {
 
     for (let i = 0; i < totalGames; i++) {
       const gameNum = i + 1;
-      const swapColors = this.config.alternateColors && i % 2 === 1;
+      // NOTE: swapColors is intentionally forced off here. The trainer records
+      // positions by playing from the canonical initial board (white at the
+      // bottom). swapColors would flip the recorded turn/color but NOT mirror
+      // the pieces on the (physical) board, producing positions whose expected
+      // move starts from a piece of the wrong color — unsolvable in the UI.
+      // Disabling it keeps every recorded position internally consistent.
+      const swapColors = false;
 
       await this.playTrainingGame(gameNum, swapColors);
 
@@ -466,8 +472,13 @@ export class OpeningBookTrainer {
   }
 
   private recordOpeningPosition(state: EngineState, moveIndex: number): void {
+    // Reconstruct the board state BEFORE the move at `moveIndex` is played, so
+    // the stored position hash represents the position the player is asked to
+    // find the move FROM. Applying moves up to and INCLUDING moveIndex was a
+    // bug: it hashed the position AFTER the move, leaving the move's from-square
+    // empty and making the trainer position unsolvable.
     const board = createInitialBoard();
-    for (let i = 0; i <= moveIndex; i++) {
+    for (let i = 0; i < moveIndex; i++) {
       applyMoveInt(board, {
         from: state.moveHistory[i].from,
         to: state.moveHistory[i].to,
@@ -475,9 +486,23 @@ export class OpeningBookTrainer {
       });
     }
 
-    const turn = state.moveHistory[moveIndex].color;
-    const hash = getBoardHashInt(board, turn);
     const move = state.moveHistory[moveIndex];
+    // Derive `turn` from the ACTUAL piece sitting on the move's from-square
+    // rather than from the move-history record. The history color can disagree
+    // with the reconstructed board (e.g. when the engine returns a move that
+    // shifts a piece of the opposite color), which produced positions whose
+    // recorded turn was inverted relative to the piece the player is asked to
+    // move — unsolvable in the UI. Taking the color from the real from-square
+    // keeps the stored turn consistent with the board. (board is a flat
+    // IntBoard: index = r * 9 + c.)
+    const fromIdx = move.from.r * 9 + move.from.c;
+    const fromPiece = board[fromIdx];
+    const turn = fromPiece
+      ? (fromPiece & COLOR_MASK) === COLOR_WHITE
+        ? 'white'
+        : 'black'
+      : state.moveHistory[moveIndex].color;
+    const hash = getBoardHashInt(board, turn);
 
     if (!this.book.data.positions[hash]) {
       this.book.data.positions[hash] = { moves: [], seenCount: 0 };
