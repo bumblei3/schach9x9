@@ -474,7 +474,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 // Standard LMR formula: reduction = log(depth) * log(movesSearched) / scale
                 const depthLog = Math.log(d);
                 const moveLog = Math.log(movesSearched);
-                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 1.75));
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 2.0));
                 reduction = Math.max(1, reduction); // At least 1 ply reduction
               }
 
@@ -566,7 +566,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               ) {
                 const depthLog = Math.log(d);
                 const moveLog = Math.log(movesSearched);
-                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 1.75));
+                reduction = Math.min(LMR_MAX_REDUCTION, Math.floor((depthLog * moveLog) / 2.0));
                 reduction = Math.max(1, reduction);
               }
 
@@ -720,9 +720,13 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
         if (Math.abs(result.score) > MATE_SCORE - 100) break;
 
-        // Optional: Early exit if IIR suggests depth increase won't help
-        if (shouldSkipDepth && d + 1 <= maxDepth) {
-          // Still do one more iteration for safety, but could break here
+        // IIR: Skip one stable depth to spend the budget on deeper/worthwhile
+        // plies. We never skip the final iteration, so the reported result is
+        // complete. The loop body (progress, mate-check) of the skipped depth is
+        // intentionally omitted — the next iteration runs it.
+        if (shouldSkipDepth && d + 1 < maxDepth) {
+          d++;
+          continue;
         }
       }
 

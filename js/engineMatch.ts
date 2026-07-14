@@ -207,11 +207,13 @@ export class EngineMatchRunner {
     for (let i = 0; i < totalGames; i++) {
       const gameNum = i + 1;
 
+      let gameResult: GameResult;
       if (this.config.alternateColors && i % 2 === 1) {
-        await this.runSingleGame(this.config.engineBlack, this.config.engineWhite, gameNum);
+        gameResult = await this.runSingleGame(this.config.engineBlack, this.config.engineWhite, gameNum);
       } else {
-        await this.runSingleGame(this.config.engineWhite, this.config.engineBlack, gameNum);
+        gameResult = await this.runSingleGame(this.config.engineWhite, this.config.engineBlack, gameNum);
       }
+      this.results.push(gameResult);
     }
 
     if (!this.config.quiet) this.printSummary();
