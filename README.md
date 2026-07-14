@@ -193,9 +193,15 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 **Nächste Schritte (offen):**
 - **Engine-Stärkung:** tieferer Suchbaum / Quiescence-Tuning / besseres
   Move-Ordering für einen stärkeren Solo-Gegner.
+  _Status: H3 + H-Q1 (Delta-Pruning) + H-Q2 (Check-Extension) in v1.5.0
+  gemergt. Match-Infra (tactical FENs + material-Gate) zeigt: Hebel sind
+  sound, aber bei fester Zeit/Depth 5 nicht messbar stärker (40 Partien
+  15:15 equal). Weitere Eval-Hebel (PSQT) riskant + schwer messbar._
 - **Daily Puzzle v1.1.0:** mehr Trainingswert (Engine-Zugvorschläge, Varianten).
-- **Coverage 82%→85%+ Branches:** Foundation-first weiterziehen (diminishing
-  returns erreicht bei 92% Lines — niedrige Priorität).
+- **Coverage:** war 82% Branches (Ziel 85%). Bei Projektumfang (7277 Branches)
+  ist 85% mit vertretbarem Aufwand nicht erreichbar — _diminishing returns,
+  daher kein hartes Ziel mehr. Gezielte Branch-Tests für gameController/
+  aiController landed in v1.5.x (Branch 82.27%).
 
 ## 📌 Bekannte Einschränkungen / Offen
 
