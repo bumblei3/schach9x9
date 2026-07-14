@@ -64,6 +64,13 @@ function quiesce(
   if (standPat >= beta) return beta;
   if (standPat > alpha) alpha = standPat;
 
+  // Delta pruning (sound): even capturing the most valuable non-king piece
+  // plus a promotion cannot raise standPat above alpha, so no capture can
+  // help -> stand pat. Upper bound = ANGEL (1220) + promotion gain (~800).
+  // Pruning only a hopeless subtree; never changes the best move.
+  const QSEARCH_DELTA = 2000;
+  if (standPat + QSEARCH_DELTA < alpha) return alpha;
+
   const activeColorStr = c === COLOR_WHITE ? 'white' : 'black';
   const captures = getAllCaptureMoves(b, activeColorStr);
 
