@@ -325,7 +325,8 @@ describe('OpeningBook', () => {
       // Move 3: Black e5xe4 (3,4->4,4) - capture
       // Move 4: White e5->e8 promotion (4,4->0,4) with promotion to queen
 
-      // Board BEFORE move 4: after moves 0-3
+      // Board BEFORE move 4: after moves 0-3. Move 4 (index 4, even) is a
+      // WHITE promotion, so the from-square (4,4) must hold a WHITE pawn.
       const board = initialBoard.map(row => [...row]);
       board[5][4] = board[7][4];
       board[7][4] = null; // White e4
@@ -335,9 +336,13 @@ describe('OpeningBook', () => {
       board[5][4] = null; // White e4->e5
       board[4][4] = board[3][4];
       board[3][4] = null; // Black captures on e5
+      // Move 4 is a promotion from (4,4). The from-square color (after move 3
+      // applied by applyGameResult) defines the side to move — derive it from
+      // the board, matching applyGameResult's 'turn from from-square' logic.
+      const fromColor = board[4][4] ? board[4][4]!.color : 'white';
 
-      // Hash for move 4 (promotion) with turn='white' (since move index 4 is even -> white)
-      const hash = book.getBoardHash(board, 'white');
+      // Hash for move 4 with the side to move taken from the from-square.
+      const hash = book.getBoardHash(board, fromColor);
       const pos = book.data.positions[hash];
       expect(pos).toBeDefined();
       // Should have recorded the promotion move with win bonus

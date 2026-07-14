@@ -204,8 +204,14 @@ export class OpeningBook {
       }
       // draw: delta = 0
 
-      // Current hash before making the move
-      const turn = moverColor;
+      // Current hash before making the move. Derive `turn` from the ACTUAL
+      // piece on the move's from-square (not from the index parity, which can
+      // disagree with the reconstructed board and produce a position whose
+      // recorded turn is inverted relative to the piece to move — unsolvable
+      // in the trainer UI). The from-square piece always matches the side to
+      // move at this point in the replay.
+      const fromPiece = board[move.from.r]?.[move.from.c];
+      const turn = fromPiece ? fromPiece.color : moverColor;
       const hash = this.getBoardHash(board, turn);
       let pos = this.data.positions[hash];
       if (!pos) {

@@ -23,6 +23,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import { OpeningBookTrainer, createInitialBoard } from '../js/utils/OpeningBookTrainer.js';
+import { reconstructBoardFromHash } from '../js/openingTrainer.js';
 import type { Square } from '../js/gameEngine.js';
 
 // --- Mock the engine so runTraining never hits the real search -------------
@@ -299,5 +300,57 @@ describe('OpeningBookTrainer.runTraining — end-to-end invariants', () => {
     expect(fs.existsSync(TMP_BOOK)).toBe(true);
     const onDisk = JSON.parse(fs.readFileSync(TMP_BOOK, 'utf8'));
     expect(JSON.stringify(onDisk.positions)).toBe(JSON.stringify(book.positions));
+  });
+});
+
+// ===========================================================================
+// C) Solvability invariant — the trainer regression guard
+// ===========================================================================
+
+describe('OpeningBookTrainer — trainer solvability invariant', () => {
+  const baseConfig = {
+    quiet: true,
+    numGames: 3,
+    depth: 1,
+    timePerMoveMs: 1,
+    openingMovesTracked: 6,
+    minPositionCount: 1,
+    maxMovesPerPosition: 5,
+    elo: 1,
+    drawMoveLimit: 12,
+    alternateColors: false,
+    outputBookPath: TMP_BOOK,
+  };
+
+  // This is the invariant that a green unit suite previously missed and that
+  // broke the opening trainer in the browser: for EVERY stored position, the
+  // from-square of each recorded move must hold a piece of the side to move
+  // in the reconstructed board. Otherwise the position is unsolvable (the
+  // player is asked to move a piece from an empty square).
+  test('every stored move starts from an occupied square of the side to move', async () => {
+    const book = await new OpeningBookTrainer(baseConfig).runTraining();
+
+    const positions = Object.entries(book.positions);
+    expect(positions.length).toBeGreaterThan(0);
+
+    let checkedMoves = 0;
+    for (const [hash, pos] of positions) {
+      const { board, turn } = reconstructBoardFromHash(hash);
+      for (const move of pos.moves) {
+        const piece = board[move.from.r]?.[move.from.c];
+        expect(
+          piece,
+          `position ${hash.slice(0, 24)}… move (${move.from.r},${move.from.c})->(${move.to.r},${move.to.c}) starts from an EMPTY square`
+        ).not.toBeNull();
+        expect(piece).not.toBeUndefined();
+        // The piece on the from-square must belong to the side to move.
+        expect(
+          piece!.color,
+          `position ${hash.slice(0, 24)}… move (${move.from.r},${move.from.c})->(${move.to.r},${move.to.c}) starts from a ${piece!.color} piece but turn is ${turn}`
+        ).toBe(turn);
+        checkedMoves++;
+      }
+    }
+    expect(checkedMoves).toBeGreaterThan(0);
   });
 });
