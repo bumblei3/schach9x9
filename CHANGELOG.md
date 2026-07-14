@@ -3,6 +3,35 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.4.1] – 2026-07-14
+
+Bugfix: Engine-Such-Asymmetrie (Null-Move-Pruning Perspektiven-Bug).
+
+### Suche / Correctness
+
+- `search.ts` Null-Move-Pruning: Perspektive beim Null-Move-Sub-Search
+  korrigiert (`maximizing` → `!maximizing`). Vorher wurde die Null-Move-
+  Bewertung aus der falschen Seiten-Perspektive genommen.
+- `search.ts` Transposition-Table: Seite am Zug (`sideToMove`) in den
+  Zobrist-Hash aufgenommen, damit Stellungen mit unterschiedlicher
+  Zugpflicht nicht verwechselt werden.
+
+### Symptom (vorher)
+
+- Bei längerer Bedenkzeit (≥ 8s) dominierte in Engine-vs-Engine-Selbsttests
+  eine Farbe systematisch (20:3 bei identischen Engines). Die Engine war bei
+  kurzer Suche (3s) symmetrisch, wurde bei tiefer Suche aber einseitig.
+- Nach dem Fix: Selbsttests bei 8s wieder symmetrisch (~21/24 Remis),
+  keine messbare Regression bei 3s.
+
+### Tests
+
+- `tests/search.symmetry.test.ts`: Spiegel-Symmetrie-Guard (Position und
+  gespiegeltes Pendant müssen gegensätzlich bewertet werden, Toleranz 100cp).
+  Hinweis: der kritische Asymmetrie-Bug zeigt sich erst bei zeitgesteuerter
+  Tiefsuche (8s-Match) und nicht bei fester Tiefe — der Match bleibt der
+  autoritative Beweis.
+
 > Hinweis: Dieser Abschnitt wird von Hand gepflegt (nicht via
 > `npm run changelog`, da dieses Skript die gesamte Datei überschreibt
 > und die Historie zerstören würde).
