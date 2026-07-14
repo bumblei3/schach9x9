@@ -17,6 +17,7 @@
 
 import { getBestMoveDetailed, type MoveResult } from './aiEngine.js';
 import type { Piece } from './types/game.js';
+import { parseFEN } from './utils.js';
 
 function pieceCodeToPiece(code: number): Piece | null {
   switch (code) {
@@ -44,12 +45,30 @@ function pieceCodeToPiece(code: number): Piece | null {
   }
 }
 
+/** Piece type -> internal board code (matches Piece|null)[][] convention. */
+function pieceToCode(p: Piece | null): number {
+  if (!p) return 0;
+  const typeCode: Record<string, number> = {
+    p: 1, n: 2, b: 3, r: 4, q: 5, k: 6, a: 7, c: 8, e: 9, j: 10,
+  };
+  const base = typeCode[p.type] ?? 0;
+  return p.color === 'white' ? base : -base;
+}
+
+/** Parse a 9x9 FEN into the number[][] board + turn used by evaluatePosition. */
+export function fenToBoard(fen: string): { board: number[][]; turn: 'white' | 'black' } {
+  const { board, turn } = parseFEN(fen);
+  const numBoard = board.map(row => row.map(pieceToCode));
+  return { board: numBoard, turn };
+}
+
 export interface NodeRequest {
   gameNumber: number;
   board: number[][];
   turn: 'white' | 'black';
   elo: number;
   moveNumber: number;
+  fen?: string; // optional: override board/turn from a FEN string
 }
 
 export interface NodeResponse {
@@ -62,8 +81,15 @@ export interface NodeResponse {
 
 export async function evaluatePosition(req: NodeRequest): Promise<NodeResponse> {
   try {
-    const uiBoard = req.board.map(row => row.map(pieceCodeToPiece));
-    const turnColor = req.turn;
+    let board = req.board;
+    let turn = req.turn;
+    if (req.fen) {
+      const parsed = fenToBoard(req.fen);
+      board = parsed.board;
+      turn = parsed.turn;
+    }
+    const uiBoard = board.map(row => row.map(pieceCodeToPiece));
+    const turnColor = turn;
     const result = await getBestMoveDetailed(
       uiBoard,
       turnColor,
