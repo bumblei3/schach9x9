@@ -185,6 +185,10 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Eröffnungs-Trainer (v1.1.0):** Solo-Spielmodus — eine Stellung aus dem
   trainierten Eröffnungsbuch wird gezeigt, der Spieler soll den engine-bewerteten
   Buch-Zug finden; Streak + Trefferquote werden gespeichert.
+  _Status: in v1.1.0 released, aber bis **PR #122** effektiv kaputt (70/71
+  Buchpositionen unlösbar — Start-Feld des erwarteten Zuges war leer). PR #122
+  hat recordOpeningPosition + applyGameResult gefixt, die kaputte `.cjs`
+  entfernt und das Buch neu generiert (jetzt 0 unlösbar)._
 - **Tägliches Puzzle (v1.2.0):** Solo-Spielmodus — ein jeden Tag rotierendes
   Schachtaktik-Puzzle (reuse `puzzleManager`).
 - **Post-Game-Analyse (E2E, v1.3.0):** Browser-Spec verifiziert Blunder/Accuracy-
@@ -196,12 +200,17 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
   _Status: H3 + H-Q1 (Delta-Pruning) + H-Q2 (Check-Extension) in v1.5.0
   gemergt. Match-Infra (tactical FENs + material-Gate) zeigt: Hebel sind
   sound, aber bei fester Zeit/Depth 5 nicht messbar stärker (40 Partien
-  15:15 equal). Weitere Eval-Hebel (PSQT) riskant + schwer messbar._
-- **Daily Puzzle v1.1.0:** mehr Trainingswert (Engine-Zugvorschläge, Varianten).
+  15:15 equal)._
+- **H-P1 — PSQT für 9x9 schärfen:** der einzige noch offene Engine-Hebel.
+  Stärkere statische Bewertung via Piece-Square-Tables; als riskant +
+  schwer messbar eingestuft (Foundation-first: nur mit Regression-Gate).
+- **Daily Puzzle v1.1.0: Engine-Zugvorschläge + Varianten** — _Status:
+  verifiziert (PR #121, E2E im echten Browser). Das Tutor-System liefert
+  Top-Züge + PV-Varianten; im Puzzle-Modus via Hint-Button/`h` verfügbar._
 - **Coverage:** war 82% Branches (Ziel 85%). Bei Projektumfang (7277 Branches)
   ist 85% mit vertretbarem Aufwand nicht erreichbar — _diminishing returns,
   daher kein hartes Ziel mehr. Gezielte Branch-Tests für gameController/
-  aiController landed in v1.5.x (Branch 82.27%).
+  aiController landed in v1.5.x (Branch 82.27%)._
 
 ## 📌 Bekannte Einschränkungen / Offen
 
