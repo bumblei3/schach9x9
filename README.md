@@ -45,6 +45,26 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Opening Book** (PGN-Import, Merge-Strategien, Eröffnungsnamen-Anzeige)
 - **JS-Suche als primäre Engine** (kein WASM-Backend nötig — läuft überall ohne native Build-Tools)
 
+### Engine-Version & Stärkungs-Hebel (v1.5.0)
+
+Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
+(jeder Hebel ein eigener Branch + PR, gemessen durch einen Regression-Gate):
+
+| Hebel | Wirkung | Status |
+| ----- | ------- | ------ |
+| **H3** – `MAX_SEARCH_TIME` 3s→5s | tiefere Suche pro Zug (stärker, längere UI-Blockade) | ✅ v1.4.2 |
+| **H-Q1** – Quiescence Delta-Pruning | sound: schneidet aussichtslose QSearch-Zweige ab | ✅ v1.5.0 |
+| **H-Q2** – Quiescence Check-Extension | fängt Horizon-Effekt bei Schachsequenzen | ✅ v1.5.0 |
+| **H-P1** – PSQT für 9x9 schärfen | stärkere statische Bewertung (riskant, in Arbeit) | ⏳ offen |
+
+**Regression-Gates** (müssen alle grün sein, bevor ein Hebel gemergt wird):
+- `js/asymmetryProbe.ts` – balanced-vs-balanced Self-Play mit alternierenden
+  Farben; erkennt Color-Bias in TT/Eval/QSearch (eine Farbe >60% = Bug).
+- `js/engineNode.ts` + `js/matchRefs.ts` – echter Stärke-Gate für die
+  deterministische Engine: `NEW_REF` vs `OLD_REF` über zwei git-Worktrees
+  (Self-Play ist wertlos, da beide Seiten identische Spiele replayen).
+- `npx vitest run` (2819 Tests), `npx tsc --noEmit`, eslint sauber.
+
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
 | Name                  | Stil                        | Aggression | Zeit-Faktor | Risiko | Interner Typ |
