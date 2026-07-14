@@ -1,14 +1,13 @@
 // Headless regression harness: runs N games, configurable personalities.
 // Usage: npx tsx tools/match-harness.ts <games> <whitePers> <blackPers>
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-import { runEngineMatch } from '../js/engineMatch.js';
+import { runEngineMatch, type EngineMatchConfig } from '../js/engineMatch.js';
+import { AI_PERSONALITIES } from '../js/ai/personalities.js';
 
 const games = parseInt(process.argv[2] || '12', 10);
-const whitePers = process.argv[3] || 'balanced';
-const blackPers = process.argv[4] || 'aggressive';
+const whitePers = (process.argv[3] || 'balanced') as keyof typeof AI_PERSONALITIES;
+const blackPers = (process.argv[4] || 'aggressive') as keyof typeof AI_PERSONALITIES;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const config: any = {
+const config: EngineMatchConfig = {
   engineWhite: { name: `W-${whitePers}`, personality: whitePers, elo: 2500, color: 'white' },
   engineBlack: { name: `B-${blackPers}`, personality: blackPers, elo: 2500, color: 'black' },
   numGames: games,
