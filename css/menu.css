@@ -250,3 +250,62 @@
   margin-bottom: 1rem;
   font-size: 1.1rem;
 }
+
+/* Daily puzzle streak badge (Phase A) */
+.daily-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  margin-right: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(78, 204, 163, 0.15);
+  border: 1px solid rgba(78, 204, 163, 0.4);
+  color: #4ecca3;
+}
+
+#daily-puzzle-streak {
+  color: #ffb347;
+  border-color: rgba(255, 179, 71, 0.45);
+  background: rgba(255, 179, 71, 0.12);
+}
+
+/* Opening trainer menu (Phase A feedback) */
+.opening-trainer-menu {
+  padding: 0.75rem 0;
+}
+.opening-trainer-hint {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #a0a0b0);
+  margin: 0.4rem 0 0.8rem;
+  line-height: 1.4;
+}
+.opening-trainer-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+.opening-trainer-feedback {
+  min-height: 1.4em;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.opening-trainer-feedback.is-ok {
+  color: #4ecca3;
+}
+.opening-trainer-feedback.is-error {
+  color: #ff6b6b;
+}
+.opening-trainer-start {
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #4ecca3, #3ba88a);
+  color: #0a0a12;
+  font-weight: 700;
+  cursor: pointer;
+}

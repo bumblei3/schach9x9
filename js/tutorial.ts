@@ -6,6 +6,8 @@ interface Step {
   content: string;
 }
 
+export type TutorialMode = 'quick' | 'full';
+
 export class Tutorial {
   private static readonly SEEN_KEY = 'schach9x9_tutorial_seen';
 
@@ -19,14 +21,36 @@ export class Tutorial {
   public currentStepEl!: HTMLElement;
   public totalStepsEl!: HTMLElement;
 
-  constructor() {
+  constructor(options: { mode?: TutorialMode } = {}) {
     this.currentStep = 0;
-    this.steps = this.createSteps();
+    this.steps = options.mode === 'quick' ? this.createQuickStartSteps() : this.createSteps();
     this.initUI();
+  }
+
+  /**
+   * Suppress first-run overlay under Playwright/CI (navigator.webdriver) or
+   * explicit ?e2e / ?notutorial — otherwise the modal intercepts all clicks.
+   */
+  public static isAutomatedBrowser(): boolean {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.webdriver) return true;
+    } catch {
+      /* ignore */
+    }
+    try {
+      if (typeof location !== 'undefined') {
+        const q = new URLSearchParams(location.search);
+        if (q.has('e2e') || q.has('notutorial')) return true;
+      }
+    } catch {
+      /* ignore */
+    }
+    return false;
   }
 
   /** Returns true when the tutorial has NOT been seen yet (first run). */
   public static shouldAutoShow(): boolean {
+    if (Tutorial.isAutomatedBrowser()) return false;
     try {
       return localStorage.getItem(Tutorial.SEEN_KEY) !== '1';
     } catch {
@@ -43,6 +67,44 @@ export class Tutorial {
     }
   }
 
+  /**
+   * First-run onboarding (Phase A): three screens covering fairy pieces,
+   * setup/king placement, and shop/upgrades — short enough to not block play.
+   */
+  public createQuickStartSteps(): Step[] {
+    return [
+      {
+        title: '⬡ Willkommen — 9×9 & Feenfiguren',
+        content: `
+          <p>Schach 9×9 spielt auf einem größeren Brett mit zusätzlichen Figuren:</p>
+          <ul style="text-align:left; line-height:1.6;">
+            <li><strong>Erzbischof</strong> — Läufer + Springer</li>
+            <li><strong>Kanzler</strong> — Turm + Springer</li>
+            <li><strong>Nachtreiter</strong> — gleitender Springer (mehrere Sprünge in Linie)</li>
+            <li><strong>Engel</strong> — Dame + Springer (Premium)</li>
+          </ul>
+          <p style="margin-top:0.75rem;color:#4ecca3;">Tipp: Die ausführliche Tour mit Zugdiagrammen findest du unter <em>Lernen → Interaktives Tutorial</em>.</p>
+        `,
+      },
+      {
+        title: '👑 Setup — König platzieren',
+        content: this.createSetupDemo(),
+      },
+      {
+        title: '💰 Shop & Upgrades',
+        content: `
+          <p>Vor dem Spiel startest du oft mit <strong>Punkten</strong> im Shop:</p>
+          <ul style="text-align:left; line-height:1.6;">
+            <li>Kaufe zusätzliche Figuren für deine Startaufstellung</li>
+            <li>Im <strong>Upgrade-Modus</strong> verbesserst du Figuren (z. B. Springer → Nachtreiter)</li>
+            <li>Kosten = Differenz der Figurenwerte</li>
+          </ul>
+          <p style="margin-top:1rem;text-align:center;font-size:1.1em;color:#4ecca3;"><strong>Viel Erfolg am Brett! ♟️</strong></p>
+        `,
+      },
+    ];
+  }
+
   public createSteps(): Step[] {
     return [
       {
@@ -53,6 +115,7 @@ export class Tutorial {
           <ul>
             <li>🏰 Das 9x9 Brett und Korridor-System</li>
             <li>⚔️ Die speziellen Figuren: Erzbischof, Kanzler, Nachtreiter und Engel</li>
+            <li>👑 Die Setup-Phase (König platzieren)</li>
             <li>💰 Das Punkte-Shop-System</li>
             <li>♟️ Grundlegende Spielregeln</li>
           </ul>
@@ -79,6 +142,10 @@ export class Tutorial {
         content: this.createCorridorDemo(),
       },
       {
+        title: '👑 Setup — König platzieren',
+        content: this.createSetupDemo(),
+      },
+      {
         title: '💰 Der Shop',
         content: this.createShopDemo(),
       },
@@ -87,6 +154,18 @@ export class Tutorial {
         content: this.createUpgradeDemo(),
       },
     ];
+  }
+
+  public createSetupDemo(): string {
+    return `
+      <p>In vielen Modi wählst du zu Beginn, <strong>wo dein König steht</strong>.</p>
+      <ul style="text-align:left; line-height:1.55; margin: 0.75rem 0;">
+        <li>Klicke auf ein erlaubtes Startfeld im eigenen <strong>Korridor</strong></li>
+        <li>Danach platzierst du (je nach Modus) weitere Figuren oder gehst in den Shop</li>
+        <li>Die KI platziert ihren König auf der gegenüberliegenden Seite</li>
+      </ul>
+      <p style="font-size:0.95em;color:#4ecca3;">Strategietipp: Der Königskorridor bestimmt, welche Flügel du früh kontrollierst.</p>
+    `;
   }
 
   public createNightriderDemo(): string {

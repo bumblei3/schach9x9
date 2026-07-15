@@ -1,5 +1,10 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { OpeningTrainerManager, loadTrainerProgress } from '../js/openingTrainer.js';
+import {
+  OpeningTrainerManager,
+  loadTrainerProgress,
+  moveToAlgebraic,
+  squareToAlgebraic,
+} from '../js/openingTrainer.js';
 import type { TrainerProgress } from '../js/openingTrainer.js';
 import { OpeningBook } from '../js/ai/OpeningBook.js';
 import type { Piece } from '../js/gameEngine.js';
@@ -87,6 +92,8 @@ describe('OpeningTrainerManager', () => {
     expect(mgr.progress.streak).toBe(1);
     expect(mgr.progress.correct).toBe(1);
     expect(mgr.accuracy).toBe(1);
+    expect(res.feedback).toMatch(/Richtig/);
+    expect(res.expectedAlgebraic).toMatch(/–/);
   });
 
   test('wrong move resets streak but records attempt', () => {
@@ -107,6 +114,8 @@ describe('OpeningTrainerManager', () => {
     expect(mgr.progress.streak).toBe(0);
     expect(mgr.progress.attempts).toBe(1);
     expect(mgr.accuracy).toBe(0);
+    expect(res.feedback).toMatch(/Falsch/);
+    expect(res.expectedAlgebraic).toBe('a9–b8'); // r0c0 -> a9, r1c1 -> b8 on 9x9
   });
 
   test('reconstructBoard turns a hash back into a renderable board + turn', () => {
@@ -269,5 +278,17 @@ describe('OpeningTrainerManager storage', () => {
     expect(progress.attempts).toBe(0);
     expect(Array.isArray(progress.solvedHashes)).toBe(true);
     expect(progress.solvedHashes).toEqual([]);
+  });
+});
+
+describe('algebraic helpers', () => {
+  test('squareToAlgebraic maps 9x9 coords', () => {
+    expect(squareToAlgebraic({ r: 8, c: 0 })).toBe('a1');
+    expect(squareToAlgebraic({ r: 0, c: 0 })).toBe('a9');
+    expect(squareToAlgebraic({ r: 4, c: 4 })).toBe('e5');
+  });
+
+  test('moveToAlgebraic joins with en-dash', () => {
+    expect(moveToAlgebraic({ r: 6, c: 4 }, { r: 4, c: 4 })).toBe('e3–e5');
   });
 });

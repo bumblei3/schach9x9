@@ -22,7 +22,24 @@ export interface TrainerPosition {
 export interface MoveResult {
   correct: boolean;
   expected: { from: Square; to: Square };
+  /** Algebraic expected move, e.g. "e2–e4" (9×9 board). */
+  expectedAlgebraic: string;
+  /** Short German feedback line for toast / menu. */
+  feedback: string;
   progress: TrainerProgress;
+}
+
+/** Convert board coords to algebraic (a1 bottom-left from white). */
+export function squareToAlgebraic(sq: { r: number; c: number }, boardSize: number = 9): string {
+  return String.fromCharCode(97 + sq.c) + (boardSize - sq.r);
+}
+
+export function moveToAlgebraic(
+  from: { r: number; c: number },
+  to: { r: number; c: number },
+  boardSize: number = 9
+): string {
+  return `${squareToAlgebraic(from, boardSize)}–${squareToAlgebraic(to, boardSize)}`;
 }
 
 const TRAINER_STORAGE_KEY = 'openingTrainer.progress';
@@ -106,9 +123,16 @@ export class OpeningTrainerManager {
     } else {
       this.progress.streak = 0;
     }
+    const expectedAlgebraic = moveToAlgebraic(pos.expectedMove.from, pos.expectedMove.to);
+    const accPct = Math.round(this.accuracy * 100);
+    const feedback = correct
+      ? `Richtig! 🔥 Serie ${this.progress.streak} · Treffer ${accPct}%`
+      : `Falsch — erwartet ${expectedAlgebraic}. Serie zurückgesetzt.`;
     return {
       correct,
       expected: pos.expectedMove,
+      expectedAlgebraic,
+      feedback,
       progress: { ...this.progress, solvedHashes: [...this.progress.solvedHashes] },
     };
   }

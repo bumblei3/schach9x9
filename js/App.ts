@@ -179,14 +179,17 @@ export class App {
     // so importing it above is enough to wire up [data-tooltip] hints.
   }
 
-  /** Show/hide the "Heute gelöst" badge on the daily-puzzle menu card. */
+  /** Show/hide the "Heute gelöst" badge + streak readout on the daily-puzzle card. */
   private refreshDailyPuzzleBadge(): void {
     const badge = document.getElementById('daily-puzzle-badge');
-    if (!badge) return;
-    if (dailyPuzzle.isSolvedToday()) {
-      badge.style.display = 'inline-block';
-    } else {
-      badge.style.display = 'none';
+    const streakEl = document.getElementById('daily-puzzle-streak');
+    if (badge) {
+      badge.style.display = dailyPuzzle.isSolvedToday() ? 'inline-block' : 'none';
+    }
+    if (streakEl) {
+      const label = dailyPuzzle.formatStreakLabel();
+      streakEl.textContent = label;
+      streakEl.style.display = label ? 'inline-block' : 'none';
     }
   }
 

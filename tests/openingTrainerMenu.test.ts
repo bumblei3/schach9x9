@@ -28,7 +28,7 @@ describe('OpeningTrainerMenu', () => {
 
     const button = container.querySelector('button');
     expect(button).not.toBeNull();
-    expect(button!.textContent).toMatch(/start/i);
+    expect(button!.textContent).toMatch(/Stellung|start|Training/i);
 
     // Some progress readout should be present.
     expect(container.textContent).toBeTruthy();
@@ -54,7 +54,7 @@ describe('OpeningTrainerMenu', () => {
 
     const text = container.textContent ?? '';
     expect(text).toContain('3');
-    expect(text.toLowerCase()).toContain('streak');
+    expect(text.toLowerCase()).toMatch(/streak|serie/);
   });
 
   test('destroy() is safe to call and removes the start listener', () => {
@@ -86,6 +86,6 @@ describe('OpeningTrainerMenu', () => {
     // Remove the progress node to force the appendChild branch.
     container.querySelector('.opening-trainer-progress')?.remove();
     expect(() => menu.updateProgress()).not.toThrow();
-    expect(container.textContent).toContain('Streak: 4');
+    expect(container.textContent).toMatch(/Streak: 4|Serie: 4/);
   });
 });

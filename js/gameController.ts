@@ -182,10 +182,10 @@ export class GameController {
 
     // Initialize helpers common to all
     soundManager.init();
-    // Auto-show tutorial ONLY on first run; manual restart stays available
-    // via the "Tutorial" button (startTutorial -> new Tutorial().show()).
+    // Auto-show short 3-screen onboarding on first run only.
+    // Full demos remain via Lernen → Interaktives Tutorial / Hilfe.
     if (Tutorial.shouldAutoShow()) {
-      new Tutorial().show();
+      new Tutorial({ mode: 'quick' }).show();
     }
 
     const boardEl = document.querySelector('#board');
@@ -768,18 +768,16 @@ export class GameController {
     }
 
     const result = manager.submitMove(pos, move);
-    const expected = result.expected;
-    const expectedStr = `(${expected.from.r},${expected.from.c})→(${expected.to.r},${expected.to.c})`;
-
-    if (result.correct) {
-      notificationUI.show('Richtig!', 'success');
-    } else {
-      notificationUI.show('Falsch — erwartet: ' + expectedStr, 'error');
-    }
+    notificationUI.show(result.feedback, result.correct ? 'success' : 'error');
 
     saveTrainerProgress(manager.progress);
-    this.openingTrainerMenu?.updateProgress();
-    this.loadTrainerPosition();
+    this.openingTrainerMenu?.updateProgress(result.feedback);
+    // Brief pause so the player can read feedback before the next position.
+    if (result.correct) {
+      this.loadTrainerPosition();
+    } else {
+      setTimeout(() => this.loadTrainerPosition(), 900);
+    }
   }
 
   reloadPage(): void {
@@ -787,7 +785,7 @@ export class GameController {
   }
 
   startTutorial(): void {
-    new Tutorial();
+    new Tutorial({ mode: 'full' }).show();
   }
 
   // ===== ANALYSIS MODE METHODS =====

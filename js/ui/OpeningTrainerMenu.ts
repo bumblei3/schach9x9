@@ -4,8 +4,7 @@
  * This class owns NO game logic. It renders a heading, a "Start training"
  * button, and a small progress readout, delegating all state to the
  * provided `OpeningTrainerManager`. The actual training flow (board
- * reconstruction, move checking, scoring) is handled by the controller
- * in Task 6.
+ * reconstruction, move checking, scoring) is handled by the controller.
  */
 
 import type { OpeningTrainerManager } from '../openingTrainer.js';
@@ -18,6 +17,7 @@ export class OpeningTrainerMenu {
   private root: HTMLElement | null;
   private startButton: HTMLButtonElement | null;
   private handleStart: () => void;
+  private lastFeedback: string;
 
   constructor(container: HTMLElement, manager: OpeningTrainerManager, onStart: () => void) {
     this.container = container;
@@ -27,6 +27,7 @@ export class OpeningTrainerMenu {
     this.root = null;
     this.startButton = null;
     this.handleStart = () => this.onStart();
+    this.lastFeedback = '';
 
     this.render();
   }
@@ -38,15 +39,27 @@ export class OpeningTrainerMenu {
     root.className = 'opening-trainer-menu';
 
     const heading = document.createElement('h2');
-    heading.textContent = 'Opening Trainer';
+    heading.textContent = 'Eröffnungs-Trainer';
     root.appendChild(heading);
 
+    const hint = document.createElement('p');
+    hint.className = 'opening-trainer-hint';
+    hint.textContent =
+      'Finde den Buch-Zug (höchste Engine-Gewichtung). Falsche Züge setzen die Serie zurück.';
+    root.appendChild(hint);
+
     root.appendChild(this.buildProgressReadout());
+
+    const feedback = document.createElement('div');
+    feedback.className = 'opening-trainer-feedback';
+    feedback.setAttribute('aria-live', 'polite');
+    feedback.textContent = this.lastFeedback;
+    root.appendChild(feedback);
 
     const startButton = document.createElement('button');
     startButton.type = 'button';
     startButton.className = 'opening-trainer-start';
-    startButton.textContent = 'Start training';
+    startButton.textContent = 'Nächste Stellung';
     startButton.addEventListener('click', this.handleStart);
     root.appendChild(startButton);
 
@@ -63,18 +76,23 @@ export class OpeningTrainerMenu {
 
     const streak = document.createElement('span');
     streak.className = 'opening-trainer-streak';
-    streak.textContent = `Streak: ${progress.streak}`;
+    streak.textContent = `Serie: ${progress.streak}`;
     readout.appendChild(streak);
 
     const solved = document.createElement('span');
     solved.className = 'opening-trainer-solved';
-    solved.textContent = `Solved: ${progress.solvedHashes.length}`;
+    solved.textContent = `Gelöst: ${progress.solvedHashes.length}`;
     readout.appendChild(solved);
 
     const acc = document.createElement('span');
     acc.className = 'opening-trainer-accuracy';
-    acc.textContent = `Accuracy: ${Math.round(accuracy * 100)}%`;
+    acc.textContent = `Treffer: ${Math.round(accuracy * 100)}%`;
     readout.appendChild(acc);
+
+    const attempts = document.createElement('span');
+    attempts.className = 'opening-trainer-attempts';
+    attempts.textContent = `Versuche: ${progress.attempts}`;
+    readout.appendChild(attempts);
 
     return readout;
   }
@@ -83,7 +101,10 @@ export class OpeningTrainerMenu {
    * Re-render only the progress readout from the current manager state.
    * Called by the controller after a submitted move updates progress.
    */
-  updateProgress(): void {
+  updateProgress(feedback?: string): void {
+    if (feedback !== undefined) {
+      this.lastFeedback = feedback;
+    }
     if (!this.root) {
       this.render();
       return;
@@ -94,6 +115,12 @@ export class OpeningTrainerMenu {
       old.parentNode.replaceChild(next, old);
     } else {
       this.root.appendChild(next);
+    }
+    const fb = this.root.querySelector('.opening-trainer-feedback');
+    if (fb) {
+      fb.textContent = this.lastFeedback;
+      fb.classList.toggle('is-error', /Falsch|zurückgesetzt/i.test(this.lastFeedback));
+      fb.classList.toggle('is-ok', /Richtig/i.test(this.lastFeedback));
     }
   }
 

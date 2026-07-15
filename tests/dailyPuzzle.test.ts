@@ -185,3 +185,27 @@ describe('getStreak', () => {
     spy.mockRestore();
   });
 });
+
+describe('best streak + formatStreakLabel', () => {
+  test('markSolvedToday updates best streak', () => {
+    const m = dpm();
+    const today = refDate();
+    m.markSolvedToday(today);
+    m.markSolvedToday(new Date(today.getTime() - 86_400_000));
+    // After only marking two days non-consecutively? both marked - walk back: today+yesterday = 2
+    // We marked today and yesterday in either order - getStreak from today should be 2 if both solved.
+    expect(m.getStreak(today)).toBe(2);
+    expect(m.getBestStreak()).toBeGreaterThanOrEqual(2);
+  });
+
+  test('formatStreakLabel is empty when never solved', () => {
+    expect(dpm().formatStreakLabel(refDate())).toBe('');
+  });
+
+  test('formatStreakLabel includes fire emoji after a solve', () => {
+    const m = dpm();
+    m.markSolvedToday(refDate());
+    expect(m.formatStreakLabel(refDate())).toMatch(/🔥/);
+    expect(m.formatStreakLabel(refDate())).toMatch(/Best/);
+  });
+});

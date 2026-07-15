@@ -74,14 +74,23 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
     const maxTimeMs = isTestEnv ? 1000 : 8000;
     const moveNumber = Math.floor(game.moveHistory.length / 2);
 
-    const topMoves: SearchResult[] = await aiEngine.getTopMoves(
-      game.board,
-      turnColor,
-      3, // Get top 3 moves
-      tutorDepth, // Search depth (min 6)
-      maxTimeMs, // Short timeout in test env
-      moveNumber // Pass move number for opening book query
-    );
+    // Prefer Web Worker path so the UI stays responsive (Phase A).
+    // Main-thread getTopMoves can block for several seconds at tutor depth.
+    let topMoves: SearchResult[] = [];
+    const aiCtrl = game.aiController;
+    if (aiCtrl && typeof aiCtrl.requestTopMoves === 'function') {
+      topMoves = await aiCtrl.requestTopMoves(3, tutorDepth, maxTimeMs, moveNumber);
+    } else {
+      // Unit tests / environments without a Worker pool — shallow main-thread ok.
+      topMoves = await aiEngine.getTopMoves(
+        game.board,
+        turnColor,
+        3,
+        isTestEnv ? 2 : Math.min(tutorDepth, 3),
+        isTestEnv ? 1000 : Math.min(maxTimeMs, 1500),
+        moveNumber
+      );
+    }
 
     if (!topMoves || topMoves.length === 0) {
       // In test environment, return mock hints so the UI can display the overlay

@@ -517,6 +517,65 @@ export class AIController {
   }
 
   /**
+   * Top-N engine moves via Web Worker (never blocks the UI thread with search).
+   * Falls back to empty array if workers are unavailable (avoids main-thread freeze).
+   */
+  public async requestTopMoves(
+    count: number = 3,
+    depth: number = 4,
+    maxTimeMs: number = 5000,
+    moveNumber?: number
+  ): Promise<SearchResult[]> {
+    if (!this.aiWorkers || this.aiWorkers.length === 0) {
+      this.initWorkerPool();
+    }
+    if (!this.aiWorkers.length) {
+      logger.warn('[AI] requestTopMoves: no workers — skipping main-thread search');
+      return [];
+    }
+
+    const worker = this.aiWorkers[0]!;
+    const reqId = `top-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const prevHandler = worker.onmessage;
+
+    return new Promise<SearchResult[]>(resolve => {
+      const timeoutId = setTimeout(() => {
+        worker.onmessage = prevHandler;
+        logger.warn('[AI] requestTopMoves timed out');
+        resolve([]);
+      }, maxTimeMs + 2500);
+
+      worker.onmessage = (e: MessageEvent) => {
+        const msg = e.data;
+        if (msg && msg.type === 'topMoves' && msg.id === reqId) {
+          clearTimeout(timeoutId);
+          worker.onmessage = prevHandler;
+          const data = Array.isArray(msg.data) ? (msg.data as SearchResult[]) : [];
+          resolve(data);
+          return;
+        }
+        // Forward unrelated messages to the previous handler (game AI moves).
+        if (typeof prevHandler === 'function') {
+          prevHandler.call(worker, e);
+        }
+      };
+
+      worker.postMessage({
+        type: 'getTopMoves',
+        id: reqId,
+        data: {
+          board: this.game.board,
+          color: this.game.turn,
+          count,
+          depth,
+          maxTimeMs,
+          moveNumber,
+        },
+      });
+    });
+  }
+
+  /**
    * Calculates the best move for the current player without executing it.
    * Used for the Interactive Tutor hint system.
    */

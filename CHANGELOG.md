@@ -3,13 +3,29 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [Unreleased]
+
+### Added / Improved (Phase A — Solo-UX)
+
+- **Tutorial Quick-Start (3 Screens):** First-Run-Onboarding mit Feenfiguren,
+  Setup (König platzieren) und Shop/Upgrades. Ausführliche Tour weiter unter
+  _Lernen → Interaktives Tutorial_. Auto-Open unterdrückt bei Playwright
+  (`navigator.webdriver` / `?e2e`).
+- **Daily-Puzzle-Streak-UI:** Badge mit aktueller Serie + Bestwert; Status-Text
+  nach dem Lösen. `getBestStreak()` / `formatStreakLabel()` in `dailyPuzzle.ts`.
+- **Eröffnungs-Trainer-Feedback:** Algebraische Züge (z. B. `e2–e4`), deutsche
+  UI, Feedback-Zeile mit Serie/Trefferquote; kurze Pause nach Fehlern.
+- **Tutor-Hints über Web Worker:** `AIController.requestTopMoves()` — keine
+  blockierende Main-Thread-Suche mehr für den Tutor (UI bleibt flüssig).
+
 ## [1.5.0] – 2026-07-14
 
 Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
 
 ### Suche / Quiescence
+
 - `search.ts` `quiesce()`: Delta-Pruning (H-Q1, sound). Wenn `standPat +
-  2000 < alpha`, wird der QSearch-Zweig abgeschnitten — selbst das
+2000 < alpha`, wird der QSearch-Zweig abgeschnitten — selbst das
   wertvollste nicht-königliche Capture + Beförderung kann den Score nicht
   über `alpha` heben. Kein Stärkeverlust möglich, spart aussichtslose
   QSearch-Tiefe.
@@ -18,6 +34,7 @@ Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
   um den Horizon-Effekt bei erzwungenen Schachsequenzen zu vermeiden.
 
 ### Tooling (Regression-Gates)
+
 - `js/asymmetryProbe.ts`: balanced-vs-balanced Self-Play mit alternierenden
   Farben. Erkennt Color-Bias in TT/Eval/QSearch (eine Farbe >60% = Bug).
 - `js/engineNode.ts` + `js/matchRefs.ts`: echter Stärke-Gate für die
@@ -25,6 +42,7 @@ Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
   (Self-Play ist wertlos, da beide Seiten identische Spiele replayen).
 
 ### Verifikation
+
 - Asymmetrie-Probe (16 Partien): VERDICT SYMMETRIC, 0 crashes.
 - `npx vitest run`: 223 Files / 2819 Tests passed (keine Regression).
 - `npx tsc --noEmit` + eslint sauber.
@@ -55,7 +73,7 @@ Engine-Stärkung (H3): längeres Suchzeit-Budget.
 - 27 Search/Engine-Unit-Tests grün; `tsc --noEmit` und eslint sauber.
 
 > Hinweis: Dieser Abschnitt wird von Hand gepflegt (nicht via `npm run
-> changelog`, da dieses Skript die gesamte Datei überschreibt und die
+changelog`, da dieses Skript die gesamte Datei überschreibt und die
 > Historie zerstören würde).
 
 ## [1.4.1] – 2026-07-14

@@ -308,11 +308,20 @@ export async function completeMoveExecution(
       soundManager.playSuccess();
       if (game.mode === 'daily-puzzle') {
         dailyPuzzle.markSolvedToday();
-        // Reflect the "Heute gelöst" badge immediately (next app load would
-        // also pick it up via App.refreshDailyPuzzleBadge, but live feedback
-        // is better UX).
+        // Reflect the "Heute gelöst" badge + streak immediately.
         const badge = document.getElementById('daily-puzzle-badge');
         if (badge) badge.style.display = 'inline-block';
+        const streakEl = document.getElementById('daily-puzzle-streak');
+        if (streakEl) {
+          const label = dailyPuzzle.formatStreakLabel();
+          streakEl.textContent = label;
+          streakEl.style.display = label ? 'inline-block' : 'none';
+        }
+        const streakLabel = dailyPuzzle.formatStreakLabel();
+        UI.updatePuzzleStatus(
+          'success',
+          streakLabel ? `Richtig! Puzzle gelöst — ${streakLabel}` : 'Richtig! Puzzle gelöst!'
+        );
       }
     } else {
       UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');

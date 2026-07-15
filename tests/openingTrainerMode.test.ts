@@ -189,8 +189,8 @@ describe('OpeningTrainerMenu.updateProgress', () => {
     const menu = new OpeningTrainerMenu(container, mgr, () => {});
 
     const before = container.textContent ?? '';
-    expect(before).toContain('Streak: 0');
-    expect(before).toContain('Solved: 0');
+    expect(before).toMatch(/Streak: 0|Serie: 0/);
+    expect(before).toMatch(/Solved: 0|Gelöst: 0/);
 
     // Mutate progress (simulating a submitted move) and re-render readout.
     mgr.progress.streak = 5;
@@ -201,9 +201,9 @@ describe('OpeningTrainerMenu.updateProgress', () => {
     menu.updateProgress();
 
     const after = container.textContent ?? '';
-    expect(after).toContain('Streak: 5');
-    expect(after).toContain('Solved: 1');
-    expect(after).toContain('Accuracy: 83%');
+    expect(after).toMatch(/Streak: 5|Serie: 5/);
+    expect(after).toMatch(/Solved: 1|Gelöst: 1/);
+    expect(after).toMatch(/Accuracy: 83%|Treffer: 83%/);
   });
 
   it('constructs a real manager position and checks submitMove + menu update round-trip', () => {
@@ -233,7 +233,7 @@ describe('OpeningTrainerMenu.updateProgress', () => {
     expect(mgr.progress.streak).toBe(1);
 
     menu.updateProgress();
-    expect(container.textContent).toContain('Streak: 1');
+    expect(container.textContent).toMatch(/Streak: 1|Serie: 1/);
   });
 });
 

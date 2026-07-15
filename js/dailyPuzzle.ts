@@ -14,6 +14,7 @@ import { puzzleManager, type Puzzle } from './puzzleManager.js';
 
 const DAY_MS = 86_400_000;
 const STREAK_CAP = 365;
+const BEST_STREAK_KEY = 'dailyPuzzle.bestStreak';
 
 function pad(n: number): string {
   return n < 10 ? `0${n}` : `${n}`;
@@ -74,6 +75,26 @@ export class DailyPuzzleManager {
   markSolvedToday(date: Date = new Date()): void {
     try {
       localStorage.setItem(`dailyPuzzle.solved.${dailyKey(date)}`, '1');
+      // Peak streak for this run: walk forward to the end of the consecutive
+      // solved chain, then count backwards (handles marking older days after
+      // newer ones were already marked).
+      let end = date;
+      for (let n = 1; n < STREAK_CAP; n++) {
+        const next = new Date(date.getTime() + n * DAY_MS);
+        let solved = false;
+        try {
+          solved = localStorage.getItem(`dailyPuzzle.solved.${dailyKey(next)}`) === '1';
+        } catch {
+          solved = false;
+        }
+        if (!solved) break;
+        end = next;
+      }
+      const current = this.getStreak(end);
+      const best = this.getBestStreak();
+      if (current > best) {
+        localStorage.setItem(BEST_STREAK_KEY, String(current));
+      }
     } catch (e) {
       console.warn('LocalStorage error:', e);
     }
@@ -99,6 +120,31 @@ export class DailyPuzzleManager {
       streak++;
     }
     return streak;
+  }
+
+  /** All-time best consecutive daily solves (persisted). */
+  getBestStreak(): number {
+    try {
+      const raw = localStorage.getItem(BEST_STREAK_KEY);
+      const n = raw ? Number(raw) : 0;
+      return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+      return 0;
+    }
+  }
+
+  /**
+   * Human-readable streak summary for menu badges / solve toast.
+   * Example: "🔥 3 Tage · Best 7" or empty string when never solved.
+   */
+  formatStreakLabel(date: Date = new Date()): string {
+    const current = this.getStreak(date);
+    const best = Math.max(this.getBestStreak(), current);
+    if (current <= 0 && best <= 0) return '';
+    if (current <= 0) return `Best ${best}`;
+    const dayWord = current === 1 ? 'Tag' : 'Tage';
+    return `🔥 ${current} ${dayWord} · Best ${best}`;
   }
 }
 
