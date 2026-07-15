@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { domClick } from './helpers/E2EHelper.js';
 
 test.describe('3D Mode Toggle @3d', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,11 +26,10 @@ test.describe('3D Mode Toggle @3d', () => {
 
     // The 3D toggle sits at the bottom of the action bar and can fall outside
     // the default Playwright viewport (the SPA disables page scroll), so a
-    // regular .click() times out on the actionability/scroll check. Trigger the
-    // real DOM click handler directly instead — this still exercises the actual
-    // toggle logic in DOMHandler, just without the pixel-visibility gate.
-    const clickToggle = () =>
-      toggleBtn.evaluate((el) => (el as HTMLButtonElement).click());
+    // regular .click() times out on the actionability/scroll check. Use the
+    // shared domClick primitive — this still exercises the actual toggle logic
+    // in DOMHandler, just without the pixel-visibility gate.
+    const clickToggle = () => domClick(page, '#toggle-3d-btn');
 
     // The engine instance is created lazily on first toggle (async dynamic
     // import) and `enabled` flips on each click, so we read the canonical

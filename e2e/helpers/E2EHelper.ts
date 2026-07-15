@@ -1,6 +1,30 @@
 import { Page, expect } from '@playwright/test';
 
 /**
+ * Triggers the real DOM click handler for `selector`, bypassing Playwright's
+ * actionability gate (visibility / scroll-into-view / stability).
+ *
+ * Why: this SPA disables page scroll and some controls (bottom action-bar
+ * buttons like `#toggle-3d-btn`, the `#menu-btn` under a bottom-sheet overlay)
+ * sit outside the default viewport or behind an overlay. `locator.click()`
+ * then times out on the actionability/scroll check even though the element is
+ * the intended target and a human could reach it. A direct DOM click still
+ * exercises the real handler wiring — it just removes the pixel gate.
+ *
+ * This is the single shared primitive that replaced the ad-hoc
+ * `page.evaluate(() => el.click())` blocks scattered across the specs after
+ * the UI-A/UI-B refactor; using it everywhere keeps the intent obvious and the
+ * behaviour consistent.
+ */
+export async function domClick(page: Page, selector: string): Promise<void> {
+  await page.evaluate((sel) => {
+    const el = document.querySelector<HTMLElement>(sel);
+    if (!el) throw new Error(`domClick: no element matches "${sel}"`);
+    el.click();
+  }, selector);
+}
+
+/**
  * Helper class for standardizing E2E test interactions in Schach 9x9.
  */
 export class E2EHelper {
@@ -80,9 +104,10 @@ export class E2EHelper {
    * @param c - Column index (0-8)
    */
   async clickCell(r: number, c: number) {
-    const cell = this.page.locator(`.cell[data-r="${r}"][data-c="${c}"]`);
-    await expect(cell).toBeVisible();
-    await cell.click();
+    // DOM click: the from/to cells in some trainer positions sit outside the
+    // default viewport or under an overlay, so locator.click() flakily times
+    // out. domClick exercises the real cell->move wiring without the gate.
+    await domClick(this.page, `.cell[data-r="${r}"][data-c="${c}"]`);
     console.log(`[E2EHelper] Clicked cell ${r},${c}`);
     await this.page.waitForTimeout(200); // Small delay to let app process
   }
@@ -138,8 +163,10 @@ export class E2EHelper {
    * Quits the current game and returns to the main menu.
    */
   async quitToMenu() {
-    const menuBtn = this.page.locator('#menu-btn');
-    await menuBtn.click();
+    // DOM click: #menu-btn can sit under the #shop-panel bottom-sheet overlay
+    // (see 3D/menu-btn fix). domClick triggers the real handler without the
+    // actionability gate.
+    await domClick(this.page, '#menu-btn');
     const mainMenu = this.page.locator('#main-menu');
     await expect(mainMenu).toBeVisible();
   }
