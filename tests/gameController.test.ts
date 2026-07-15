@@ -216,3 +216,42 @@ describe('placeKing', () => {
     expect(game.board[7][7]).toEqual({ type: 'k', color: 'white', hasMoved: false });
   });
 });
+
+// Regression guard for the opening-trainer fix shipped in PR #124: a book hash
+// may encode "black to move" (trailing 'b'). Without forcing the turn to the
+// player's color, handleCellClick would reject every click as "AI turn" and
+// the trainer would silently break (streak stuck at 0). loadTrainerPosition
+// must override the decoded turn with game.playerColor.
+describe('loadTrainerPosition — black-to-move book hash', () => {
+  test('forces game.turn to playerColor even when the book hash says black', () => {
+    // Valid 163-char hash: 81 empty cells (162 '.') + trailing 'b'.
+    const blackHash = '.'.repeat(162) + 'b';
+    const trainerPos = {
+      hash: blackHash,
+      expectedMove: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+    };
+
+    // Inject a manager that returns this black-to-move position, bypassing
+    // listPositions()' own black-skip filter (defense-in-depth at the load site).
+    (controller as any).openingTrainerManager = {
+      getNextPosition: () => trainerPos,
+    };
+
+    // Simulate the real broken state: game.turn was left at 'black' (e.g. from
+    // the decoded book hash) before the trainer loads the position. Without
+    // the fix, loadTrainerPosition never overrides it and handleCellClick
+    // rejects every click as "AI turn".
+    game.turn = 'black';
+
+    controller.loadTrainerPosition();
+
+    // The fix must override the stale 'black' turn with the player's color so
+    // the human can actually move.
+    expect((controller as any).currentTrainerPosition).toBe(trainerPos);
+    expect(game.turn).toBe(game.playerColor);
+    expect(game.turn).toBe('white');
+    // The board must have been reconstructed (81 cells) and rendered.
+    expect(game.board.length).toBe(9);
+    expect(game.board[0].length).toBe(9);
+  });
+});
