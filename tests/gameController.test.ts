@@ -10,7 +10,7 @@
  * mocked so the tests exercise only the decision logic.
  */
 
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // --- Mock all heavy / IO dependencies of the controller -------------------
 vi.mock('../js/statisticsManager.js', () => ({
@@ -50,11 +50,16 @@ vi.mock('../js/ui.js', () => ({
   renderBoard: vi.fn(),
   updateStatus: vi.fn(),
   updateShopUI: vi.fn(),
+  updateStatistics: vi.fn(),
+  updateClockUI: vi.fn(),
+  updateClockDisplay: vi.fn(),
+  updateCapturedUI: vi.fn(),
+  updateMoveHistoryUI: vi.fn(),
   showShop: vi.fn(),
   showModal: vi.fn(),
 }));
 vi.mock('../js/sounds.js', () => ({
-  soundManager: { playGameOver: vi.fn(), playGameStart: vi.fn() },
+  soundManager: { playGameOver: vi.fn(), playGameStart: vi.fn(), playMove: vi.fn() },
 }));
 vi.mock('../js/effects.js', () => ({ confettiSystem: { spawn: vi.fn() } }));
 vi.mock('../js/logger.js', () => ({
@@ -66,10 +71,25 @@ vi.mock('../js/logger.js', () => ({
     context: () => ({ debug: vi.fn(), warn: vi.fn(), info: vi.fn(), error: vi.fn() }),
   },
 }));
+// storage.js is exercised by saveGame / loadGame — give it a controllable mock.
+const storageManager = {
+  saveGame: vi.fn(() => true),
+  loadGame: vi.fn(() => null),
+  loadStateIntoGame: vi.fn(() => true),
+};
+vi.mock('../js/storage.js', () => ({ storageManager }));
+// aiEngine is imported only for types/constants (PIECE_*) — auto-mock avoids
+// pulling the real search engine into this logic suite.
+vi.mock('../js/aiEngine.js', () => ({ PIECE_KING: 6, PIECE_QUEEN: 8 }));
 
 // Minimal DOM + storage stubs so getElementById / localStorage never throw.
-const noopEl = { textContent: '', classList: { add: vi.fn(), remove: vi.fn() } };
-vi.stubGlobal('document', { getElementById: () => noopEl });
+const noopEl = { textContent: '', classList: { add: vi.fn(), remove: vi.fn() }, checked: false, value: '' };
+const noopSelect = { value: '', forEach: (cb: (e: any) => void) => cb(noopSelect) };
+vi.stubGlobal('document', {
+  getElementById: () => noopEl,
+  querySelector: () => noopEl,
+  querySelectorAll: () => [] as any[],
+});
 vi.stubGlobal('localStorage', {
   getItem: () => null,
   setItem: () => {},
@@ -253,5 +273,116 @@ describe('loadTrainerPosition — black-to-move book hash', () => {
     // The board must have been reconstructed (81 cells) and rendered.
     expect(game.board.length).toBe(9);
     expect(game.board[0].length).toBe(9);
+  });
+});
+
+// --- Draw offer when the opponent is the AI ---------------------------------
+// The human player offers a draw; gameController must schedule the AI's
+// draw evaluation (aiEvaluateDrawOffer) after AI_DELAY_MS instead of showing
+// the human dialog. This path was previously uncovered.
+describe('offerDraw — AI opponent', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test('schedules aiEvaluateDrawOffer when a human offers draw to the AI', () => {
+    game = makeGame({ isAI: true, turn: 'white', drawOffered: false });
+    game.aiEvaluateDrawOffer = vi.fn();
+    controller = new GameController(game);
+
+    controller.offerDraw('white');
+
+    // Not yet called synchronously
+    expect(game.aiEvaluateDrawOffer).not.toHaveBeenCalled();
+    // After the delay it fires
+    vi.advanceTimersByTime(1000);
+    expect(game.aiEvaluateDrawOffer).toHaveBeenCalledTimes(1);
+  });
+
+  test('schedules aiEvaluateDrawOffer even when it is the AI turn (human offer wins)', () => {
+    // In a real game only the human calls offerDraw(); regardless of whose
+    // turn it is, an AI opponent must evaluate the pending offer.
+    game = makeGame({ isAI: true, turn: 'black', drawOffered: false });
+    game.aiEvaluateDrawOffer = vi.fn();
+    controller = new GameController(game);
+
+    controller.offerDraw('white');
+
+    expect(game.aiEvaluateDrawOffer).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1000);
+    expect(game.aiEvaluateDrawOffer).toHaveBeenCalledTimes(1);
+  });
+
+  test('no-op when not in PLAY phase (no timer scheduled)', () => {
+    game = makeGame({ isAI: true, phase: PHASES.GAME_OVER, drawOffered: false });
+    game.aiEvaluateDrawOffer = vi.fn();
+    controller = new GameController(game);
+
+    controller.offerDraw('white');
+
+    vi.advanceTimersByTime(1000);
+    expect(game.aiEvaluateDrawOffer).not.toHaveBeenCalled();
+  });
+});
+
+// --- saveGame / loadGame error + success branches ---------------------------
+describe('saveGame / loadGame', () => {
+  beforeEach(() => {
+    // reset storage mock to a clean success-by-default state
+    storageManager.saveGame.mockReturnValue(true);
+    storageManager.loadGame.mockReturnValue(null);
+    storageManager.loadStateIntoGame.mockReturnValue(true);
+  });
+
+  test('saveGame logs success when storageManager.saveGame returns true', () => {
+    game = makeGame();
+    controller = new GameController(game);
+    (controller as any).saveGame();
+    expect(game.log).toHaveBeenCalledWith('💾 Spiel erfolgreich gespeichert!');
+  });
+
+  test('saveGame logs error when storageManager.saveGame returns false', () => {
+    storageManager.saveGame.mockReturnValue(false);
+    game = makeGame();
+    controller = new GameController(game);
+    (controller as any).saveGame();
+    expect(game.log).toHaveBeenCalledWith('❌ Fehler beim Speichern.');
+  });
+
+  test('loadGame no-ops with a warning when there is no saved game', () => {
+    storageManager.loadGame.mockReturnValue(null);
+    game = makeGame();
+    controller = new GameController(game);
+    (controller as any).loadGame();
+    expect(game.log).toHaveBeenCalledWith('⚠️ Kein gespeichertes Spiel gefunden.');
+    expect(storageManager.loadStateIntoGame).not.toHaveBeenCalled();
+  });
+
+  test('loadGame logs error and returns when storageManager.loadGame throws', () => {
+    storageManager.loadGame.mockImplementation(() => {
+      throw new Error('corrupt');
+    });
+    game = makeGame();
+    controller = new GameController(game);
+    (controller as any).loadGame();
+    expect(game.log).toHaveBeenCalledWith('❌ Fehler beim Laden: corrupt');
+    expect(storageManager.loadStateIntoGame).not.toHaveBeenCalled();
+  });
+
+  test('loadGame restores state via loadStateIntoGame on success', () => {
+    const fakeState = { board: [], turn: 'white' } as any;
+    storageManager.loadGame.mockReturnValue(fakeState);
+    storageManager.loadStateIntoGame.mockReturnValue(true);
+    game = makeGame();
+    controller = new GameController(game);
+    (controller as any).loadGame();
+    expect(storageManager.loadStateIntoGame).toHaveBeenCalledWith(
+      game,
+      fakeState
+    );
+    expect(game.log).toHaveBeenCalledWith('📂 Spielstand geladen.');
   });
 });
