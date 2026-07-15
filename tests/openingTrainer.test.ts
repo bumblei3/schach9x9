@@ -161,8 +161,11 @@ describe('OpeningTrainerManager', () => {
       },
     });
     const mgr = new OpeningTrainerManager(book);
-    const pos = mgr.getNextPosition()!;
-    const recon = mgr.reconstructBoard(pos.hash);
+    // Test reconstructBoard directly (not via getNextPosition/listPositions):
+    // the trainer intentionally skips black-to-move positions at load time
+    // (it only trains white moves), but reconstructBoard must still decode
+    // them correctly when given a hash.
+    const recon = mgr.reconstructBoard(hash);
     expect(recon.turn).toBe('black');
     expect((recon.board[2][3] as Piece).color).toBe('black');
     expect((recon.board[2][3] as Piece).type).toBe('r');
