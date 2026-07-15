@@ -94,8 +94,8 @@ export class OpeningTrainerManager {
       // which is white by default). A black-to-move position would present a
       // black piece as the expected move; the trainer strategy only selects
       // own (white) pieces, so the click would never register a move and the
-      // streak would silently stay at 0. Skip those positions.
-      if (!hash.endsWith('w')) continue;
+      // streak would silently stay at 0. Skip black-to-move positions.
+      if (hash.endsWith('b')) continue;
 
       const best = entry.moves.reduce((a, b) => (b.weight > a.weight ? b : a));
       result.push({
