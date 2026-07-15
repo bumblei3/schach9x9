@@ -85,7 +85,7 @@ test.describe('Opening-Trainer correct-move path (browser)', () => {
       .poll(
         async () => {
           const txt = await page.locator('.opening-trainer-streak').textContent();
-          const m = txt?.match(/Streak:\s*(\d+)/);
+          const m = txt?.match(/(?:Streak|Serie):\s*(\d+)/);
           return m ? parseInt(m[1], 10) : 0;
         },
         { timeout: 5000 }
