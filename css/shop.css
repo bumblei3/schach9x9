@@ -460,3 +460,25 @@
   line-height: 1.4;
   margin: 0;
 }
+
+/* UI-B: stronger bottom-sheet feel on mobile */
+@media (max-width: 768px) {
+  .shop-panel {
+    max-height: min(52vh, 420px);
+    padding-top: 0.65rem;
+    z-index: var(--z-overlay);
+  }
+
+  .shop-panel.bottom-sheet {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .shop-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  #finish-setup-btn {
+    min-height: 48px;
+  }
+}

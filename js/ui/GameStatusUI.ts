@@ -221,15 +221,27 @@ export function updateOpeningUI(game: Game): void {
 export function updateClockUI(game: Game): void {
   const whiteClockEl = document.getElementById('clock-white');
   const blackClockEl = document.getElementById('clock-black');
-  if (whiteClockEl && blackClockEl) {
-    whiteClockEl.classList.remove('active', 'low-time');
-    blackClockEl.classList.remove('active', 'low-time');
-    if (game.turn === 'white') {
-      whiteClockEl.classList.add('active');
-      if (game.whiteTime < 30) whiteClockEl.classList.add('low-time');
-    } else {
-      blackClockEl.classList.add('active');
-      if (game.blackTime < 30) blackClockEl.classList.add('low-time');
+  const headerWhite = document.getElementById('header-clock-white');
+  const headerBlack = document.getElementById('header-clock-black');
+  const whiteActive = game.turn === 'white';
+  const blackActive = !whiteActive;
+  const whiteLow = game.whiteTime < 30;
+  const blackLow = game.blackTime < 30;
+
+  for (const el of [whiteClockEl, headerWhite]) {
+    if (!el) continue;
+    el.classList.remove('active', 'low-time');
+    if (whiteActive) {
+      el.classList.add('active');
+      if (whiteLow) el.classList.add('low-time');
+    }
+  }
+  for (const el of [blackClockEl, headerBlack]) {
+    if (!el) continue;
+    el.classList.remove('active', 'low-time');
+    if (blackActive) {
+      el.classList.add('active');
+      if (blackLow) el.classList.add('low-time');
     }
   }
 }
@@ -244,8 +256,14 @@ export function updateClockDisplay(game: Game): void {
       .padStart(2, '0')}`;
   const whiteEl = document.getElementById('clock-white');
   const blackEl = document.getElementById('clock-black');
-  if (whiteEl) whiteEl.textContent = formatTime(game.whiteTime);
-  if (blackEl) blackEl.textContent = formatTime(game.blackTime);
+  const headerWhite = document.getElementById('header-clock-white');
+  const headerBlack = document.getElementById('header-clock-black');
+  const w = formatTime(game.whiteTime);
+  const b = formatTime(game.blackTime);
+  if (whiteEl) whiteEl.textContent = w;
+  if (blackEl) blackEl.textContent = b;
+  if (headerWhite) headerWhite.textContent = w;
+  if (headerBlack) headerBlack.textContent = b;
 }
 
 /**

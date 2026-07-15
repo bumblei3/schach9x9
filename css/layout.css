@@ -632,3 +632,297 @@
     top: auto;
   }
 }
+
+/* ===========================================
+   UI-B: Compact header, sheets, landscape
+   =========================================== */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-overlay) - 1);
+  background: rgba(2, 4, 10, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.sheet-backdrop.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  margin: 0 auto 0.85rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.logo-icon {
+  flex-shrink: 0;
+  margin-right: 0 !important;
+  vertical-align: middle;
+}
+
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+  padding: 0 0.5rem;
+}
+
+.header-clocks {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.header-clock {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.header-clock.active {
+  color: #fff;
+  background: var(--accent-gradient);
+}
+
+.header-clock.low-time {
+  background: var(--danger);
+  color: #fff;
+}
+
+.header-clock-sep {
+  opacity: 0.45;
+}
+
+/* Compact mobile chrome */
+@media (max-width: 768px) {
+  .minimal-header {
+    height: auto;
+    min-height: 44px;
+    padding: 0.4rem 0.15rem;
+    gap: 0.35rem;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .header-clocks {
+    display: flex;
+  }
+
+  .status-pill {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-info {
+    height: 48px;
+    padding: 0.3rem 0.65rem;
+  }
+
+  .player-name {
+    font-size: 0.8rem;
+  }
+
+  .player-avatar {
+    margin-right: 0.5rem;
+  }
+
+  .player-avatar svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .clock-display {
+    font-size: 1rem;
+    padding: 2px 8px;
+  }
+
+  /* Hide full clocks when header clocks are visible — more board room */
+  .player-info .clock-display {
+    display: none;
+  }
+
+  .game-area {
+    gap: 0.5rem;
+  }
+
+  /* Action overflow as true bottom sheet on phone */
+  .action-overflow-menu.is-sheet,
+  .action-overflow-menu:not(.hidden) {
+    /* base popover kept for desktop; sheet overrides below */
+  }
+
+  .action-bar-more .action-overflow-menu:not(.hidden) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 0.85rem 0.85rem calc(0.85rem + env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+    z-index: var(--z-overlay);
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.55);
+  }
+
+  .action-bar-more .action-overflow-menu:not(.hidden)::before {
+    content: '';
+    grid-column: 1 / -1;
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    margin: 0 auto 0.25rem;
+  }
+
+  .action-bar-more .action-overflow-menu .action-icon-btn {
+    width: 100%;
+    min-width: 0;
+    height: 56px;
+  }
+
+  .action-bar-more .action-overflow-menu .action-label {
+    display: block;
+    font-size: 0.58rem;
+  }
+}
+
+/* Landscape: board-focused two-column layout */
+@media (orientation: landscape) and (max-height: 560px) {
+  #app-container {
+    max-width: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    padding: env(safe-area-inset-top) 0.5rem env(safe-area-inset-bottom);
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  .minimal-header {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .game-area {
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 0;
+    height: calc(100dvh - 56px);
+  }
+
+  .player-info {
+    writing-mode: horizontal-tb;
+    width: 88px;
+    height: auto;
+    min-height: 100px;
+    flex-direction: column;
+    padding: 0.4rem;
+    gap: 0.35rem;
+  }
+
+  .player-info .clock-display {
+    display: block;
+    font-size: 0.85rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .header-clocks {
+    display: flex;
+  }
+
+  #board-container {
+    max-height: calc(100dvh - 72px);
+    max-width: min(100%, calc(100dvh - 72px));
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .action-bar {
+    position: fixed;
+    bottom: env(safe-area-inset-bottom);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: var(--z-overlay);
+  }
+}
+
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 561px) {
+  #app-container {
+    max-width: 1100px;
+  }
+
+  .game-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 420px) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+
+  .player-info.opponent {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    height: auto;
+    min-height: 120px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .player-info.self {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    height: auto;
+    min-height: 120px;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  #board-container {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .action-bar {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}

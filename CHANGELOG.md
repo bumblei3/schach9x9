@@ -5,6 +5,17 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added / Improved (UI-B — Mobile & Flow)
+
+- **Bottom-Sheets:** Shop mit Sheet-Handle; Action-„Mehr“ auf Mobile als
+  Bottom-Sheet mit Backdrop (`#sheet-backdrop`).
+- **Compact In-Game Header:** kompakte Statuszeile + Uhren im Header auf
+  schmalen Screens (Player-Clocks ausgeblendet zugunsten Brettfläche).
+- **Landscape-Layout:** Brett-fokussiertes Layout im Querformat
+  (Phone landscape + breites Landscape-Desktop).
+- **Menü ohne Inline-`onclick`:** Spielmodus-Karten als `<button
+data-init-mode>` + `DOMHandler.initGameModeCards()` (a11y/testbar).
+
 ### Added / Improved (UI-A — Interface)
 
 - **Action-Bar entlastet:** Kern-Aktionen (Rückgängig, Tipps, Bester Zug, Analyse)

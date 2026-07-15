@@ -203,11 +203,18 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - [✅] **Opening-Trainer-Feedback** — algebraisch, deutsch, Serie/Treffer
 - [✅] **Tutor-Hints via Worker** — kein Main-Thread-Freeze bei getTopMoves
 
-**UI-A (Interface, Unreleased):**
+**UI-A (Interface):**
 
 - [✅] **Action-Bar Primary + Mehr-Overflow**
 - [✅] **Menü Empfohlen / Mehr Modi**
 - [✅] **Deutsche Microcopy + Streak-Look + Last-Move-Highlight**
+
+**UI-B (Mobile & Flow, Unreleased):**
+
+- [✅] **Bottom-Sheets** (Shop + Mehr-Menü mobil + Backdrop)
+- [✅] **Compact Header** mit Header-Uhren
+- [✅] **Landscape-Layout**
+- [✅] **Menü-Cards als Buttons** (`data-init-mode`, kein inline onclick)
 
 **Nächste Schritte (offen):**
 

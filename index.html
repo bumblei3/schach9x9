@@ -92,6 +92,9 @@
       </div>
     </div>
 
+    <!-- Sheet backdrop (mobile bottom sheets) -->
+    <div id="sheet-backdrop" class="sheet-backdrop hidden" aria-hidden="true"></div>
+
     <!-- GAME LAYER: Main board and game controls -->
     <div id="game-layer">
       <div id="app-container">
@@ -108,7 +111,8 @@
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              style="margin-right: 8px; vertical-align: bottom"
+              class="logo-icon"
+              aria-hidden="true"
             >
               <rect width="18" height="18" x="3" y="3" rx="2" />
               <path d="M7 7h10" />
@@ -116,10 +120,17 @@
               <path d="M7 17h10" />
               <path d="M12 3v18" />
             </svg>
-            Schach 9x9
+            <span class="logo-text">Schach 9x9</span>
           </div>
-          <div id="status-display" data-testid="status-display" class="status-pill">
-            Initialisiere...
+          <div class="header-center">
+            <div id="status-display" data-testid="status-display" class="status-pill">
+              Initialisiere...
+            </div>
+            <div class="header-clocks" aria-label="Uhren">
+              <span class="header-clock header-clock-opp" id="header-clock-black">5:00</span>
+              <span class="header-clock-sep" aria-hidden="true">·</span>
+              <span class="header-clock header-clock-self" id="header-clock-white">5:00</span>
+            </div>
           </div>
           <button id="menu-btn" class="icon-btn" aria-label="Menü öffnen">
             <svg
@@ -655,7 +666,13 @@
           </div>
 
           <!-- Shop Panel (Contextual) -->
-          <div id="shop-panel" class="shop-panel hidden">
+          <div
+            id="shop-panel"
+            class="shop-panel bottom-sheet hidden"
+            role="dialog"
+            aria-label="Shop"
+          >
+            <div class="sheet-handle" aria-hidden="true"></div>
             <div class="shop-header">
               <h2>Truppen anheuern</h2>
               <div class="shop-points">
@@ -1108,28 +1125,26 @@
                       </div>
                     </div>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="classic"
+                      data-init-points="0"
                       data-mode="classic"
-                      onclick="
-                        window.app.init(0, 'classic');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <div class="card-icon">🏰</div>
                       <div class="card-title">Klassisch 9×9</div>
                       <div class="card-desc">
                         Das volle Erlebnis mit Erzbischof, Kanzler und 3 Korridoren.
                       </div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card gamemode-card-daily"
+                      data-init-mode="daily-puzzle"
+                      data-init-points="0"
                       data-mode="daily-puzzle"
-                      onclick="
-                        window.app.init(0, 'daily-puzzle');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <span class="card-tag tag-pro">Täglich</span>
                       <div class="card-icon daily-streak-icon" aria-hidden="true">📅</div>
@@ -1147,7 +1162,7 @@
                           >Heute gelöst ✓</span
                         >
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </section>
 
@@ -1167,85 +1182,79 @@
                     class="gamemode-grid menu-more-grid is-collapsed"
                     hidden
                   >
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="setup"
+                      data-init-points="25"
                       data-mode="setup"
-                      onclick="
-                        window.app.init(25, 'setup');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <div class="card-icon">💰</div>
                       <div class="card-title">Truppen anheuern (9×9)</div>
                       <div class="card-desc">
                         Stelle deine eigene 9×9-Armee mit 25 Punkten zusammen.
                       </div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="upgrade"
+                      data-init-points="25"
                       data-mode="upgrade"
-                      onclick="
-                        window.app.init(25, 'upgrade');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <div class="card-icon">👑</div>
                       <div class="card-title">Klassisch 9×9 + Upgrades</div>
                       <div class="card-desc">
                         Starte mit dem klassischen Layout und 25 Punkten für Truppen-Verbesserungen.
                       </div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
-                      onclick="
-                        window.app.init(15, 'upgrade8x8');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
+                      data-init-mode="upgrade8x8"
+                      data-init-points="15"
                     >
                       <div class="card-icon">💎</div>
                       <div class="card-title">8×8 + Upgrades</div>
                       <div class="card-desc">
                         Starte mit 15 Punkten auf einem Standard-Brett und verbessere deine Armee.
                       </div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="cross"
+                      data-init-points="15"
                       data-mode="cross"
-                      onclick="
-                        window.app.init(15, 'cross');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <div class="card-icon">✝️</div>
                       <div class="card-title">Kreuz-Modus</div>
                       <div class="card-desc">
                         Kämpfe auf einem kreuzförmigen Brett – nur die Mitte zählt!
                       </div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="standard8x8"
+                      data-init-points="0"
                       data-mode="standard8x8"
-                      onclick="
-                        window.app.init(0, 'standard8x8');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <div class="card-icon">♟️</div>
                       <div class="card-title">Standard 8×8</div>
                       <div class="card-desc">Klassisches Schachbrett, aber mit 9×9-Regeln.</div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="puzzle"
+                      data-init-points="0"
                       data-mode="puzzle"
-                      onclick="
-                        window.app.init(0, 'puzzle');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <span class="card-tag tag-pro">Training</span>
                       <div class="card-icon">🧩</div>
@@ -1253,22 +1262,21 @@
                       <div class="card-desc">
                         Löse taktische Aufgaben und verbessere dein Spiel.
                       </div>
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       class="gamemode-card"
+                      data-init-mode="opening-trainer"
+                      data-init-points="0"
                       data-mode="opening-trainer"
-                      onclick="
-                        window.app.init(0, 'opening-trainer');
-                        document.getElementById('main-menu').classList.remove('active');
-                      "
                     >
                       <div class="card-icon">📖</div>
                       <div class="card-title">Eröffnungs-Trainer</div>
                       <div class="card-desc">
                         Trainiere Eröffnungen aus dem Buch – finde den richtigen Zug.
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </section>
               </div>

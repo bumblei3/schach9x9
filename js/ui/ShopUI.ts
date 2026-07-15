@@ -18,13 +18,25 @@ import type { Game } from '../gameEngine.js';
 export function showShop(game: GameLike, show: boolean): void {
   const panel = document.getElementById('shop-panel');
   if (!panel) return;
+  const backdrop = document.getElementById('sheet-backdrop');
 
   if (show) {
     panel.classList.remove('hidden');
     document.body.classList.add('setup-mode');
+    // Mobile: dim the board behind the bottom sheet (desktop keeps side panel).
+    if (backdrop && window.matchMedia('(max-width: 768px)').matches) {
+      backdrop.classList.remove('hidden');
+      backdrop.setAttribute('aria-hidden', 'false');
+    }
   } else {
     panel.classList.add('hidden');
     document.body.classList.remove('setup-mode');
+    // Only hide backdrop if the action overflow is also closed.
+    const overflow = document.getElementById('action-overflow-menu');
+    if (backdrop && (!overflow || overflow.classList.contains('hidden'))) {
+      backdrop.classList.add('hidden');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
   }
   updateShopUI(game);
 }
