@@ -89,6 +89,16 @@ export class OpeningTrainerManager {
     for (const [hash, entry] of Object.entries(positions)) {
       if (!entry.moves || entry.moves.length === 0) continue;
 
+      // Only train white-to-move positions. The trainer forces the player to
+      // move (GameController.loadTrainerPosition sets game.turn = playerColor,
+      // which is white by default). A black-to-move position would present a
+      // black piece as the expected move; the trainer strategy only selects
+      // own (white) pieces, so the click would never register a move and the
+      // streak would silently stay at 0. Skip black-to-move positions.
+      // Genuine book hashes are 163 chars (81 squares × 2 + turn char) and end
+      // in 'w'/'b'; ignore shorter test/dummy keys so they aren't dropped.
+      if (hash.length >= 160 && hash.endsWith('b')) continue;
+
       const best = entry.moves.reduce((a, b) => (b.weight > a.weight ? b : a));
       result.push({
         hash,

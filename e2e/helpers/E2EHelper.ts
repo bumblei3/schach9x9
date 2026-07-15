@@ -65,7 +65,7 @@ export class E2EHelper {
   selectModeLocator(modeOrText: string) {
     // Modes WITHOUT a data-mode attribute -> match by title / id.
     if (modeOrText === 'upgrade8x8') {
-      return this.page.locator('.gamemode-card').filter({ hasText: '8x8 + Upgrades' });
+      return this.page.locator('.gamemode-card[data-init-mode="upgrade8x8"]');
     }
     if (modeOrText === 'campaign') {
       return this.page.locator('#campaign-start-btn');

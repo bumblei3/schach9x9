@@ -742,9 +742,14 @@ export class GameController {
     }
     this.currentTrainerPosition = pos;
 
-    const { board, turn } = reconstructBoardFromHash(pos.hash);
+    const { board } = reconstructBoardFromHash(pos.hash);
     this.game.board = board as (PieceWithMoved | null)[][];
-    this.game.turn = turn as Player;
+    // The trainer always presents a position where the player is to move
+    // (white by default). The book hash encodes the turn, but some entries
+    // record "b" (black to move), which would make handleCellClick reject
+    // every click as "AI turn" and silently break the trainer. Force the
+    // turn to the player's color so the player can actually enter the move.
+    this.game.turn = this.game.playerColor;
     // Clear any stale selection from a previous position (e.g. via Start button).
     this.game.selectedSquare = null;
     this.game.validMoves = null;
