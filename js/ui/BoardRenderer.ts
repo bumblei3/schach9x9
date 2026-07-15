@@ -542,13 +542,12 @@ export function renderBoard(game: GameLike): void {
         }
       }
 
-      // Last move highlight
+      // Last move highlight (origin softer, destination stronger)
       if (game.lastMoveHighlight) {
-        if (
-          (game.lastMoveHighlight.from.r === r && game.lastMoveHighlight.from.c === c) ||
-          (game.lastMoveHighlight.to.r === r && game.lastMoveHighlight.to.c === c)
-        ) {
-          cell.classList.add('last-move');
+        if (game.lastMoveHighlight.from.r === r && game.lastMoveHighlight.from.c === c) {
+          cell.classList.add('last-move', 'last-move-from');
+        } else if (game.lastMoveHighlight.to.r === r && game.lastMoveHighlight.to.c === c) {
+          cell.classList.add('last-move', 'last-move-to');
         }
       }
 

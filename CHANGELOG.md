@@ -5,6 +5,19 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added / Improved (UI-A — Interface)
+
+- **Action-Bar entlastet:** Kern-Aktionen (Rückgängig, Tipps, Bester Zug, Analyse)
+  sichtbar; Rest hinter **Mehr**-Overflow (Drohungen, Chancen, Buch, 3D, Skin, Info,
+  Vollbild) — ruhigeres In-Game-Dock, kein Horizontal-Scroll-Chaos mobil.
+- **Menü „Empfohlen“ / „Mehr Modi“:** Kampagne, Klassisch 9×9, Daily Puzzle (und
+  Fortsetzen) prominent; restliche Modi einklappbar.
+- **Deutsche Microcopy:** Spinner/Analyse-Panel (z. B. „Berechne…“, „Tiefenanalyse“).
+- **Daily-Streak visuell:** hervorgehobene Streak-Pills + leichte Glow-Animation
+  (respektiert `prefers-reduced-motion`).
+- **Letzter Zug klarer:** getrennte Origin/Ziel-Styles (`last-move-from` /
+  `last-move-to`) + stärkerer Ziel-Glow.
+
 ### Added / Improved (Phase A — Solo-UX)
 
 - **Tutorial Quick-Start (3 Screens):** First-Run-Onboarding mit Feenfiguren,

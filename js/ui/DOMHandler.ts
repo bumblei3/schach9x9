@@ -166,12 +166,16 @@ export class DOMHandler {
         const mainMenu = document.getElementById('main-menu');
         if (mainMenu) mainMenu.classList.remove('active');
 
-        if (!this.tutorial) {
-          this.tutorial = new Tutorial();
-        }
+        // Always show full tour from the Learn tab (not the 3-screen quickstart).
+        this.tutorial = new Tutorial({ mode: 'full' });
         this.tutorial.show();
       });
     }
+
+    // Action-bar overflow ("Mehr")
+    this.initActionOverflow();
+    // Play menu: Empfohlen / Mehr Modi
+    this.initMoreModesToggle();
 
     // Shop Item Selection
     document.querySelectorAll<HTMLElement>('.shop-item').forEach(btn => {
@@ -499,6 +503,54 @@ export class DOMHandler {
         }
       });
     }
+  }
+
+  /** Primary/overflow action bar: keep core actions visible, rest in "Mehr". */
+  private initActionOverflow(): void {
+    const moreBtn = document.getElementById('action-more-btn');
+    const menu = document.getElementById('action-overflow-menu');
+    if (!moreBtn || !menu) return;
+
+    const setOpen = (open: boolean) => {
+      menu.classList.toggle('hidden', !open);
+      moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      moreBtn.classList.toggle('active', open);
+    };
+
+    moreBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      setOpen(menu.classList.contains('hidden'));
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', e => {
+      if (menu.classList.contains('hidden')) return;
+      const t = e.target as Node;
+      if (menu.contains(t) || moreBtn.contains(t)) return;
+      setOpen(false);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+        setOpen(false);
+      }
+    });
+  }
+
+  /** Collapse "Mehr Modi" section on the main play menu. */
+  private initMoreModesToggle(): void {
+    const toggle = document.getElementById('toggle-more-modes');
+    const grid = document.getElementById('more-modes-grid');
+    if (!toggle || !grid) return;
+
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      const next = !expanded;
+      toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
+      grid.hidden = !next;
+      grid.classList.toggle('is-collapsed', !next);
+    });
   }
 
   private initMenuHandlers(): void {

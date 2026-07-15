@@ -203,8 +203,35 @@ body.mode-3d #board-wrapper {
   box-shadow: inset 0 0 0 4px var(--accent-primary);
 }
 
+/* Last-move highlight (UI-A): strong but readable on every board theme */
 .cell.last-move {
-  background-color: rgba(99, 102, 241, 0.4) !important;
+  position: relative;
+  background-color: rgba(99, 102, 241, 0.38) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(165, 180, 252, 0.75),
+    inset 0 0 14px rgba(99, 102, 241, 0.28);
+}
+
+.cell.last-move-from {
+  background-color: rgba(99, 102, 241, 0.28) !important;
+  box-shadow: inset 0 0 0 2px rgba(165, 180, 252, 0.55);
+}
+
+.cell.last-move-to {
+  background-color: rgba(99, 102, 241, 0.55) !important;
+  box-shadow:
+    inset 0 0 0 3px rgba(199, 210, 254, 0.98),
+    inset 0 0 20px rgba(99, 102, 241, 0.45),
+    0 0 12px rgba(99, 102, 241, 0.35);
+}
+
+.cell.last-move-to::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.22) 0%, transparent 60%);
 }
 
 .cell.valid-move::after {

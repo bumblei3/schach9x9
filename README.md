@@ -196,12 +196,18 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Post-Game-Analyse (E2E, v1.3.0):** Browser-Spec verifiziert Blunder/Accuracy-
   Auswertung im echten Browser (`e2e/post-game-analysis.spec.ts`).
 
-**Phase A (Solo-UX, Unreleased):**
+**Phase A (Solo-UX):**
 
 - [✅] **Quick-Start Tutorial** — 3 Screens (Feenfiguren, Setup, Shop)
 - [✅] **Daily-Puzzle-Streak** — Serie + Best auf der Menükarte / nach dem Lösen
 - [✅] **Opening-Trainer-Feedback** — algebraisch, deutsch, Serie/Treffer
 - [✅] **Tutor-Hints via Worker** — kein Main-Thread-Freeze bei getTopMoves
+
+**UI-A (Interface, Unreleased):**
+
+- [✅] **Action-Bar Primary + Mehr-Overflow**
+- [✅] **Menü Empfohlen / Mehr Modi**
+- [✅] **Deutsche Microcopy + Streak-Look + Last-Move-Highlight**
 
 **Nächste Schritte (offen):**
 
