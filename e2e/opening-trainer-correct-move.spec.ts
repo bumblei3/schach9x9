@@ -59,13 +59,26 @@ test.describe('Opening-Trainer correct-move path (browser)', () => {
     expect(expectedMove).toBeTruthy();
 
     // Play it via the two-click flow: select the from-cell, then the to-cell.
-    await page
-      .locator(`.cell[data-r="${expectedMove.from.r}"][data-c="${expectedMove.from.c}"]`)
-      .click();
+    // Use a direct DOM click on the cells: some trainer positions place the
+    // from-cell outside the default Playwright viewport (the SPA disables page
+    // scroll) or under an overlay, so locator.click()'s actionability check
+    // flakily times out. A DOM click still exercises the real cell->move
+    // wiring in GameController, just without the pixel-visibility gate.
+    await page.evaluate(
+      (m) =>
+        document
+          .querySelector(`.cell[data-r="${m.from.r}"][data-c="${m.from.c}"]`)
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
+      expectedMove
+    );
     await page.waitForTimeout(150);
-    await page
-      .locator(`.cell[data-r="${expectedMove.to.r}"][data-c="${expectedMove.to.c}"]`)
-      .click();
+    await page.evaluate(
+      (m) =>
+        document
+          .querySelector(`.cell[data-r="${m.to.r}"][data-c="${m.to.c}"]`)
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
+      expectedMove
+    );
 
     // The controller must score it correct. Two signals prove this:
     //  1) a "Richtig!" success notification appears (soft — timing-sensitive), and

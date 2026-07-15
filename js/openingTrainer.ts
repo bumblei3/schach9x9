@@ -89,6 +89,14 @@ export class OpeningTrainerManager {
     for (const [hash, entry] of Object.entries(positions)) {
       if (!entry.moves || entry.moves.length === 0) continue;
 
+      // Only train white-to-move positions. The trainer forces the player to
+      // move (GameController.loadTrainerPosition sets game.turn = playerColor,
+      // which is white by default). A black-to-move position would present a
+      // black piece as the expected move; the trainer strategy only selects
+      // own (white) pieces, so the click would never register a move and the
+      // streak would silently stay at 0. Skip those positions.
+      if (!hash.endsWith('w')) continue;
+
       const best = entry.moves.reduce((a, b) => (b.weight > a.weight ? b : a));
       result.push({
         hash,
