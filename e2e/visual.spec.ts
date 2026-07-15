@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { domClick } from './helpers/E2EHelper.js';
 
 test.describe('Visual Regression Tests @visual', () => {
   test.beforeEach(async ({ page }) => {
@@ -67,13 +68,13 @@ test.describe('Visual Regression Tests @visual', () => {
 
   test('Menu Overlay from Game', async ({ page }) => {
     // Start game first to enable menu button logic
-    await page.click('.gamemode-card[data-mode="setup"]');
+    await domClick(page, '.gamemode-card[data-mode="setup"]');
 
     // Click menu button (the burger menu in header). After the setup-mode
     // refactor the #shop-panel overlays the header and intercepts Playwright's
-    // locator.click() (actionability/stable check fails). Trigger the real DOM
-    // handler directly — same approach as the 3D toggle fix.
-    await page.evaluate(() => document.getElementById('menu-btn')?.click());
+    // locator.click() (actionability/stable check fails). Use the shared
+    // domClick primitive — same approach as the 3D toggle fix.
+    await domClick(page, '#menu-btn');
     const menu = page.locator('#main-menu'); // It re-opens the main menu
     await expect(menu).toBeVisible();
     await expect(menu).toHaveClass(/active/);

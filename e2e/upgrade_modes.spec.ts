@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { domClick } from './helpers/E2EHelper.js';
 
 test.describe('Upgrade Modes @upgrade', () => {
   test.beforeEach(async ({ page }) => {
@@ -45,9 +46,7 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should start 8x8 + Upgrades correctly', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    const upgrade8x8Card = page.locator('.gamemode-card[data-init-mode="upgrade8x8"]');
-    await expect(upgrade8x8Card).toBeVisible();
-    await upgrade8x8Card.click();
+    await domClick(page, '.gamemode-card[data-init-mode="upgrade8x8"]');
 
     // 2. Verify Initial State
     await expect(page.locator('#board .cell').first()).toBeVisible();
@@ -67,7 +66,8 @@ test.describe('Upgrade Modes @upgrade', () => {
     // 3. Perform an Upgrade
     // Standard 8x8: White Pawns at Row 6.
     const pawnCell = page.locator('.cell[data-r="6"][data-c="4"]');
-    await pawnCell.click();
+    await expect(pawnCell).toBeVisible();
+    await domClick(page, '.cell[data-r="6"][data-c="4"]');
 
     const shopPanel = page.locator('#shop-panel');
     await expect(shopPanel).toBeVisible();
@@ -126,7 +126,7 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should show Angel upgrade option for Queen in upgrade mode', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    await page.locator('.gamemode-card[data-init-mode="upgrade8x8"]').click();
+    await domClick(page, '.gamemode-card[data-init-mode="upgrade8x8"]');
     await page.waitForSelector('body.game-initialized');
 
     // 2. Check if Queen has upgrade options
@@ -164,7 +164,7 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should complete 8x8 upgrade mode setup', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    await page.locator('.gamemode-card[data-init-mode="upgrade8x8"]').click();
+    await domClick(page, '.gamemode-card[data-init-mode="upgrade8x8"]');
     await page.waitForSelector('body.game-initialized');
     await expect(page.locator('#board .cell').first()).toBeVisible();
 
