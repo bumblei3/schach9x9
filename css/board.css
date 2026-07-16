@@ -322,13 +322,55 @@ body.mode-3d #board-wrapper {
 
 /* --- Check / Checkmate --- */
 .cell.in-check {
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, transparent 70%);
-  animation: pulse-red 2s infinite;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.55) 0%, transparent 72%) !important;
+  animation: pulse-red 1.2s ease-in-out infinite;
+  box-shadow:
+    inset 0 0 0 2px rgba(239, 68, 68, 0.85),
+    0 0 18px rgba(239, 68, 68, 0.45);
+  z-index: 3;
+}
+
+.cell.in-check .piece,
+.cell.in-check .piece-svg {
+  animation: king-piece-pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
+}
+
+.piece.king-in-check,
+.piece-svg.king-in-check {
+  animation: king-piece-pulse 0.45s ease-in-out 3;
 }
 
 .cell.checkmate {
   background: rgba(239, 68, 68, 0.8) !important;
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+}
+
+/* Illegal move attempt */
+.cell.invalid-move {
+  animation: invalid-flash 0.5s ease-out;
+  position: relative;
+  z-index: 4;
+}
+
+.cell.invalid-move::after {
+  content: '✕';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  color: #fecaca;
+  text-shadow: 0 0 8px rgba(127, 29, 29, 0.9);
+  pointer-events: none;
+  animation: invalid-x 0.5s ease-out;
+}
+
+.cell.piece-shake .piece,
+.cell.piece-shake .piece-svg {
+  animation: piece-shake 0.4s ease-in-out;
 }
 
 /* --- Move Quality Indicators --- */
@@ -365,6 +407,14 @@ body.mode-3d #board-wrapper {
 .cell.quality-blunder::before {
   content: '??';
   background-color: #f87171;
+}
+
+/* Status line when a side is in check */
+#status-display.status-check,
+#status-display.status-check-active {
+  color: #fecaca;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
 }
 
 [class*='quality-']::before {

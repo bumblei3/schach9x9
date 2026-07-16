@@ -5,6 +5,17 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added / Improved (UX — Check & Illegal Moves)
+
+- **Schach sichtbarer:** König-Feld pulsiert stärker (Dauer-Glow solange im
+  Schach), Figur skaliert kurz, Statuszeile zeigt `⚠️ SCHACH — … am Zug`
+  und flasht beim Eintritt in Schach.
+- **Ungültige Züge:** Klick/Drag auf illegales Zielfeld → rotes ✕ auf dem
+  Ziel + Shake der eigenen Figur (+ kurzes `navigator.vibrate` auf Mobil).
+  Leeres Feld deselektiert danach (wie bisher); nicht-schlagbare
+  Gegnerfigur zeigt den Flash und wechselt dann zur Bedrohungsanzeige.
+- Unit-Tests: `tests/ui/invalidMoveFeedback.test.ts` + MoveController-Cases.
+
 ### Fixed (Tech Debt — dead dynamic imports)
 
 - **Ineffektiver dynamischer Import in `ShopUI` entfernt:** `ShopUI.ts`
