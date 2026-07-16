@@ -18,6 +18,7 @@ import type { UIEffects } from './ui/ui_effects.js';
 import type { KeyboardManager } from './input/KeyboardManager.js';
 import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
+import * as UI from './ui.js';
 // Side-effect import: TooltipManager is a module-level singleton that wires
 // up [data-tooltip] hints on construction (used by the action bar, etc.).
 import './ui/TooltipManager.js';
@@ -73,7 +74,7 @@ export class App {
     const { UIEffects } = await import('./ui/ui_effects.js');
     const { KeyboardManager } = await import('./input/KeyboardManager.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
-    UI_MODULE = await import('./ui.js');
+    UI_MODULE = UI;
     await import('./ui/AchievementUI.js'); // Initialize achievements UI
     // Expose to window for legacy/debug access
     window.UI = UI_MODULE;

@@ -104,134 +104,61 @@ export const EVAL_VALUES: Record<number, number> = {
 // Row 0 = top of board (white pawn promotion rank)
 // Row 8 = bottom of board (black pawn promotion rank)
 // Black pieces use mirrored lookup: (8 - row) * 9 + col
+//
+// H-P1: Non-pawn pieces use geometrically centered tables peaking at the
+// true 9x9 center (4,4). Older hand-tuned tables were 8x8-lifts with a peak
+// near (3.5) and under-rewarded the real board center. Pawns keep rank-based
+// advancement bonuses (center PST would be wrong for them). King midgame
+// keeps castling-friendly corner bias.
 // =====================================================================
 
+/** Exact geometric center of the 9x9 board (exported for tests). */
+export const PSQT_CENTER = { r: 4, c: 4 } as const;
+
+/**
+ * Build an 81-entry PSQT peaking at (4,4).
+ * @param maxBonus value at the center
+ * @param edgeBonus value at the farthest corner (Chebyshev d=4)
+ * @param exponent taper curve (1 = linear, 2 = steeper toward center)
+ */
+export function buildCenteredPST(
+  maxBonus: number,
+  edgeBonus: number,
+  exponent = 1
+): number[] {
+  const t: number[] = [];
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const d = Math.max(Math.abs(r - PSQT_CENTER.r), Math.abs(c - PSQT_CENTER.c)); // 0..4
+      const f = Math.pow(1 - d / 4, exponent);
+      t.push(Math.round(edgeBonus + (maxBonus - edgeBonus) * f));
+    }
+  }
+  return t;
+}
+
+// Pawns: rank-based advancement (NOT center-biased)
 const PAWN_TABLE = [
-  60,
-  60,
-  60,
-  60,
-  60,
-  60,
-  60,
-  60,
-  60, // row 0 (promotion)
-  45,
-  45,
-  45,
-  50,
-  50,
-  50,
-  45,
-  45,
-  45, // row 1
-  30,
-  30,
-  30,
-  35,
-  35,
-  35,
-  30,
-  30,
-  30, // row 2
-  20,
-  20,
-  20,
-  25,
-  25,
-  25,
-  20,
-  20,
-  20, // row 3
-  15,
-  15,
-  15,
-  18,
-  18,
-  18,
-  15,
-  15,
-  15, // row 4
-  10,
-  10,
-  10,
-  12,
-  12,
-  12,
-  10,
-  10,
-  10, // row 5
-  5,
-  5,
-  5,
-  5,
-  5,
-  5,
-  5,
-  5,
-  5, // row 6
-  5,
-  5,
-  5,
-  5,
-  5,
-  5,
-  5,
-  5,
-  5, // row 7 (starting rank)
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0, // row 8
+  60, 60, 60, 60, 60, 60, 60, 60, 60, // row 0 (promotion)
+  45, 45, 45, 50, 50, 50, 45, 45, 45, // row 1
+  30, 30, 30, 35, 35, 35, 30, 30, 30, // row 2
+  20, 20, 20, 25, 25, 25, 20, 20, 20, // row 3
+  15, 15, 15, 18, 18, 18, 15, 15, 15, // row 4
+  10, 10, 10, 12, 12, 12, 10, 10, 10, // row 5
+  5, 5, 5, 5, 5, 5, 5, 5, 5, // row 6
+  5, 5, 5, 5, 5, 5, 5, 5, 5, // row 7 (starting rank-ish)
+  0, 0, 0, 0, 0, 0, 0, 0, 0, // row 8
 ];
 
-const KNIGHT_TABLE = [
-  -10, -5, -5, -5, -5, -5, -5, -5, -10, -5, 0, 5, 5, 5, 5, 5, 0, -5, 5, 5, 15, 15, 15, 15, 15, 5, 5,
-  5, 10, 15, 20, 20, 20, 15, 10, 5, 5, 10, 15, 20, 25, 20, 15, 10, 5, 5, 10, 15, 20, 20, 20, 15, 10,
-  5, 5, 5, 15, 15, 15, 15, 15, 5, 5, -5, 0, 5, 5, 5, 5, 5, 0, -5, -10, -5, -5, -5, -5, -5, -5, -5,
-  -10,
-];
-
-const BISHOP_TABLE = [
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 10, 10, 10, 10, 10, 5, 0, 0, 5, 10,
-  15, 15, 15, 10, 5, 0, 0, 5, 10, 15, 20, 15, 10, 5, 0, 0, 5, 10, 15, 15, 15, 10, 5, 0, 0, 5, 10,
-  10, 10, 10, 10, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-];
-
-const ROOK_TABLE = [
-  10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  5, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-];
-
-const QUEEN_TABLE = [
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 10, 10, 10, 10, 10, 5, 0, 0, 5, 10,
-  15, 15, 15, 10, 5, 0, 0, 5, 10, 15, 15, 15, 10, 5, 0, 0, 5, 10, 15, 15, 15, 10, 5, 0, 0, 5, 10,
-  10, 10, 10, 10, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-];
-
-const ARCHBISHOP_TABLE = [
-  -5, 0, 0, 0, 0, 0, 0, 0, -5, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 10, 12, 12, 12, 10, 5, 0, 0, 5, 12,
-  18, 18, 18, 12, 5, 0, 0, 5, 12, 18, 22, 18, 12, 5, 0, 0, 5, 12, 18, 18, 18, 12, 5, 0, 0, 5, 10,
-  12, 12, 12, 10, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, -5, 0, 0, 0, 0, 0, 0, 0, -5,
-];
-
-const CHANCELLOR_TABLE = [
-  0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 10, 10, 10, 10, 10, 5, 5, 5, 5, 10,
-  15, 15, 15, 10, 5, 5, 5, 5, 10, 15, 15, 15, 10, 5, 5, 5, 5, 10, 15, 15, 15, 10, 5, 5, 5, 5, 10,
-  10, 10, 10, 10, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0,
-];
-
-const ANGEL_TABLE = [
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 10, 10, 10, 10, 10, 5, 0, 0, 5, 10,
-  15, 15, 15, 10, 5, 0, 0, 5, 10, 15, 15, 15, 10, 5, 0, 0, 5, 10, 15, 15, 15, 10, 5, 0, 0, 5, 10,
-  10, 10, 10, 10, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-];
+// H-P1 centered tables (knight needs the sharpest center bias)
+const KNIGHT_TABLE = buildCenteredPST(28, -12, 2.0);
+const BISHOP_TABLE = buildCenteredPST(22, -6, 1.6);
+const ROOK_TABLE = buildCenteredPST(12, -4, 1.2);
+const QUEEN_TABLE = buildCenteredPST(16, -6, 1.5);
+// Fairy pieces (9x9 identity) — share geometry with their classical cousins
+const ARCHBISHOP_TABLE = buildCenteredPST(24, -8, 1.7); // B+N hybrid → center-hungry
+const CHANCELLOR_TABLE = buildCenteredPST(18, -6, 1.4); // R+N hybrid
+const ANGEL_TABLE = buildCenteredPST(18, -6, 1.5); // super-queen-ish
 
 const KING_MIDGAME_TABLE = [
   20, 30, 10, 0, 0, 0, 10, 30, 20, 20, 20, 0, 0, 0, 0, 0, 20, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

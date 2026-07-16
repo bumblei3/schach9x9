@@ -98,6 +98,21 @@ export class MoveController {
         await finalizeMove();
         return;
       }
+
+      // Invalid destination for the selected piece — clear visual feedback
+      const from = this.game.selectedSquare!;
+      if (typeof UI.showInvalidMoveFeedback === 'function') {
+        UI.showInvalidMoveFeedback({ r, c }, from);
+      }
+
+      // Empty square: deselect (classic chess UI) after the flash
+      if (!clickedPiece) {
+        this.game.selectedSquare = null;
+        this.game.validMoves = null;
+        UI.renderBoard(this.game);
+        return;
+      }
+      // Enemy piece: fall through to show its threats, with invalid flash already shown
     }
 
     // 3. If clicking an enemy piece (and not capturing it), select it to show threats

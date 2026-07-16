@@ -170,9 +170,16 @@ export function updateStatus(game: Game): void {
     case PHASES.SETUP_BLACK_UPGRADES:
       text = 'Schwarz: Klicke eine Figur für Upgrades';
       break;
-    case PHASES.PLAY:
-      text = `Spiel läuft - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+    case PHASES.PLAY: {
+      const side = game.turn === 'white' ? 'Weiß' : 'Schwarz';
+      const inCheck =
+        typeof game.isInCheck === 'function' ? game.isInCheck(game.turn) : false;
+      text = inCheck
+        ? `⚠️ SCHACH — ${side} am Zug`
+        : `Spiel läuft - ${side} am Zug`;
+      statusEl.classList.toggle('status-check-active', !!inCheck);
       break;
+    }
     case PHASES.ANALYSIS:
       text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
       break;
@@ -181,6 +188,9 @@ export function updateStatus(game: Game): void {
       break;
   }
   statusEl.textContent = text;
+  if (game.phase !== PHASES.PLAY) {
+    statusEl.classList.remove('status-check-active', 'status-check');
+  }
   updateOpeningUI(game);
 }
 

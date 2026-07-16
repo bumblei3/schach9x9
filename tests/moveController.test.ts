@@ -25,6 +25,7 @@ type MockUI = {
   updateClockDisplay: MockInstance;
   updateClockUI: MockInstance;
   renderEvalGraph: MockInstance;
+  showInvalidMoveFeedback: MockInstance;
 };
 
 // Extended Game interface for testing to include mocked methods and properties
@@ -72,6 +73,7 @@ vi.mock('../js/ui.js', () => ({
   updateClockDisplay: vi.fn(),
   updateClockUI: vi.fn(),
   renderEvalGraph: vi.fn(),
+  showInvalidMoveFeedback: vi.fn(),
 }));
 
 vi.mock('../js/sounds.js', () => ({
@@ -481,12 +483,29 @@ describe('MoveController', () => {
 
     it('should deselect when clicking empty square', () => {
       game.selectedSquare = { r: 4, c: 4 };
+      game.board[4][4] = { type: 'p', color: 'white' } as any;
+      game.turn = 'white';
       game.validMoves = [{ r: 3, c: 4 }];
 
       moveController.handlePlayClick(2, 2);
 
       expect(game.selectedSquare).toBeNull();
       expect(game.validMoves).toBeNull();
+      expect(UI.showInvalidMoveFeedback).toHaveBeenCalledWith({ r: 2, c: 2 }, { r: 4, c: 4 });
+    });
+
+    it('should flash invalid feedback when clicking non-capturable enemy', async () => {
+      game.board[6][4] = { type: 'p', color: 'white' } as any;
+      game.board[0][0] = { type: 'r', color: 'black' } as any;
+      game.turn = 'white';
+      game.selectedSquare = { r: 6, c: 4 };
+      game.validMoves = [{ r: 5, c: 4 }]; // only one step forward — 0,0 illegal
+
+      await moveController.handlePlayClick(0, 0);
+
+      expect(UI.showInvalidMoveFeedback).toHaveBeenCalledWith({ r: 0, c: 0 }, { r: 6, c: 4 });
+      // then switches selection to enemy piece to show threats
+      expect(game.selectedSquare).toEqual({ r: 0, c: 0 });
     });
 
     it('should switch selection when clicking different own piece', () => {

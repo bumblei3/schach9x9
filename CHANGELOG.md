@@ -21,6 +21,69 @@ Generiert aus den Git-Commits via `npm run changelog`.
   - `e2e/move-time-chart.spec.ts`: echter Browser-Test (Playwright) —
     Container sichtbar, `timeUsed` erfasst, ≥1 Balken gerendert.
 
+### Added / Improved (Engine — H-P1 PSQT 9×9)
+
+- **H-P1 Piece-Square-Tables zentriert auf (4,4):** Springer, Läufer, Turm,
+  Dame, Erzbischof, Kanzler und Engel nutzen `buildCenteredPST()` mit Peak
+  am echten 9×9-Zentrum (alte 8×8-Lifts peakten ~3.5). **Bauern** bleiben
+  rang-basiert (Promotion), **König-Mittelspiel** behält Rochade-Ecken.
+- Export: `buildCenteredPST`, `PSQT_CENTER` + Invariant-Tests (Peak +
+  Knight center > corner).
+
+### Added / Improved (Tutor — „Warum war das gut/schlecht?“ + Alternative)
+
+- **Erklärung nach jedem eigenen Zug:** Toast + Floating-Panel mit
+  Qualitätslabel (Bester Zug / Ungenau / Patzer …) und **1–2 konkreten
+  Gründen** (Taktik, Warnung, Strategie) statt nur Badge.
+- **Besserer Zug bei Schwäche:** bei Ungenauigkeit/Fehler/Patzer sucht der
+  Tutor kurz die Engine-Alternative (Brett temporär zurücksetzen), zeichnet
+  einen **grünen Pfeil** + Feld-Highlights und schreibt „Besser war: …“ ins
+  Panel/Toast. `findBetterAlternative()` + `showBetterMoveArrow()`.
+- `buildTutorSummary()` priorisiert Gabel/Schach/hängende Figur vor generischen
+  Texten; Fallback je Kategorie.
+- `checkBlunder` zeigt Feedback immer (nicht nur bei ≥3.0-Drop); Blunder-Modal
+  nur noch mit KI-Mentor. AI-Schwarz-Züge im Solo werden übersprungen.
+- **Bugfix:** Tutor bekam `piece` nur als Typ-String → `piece.color` war
+  undefined; jetzt volles Piece-Objekt + `captured` für Reverse-Search.
+- CSS: `.tutor-feedback`, `.better-move-from/to`.
+
+### Added / Improved (UX — Check & Illegal Moves)
+
+- **Schach sichtbarer:** König-Feld pulsiert stärker (Dauer-Glow solange im
+  Schach), Figur skaliert kurz, Statuszeile zeigt `⚠️ SCHACH — … am Zug`
+  und flasht beim Eintritt in Schach.
+- **Ungültige Züge:** Klick/Drag auf illegales Zielfeld → rotes ✕ auf dem
+  Ziel + Shake der eigenen Figur (+ kurzes `navigator.vibrate` auf Mobil).
+  Leeres Feld deselektiert danach (wie bisher); nicht-schlagbare
+  Gegnerfigur zeigt den Flash und wechselt dann zur Bedrohungsanzeige.
+- Unit-Tests: `tests/ui/invalidMoveFeedback.test.ts` + MoveController-Cases.
+
+### Fixed (Tech Debt — dead dynamic imports)
+
+- **Ineffektiver dynamischer Import in `ShopUI` entfernt:** `ShopUI.ts`
+  importierte `TutorUI` dynamisch als "fallback", obwohl `ui.ts` `TutorUI`
+  bereits statisch lädt (→ TutorUI war immer im Main-Chunk, der dynamische
+  Import war nutzlos + erzeugte `INEFFECTIVE_DYNAMIC_IMPORT`-Build-Warning).
+  Ersetzt durch statischen Import + direkten Aufruf von
+  `updateTutorRecommendations`. Die Circular-Dependency (TutorUI↔ShopUI) ist
+  harmlos, da beide Funktionen als `export function` gehoistet werden.
+
+- **Tote dynamische `ui.ts`-Imports entfernt (zentral):** `App.ts`,
+  `TutorUI.ts` und `KeyboardManager.ts` importierten `ui.ts` dynamisch als
+  Fallback — obwohl `ui.ts` bereits von `moveController`, `gameController`,
+  `aiController`, `AnalysisController`, `TimeManager` statisch geladen wird
+  (→ immer im Main-Chunk, dynamisch nutzlos + `INEFFECTIVE_DYNAMIC_IMPORT`).
+  Ersetzt durch statische Imports:
+  - `App.ts`: `import * as UI` + `UI_MODULE = UI` (Lazy-`await import` weg).
+  - `TutorUI.ts`: statisch `showToast` statt `import('../ui.js').then(...)`.
+  - `KeyboardManager.ts`: statisch `updateStatus` statt dynamischem `.then()`.
+  - E2E-Smoke-Test (`e2e/ui-static-import-smoke.spec.ts`) beweist, dass die
+    App nach dem Statik-Switch noch bootet (window.UI + renderBoard/
+    updateStatus/showToast vorhanden) und ein Spiel + Resign funktioniert.
+    Hätte eine kaputte Circular-Dep (Statik-Switch) nicht gefangen.
+
+  - Build-Warning `INEFFECTIVE_DYNAMIC_IMPORT` (ui.ts) ist weg.
+
 ### Added (Solo UX — Material Chart)
 
 - **Material-Verlauf-Grafik (#6 Statistiken):** nach einem Solo-Spiel (nicht

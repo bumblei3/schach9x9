@@ -185,3 +185,146 @@
     height: 200px;
   }
 }
+
+/* --- Live Tutor Feedback (after each human move) --- */
+.tutor-feedback {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  transform: translateX(-50%);
+  z-index: 1200;
+  max-width: min(480px, 92vw);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  animation: tutorFeedbackIn 0.25s ease-out;
+  pointer-events: none;
+}
+
+.tutor-feedback--fade {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.tutor-feedback-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tutor-feedback-badge {
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.tutor-feedback-move {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.tutor-feedback-body {
+  color: #cbd5e1;
+}
+
+.tutor-feedback--brilliant,
+.tutor-feedback--best,
+.tutor-feedback--excellent,
+.tutor-feedback--good {
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.tutor-feedback--brilliant .tutor-feedback-badge,
+.tutor-feedback--best .tutor-feedback-badge {
+  color: #86efac;
+}
+
+.tutor-feedback--inaccuracy {
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
+.tutor-feedback--inaccuracy .tutor-feedback-badge {
+  color: #fde047;
+}
+
+.tutor-feedback--mistake,
+.tutor-feedback--blunder {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.tutor-feedback--mistake .tutor-feedback-badge,
+.tutor-feedback--blunder .tutor-feedback-badge {
+  color: #fca5a5;
+}
+
+@keyframes tutorFeedbackIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Better-move suggestion (tutor alternative after a weak move) */
+.tutor-feedback-better {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 0.85rem;
+  color: #bbf7d0;
+}
+
+.tutor-feedback-better-label {
+  font-weight: 700;
+  margin-right: 6px;
+  color: #86efac;
+}
+
+.tutor-feedback-better-move {
+  font-weight: 600;
+}
+
+.tutor-feedback-better-hint {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.cell.better-move-from {
+  box-shadow: inset 0 0 0 3px rgba(34, 197, 94, 0.55) !important;
+  background: rgba(34, 197, 94, 0.18) !important;
+}
+
+.cell.better-move-to {
+  box-shadow:
+    inset 0 0 0 3px rgba(34, 197, 94, 0.85),
+    0 0 14px rgba(34, 197, 94, 0.4) !important;
+  background: rgba(34, 197, 94, 0.28) !important;
+  animation: better-move-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes better-move-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 3px rgba(34, 197, 94, 0.85),
+      0 0 10px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 3px rgba(34, 197, 94, 1),
+      0 0 18px rgba(34, 197, 94, 0.55);
+  }
+}

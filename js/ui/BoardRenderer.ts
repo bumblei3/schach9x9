@@ -17,6 +17,43 @@ let touchDragOrigin: { r: number; c: number; cellSize: number } | null = null;
 let touchDragValidMoves: Square[] = [];
 
 /**
+ * Visual feedback for illegal drop/click targets (no import from ui.ts — avoids cycles).
+ */
+function showInvalidDropFeedback(toR: number, toC: number, fromR: number, fromC: number): void {
+  const toCell = document.querySelector(`.cell[data-r="${toR}"][data-c="${toC}"]`);
+  if (toCell) {
+    toCell.classList.remove('invalid-move');
+    void (toCell as HTMLElement).offsetWidth;
+    toCell.classList.add('invalid-move');
+    setTimeout(() => toCell.classList.remove('invalid-move'), 550);
+  }
+  const fromCell = document.querySelector(`.cell[data-r="${fromR}"][data-c="${fromC}"]`);
+  if (fromCell) {
+    fromCell.classList.remove('piece-shake');
+    void (fromCell as HTMLElement).offsetWidth;
+    fromCell.classList.add('piece-shake');
+    setTimeout(() => fromCell.classList.remove('piece-shake'), 450);
+  }
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    try {
+      navigator.vibrate(30);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+/**
+ * Public illegal-move feedback (click path from MoveController / ui.ts).
+ */
+export function showInvalidMoveFeedback(
+  to: { r: number; c: number },
+  from?: { r: number; c: number } | null
+): void {
+  showInvalidDropFeedback(to.r, to.c, from?.r ?? to.r, from?.c ?? to.c);
+}
+
+/**
  * Get effective board size (from game instance or fallback to BOARD_SIZE)
  */
 function getBoardSize(game: GameLike): number {
@@ -208,6 +245,9 @@ export function initBoardUI(game: GameLike): void {
             game.selectedSquare = { r: fromR, c: fromC };
             game.validMoves = validMoves;
             game.handleCellClick?.(r, c);
+          } else {
+            // Illegal drop target — shake origin + mark destination
+            showInvalidDropFeedback(r, c, fromR, fromC);
           }
         }
       });
@@ -318,6 +358,8 @@ export function initBoardUI(game: GameLike): void {
             game.selectedSquare = { r: fromR, c: fromC };
             game.validMoves = touchDragValidMoves;
             game.handleCellClick?.(targetR, targetC);
+          } else {
+            showInvalidDropFeedback(targetR, targetC, fromR, fromC);
           }
         }
         touchDragValidMoves = [];
@@ -551,7 +593,7 @@ export function renderBoard(game: GameLike): void {
         }
       }
 
-      // Check highlight
+      // Check highlight (cell + persistent king pulse while in check)
       if (game.phase === PHASES.PLAY && p && p.type === 'k' && game.isInCheck) {
         if (game.isInCheck(p.color)) {
           cell.classList.add('in-check');
