@@ -4,11 +4,9 @@
  */
 import { PIECE_VALUES } from '../config.js';
 import { getPieceText } from './BoardRenderer.js';
+import { updateTutorRecommendations } from './TutorUI.js';
 import type { GameLike, PieceType } from '../types/core.js';
 import type { Game } from '../gameEngine.js';
-
-// Removed top-level await preventing circular dependency
-// const { updateTutorRecommendations } = (await import('./TutorUI.js')) as any;
 
 /**
  * Zeigt oder verbirgt das Shop-Panel.
@@ -118,13 +116,7 @@ export function updateShopUI(game: GameLike): void {
     if (legacyUpdate) {
       legacyUpdate(game);
     } else {
-      // Dynamic import fallback
-      import('./TutorUI.js').then(
-        (module: { updateTutorRecommendations?: (_game: Game) => void }) => {
-          if (module.updateTutorRecommendations)
-            module.updateTutorRecommendations(game as unknown as Game);
-        }
-      );
+      updateTutorRecommendations(game as unknown as Game);
     }
   }
 }

@@ -5,6 +5,17 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Fixed (Tech Debt — dead dynamic imports)
+
+- **Ineffektiver dynamischer Import in `ShopUI` entfernt:** `ShopUI.ts`
+  importierte `TutorUI` dynamisch als "fallback", obwohl `ui.ts` `TutorUI`
+  bereits statisch lädt (→ TutorUI war immer im Main-Chunk, der dynamische
+  Import war nutzlos + erzeugte `INEFFECTIVE_DYNAMIC_IMPORT`-Build-Warning).
+  Ersetzt durch statischen Import + direkten Aufruf von
+  `updateTutorRecommendations`. Die Circular-Dependency (TutorUI↔ShopUI) ist
+  harmlos, da beide Funktionen als `export function` gehoistet werden.
+  - Build-Warning `INEFFECTIVE_DYNAMIC_IMPORT` (ShopUI→TutorUI) ist weg.
+
 ### Added (Solo UX — Material Chart)
 
 - **Material-Verlauf-Grafik (#6 Statistiken):** nach einem Solo-Spiel (nicht
