@@ -54,7 +54,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 | ------------------------------------- | ---------------------------------------------------- | --------- |
 | **H3** – `MAX_SEARCH_TIME` 3s→5s      | tiefere Suche pro Zug (stärker, längere UI-Blockade) | ✅ v1.4.2 |
 | **H-Q1** – Quiescence Delta-Pruning   | sound: schneidet aussichtslose QSearch-Zweige ab     | ✅ v1.5.0 |
-| **H-Q2** – Quiescence Check-Extension | fängt Horizon-Effekt bei Schachsequenzen             | ✅ v1.5.0 |
+| **H-Q2** – Quiescence Check-Extension | reverted: bei fester Zeit messbar schwächer (8:5 im Baseline-Match) | ↩️ revertiert |
 | **H-P1** – PSQT für 9x9 schärfen      | stärkere statische Bewertung (riskant, in Arbeit)    | ⏳ offen  |
 
 **Regression-Gates** (müssen alle grün sein, bevor ein Hebel gemergt wird):

@@ -72,14 +72,14 @@ function quiesce(
   if (standPat + QSEARCH_DELTA < alpha) return alpha;
 
   const activeColorStr = c === COLOR_WHITE ? 'white' : 'black';
+  // NOTE: H-Q2 (quiescence check-extension) was reverted. A baseline match
+  // (NEW=H-Q1+H-Q2 vs OLD=H-Q1-only, 24 tactical-FEN games, repaired gate)
+  // showed H-Q2 makes the engine WEAKER at fixed time (5 NEW wins vs 8 OLD
+  // wins): generating all evasion moves under check instead of just captures
+  // burns search depth per move. H-Q1 (delta pruning, sound) is kept.
   const inCheck = checkInt(b, c);
 
-  // Check extension: when the side to move is in check, quiescence must
-  // consider ALL evasion moves (not just captures), otherwise a forced
-  // check sequence is cut off at the horizon and misevaluated.
-  const moves = inCheck
-    ? genLegalInt(b, activeColorStr)
-    : getAllCaptureMoves(b, activeColorStr);
+  const moves = getAllCaptureMoves(b, activeColorStr);
 
   if (!inCheck) {
     moves.sort((_, mv) => {
