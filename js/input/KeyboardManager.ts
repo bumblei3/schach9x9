@@ -3,7 +3,7 @@
  * Maps key combinations to game actions.
  * @module KeyboardManager
  */
-import { showToast, closeModal, renderBoard } from '../ui.js';
+import { showToast, closeModal, renderBoard, updateStatus } from '../ui.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
 
@@ -172,6 +172,6 @@ export class KeyboardManager {
     );
 
     renderBoard(g);
-    import('../ui.js').then(UI => UI.updateStatus(g));
+    updateStatus(g);
   }
 }

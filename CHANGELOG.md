@@ -5,6 +5,32 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Fixed (Tech Debt — dead dynamic imports)
+
+- **Ineffektiver dynamischer Import in `ShopUI` entfernt:** `ShopUI.ts`
+  importierte `TutorUI` dynamisch als "fallback", obwohl `ui.ts` `TutorUI`
+  bereits statisch lädt (→ TutorUI war immer im Main-Chunk, der dynamische
+  Import war nutzlos + erzeugte `INEFFECTIVE_DYNAMIC_IMPORT`-Build-Warning).
+  Ersetzt durch statischen Import + direkten Aufruf von
+  `updateTutorRecommendations`. Die Circular-Dependency (TutorUI↔ShopUI) ist
+  harmlos, da beide Funktionen als `export function` gehoistet werden.
+
+- **Tote dynamische `ui.ts`-Imports entfernt (zentral):** `App.ts`,
+  `TutorUI.ts` und `KeyboardManager.ts` importierten `ui.ts` dynamisch als
+  Fallback — obwohl `ui.ts` bereits von `moveController`, `gameController`,
+  `aiController`, `AnalysisController`, `TimeManager` statisch geladen wird
+  (→ immer im Main-Chunk, dynamisch nutzlos + `INEFFECTIVE_DYNAMIC_IMPORT`).
+  Ersetzt durch statische Imports:
+  - `App.ts`: `import * as UI` + `UI_MODULE = UI` (Lazy-`await import` weg).
+  - `TutorUI.ts`: statisch `showToast` statt `import('../ui.js').then(...)`.
+  - `KeyboardManager.ts`: statisch `updateStatus` statt dynamischem `.then()`.
+  - E2E-Smoke-Test (`e2e/ui-static-import-smoke.spec.ts`) beweist, dass die
+    App nach dem Statik-Switch noch bootet (window.UI + renderBoard/
+    updateStatus/showToast vorhanden) und ein Spiel + Resign funktioniert.
+    Hätte eine kaputte Circular-Dep (Statik-Switch) nicht gefangen.
+
+  - Build-Warning `INEFFECTIVE_DYNAMIC_IMPORT` (ui.ts) ist weg.
+
 ### Added (Solo UX — Material Chart)
 
 - **Material-Verlauf-Grafik (#6 Statistiken):** nach einem Solo-Spiel (nicht
