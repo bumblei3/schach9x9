@@ -64,6 +64,11 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 - `js/engineNode.ts` + `js/matchRefs.ts` – echter Stärke-Gate für die
   deterministische Engine: `NEW_REF` vs `OLD_REF` über zwei git-Worktrees
   (Self-Play ist wertlos, da beide Seiten identische Spiele replayen).
+  `matchRefs` spielt mit `MATCH_FENS=1` echte 9×9-Taktik-FENs (Forks,
+  Skewers, Back-Rank) und wertet bei Zeitablauf das **Material-Delta zur
+  Ausgangsstellung** — nicht das absolute Brettmaterial. (Vor v1.6.0 baute
+  `playGame` das Brett fälschlich aus der Startstellung, sodass Taktik-FENs
+  nie wirklich gespielt wurden — der Gate war damals blind.)
 - `npx vitest run` (2819 Tests), `npx tsc --noEmit`, eslint sauber.
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)

@@ -25,8 +25,20 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { parseFEN } from './utils.js';
+import type { Piece } from './types/game.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+/** Piece type -> internal board code (mirror of engineNode.pieceToCode). */
+function pieceToCode(p: Piece | null): number {
+  if (!p) return 0;
+  const typeCode: Record<string, number> = {
+    p: 1, n: 2, b: 3, r: 4, q: 5, k: 6, a: 7, c: 8, e: 9, j: 10,
+  };
+  const base = typeCode[p.type] ?? 0;
+  return p.color === 'white' ? base : -base;
+}
 
 interface NodeResponse {
   gameNumber: number;
@@ -89,6 +101,17 @@ function askMove(
   });
 }
 
+/**
+ * Parse a 9x9 FEN into the internal number[][] board used by the engines.
+ * This is the ONLY authoritative way to build a board from a FEN — callers
+ * must use this (not `initialBoard`) when a FEN is supplied, otherwise the
+ * tactical position is silently replaced by the starting position.
+ */
+function boardFromFen(fen: string): number[][] {
+  const { board } = parseFEN(fen);
+  return board.map(row => row.map(pieceToCode));
+}
+
 function initialBoard(): number[][] {
   const board: number[][] = Array(9).fill(null).map(() => Array(9).fill(0));
   const back = [
@@ -104,9 +127,49 @@ function initialBoard(): number[][] {
   return board;
 }
 
+/** Build the starting board for a game, honoring an optional start FEN. */
+export function startingBoard(fen?: string): number[][] {
+  return fen ? boardFromFen(fen) : initialBoard();
+}
+
 function applyMove(board: number[][], move: NonNullable<NodeResponse['move']>): void {
-  board[move.to.r][move.to.c] = board[move.from.r][move.from.c];
+  const piece = board[move.from.r][move.from.c];
+  board[move.to.r][move.to.c] = piece;
   board[move.from.r][move.from.c] = 0;
+  // Promotion: a pawn reaching the last rank becomes the chosen piece
+  // (archbishop/chancellor/queen). `promotion` is a piece letter or PieceType.
+  if (move.promotion) {
+    const promoType = String(move.promotion).toLowerCase();
+    const typeCode: Record<string, number> = { a: 7, c: 8, q: 5, r: 4, b: 3, n: 2 };
+    const code = typeCode[promoType];
+    if (code) {
+      const colorSign = piece > 0 ? 1 : -1;
+      board[move.to.r][move.to.c] = colorSign * code;
+    }
+  }
+}
+
+/**
+ * Material balance from NEW's perspective: NEW-owned material minus OLD-owned
+ * material. Positive => NEW is ahead. Side ownership depends on `newIsWhite`.
+ */
+export function materialDiff(board: number[][], newIsWhite: boolean): number {
+  let newMat = 0;
+  let oldMat = 0;
+  for (const row of board) {
+    for (const cell of row) {
+      if (cell === 0) continue;
+      const value = PIECE_VALUE[Math.abs(cell)] ?? 0;
+      if (cell > 0) {
+        if (newIsWhite) newMat += value;
+        else oldMat += value;
+      } else {
+        if (newIsWhite) oldMat += value;
+        else newMat += value;
+      }
+    }
+  }
+  return newMat - oldMat;
 }
 
 /**
@@ -118,31 +181,31 @@ function applyMove(board: number[][], move: NonNullable<NodeResponse['move']>): 
  * Format: standard 9x9 FEN (rows 9..1 separated by '/'), piece letters
  * PNBRQKAC (A=archbishop, C=chancellor). Turn is 'w' or 'b'.
  */
-const TACTICAL_FENS: string[] = [
-  // 1. Queen checkmate threat: Q on 8th, black king on c8 (trapped) -> mate in 1
-  '8/8/8/8/8/8/8/3q4/2k4K w - - 0 1',
-  // 2. Knight fork: N can fork king (h8) + rook (c4) -> wins material
-  '8/8/8/8/8/2r5/8/7N/6kK w - - 0 1',
-  // 3. Hanging rook: black R on c4, white N on c5 attacks it -> grab wins
-  '8/8/8/2N5/2r5/8/8/K6k b - - 0 1',
-  // 4. Promotion with check: pawn one step from promotion, promotes with check
-  '8/8/8/8/8/8/4P3/4k2K/7k w - - 0 1',
-  // 5. Discovered check: bishop on a8, rook behind on d1 -> Rxd1 discovered check
-  '8/8/8/8/8/8/8/b6k/K2R4 w - - 0 1',
-  // 6. Back-rank: black king trapped on 8th, white Q delivers mate
-  '8/8/8/8/8/8/8/3q4/k1K5 w - - 0 1',
-  // 7. Skewer: white rook on a1, king + queen on same rank -> wins queen
-  '8/8/8/8/8/8/8/8/R2qk2K w - - 0 1',
-  // 8. Pin break: black bishop pins rook, white can win bishop with knight
-  '8/8/8/8/8/8/8/2n5/1b1rk2K w - - 0 1',
-  // 9. Double attack: white queen attacks rook + bishop simultaneously
-  '8/8/8/8/8/8/8/3q4/1r2b2K w - - 0 1',
-  // 10. En prise rook: black R on e5, white pawn can capture with tempo
-  '8/8/8/8/4r3/4P3/8/6kK/8 w - - 0 1',
-  // 11. Fork queen+king: white knight forks -> wins queen
-  '8/8/8/8/8/8/8/2N5/2q2k1K w - - 0 1',
-  // 12. Trapped king escape: black king on h8, white Q checks, must find mate
-  '8/8/8/8/8/8/8/7q/6kK w - - 0 1',
+export const TACTICAL_FENS: string[] = [
+  // 1. Back-rank: black king a1, white Q d2 + K d1 -> mate threat. (9 files a..i)
+  '9/9/9/9/9/9/9/3q5/k1K5N w - - 0 1',
+  // 2. Knight fork: N h2 forks black K a1 + R d5.
+  '9/9/9/3r5/9/9/7N1/7K1/k8 w - - 0 1',
+  // 3. Hanging rook: black R d5, white N d6 attacks it. Black to move.
+  '9/9/3N5/3r5/9/9/9/K6k1/9 b - - 0 1',
+  // 4. Promotion with check: white pawn d2 one step from promotion (rank 1).
+  '9/9/9/9/9/9/3P5/3k3K1/8k w - - 0 1',
+  // 5. Discovered check: B a9, R d1, black K d8 -> Rxd1 / discovered.
+  'B8/9/9/3k5/9/9/9/3R3K1/8k w - - 0 1',
+  // 6. Back-rank trap: black K a1, white Q d2 mate.
+  '9/9/9/9/9/9/9/3q5/k1K5N w - - 0 1',
+  // 7. Skewer: white R a1, black K + Q same rank -> wins queen.
+  '9/9/9/9/9/9/9/R2qk2K1/8k w - - 0 1',
+  // 8. Pin break: black B pins R, white N wins bishop.
+  '9/9/9/9/9/9/9/2n6/1b1rk2K1 w - - 0 1',
+  // 9. Double attack: white Q attacks R + B simultaneously.
+  '9/9/9/9/9/9/9/3q5/1r2b2K1 w - - 0 1',
+  // 10. En prise rook: black R e5, white pawn captures with tempo.
+  '9/9/9/4r4/4P4/9/9/6kK1/8k w - - 0 1',
+  // 11. Fork queen+king: white N forks -> wins queen.
+  '9/9/9/9/9/9/9/2N6/2q2k1K1 w - - 0 1',
+  // 12. Trapped king escape: black K i1, white Q h2 checks.
+  '9/9/9/9/9/9/9/7q1/6kK1 w - - 0 1',
 ];
 
 async function playGame(
@@ -153,54 +216,42 @@ async function playGame(
   maxMoves: number,
   startFen?: string
 ): Promise<'new' | 'old' | 'draw'> {
-  const board = initialBoard();
-  let turn: 'white' | 'black' = 'white';
+  // BUG FIX: when a start FEN is given, the game MUST start from that
+  // position — not the starting position with a phantom first move.
+  const board = startingBoard(startFen);
+  // Snapshot the starting material balance so the final result reflects
+  // MATERIAL GAINED, not absolute material (tactical FENs may start lopsided).
+  const startDiff = startFen ? materialDiff(board, newIsWhite) : 0;
+  let turn: 'white' | 'black' = startFen ? fenToBoardTurn(startFen) : 'white';
   let moveNumber = 1;
-  let firstFen: string | undefined = startFen;
   for (let i = 0; i < maxMoves; i++) {
     const newToMove = (turn === 'white') === newIsWhite;
     const h = newToMove ? newH : oldH;
-    const res = await askMove(h, board, turn, elo, moveNumber, firstFen);
-    firstFen = undefined; // only the first move uses the FEN; rest is board state
+    const res = await askMove(h, board, turn, elo, moveNumber);
     if (res.error || !res.move) return 'draw'; // crash/illegal -> draw, flagged
     applyMove(board, res.move);
     if (moveNumber >= 100) break; // no mate -> decide by material
     turn = turn === 'white' ? 'black' : 'white';
     if (turn === 'white') moveNumber++;
   }
-  // No mate within move limit: decide by material on the board.
-  // NEW plays white when newIsWhite, so its material is the side it owns.
-  return materialWinner(board, newIsWhite);
+  // No mate within move limit: decide by net material change from the start.
+  const endDiff = materialDiff(board, newIsWhite);
+  const net = endDiff - startDiff;
+  if (net > 0) return 'new';
+  if (net < 0) return 'old';
+  return 'draw';
+}
+
+/** Extract the side-to-move from a FEN's second field ('w'|'b'). */
+export function fenToBoardTurn(fen: string): 'white' | 'black' {
+  const turn = fen.split(' ')[1];
+  return turn === 'b' ? 'black' : 'white';
 }
 
 /** Piece values (9x9: A=archbishop, C=chancellor, E=angel rank above queen). */
 const PIECE_VALUE: Record<number, number> = {
   1: 100, 2: 320, 3: 330, 4: 500, 5: 900, 6: 20000, 7: 950, 8: 950, 9: 1100, 10: 1100,
 };
-
-/** NEW=white side (newIsWhite=true) material vs OLD=black side. NEW wins if it has more material. */
-function materialWinner(board: number[][], newIsWhite: boolean): 'new' | 'old' | 'draw' {
-  let newMat = 0;
-  let oldMat = 0;
-  for (const row of board) {
-    for (const cell of row) {
-      if (cell === 0) continue;
-      const value = PIECE_VALUE[Math.abs(cell)] ?? 0;
-      if (cell > 0) {
-        // white piece
-        if (newIsWhite) newMat += value;
-        else oldMat += value;
-      } else {
-        // black piece
-        if (newIsWhite) oldMat += value;
-        else newMat += value;
-      }
-    }
-  }
-  if (newMat > oldMat) return 'new';
-  if (oldMat > newMat) return 'old';
-  return 'draw';
-}
 
 async function main(): Promise<void> {
   const newDir = process.env.NEW_REF || __dirname;
@@ -250,7 +301,10 @@ async function main(): Promise<void> {
   else console.log('VERDICT: equal - no measurable delta at this sample.');
 }
 
-main().catch((e) => {
-  console.error('[MatchRefs] FATAL:', e);
-  process.exit(1);
-});
+// Only auto-run when executed directly (not when imported by tests).
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((e) => {
+    console.error('[MatchRefs] FATAL:', e);
+    process.exit(1);
+  });
+}
