@@ -21,6 +21,15 @@ Generiert aus den Git-Commits via `npm run changelog`.
     korrekt gewertet (`materialDiff` statt `materialWinner`).
   - `applyMove` handhabt jetzt Promotion (Engel/Kanzler/Dame) korrekt
     (vorher nur Roh-Kopie ohne Beförderung).
+- **H-Q2 (Quiescence Check-Extension) revertiert — Engine bei fester Zeit
+  messbar stärker:** Mit dem reparierten Gate lief ein Baseline-Match
+  `NEW` (H-Q1+H-Q2) vs `OLD` (H-Q1-only, Check-Extension deaktiviert) über
+  24 taktische 9×9-FENs (elo 1600, 40 Züge):
+  `NEW wins 5 | OLD wins 8 | Draws 11 → VERDICT: NEW weaker`.
+  Die Check-Extension generiert bei Schach ALLE Evasion-Moves statt nur
+  Captures → viel mehr Knoten pro Zug → bei gleicher Zeit weniger Tiefe →
+  schlechtere Bewertung. H-Q1 (Delta-Pruning, sound) bleibt. `quiesce()` in
+  `js/search.ts` nutzt jetzt immer nur Capture-Moves.
 - **TACTICAL_FENS auf echte 9×9-Stellungen korrigiert:** alle 12 FENs waren
   8 Breit (8×8-Format) und damit ungültig für das 9×9-Brett — sie wurden
   stillschweigend nie geparst. Jetzt gültige 9×9-FENs (verifiziert durch
