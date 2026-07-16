@@ -21,6 +21,8 @@ import {
   checkBlunder,
   showBlunderWarning,
   analyzePlayerMovePreExecution,
+  buildTutorSummary,
+  showTutorMoveFeedback,
   type MoveInfo,
   type MoveExplanation,
 } from './tutor/MoveAnalyzer.js';
@@ -165,6 +167,14 @@ export class TutorController implements TutorControllerLike {
 
   public analyzeMoveWithExplanation(move: unknown, score: number, bestScore: number): unknown {
     return analyzeMoveWithExplanation(this.game, move as MoveInfo, score, bestScore);
+  }
+
+  public buildTutorSummary(analysis: MoveExplanation): string {
+    return buildTutorSummary(analysis);
+  }
+
+  public showTutorMoveFeedback(analysis: MoveExplanation): void {
+    return showTutorMoveFeedback(analysis);
   }
 
   public handlePlayerMove(from: { r: number; c: number }, to: { r: number; c: number }): void {

@@ -274,16 +274,14 @@ export async function completeMoveExecution(
   UI.updateMoveHistoryUI(game);
   UI.updateStatus(game);
 
-  // Blunder Detection
-  if (game.tutorController?.checkBlunder) {
-    // Fire and forget or await? Safer to await to ensure sequence
+  // Tutor: move quality + explanation (needs full piece with color)
+  if (game.tutorController?.checkBlunder && moveRecord.piece) {
     const moveRecordForTutor: MoveRecord = {
       from: moveRecord.from,
       to: moveRecord.to,
-      piece: (moveRecord.piece?.type as PieceType) ?? 'p',
+      piece: moveRecord.piece as Piece,
       evalScore: moveRecord.evalScore,
     };
-    // Fire and forget or await? Safer to await to ensure sequence
     await game.tutorController.checkBlunder(moveRecordForTutor);
   }
 

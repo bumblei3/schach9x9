@@ -23,6 +23,8 @@ export interface MoveExplanation {
   score: number;
   category: string;
   qualityLabel: string;
+  /** One short line for toast / coach (built from tactics + warnings) */
+  summary: string;
   tacticalExplanations: string[];
   strategicExplanations: string[];
   warnings: string[];
@@ -131,6 +133,140 @@ export async function analyzePlayerMovePreExecution(
 }
 
 /**
+ * Builds a short human-readable summary from analysis parts (max 2 reasons).
+ */
+export function buildTutorSummary(analysis: Omit<MoveExplanation, 'summary'> | MoveExplanation): string {
+  const reasons: string[] = [];
+  const push = (text: string | undefined) => {
+    if (!text) return;
+    const clean = text.replace(/\s+/g, ' ').trim();
+    if (!clean || reasons.includes(clean)) return;
+    if (reasons.length < 2) reasons.push(clean);
+  };
+
+  // Prefer concrete tactics, then warnings (why bad), then strategy
+  for (const t of analysis.tacticalExplanations || []) push(t);
+  for (const w of analysis.warnings || []) push(w);
+  for (const s of analysis.strategicExplanations || []) push(s);
+
+  if (reasons.length > 0) return reasons.join(' · ');
+
+  // Fallback by quality category
+  switch (analysis.category) {
+    case 'brilliant':
+      return 'Taktische Idee mit klarem Vorteil.';
+    case 'best':
+      return 'Stärkster Zug nach Engine-Bewertung.';
+    case 'excellent':
+      return 'Sehr starke Fortsetzung, nur minimal unter dem Bestzug.';
+    case 'good':
+      return 'Solider Zug ohne klares taktisches Motiv.';
+    case 'inaccuracy':
+      return 'Es gibt spürbar bessere Alternativen.';
+    case 'mistake':
+      return 'Die Stellung wird spürbar schlechter.';
+    case 'blunder':
+      return 'Grober Stellungs- oder Materialverlust.';
+    default:
+      return 'Solider Zug.';
+  }
+}
+
+/**
+ * Toast + optional panel: quality label + one-line "why".
+ */
+export function showTutorMoveFeedback(analysis: MoveExplanation): void {
+  const summary = analysis.summary || buildTutorSummary(analysis);
+  const emoji: Record<string, string> = {
+    brilliant: '💎',
+    best: '⭐',
+    excellent: '✨',
+    good: '✅',
+    inaccuracy: '⁉️',
+    mistake: '❓',
+    blunder: '💥',
+    normal: '♟️',
+  };
+  const shortLabel: Record<string, string> = {
+    brilliant: 'Brilliant',
+    best: 'Bester Zug',
+    excellent: 'Exzellent',
+    good: 'Gut',
+    inaccuracy: 'Ungenau',
+    mistake: 'Fehler',
+    blunder: 'Patzer',
+    normal: 'Zug',
+  };
+  const cat = analysis.category || 'normal';
+  const toastType =
+    cat === 'blunder' || cat === 'mistake'
+      ? 'error'
+      : cat === 'inaccuracy'
+        ? 'warning'
+        : cat === 'best' || cat === 'brilliant' || cat === 'excellent' || cat === 'good'
+          ? 'success'
+          : 'neutral';
+
+  const head = `${emoji[cat] || '♟️'} ${shortLabel[cat] || 'Zug'}`;
+  showToast(`${head}: ${summary}`, toastType);
+  renderTutorFeedbackPanel(analysis, summary);
+}
+
+/**
+ * Compact persistent feedback in #tutor-feedback (created if missing).
+ */
+export function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): void {
+  let panel = document.getElementById('tutor-feedback');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'tutor-feedback';
+    panel.className = 'tutor-feedback';
+    panel.setAttribute('role', 'status');
+    panel.setAttribute('aria-live', 'polite');
+    // Prefer next to board / action area
+    const host =
+      document.getElementById('game-panel') ||
+      document.getElementById('board-container') ||
+      document.querySelector('.game-area') ||
+      document.body;
+    host.appendChild(panel);
+  }
+
+  const cat = analysis.category || 'normal';
+  panel.className = `tutor-feedback tutor-feedback--${cat}`;
+  panel.hidden = false;
+
+  const text = summary || analysis.summary || buildTutorSummary(analysis);
+  const notation = analysis.notation ? `<span class="tutor-feedback-move">${escapeHtml(analysis.notation)}</span>` : '';
+
+  panel.innerHTML = `
+    <div class="tutor-feedback-head">
+      <span class="tutor-feedback-badge">${escapeHtml(analysis.qualityLabel.split(/[.!]/)[0] || cat)}</span>
+      ${notation}
+    </div>
+    <div class="tutor-feedback-body">${escapeHtml(text)}</div>
+  `;
+
+  // Auto-fade after longer reads for good moves; keep mistakes longer
+  const keepMs = cat === 'blunder' || cat === 'mistake' ? 12000 : 7000;
+  window.clearTimeout((panel as HTMLElement & { _hideTimer?: number })._hideTimer);
+  (panel as HTMLElement & { _hideTimer?: number })._hideTimer = window.setTimeout(() => {
+    panel?.classList.add('tutor-feedback--fade');
+    setTimeout(() => {
+      if (panel) panel.hidden = true;
+    }, 400);
+  }, keepMs);
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
  * Analyzes a move and provides a detailed explanation
  */
 export function analyzeMoveWithExplanation(
@@ -191,11 +327,14 @@ export function analyzeMoveWithExplanation(
     if (pattern.question) questions.push(pattern.question);
   });
 
-  // Analyze strategic value
+  // Analyze strategic value (piece may already sit on `to` after the move)
   const strategic = analyzeStrategicValue(game, move);
   strategic.forEach(s => {
     strategicExplanations.push(s.explanation);
   });
+
+  // Concrete material / check notes on the post-move board
+  appendPostMoveReasons(game, move, tacticalExplanations, warnings);
 
   // Check for threats to own pieces after this move
   const threats = detectThreatsAfterMove(game, analyzer, move);
@@ -205,7 +344,7 @@ export function analyzeMoveWithExplanation(
     });
   }
 
-  return {
+  const base = {
     move,
     score,
     category,
@@ -219,6 +358,47 @@ export function analyzeMoveWithExplanation(
     scoreDiff: diff,
     notation: getMoveNotation(game, move),
   };
+
+  return {
+    ...base,
+    summary: buildTutorSummary(base),
+  };
+}
+
+/**
+ * Extra plain-language reasons from the board after the move was played.
+ */
+function appendPostMoveReasons(
+  game: GameLike,
+  move: MoveInfo,
+  tactical: string[],
+  warnings: string[]
+): void {
+  // Piece is usually on destination after execution
+  const pieceOnTo = game.board[move.to.r]?.[move.to.c];
+  const pieceOnFrom = game.board[move.from.r]?.[move.from.c];
+  const mover = pieceOnTo || pieceOnFrom;
+  if (!mover) return;
+
+  const opponent = mover.color === 'white' ? 'black' : 'white';
+
+  // Did we give check?
+  try {
+    if (typeof game.isInCheck === 'function' && game.isInCheck(opponent as 'white' | 'black')) {
+      tactical.push('♔ Schach dem Gegner!');
+    }
+  } catch {
+    /* ignore */
+  }
+
+  // Own king in check after own move = illegal in real chess; still warn if engine allows
+  try {
+    if (typeof game.isInCheck === 'function' && game.isInCheck(mover.color as 'white' | 'black')) {
+      warnings.push('Dein König steht (noch) im Schach — decken oder fliehen!');
+    }
+  } catch {
+    /* ignore */
+  }
 }
 
 /**
@@ -228,7 +408,8 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
   const patterns: StrategicPattern[] = [];
   const from = move.from;
   const to = move.to;
-  const piece = game.board[from.r][from.c];
+  // Support both pre-move (piece on from) and post-move (piece on to) boards
+  const piece = game.board[from.r]?.[from.c] || game.board[to.r]?.[to.c];
 
   if (!piece) return patterns;
 
@@ -363,27 +544,26 @@ export function getScoreDescription(score: number): ScoreDescription {
  * Gets algebraic notation for a move
  */
 export function getMoveNotation(game: GameLike, move: MoveInfo): string {
-  const piece = game.board[move.from.r][move.from.c];
+  // After move execution the piece sits on `to`; before, on `from`.
+  const piece = game.board[move.from.r]?.[move.from.c] || game.board[move.to.r]?.[move.to.c];
+  const fromNotation = String.fromCharCode(97 + move.from.c) + (BOARD_SIZE - move.from.r);
+  const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
 
-  // Handle null piece gracefully
   if (!piece) {
-    const fromNotation = String.fromCharCode(97 + move.from.c) + (BOARD_SIZE - move.from.r);
-    const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
     return `Zug ${fromNotation}→${toNotation}`;
   }
 
-  const targetPiece = game.board[move.to.r][move.to.c];
+  // If piece already on destination, we cannot see the captured piece on `to`.
+  const pieceOnFrom = game.board[move.from.r]?.[move.from.c];
+  const targetPiece = pieceOnFrom ? game.board[move.to.r]?.[move.to.c] : null;
   const pieceSymbol = getPieceText(piece);
-  const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
-
   const pieceName = getPieceName(piece.type);
 
-  if (targetPiece) {
+  if (targetPiece && targetPiece !== piece) {
     const targetName = getPieceName(targetPiece.type);
     return `${pieceSymbol} ${pieceName} schlägt ${targetName} (${toNotation})`;
-  } else {
-    return `${pieceSymbol} ${pieceName} nach ${toNotation}`;
   }
+  return `${pieceSymbol} ${pieceName} ${fromNotation}→${toNotation}`;
 }
 
 /**
@@ -447,7 +627,8 @@ export function handlePlayerMove(
 }
 
 /**
- * Checks for blunders
+ * Checks move quality after a human move: quality badge + tutor explanation toast.
+ * Severe drops still open the blunder modal (when mentor is on).
  */
 export async function checkBlunder(
   game: GameLike,
@@ -456,48 +637,54 @@ export async function checkBlunder(
   },
   moveRecord: MoveRecord
 ): Promise<void> {
-  if (!moveRecord || game.mode === 'puzzle') return;
+  if (!moveRecord || game.mode === 'puzzle' || game.mode === 'daily-puzzle') return;
+  // Skip AI side in solo vs AI (black)
+  if (game.isAI && moveRecord.piece?.color === 'black') return;
 
   const currentEval = moveRecord.evalScore;
   const prevEval = game.lastEval || 0;
-  const turn = moveRecord.piece.color;
+  const turn = moveRecord.piece?.color || game.turn;
 
   // Advantage drop (from perspective of current player)
   const currentEvalNum = currentEval ?? 0;
   const drop = turn === 'white' ? prevEval - currentEvalNum : currentEvalNum - prevEval;
 
   // Track accuracy for Elo estimation
-  // Using a sigmoid-like curve or simple mapping:
-  // 0 drop = 100%, 100 drop = 90%, 200 drop = 70%, 500 drop = 20%
   const clampedDrop = Math.max(0, drop);
   const accuracy = 100 * Math.pow(0.5, clampedDrop / 200);
   if (game.stats) game.stats.accuracies.push(accuracy);
 
-  if (drop >= 300) {
-    // 3.0 evaluation drop is a blunder (increased from 2.0 to be less annoying)
-    const analysis = analyzeMoveWithExplanation(
-      game,
-      { from: moveRecord.from, to: moveRecord.to },
-      currentEvalNum,
-      turn === 'white' ? prevEval : -prevEval
-    );
-    tutorController.showBlunderWarning(analysis, () => {});
+  // Best score: engine top move if available, else previous eval
+  const bestScore =
+    game.bestMoves && game.bestMoves.length > 0
+      ? ((game.bestMoves[0] as { score?: number }).score ?? prevEval)
+      : prevEval;
+
+  // For white, higher eval is better; for black invert comparison baseline
+  const playerBest =
+    turn === 'white' ? (bestScore ?? prevEval) : -(bestScore ?? prevEval);
+  const playerScore = turn === 'white' ? currentEvalNum : -currentEvalNum;
+
+  const analysis = analyzeMoveWithExplanation(
+    game,
+    { from: moveRecord.from, to: moveRecord.to },
+    playerScore,
+    playerBest
+  );
+
+  // Board quality highlight + floating label
+  if (showMoveQuality) {
+    showMoveQuality(game, { from: moveRecord.from, to: moveRecord.to }, analysis.category);
   }
 
-  // Show quality highlight on the board
-  if (showMoveQuality) {
-    // We assume the best move score is either the engine's best or the previous eval if no engine ran
-    const bestScore =
-      game.bestMoves && game.bestMoves.length > 0
-        ? ((game.bestMoves[0] as { score?: number }).score ?? prevEval)
-        : prevEval;
-    const analysis = analyzeMoveWithExplanation(
-      game,
-      { from: moveRecord.from, to: moveRecord.to },
-      currentEvalNum,
-      bestScore ?? prevEval
-    );
-    showMoveQuality(game, { from: moveRecord.from, to: moveRecord.to }, analysis.category);
+  // Always show why (toast + panel) for human moves in play
+  if (game.phase === PHASES.PLAY || game.phase === 'play' || !game.phase) {
+    showTutorMoveFeedback(analysis);
+  }
+
+  // Modal only for serious blunders when KI-Mentor is enabled
+  if (drop >= 300 && game.kiMentorEnabled) {
+    tutorController.showBlunderWarning(analysis, () => {});
   }
 
   game.lastEval = currentEval;
@@ -524,9 +711,10 @@ export function showBlunderWarning(
   const title = isPreMove ? '⚠️ Warnung: Grober Fehler?' : '⚠️ Schwerer Fehler (Blunder)';
   const diff = (analysis.scoreDiff / -100).toFixed(1);
 
+  const summary = analysis.summary || buildTutorSummary(analysis);
   const message = isPreMove
-    ? `Dieser Zug würde deine Stellung um ${diff} Bauern verschlechtern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du diesen Zug wirklich ausführen?`
-    : `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`;
+    ? `Dieser Zug würde deine Stellung um ${diff} Bauern verschlechtern.\n\n${summary}\n\n${warnings}\n\n${explanation}\n\nMöchtest du diesen Zug wirklich ausführen?`
+    : `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.\n\nWarum: ${summary}\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`;
 
   const buttons = isPreMove
     ? [

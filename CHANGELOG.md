@@ -5,6 +5,20 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added / Improved (Tutor — „Warum war das gut/schlecht?“)
+
+- **Erklärung nach jedem eigenen Zug:** Toast + Floating-Panel mit
+  Qualitätslabel (Bester Zug / Ungenau / Patzer …) und **1–2 konkreten
+  Gründen** (Taktik, Warnung, Strategie) statt nur Badge.
+- `buildTutorSummary()` priorisiert Gabel/Schach/hängende Figur vor generischen
+  Texten; Fallback je Kategorie.
+- `checkBlunder` zeigt Feedback immer (nicht nur bei ≥3.0-Drop); Blunder-Modal
+  nur noch mit KI-Mentor. AI-Schwarz-Züge im Solo werden übersprungen.
+- **Bugfix:** Tutor bekam `piece` nur als Typ-String → `piece.color` war
+  undefined; jetzt volles Piece-Objekt. Notation/Strategie funktionieren
+  post-move (Figur auf Ziel-Feld).
+- CSS: `.tutor-feedback` Panel am unteren Bildrand.
+
 ### Added / Improved (UX — Check & Illegal Moves)
 
 - **Schach sichtbarer:** König-Feld pulsiert stärker (Dauer-Glow solange im
