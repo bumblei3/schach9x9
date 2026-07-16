@@ -23,6 +23,7 @@ import type { AIController } from './aiController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
+import { getHeatmapUI, HeatmapUI } from './ui/HeatmapUI.js';
 import { showPostGameStats } from './ui/PostGameAnalysisUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
@@ -90,6 +91,7 @@ export class GameController {
   shopManager: ShopManager;
   analysisController: AnalysisController;
   analysisUI: AnalysisUI;
+  heatmapUI: HeatmapUI;
   puzzleMenu: PuzzleMenu;
   moveExecutor: unknown;
   gameStartTime: number | null;
@@ -105,6 +107,7 @@ export class GameController {
     this.shopManager = new ShopManager(game);
     this.analysisController = new AnalysisController(this);
     this.analysisUI = new AnalysisUI({ game });
+    this.heatmapUI = getHeatmapUI();
     this.puzzleMenu = new PuzzleMenu(this);
     this.moveExecutor = null; // Circular dependency resolved later
     this.game.gameController = this;
@@ -1005,6 +1008,11 @@ export class GameController {
     // Show post-game stats and analysis button (unless in campaign mode)
     if (!this.game.campaignMode) {
       showPostGameStats(this.game, result, winnerColor);
+      // Render + show the move-activity heatmap (solo only)
+      if (this.heatmapUI && this.game.moveHistory && this.game.moveHistory.length > 0) {
+        this.heatmapUI.render(this.game.moveHistory, this.game.playerColor !== 'black');
+        this.heatmapUI.show();
+      }
     }
 
     // Show analysis prompt after a short delay (only if not campaign win)
