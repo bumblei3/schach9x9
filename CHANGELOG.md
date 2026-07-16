@@ -5,6 +5,36 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Fixed (Engine Strength Gate — matchRefs)
+
+- **Kritischer FEN-Bug im Stärke-Gate behoben:** `matchRefs.playGame()` baute
+  das Brett IMMER aus der Startstellung und schickte das `startFen` nur an
+  Zug 1 als Once-Override an `engineNode` — die tatsächliche Partie lief auf
+  der Startstellung mit einem Phantom-Eröffnungszug. Der Gate hat damit
+  Taktik-FENs (Forks, Skewers, Back-Rank) nie wirklich gespielt; alle
+  bisherigen "Engine nicht messbar stärker"-Befunde waren wertlos.
+  - `playGame` nutzt jetzt `startingBoard(startFen)`, spielt also die echte
+    FEN-Position (Bug-Fix in `js/matchRefs.ts`).
+  - Material-Verdict (wer gewinnt bei Zeitablauf) misst jetzt das
+    **Material-DELTA zur Ausgangsstellung**, nicht das absolute Brettmaterial
+    — tactic-FENs mit unausgeglichener Start-Materialverteilung werden
+    korrekt gewertet (`materialDiff` statt `materialWinner`).
+  - `applyMove` handhabt jetzt Promotion (Engel/Kanzler/Dame) korrekt
+    (vorher nur Roh-Kopie ohne Beförderung).
+- **TACTICAL_FENS auf echte 9×9-Stellungen korrigiert:** alle 12 FENs waren
+  8 Breit (8×8-Format) und damit ungültig für das 9×9-Brett — sie wurden
+  stillschweigend nie geparst. Jetzt gültige 9×9-FENs (verifiziert durch
+  `scripts/verify-fens.ts`).
+- **`main()` in `matchRefs.ts` ge-guardet** (nur bei Direkt-Aufruf, nicht
+  beim Import durch Tests) — sonst würden Tests beim Import sofort zwei
+  Engine-Prozesse spawnen + `process.exit` triggern.
+- **Toter Code entfernt:** `startingMaterialDiff` (unbenutzt), `materialWinner`
+  (durch `materialDiff` ersetzt). `startingBoard`/`materialDiff`/`fenToBoardTurn`/
+  `TACTICAL_FENS` exportiert für Tests.
+- **Neue Invariant-Tests:** `tests/matchRefs.test.ts` (9 Tests) + Tool
+  `scripts/verify-fens.ts` sichern den Fix (FEN wird wirklich gespielt,
+  Material-Delta-Logik, Seite-zu-ziehen-Parsing, gültige 9×9-FENs).
+
 ### Added / Improved (UI-B — Mobile & Flow)
 
 - **Bottom-Sheets:** Shop mit Sheet-Handle; Action-„Mehr“ auf Mobile als
