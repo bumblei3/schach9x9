@@ -25,7 +25,7 @@ import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { getHeatmapUI, HeatmapUI } from './ui/HeatmapUI.js';
 import { showPostGameStats } from './ui/PostGameAnalysisUI.js';
-import { renderMaterialGraph } from './ui/GameStatusUI.js';
+import { renderMaterialGraph, renderMoveTimeGraph } from './ui/GameStatusUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
@@ -1017,6 +1017,10 @@ export class GameController {
       // Render + show the material-balance chart (solo only)
       if (this.game.moveHistory && this.game.moveHistory.length > 0) {
         renderMaterialGraph(this.game);
+      }
+      // Render + show the move-time chart (solo only)
+      if (this.game.moveHistory && this.game.moveHistory.length > 0) {
+        renderMoveTimeGraph(this.game);
       }
     }
 

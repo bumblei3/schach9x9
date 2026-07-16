@@ -29,6 +29,7 @@ export async function executeMove(
   isUndoRedo: boolean = false,
   promotionType?: string
 ): Promise<void> {
+  const moveStartTime = Date.now();
   // Clear redo stack if this is a new move
   if (!isUndoRedo) {
     moveController.redoStack = [];
@@ -251,6 +252,10 @@ export async function executeMove(
       }
     }
   }
+
+  // Record how long this move took to execute (AI thinking time / player
+  // execution time). Stored on the history entry for the move-time chart.
+  moveRecord.timeUsed = Date.now() - moveStartTime;
 
   await completeMoveExecution(game, moveController, moveRecord);
 }
