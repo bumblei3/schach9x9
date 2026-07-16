@@ -6,7 +6,8 @@ import { BOARD_SIZE, PHASES, PIECE_VALUES } from '../config.js';
 import { renderBoard } from './BoardRenderer.js';
 import { getOpeningName } from '../ai/OpeningDatabase.js';
 import { openingBookUI } from './OpeningBookUI.js';
-import type { Game, PieceWithMoved } from '../gameEngine.js';
+import type { Game, PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
+import { computeMaterialSeries } from '../analyze/materialSeries.js';
 import type { Square } from '../types/game.js';
 
 interface SavedGameState {
@@ -328,6 +329,56 @@ export function renderEvalGraph(game: Game): void {
     });
     svg.dataset.hasListener = 'true';
   }
+}
+
+/**
+ * Renders the material-balance graph (white vs black material over the game)
+ * into #material-graph. Mirrors renderEvalGraph but plots the material DIFF
+ * (whiteMaterial - blackMaterial in centi-pawns) instead of the engine eval.
+ */
+export function renderMaterialGraph(game: Game): void {
+  const container = document.getElementById('material-graph-container');
+  const svg = document.getElementById('material-graph') as unknown as SVGSVGElement & {
+    dataset: Record<string, string>;
+  };
+  if (!container || !svg) return;
+  if (game.phase === PHASES.ANALYSIS || game.phase === PHASES.GAME_OVER)
+    container.classList.remove('hidden');
+  const history = game.moveHistory;
+  if (history.length === 0) {
+    svg.innerHTML = '';
+    return;
+  }
+  const series = computeMaterialSeries(history as MoveHistoryEntry[]);
+  const scores = series.points.map(p => p.diff);
+  const width = 1000,
+    height = 100,
+    centerY = height / 2,
+    maxDiff = 2000; // centi-pawns; clamp large material swings
+  const points = scores.map((score, i) => {
+    const x = (i / (scores.length - 1)) * width;
+    const norm = Math.max(-maxDiff, Math.min(maxDiff, score));
+    const y = centerY - (norm / maxDiff) * (height / 2);
+    return { x, y, score, index: i - 1 };
+  });
+  let svgContent = `<defs><linearGradient id="mat-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#4ade80;stop-opacity:1" /><stop offset="50%" style="stop-color:#fbbf24;stop-opacity:1" /><stop offset="100%" style="stop-color:#f87171;stop-opacity:1" /></linearGradient></defs><line x1="0" y1="${centerY}" x2="${width}" y2="${centerY}" class="eval-zero-line" />`;
+  if (points.length > 1) {
+    let areaPath = `M ${points[0].x} ${centerY} `;
+    points.forEach(p => {
+      areaPath += `L ${p.x} ${p.y} `;
+    });
+    areaPath += `L ${points[points.length - 1].x} ${centerY} Z`;
+    svgContent += `<path d="${areaPath}" class="eval-area" />`;
+    let linePath = `M ${points[0].x} ${points[0].y} `;
+    for (let i = 1; i < points.length; i++) linePath += `L ${points[i].x} ${points[i].y} `;
+    svgContent += `<path d="${linePath}" class="eval-line" />`;
+  }
+  points.forEach((p, i) => {
+    const skip = Math.ceil(points.length / 50);
+    if (i % skip === 0 || i === points.length - 1)
+      svgContent += `<circle cx="${p.x}" cy="${p.y}" r="3" class="eval-point" data-index="${p.index}"><title>Zug ${i}: ${p.score > 0 ? '+' : ''}${(p.score / 100).toFixed(2)} (weiß)</title></circle>`;
+  });
+  svg.innerHTML = svgContent;
 }
 
 /**
