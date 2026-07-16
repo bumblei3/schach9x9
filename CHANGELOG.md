@@ -5,6 +5,23 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added (Solo UX — Material Chart)
+
+- **Material-Verlauf-Grafik (#6 Statistiken):** nach einem Solo-Spiel (nicht
+  Campaign) wird die Material-Bilanz (weiß − schwarz in Zentibauern) über
+  alle Züge als SVG-Kurve in `#material-graph` gezeichnet — zeigt wer wann
+  Material gewann/verlor.
+  - `js/analyze/materialSeries.ts`: pure `computeMaterialSeries()` (kein DOM,
+    voll unit-getestet) — trackt Material kumulativ aus `moveHistory`
+    (Captures senken die verlierende Seite, Promotion hebt die eigene),
+    ermittelt finalen Diff + beste Weiß/Schwarz-Position.
+  - `renderMaterialGraph()` in `js/ui/GameStatusUI.ts`: spiegelt
+    `renderEvalGraph`, plotter aber den Material-Diff statt der Engine-Eval.
+  - `gameController.handleGameEnd` ruft es nach Solo-Spielen auf.
+  - `e2e/material-chart.spec.ts`: echter Browser-Test (Playwright) — Container
+    sichtbar, SVG mit geplotteter Kurve. Der E2E-Gate fing einen falschen
+    `toHaveCount(expect.any())`-Matcher ab, den Unit-Tests nicht bemerkt hätten.
+
 ### Added (Solo UX — Move-Activity Heatmap)
 
 - **Feld-Hitze-Panel (#6 Statistiken):** nach einem Solo-Spiel (nicht
