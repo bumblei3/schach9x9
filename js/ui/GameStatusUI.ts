@@ -382,6 +382,42 @@ export function renderMaterialGraph(game: Game): void {
 }
 
 /**
+ * Renders the move-time chart (execution time per move, in seconds) into
+ * #move-time-graph. Mirrors the other post-game charts but draws bars
+ * (one per move) instead of a line, since move time is a discrete per-move
+ * value rather than a continuous series.
+ */
+export function renderMoveTimeGraph(game: Game): void {
+  const container = document.getElementById('move-time-graph-container');
+  const svg = document.getElementById('move-time-graph') as unknown as SVGSVGElement & {
+    dataset: Record<string, string>;
+  };
+  if (!container || !svg) return;
+  if (game.phase === PHASES.ANALYSIS || game.phase === PHASES.GAME_OVER)
+    container.classList.remove('hidden');
+  const history = game.moveHistory;
+  if (history.length === 0) {
+    svg.innerHTML = '';
+    return;
+  }
+  const times = history.map(m => ((m as { timeUsed?: number }).timeUsed ?? 0) / 1000); // seconds
+  const width = 1000,
+    height = 100;
+  const maxTime = Math.max(1, ...times); // avoid divide-by-zero
+  const barW = width / times.length;
+  let svgContent = `<line x1="0" y1="${height - 1}" x2="${width}" y2="${height - 1}" class="eval-zero-line" />`;
+  times.forEach((t, i) => {
+    const h = (t / maxTime) * (height - 4);
+    const x = i * barW;
+    const y = height - h;
+    const color = t > maxTime * 0.66 ? '#f87171' : t > maxTime * 0.33 ? '#fbbf24' : '#4ade80';
+    svgContent += `<rect x="${x + 1}" y="${y}" width="${Math.max(0.5, barW - 2)}" height="${Math.max(0.5, h)}" fill="${color}" class="time-bar" data-index="${i}"><title>Zug ${i + 1}: ${t.toFixed(2)}s</title></rect>`;
+  });
+  svg.innerHTML = svgContent;
+}
+
+
+/**
  * Aktualisiert die Statistiken.
  */
 export function updateStatistics(game: Game): void {

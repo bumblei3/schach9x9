@@ -5,6 +5,22 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added (Solo UX — Move-Time Chart)
+
+- **Zug-Zeit-Diagramm (#6 Statistiken):** nach einem Solo-Spiel (nicht
+  Campaign) wird die Ausführungszeit pro Zug (in Sekunden) als Balken-Diagramm
+  in `#move-time-graph` gezeichnet — lange Züge (KI-Denkzeit / komplexe
+  Stellungen) rot, mittlere gelb, schnelle grün.
+  - `js/move/MoveExecutor.ts`: `moveRecord.timeUsed` wird jetzt bei jedem
+    Zug gemessen (`Date.now()` am `executeMove`-Start, Dauer vor `push` in
+    `moveHistory`). Das Feld war zuvor im Interface deklariert, aber TOT
+    (niemand hat es befüllt) — PGN-Export nutzte es nie.
+  - `renderMoveTimeGraph()` in `js/ui/GameStatusUI.ts`: zeichnet pro Zug
+    einen Balken (Farbe nach Dauer), spiegelt die anderen Post-Game-Charts.
+  - `gameController.handleGameEnd` ruft es nach Solo-Spielen auf.
+  - `e2e/move-time-chart.spec.ts`: echter Browser-Test (Playwright) —
+    Container sichtbar, `timeUsed` erfasst, ≥1 Balken gerendert.
+
 ### Added (Solo UX — Material Chart)
 
 - **Material-Verlauf-Grafik (#6 Statistiken):** nach einem Solo-Spiel (nicht
