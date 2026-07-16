@@ -619,6 +619,26 @@
           </div>
 
           <!-- Opening Book Panel -->
+          <div id="move-heatmap-panel" class="analysis-panel hidden">
+            <div class="opening-book-header">
+              <h3>Feld-Hitze (Zug-Aktivität)</h3>
+              <button id="close-heatmap-btn" class="close-icon-btn">×</button>
+            </div>
+            <div class="heatmap-body">
+              <p class="heatmap-hint">
+                Wie oft jedes Feld als Zug-Ursprung (von) oder Ziel (nach) genutzt wurde.
+              </p>
+              <div id="heatmap-grid" class="heatmap-grid" role="grid" aria-label="Zug-Hitze Karte"></div>
+              <div class="heatmap-legend">
+                <span>wenig</span>
+                <span class="heatmap-legend-bar"></span>
+                <span>viel</span>
+              </div>
+              <p id="heatmap-hottest" class="heatmap-hottest"></p>
+            </div>
+          </div>
+
+          <!-- Opening Book Panel -->
           <div id="opening-book-panel" class="opening-book-panel hidden">
             <div class="opening-book-header">
               <h3>Eröffnungsbuch</h3>

@@ -5,6 +5,22 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
+### Added (Solo UX — Move-Activity Heatmap)
+
+- **Feld-Hitze-Panel (#6 Statistiken):** nach einem Solo-Spiel (nicht
+  Campaign) öffnet sich automatisch ein 9×9-Heatmap-Panel, das pro Feld
+  zählt, wie oft es als Zug-Ursprung (von) oder Ziel (nach) genutzt wurde.
+  Zeigt das aktivste Feld und färbt das Brett nach Intensität.
+  - `js/analyze/heatmap.ts`: pure `computeHeatmap()` (kein DOM, voll
+    unit-getestet) — zählt from/to pro Quadrat, ermittelt heißestes Feld +
+    maxCount zur Normalisierung.
+  - `js/ui/HeatmapUI.ts`: rendert das Grid in `#move-heatmap-panel`,
+    spiegelt Reihen für Weiß-Sicht (weiß unten).
+  - `gameController.handleGameEnd` rendert + zeigt das Panel (Solo-only).
+  - `e2e/heatmap.spec.ts`: echter Browser-Test (Playwright) — Panel sichtbar,
+    81 Zellen, Intensität > 0 nach gespieltem Zug. Dieser E2E-Gate fing einen
+    falschen Start-Zellen-Selektor ab, den Unit-Tests nicht bemerkt hätten.
+
 ### Fixed (Engine Strength Gate — matchRefs)
 
 - **Kritischer FEN-Bug im Stärke-Gate behoben:** `matchRefs.playGame()` baute
