@@ -12,7 +12,7 @@
  */
 
 import { describe, test, expect } from 'vitest';
-import { evaluate, EVAL_VALUES } from '../js/evaluate.js';
+import { evaluate, EVAL_VALUES, buildCenteredPST, PSQT_CENTER } from '../js/evaluate.js';
 import {
   WHITE_PAWN,
   WHITE_ROOK,
@@ -93,6 +93,36 @@ describe('evaluate — symmetric position is balanced', () => {
     expect(Math.abs(fromWhite)).toBeLessThan(50);
     expect(Math.abs(fromBlack)).toBeLessThan(50);
     expect(fromBlack).toBeCloseTo(-fromWhite, -1);
+  });
+});
+
+describe('evaluate — H-P1 centered PSQT geometry', () => {
+  test('buildCenteredPST peaks at the true 9x9 center (4,4)', () => {
+    const t = buildCenteredPST(30, -10, 2);
+    expect(t).toHaveLength(81);
+    const centerIdx = PSQT_CENTER.r * 9 + PSQT_CENTER.c;
+    expect(t[centerIdx]).toBe(30);
+    // Corners are edges
+    expect(t[0]).toBe(-10);
+    expect(t[8]).toBe(-10);
+    expect(t[72]).toBe(-10);
+    expect(t[80]).toBe(-10);
+    // Center strictly better than a near-edge square
+    expect(t[centerIdx]).toBeGreaterThan(t[1 * 9 + 1]!);
+  });
+
+  test('a knight on e5 (center) outscores a knight in the corner (same material)', () => {
+    const corner = emptyBoard();
+    corner[idx(4, 0)] = BLACK_KING;
+    corner[idx(8, 8)] = WHITE_KING;
+    corner[idx(0, 0)] = WHITE_KNIGHT;
+
+    const center = emptyBoard();
+    center[idx(4, 0)] = BLACK_KING;
+    center[idx(8, 8)] = WHITE_KING;
+    center[idx(4, 4)] = WHITE_KNIGHT;
+
+    expect(evaluate(center, COLOR_WHITE)).toBeGreaterThan(evaluate(corner, COLOR_WHITE));
   });
 });
 

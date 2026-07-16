@@ -55,7 +55,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 | **H3** – `MAX_SEARCH_TIME` 3s→5s      | tiefere Suche pro Zug (stärker, längere UI-Blockade) | ✅ v1.4.2 |
 | **H-Q1** – Quiescence Delta-Pruning   | sound: schneidet aussichtslose QSearch-Zweige ab     | ✅ v1.5.0 |
 | **H-Q2** – Quiescence Check-Extension | reverted: bei fester Zeit messbar schwächer (8:5 im Baseline-Match) | ↩️ revertiert |
-| **H-P1** – PSQT für 9x9 schärfen      | stärkere statische Bewertung (riskant, in Arbeit)    | ⏳ offen  |
+| **H-P1** – PSQT für 9x9 zentrieren    | Center-(4,4)-PST für Minor/Fairy; Bauern/King separat | ✅ Unreleased |
 
 **Regression-Gates** (müssen alle grün sein, bevor ein Hebel gemergt wird):
 
@@ -229,9 +229,9 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
   gemergt. Match-Infra (tactical FENs + material-Gate) zeigt: Hebel sind
   sound, aber bei fester Zeit/Depth 5 nicht messbar stärker (40 Partien
   15:15 equal)._
-- **H-P1 — PSQT für 9x9 schärfen:** der einzige noch offene Engine-Hebel.
-  Stärkere statische Bewertung via Piece-Square-Tables; als riskant +
-  schwer messbar eingestuft (Foundation-first: nur mit Regression-Gate).
+- **H-P1 — PSQT für 9x9 zentrieren:** ✅ umgesetzt (`buildCenteredPST`, Peak
+  bei (4,4) für N/B/R/Q/A/C/E; Bauern rang-basiert, König-MG unverändert).
+  Follow-up: optionales NEW-vs-OLD `matchRefs`-Match bei Bedarf.
 - **Daily Puzzle v1.1.0: Engine-Zugvorschläge + Varianten** — _Status:
   verifiziert (PR #121, E2E im echten Browser). Das Tutor-System liefert
   Top-Züge + PV-Varianten; im Puzzle-Modus via Hint-Button/`h` verfügbar._

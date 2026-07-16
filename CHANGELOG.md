@@ -5,19 +5,31 @@ Generiert aus den Git-Commits via `npm run changelog`.
 
 ## [Unreleased]
 
-### Added / Improved (Tutor — „Warum war das gut/schlecht?“)
+### Added / Improved (Engine — H-P1 PSQT 9×9)
+
+- **H-P1 Piece-Square-Tables zentriert auf (4,4):** Springer, Läufer, Turm,
+  Dame, Erzbischof, Kanzler und Engel nutzen `buildCenteredPST()` mit Peak
+  am echten 9×9-Zentrum (alte 8×8-Lifts peakten ~3.5). **Bauern** bleiben
+  rang-basiert (Promotion), **König-Mittelspiel** behält Rochade-Ecken.
+- Export: `buildCenteredPST`, `PSQT_CENTER` + Invariant-Tests (Peak +
+  Knight center > corner).
+
+### Added / Improved (Tutor — „Warum war das gut/schlecht?“ + Alternative)
 
 - **Erklärung nach jedem eigenen Zug:** Toast + Floating-Panel mit
   Qualitätslabel (Bester Zug / Ungenau / Patzer …) und **1–2 konkreten
   Gründen** (Taktik, Warnung, Strategie) statt nur Badge.
+- **Besserer Zug bei Schwäche:** bei Ungenauigkeit/Fehler/Patzer sucht der
+  Tutor kurz die Engine-Alternative (Brett temporär zurücksetzen), zeichnet
+  einen **grünen Pfeil** + Feld-Highlights und schreibt „Besser war: …“ ins
+  Panel/Toast. `findBetterAlternative()` + `showBetterMoveArrow()`.
 - `buildTutorSummary()` priorisiert Gabel/Schach/hängende Figur vor generischen
   Texten; Fallback je Kategorie.
 - `checkBlunder` zeigt Feedback immer (nicht nur bei ≥3.0-Drop); Blunder-Modal
   nur noch mit KI-Mentor. AI-Schwarz-Züge im Solo werden übersprungen.
 - **Bugfix:** Tutor bekam `piece` nur als Typ-String → `piece.color` war
-  undefined; jetzt volles Piece-Objekt. Notation/Strategie funktionieren
-  post-move (Figur auf Ziel-Feld).
-- CSS: `.tutor-feedback` Panel am unteren Bildrand.
+  undefined; jetzt volles Piece-Objekt + `captured` für Reverse-Search.
+- CSS: `.tutor-feedback`, `.better-move-from/to`.
 
 ### Added / Improved (UX — Check & Illegal Moves)
 

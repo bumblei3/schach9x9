@@ -35,10 +35,13 @@ export async function executeMove(
     moveController.updateUndoRedoButtons();
   }
 
-  // Clear tutor arrows and stale hints when making a move
+  // Clear tutor arrows / better-move highlights and stale hints when making a move
   if (game.arrowRenderer) {
     game.arrowRenderer.clearArrows();
   }
+  document
+    .querySelectorAll?.('.cell.better-move-from, .cell.better-move-to')
+    .forEach(el => el.classList.remove('better-move-from', 'better-move-to'));
   game.bestMoves = [];
 
   const piece = game.board[from.r][from.c] as PieceWithMoved;
@@ -274,13 +277,14 @@ export async function completeMoveExecution(
   UI.updateMoveHistoryUI(game);
   UI.updateStatus(game);
 
-  // Tutor: move quality + explanation (needs full piece with color)
+  // Tutor: move quality + explanation (needs full piece with color + capture)
   if (game.tutorController?.checkBlunder && moveRecord.piece) {
     const moveRecordForTutor: MoveRecord = {
       from: moveRecord.from,
       to: moveRecord.to,
       piece: moveRecord.piece as Piece,
       evalScore: moveRecord.evalScore,
+      captured: (moveRecord.captured as Piece | null | undefined) ?? null,
     };
     await game.tutorController.checkBlunder(moveRecordForTutor);
   }

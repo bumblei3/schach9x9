@@ -872,6 +872,7 @@ function createMockHints(game: Game, turnColor: 'white' | 'black'): TutorHint[] 
       category: index === 0 ? 'best' : 'good',
       qualityLabel: index === 0 ? '⭐ Bester Zug!' : '✅ Guter Zug',
       summary: index === 0 ? 'Stärkster Zug nach Engine-Bewertung.' : 'Solider Zug.',
+      betterMove: null,
       tacticalExplanations: [],
       strategicExplanations: ['Mock hint for e2e testing'],
       warnings: [],
