@@ -4,6 +4,7 @@
  */
 import { PHASES } from '../config.js';
 import { updateShopUI } from './ShopUI.js';
+import { showToast } from '../ui.js';
 import type { Game } from '../gameEngine.js';
 import type { MoveExplanation } from '../tutor/MoveAnalyzer.js';
 import type { MoveResult } from '../aiEngine.js';
@@ -246,14 +247,10 @@ export async function showTutorSuggestions(
         // Instead of an alert, we could show a toast or just a log
         console.log('[TutorUI] No hints available yet.');
         // Show user-friendly toast
-        import('../ui.js')
-          .then(ui => {
-            ui.showToast(
-              'Keine Vorschläge verfügbar. Möglicherweise ist die KI noch am Denken oder es gibt keine legalen Züge.',
-              'info'
-            );
-          })
-          .catch(() => {});
+        showToast(
+          'Keine Vorschläge verfügbar. Möglicherweise ist die KI noch am Denken oder es gibt keine legalen Züge.',
+          'info'
+        );
         return;
       }
 
