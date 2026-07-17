@@ -192,6 +192,16 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             <svg id="eval-graph" preserveAspectRatio="none" viewBox="0 0 1000 100"></svg>
           </div>
 
+          <!-- Material Balance Graph -->
+          <div id="material-graph-container" class="eval-graph-container hidden">
+            <svg id="material-graph" preserveAspectRatio="none" viewBox="0 0 1000 100"></svg>
+          </div>
+
+          <!-- Move Time Graph -->
+          <div id="move-time-graph-container" class="eval-graph-container hidden">
+            <svg id="move-time-graph" preserveAspectRatio="none" viewBox="0 0 1000 100"></svg>
+          </div>
+
           <!-- Player Info / Clock -->
           <div class="player-info self">
             <div class="player-details">
@@ -388,6 +398,26 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           </div>
 
           <!-- Opening Book Panel -->
+          <div id="move-heatmap-panel" class="analysis-panel hidden">
+            <div class="opening-book-header">
+              <h3>Feld-Hitze (Zug-Aktivität)</h3>
+              <button id="close-heatmap-btn" class="close-icon-btn">×</button>
+            </div>
+            <div class="heatmap-body">
+              <p class="heatmap-hint">
+                Wie oft jedes Feld als Zug-Ursprung (von) oder Ziel (nach) genutzt wurde.
+              </p>
+              <div id="heatmap-grid" class="heatmap-grid" role="grid" aria-label="Zug-Hitze Karte"></div>
+              <div class="heatmap-legend">
+                <span>wenig</span>
+                <span class="heatmap-legend-bar"></span>
+                <span>viel</span>
+              </div>
+              <p id="heatmap-hottest" class="heatmap-hottest"></p>
+            </div>
+          </div>
+
+          <!-- Opening Book Panel -->
           <div id="opening-book-panel" class="opening-book-panel hidden">
             <div class="opening-book-header">
               <h3>Eröffnungsbuch</h3>
@@ -440,7 +470,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             </div>
 
             <!-- Tutor Recommendations Section -->
-            <div id="tutor-recommendations-section" class="tutor-recommendations-section">
+            <div id="tutor-recommendations-section" class="tutor-recommendations-section hidden">
               <button id="toggle-tutor-recommendations" class="btn-secondary full-width" style="padding: 8px; font-size: 0.9rem; margin-bottom: 1rem">
                 💡 KI-Vorlagen anzeigen
               </button>
@@ -1072,7 +1102,7 @@ exports[`Visual DOM Snapshot Tests > Shop panel snapshot 1`] = `
             </div>
 
             <!-- Tutor Recommendations Section -->
-            <div id="tutor-recommendations-section" class="tutor-recommendations-section">
+            <div id="tutor-recommendations-section" class="tutor-recommendations-section hidden">
               <button id="toggle-tutor-recommendations" class="btn-secondary full-width" style="padding: 8px; font-size: 0.9rem; margin-bottom: 1rem">
                 💡 KI-Vorlagen anzeigen
               </button>

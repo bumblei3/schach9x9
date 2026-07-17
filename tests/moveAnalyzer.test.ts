@@ -143,7 +143,7 @@ describe('MoveAnalyzer', () => {
       const move = { from: { r: 6, c: 3 }, to: { r: 4, c: 4 } };
       const notation = MoveAnalyzer.getMoveNotation(game as any, move);
 
-      expect(notation).toContain('nach');
+      expect(notation).toContain('→');
       expect(notation).toContain('e5');
     });
 

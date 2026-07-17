@@ -263,15 +263,16 @@ describe('Controllers Coverage Expansion', () => {
         piece: { color: 'white' },
       };
       game.lastEval = 0;
+      game.kiMentorEnabled = true; // Modal only fires when KI-Mentor enabled
       game.board[6][4] = { type: 'p', color: 'white' };
+
+      // checkBlunder warns via tutorController.showBlunderWarning (not UI.showModal)
+      const showBlunderWarning = vi.fn();
+      tc.showBlunderWarning = showBlunderWarning;
 
       await tc.checkBlunder(moveRecord);
 
-      expect(UI_MOCK.showModal).toHaveBeenCalledWith(
-        expect.stringContaining('Fehler'),
-        expect.any(String),
-        expect.any(Array)
-      );
+      expect(showBlunderWarning).toHaveBeenCalled();
     });
 
     test('detectTacticalPatterns should detect fork', () => {

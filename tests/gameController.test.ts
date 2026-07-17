@@ -83,7 +83,20 @@ vi.mock('../js/storage.js', () => ({ storageManager }));
 vi.mock('../js/aiEngine.js', () => ({ PIECE_KING: 6, PIECE_QUEEN: 8 }));
 
 // Minimal DOM + storage stubs so getElementById / localStorage never throw.
-const noopEl = { textContent: '', classList: { add: vi.fn(), remove: vi.fn() }, checked: false, value: '' };
+const noopEl = {
+  textContent: '',
+  classList: { add: vi.fn(), remove: vi.fn() },
+  checked: false,
+  value: '',
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  querySelector: () => noopEl,
+  querySelectorAll: () => [] as any[],
+  appendChild: vi.fn(),
+  setAttribute: vi.fn(),
+  getAttribute: () => null,
+  style: {},
+};
 const noopSelect = { value: '', forEach: (cb: (e: any) => void) => cb(noopSelect) };
 vi.stubGlobal('document', {
   getElementById: () => noopEl,

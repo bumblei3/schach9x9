@@ -96,6 +96,7 @@ describe('TutorController Extra Coverage', () => {
   describe('checkBlunder', () => {
     test('should detect blunder for white (heavy eval drop)', async () => {
       game.lastEval = 100; // White is +1.0
+      game.kiMentorEnabled = true; // Modal only fires when KI-Mentor enabled
       const moveRecord = {
         from: { r: 6, c: 4 },
         to: { r: 4, c: 4 },
@@ -108,6 +109,7 @@ describe('TutorController Extra Coverage', () => {
       // Mock analysis results and internal calls
       tutor.analyzeMoveWithExplanation = vi.fn(() => ({
         title: 'Blunder',
+        category: 'blunder',
         tacticalExplanations: [],
         warnings: [],
       }));
