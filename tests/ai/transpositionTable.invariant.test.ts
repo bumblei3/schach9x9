@@ -127,21 +127,21 @@ describe('Zobrist hashing — avalanche / diffusion', () => {
 });
 
 describe('Zobrist hashing — index folding & collisions', () => {
-  const TT_MASK = (1 << 18) - 1;
+  const TT_MASK = (1 << 20) - 1;
 
-  test('TT index is always within [0, 2^18)', () => {
+  test('TT index is always within [0, 2^20)', () => {
     for (let i = 0; i < 50; i++) {
       const sq = (i * 7) % SQUARE_COUNT;
       const h = computeZobristHash(boardWith(sq, PIECE_PAWN, COLOR_WHITE), COLOR_WHITE);
       const idx = (h >>> 0) & TT_MASK;
       expect(idx).toBeGreaterThanOrEqual(0);
-      expect(idx).toBeLessThan(1 << 18);
+      expect(idx).toBeLessThan(1 << 20);
     }
   });
 
-  test('distinct full-length hashes that alias in the low 18 bits collide in index', () => {
-    const hA = 0x0000a; // low 18 bits = 0xa
-    const hB = (1 << 18) | 0x000a; // next bucket up, same low 18 bits
+  test('distinct full-length hashes that alias in the low 20 bits collide in index', () => {
+    const hA = 0x0000a; // low 20 bits = 0xa
+    const hB = (1 << 20) | 0x000a; // next bucket up, same low 20 bits
     expect((hA >>> 0) & TT_MASK).toBe((hB >>> 0) & TT_MASK);
   });
 
@@ -227,9 +227,9 @@ describe('TranspositionTable — depth-preferred replacement rule', () => {
   });
 
   test('a shallower re-store with a DIFFERENT hash at the same index does NOT replace', () => {
-    // Choose two hashes that alias to the same low-18-bit index but differ.
+    // Choose two hashes that alias to the same low-20-bit index but differ.
     const h1 = 0x0000a;
-    const h2 = (1 << 18) | 0x000a; // same index, different full hash
+    const h2 = (1 << 20) | 0x000a; // same index, different full hash
     tt.store(h1, 10, 100, 'exact', { from: 1, to: 2 });
     tt.store(h2, 2, 999, 'lower', { from: 3, to: 4 }); // shallow + mismatched hash
     // depth 2 < stored 10 and hash differs => no replacement
@@ -239,7 +239,7 @@ describe('TranspositionTable — depth-preferred replacement rule', () => {
 
   test('a deeper re-store at the same index (different hash) DOES replace', () => {
     const h1 = 0x0000a;
-    const h2 = (1 << 18) | 0x000a;
+    const h2 = (1 << 20) | 0x000a;
     tt.store(h1, 3, 100, 'exact', null);
     tt.store(h2, 7, 777, 'upper', null); // deeper, replaces shallow entry
     // Now probing the new hash returns the deeper score; probing old hash misses.
@@ -308,7 +308,7 @@ describe('TranspositionTable — index collision accounting', () => {
 
   test('two aliasing hashes occupy one logical slot and size counts it once', () => {
     const h1 = 0x0000f;
-    const h2 = (1 << 18) | 0x000f; // same index
+    const h2 = (1 << 20) | 0x000f; // same index
     tt.store(h1, 5, 11, 'exact', null);
     tt.store(h2, 5, 22, 'exact', null); // same depth => replaces
     expect(tt.size()).toBe(1);
