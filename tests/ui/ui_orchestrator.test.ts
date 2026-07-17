@@ -29,6 +29,7 @@ describe('UI Orchestrator - Animation Tests', () => {
         add: vi.fn(),
         remove: vi.fn(),
       },
+      querySelector: vi.fn(() => null),
     };
 
     vi.spyOn(document, 'querySelector').mockImplementation(() => elementMock);

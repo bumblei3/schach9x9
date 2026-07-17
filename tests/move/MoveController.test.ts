@@ -16,6 +16,7 @@ vi.mock('../../js/campaign/CampaignManager.js', () => ({
 vi.mock('../../js/ui.js', () => ({
   renderBoard: vi.fn(),
   showPromotionUI: vi.fn(),
+  showInvalidMoveFeedback: vi.fn(),
 }));
 
 // --- Imports (top-level; esm) -------------------------------------------
