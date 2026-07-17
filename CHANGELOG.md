@@ -3,7 +3,7 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
-## [Unreleased]
+## [1.5.1] – 2026-07-17
 
 ### Added (Solo UX — Move-Time Chart)
 
@@ -195,7 +195,14 @@ data-init-mode>` + `DOMHandler.initGameModeCards()` (a11y/testbar).
 
 ## [1.5.0] – 2026-07-14
 
-Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
+Engine-Stärkung (Eval/Quiescence) — H-Q1 (sound) + Match-Tooling.
+
+> **Korrektur (2026-07-17):** H-Q2 (Quiescence Check-Extension) wurde
+> **nicht** released. Ein reparierter Stärke-Gate-Match (NEW H-Q1+H-Q2 vs
+> OLD H-Q1-only, 24 taktische 9×9-FENs, elo 1600) zeigte H-Q2 **macht die
+> Engine schwächer** (5 NEW wins vs 8 OLD wins). H-Q2 wurde daher in
+> `[Unreleased]` revertiert (siehe unten). Dieser Release enthält nur
+> H-Q1 (Delta-Pruning, sound) + das Regression-Gate-Tooling.
 
 ### Suche / Quiescence
 
@@ -204,9 +211,6 @@ Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
   wertvollste nicht-königliche Capture + Beförderung kann den Score nicht
   über `alpha` heben. Kein Stärkeverlust möglich, spart aussichtslose
   QSearch-Tiefe.
-- `search.ts` `quiesce()`: Check-Extension (H-Q2). Steht die Seite am Zug
-  im Schach, werden ALLE Legal-Moves (1 Ply) statt nur Captures durchsucht,
-  um den Horizon-Effekt bei erzwungenen Schachsequenzen zu vermeiden.
 
 ### Tooling (Regression-Gates)
 
@@ -221,11 +225,6 @@ Engine-Stärkung (Eval/Quiescence) — H-Q1 + H-Q2.
 - Asymmetrie-Probe (16 Partien): VERDICT SYMMETRIC, 0 crashes.
 - `npx vitest run`: 223 Files / 2819 Tests passed (keine Regression).
 - `npx tsc --noEmit` + eslint sauber.
-- Ref-Match (neu H-Q1+H-Q2 vs alt IIR-Stand, 8 Partien, elo 1600):
-  NEW 0 / OLD 0 / Draw 8 — equal, keine OLD-Wins (kein Stärkeverlust).
-  Hinweis: bei elo 1600 enden beide Engines sehr solide (viele Remis);
-  der Match ist nicht sensitiv genug, um den H-Q2-Gewinn zu quantifizieren.
-  Beide Hebel sind per Konstruktion sound.
 
 ## [1.4.2] – 2026-07-14
 
