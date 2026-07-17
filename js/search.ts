@@ -56,7 +56,7 @@ function quiesce(
 ): number {
   nodes.count++;
 
-  if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+  if (nodes.count % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
     return evaluate(b, c, evalConfig);
   }
 
@@ -235,7 +235,7 @@ function probcut(
     const move = probcutMoves[i];
     const undo = makeMoveInt(board, move);
     nodes.count++;
-    if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+    if (nodes.count % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
       undoMoveInt(board, undo);
       return false;
     }
@@ -303,7 +303,7 @@ function isSingularMove(
 
     const undo = makeMoveInt(board, move);
     nodes.count++;
-    if (nodes.count % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+    if (nodes.count % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
       undoMoveInt(board, undo);
       return false;
     }
@@ -373,7 +373,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         isRoot: boolean = false
       ): { score: number; bestMove: Move | null } {
         nodes++;
-        if (nodes % 1000 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+        if (nodes % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
           return { score: evaluate(b, color, evalConfig), bestMove: null };
         }
 
