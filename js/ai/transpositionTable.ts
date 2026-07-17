@@ -123,10 +123,10 @@ export interface TTEntry {
 
 /**
  * Fixed-size transposition table using Zobrist hash as index.
- * Size: 2^18 = 262144 entries (~4MB with packed entries).
+ * Size: 2^20 = 1048576 entries (~16MB with packed entries).
  * Replacement: depth-preferred (replace if new depth >= stored depth, or same slot).
  */
-const TT_SIZE = 1 << 18; // 262144 entries
+const TT_SIZE = 1 << 20; // 1048576 entries (~16MB with packed entries; raised 1<<18->1<<20 for fewer collisions at depth)
 const TT_MASK = TT_SIZE - 1;
 
 // Pre-allocated arrays for cache-friendly access
