@@ -35,9 +35,9 @@ export interface VariantNode {
 /** Return a shallow-cloned board with `move` applied. Does NOT mutate input. */
 function applyMove(
   board: (Piece | null)[][],
-  move: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: PieceType },
+  move: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: PieceType }
 ): (Piece | null)[][] {
-  const next = board.map((row) => row.map((p) => (p ? { ...p } : null)));
+  const next = board.map(row => row.map(p => (p ? { ...p } : null)));
   const piece = next[move.from.r]?.[move.from.c];
   if (!piece) return next;
   const moved: Piece = { ...piece, hasMoved: true };
@@ -49,7 +49,11 @@ function applyMove(
 
 function toFullMove(
   board: (Piece | null)[][],
-  result: { from: { r: number; c: number }; to: { r: number; c: number }; promotion?: string | PieceType },
+  result: {
+    from: { r: number; c: number };
+    to: { r: number; c: number };
+    promotion?: string | PieceType;
+  }
 ): Move | null {
   const from = result.from;
   const to = result.to;
@@ -66,7 +70,7 @@ export async function buildVariantTree(
   uiBoard: (Piece | null)[][],
   turnColor: 'white' | 'black',
   count = 3,
-  depth = 2,
+  depth = 2
 ): Promise<VariantNode[]> {
   const rootResults = await getTopMoves(uiBoard, turnColor, count, depth);
 

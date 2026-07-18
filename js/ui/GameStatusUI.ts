@@ -175,11 +175,8 @@ export function updateStatus(game: Game): void {
       break;
     case PHASES.PLAY: {
       const side = game.turn === 'white' ? 'Weiß' : 'Schwarz';
-      const inCheck =
-        typeof game.isInCheck === 'function' ? game.isInCheck(game.turn) : false;
-      text = inCheck
-        ? `⚠️ SCHACH — ${side} am Zug`
-        : `Spiel läuft - ${side} am Zug`;
+      const inCheck = typeof game.isInCheck === 'function' ? game.isInCheck(game.turn) : false;
+      text = inCheck ? `⚠️ SCHACH — ${side} am Zug` : `Spiel läuft - ${side} am Zug`;
       statusEl.classList.toggle('status-check-active', !!inCheck);
       break;
     }
@@ -463,16 +460,13 @@ export async function renderVariantTree(game: Game): Promise<void> {
     const line = document.createElement('div');
     line.className = 'variant-root';
     const moveStr = moveToAlgebraic(node.move.from, node.move.to, 9);
-    const contStr = node.continuation
-      .map((m) => moveToAlgebraic(m.from, m.to, 9))
-      .join(' → ');
+    const contStr = node.continuation.map(m => moveToAlgebraic(m.from, m.to, 9)).join(' → ');
     line.textContent =
       `${moveStr} (${node.score >= 0 ? '+' : ''}${node.score})` +
       (contStr ? `  →  ${contStr}` : '');
     root.appendChild(line);
   }
 }
-
 
 /**
  * Aktualisiert die Statistiken.

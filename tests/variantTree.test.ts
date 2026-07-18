@@ -41,7 +41,7 @@ describe('buildVariantTree', () => {
 
   it('does not mutate the input board (pure function)', async () => {
     const board = BoardFactory.createLevel1Board();
-    const snapshot = board.map((row) => row.map((p) => (p ? { ...p } : null)));
+    const snapshot = board.map(row => row.map(p => (p ? { ...p } : null)));
     await buildVariantTree(board, 'white', 2, 1);
     expect(board).toEqual(snapshot);
   });

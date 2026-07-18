@@ -273,9 +273,7 @@ describe('moveToNotation — engine annotations (commented PGN)', () => {
 
   test('generatePGN exports annotations end-to-end when enabled', () => {
     const game = baseGame({
-      moveHistory: [
-        mv({ classification: 'blunder', evalScore: -200, timeUsed: 30 }),
-      ],
+      moveHistory: [mv({ classification: 'blunder', evalScore: -200, timeUsed: 30 })],
     });
     const pgn = generatePGN(game, {}, true);
     expect(pgn).toContain('??');

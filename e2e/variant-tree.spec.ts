@@ -35,8 +35,8 @@ test.describe('variant-tree panel after solo game end', () => {
 
     await page.waitForFunction(
       () =>
-        ((window as unknown as { app: { game: { moveHistory: unknown[] } } }).app.game
-          .moveHistory?.length ?? 0) >= 1,
+        ((window as unknown as { app: { game: { moveHistory: unknown[] } } }).app.game.moveHistory
+          ?.length ?? 0) >= 1,
       { timeout: 15000 }
     );
 
