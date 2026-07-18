@@ -16,7 +16,7 @@
  *   the continuation is derived by re-querying `getTopMoves` for the opponent.
  */
 
-import type { Move, Piece } from '../types/core.js';
+import type { Move, Piece, PieceType } from '../types/core.js';
 import { getTopMoves } from '../aiEngine.js';
 
 export interface VariantNode {
@@ -46,8 +46,6 @@ function applyMove(
   next[move.from.r][move.from.c] = null;
   return next;
 }
-
-type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j' | null;
 
 function toFullMove(
   board: (Piece | null)[][],
