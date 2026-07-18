@@ -235,3 +235,51 @@ describe('generatePGN — headers + result + move numbering', () => {
     expect(pgn).toContain('1. e3 e7 2. d4 e6');
   });
 });
+
+describe('moveToNotation — engine annotations (commented PGN)', () => {
+  function baseGame(over: any = {}): any {
+    return { moveHistory: [], boardShape: 'square', ...over } as any;
+  }
+
+  test('classification blunder renders ??', () => {
+    const notation = moveToNotation(mv({ classification: 'blunder' }), null, true);
+    expect(notation).toContain('??');
+  });
+
+  test('classification mistake renders ?', () => {
+    const notation = moveToNotation(mv({ classification: 'mistake' }), null, true);
+    expect(notation).toContain('?');
+  });
+
+  test('classification brillant renders !!', () => {
+    const notation = moveToNotation(mv({ classification: 'brilliant' }), null, true);
+    expect(notation).toContain('!!');
+  });
+
+  test('evalScore renders [%eval +cp] annotation', () => {
+    const notation = moveToNotation(mv({ evalScore: 123 }), null, true);
+    expect(notation).toContain('[%eval +1.23]');
+  });
+
+  test('negative evalScore keeps its sign', () => {
+    const notation = moveToNotation(mv({ evalScore: -45 }), null, true);
+    expect(notation).toContain('[%eval -0.45]');
+  });
+
+  test('timeUsed renders [%clk m:ss] annotation', () => {
+    const notation = moveToNotation(mv({ timeUsed: 75 }), null, true); // 1:15
+    expect(notation).toContain('[%clk 1:15]');
+  });
+
+  test('generatePGN exports annotations end-to-end when enabled', () => {
+    const game = baseGame({
+      moveHistory: [
+        mv({ classification: 'blunder', evalScore: -200, timeUsed: 30 }),
+      ],
+    });
+    const pgn = generatePGN(game, {}, true);
+    expect(pgn).toContain('??');
+    expect(pgn).toContain('[%eval -2]');
+    expect(pgn).toContain('[%clk 0:30]');
+  });
+});
