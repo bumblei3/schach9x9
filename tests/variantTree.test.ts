@@ -45,4 +45,13 @@ describe('buildVariantTree', () => {
     await buildVariantTree(board, 'white', 2, 1);
     expect(board).toEqual(snapshot);
   });
+
+  it('respects the requested count when that many legal moves exist', async () => {
+    const board = BoardFactory.createLevel1Board();
+    const tree = await buildVariantTree(board, 'white', 2, 1);
+    expect(tree.length).toBe(2);
+    for (const node of tree) {
+      expect(Array.isArray(node.continuation)).toBe(true);
+    }
+  });
 });
