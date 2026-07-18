@@ -455,7 +455,9 @@ export async function renderVariantTree(game: Game): Promise<void> {
   const turn: 'white' | 'black' = game.turn === 'white' ? 'white' : 'black';
   // Awaiting the async KI search before rendering — no isAnimating guard.
   const nodes = await buildVariantTree(board, turn, 3, 2);
+  if (nodes.length === 0) return; // nothing to show; keep panel hidden
 
+  container.classList.remove('hidden');
   root.innerHTML = '';
   for (const node of nodes) {
     const line = document.createElement('div');

@@ -1025,7 +1025,9 @@ export class GameController {
       // Render + show the variant-tree panel (solo only). Async KI search, so
       // fire-and-forget after resign — the panel fills in once it resolves.
       if (this.game.moveHistory && this.game.moveHistory.length > 0) {
-        void renderVariantTree(this.game);
+        void renderVariantTree(this.game).catch((e) =>
+          logger.warn('[GameController] variant-tree render failed:', e),
+        );
       }
     }
 
