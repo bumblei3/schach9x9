@@ -1,0 +1,1 @@
+MATCH aggressive@e2500@d8-d8-vs-solid@e2500 | aggressive@d2500 vs solid@d2500 | GAMES=40 W=8 B=23 D=9 | avgMoves=20.4 avgMaxDepth=6.8 avgNps=9236 | blunders=0 mistakes=0 | eloDiff(W over B)=-137
