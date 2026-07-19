@@ -3,6 +3,24 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.6.0] – 2026-07-19
+
+### Added (Solo UX — Variant Tree)
+
+- **Variantenbaum nach Solo-Partien (#144):** nach Spielende (nicht Campaign)
+  zeigt `#variant-tree` die Top-Kandidaten der Engine inkl. Bewertung und
+  kurzer Best-Reply-Fortsetzung (Opponent-Antwort → eigener Folgezuge).
+  - `js/analyze/variantTree.ts`: pure, DOM-freie Builder-API
+    (`buildVariantTree`) auf Basis von `getTopMoves` (kein PV-Feld — Fortsetzung
+    durch erneute Top-Move-Abfrage nach dem Zug).
+  - `renderVariantTree()` in `js/ui/GameStatusUI.ts`: listet `.variant-root`-
+    Zeilen; Container bleibt versteckt, bis Nodes existieren; Fehler via
+    `.catch` im GameController geloggt.
+  - `gameController.handleGameEnd` startet den async Render nur im Solo-Modus.
+  - Unit-Tests (`tests/variantTree.test.ts`), PGN-Annotationen
+    (classification / evalScore / timeUsed), Playwright-E2E
+    (`e2e/variant-tree.spec.ts`), Plan-Doku unter `docs/plans/`.
+
 ## [1.5.1] – 2026-07-17
 
 ### Added (Solo UX — Move-Time Chart)

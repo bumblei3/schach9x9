@@ -221,6 +221,11 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - [✅] **Landscape-Layout**
 - [✅] **Menü-Cards als Buttons** (`data-init-mode`, kein inline onclick)
 
+**Solo-Analyse (v1.6.0):**
+
+- [✅] **Variant-Tree Panel** — Top-Engine-Kandidaten + Best-Reply-Fortsetzung
+  nach Solo-Spielende (`buildVariantTree` + `#variant-tree`, PR #144)
+
 **Nächste Schritte (offen):**
 
 - **Engine-Stärkung:** tieferer Suchbaum / Quiescence-Tuning / besseres
@@ -232,6 +237,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **H-P1 — PSQT für 9x9 zentrieren:** ✅ umgesetzt (`buildCenteredPST`, Peak
   bei (4,4) für N/B/R/Q/A/C/E; Bauern rang-basiert, König-MG unverändert).
   Follow-up: optionales NEW-vs-OLD `matchRefs`-Match bei Bedarf.
+- **Eröffnungsbuch erweitern** — mehr trainierte 9×9-Positionen für Trainer + KI.
 - **Daily Puzzle v1.1.0: Engine-Zugvorschläge + Varianten** — _Status:
   verifiziert (PR #121, E2E im echten Browser). Das Tutor-System liefert
   Top-Züge + PV-Varianten; im Puzzle-Modus via Hint-Button/`h` verfügbar._
