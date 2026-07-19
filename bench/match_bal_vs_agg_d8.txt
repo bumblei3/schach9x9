@@ -1,0 +1,1 @@
+MATCH balanced@d8-vs-aggressive@d8 | balanced@d8 vs aggressive@d8 | GAMES=40 W=6 B=3 D=31 | avgMoves=41.0 avgMaxDepth=7.0 avgNps=11342 | blunders=0 mistakes=0 | eloDiff(W over B)=26

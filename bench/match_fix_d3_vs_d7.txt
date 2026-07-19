@@ -1,0 +1,1 @@
+MATCH balanced@e2500@d3-d7-vs-balanced@e2500 | balanced@d2500 vs balanced@d2500 | GAMES=24 W=17 B=7 D=0 | avgMoves=6.8 avgMaxDepth=5.0 avgNps=8698 | blunders=0 mistakes=0 | eloDiff(W over B)=154

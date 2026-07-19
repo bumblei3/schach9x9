@@ -294,7 +294,7 @@ export class EngineMatchRunner {
             uiBoard,
             color as 'white' | 'black',
             engineConfig.depth || 6,
-            { elo, personality, maxTimeMs: timeAlloc.allocatedTimeMs },
+            { elo, personality, maxTimeMs: timeAlloc.allocatedTimeMs, maxDepth: engineConfig.depth },
             moveNumber
           );
           engineResult = result;
