@@ -25,7 +25,7 @@ import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { getHeatmapUI, HeatmapUI } from './ui/HeatmapUI.js';
 import { showPostGameStats } from './ui/PostGameAnalysisUI.js';
-import { renderMaterialGraph, renderMoveTimeGraph } from './ui/GameStatusUI.js';
+import { renderMaterialGraph, renderMoveTimeGraph, renderVariantTree } from './ui/GameStatusUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
@@ -1021,6 +1021,13 @@ export class GameController {
       // Render + show the move-time chart (solo only)
       if (this.game.moveHistory && this.game.moveHistory.length > 0) {
         renderMoveTimeGraph(this.game);
+      }
+      // Render + show the variant-tree panel (solo only). Async KI search, so
+      // fire-and-forget after resign — the panel fills in once it resolves.
+      if (this.game.moveHistory && this.game.moveHistory.length > 0) {
+        void renderVariantTree(this.game).catch(e =>
+          logger.warn('[GameController] variant-tree render failed:', e)
+        );
       }
     }
 

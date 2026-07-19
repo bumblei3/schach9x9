@@ -8,6 +8,9 @@ import { getOpeningName } from '../ai/OpeningDatabase.js';
 import { openingBookUI } from './OpeningBookUI.js';
 import type { Game, PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
 import { computeMaterialSeries } from '../analyze/materialSeries.js';
+import { buildVariantTree } from '../analyze/variantTree.js';
+import type { Piece } from '../types/core.js';
+import { moveToAlgebraic } from '../openingTrainer.js';
 import type { Square } from '../types/game.js';
 
 interface SavedGameState {
@@ -172,11 +175,8 @@ export function updateStatus(game: Game): void {
       break;
     case PHASES.PLAY: {
       const side = game.turn === 'white' ? 'Weiß' : 'Schwarz';
-      const inCheck =
-        typeof game.isInCheck === 'function' ? game.isInCheck(game.turn) : false;
-      text = inCheck
-        ? `⚠️ SCHACH — ${side} am Zug`
-        : `Spiel läuft - ${side} am Zug`;
+      const inCheck = typeof game.isInCheck === 'function' ? game.isInCheck(game.turn) : false;
+      text = inCheck ? `⚠️ SCHACH — ${side} am Zug` : `Spiel läuft - ${side} am Zug`;
       statusEl.classList.toggle('status-check-active', !!inCheck);
       break;
     }
@@ -426,6 +426,47 @@ export function renderMoveTimeGraph(game: Game): void {
   svg.innerHTML = svgContent;
 }
 
+/**
+ * Renders the variant-tree panel (#variant-tree) after a SOLO game ends.
+ *
+ * Builds the top-N candidate moves for the side to move (plus each one's best
+ * reply chain) via `buildVariantTree`, and lists them as `.variant-root` divs
+ * inside #variant-tree. `buildVariantTree` is async (KI search), so this
+ * function is async and awaits it before touching the DOM.
+ *
+ * IMPORTANT: this is a post-game render and must NOT be guarded by the
+ * animation/isAnimating state — after resign the game can still briefly report
+ * isAnimating, and a guard would leave the panel empty.
+ */
+export async function renderVariantTree(game: Game): Promise<void> {
+  const container = document.getElementById('variant-tree-container');
+  const root = document.getElementById('variant-tree');
+  if (!container || !root) return;
+
+  // Only show after solo games that actually had moves.
+  if (!game.moveHistory || game.moveHistory.length === 0) return;
+
+  container.classList.remove('hidden');
+
+  const board = game.board as (Piece | null)[][];
+  const turn: 'white' | 'black' = game.turn === 'white' ? 'white' : 'black';
+  // Awaiting the async KI search before rendering — no isAnimating guard.
+  const nodes = await buildVariantTree(board, turn, 3, 2);
+  if (nodes.length === 0) return; // nothing to show; keep panel hidden
+
+  container.classList.remove('hidden');
+  root.innerHTML = '';
+  for (const node of nodes) {
+    const line = document.createElement('div');
+    line.className = 'variant-root';
+    const moveStr = moveToAlgebraic(node.move.from, node.move.to, 9);
+    const contStr = node.continuation.map(m => moveToAlgebraic(m.from, m.to, 9)).join(' → ');
+    line.textContent =
+      `${moveStr} (${node.score >= 0 ? '+' : ''}${node.score})` +
+      (contStr ? `  →  ${contStr}` : '');
+    root.appendChild(line);
+  }
+}
 
 /**
  * Aktualisiert die Statistiken.
