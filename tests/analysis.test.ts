@@ -95,7 +95,7 @@ describe('AnalysisManager', () => {
       from: { r: 7, c: 4 },
       to: { r: 5, c: 4 },
     };
-    mockGame.bestMoves = [mockMove];
+    mockGame.bestMoves = [{ move: mockMove, score: 100 }];
 
     analysisManager.showBestMove = true;
     const arrows = analysisManager.getBestMoveArrows();

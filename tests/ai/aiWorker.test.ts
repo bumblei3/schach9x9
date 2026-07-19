@@ -132,15 +132,16 @@ describe('aiWorker protocol', () => {
 
   test('analyze posts the analysis result', async () => {
     await send('analyze', { board: [], color: 'white' });
-    // Worker now builds the analysis from getBestMoveDetailed (score) +
-    // getTopMoves (ranked candidates), not the old analyzePosition() shape.
-    expect(aiEngine.getBestMoveDetailed).toHaveBeenCalled();
+    // Worker builds the analysis from the time-bounded getTopMoves
+    // (ranked candidates + overall score). getBestMoveDetailed is NOT used
+    // here (an empty timeParams would mean an unbounded search that hangs on
+    // a 9x9 board at analysis depth).
     expect(aiEngine.getTopMoves).toHaveBeenCalled();
-    const analysis = posted.find(m => m.type === 'analysis');
+    const analysis = posted.find((m) => m.type === 'analysis');
     expect(analysis).toBeDefined();
     expect(analysis.data).toEqual(
       expect.objectContaining({
-        score: 123,
+        score: 1,
         topMoves: expect.arrayContaining([
           expect.objectContaining({
             move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },

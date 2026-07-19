@@ -100,6 +100,14 @@ export class App {
     this.gameController!.game = this.game;
     this.moveController!.game = this.game;
 
+    // Wire the AnalysisUI (created by GameController) to the AIController.
+    // DOMHandler tries to do this in its constructor, but app.game is null
+    // at that point, so the bridge is skipped and aiController.analysisUI
+    // stays null -> live engine analysis never renders its top moves.
+    if (this.aiController && this.gameController?.analysisUI) {
+      this.aiController.setAnalysisUI(this.gameController.analysisUI);
+    }
+
     this.tutorController = new TutorController(this.game);
     this.game.tutorController = this.tutorController;
 

@@ -1,7 +1,6 @@
 import * as TacticsDetector from './tutor/TacticsDetector.js';
 import * as aiEngine from './aiEngine.js';
 import type { Player, Piece } from './types/game.js';
-import type { MoveHistoryEntry } from './gameEngine.js';
 import type { Analyzer } from './tutor/TacticsDetector.js';
 import { Game } from './gameEngine.js';
 
@@ -57,7 +56,7 @@ export class AnalysisManager {
       arrows.push(...this.getOpportunityArrows());
     }
 
-    if (this.showBestMove) {
+    if (this.showBestMove || this.game.analysisMode) {
       arrows.push(...this.getBestMoveArrows());
     }
 
@@ -158,15 +157,19 @@ export class AnalysisManager {
 
   public getBestMoveArrows(): Arrow[] {
     const arrows: Arrow[] = [];
-    const hints = (this.game.bestMoves as unknown as MoveHistoryEntry[]) || [];
+    const hints = (this.game.bestMoves as unknown as Array<{
+      move: { from: { r: number; c: number }; to: { r: number; c: number } };
+      score: number;
+      notation?: string;
+    }>) || [];
 
     if (hints.length > 0) {
       const best = hints[0];
       arrows.push({
-        fromR: best.from.r,
-        fromC: best.from.c,
-        toR: best.to.r,
-        toC: best.to.c,
+        fromR: best.move.from.r,
+        fromC: best.move.from.c,
+        toR: best.move.to.r,
+        toC: best.move.to.c,
         colorKey: 'green',
       });
     }

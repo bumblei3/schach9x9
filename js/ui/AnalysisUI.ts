@@ -113,6 +113,22 @@ export class AnalysisUI {
   ): void {
     if (!this.panel || this.panel.classList.contains('hidden')) return;
 
+    // Lazily re-acquire DOM refs. AnalysisUI is constructed by DOMHandler
+    // early (before #top-moves-content / panel children exist in the DOM),
+    // so the cached refs can be null even though the elements are now present.
+    // Without this, updatePanel silently skips rendering the live top moves.
+    if (this.topMovesContainer === null) {
+      this.topMovesContainer = document.getElementById('top-moves-content');
+    }
+    if (this.evalScoreValue === null) {
+      this.evalScoreValue = document.getElementById('eval-score');
+    }
+    if (this.panelBarValue === null) {
+      this.panelBarValue = document.getElementById('eval-bar');
+    }
+    if (this.engineInfo === null) {
+      this.engineInfo = document.getElementById('analysis-engine-info');
+    }
     // Update panel score
     const displayScore = (score / 100).toFixed(2);
     const prefix = score > 0 ? '+' : '';

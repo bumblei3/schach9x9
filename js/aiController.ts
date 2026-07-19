@@ -698,6 +698,7 @@ export class AIController {
     maxDepth?: number;
     nodes?: number;
   }): void {
+    this.analysisActive = true;
     if (this.analysisUI) {
       this.analysisUI.update(data);
     }
