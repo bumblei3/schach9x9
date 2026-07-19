@@ -223,7 +223,10 @@ export async function getBestMoveDetailed(
   if (timeParams.elo) {
     const eloParams = getParamsForElo(timeParams.elo);
     config = { ...timeParams, ...eloParams };
-    maxDepth = config.maxDepth!;
+    // An explicit maxDepth from the caller overrides the Elo-derived default.
+    // This lets benchmarking/tools pin an exact search depth; UI/worker callers
+    // that only pass `elo` keep the Elo-scaled depth as before.
+    maxDepth = timeParams.maxDepth ?? config.maxDepth!;
   }
 
   // --- ADAPTIVE TIME MANAGEMENT ---

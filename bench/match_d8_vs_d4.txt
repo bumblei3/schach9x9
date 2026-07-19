@@ -1,0 +1,1 @@
+MATCH balanced@d8-vs-balanced@d4 | balanced@d8 vs balanced@d4 | GAMES=40 W=1 B=8 D=31 | avgMoves=40.9 avgMaxDepth=7.0 avgNps=12075 | blunders=0 mistakes=0 | eloDiff(W over B)=-61
