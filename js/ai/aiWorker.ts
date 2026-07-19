@@ -101,11 +101,12 @@ self.onmessage = async function (e: MessageEvent) {
           workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
 
-        // Build an analysis result with BOTH an overall score (from a deep
-        // search) and the ranked top candidate moves (what the UI expects).
-        // analyzePosition() returns a SearchResult (score/pv) but the UI's
-        // AnalysisUI.update() reads `topMoves[]`, so we fetch them explicitly.
-        const search = await getBestMoveDetailed(board, color, depth, {});
+        // NOTE: use the TIME-BOUNDED getTopMoves (maxTimeMs below) for the
+        // ranked candidates AND the overall score (best move's score). Do NOT
+        // call getBestMoveDetailed(board, color, depth, {}) here — an empty
+        // timeParams means an UNBOUNDED search, and at analysis depth (12 for
+        // the live overlay) that hangs on a 9x9 board and the worker never
+        // posts a result back (live analysis never populates).
         const topMoves = await getTopMoves(
           board,
           color,
@@ -115,13 +116,14 @@ self.onmessage = async function (e: MessageEvent) {
           0
         );
 
+        const best = topMoves[0];
         workerSelf.postMessage({
           type: 'analysis',
           id,
           data: {
-            score: search?.score ?? 0,
-            depth: search?.depth ?? depth,
-            nodes: search?.nodes ?? 0,
+            score: best?.score ?? 0,
+            depth: best?.depth ?? depth,
+            nodes: best?.nodes ?? 0,
             topMoves: topMoves
               .filter((t: SearchResult) => t.move != null)
               .map((t: SearchResult) => ({

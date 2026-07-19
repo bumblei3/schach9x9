@@ -278,7 +278,7 @@ describe('AI Worker Message Handlers', () => {
       type: 'analysis',
       id: 'test-7',
       data: expect.objectContaining({
-        score: 50,
+        score: 100,
         topMoves: expect.arrayContaining([
           expect.objectContaining({
             move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
