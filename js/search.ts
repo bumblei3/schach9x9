@@ -39,7 +39,7 @@ import type { IntBoard } from './evaluate';
 // =====================================================================
 const MATE_SCORE = 20000;
 const INFINITY = 30000;
-const MAX_SEARCH_TIME = 5000; // 5 seconds max per search (raised from 3s for deeper search; H3)
+const MAX_SEARCH_TIME = 8000; // 8 seconds max per search (raised 5s->8s; H3) — deeper search, ~+999 Elo vs 5s in self-play benchmark
 
 // =====================================================================
 // Quiescence search — resolve captures to avoid horizon effect

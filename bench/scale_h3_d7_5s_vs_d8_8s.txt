@@ -1,0 +1,1 @@
+SCALE d7@5000ms-vs-d8@8000ms | GAMES=40 W=0 B=40 D=0 | avgMaxDepth=7.5 avgNps=3624 | eloDiff(W over B)=-999
