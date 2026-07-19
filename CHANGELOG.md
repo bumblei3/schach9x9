@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.6.1] – 2026-07-19
+
+### Improved (Opening Book)
+
+- **Eröffnungsbuch stark erweitert:** `public/opening-book.json` von **71 → 2604**
+  Positionen (89 → 3648 Züge) durch Multi-Persönlichkeits-Self-Play
+  (balanced / aggressive / defensive / positional / trapper), Elo 1100 mit
+  Blunder-RNG für echte Eröffnungs-Vielfalt (High-Elo-Self-Play war
+  deterministisch und erzeugte keine neuen Stellungen).
+  - Merge auf dem bestehenden Buch, `minPositionCount=2`, max 5 Züge/Position.
+  - Solvability-Filter: jeder gespeicherte Zug startet auf einer besetzten
+    Figur der Zugseite (1 unlösbarer Eintrag entfernt).
+  - Trainer (nur Weiß am Zug): **1271** nutzbare Positionen (vorher 34).
+
 ## [1.6.0] – 2026-07-19
 
 ### Added (Solo UX — Variant Tree)
