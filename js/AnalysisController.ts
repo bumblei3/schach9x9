@@ -27,11 +27,19 @@ interface AnalysisBasePosition {
  */
 export class AnalysisController {
   public gameController: GameController;
-  public game: GameExtended;
 
   constructor(gameController: GameController) {
     this.gameController = gameController;
-    this.game = gameController.game;
+  }
+
+  /**
+   * Live reference to the current game. Must be a getter (not a snapshot taken
+   * in the constructor): App.startGame() replaces gameController.game with a new
+   * Game instance on every new game, so a cached copy would go stale and mutate
+   * the wrong instance (analysisMode set on a dead object -> UI never updates).
+   */
+  get game(): GameExtended {
+    return this.gameController.game;
   }
 
   /**

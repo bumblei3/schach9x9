@@ -59,7 +59,9 @@ beforeEach(() => {
     score: 123,
   });
   ai.evaluatePosition.mockResolvedValue(42);
-  ai.getTopMoves.mockResolvedValue([{ from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, score: 1 }]);
+  ai.getTopMoves.mockResolvedValue([
+    { move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } }, score: 1 },
+  ]);
   ai.analyzePosition.mockReturnValue({ summary: 'ok' });
   // Exercise the progress callbacks registered inside the handlers.
   ai.setProgressCallback.mockImplementation((cb: (p: any) => void) => {
@@ -130,10 +132,23 @@ describe('aiWorker protocol', () => {
 
   test('analyze posts the analysis result', async () => {
     await send('analyze', { board: [], color: 'white' });
-    expect(aiEngine.analyzePosition).toHaveBeenCalledWith([], 'white');
+    // Worker now builds the analysis from getBestMoveDetailed (score) +
+    // getTopMoves (ranked candidates), not the old analyzePosition() shape.
+    expect(aiEngine.getBestMoveDetailed).toHaveBeenCalled();
+    expect(aiEngine.getTopMoves).toHaveBeenCalled();
     const analysis = posted.find(m => m.type === 'analysis');
     expect(analysis).toBeDefined();
-    expect(analysis.data).toEqual({ summary: 'ok' });
+    expect(analysis.data).toEqual(
+      expect.objectContaining({
+        score: 123,
+        topMoves: expect.arrayContaining([
+          expect.objectContaining({
+            move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+            score: 1,
+          }),
+        ]),
+      })
+    );
   });
 
   test('search posts a bestMove result (legacy shape, spread into message)', async () => {
