@@ -227,7 +227,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
   describe('analyze - success path', () => {
     test('should call setProgressCallback and run the analysis search', async () => {
-      const { getBestMoveDetailed, getTopMoves, setProgressCallback } = await import(
+      const { getTopMoves, setProgressCallback } = await import(
         '../../js/aiEngine.js'
       );
 
@@ -418,7 +418,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
   describe('analyze - missing depth/topMovesCount params', () => {
     test('defaults depth/topMovesCount when omitted', async () => {
-      const { getBestMoveDetailed, getTopMoves } = await import('../../js/aiEngine.js');
+      const { getTopMoves } = await import('../../js/aiEngine.js');
 
       const mockBoard = Array(9)
         .fill(null)
