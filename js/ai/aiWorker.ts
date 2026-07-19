@@ -8,11 +8,11 @@ import { setCurrentBoardShape, type BoardShape } from '../config.js';
 import {
   getBestMoveDetailed,
   getTopMoves,
-  analyzePosition,
   evaluatePosition,
   setOpeningBook,
   setProgressCallback,
   type AIProgressData,
+  type SearchResult,
 } from '../aiEngine.js';
 
 const workerSelf: Worker = self as unknown as Worker;
@@ -95,18 +95,41 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'analyze': {
-        const { board, color } = data;
+        const { board, color, depth = 4, topMovesCount = 3 } = data;
 
         setProgressCallback(progress => {
           workerSelf.postMessage({ type: 'progress', id, data: progress });
         });
-        // Use the new deep analysis function
-        const analysis = analyzePosition(board, color);
+
+        // Build an analysis result with BOTH an overall score (from a deep
+        // search) and the ranked top candidate moves (what the UI expects).
+        // analyzePosition() returns a SearchResult (score/pv) but the UI's
+        // AnalysisUI.update() reads `topMoves[]`, so we fetch them explicitly.
+        const search = await getBestMoveDetailed(board, color, depth, {});
+        const topMoves = await getTopMoves(
+          board,
+          color,
+          topMovesCount,
+          depth,
+          8000,
+          0
+        );
 
         workerSelf.postMessage({
           type: 'analysis',
           id,
-          data: analysis,
+          data: {
+            score: search?.score ?? 0,
+            depth: search?.depth ?? depth,
+            nodes: search?.nodes ?? 0,
+            topMoves: topMoves
+              .filter((t: SearchResult) => t.move != null)
+              .map((t: SearchResult) => ({
+                move: t.move as { from: { r: number; c: number }; to: { r: number; c: number } },
+                score: t.score,
+                notation: `${t.move!.from.r},${t.move!.from.c}->${t.move!.to.r},${t.move!.to.c}`,
+              })),
+          },
         });
         break;
       }

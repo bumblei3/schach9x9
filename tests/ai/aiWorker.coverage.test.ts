@@ -226,14 +226,10 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
   });
 
   describe('analyze - success path', () => {
-    test('should call setProgressCallback and analyzePosition', async () => {
-      const { analyzePosition, setProgressCallback } = await import('../../js/aiEngine.js');
-      (analyzePosition as any).mockResolvedValueOnce({
-        bestMove: { from: { r: 3, c: 3 }, to: { r: 4, c: 4 } },
-        score: 75,
-        threats: [],
-        opportunities: [],
-      });
+    test('should call setProgressCallback and run the analysis search', async () => {
+      const { getBestMoveDetailed, getTopMoves, setProgressCallback } = await import(
+        '../../js/aiEngine.js'
+      );
 
       const mockBoard = Array(9)
         .fill(null)
@@ -248,7 +244,9 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
       } as MessageEvent);
 
       expect(setProgressCallback).toHaveBeenCalled();
-      expect(analyzePosition).toHaveBeenCalledWith(mockBoard, 'white');
+      // Worker builds analysis from a deep search + ranked top moves.
+      expect(getBestMoveDetailed).toHaveBeenCalled();
+      expect(getTopMoves).toHaveBeenCalled();
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'analysis',
@@ -419,14 +417,8 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
   });
 
   describe('analyze - missing depth/topMovesCount params', () => {
-    test('should call analyzePosition without extra params', async () => {
-      const { analyzePosition } = await import('../../js/aiEngine.js');
-      (analyzePosition as any).mockResolvedValueOnce({
-        bestMove: null,
-        score: 0,
-        threats: [],
-        opportunities: [],
-      });
+    test('defaults depth/topMovesCount when omitted', async () => {
+      const { getBestMoveDetailed, getTopMoves } = await import('../../js/aiEngine.js');
 
       const mockBoard = Array(9)
         .fill(null)
@@ -440,7 +432,9 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
         },
       } as MessageEvent);
 
-      expect(analyzePosition).toHaveBeenCalledWith(mockBoard, 'white');
+      // depth defaults to 4, topMovesCount to 3 when not provided.
+      expect(getBestMoveDetailed).toHaveBeenCalledWith(mockBoard, 'white', 4, {});
+      expect(getTopMoves).toHaveBeenCalledWith(mockBoard, 'white', 3, 4, 8000, 0);
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'analysis',

@@ -277,7 +277,15 @@ describe('AI Worker Message Handlers', () => {
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'analysis',
       id: 'test-7',
-      data: expect.objectContaining({ bestMove: null, score: 0 }),
+      data: expect.objectContaining({
+        score: 50,
+        topMoves: expect.arrayContaining([
+          expect.objectContaining({
+            move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
+            score: 100,
+          }),
+        ]),
+      }),
     });
   });
 

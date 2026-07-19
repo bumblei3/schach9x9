@@ -922,7 +922,10 @@ export class AIController {
 
     // Use worker 0 for analysis to avoid conflict with game search
     const worker = this.aiWorkers[0];
-    const boardInt = aiEngine.convertBoardToInt(this.game.board);
+    // NOTE: send the UiBoard, NOT the IntBoard. analyzePosition() in aiEngine
+    // expects a UiBoard (piece objects); convertBoardToInt here was a bug that
+    // produced empty top-moves in the live analysis overlay.
+    const boardUi = this.game.board;
 
     // Deep analysis depth
     const analysisDepth = this.game.analysisMode ? 12 : 8;
@@ -930,7 +933,7 @@ export class AIController {
     worker.postMessage({
       type: 'analyze',
       data: {
-        board: boardInt,
+        board: boardUi,
         color: this.game.turn,
         depth: analysisDepth,
         topMovesCount: 3,
