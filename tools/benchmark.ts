@@ -49,13 +49,17 @@ async function main() {
   const bDepthArg = process.argv[8];
   const wDepth = wDepthArg ? parseInt(wDepthArg, 10) : undefined;
   const bDepth = bDepthArg ? parseInt(bDepthArg, 10) : undefined;
+  // Optional opening-book toggle (arg 9): "no" disables the book.
+  const bookArg = process.argv[9];
+  const openingBook = bookArg !== 'no';
 
   const config: EngineMatchConfig = {
     engineWhite: { name: `W-${wPers}`, personality: wPers, elo: wElo, color: 'white', depth: wDepth } as EngineMatchConfig['engineWhite'],
     engineBlack: { name: `B-${bPers}`, personality: bPers, elo: bElo, color: 'black', depth: bDepth } as EngineMatchConfig['engineBlack'],
     numGames: games,
     alternateColors: true,
-    timeControl: { type: 'fixed-time', baseTimeMs: 3000, incrementMs: 100, maxTimeMs: 5000 },
+    openingBook,
+    timeControl: { type: 'fixed-time', baseTimeMs: 8000, incrementMs: 0, maxTimeMs: 8000 },
     savePgns: false,
     quiet: true,
   };
