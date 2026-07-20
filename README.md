@@ -230,18 +230,33 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 
 - **Engine-Stärkung:** tieferer Suchbaum / Quiescence-Tuning / besseres
   Move-Ordering für einen stärkeren Solo-Gegner.
-  _Status: H3 + H-Q1 (Delta-Pruning) + H-Q2 (Check-Extension) in v1.5.0
-  gemergt. Match-Infra (tactical FENs + material-Gate) zeigt: Hebel sind
-  sound, aber bei fester Zeit/Depth 5 nicht messbar stärker (40 Partien
-  15:15 equal)._
+  _Status: **feature-complete / geparkt.** H3 (MAX_SEARCH_TIME 3s→5s→8s,
+  #114/#149), H-Q1 Delta-Pruning (#115), H-Q2 Check-Extension (#116, dann
+  **revertiert** — Engine schwächer bei fester Zeit, #130), LMR-Skala 2.0
+  (v1.4.0), IIR-Skip (#111), H4 time-probe 256 (#135), H-P1 zentrierte PSQT
+  (ad1b658) — alle gemergt. Match-Infra zeigt: Hebel sind **sound, aber bei
+  fester Zeit/Depth nicht messbar stärker** (40 Partien 15:15 equal)._
+  - **Mobility-Lever:** ❌ **abgelehnt** (chore #151) — negative
+    Engine-Tuning-Messung, kein Elo-Gewinn.
+  - **NNUE:** ⏸️ **geparkt** (2026-07-17) — sucht sich nicht als lohnend.
+  - _Verbleibende echte Lücke: die **absolute** Engine-Stärke ist unbekannt —
+    alle Benchmarks sind Self-Play bzw. 15:15 equal bei Depth 5. Ein Match
+    gegen eine **fixe externe Referenz** (z.B. Stockfish niedrige Tiefe)
+    steht noch aus._
 - **H-P1 — PSQT für 9x9 zentrieren:** ✅ umgesetzt (`buildCenteredPST`, Peak
   bei (4,4) für N/B/R/Q/A/C/E; Bauern rang-basiert, König-MG unverändert).
-  Follow-up: optionales NEW-vs-OLD `matchRefs`-Match bei Bedarf.
+  NEW-vs-OLD `matchRefs`-Match: kein messbarer Gewinn → kein Follow-up nötig.
 - **Eröffnungsbuch erweitern** — ✅ v1.6.1: 71→2604 Positionen
   (Multi-Persönlichkeit + Elo-1100 Blunder-RNG; Trainer-Weiß: 1271 Positionen).
-- **Daily Puzzle v1.1.0: Engine-Zugvorschläge + Varianten** — _Status:
-  verifiziert (PR #121, E2E im echten Browser). Das Tutor-System liefert
-  Top-Züge + PV-Varianten; im Puzzle-Modus via Hint-Button/`h` verfügbar._
+  - **Buch-Qualität gemessen (2026-07-20, #156):** `tools/book-eval.ts`
+    verglich den Buch-Zug jeder Position mit den Engine-Top-Moves (depth 6,
+    200 Stichproben) → **Top-1 16%, Top-3 42.5%, Top-5 62%, Eval-Loss 16.1cp.**
+    Das Buch ist ein bewusstes **Vielfalt-Buch** (kein Engine-Optimum); nur
+    16% Engine-Erstwahl sind erwartbar und designbedingt. ⏸️ **Geparkt:**
+    eine Stärkungs-Nachbesserung würde den Vielfalt-Zweck (#146) torpedieren.
+- **Daily Puzzle v1.1.0: Engine-Zugvorschläge + Varianten** — ✅ verifiziert
+  (PR #121, E2E im echten Browser). Tutor-System liefert Top-Züge + PV-
+  Varianten; im Puzzle-Modus via Hint-Button/`h` verfügbar.
 - **Coverage:** war 82% Branches (Ziel 85%). Bei Projektumfang (7277 Branches)
   ist 85% mit vertretbarem Aufwand nicht erreichbar — _diminishing returns,
   daher kein hartes Ziel mehr. Gezielte Branch-Tests für gameController/
