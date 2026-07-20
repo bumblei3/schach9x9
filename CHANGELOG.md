@@ -3,6 +3,33 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.6.2] – 2026-07-20
+
+### Added (Tooling)
+
+- **Eröffnungsbuch-Qualitätsmesser (`tools/book-eval.ts`, #156):** lädt
+  `public/opening-book.json`, rekonstruiert pro Position das Brett und
+  vergleicht den Buch-Zug mit den Engine-Top-Moves (`getTopMoves`, depth 6,
+  4s/Position). Berichtet `bookMatchesEngineTop1/3/5%` + `avgEvalLossCp`.
+  - Bug behoben: das Tool lud ursprünglich die Root-`opening-book.json`
+    (1294 B, 2 Positionen — alter Test-Stub) statt der echten Engine-Datei
+    `public/opening-book.json` (1.3 MB, 2604 Positionen).
+  - Messung (200 Stichproben, depth 6): **Top-1 16%, Top-3 42.5%,
+    Top-5 62%, Eval-Loss 16.1cp.**
+
+### Changed (Documentation / Status)
+
+- **Engine-Stärkung als feature-complete / geparkt dokumentiert:** alle
+  Such-Hebel (H3 8s, H-Q1, LMR 2.0, IIR-Skip, H4, H-P1 PSQT) sind gemergt,
+  aber bei fester Zeit/Depth nicht messbar stärker (40 Partien 15:15 equal).
+  **Mobility-Lever abgelehnt** (#151, negative Tuning-Messung), **NNUE
+  geparkt** (2026-07-17). Verbleibende Lücke: absolute Engine-Stärke
+  (Self-Play liefert keine echte Elo-Zahl).
+- **Eröffnungsbuch als Vielfalt-Buch geparkt:** 16% Engine-Top-1 ist
+  designbedingt (Multi-Personality Self-Play + Blunder-RNG, #146). Eine
+  Stärkungs-Nachbesserung würde den Vielfalt-Zweck torpedieren → kein
+  weiteres Tuning.
+
 ## [1.6.1] – 2026-07-19
 
 ### Improved (Opening Book)
