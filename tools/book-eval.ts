@@ -63,7 +63,17 @@ async function main() {
   const depth = parseInt(process.argv[2] || '6', 10);
   const maxPositions = process.argv[3] ? parseInt(process.argv[3], 10) : Infinity;
 
-  const bookPath = path.resolve(process.cwd(), 'opening-book.json');
+  // The real book the engine loads at runtime is public/opening-book.json
+  // (the root opening-book.json is a small legacy/test stub with ~2 entries).
+  const candidates = [
+    path.resolve(process.cwd(), 'public/opening-book.json'),
+    path.resolve(process.cwd(), 'opening-book.json'),
+  ];
+  const bookPath = candidates.find((p) => fs.existsSync(p))!;
+  if (!bookPath) {
+    console.error('No opening-book.json found (checked public/ then root).');
+    process.exit(1);
+  }
   const raw = JSON.parse(fs.readFileSync(bookPath, 'utf-8')) as {
     positions: Record<string, { moves: { from: { r: number; c: number }; to: { r: number; c: number }; weight: number; games: number }[]; seenCount: number }>;
   };
