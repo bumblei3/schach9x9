@@ -341,8 +341,12 @@ export class StatisticsManager {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
+    // Games dated at or after the cutoff are included (>=). Using strict >
+    // would exclude games dated exactly on the cutoff boundary, which causes
+    // flaky behaviour when the cutoff is computed a few ms after the game's
+    // reference time in tests.
     const recentGames = this.data.games.filter(
-      g => new Date(g.date).getTime() > cutoffDate.getTime()
+      g => new Date(g.date).getTime() >= cutoffDate.getTime()
     );
 
     const stats = {

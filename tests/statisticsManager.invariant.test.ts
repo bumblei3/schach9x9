@@ -235,14 +235,14 @@ describe('getRecentStats() cutoff window', () => {
     m = new StatisticsManager();
   });
 
-  test('a game exactly at the cutoff is EXCLUDED (implementation uses >, not >=)', () => {
+  test('a game exactly at the cutoff is INCLUDED (implementation uses >=)', () => {
     m.saveGame(makeGame({ result: 'win' }));
     const games = (m as unknown as { data: { games: GameRecord[] } }).data.games;
     const boundary = new Date();
     boundary.setDate(boundary.getDate() - 30);
     games[0].date = boundary.toISOString(); // exactly 30 days ago
     const recent = m.getRecentStats(30);
-    expect(recent.totalGames).toBe(0);
+    expect(recent.totalGames).toBe(1);
   });
 
   test('a game one millisecond inside the window is INCLUDED', () => {

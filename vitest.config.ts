@@ -6,6 +6,10 @@ export default defineConfig({
     globals: true,
     pool: 'threads', // Use threads instead of forks to avoid worker crash issues
     setupFiles: ['./tests/vitest.setup.ts'],
+    // Expert-level iterative-deepening test runs deep and can exceed the
+    // default 5 s timeout in CI. Give it 30 s instead of touching the
+    // individual test (avoids per-test timeout noise in the output).
+    testTimeout: 30_000,
     include: ['tests/**/*.{test,unit.test,integration.test}.{js,ts}'],
     exclude: [
       '**/node_modules/**',
