@@ -237,6 +237,8 @@ describe('AI Engine', () => {
       expect(beginner!.to).not.toEqual(expert!.to);
     });
 
+    // Expert-level search runs deep — needs a longer timeout (default 5 s)
+    // so it does not flake in CI.
     test('Expert should reach target depth via iterative deepening', async () => {
       // At expert strength (elo 2500) the JS search must complete at least one
       // ply and report a depth >= 1 with a defined score.
