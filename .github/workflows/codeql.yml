@@ -1,0 +1,42 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: ['main', 'master']
+  pull_request:
+    branches: ['main', 'master']
+  schedule:
+    # Weekly scan (defense-in-depth, mirrors trischach setup)
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  analyze:
+    name: CodeQL Analyze (javascript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Non-blocking: a CodeQL finding must not abort the pipeline, but it is
+    # reported as a security alert on the repo (visibility, not gate).
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: '/language:javascript-typescript'
