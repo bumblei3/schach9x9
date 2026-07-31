@@ -84,3 +84,90 @@ export function parseFEN(fen: string): ParsedFEN {
 
   return { board, turn };
 }
+
+/**
+ * Serializes a board + side-to-move into a 9x9 FEN string.
+ * Empty ranks use digit 9 (not 8). Fairy pieces: a/c/e/j (case = color).
+ * Halfmove/fullmove default to 0 1 when omitted.
+ */
+export function toFEN(
+  board: (Piece | null)[][],
+  turn: Player = 'white',
+  halfMove: number = 0,
+  fullMove: number = 1
+): string {
+  const size = board.length;
+  const ranks: string[] = [];
+  for (let r = 0; r < size; r++) {
+    let rank = '';
+    let empty = 0;
+    const row = board[r] ?? [];
+    const cols = row.length || size;
+    for (let c = 0; c < cols; c++) {
+      const p = row[c];
+      if (!p) {
+        empty++;
+        continue;
+      }
+      if (empty > 0) {
+        rank += String(empty);
+        empty = 0;
+      }
+      const ch = p.type;
+      rank += p.color === 'white' ? ch.toUpperCase() : ch.toLowerCase();
+    }
+    if (empty > 0) rank += String(empty);
+    ranks.push(rank);
+  }
+  const stm = turn === 'white' ? 'w' : 'b';
+  return `${ranks.join('/')} ${stm} - - ${halfMove} ${fullMove}`;
+}
+
+export interface SharePositionParams {
+  fen: string;
+  turn?: Player;
+}
+
+/**
+ * Extract a shared position from URL search (`?fen=…`) or hash (`#fen=…`).
+ * Returns null when no usable FEN is present.
+ */
+export function parseShareQuery(
+  search: string = typeof location !== 'undefined' ? location.search : '',
+  hash: string = typeof location !== 'undefined' ? location.hash : ''
+): SharePositionParams | null {
+  const fromParams = (raw: string): SharePositionParams | null => {
+    const q = raw.startsWith('?') || raw.startsWith('#') ? raw.slice(1) : raw;
+    if (!q) return null;
+    const params = new URLSearchParams(q);
+    const fen = params.get('fen');
+    if (!fen || !fen.includes('/')) return null;
+    const turnRaw = params.get('turn');
+    const turn: Player | undefined =
+      turnRaw === 'b' || turnRaw === 'black'
+        ? 'black'
+        : turnRaw === 'w' || turnRaw === 'white'
+          ? 'white'
+          : undefined;
+    return turn ? { fen, turn } : { fen };
+  };
+
+  return fromParams(search) ?? fromParams(hash);
+}
+
+/**
+ * Build a shareable absolute URL for a position (query form).
+ * Keeps the current origin + path; only replaces search.
+ */
+export function buildShareUrl(
+  fen: string,
+  base: string = typeof location !== 'undefined'
+    ? `${location.origin}${location.pathname}`
+    : 'https://bumblei3.github.io/schach9x9/'
+): string {
+  const url = new URL(base);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('fen', fen);
+  return url.toString();
+}
