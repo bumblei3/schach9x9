@@ -124,9 +124,40 @@ describe('OpeningBookUI', () => {
     expect(document.getElementById('current-opening-name')!.textContent).toBe('Test Eröffnung');
     expect(document.getElementById('current-opening-eco')!.textContent).toContain('T00');
     expect(document.getElementById('current-opening-category')!.textContent).toBe('Test Category');
-    // Stats and moves should be rendered.
-    expect(document.getElementById('current-opening-stats')!.innerHTML).toContain('Beliebtheit');
-    expect(document.getElementById('current-opening-moves')!.innerHTML).toContain('opening-move');
+    // Stats and moves should be rendered (textContent — XSS-safe).
+    expect(document.getElementById('current-opening-stats')!.textContent).toContain('Beliebtheit');
+    expect(
+      document.getElementById('current-opening-moves')!.querySelector('.opening-move')
+    ).not.toBeNull();
+  });
+
+  test('XSS: malicious opening fields are not interpreted as HTML', async () => {
+    const { getOpeningEntry } = await import('../../js/ai/OpeningDatabase.js');
+    const { getBoardHash } = await import('../../js/move/MoveValidator.js');
+    const evil = {
+      name: '<img src=x onerror=window.__xss=1>',
+      eco: '<script>window.__xss=1</script>',
+      category: '"><img src=x onerror=window.__xss=1>',
+      popularity: 1,
+      whiteWinRate: 1,
+      blackWinRate: 1,
+      drawRate: 1,
+      avgElo: 1000,
+      moves: ['<b>evil</b>', '1. e4<img src=x onerror=window.__xss=1>'],
+      description: '<script>window.__xss=1</script>desc',
+    };
+    (getOpeningEntry as any).mockReturnValueOnce(evil);
+    (getBoardHash as any).mockReturnValue('KNOWN_HASH');
+    (window as any).__xss = 0;
+    const game = makeGame({ turn: 'white' });
+    ui.setGame(game as any);
+    ui.updateCurrentOpening();
+    expect((window as any).__xss).toBe(0);
+    // Raw text is visible; no img/script nodes from the payload.
+    expect(document.getElementById('current-opening-name')!.textContent).toContain('onerror');
+    expect(document.getElementById('current-opening-name')!.querySelector('img')).toBeNull();
+    expect(document.getElementById('current-opening-moves')!.querySelector('img')).toBeNull();
+    expect(document.getElementById('current-opening-description')!.querySelector('script')).toBeNull();
   });
 
   test('updateCurrentOpening hides when no opening matches', async () => {
