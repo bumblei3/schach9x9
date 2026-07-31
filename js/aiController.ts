@@ -425,12 +425,10 @@ export class AIController {
         logger.debug(`[AI] Dispatching search to worker ${i}`);
 
         // Calculate Time Limit based on difficulty
-        let timeLimit = AI_TIMEOUT_MS;
-        if (this.game.mode === 'standard8x8' || this.game.mode === 'classic') {
-          timeLimit = AI_CLASSIC_TIMEOUT_MS;
-        } else {
-          timeLimit = AI_DIFFICULTY_TIMEOUT_MS[this.game.difficulty] || AI_TIMEOUT_MS;
-        }
+        const timeLimit =
+          this.game.mode === 'standard8x8' || this.game.mode === 'classic'
+            ? AI_CLASSIC_TIMEOUT_MS
+            : AI_DIFFICULTY_TIMEOUT_MS[this.game.difficulty] || AI_TIMEOUT_MS;
 
         // Fall back to the balanced profile if the configured personality has
         // no entry in AI_PERSONALITIES (e.g. campaign level 'final_battle' uses
@@ -604,12 +602,16 @@ export class AIController {
         const bestResult = workerResults.find(r => r && r.move);
         if (bestResult && bestResult.move) {
           // Generate simple explanation based on score/action
-          let explanation = 'Ein solider Zug.';
-          if (bestResult.score > 300) explanation = 'Gewinnt deutlich Material.';
-          else if (bestResult.score > 100) explanation = 'Verschafft einen Vorteil.';
-          else if (bestResult.move.capture) explanation = 'Schlägt eine gegnerische Figur.';
-          else if (bestResult.move.promotion) explanation = 'Holt eine neue Figur.';
-          else explanation = 'Verbessert die Position.';
+          const explanation =
+            bestResult.score > 300
+              ? 'Gewinnt deutlich Material.'
+              : bestResult.score > 100
+                ? 'Verschafft einen Vorteil.'
+                : bestResult.move.capture
+                  ? 'Schlägt eine gegnerische Figur.'
+                  : bestResult.move.promotion
+                    ? 'Holt eine neue Figur.'
+                    : 'Verbessert die Position.';
 
           resolve({ move: bestResult.move, explanation });
         } else {
@@ -752,7 +754,7 @@ export class AIController {
 
     if (!data) return; // Guard against null data
 
-    if (data && depthEl) {
+    if (depthEl) {
       depthEl.textContent = `Tiefe ${data.depth ?? 0}/${data.maxDepth ?? 0}`;
     }
 

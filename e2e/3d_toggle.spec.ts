@@ -20,7 +20,6 @@ test.describe('3D Mode Toggle @3d', () => {
     await expect(page.locator('#board')).toBeVisible();
     await expect(page.locator('body')).toHaveClass(/game-initialized/);
 
-    const toggleBtn = page.locator('#toggle-3d-btn');
     const container3d = page.locator('#battle-chess-3d-container');
     const boardWrapper = page.locator('#board-wrapper');
 
@@ -71,7 +70,6 @@ test.describe('3D Mode Toggle @3d', () => {
     );
 
     // Second toggle: flips back to the original state, 2D board visible again
-    const afterFirst = await getEnabled();
     await clickToggle();
     await page.waitForFunction(
       (prev) =>

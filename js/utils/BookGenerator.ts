@@ -47,20 +47,24 @@ async function generateBook(): Promise<void> {
     metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode },
   };
 
-  if (fs.existsSync(outputFile)) {
-    try {
-      bookData = JSON.parse(fs.readFileSync(outputFile, 'utf8'));
-      if (bookData.metadata && bookData.metadata.mode && bookData.metadata.mode !== mode) {
-        console.warn(
-          `Warning: Existing book has mode ${bookData.metadata.mode}, but we are generating for ${mode}. overwriting.`
-        );
-        bookData = {
-          positions: {},
-          metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode },
-        };
-      }
-      console.log(`Loaded existing book with ${Object.keys(bookData.positions).length} positions.`);
-    } catch {
+  // Atomic-ish read of existing book: try open/read once (no existsSync → read
+  // TOCTOU). Missing file is fine (ENOENT → start fresh).
+  try {
+    const existing = fs.readFileSync(outputFile, 'utf8');
+    bookData = JSON.parse(existing) as BookData;
+    if (bookData.metadata && bookData.metadata.mode && bookData.metadata.mode !== mode) {
+      console.warn(
+        `Warning: Existing book has mode ${bookData.metadata.mode}, but we are generating for ${mode}. overwriting.`
+      );
+      bookData = {
+        positions: {},
+        metadata: { version: '2.0', generatedAt: new Date().toISOString(), mode: mode },
+      };
+    }
+    console.log(`Loaded existing book with ${Object.keys(bookData.positions).length} positions.`);
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException)?.code;
+    if (code !== 'ENOENT') {
       console.warn('Could not parse existing book, starting fresh.');
     }
   }
@@ -85,10 +89,12 @@ async function generateBook(): Promise<void> {
 
   recalcWeights(book);
 
-  fs.writeFileSync(
-    outputFile,
-    JSON.stringify((book as unknown as { data: BookData }).data, null, 2)
-  );
+  // Write via exclusive temp + rename to avoid partial/racy overwrite of the
+  // live book path (mitigates file-system race / TOCTOU on output).
+  const tmpOut = `${outputFile}.${process.pid}.${Date.now()}.tmp`;
+  const payload = JSON.stringify((book as unknown as { data: BookData }).data, null, 2);
+  fs.writeFileSync(tmpOut, payload, { encoding: 'utf8', flag: 'wx' });
+  fs.renameSync(tmpOut, outputFile);
   console.log(
     `Book saved to ${outputFile}. Total positions: ${Object.keys((book as unknown as { data: BookData }).data.positions).length}`
   );

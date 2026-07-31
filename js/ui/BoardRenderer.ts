@@ -329,8 +329,8 @@ export function initBoardUI(game: GameLike): void {
       cell.addEventListener('touchend', e => {
         if (!touchDragElement || !touchDragOrigin) return;
 
-        // Clean up visual elements
-        if (touchDragElement && document.body.contains(touchDragElement)) {
+        // Clean up visual elements (touchDragElement is non-null after the guard)
+        if (document.body.contains(touchDragElement)) {
           document.body.removeChild(touchDragElement);
         }
         touchDragElement = null;

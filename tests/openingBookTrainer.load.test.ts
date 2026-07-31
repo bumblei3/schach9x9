@@ -50,8 +50,10 @@ vi.mock('../js/aiEngine.js', () => {
   };
 });
 
-const TMP_INPUT = path.join(os.tmpdir(), 'schach9x9-trainer-load-input.json');
-const TMP_OUTPUT = path.join(os.tmpdir(), 'schach9x9-trainer-load-output.json');
+// Private temp dir via mkdtemp (CodeQL js/insecure-temporary-file).
+let tmpDir = '';
+let TMP_INPUT = '';
+let TMP_OUTPUT = '';
 
 // book.load parses this shape (see BookData in OpeningBookTrainer.ts).
 function writeBook(positions: number) {
@@ -72,15 +74,23 @@ function writeBook(positions: number) {
         totalPositions: positions,
         totalMoves: positions,
       },
-    })
+    }),
+    { encoding: 'utf8', flag: 'w' }
   );
 }
 
 beforeEach(() => {
-  for (const f of [TMP_INPUT, TMP_OUTPUT]) if (fs.existsSync(f)) fs.unlinkSync(f);
+  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'schach9x9-trainer-'));
+  TMP_INPUT = path.join(tmpDir, 'input.json');
+  TMP_OUTPUT = path.join(tmpDir, 'output.json');
 });
 afterEach(() => {
-  for (const f of [TMP_INPUT, TMP_OUTPUT]) if (fs.existsSync(f)) fs.unlinkSync(f);
+  if (tmpDir && fs.existsSync(tmpDir)) {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+  tmpDir = '';
+  TMP_INPUT = '';
+  TMP_OUTPUT = '';
 });
 
 describe('OpeningBookTrainer.loadExistingBook', () => {
