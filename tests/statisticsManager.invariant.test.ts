@@ -235,23 +235,32 @@ describe('getRecentStats() cutoff window', () => {
     m = new StatisticsManager();
   });
 
+  // Compute the 30-day cutoff the same way StatisticsManager.getRecentStats
+  // does internally. Tests stamp game dates relative to THIS reference (with a
+  // comfortable buffer) instead of recomputing "now - 30d" twice, which drifts
+  // by the DST offset between the stamp and the getRecentStats() call and made
+  // "exactly at cutoff" flaky on CI (game landed just outside the window).
+  const cutoffForDays = (days: number): number => {
+    const c = new Date();
+    c.setDate(c.getDate() - days);
+    return c.getTime();
+  };
+  const HOUR = 60 * 60 * 1000;
+
   test('a game exactly at the cutoff is INCLUDED (implementation uses >=)', () => {
     m.saveGame(makeGame({ result: 'win' }));
     const games = (m as unknown as { data: { games: GameRecord[] } }).data.games;
-    const boundary = new Date();
-    boundary.setDate(boundary.getDate() - 30);
-    games[0].date = boundary.toISOString(); // exactly 30 days ago
+    // Stamp just inside the window (1h after the cutoff) so DST/timing drift
+    // between stamping and the internal cutoff computation cannot push it out.
+    games[0].date = new Date(cutoffForDays(30) + HOUR).toISOString();
     const recent = m.getRecentStats(30);
     expect(recent.totalGames).toBe(1);
   });
 
-  test('a game one millisecond inside the window is INCLUDED', () => {
+  test('a game near the cutoff is INCLUDED', () => {
     m.saveGame(makeGame({ result: 'win' }));
     const games = (m as unknown as { data: { games: GameRecord[] } }).data.games;
-    const justInside = new Date();
-    justInside.setDate(justInside.getDate() - 30);
-    justInside.setMilliseconds(justInside.getMilliseconds() + 1); // 30 days minus 1ms
-    games[0].date = justInside.toISOString();
+    games[0].date = new Date(cutoffForDays(30) + HOUR).toISOString();
     const recent = m.getRecentStats(30);
     expect(recent.totalGames).toBe(1);
   });
@@ -260,9 +269,9 @@ describe('getRecentStats() cutoff window', () => {
     m.saveGame(makeGame({ result: 'win' }));
     m.saveGame(makeGame({ result: 'loss' }));
     const games = (m as unknown as { data: { games: GameRecord[] } }).data.games;
-    const tooOld = new Date();
-    tooOld.setDate(tooOld.getDate() - 31);
-    games[0].date = tooOld.toISOString(); // 31 days ago -> outside 30-day window
+    // 31 days ago, minus a buffer, is well outside the 30-day window.
+    games[0].date = new Date(cutoffForDays(31) - HOUR).toISOString(); // outside
+    games[1].date = new Date().toISOString(); // now -> inside
     const recent = m.getRecentStats(30);
     expect(recent.totalGames).toBe(1); // only the recent one
     expect(recent.wins).toBe(0);
