@@ -7,44 +7,37 @@ on:
     branches: ['main', 'master']
   workflow_dispatch:
   schedule:
-    # Weekly schedule for regression detection
+    # Weekly schedule for regression detection (+ Node 22 matrix)
     - cron: '0 2 * * 1'
 
-# Sets permissions of the GITHUB_TOKEN
+# Default least privilege; deploy job elevates Pages permissions.
 permissions:
   contents: read
-  pages: write
-  id-token: write
-  checks: write
-  pull-requests: write
 
-# Allow only one concurrent run per ref/workflow; do NOT cancel an
-# in-progress run when a new push arrives — let it finish, queue the rest.
+# Cancel superseded PR/workflow runs; keep main deploys serial (no cancel).
 concurrency:
-  group: 'ci-${{ github.ref }}-${{ github.workflow }}'
-  cancel-in-progress: false
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
 env:
-  # Pin Node.js version for reproducible builds
   NODE_VERSION: '24.0.0'
-  # Cache versions for reproducibility
   NPM_CACHE_VERSION: '3'
   PLAYWRIGHT_CACHE_VERSION: '1'
 
 jobs:
   # =======================================================================
-  # LINT & TYPE CHECK (Fast, runs first)
+  # LINT & TYPE CHECK (blocking, parallel with unit tests)
   # =======================================================================
   lint:
     name: Lint & Type Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Non-blocking: lint/type errors must not abort the pipeline.
-    continue-on-error: true
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # Needed for commit message linting
+          fetch-depth: 0 # commitlint needs history
 
       - name: Setup Node.js & dependencies
         uses: ./.github/actions/setup-node-deps
@@ -66,6 +59,7 @@ jobs:
       - name: Run TypeScript type check
         id: tsc-check
         run: |
+          set -o pipefail
           npx tsc --noEmit 2>&1 | tee tsc-output.txt
 
       - name: TypeScript errors summary
@@ -76,35 +70,39 @@ jobs:
           else
             ERROR_COUNT=0
           fi
-          echo "TypeScript Errors: $ERROR_COUNT" >> $GITHUB_STEP_SUMMARY
-          if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo "⚠️ **Pre-existing TypeScript errors found** (non-blocking)"
-            grep "error TS" tsc-output.txt | head -20 >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ No TypeScript errors"
-          fi
+          {
+            echo "## TypeScript"
+            echo "Errors: $ERROR_COUNT"
+            if [ "$ERROR_COUNT" -gt 0 ]; then
+              echo ""
+              echo '```'
+              grep "error TS" tsc-output.txt | head -20 || true
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Run Commitlint (if PR)
+      - name: Run Commitlint (PR only)
         if: github.event_name == 'pull_request'
         run: |
-          npm install -g @commitlint/cli @commitlint/config-conventional
-          git fetch origin main
-          commitlint --from=origin/main --to=HEAD --verbose
+          git fetch origin main --depth=50
+          # Local configs exist; @commitlint/config-conventional via npx peer
+          npm install --no-save --legacy-peer-deps \
+            @commitlint/cli@19 @commitlint/config-conventional@19
+          npx commitlint --from origin/main --to HEAD --verbose
 
   # =======================================================================
-  # UNIT TESTS (Fast, parallelizable)
+  # UNIT TESTS (blocking; Node 24 on PR/push, 22+24 on weekly schedule)
   # =======================================================================
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [lint]
-    # Non-blocking: failing unit tests must not abort the pipeline.
-    continue-on-error: true
+    permissions:
+      contents: read
     strategy:
-      matrix:
-        node-version: ['22', '24']
       fail-fast: false
+      matrix:
+        node-version: ${{ fromJSON(github.event_name == 'schedule' && '["22","24"]' || '["24"]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -115,7 +113,9 @@ jobs:
           cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Run unit tests with coverage
-        run: npm run test:coverage 2>&1 | tee test-output.txt
+        run: |
+          set -o pipefail
+          npm run test:coverage 2>&1 | tee test-output.txt
         timeout-minutes: 25
 
       - name: Coverage report to summary
@@ -155,22 +155,131 @@ jobs:
         if: always()
         run: |
           TEST_COUNT=$(grep -oE 'Tests +[0-9]+ passed' test-output.txt 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "unknown")
-          echo "## Test Summary (Node ${{ matrix.node-version }})" >> $GITHUB_STEP_SUMMARY
-          echo "Tests run: $TEST_COUNT" >> $GITHUB_STEP_SUMMARY
-          echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Test Summary (Node ${{ matrix.node-version }})"
+            echo "Tests run: $TEST_COUNT"
+            echo "Status: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # =======================================================================
-  # E2E TESTS (Playwright) - Non-blocking
+  # PRODUCTION BUILD (blocking — required for deploy + e2e artifact)
+  # =======================================================================
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, test]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js & dependencies
+        uses: ./.github/actions/setup-node-deps
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: ${{ env.NPM_CACHE_VERSION }}
+
+      - name: Cache Vite build cache
+        uses: actions/cache@v6
+        with:
+          path: node_modules/.vite
+          key: ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json', 'vite.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ dist directory not created"
+            exit 1
+          fi
+          echo "Build size:"
+          du -sh dist/
+          find dist -name "*.js" -exec wc -c {} \; | sort -rn | head -5
+
+      - name: Build summary + budget
+        if: always()
+        run: |
+          if [ ! -d dist ]; then
+            echo "No dist/ — build failed" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          TOTAL_SIZE=$(du -sb dist/ | cut -f1)
+          JS_SIZE=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
+          CSS_SIZE=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
+          {
+            echo "## Build Summary"
+            echo "Dist size: $(du -sh dist/ | cut -f1)"
+            echo "JS: $((JS_SIZE / 1024)) KB"
+            echo "CSS: $((CSS_SIZE / 1024)) KB"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Soft budget (warning only): 3D + engine routinely ~1.8 MB.
+          MAX_SIZE=$((2000 * 1024))
+          if [ "$TOTAL_SIZE" -gt "$MAX_SIZE" ]; then
+            {
+              echo "⚠️ Bundle exceeds 2000 KB budget — review chunk growth"
+              echo "Top chunks:"
+              find dist/assets -name "*.js" -exec wc -c {} + | sort -rn | head -10 \
+                | awk '{printf "  %s: %d KB\n", $2, $1/1024}'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "✅ Bundle size within budget ($((TOTAL_SIZE / 1024)) KB <= 2000 KB)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-build
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+  # =======================================================================
+  # REQUIRED GATE (single status check for branch protection)
+  # =======================================================================
+  ci-gate:
+    name: CI Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: [lint, test, build]
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Require lint + test + build success
+        run: |
+          echo "lint=${{ needs.lint.result }}"
+          echo "test=${{ needs.test.result }}"
+          echo "build=${{ needs.build.result }}"
+          fail=0
+          [ "${{ needs.lint.result }}" = "success" ] || fail=1
+          [ "${{ needs.test.result }}" = "success" ] || fail=1
+          [ "${{ needs.build.result }}" = "success" ] || fail=1
+          if [ "$fail" -ne 0 ]; then
+            echo "❌ Required jobs failed — CI gate closed"
+            exit 1
+          fi
+          echo "✅ CI gate open (lint + test + build)"
+
+  # =======================================================================
+  # E2E TESTS (Playwright) — non-blocking (flaky browser / snapshots)
   # =======================================================================
   e2e-test:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 75
     needs: [build]
-    # E2E is intentionally non-blocking: a flaky browser test or a new visual
-    # snapshot must not block the production deploy. Results are still reported
-    # via the Playwright GitHub reporter and uploaded as an artifact.
+    # Intentionally non-blocking: flake/snapshot noise must not block deploy.
     continue-on-error: true
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
 
@@ -195,23 +304,33 @@ jobs:
           name: production-build
           path: dist/
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright Chromium (cache miss)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Ensure Playwright Chromium present (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install chromium
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=github
         timeout-minutes: 60
+        env:
+          CI: true
 
       - name: E2E test summary
         if: always()
         run: |
-          echo "## E2E Test Summary" >> $GITHUB_STEP_SUMMARY
-          echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## E2E Test Summary"
+            echo "Status: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run Visual Regression tests
         continue-on-error: true
         run: npm run test:visual
+        env:
+          CI: true
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7
@@ -220,16 +339,18 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+          if-no-files-found: ignore
 
   # =======================================================================
-  # SECURITY & DEPENDENCY AUDIT (Non-blocking)
+  # SECURITY & DEPENDENCY AUDIT (non-blocking)
   # =======================================================================
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Non-blocking: an audit finding must not abort the pipeline.
     continue-on-error: true
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
 
@@ -240,17 +361,18 @@ jobs:
           cache-version: ${{ env.NPM_CACHE_VERSION }}
 
       - name: Run npm audit
-        id: npm-audit
         run: |
           npm audit --audit-level=high --omit=dev --json > audit-report.json || true
-          cat audit-report.json | jq -r '.metadata.vulnerabilities | to_entries[] | "\(.key): \(.value)"' > audit-summary.txt
-          echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
-          cat audit-summary.txt >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Security Audit Summary"
+            jq -r '.metadata.vulnerabilities | to_entries[] | "\(.key): \(.value)"' audit-report.json \
+              || echo "(could not parse audit report)"
+          } | tee audit-summary.txt >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check for outdated packages
         run: |
           npx npm-check-updates -f '/^[^@]/' --rejected --timeout 10000 > outdated.txt || true
-          cat outdated.txt >> $GITHUB_STEP_SUMMARY
+          cat outdated.txt >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Upload audit report
         uses: actions/upload-artifact@v7
@@ -262,108 +384,19 @@ jobs:
             audit-summary.txt
             outdated.txt
           retention-days: 7
+          if-no-files-found: ignore
 
   # =======================================================================
-  # BUILD & PERFORMANCE BENCHMARK
-  # =======================================================================
-  build:
-    name: Production Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [lint, test]
-    # Non-blocking: a build failure must not abort the pipeline.
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js & dependencies
-        uses: ./.github/actions/setup-node-deps
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-version: ${{ env.NPM_CACHE_VERSION }}
-
-      - name: Cache Vite build cache
-        uses: actions/cache@v6
-        id: vite-cache
-        with:
-          path: node_modules/.vite
-          key: ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-${{ hashFiles('package-lock.json', 'vite.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-vite-${{ env.NPM_CACHE_VERSION }}-
-
-      - name: Build production bundle
-        run: npm run build
-        env:
-          NODE_OPTIONS: '--max-old-space-size=4096'
-
-      - name: Verify build output
-        run: |
-          if [ ! -d "dist" ]; then
-            echo "❌ dist directory not created"
-            exit 1
-          fi
-          echo "Build size:"
-          du -sh dist/
-          find dist -name "*.js" -exec wc -c {} \; | sort -rn | head -5
-
-      - name: Build summary
-        if: always()
-        run: |
-          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "Dist size: $(du -sh dist/)" >> $GITHUB_STEP_SUMMARY
-          BUNDLE_JS=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
-          BUNDLE_CSS=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
-          echo "JS: $((BUNDLE_JS / 1024)) KB" >> $GITHUB_STEP_SUMMARY
-          echo "CSS: $((BUNDLE_CSS / 1024)) KB" >> $GITHUB_STEP_SUMMARY
-
-      - name: Bundle Size Diff (PR only)
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "📦 Checking production bundle size..."
-          TOTAL_SIZE=$(du -sb dist/ | cut -f1)
-          echo "Total dist size: $TOTAL_SIZE bytes ($(($TOTAL_SIZE / 1024)) KB)"
-
-          JS_SIZE=$(find dist -name "*.js" -exec wc -c {} + | tail -1 | awk '{print $1}')
-          CSS_SIZE=$(find dist -name "*.css" -exec wc -c {} + | tail -1 | awk '{print $1}')
-
-          echo "JS bundle: $(($JS_SIZE / 1024)) KB"
-          echo "CSS: $(($CSS_SIZE / 1024)) KB"
-
-          # Budget: 2000 KB total (JS + CSS). Historically set to 1200 KB, but
-          # the app (9x9 engine + 3D renderer + AI + tutor + campaign) routinely
-          # builds to ~1.8 MB. The 3D renderer (battleChess3D, ~570 KB, already
-          # lazy-loaded) dominates; the remainder is many small feature modules.
-          # Tracked as a warning + chunk breakdown rather than a hard gate so the
-          # size trend stays visible without blocking the non-blocking pipeline.
-          MAX_SIZE=$((2000 * 1024))
-          if [ $TOTAL_SIZE -gt $MAX_SIZE ]; then
-            echo "⚠️ Bundle exceeds 2000 KB budget — review chunk growth" >> $GITHUB_STEP_SUMMARY
-            echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
-            echo "Total: $(($TOTAL_SIZE / 1024)) KB (budget 2000 KB)" >> $GITHUB_STEP_SUMMARY
-            echo "Top chunks:" >> $GITHUB_STEP_SUMMARY
-            find dist/assets -name "*.js" -exec wc -c {} + | sort -rn | head -10 | awk '{printf "  %s: %d KB\n", $2, $1/1024}' >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ Bundle size within budget ($(($TOTAL_SIZE / 1024)) KB <= 2000 KB)"
-          fi
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: production-build
-          path: dist/
-          retention-days: 7
-
-  # =======================================================================
-  # LIGHTHOUSE (against the freshly built dist/, not live Pages)
+  # LIGHTHOUSE (against built dist/) — non-blocking
   # =======================================================================
   lighthouse:
     name: Lighthouse (Build)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [build]
-    # Non-blocking: a perf regression must not abort the pipeline.
     continue-on-error: true
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
 
@@ -406,24 +439,29 @@ jobs:
       - name: Lighthouse summary
         if: always()
         run: |
-          echo "## Lighthouse Summary (built dist/)" >> $GITHUB_STEP_SUMMARY
-          echo "Status: ${{ job.status }} (see uploaded artifacts)" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Lighthouse Summary (built dist/)"
+            echo "Status: ${{ job.status }} (see uploaded artifacts)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # =======================================================================
-  # DEPLOY TO GITHUB PAGES
+  # DEPLOY TO GITHUB PAGES (main only, after successful build)
   # =======================================================================
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    # Prevent parallel GitHub Pages deployments (queue instead of cancel)
+    needs: [build, ci-gate]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     concurrency:
-      group: 'deploy-github-pages'
+      group: deploy-github-pages
       cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [lint, build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -446,14 +484,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5
 
-      - name: Comment on deployment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v9
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: ${{ github.event.number }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🚀 Deployment to GitHub Pages successful!\n\n**Live:** ${{ steps.deployment.outputs.page_url }}\n\n**Commit:** ${ github.sha }\n**Workflow:** ${ github.run_id }}'
-            })
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "## Deploy"
+            echo "Status: ${{ job.status }}"
+            echo "URL: ${{ steps.deployment.outputs.page_url }}"
+            echo "Commit: \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
