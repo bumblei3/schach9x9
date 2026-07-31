@@ -24,7 +24,17 @@ sessions don't waste time re-testing them.
   without book, balanced-vs-balanced is symmetric, eloDiff 0, ~85% draws — a
   9x9 board property).
 
+## H-P1 centered PSQT (REVERTED 2026-07-31)
+- Geometric `buildCenteredPST` tables (peak at 4,4) for N/B/R/Q/A/C/E.
+- matchRefs tactical FENs, elo 1600, maxMoves 40:
+  - main(H-P1) vs v1.5.0 → **5:10** (n=24) — main weaker
+  - main(H-P1) vs pre-H-P1 → **5:8** (n=20) — H-P1 cluster weaker
+  - hand-tuned vs H-P1 → **6:5** (n=20) — hand-tuned wins
+- Conclusion: do **not** wire production tables to `buildCenteredPST`.
+  Helper may stay exported for experiments. Hand-tuned tables restored.
+
 ## What this means
 The engine is well-calibrated at the current eval weights. Remaining strength
 gains would require structural eval changes (king-safety/endgame rework) with
 NO guaranteed Elo payoff — treat as speculative, gate behind a real benchmark.
+H-P1 is closed as a negative result (same class as Mobility).

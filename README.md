@@ -55,7 +55,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 | **H3** – `MAX_SEARCH_TIME` 3s→5s      | tiefere Suche pro Zug (stärker, längere UI-Blockade) | ✅ v1.4.2 |
 | **H-Q1** – Quiescence Delta-Pruning   | sound: schneidet aussichtslose QSearch-Zweige ab     | ✅ v1.5.0 |
 | **H-Q2** – Quiescence Check-Extension | reverted: bei fester Zeit messbar schwächer (8:5 im Baseline-Match) | ↩️ revertiert |
-| **H-P1** – PSQT für 9x9 zentrieren    | Center-(4,4)-PST für Minor/Fairy; Bauern/King separat | ✅ Unreleased |
+| **H-P1** – PSQT für 9x9 zentrieren    | Center-(4,4)-PST — **schwächer** auf Taktik-FENs (5:10 vs v1.5.0) | ↩️ revertiert 2026-07-31 |
 
 **Regression-Gates** (müssen alle grün sein, bevor ein Hebel gemergt wird):
 
@@ -243,9 +243,10 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
     alle Benchmarks sind Self-Play bzw. 15:15 equal bei Depth 5. Ein Match
     gegen eine **fixe externe Referenz** (z.B. Stockfish niedrige Tiefe)
     steht noch aus._
-- **H-P1 — PSQT für 9x9 zentrieren:** ✅ umgesetzt (`buildCenteredPST`, Peak
-  bei (4,4) für N/B/R/Q/A/C/E; Bauern rang-basiert, König-MG unverändert).
-  NEW-vs-OLD `matchRefs`-Match: kein messbarer Gewinn → kein Follow-up nötig.
+- **H-P1 — PSQT für 9x9 zentrieren:** ↩️ **reverted 2026-07-31.**
+  `buildCenteredPST` blieb als Experiment-Helper, Produktion nutzt wieder
+  handgetunte Tabellen. Gate: `bench/ABSOLUTE_STRENGTH_BASELINE.md`
+  (main+H-P1 5:10 vs v1.5.0; hand-tuned 6:5 vs H-P1).
 - **Eröffnungsbuch erweitern** — ✅ v1.6.1: 71→2604 Positionen
   (Multi-Persönlichkeit + Elo-1100 Blunder-RNG; Trainer-Weiß: 1271 Positionen).
   - **Buch-Qualität gemessen (2026-07-20, #156):** `tools/book-eval.ts`

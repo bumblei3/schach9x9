@@ -5,7 +5,7 @@
  * Decouples UI event logic from the main App bootstrapper.
  */
 
-import { debounce } from '../utils.js';
+import { debounce, parseShareQuery } from '../utils.js';
 import * as UI from '../ui.js';
 import { clearPieceCache } from '../ui/BoardRenderer.js';
 import { showToast } from '../ui/OverlayManager.js';
@@ -78,6 +78,9 @@ export class DOMHandler {
     } catch (e) {
       console.error('[DOMHandler] Failed to add app-ready class:', e);
     }
+
+    // Deep-link: ?fen=… or #fen=… → classic + analysis with shared position
+    void this.tryLoadSharedPositionFromUrl();
 
     const pointsButtons = document.querySelectorAll<HTMLElement>('.points-btn');
     pointsButtons.forEach(btn => {
@@ -591,6 +594,35 @@ export class DOMHandler {
   }
 
   /**
+   * If the page was opened with a shared FEN, auto-start classic and load it.
+   * Runs once at DOM bootstrap so cold links work without a menu click.
+   */
+  private async tryLoadSharedPositionFromUrl(): Promise<void> {
+    try {
+      const shared = parseShareQuery(
+        typeof location !== 'undefined' ? location.search : '',
+        typeof location !== 'undefined' ? location.hash : ''
+      );
+      if (!shared) return;
+
+      // Hide main menu so the board is visible immediately.
+      const mainMenu = document.getElementById('main-menu');
+      if (mainMenu) mainMenu.classList.remove('active');
+
+      await this.app.init(0, 'classic');
+      const ok = this.gameController?.loadSharedPosition(shared.fen, shared.turn) ?? false;
+      if (ok) {
+        // Strip share query/hash so a refresh doesn't re-import mid-session.
+        if (typeof history !== 'undefined' && typeof location !== 'undefined') {
+          history.replaceState(null, '', location.pathname);
+        }
+      }
+    } catch (e) {
+      console.error('[DOMHandler] Shared position load failed:', e);
+    }
+  }
+
+  /**
    * Wire play-menu cards that declare data-init-mode / data-init-points.
    * Replaces inline onclick handlers (UI-B a11y + testability).
    */
@@ -799,6 +831,20 @@ export class DOMHandler {
         } else {
           downloadPGN(pgn);
         }
+        if (mainMenu) {
+          mainMenu.classList.remove('active');
+        }
+      });
+    }
+
+    const sharePosBtn = document.getElementById('share-position-btn');
+    if (sharePosBtn) {
+      sharePosBtn.addEventListener('click', async () => {
+        if (!this.gameController) {
+          showToast('Starte zuerst ein Spiel.', 'warning');
+          return;
+        }
+        await this.gameController.shareCurrentPosition();
         if (mainMenu) {
           mainMenu.classList.remove('active');
         }

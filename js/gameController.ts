@@ -44,6 +44,7 @@ import {
 } from './openingTrainer.js';
 import { OpeningTrainerMenu } from './ui/OpeningTrainerMenu.js';
 import type { Square } from './gameEngine.js';
+import { parseFEN, toFEN, buildShareUrl } from './utils.js';
 
 import type { GameModeStrategy } from './modes/GameModeStrategy.js';
 import { SetupModeStrategy } from './modes/strategies/SetupMode.js';
@@ -795,6 +796,96 @@ export class GameController {
 
   startTutorial(): void {
     new Tutorial({ mode: 'full' }).show();
+  }
+
+  // ===== SHARED POSITION (FEN link) =====
+
+  /**
+   * Serialize the current board for sharing (FEN string).
+   */
+  getCurrentFEN(): string {
+    return toFEN(this.game.board, this.game.turn, this.game.halfMoveClock ?? 0, 1);
+  }
+
+  /**
+   * Build a shareable URL for the current position.
+   */
+  getShareUrl(): string {
+    return buildShareUrl(this.getCurrentFEN());
+  }
+
+  /**
+   * Load a shared FEN into the current game and open analysis mode.
+   * Intended for classic/setup play boards (9x9). Returns false on parse failure.
+   */
+  loadSharedPosition(fen: string, preferredTurn?: Player): boolean {
+    try {
+      const parsed = parseFEN(fen.trim());
+      const turn = preferredTurn ?? parsed.turn;
+      // Attach hasMoved so MoveExecutor / castling checks stay consistent.
+      this.game.board = parsed.board.map(row =>
+        row.map(p => (p ? ({ ...p, hasMoved: false } as PieceWithMoved) : null))
+      );
+      this.game.turn = turn;
+      this.game.phase = PHASES.PLAY;
+      this.game.moveHistory = [];
+      this.game.redoStack = [];
+      this.game.selectedSquare = null;
+      this.game.validMoves = null;
+      this.game.lastMove = null;
+      this.game.lastMoveHighlight = null;
+      this.game.halfMoveClock = 0;
+      this.game.positionHistory = [];
+      this.game.capturedPieces = { white: [], black: [] };
+      this.game.analysisMode = false;
+
+      this.stopClock();
+      UI.renderBoard(this.game);
+      UI.updateStatus(this.game);
+      UI.updateCapturedUI(this.game);
+      UI.updateMoveHistoryUI(this.game);
+
+      const ok = this.enterAnalysisMode();
+      if (ok) {
+        notificationUI.show('Geteilte Stellung geladen — Analyse-Modus.', 'success');
+        this.requestPositionAnalysis();
+      } else {
+        notificationUI.show('Stellung geladen.', 'info');
+      }
+      logger.info('[Share] Loaded FEN into analysis:', fen.slice(0, 40));
+      return true;
+    } catch (e) {
+      logger.error('[Share] Failed to load FEN:', e);
+      notificationUI.show('FEN konnte nicht geladen werden.', 'error');
+      return false;
+    }
+  }
+
+  /**
+   * Copy FEN + share URL to the clipboard (falls back to download-style alert).
+   */
+  async shareCurrentPosition(): Promise<boolean> {
+    if (!this.game?.board) {
+      notificationUI.show('Kein Brett zum Teilen.', 'warning');
+      return false;
+    }
+    const fen = this.getCurrentFEN();
+    const url = buildShareUrl(fen);
+    const payload = `${url}\n\nFEN: ${fen}`;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(payload);
+        notificationUI.show('Link + FEN in die Zwischenablage kopiert.', 'success');
+        return true;
+      }
+    } catch {
+      /* fall through */
+    }
+    // Fallback: show so the user can copy manually
+    notificationUI.show('Zwischenablage blockiert — FEN unten im Log.', 'warning');
+    this.game.log?.(`🔗 Teilen: ${url}`);
+    this.game.log?.(`FEN: ${fen}`);
+    return false;
   }
 
   // ===== ANALYSIS MODE METHODS =====

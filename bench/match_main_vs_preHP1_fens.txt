@@ -1,0 +1,27 @@
+[MatchRefs] NEW=/tmp/s9-new
+[MatchRefs] OLD=/tmp/s9-pre-hp1
+[MatchRefs] TACTICAL FENs, 10x2 games, elo 1600, maxMoves 40
+  game 1: NEW
+  game 2: OLD
+  game 3: OLD
+  game 4: NEW
+  game 5: DRAW
+  game 6: OLD
+  game 7: DRAW
+  game 8: DRAW
+  game 9: DRAW
+  game 10: OLD
+  game 11: OLD
+  game 12: DRAW
+  game 13: NEW
+  game 14: OLD
+  game 15: OLD
+  game 16: NEW
+  game 17: DRAW
+  game 18: OLD
+  game 19: NEW
+  game 20: DRAW
+
+=== MATCH REFS RESULT (NEW vs OLD) ===
+NEW wins: 5 | OLD wins: 8 | Draws: 7 (of 20)
+VERDICT: NEW weaker - REVERT lever.

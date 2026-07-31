@@ -1,0 +1,31 @@
+[MatchRefs] NEW=/home/tobber/schach9x9
+[MatchRefs] OLD=/tmp/s9-old
+[MatchRefs] TACTICAL FENs, 12x2 games, elo 1600, maxMoves 40
+  game 1: NEW
+  game 2: OLD
+  game 3: DRAW
+  game 4: NEW
+  game 5: DRAW
+  game 6: OLD
+  game 7: DRAW
+  game 8: DRAW
+  game 9: DRAW
+  game 10: OLD
+  game 11: OLD
+  game 12: DRAW
+  game 13: NEW
+  game 14: OLD
+  game 15: DRAW
+  game 16: NEW
+  game 17: DRAW
+  game 18: OLD
+  game 19: NEW
+  game 20: DRAW
+  game 21: DRAW
+  game 22: OLD
+  game 23: DRAW
+  game 24: DRAW
+
+=== MATCH REFS RESULT (NEW vs OLD) ===
+NEW wins: 5 | OLD wins: 7 | Draws: 12 (of 24)
+VERDICT: NEW weaker - REVERT lever.
