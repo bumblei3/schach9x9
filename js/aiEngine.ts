@@ -175,12 +175,8 @@ function convertMoveToResult(
 // --- Elo params ---
 
 export function getParamsForElo(elo: number): EloParams {
-  let depth = 4;
-  if (elo < 1000) depth = 3;
-  else if (elo < 1400) depth = 4;
-  else if (elo < 1800) depth = 5;
-  else if (elo < 2200) depth = 6;
-  else depth = 7;
+  const depth =
+    elo < 1000 ? 3 : elo < 1400 ? 4 : elo < 1800 ? 5 : elo < 2200 ? 6 : 7;
   return { maxDepth: depth, elo };
 }
 

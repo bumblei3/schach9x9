@@ -55,12 +55,27 @@ test.describe('Live engine analysis mode', () => {
       expect(html).toContain('top-move-item');
     }).toPass({ timeout: 30000 });
 
-    // The engine's best move is drawn as a board arrow. Continuous
-    // analysis re-draws it each tick, so retry rather than a
-    // single-point visibility check.
+    // The engine's best move is drawn as a board arrow (.tutor-arrow SVG
+    // path). Continuous analysis re-draws it each tick, so retry. We assert
+    // on the arrow's geometry (a non-degenerate <path d="...">) instead of
+    // toBeVisible(): a vertical/horizontal best-move arrow has a zero-width
+    // bounding box, which Playwright's visibility heuristic can flag as
+    // "hidden" even though it renders for the user — a flaky false negative
+    // seen on CI. Checking for an actual drawn line is the robust signal.
     const arrow = page.locator('.tutor-arrow').first();
     await expect(async () => {
-      await expect(arrow).toBeVisible();
+      const d = await arrow.getAttribute('d');
+      expect(d).toBeTruthy();
+      // Require a line with two distinct endpoints (M x y L x y).
+      const m = /^M\s+([\d.]+)\s+([\d.]+)\s+L\s+([\d.]+)\s+([\d.]+)$/.exec(d ?? '');
+      expect(m).not.toBeNull();
+      if (m) {
+        const [, x1, y1, x2, y2] = m;
+        const dx = Math.abs(parseFloat(x2) - parseFloat(x1));
+        const dy = Math.abs(parseFloat(y2) - parseFloat(y1));
+        // Non-degenerate: at least one axis spans more than a pixel.
+        expect(dx + dy).toBeGreaterThan(1);
+      }
     }).toPass({ timeout: 30000 });
 
     logs

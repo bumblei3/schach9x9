@@ -345,7 +345,6 @@ export function analyzeMoveWithExplanation(
   const tacticalExplanations: string[] = [];
   const strategicExplanations: string[] = [];
   const warnings: string[] = [];
-  let category = 'normal';
 
   // Calculate difference from best move (relative quality)
   const diff = score - bestScore;
@@ -353,6 +352,7 @@ export function analyzeMoveWithExplanation(
 
   // Categorize based on relative score
   let qualityLabel = '';
+  let category = 'normal';
   const diffP = parseFloat(diffPawns);
 
   if (diffP >= 0) {

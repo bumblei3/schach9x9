@@ -17,11 +17,43 @@ import {
 
 const workerSelf: Worker = self as unknown as Worker;
 
-const workerHeartbeats: Record<string | number, number> = {};
+// Map avoids CodeQL js/remote-property-injection (object index from message id).
+const workerHeartbeats = new Map<string | number, number>();
+
+/** Only accept finite numbers or short plain strings as correlation ids. */
+function sanitizeWorkerId(raw: unknown): string | number | undefined {
+  if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+  if (typeof raw === 'string' && raw.length > 0 && raw.length <= 64 && /^[\w.-]+$/.test(raw)) {
+    return raw;
+  }
+  return undefined;
+}
+
+function touchHeartbeat(id: string | number | undefined): void {
+  if (id === undefined) return;
+  workerHeartbeats.set(id, Date.now());
+}
 
 self.onmessage = async function (e: MessageEvent) {
   try {
-    const { type, data, id } = e.data;
+    // Dedicated workers only receive from their creating document (same origin).
+    // Still reject unexpected origins when the browser sets e.origin.
+    if (e.origin && e.origin !== self.location.origin) {
+      logger.warn('[AI Worker] Rejected message from unexpected origin:', e.origin);
+      return;
+    }
+
+    const msg = e.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    const type = (msg as { type?: unknown }).type;
+    const data = (msg as { data?: unknown }).data as Record<string, unknown> | undefined;
+    const id = sanitizeWorkerId((msg as { id?: unknown }).id);
+
+    if (typeof type !== 'string') {
+      logger.warn('[AI Worker] Message missing string type');
+      return;
+    }
 
     switch (type) {
       case 'loadBook': {
@@ -29,8 +61,11 @@ self.onmessage = async function (e: MessageEvent) {
           logger.warn('[AI Worker] loadBook called without book data');
           break;
         }
-        setOpeningBook(data.book);
-        logger.info('[AI Worker] Opening book loaded:', data.book.metadata);
+        setOpeningBook(data.book as Parameters<typeof setOpeningBook>[0]);
+        logger.info(
+          '[AI Worker] Opening book loaded:',
+          (data.book as { metadata?: unknown }).metadata
+        );
         break;
       }
 
@@ -44,9 +79,16 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'getBestMove': {
-        const { board, color, depth, config, personality, moveNumber } = data;
+        const { board, color, depth, config, personality, moveNumber } = (data ?? {}) as {
+          board: Parameters<typeof getBestMoveDetailed>[0];
+          color: Parameters<typeof getBestMoveDetailed>[1];
+          depth: number;
+          config?: { elo?: number; personality?: string };
+          personality?: string;
+          moveNumber?: number;
+        };
 
-        if (id !== undefined) workerHeartbeats[id] = Date.now();
+        touchHeartbeat(id);
 
         // Setup progress callback + heartbeat
         const heartbeatInterval = setInterval(() => {
@@ -76,16 +118,25 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'evaluatePosition': {
-        const { board: evalBoard, forColor } = data;
+        if (!data) break;
+        const evalBoard = data.board as Parameters<typeof evaluatePosition>[0];
+        const forColor = data.forColor as Parameters<typeof evaluatePosition>[1];
         const score = await evaluatePosition(evalBoard, forColor);
         workerSelf.postMessage({ type: 'positionScore', id, data: score });
         break;
       }
 
       case 'getTopMoves': {
-        const { board, color, count, depth, maxTimeMs, moveNumber } = data;
+        if (!data) break;
         try {
-          const topMoves = await getTopMoves(board, color, count, depth, maxTimeMs, moveNumber);
+          const topMoves = await getTopMoves(
+            data.board as Parameters<typeof getTopMoves>[0],
+            data.color as Parameters<typeof getTopMoves>[1],
+            data.count as number | undefined,
+            data.depth as number | undefined,
+            data.maxTimeMs as number | undefined,
+            data.moveNumber as number | undefined
+          );
           workerSelf.postMessage({ type: 'topMoves', id, data: topMoves });
         } catch (error) {
           logger.error('[AI Worker] getTopMoves failed:', error);
@@ -95,7 +146,11 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'analyze': {
-        const { board, color, depth = 4, topMovesCount = 3 } = data;
+        if (!data) break;
+        const board = data.board as Parameters<typeof getTopMoves>[0];
+        const color = data.color as Parameters<typeof getTopMoves>[1];
+        const depth = typeof data.depth === 'number' ? data.depth : 4;
+        const topMovesCount = typeof data.topMovesCount === 'number' ? data.topMovesCount : 3;
 
         setProgressCallback(progress => {
           workerSelf.postMessage({ type: 'progress', id, data: progress });
@@ -107,14 +162,7 @@ self.onmessage = async function (e: MessageEvent) {
         // timeParams means an UNBOUNDED search, and at analysis depth (12 for
         // the live overlay) that hangs on a 9x9 board and the worker never
         // posts a result back (live analysis never populates).
-        const topMoves = await getTopMoves(
-          board,
-          color,
-          topMovesCount,
-          depth,
-          8000,
-          0
-        );
+        const topMoves = await getTopMoves(board, color, topMovesCount, depth, 8000, 0);
 
         const best = topMoves[0];
         workerSelf.postMessage({
@@ -137,9 +185,13 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'search': {
-        const { board, color, depth, personality } = data;
+        if (!data) break;
+        const board = data.board as Parameters<typeof getBestMoveDetailed>[0];
+        const color = data.color as Parameters<typeof getBestMoveDetailed>[1];
+        const depth = data.depth as number;
+        const personality = data.personality as string | undefined;
 
-        if (id !== undefined) workerHeartbeats[id] = Date.now();
+        touchHeartbeat(id);
 
         const heartbeatInterval = setInterval(() => {
           if (id !== undefined)
@@ -168,16 +220,20 @@ self.onmessage = async function (e: MessageEvent) {
         // Compatible with old protocol just in case? 'SEARCH'
         if (type === 'SEARCH') {
           // Adapter for legacy messages if any
-          const { board, turnColor, depth, personality, elo } = e.data.payload;
+          const payload = (msg as { payload?: Record<string, unknown> }).payload;
+          if (!payload) break;
+          const board = payload.board as Parameters<typeof getBestMoveDetailed>[0];
+          const turnColor = payload.turnColor as Parameters<typeof getBestMoveDetailed>[1];
+          const depth = payload.depth as number;
           const timeParams = {
-            elo: elo,
-            personality: personality,
+            elo: payload.elo as number | undefined,
+            personality: payload.personality as string | undefined,
             maxDepth: depth,
           };
           const bestMove = await getBestMoveDetailed(board, turnColor, depth, timeParams);
           workerSelf.postMessage({
             type: 'SEARCH_RESULT',
-            id: e.data.id,
+            id,
             payload: bestMove,
           });
           return;

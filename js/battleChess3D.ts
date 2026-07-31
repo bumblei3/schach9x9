@@ -109,7 +109,11 @@ export class BattleChess3D {
       if (success) {
         this.pieceManager.init();
         this.inputHandler.enable();
-        this.enabled = true;
+        // NOTE: do NOT set `this.enabled` here. `enabled` is the caller's
+        // desired on/off state and is owned by the toggle handler. Setting it
+        // true as a side effect of init() races with the toggle (which sets
+        // the target state after awaiting init), making the first 3D toggle
+        // non-deterministic.
 
         // Restore saved settings
         const savedSkin = localStorage.getItem('chess_skin') || 'classic';

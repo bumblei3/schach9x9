@@ -374,35 +374,45 @@ export class DOMHandler {
         const boardWrapper = document.getElementById('board-wrapper');
         if (!container3D || !boardWrapper) return;
 
-        if (this.app.battleChess3D) {
-          this.app.battleChess3D.enabled = !this.app.battleChess3D.enabled;
+        // Lazily create the 3D engine on first toggle (it is undefined until
+        // then). The previous guard `if (this.app.battleChess3D)` skipped the
+        // entire toggle on the first click, leaving `enabled` at its
+        // constructor default (false) and never flipping to 3D on click #1.
+        if (!this.app.battleChess3D) {
+          await this.app.init3D();
+        }
+        if (!this.app.battleChess3D) return; // init failed; bail out
 
-          if (this.app.battleChess3D.enabled) {
-            container3D.classList.remove('hidden');
-            void container3D.offsetWidth; // Force reflow
-            container3D.classList.add('active');
-            document.body.classList.add('mode-3d');
-            toggle3D.classList.add('active-3d');
-            boardWrapper.style.opacity = '0'; // Hide 2D board
+        // Compute the desired state explicitly. init() also sets `enabled`
+        // true on success, so we re-assert the target state *after* init to
+        // avoid a race between init()'s write and our toggle (which otherwise
+        // made the first toggle non-deterministic).
+        const wantOn = !this.app.battleChess3D.enabled;
+        if (wantOn && !this.app.battleChess3D.scene) {
+          await this.app.init3D();
+        }
+        this.app.battleChess3D.enabled = wantOn;
 
-            if (!this.app.battleChess3D!.scene) {
-              await this.app.init3D();
-              this.app.battleChess3D!.updateFromGameState(this.game);
-            } else {
-              this.app.battleChess3D!.updateFromGameState(this.game);
-              this.app.battleChess3D!.onWindowResize();
+        if (wantOn) {
+          container3D.classList.remove('hidden');
+          void container3D.offsetWidth; // Force reflow
+          container3D.classList.add('active');
+          document.body.classList.add('mode-3d');
+          toggle3D.classList.add('active-3d');
+          boardWrapper.style.opacity = '0'; // Hide 2D board
+
+          this.app.battleChess3D.updateFromGameState(this.game);
+          this.app.battleChess3D.onWindowResize();
+        } else {
+          container3D.classList.remove('active');
+          document.body.classList.remove('mode-3d');
+          toggle3D.classList.remove('active-3d');
+          setTimeout(() => {
+            if (!this.app.battleChess3D!.enabled) {
+              container3D.classList.add('hidden');
             }
-          } else {
-            container3D.classList.remove('active');
-            document.body.classList.remove('mode-3d');
-            toggle3D.classList.remove('active-3d');
-            setTimeout(() => {
-              if (!this.app.battleChess3D!.enabled) {
-                container3D.classList.add('hidden');
-              }
-            }, 500);
-            boardWrapper.style.opacity = '1';
-          }
+          }, 500);
+          boardWrapper.style.opacity = '1';
         }
       });
     }
