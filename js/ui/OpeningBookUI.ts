@@ -1,6 +1,9 @@
 /**
  * Opening Book UI Component for Schach 9x9
- * Displays detailed opening database information, statistics, and book moves
+ * Displays detailed opening database information, statistics, and book moves.
+ *
+ * XSS-safe: all dynamic strings go through textContent / createElement.
+ * Never assign untrusted (or DB-derived) strings via innerHTML.
  */
 import {
   getOpeningEntry,
@@ -27,6 +30,36 @@ interface OpeningBookUIElements {
   searchInput: HTMLInputElement | null;
   searchResults: HTMLElement | null;
   categoryFilter: HTMLSelectElement | null;
+}
+
+type OpeningEntry = NonNullable<ReturnType<typeof getOpeningEntry>>;
+
+/** Create an element with optional class, text, and attributes (values as text, never HTML). */
+function el<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  opts: {
+    className?: string;
+    text?: string;
+    attrs?: Record<string, string>;
+    children?: Node[];
+  } = {}
+): HTMLElementTagNameMap[K] {
+  const node = document.createElement(tag);
+  if (opts.className) node.className = opts.className;
+  if (opts.text != null) node.textContent = opts.text;
+  if (opts.attrs) {
+    for (const [k, v] of Object.entries(opts.attrs)) {
+      node.setAttribute(k, v);
+    }
+  }
+  if (opts.children) {
+    for (const child of opts.children) node.appendChild(child);
+  }
+  return node;
+}
+
+function clearChildren(node: HTMLElement): void {
+  node.replaceChildren();
 }
 
 export class OpeningBookUI {
@@ -113,7 +146,7 @@ export class OpeningBookUI {
     }
   }
 
-  private showCurrentOpening(entry: NonNullable<ReturnType<typeof getOpeningEntry>>): void {
+  private showCurrentOpening(entry: OpeningEntry): void {
     if (!this.elements.currentOpening) return;
 
     this.elements.currentOpening.textContent = entry.name;
@@ -126,18 +159,28 @@ export class OpeningBookUI {
       this.elements.currentCategory.textContent = entry.category;
     }
     if (this.elements.currentStats) {
-      this.elements.currentStats.innerHTML = `
-        <span class="stat-pill">Beliebtheit: ${entry.popularity}%</span>
-        <span class="stat-pill white">Weiß: ${entry.whiteWinRate}%</span>
-        <span class="stat-pill black">Schwarz: ${entry.blackWinRate}%</span>
-        <span class="stat-pill draw">Remis: ${entry.drawRate}%</span>
-        <span class="stat-pill">Ø Elo: ${entry.avgElo}</span>
-      `;
+      clearChildren(this.elements.currentStats);
+      const stats: Array<{ className: string; text: string }> = [
+        { className: 'stat-pill', text: `Beliebtheit: ${entry.popularity}%` },
+        { className: 'stat-pill white', text: `Weiß: ${entry.whiteWinRate}%` },
+        { className: 'stat-pill black', text: `Schwarz: ${entry.blackWinRate}%` },
+        { className: 'stat-pill draw', text: `Remis: ${entry.drawRate}%` },
+        { className: 'stat-pill', text: `Ø Elo: ${entry.avgElo}` },
+      ];
+      for (const s of stats) {
+        this.elements.currentStats.appendChild(el('span', { className: s.className, text: s.text }));
+      }
     }
     if (this.elements.currentMoves) {
-      this.elements.currentMoves.innerHTML = entry.moves
-        .map(m => `<span class="opening-move">${m}</span>`)
-        .join(' → ');
+      clearChildren(this.elements.currentMoves);
+      entry.moves.forEach((m, i) => {
+        if (i > 0) {
+          this.elements.currentMoves!.appendChild(document.createTextNode(' → '));
+        }
+        this.elements.currentMoves!.appendChild(
+          el('span', { className: 'opening-move', text: m })
+        );
+      });
     }
     if (this.elements.currentDescription) {
       this.elements.currentDescription.textContent = entry.description;
@@ -163,20 +206,24 @@ export class OpeningBookUI {
 
     const turn = this.game.turn;
     const bookMove = openingBook.getMove(this.game.board, turn);
+    clearChildren(this.elements.bookMovesList);
 
     if (bookMove) {
-      // Show the book move
       const fromSquare = this.squareToAlgebraic(bookMove.from);
       const toSquare = this.squareToAlgebraic(bookMove.to);
-      this.elements.bookMovesList.innerHTML = `
-        <div class="book-move-item book-move">
-          <span class="move-notation">${fromSquare}${toSquare}</span>
-          <span class="move-source">Buchzug</span>
-        </div>
-      `;
+      this.elements.bookMovesList.appendChild(
+        el('div', {
+          className: 'book-move-item book-move',
+          children: [
+            el('span', { className: 'move-notation', text: `${fromSquare}${toSquare}` }),
+            el('span', { className: 'move-source', text: 'Buchzug' }),
+          ],
+        })
+      );
     } else {
-      this.elements.bookMovesList.innerHTML =
-        '<div class="no-book-moves">Kein Buchzug für diese Stellung</div>';
+      this.elements.bookMovesList.appendChild(
+        el('div', { className: 'no-book-moves', text: 'Kein Buchzug für diese Stellung' })
+      );
     }
   }
 
@@ -184,7 +231,7 @@ export class OpeningBookUI {
     if (!this.elements.searchResults) return;
 
     if (!query) {
-      this.elements.searchResults.innerHTML = '';
+      clearChildren(this.elements.searchResults);
       this.renderTopOpenings();
       return;
     }
@@ -207,32 +254,32 @@ export class OpeningBookUI {
 
   private renderSearchResults(entries: ReturnType<typeof searchOpenings>): void {
     if (!this.elements.searchResults) return;
+    clearChildren(this.elements.searchResults);
 
     if (entries.length === 0) {
-      this.elements.searchResults.innerHTML =
-        '<div class="no-results">Keine Eröffnungen gefunden</div>';
+      this.elements.searchResults.appendChild(
+        el('div', { className: 'no-results', text: 'Keine Eröffnungen gefunden' })
+      );
       return;
     }
 
-    this.elements.searchResults.innerHTML = entries
-      .slice(0, 20)
-      .map(entry => this.renderOpeningEntry(entry))
-      .join('');
+    for (const entry of entries.slice(0, 20)) {
+      this.elements.searchResults.appendChild(this.buildOpeningEntry(entry, false));
+    }
   }
 
   private renderTopOpenings(): void {
     if (!this.elements.topOpeningsList) return;
+    clearChildren(this.elements.topOpeningsList);
 
     const topOpenings = getTopOpenings(15);
-    this.elements.topOpeningsList.innerHTML = topOpenings
-      .map(entry => this.renderOpeningEntry(entry, true))
-      .join('');
+    for (const entry of topOpenings) {
+      this.elements.topOpeningsList.appendChild(this.buildOpeningEntry(entry, true));
+    }
   }
 
-  private renderOpeningEntry(
-    entry: NonNullable<ReturnType<typeof getOpeningEntry>>,
-    compact = false
-  ): string {
+  /** Build a safe DOM node for one opening entry (no HTML string interpolation). */
+  private buildOpeningEntry(entry: OpeningEntry, compact = false): HTMLElement {
     const winRateColor =
       entry.whiteWinRate > entry.blackWinRate
         ? 'white'
@@ -240,24 +287,63 @@ export class OpeningBookUI {
           ? 'black'
           : 'draw';
 
-    return `
-      <div class="opening-entry${compact ? ' compact' : ''}" data-eco="${entry.eco}" data-name="${entry.name}">
-        <div class="opening-entry-header">
-          <span class="opening-name">${entry.name}</span>
-          <span class="opening-eco">${entry.eco}</span>
-        </div>
-        <div class="opening-meta">
-          <span class="opening-category">${entry.category}</span>
-          <span class="opening-popularity">Pop: ${entry.popularity}%</span>
-        </div>
-        <div class="opening-stats">
-          <span class="stat ${winRateColor}">W:${entry.whiteWinRate}% B:${entry.blackWinRate}% R:${entry.drawRate}%</span>
-          <span class="stat elo">Ø ${entry.avgElo}</span>
-        </div>
-        ${!compact ? `<div class="opening-moves">${entry.moves.join(' → ')}</div>` : ''}
-        ${!compact ? `<div class="opening-description">${entry.description}</div>` : ''}
-      </div>
-    `;
+    const root = el('div', {
+      className: `opening-entry${compact ? ' compact' : ''}`,
+      attrs: { 'data-eco': entry.eco, 'data-name': entry.name },
+    });
+
+    root.appendChild(
+      el('div', {
+        className: 'opening-entry-header',
+        children: [
+          el('span', { className: 'opening-name', text: entry.name }),
+          el('span', { className: 'opening-eco', text: entry.eco }),
+        ],
+      })
+    );
+
+    root.appendChild(
+      el('div', {
+        className: 'opening-meta',
+        children: [
+          el('span', { className: 'opening-category', text: entry.category }),
+          el('span', {
+            className: 'opening-popularity',
+            text: `Pop: ${entry.popularity}%`,
+          }),
+        ],
+      })
+    );
+
+    root.appendChild(
+      el('div', {
+        className: 'opening-stats',
+        children: [
+          el('span', {
+            className: `stat ${winRateColor}`,
+            text: `W:${entry.whiteWinRate}% B:${entry.blackWinRate}% R:${entry.drawRate}%`,
+          }),
+          el('span', { className: 'stat elo', text: `Ø ${entry.avgElo}` }),
+        ],
+      })
+    );
+
+    if (!compact) {
+      root.appendChild(
+        el('div', {
+          className: 'opening-moves',
+          text: entry.moves.join(' → '),
+        })
+      );
+      root.appendChild(
+        el('div', {
+          className: 'opening-description',
+          text: entry.description,
+        })
+      );
+    }
+
+    return root;
   }
 
   private squareToAlgebraic(sq: { r: number; c: number }): string {
@@ -288,17 +374,20 @@ export class OpeningBookUI {
     if (!this.elements.categoryFilter) return;
 
     const categories = new Set<string>();
-
     Object.values(OPENING_DATABASE).forEach(entry => {
       categories.add(entry.category);
     });
-
     const sortedCategories = Array.from(categories).sort();
 
-    this.elements.categoryFilter.innerHTML = `
-      <option value="all">Alle Kategorien</option>
-      ${sortedCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-    `;
+    clearChildren(this.elements.categoryFilter);
+    this.elements.categoryFilter.appendChild(
+      el('option', { text: 'Alle Kategorien', attrs: { value: 'all' } })
+    );
+    for (const cat of sortedCategories) {
+      this.elements.categoryFilter.appendChild(
+        el('option', { text: cat, attrs: { value: cat } })
+      );
+    }
   }
 }
 
