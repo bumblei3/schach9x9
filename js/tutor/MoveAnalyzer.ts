@@ -352,7 +352,11 @@ export function analyzeMoveWithExplanation(
 
   // Categorize based on relative score
   let qualityLabel = '';
-  let category = 'normal';
+  // `category` is always assigned in the if/else chain below (incl. the final
+  // else), so no initial value is needed. A `let category = 'normal'` here is
+  // dead (js/useless-assignment-to-local) since it is unconditionally
+  // overwritten before any read.
+  let category: string;
   const diffP = parseFloat(diffPawns);
 
   if (diffP >= 0) {
