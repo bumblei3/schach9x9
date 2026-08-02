@@ -186,36 +186,35 @@ export function getAllCaptureMoves(board: BoardStorage, turnColor: string): Move
 
 function generatePawnMoves(board: BoardStorage, from: number, color: number, moves: Move[]): void {
   const direction = color === COLOR_WHITE ? up() : down();
-  // const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2.
-  // 9x9 Board:
-  // White Pawns start at Row 6, 7? No, Row 8 is King. Row 7 Pawns?
-  // Let's assume standard layout: White at bottom (Row 8), Black at top (Row 0).
-  // White Pawns at Row 7. Move Up (-9).
-  // Black Pawns at Row 1. Move Down (+9).
-  // Wait, existing config says: White moves up() (decreasing index).
-  // Initial setup: White Rooks at Row 8. Pawns at Row 7?
-  // Let's assume Row 7 is start for White. Row 1 for Black.
-
+  const size = getCurrentBoardSize();
   const forward = from + direction;
   const rank = indexToRow(from);
+  // Promotion rank: white advances to row 0, black to row size-1.
+  const promoRank = color === COLOR_WHITE ? 0 : size - 1;
+
+  // gameEngine / standard chess: white pawns on size-2, black on 1.
+  // Historical AI test boards also use white@6 / black@2 on 9×9 search boards.
+  const isStartRank =
+    color === COLOR_WHITE ? rank === size - 2 || rank === 6 : rank === 1 || rank === 2;
+
+  const pushMove = (to: number, flags?: string): void => {
+    if (indexToRow(to) === promoRank) {
+      // Auto-queen (engine search does not branch multi-promo).
+      moves.push({ from, to, promotion: PIECE_QUEEN, flags });
+    } else {
+      moves.push({ from, to, flags });
+    }
+  };
 
   // Single Push
-  if (board[forward] === PIECE_NONE) {
-    moves.push({ from, to: forward });
+  if (isValidSquare(forward) && board[forward] === PIECE_NONE) {
+    pushMove(forward);
 
-    // Double Push
-    const isStart = (color === COLOR_WHITE && rank === 6) || (color === COLOR_BLACK && rank === 2); // 0-indexed rows
-    // Actually standard is: Black at 0,1,2. White at 6,7,8.
-    // Pawns at 2 and 6?
-    // Wait, 9x9. 0..8.
-    // Black Pawns at row 2?
-    // Let's stick to logic: if (rank === startRank) check double.
-
-    // For now, assuming standard double push allowed.
-    if (isStart) {
+    // Double Push from start rank
+    if (isStartRank) {
       const doubleForward = forward + direction;
-      if (board[doubleForward] === PIECE_NONE) {
-        moves.push({ from, to: doubleForward, flags: 'double' });
+      if (isValidSquare(doubleForward) && board[doubleForward] === PIECE_NONE) {
+        pushMove(doubleForward, 'double');
       }
     }
   }
@@ -228,7 +227,7 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
     if (isValidSquare(captureLeft)) {
       const target = board[captureLeft];
       if (target !== PIECE_NONE && (target & COLOR_MASK) !== color) {
-        moves.push({ from, to: captureLeft });
+        pushMove(captureLeft);
       }
     }
   }
@@ -239,7 +238,7 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
     if (isValidSquare(captureRight)) {
       const target = board[captureRight];
       if (target !== PIECE_NONE && (target & COLOR_MASK) !== color) {
-        moves.push({ from, to: captureRight });
+        pushMove(captureRight);
       }
     }
   }
@@ -405,12 +404,13 @@ export function makeMove(board: BoardStorage, move: Move): UndoInfo {
   const piece = board[move.from];
   const captured = board[move.to];
 
-  // We assume move is simplified to simple object logic here.
-  // Deep state (like hasMoved) is lost in this simple integer array.
-  // For a real engine, we use a separate state stack.
-  // For now, we just swap.
-
-  board[move.to] = piece;
+  // Deep state (hasMoved / castling rights / EP) is not tracked on the int board.
+  // Promotion: replace the moving piece with the promo type, keeping color.
+  if (move.promotion) {
+    board[move.to] = (piece & COLOR_MASK) | (move.promotion & TYPE_MASK);
+  } else {
+    board[move.to] = piece;
+  }
   board[move.from] = PIECE_NONE;
 
   return { move, captured, piece };
@@ -418,6 +418,7 @@ export function makeMove(board: BoardStorage, move: Move): UndoInfo {
 
 export function undoMove(board: BoardStorage, undoInfo: UndoInfo): void {
   const { move, captured, piece } = undoInfo;
+  // Restore the original moving piece (pre-promotion), not the promo piece on `to`.
   board[move.from] = piece;
   board[move.to] = captured;
 }

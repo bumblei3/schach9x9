@@ -21,6 +21,7 @@
     "test:visual:update": "npx playwright test --grep @visual --update-snapshots",
     "test:coverage": "vitest run --coverage",
     "changelog": "node scripts/changelog.mjs",
+    "match:stockfish": "npx tsx tools/stockfish-match.ts",
     "postinstall": "npm rebuild rolldown vite || true"
   },
   "devDependencies": {
@@ -41,6 +42,7 @@
     "jsdoc": "^4.0.5",
     "jsdom": "^29.1.1",
     "prettier": "^3.9.6",
+    "stockfish": "^18.0.8",
     "ts-jest": "^29.4.12",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",

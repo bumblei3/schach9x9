@@ -9,6 +9,12 @@ Changes since `v1.6.1`.
 
 ### Bug Fixes
 
+- **8x8 pawn double-push + auto-queen promotion (Integer-Engine).**
+  Doppelzug-Startreihen waren hardcodiert (weiß rank 6 / schwarz rank 2) und
+  passten nicht zu `gameEngine` (weiß `size-2`, schwarz rank 1) — nach e2e4
+  hatte Schwarz nur 12 statt 20 legale Züge. Jetzt size-aware (+ Legacy 6/2
+  für alte 9×9-Testbretter). Bauern auf der letzten Reihe promoten Auto-Dame;
+  `makeMove`/`undoMove` wenden Promotion korrekt an. (2026-08-02)
 - **8x8-Modus repariert — Move-Generierung size-aware (gemessen, 2936 Tests grün).**
   Der `standard8x8`-Modus war fundamental broken: `genLegalInt`/MoveGenerator war
   hart auf 9x9 codiert (SQUARE_COUNT=81, fixe Offsets UP=-9, isValidSquare ohne
@@ -23,8 +29,17 @@ Changes since `v1.6.1`.
 - **analysis:** repair live engine analysis pipeline (3 bugs) (#152) (113359d)
 - **engine:** respect explicit search depth in benchmarks + add depth-aware harness (#148) (ac1391b)
 
+### Tools
+
+- **Absolute strength vs Stockfish (8×8):** `tools/stockfish-match.ts` +
+  `npm run match:stockfish`. Headless Child-Process UCI gegen `stockfish@18`
+  (lite-single). Symmetrische Regeln (keine Rochade/EP, Auto-Dame). Baseline
+  in `bench/ABSOLUTE_STRENGTH_BASELINE.md`. (2026-08-02)
+
 ### Documentation
 
+- **Absolute Stockfish baseline** dokumentiert (Track B 8×8 + Track A 9×9 refs).
+  STATUS.md: nächster Hebel = Rochade/EP, nicht weitere 9×9-Search-Knobs.
 - **8x8-Modus repariert (siehe Bug Fixes).** Vorheriger Eintrag "8x8-Modus broken
   — absoluter Stockfish-Match gescheitert" wird hiermit durch den erfolgreichen
   Repair ersetzt: die Move-Generierung ist jetzt size-aware, der `standard8x8`-
