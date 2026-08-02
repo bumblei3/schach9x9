@@ -41,8 +41,15 @@ package.json hatte kein license-Feld. Jetzt einheitlich WTFPL (wie trischach).
 
 ## Offene Punkte (aus CHANGELOG)
 
-- **TypeScript 7:** auf `^6.0.3` fixiert — `typescript-eslint` v8 unterstützt
-  nur `typescript <6.1.0`. TS 7 erst nach Release von `typescript-eslint` v9.
+- **TypeScript 7: VERSUCHT 2026-08-02, blockiert.** TS 7.0.2 ist auf npm,
+  aber typescript-eslint v8.65.0 hat peerDep `typescript >=4.8.4 <6.1.0` und
+  **crasht hart** mit TS 7.0 ("typescript-eslint does not support TS 7.0").
+  Gemessen im abgeschirmten Branch `try/ts7`: `tsc --noEmit` läuft mit TS 7
+  **grün** (keine neuen Errors), aber `eslint .` bricht mit obigem Error.
+  Side-by-side mit TS-6-API (TS-7-Announcement) ist fragil und riskiert die
+  4 CI-checks → nicht weiterverfolgt. Branch sauber revertiert (Lock-Hash
+  wieder 3d46a0e, TS 6.0.3, eslint grün). **Weiterhin auf TS 6.0.3 fixiert,**
+  bis typescript-eslint **v9** (oder TS 7.1+ Support per Issue #10940) da ist.
 - **Multiplayer:** bewusst nicht geplant (Solo-Fokus).
 - Keine offenen Engine-Hebel — bewusst alles geparkt.
 
