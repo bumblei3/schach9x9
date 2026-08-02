@@ -5,13 +5,13 @@ Gehalten von Hermes; bei jeder "wie weiter verbessern"-Run neu verifiziert.
 
 ## Gesundheit (frisch verifiziert 2026-08-02)
 
-| Gate            | Befehl                | Ergebnis              |
-|-----------------|-----------------------|-----------------------|
-| Tests           | `npx vitest run`      | 2936/2936 passed (235 files) |
-| Typecheck       | `npx tsc --noEmit`    | grün (exit 0)         |
-| Lint            | `npx eslint .`        | grün (exit 0)         |
-| Build           | `npx vite build`      | `dist/` vorhanden/ok  |
-| Security        | CodeQL                | keine offenen Alerts (letzte Fixes #169/#170/#171) |
+| Gate      | Befehl             | Ergebnis                                           |
+| --------- | ------------------ | -------------------------------------------------- |
+| Tests     | `npx vitest run`   | 2936/2936 passed (235 files)                       |
+| Typecheck | `npx tsc --noEmit` | grün (exit 0)                                      |
+| Lint      | `npx eslint .`     | grün (exit 0)                                      |
+| Build     | `npx vite build`   | `dist/` vorhanden/ok                               |
+| Security  | CodeQL             | keine offenen Alerts (letzte Fixes #169/#170/#171) |
 
 Working Tree: sauber, synced mit origin. Keine ungepushten Commits.
 
@@ -41,6 +41,19 @@ package.json hatte kein license-Feld. Jetzt einheitlich WTFPL (wie trischach).
 
 ## Offene Punkte (aus CHANGELOG)
 
+- **Absolute Engine-Stärke vs Stockfish: NICHT MESSBAR — 8x8-Modus broken.**
+  Versuch 2026-08-02: Stockfish-WASM (npm `stockfish@18`) gegen die Engine im
+  `standard8x8`-Modus matchen. Scheiterte, weil der 8x8-Modus **fundamental
+  broken** ist: `genLegalInt` (Move-Generierung in aiEngine/MoveGenerator) ist
+  hart auf 9x9 codiert und kennt das 8x8-Board nicht — `getAllLegalMoves` auf
+  einem 8x8-Brett liefert 19/38 Züge mit out-of-range Koordinaten (r/c > 7).
+  Ein `size=9`-Fix in `convertMoveToResult` heilt das nicht (der Index selbst
+  ist 9x9-basiert). Der `standard8x8`-Modus kann also gar nicht legal ziehen;
+  ein absoluter Stärke-Match ist ohne 8x8-Reparatur der Move-Generierung
+  (variabler Board-Größe) unmöglich. Das ist die echte Lücke, die README
+  "absolute Stärke vs Stockfish" meint — sie ist eine Engine-Reparatur, kein
+  Benchmark-Problem. Versuchs-Artefakte (stockfish-match.ts, stockfish-dep)
+  wieder radikal entfernt.
 - **TypeScript 7: VERSUCHT 2026-08-02, blockiert.** TS 7.0.2 ist auf npm,
   aber typescript-eslint v8.65.0 hat peerDep `typescript >=4.8.4 <6.1.0` und
   **crasht hart** mit TS 7.0 ("typescript-eslint does not support TS 7.0").
@@ -57,6 +70,7 @@ package.json hatte kein license-Feld. Jetzt einheitlich WTFPL (wie trischach).
 
 Kein aktiver Stärkungs-Hebel mehr — die Engine-Arbeit ist an dem Punkt ehrlich
 abgeschlossen ("feature-complete"). Sinnvolle nächste Schritte wären eher:
+
 - Eine absolute Engine-Stärke-Bench-Infra (Analog zu trischach) einziehen, um
   künftige Änderungen ehrlich messbar zu machen.
 - TS 7 Upgrade, sobald typescript-eslint v9 da ist.

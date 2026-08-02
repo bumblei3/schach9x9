@@ -13,6 +13,18 @@ Changes since `v1.6.1`.
 - **analysis:** repair live engine analysis pipeline (3 bugs) (#152) (113359d)
 - **engine:** respect explicit search depth in benchmarks + add depth-aware harness (#148) (ac1391b)
 
+### Documentation
+
+- **8x8-Modus broken — absoluter Stockfish-Match gescheitert (gemessen).**
+  Versuch, die Engine im `standard8x8`-Modus gegen Stockfish-WASM (npm
+  `stockfish@18`) zu matchen (absolute Stärke, README-Lücke). Scheiterte:
+  `genLegalInt` (Move-Generierung) ist hart auf 9x9 codiert — `getAllLegalMoves`
+  auf 8x8 liefert 19/38 Züge mit out-of-range Koordinaten. Ein `size=9`-Fix in
+  `convertMoveToResult` heilt das nicht (Index selbst 9x9-basiert). Der
+  `standard8x8`-Modus kann nicht legal ziehen; absoluter Match nur mit
+  8x8-Reparatur der Move-Generierung möglich. Versuchs-Artefakte radikal
+  entfernt. (2026-08-02)
+
 ### Performance
 
 - **search:** raise MAX_SEARCH_TIME 5s -> 8s (H3, deeper search) (#149) (3b00581)
