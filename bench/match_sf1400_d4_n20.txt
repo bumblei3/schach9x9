@@ -1,0 +1,11 @@
+# Canonical absolute baseline — 2026-08-02
+# npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --quiet
+# rules: full standard (castling + EP + auto-queen)
+# engine: stockfish@18 lite-single
+
+games=20 ourDepth=4 sfDepth=8 sfElo=1400
+W-D-L (ours): 0-4-16
+score: 0.100
+elo vs SF≈1400: -381.7
+term: checkmate=16 illegal-sf=2 max-plies=2
+RESULT oursW=0 sfW=16 D=4 score=0.1000 elo=-381.7 depth=4 sfDepth=8

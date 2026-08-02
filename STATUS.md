@@ -7,56 +7,51 @@ Gehalten von Hermes; bei jeder "wie weiter verbessern"-Run neu verifiziert.
 
 | Gate      | Befehl             | Ergebnis                                           |
 | --------- | ------------------ | -------------------------------------------------- |
-| Tests     | `npx vitest run`   | 2936/2936 passed (vor SF-Harness-Commit; Spot-Check 21/21 8x8-related grün) |
+| Tests     | `npx vitest run`   | historisch 2936; Spot-Checks 8x8/engine grün nach SF-Arbeit |
 | Typecheck | `npx tsc --noEmit` | grün (historisch)                                  |
 | Lint      | `npx eslint .`     | grün (historisch)                                  |
 | Build     | `npx vite build`   | `dist/` vorhanden/ok                               |
 | Security  | CodeQL             | keine offenen Alerts (letzte Fixes #169/#170/#171) |
 
-## Absolute Strength — Track B (NEU)
-
-Headless Match vs Stockfish WASM auf **8×8**:
+## Absolute Strength — Track B (kanonische Baseline)
 
 ```bash
-npm run match:stockfish -- --games=8 --depth=4 --sf-depth=8 --sf-elo=1400
+npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --quiet
 ```
 
-- Tool: `tools/stockfish-match.ts` (Child-Process UCI, `stockfish@18` devDep)
-- Doku + Zahlen: `bench/ABSOLUTE_STRENGTH_BASELINE.md`
-- Regeln: **volle Standard-8×8** (Rochade + EP + Auto-Dame) via `RuleState`
-- Erste Messung: vs SF full d4 → 0–0–6; vs SF Elo1400 d4 → grob ~−140 Elo (kleine n)
-- Smoke mit Castle/EP: 2 Partien d2, 0× `illegal-sf`
+| | |
+|--|--|
+| **n** | 20 (volle Regeln: Rochade + EP + Auto-Dame) |
+| **W–D–L (wir)** | **0–4–16** |
+| **Score** | **0.100** |
+| **Elo vs SF≈1400** | **≈ −382** |
+| Term | matt 16 · max-plies 2 · illegal-sf 2 (als Remis) |
+
+Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
 
 ## Engine-Stärkung 9×9 — feature-complete / geparkt
 
-Alle Such-Hebel gemergt, bei fester Zeit/Depth **nicht messbar stärker**:
-
-- H3, H-Q1, LMR 2.0, IIR-Skip, H4, H-P1 — kein messbarer Elo-Gewinn
-- Mobility abgelehnt (#151), NNUE geparkt, Buch = Vielfalt (#146)
-
-Relative 9×9-Messung weiter über `js/matchRefs.ts` (Track A).
+Alle Such-Hebel gemergt, bei fester Zeit/Depth **nicht messbar stärker**.
+Relative 9×9-Messung: `js/matchRefs.ts` (Track A).
 
 ## Lizenz
 
-WTFPL (Commit 8ec8ceb) — einheitlich mit trischach.
+WTFPL (Commit 8ec8ceb).
 
 ## Offene Punkte
 
-- **8x8-Regeln:** Doppelzug, Auto-Queen, **Rochade, En passant** im Integer-
-  Board (`setRules` / `RuleState`). 9×9 default bleibt rights=0 (kein Verhalten
-  ohne Opt-in).
-- **Absolute Stärke:** Messlatte steht; Engine klar unter SF-1400 bei d4.
-  Nächster Engine-Schritt: n≥20 neu baselinen, dann gezielte Hebel — nicht blind
-  9×9-Tuning.
-- **TypeScript 7:** blockiert durch typescript-eslint v8 → bleibt TS 6.0.3.
+- **2/20 illegal-sf** unter vollen Regeln — Rest-Mismatch (loggen/fixen wenn Rate steigt).
+- **Absolute Stärke:** Gate steht; Engine klar unter SF-1400 bei d4.
+- **TypeScript 7:** blockiert durch typescript-eslint v8 → TS 6.0.3.
 - **Multiplayer:** bewusst nicht geplant.
 
 ## Nächster sinnvoller Schritt
 
-1. Baseline n≥20 vs SF Elo 1400/1600 (volle Regeln)
-2. Solo-UX (Puzzle/Trainer/Post-Game) parallel möglich
-3. Engine-Hebel nur mit Gate gegen diese Baseline
+1. Solo-UX (Puzzle/Trainer/Post-Game) — Produkt-Wert ohne Elo-Blindflug
+2. Engine-Hebel **nur** wenn Score vs kanonischer Baseline steigt (n≥20, gleiche Flags)
+3. optional: illegal-sf-Ursachen debuggen; SF Elo 1600-Leiter
 4. TS 7 warten auf eslint-Support
+5. 3+ lokale Commits pushen wenn Remote gewünscht
 
-Im Unterschied zu trischach (aktive 3P-Hebel) ist 9×9-Engine feature-complete;
-der aktive Strang ist **8×8 absolute Messung** (Regeln jetzt vollständig).
+9×9-Engine feature-complete; aktiver Strang war **8×8 absolute Messung** — Baseline
+jetzt gesetzt. Nächster Produkt-Hebel eher Solo-UX als weiteres Tuning.

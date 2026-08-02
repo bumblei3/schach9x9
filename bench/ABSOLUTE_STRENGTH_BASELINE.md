@@ -51,15 +51,41 @@ moves (should be rare) are scored **draw / `illegal-sf`**, never as a free win.
 
 ### Baseline results (2026-08-02)
 
+#### Canonical row (use this for regressions)
+
+```bash
+npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --quiet
+```
+
+| Metric | Value |
+|--------|--------|
+| **Date** | 2026-08-02 |
+| **Commit family** | post-castling/EP (`9140034`+) |
+| **Rules** | full standard (castle + EP + auto-queen) |
+| **n** | **20** (alt. colors) |
+| **W–D–L (ours)** | **0–4–16** |
+| **Score** | **0.100** |
+| **Elo vs SF≈1400** | **≈ −382** (95% CI rough: −1200 … −208) |
+| **Terminations** | checkmate=16, max-plies=2, illegal-sf=2 |
+
+Raw one-liner:
+`RESULT oursW=0 sfW=16 D=4 score=0.1000 elo=-381.7 depth=4 sfDepth=8`
+
+**Reading:** At fixed depth 4 the engine scores ~10% against Stockfish-lite
+limited to UCI Elo 1400 (SF searching depth 8). That is a clear gap — useful
+as a floor. Two `illegal-sf` voids (scored draw) remain; investigate if the
+rate rises. Openings at d4 are shallow (often flank pawn pushes).
+
+#### Older / smoke rows
+
 | Setup | n | W–D–L (ours) | Score | Elo vs SF≈ | Notes |
 |-------|---|--------------|-------|------------|-------|
-| depth=2 vs SF d2 full | 2 | 0–0–2 | 0.00 | ≲ −1200 | smoke; full rules (castle+EP) |
-| depth=3 vs SF d4 full | 6 | 0–0–6 | 0.00 | ≲ −1200 | pre-castling series; SF mates |
-| depth=4 vs SF d8 **Elo 1400** | 8 | ~1–3–4 | ~0.31 | ~−137 | pre-castling; order of magnitude |
+| depth=2 vs SF d2 full | 2 | 0–0–2 | 0.00 | ≲ −1200 | smoke |
+| depth=3 vs SF d4 full | 6 | 0–0–6 | 0.00 | ≲ −1200 | full SF |
+| depth=4 vs SF d8 Elo1400 (n=8, pre-n20) | 8 | ~1–3–4 | ~0.31 | ~−137 | superseded by n=20 |
 
-**Reading:** At search depth 3–4 the 8×8 engine is clearly weaker than
-Stockfish-lite even when SF is limited to ~1400 Elo. Re-run with n≥20 after
-major search changes.
+**Any claimed strength gain must beat the canonical n=20 row** (higher score
+or Elo with same flags, ideally n≥20).
 
 ### Re-run checklist (before claiming a strength gain)
 
