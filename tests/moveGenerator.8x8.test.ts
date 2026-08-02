@@ -69,17 +69,19 @@ describe('MoveGenerator 8x8', () => {
     expect(black.some(m => m.from === 12 && m.to === 28)).toBe(true);
   });
 
-  test('white pawn on 7th rank auto-promotes to queen', () => {
+  test('white pawn on 7th rank generates all four promotions', () => {
     const b = emptyBoard();
     b[1 * SIZE + 0] = COLOR_WHITE | PIECE_PAWN; // a7
     b[7 * SIZE + 4] = COLOR_WHITE | PIECE_KING;
     b[0 * SIZE + 4] = COLOR_BLACK | PIECE_KING;
     const moves = getAllLegalMoves(b, 'white');
-    const a8 = moves.find(m => m.from === 8 && m.to === 0);
-    expect(a8).toBeDefined();
-    expect(a8!.promotion).toBe(PIECE_QUEEN);
-    const undo = makeMove(b, a8!);
-    expect(b[0] & 15).toBe(PIECE_QUEEN);
+    const promos = moves.filter(m => m.from === 8 && m.to === 0);
+    expect(promos.map(m => m.promotion).sort()).toEqual(
+      [PIECE_QUEEN, PIECE_ROOK, PIECE_BISHOP, PIECE_KNIGHT].sort()
+    );
+    const toBishop = promos.find(m => m.promotion === PIECE_BISHOP)!;
+    const undo = makeMove(b, toBishop);
+    expect(b[0] & 15).toBe(PIECE_BISHOP);
     expect(b[0] & COLOR_WHITE).toBe(COLOR_WHITE);
     undoMove(b, undo);
     expect(b[8]).toBe(COLOR_WHITE | PIECE_PAWN);

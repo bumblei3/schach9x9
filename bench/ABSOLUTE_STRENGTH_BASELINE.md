@@ -59,30 +59,34 @@ npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --qui
 
 | Metric | Value |
 |--------|--------|
-| **Date** | 2026-08-02 |
-| **Commit family** | post-castling/EP (`9140034`+) |
-| **Rules** | full standard (castle + EP + auto-queen) |
+| **Date** | 2026-08-02 (post underpromo fix) |
+| **Rules** | full standard (castle + EP + **q/r/b/n promotions**) |
 | **n** | **20** (alt. colors) |
-| **W–D–L (ours)** | **0–4–16** |
-| **Score** | **0.100** |
-| **Elo vs SF≈1400** | **≈ −382** (95% CI rough: −1200 … −208) |
-| **Terminations** | checkmate=16, max-plies=2, illegal-sf=2 |
+| **W–D–L (ours)** | **0–3–17** |
+| **Score** | **0.075** |
+| **Elo vs SF≈1400** | **≈ −436** (95% CI rough: −1200 … −251) |
+| **Terminations** | checkmate=17, max-plies=3, **illegal-sf=0** |
 
 Raw one-liner:
-`RESULT oursW=0 sfW=16 D=4 score=0.1000 elo=-381.7 depth=4 sfDepth=8`
+`RESULT oursW=0 sfW=17 D=3 score=0.0750 elo=-436.4 depth=4 sfDepth=8`
 
-**Reading:** At fixed depth 4 the engine scores ~10% against Stockfish-lite
-limited to UCI Elo 1400 (SF searching depth 8). That is a clear gap — useful
-as a floor. Two `illegal-sf` voids (scored draw) remain; investigate if the
-rate rises. Openings at d4 are shallow (often flank pawn pushes).
+**Reading:** At fixed depth 4 the engine scores ~7.5% against Stockfish-lite
+UCI Elo 1400 (SF depth 8). Clear gap — the regression floor. Openings at d4
+are shallow (flank pawn pushes common).
+
+##### illegal-sf root cause (fixed)
+
+Previous n=20 run (queen-only promo) had **2× illegal-sf**: SF underpromoted
+(`c7c8b` on FEN `…/ppPbpppp/… w - -`) while we only generated `c7c8q`.
+Move gen now emits all four promotion pieces; re-run shows **0 illegal-sf**.
 
 #### Older / smoke rows
 
 | Setup | n | W–D–L (ours) | Score | Elo vs SF≈ | Notes |
 |-------|---|--------------|-------|------------|-------|
+| depth=4 vs SF d8 Elo1400 (queen-only promo) | 20 | 0–4–16 | 0.10 | ≈−382 | 2 illegal-sf voids; superseded |
 | depth=2 vs SF d2 full | 2 | 0–0–2 | 0.00 | ≲ −1200 | smoke |
 | depth=3 vs SF d4 full | 6 | 0–0–6 | 0.00 | ≲ −1200 | full SF |
-| depth=4 vs SF d8 Elo1400 (n=8, pre-n20) | 8 | ~1–3–4 | ~0.31 | ~−137 | superseded by n=20 |
 
 **Any claimed strength gain must beat the canonical n=20 row** (higher score
 or Elo with same flags, ideally n≥20).

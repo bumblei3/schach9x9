@@ -21,11 +21,11 @@ npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --qui
 
 | | |
 |--|--|
-| **n** | 20 (volle Regeln: Rochade + EP + Auto-Dame) |
-| **W–D–L (wir)** | **0–4–16** |
-| **Score** | **0.100** |
-| **Elo vs SF≈1400** | **≈ −382** |
-| Term | matt 16 · max-plies 2 · illegal-sf 2 (als Remis) |
+| **n** | 20 (volle Regeln: Rochade + EP + q/r/b/n-Promo) |
+| **W–D–L (wir)** | **0–3–17** |
+| **Score** | **0.075** |
+| **Elo vs SF≈1400** | **≈ −436** |
+| Term | matt 17 · max-plies 3 · **illegal-sf 0** |
 
 Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
 

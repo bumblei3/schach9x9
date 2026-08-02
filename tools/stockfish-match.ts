@@ -7,8 +7,9 @@
  * Stockfish WASM (`stockfish@18`) for an *absolute* strength baseline.
  *
  * Protocol notes (fairness):
- *  - Full standard chess rules on 8×8: castling, en passant, auto-queen
- *    promotion (via RuleState in MoveGenerator + FEN with KQkq/ep for SF).
+ *  - Full standard chess rules on 8×8: castling, en passant, all promotions
+ *    q/r/b/n (via RuleState + FEN with KQkq/ep for SF). Underpromotion matters:
+ *    SF often plays e.g. c7c8b; queen-only gen caused illegal-sf voids.
  *  - Opening book is disabled (depth search only).
  *
  * Usage:
@@ -501,21 +502,21 @@ async function playGame(
             m.from === move.from &&
             m.to === move.to &&
             (move.promotion
-              ? (m.promotion ?? PIECE_QUEEN) === move.promotion
-              : true)
+              ? m.promotion === move.promotion
+              : m.promotion === undefined)
         );
         if (!loose) {
-          // Rule-set mismatch (typically castling/EP — not implemented on our
-          // int board). Do NOT score as a win for us; void as draw so Elo is
-          // not inflated by incomplete rules.
-          if (!quiet) {
-            console.error(
-              `  SF move illegal under our rules (void/draw): ${uci} (legal sample: ${legal
-                .slice(0, 5)
-                .map(moveToUci)
-                .join(' ')})`
-            );
-          }
+          // True rule mismatch (should be rare after underpromo support).
+          // Void as draw — never count as a free win.
+          const sameSq = legal
+            .filter(m => m.from === move.from && m.to === move.to)
+            .map(moveToUci);
+          console.error(
+            `  SF move illegal under our rules (void/draw): ${uci}` +
+              ` fen=${boardToFen(board, turn, 0, fullmove)}` +
+              ` same-sq=[${sameSq.join(',')}]` +
+              ` sample=[${legal.slice(0, 6).map(moveToUci).join(' ')}]`
+          );
           return {
             game,
             ourColor,
@@ -526,7 +527,7 @@ async function playGame(
             moves,
           };
         }
-        // Prefer our legal move object (ensures auto-queen promo applied)
+        // Use our legal move object (flags for castle/ep; SF promo type preserved)
         move = loose;
         uci = moveToUci(move);
       }

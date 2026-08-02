@@ -9,8 +9,12 @@ Changes since `v1.6.1`.
 
 ### Bug Fixes
 
+- **8x8 underpromotion (illegal-sf root cause).** Pawn promotions now generate
+  all of q/r/b/n (queen first for ordering). Stockfish underpromotions such as
+  `c7c8b` no longer void match games; n=20 SF Elo1400 re-run → 0 illegal-sf.
+  (2026-08-02)
 - **8x8 full standard rules on integer engine: castling + en passant +
-  double-push + auto-queen.** `RuleState` (`setRules`/`getRules`) tracks
+  double-push + promotions.** `RuleState` (`setRules`/`getRules`) tracks
   castling rights + EP square; `makeMove`/`undoMove` update and restore them.
   9×9 default remains rights=0 (no behaviour change without opt-in). Double-push
   ranks size-aware. (2026-08-02)

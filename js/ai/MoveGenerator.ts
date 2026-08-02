@@ -248,8 +248,11 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
 
   const pushMove = (to: number, flags?: string): void => {
     if (indexToRow(to) === promoRank) {
-      // Auto-queen (engine search does not branch multi-promo).
-      moves.push({ from, to, promotion: PIECE_QUEEN, flags });
+      // All underpromotions: SF (and correct chess) may choose n/b/r/q.
+      // Queen first so move-ordering / naive pickers still prefer Q.
+      for (const promo of [PIECE_QUEEN, PIECE_ROOK, PIECE_BISHOP, PIECE_KNIGHT]) {
+        moves.push({ from, to, promotion: promo, flags });
+      }
     } else {
       moves.push({ from, to, flags });
     }
