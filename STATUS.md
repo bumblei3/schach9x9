@@ -41,19 +41,21 @@ package.json hatte kein license-Feld. Jetzt einheitlich WTFPL (wie trischach).
 
 ## Offene Punkte (aus CHANGELOG)
 
-- **Absolute Engine-Stärke vs Stockfish: NICHT MESSBAR — 8x8-Modus broken.**
-  Versuch 2026-08-02: Stockfish-WASM (npm `stockfish@18`) gegen die Engine im
-  `standard8x8`-Modus matchen. Scheiterte, weil der 8x8-Modus **fundamental
-  broken** ist: `genLegalInt` (Move-Generierung in aiEngine/MoveGenerator) ist
-  hart auf 9x9 codiert und kennt das 8x8-Board nicht — `getAllLegalMoves` auf
-  einem 8x8-Brett liefert 19/38 Züge mit out-of-range Koordinaten (r/c > 7).
-  Ein `size=9`-Fix in `convertMoveToResult` heilt das nicht (der Index selbst
-  ist 9x9-basiert). Der `standard8x8`-Modus kann also gar nicht legal ziehen;
-  ein absoluter Stärke-Match ist ohne 8x8-Reparatur der Move-Generierung
-  (variabler Board-Größe) unmöglich. Das ist die echte Lücke, die README
-  "absolute Stärke vs Stockfish" meint — sie ist eine Engine-Reparatur, kein
-  Benchmark-Problem. Versuchs-Artefakte (stockfish-match.ts, stockfish-dep)
-  wieder radikal entfernt.
+- **8x8-Modus REPARIERT (2026-08-02).** War fundamental broken: Move-Generierung
+  (`genLegalInt`/MoveGenerator) war hart auf 9x9 codiert — `SQUARE_COUNT=81`,
+  fixe Offsets (UP=-9 etc.), `isValidSquare` ohne Wrap-Schutz, `indexToRow/Col`
+  mit /9. `getAllLegalMoves` auf 8x8 lieferte 19/38 out-of-range Züge → Engine
+  konnte im `standard8x8`-Modus nicht legal ziehen. Repair: Offsets + SQUARE_COUNT
+  - `isValidSquare` (Spalten-Wrap-Schutz) + `indexToRow/Col` aus `getCurrentBoardSize()`
+    abgeleitet (lazy, nicht beim Modul-Laden — sonst Load-Order-Crash). Bei size=9
+    exakt No-Op (keine 9x9-Regression, 2936 Tests grün). 8x8 liefert jetzt korrekte
+    20 Startzüge, 0 out-of-range. **Folge:** absoluter Stockfish-Match (README-Lücke)
+    ist jetzt möglich — noch nicht gebaut.
+- **Absolute Engine-Stärke vs Stockfish: jetzt MÖGLICH, aber noch nicht gemessen.**
+  Seit 8x8-Repair kann die Engine im `standard8x8`-Modus legal ziehen. Ein Match
+  vs Stockfish-WASM (npm `stockfish@18`) ist machbar, wurde aber noch nicht
+  ausgeführt (benötigt headless-fähiges Match-Skript; `getBestMoveDetailed` ist
+  DOM/Worker-gebunden, daher eigene alpha-beta über headless-Primitives nötig).
 - **TypeScript 7: VERSUCHT 2026-08-02, blockiert.** TS 7.0.2 ist auf npm,
   aber typescript-eslint v8.65.0 hat peerDep `typescript >=4.8.4 <6.1.0` und
   **crasht hart** mit TS 7.0 ("typescript-eslint does not support TS 7.0").

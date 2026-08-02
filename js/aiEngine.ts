@@ -6,6 +6,7 @@
 
 import { logger } from './logger';
 import { AI_PERSONALITIES } from './ai/personalities';
+import { getCurrentBoardSize } from './config';
 import {
   calculateTimeAllocation,
   detectTacticalComplexity,
@@ -161,10 +162,10 @@ export function convertBoardToInt(uiBoard: UiBoard | IntBoard): IntBoard {
 // --- Board conversion ---
 
 function convertMoveToResult(
-  move: { from: number; to: number; promotion?: number } | null
+  move: { from: number; to: number; promotion?: number } | null,
+  size = getCurrentBoardSize()
 ): MoveResult | null {
   if (!move) return null;
-  const size = 9;
   return {
     from: { r: Math.floor(move.from / size), c: move.from % size },
     to: { r: Math.floor(move.to / size), c: move.to % size },
@@ -175,8 +176,7 @@ function convertMoveToResult(
 // --- Elo params ---
 
 export function getParamsForElo(elo: number): EloParams {
-  const depth =
-    elo < 1000 ? 3 : elo < 1400 ? 4 : elo < 1800 ? 5 : elo < 2200 ? 6 : 7;
+  const depth = elo < 1000 ? 3 : elo < 1400 ? 4 : elo < 1800 ? 5 : elo < 2200 ? 6 : 7;
   return { maxDepth: depth, elo };
 }
 
@@ -460,7 +460,7 @@ export function getAllLegalMoves(uiBoard: UiBoard, turnColor: Player): MoveResul
   const board = convertBoardToInt(uiBoard);
   const intMoves = genLegalInt(board, turnColor);
   return intMoves
-    .map(m => convertMoveToResult(m as unknown as { from: number; to: number }))
+    .map(m => convertMoveToResult(m as unknown as { from: number; to: number }, uiBoard.length))
     .filter(Boolean) as MoveResult[];
 }
 

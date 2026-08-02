@@ -1,5 +1,4 @@
 import {
-  SQUARE_COUNT,
   PIECE_NONE,
   PIECE_PAWN,
   PIECE_KNIGHT,
@@ -36,7 +35,12 @@ export {
   COLOR_BLACK,
 };
 
-import { isBlockedSquare, getCurrentBoardShape, type BoardShape } from '../config.js';
+import {
+  isBlockedSquare,
+  getCurrentBoardShape,
+  getCurrentBoardSize,
+  type BoardShape,
+} from '../config.js';
 
 export type BoardStorage = number[] | Int8Array;
 
@@ -64,16 +68,30 @@ export interface UndoInfo {
   piece: number;
 }
 
-// Offsets
-const UP = -9;
-const DOWN = 9;
-const LEFT = -1;
-const RIGHT = 1;
-
-const KNIGHT_OFFSETS = [-19, -17, -11, -7, 7, 11, 17, 19];
-const KING_OFFSETS = [-10, -9, -8, -1, 1, 8, 9, 10];
-const BISHOP_OFFSETS = [-10, -8, 8, 10];
-const ROOK_OFFSETS = [-9, 9, -1, 1];
+// Offsets — size-aware, evaluated lazily (per call, not at module load) so the
+// board size is read after config.ts is initialised. For size=9 these equal the
+// legacy hard-coded values (up()=-9, DIAG=±10/±8, KNIGHT=±19/±17/±11/±7). For
+// size=8 they become the correct 8x8 geometry (up()=-8, DIAG=±9/±7, KNIGHT=±17/±15/±10/±6).
+const up = () => -getCurrentBoardSize();
+const down = () => getCurrentBoardSize();
+const left = () => -1;
+const right = () => 1;
+const knightOffsets = () => {
+  const s = getCurrentBoardSize();
+  return [-2 * s - 1, -2 * s + 1, -s - 2, -s + 2, s - 2, s + 2, 2 * s - 1, 2 * s + 1];
+};
+const kingOffsets = () => {
+  const s = getCurrentBoardSize();
+  return [-s - 1, -s, -s + 1, -1, 1, s - 1, s, s + 1];
+};
+const bishopOffsets = () => {
+  const s = getCurrentBoardSize();
+  return [-s - 1, -s + 1, s - 1, s + 1];
+};
+const rookOffsets = () => {
+  const s = getCurrentBoardSize();
+  return [-s, s, -1, 1];
+};
 
 /**
  * Generate all legal moves for position
@@ -90,7 +108,7 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): Move[]
   const moves: Move[] = [];
 
   // 1. Generate Pseudo-Legal Moves
-  for (let from = 0; from < SQUARE_COUNT; from++) {
+  for (let from = 0; from < getCurrentBoardSize() * getCurrentBoardSize(); from++) {
     const piece = board[from];
     if (piece === PIECE_NONE) continue;
     if ((piece & COLOR_MASK) !== color) continue;
@@ -167,14 +185,14 @@ export function getAllCaptureMoves(board: BoardStorage, turnColor: string): Move
 }
 
 function generatePawnMoves(board: BoardStorage, from: number, color: number, moves: Move[]): void {
-  const direction = color === COLOR_WHITE ? UP : DOWN;
+  const direction = color === COLOR_WHITE ? up() : down();
   // const startRow = color === COLOR_WHITE ? 6 : 2; // Rank 6 (index 6) for White? No, standard chess rank 2.
   // 9x9 Board:
   // White Pawns start at Row 6, 7? No, Row 8 is King. Row 7 Pawns?
   // Let's assume standard layout: White at bottom (Row 8), Black at top (Row 0).
   // White Pawns at Row 7. Move Up (-9).
   // Black Pawns at Row 1. Move Down (+9).
-  // Wait, existing config says: White moves UP (decreasing index).
+  // Wait, existing config says: White moves up() (decreasing index).
   // Initial setup: White Rooks at Row 8. Pawns at Row 7?
   // Let's assume Row 7 is start for White. Row 1 for Black.
 
@@ -204,7 +222,7 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
 
   // Captures
   // Left Capture
-  const captureLeft = from + direction + LEFT;
+  const captureLeft = from + direction + left();
   if (Math.abs(indexToCol(from) - indexToCol(captureLeft)) === 1) {
     // Prevent wrap
     if (isValidSquare(captureLeft)) {
@@ -216,7 +234,7 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
   }
 
   // Right Capture
-  const captureRight = from + direction + RIGHT;
+  const captureRight = from + direction + right();
   if (Math.abs(indexToCol(from) - indexToCol(captureRight)) === 1) {
     if (isValidSquare(captureRight)) {
       const target = board[captureRight];
@@ -241,11 +259,11 @@ function generatePieceMoves(
     type === PIECE_CHANCELLOR ||
     type === PIECE_ANGEL
   ) {
-    generateSteppingMoves(board, from, KNIGHT_OFFSETS, color, moves);
+    generateSteppingMoves(board, from, knightOffsets(), color, moves);
   }
 
   if (type === PIECE_KING) {
-    generateSteppingMoves(board, from, KING_OFFSETS, color, moves);
+    generateSteppingMoves(board, from, kingOffsets(), color, moves);
   }
 
   // Sliders
@@ -255,7 +273,7 @@ function generatePieceMoves(
     type === PIECE_QUEEN ||
     type === PIECE_ANGEL
   ) {
-    generateSlidingMoves(board, from, BISHOP_OFFSETS, color, moves);
+    generateSlidingMoves(board, from, bishopOffsets(), color, moves);
   }
 
   if (
@@ -264,11 +282,11 @@ function generatePieceMoves(
     type === PIECE_QUEEN ||
     type === PIECE_ANGEL
   ) {
-    generateSlidingMoves(board, from, ROOK_OFFSETS, color, moves);
+    generateSlidingMoves(board, from, rookOffsets(), color, moves);
   }
 
   if (type === PIECE_NIGHTRIDER) {
-    generateSlidingMoves(board, from, KNIGHT_OFFSETS, color, moves);
+    generateSlidingMoves(board, from, knightOffsets(), color, moves);
   }
 }
 
@@ -339,19 +357,22 @@ function generateSlidingMoves(
       if (offset === 1 || offset === -1) {
         if (toR !== r) break;
       }
-      // VERTICAL (+/- 9): Col must not change.
-      if (offset === 9 || offset === -9) {
+      // VERTICAL (+/- BS): Col must not change.
+      if (offset === getCurrentBoardSize() || offset === -getCurrentBoardSize()) {
         if (toC !== c) break;
       }
       // DIAGONAL: Row and Col must both change by 1.
-      else if (Math.abs(offset) === 8 || Math.abs(offset) === 10) {
+      else if (
+        Math.abs(offset) === getCurrentBoardSize() - 1 ||
+        Math.abs(offset) === getCurrentBoardSize() + 1
+      ) {
         const prev = to - offset;
         const prevR = indexToRow(prev);
         const prevC = indexToCol(prev);
         if (Math.abs(toR - prevR) !== 1 || Math.abs(toC - prevC) !== 1) break;
       }
       // KNIGHT: (Nightrider only) Must change 2 rows/1 col or 1 row/2 cols
-      else if (KNIGHT_OFFSETS.includes(offset)) {
+      else if (knightOffsets().includes(offset)) {
         const prev = to - offset;
         const prevR = indexToRow(prev);
         const prevC = indexToCol(prev);
@@ -408,18 +429,18 @@ export function isSquareAttacked(
 ): boolean {
   // 1. Pawn Attacks
   // Pawns attack diagonally. From 'attackerColor' perspective.
-  // White Pawns attack UP-LEFT (-10) and UP-RIGHT (-8)?
-  // Wait, UP is -9. Left is -1. Up-Left is -10. Up-Right is -8.
-  // Black Pawns attack DOWN-LEFT (+8) and DOWN-RIGHT (+10).
+  // White Pawns attack up()-left() (-10) and up()-right() (-8)?
+  // Wait, up() is -9. Left is -1. Up-Left is -10. Up-Right is -8.
+  // Black Pawns attack down()-left() (+8) and down()-right() (+10).
   // We check if an attacker pawn exists at square - attack_dir.
 
   // Reverse Check:
   // If we are checking if White attacks 'square', we check if there is a White pawn at square - (-10) = square + 10 (Down-Right from square).
   // Basically, we look "backward" along the pawn's attack line.
 
-  const forward = attackerColor === COLOR_WHITE ? UP : DOWN;
+  const forward = attackerColor === COLOR_WHITE ? up() : down();
   // Attack sources are behind the target relative to pawn movement
-  // White Pawn attacks 'square' from (square - UP - LEFT) and (square - UP - RIGHT)
+  // White Pawn attacks 'square' from (square - up() - left()) and (square - up() - right())
   // = square + 9 + 1 = square + 10
   // = square + 9 - 1 = square + 8
 
@@ -428,13 +449,13 @@ export function isSquareAttacked(
   // Check (r+1, c-1) and (r+1, c+1) for White Pawn.
 
   // Generalized:
-  // Check square - forward - LEFT
-  // Check square - forward - RIGHT
+  // Check square - forward - left()
+  // Check square - forward - right()
   // Careful with signs. 'forward' is -9 for White.
   // Check square - (-9) - (-1) = square + 10.
   // Check square - (-9) - (1) = square + 8.
 
-  const pawnStartOffsets = [-(forward + LEFT), -(forward + RIGHT)];
+  const pawnStartOffsets = [-(forward + left()), -(forward + right())];
 
   for (const offset of pawnStartOffsets) {
     const from = square + offset;
@@ -454,7 +475,7 @@ export function isSquareAttacked(
   }
 
   // 2. Knight/Stepping Attacks
-  for (const offset of KNIGHT_OFFSETS) {
+  for (const offset of knightOffsets()) {
     const from = square - offset; // Jump back
     if (isValidSquare(from)) {
       // Check wrap (Manhattan distance approx or row/col diff)
@@ -484,7 +505,7 @@ export function isSquareAttacked(
   }
 
   // 3. King Attacks (distance 1)
-  for (const offset of KING_OFFSETS) {
+  for (const offset of kingOffsets()) {
     const from = square - offset;
     if (isValidSquare(from)) {
       // Check wrap (distance 1)
@@ -509,7 +530,7 @@ export function isSquareAttacked(
 
   // Diagonals (Bishop, Queen, Archbishop, Angel)
   if (
-    checkRayAttacks(board, square, BISHOP_OFFSETS, attackerColor, [
+    checkRayAttacks(board, square, bishopOffsets(), attackerColor, [
       PIECE_BISHOP,
       PIECE_QUEEN,
       PIECE_ARCHBISHOP,
@@ -520,7 +541,7 @@ export function isSquareAttacked(
 
   // Orthogonals (Rook, Queen, Chancellor, Angel)
   if (
-    checkRayAttacks(board, square, ROOK_OFFSETS, attackerColor, [
+    checkRayAttacks(board, square, rookOffsets(), attackerColor, [
       PIECE_ROOK,
       PIECE_QUEEN,
       PIECE_CHANCELLOR,
@@ -530,7 +551,7 @@ export function isSquareAttacked(
     return true;
 
   // 5. Nightrider Sliding Knight Attacks
-  if (checkRayAttacks(board, square, KNIGHT_OFFSETS, attackerColor, [PIECE_NIGHTRIDER]))
+  if (checkRayAttacks(board, square, knightOffsets(), attackerColor, [PIECE_NIGHTRIDER]))
     return true;
 
   return false;
@@ -561,7 +582,7 @@ function checkRayAttacks(
       const pc = indexToCol(curr - offset);
 
       // Should be continuous (dist 1) for non-knight offsets
-      if (KNIGHT_OFFSETS.includes(offset)) {
+      if (knightOffsets().includes(offset)) {
         const dr = Math.abs(cr - pr);
         const dc = Math.abs(cc - pc);
         if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
@@ -592,7 +613,7 @@ function checkRayAttacks(
 export function findKing(board: BoardStorage, color: number): number {
   // const kingType = PIECE_KING; // What about Angel? If Angel is royal?
   // User said "Grand Refactor".
-  for (let i = 0; i < SQUARE_COUNT; i++) {
+  for (let i = 0; i < getCurrentBoardSize() * getCurrentBoardSize(); i++) {
     if ((board[i] & TYPE_MASK) === PIECE_KING && (board[i] & COLOR_MASK) === color) return i;
   }
   return -1;
@@ -694,7 +715,7 @@ function getLVA(
   }
 
   // Knights (and pieces with Knight movement)
-  for (const offset of KNIGHT_OFFSETS) {
+  for (const offset of knightOffsets()) {
     const from = square + offset;
     if (!isValidSquare(from) || usedSquares.has(from)) continue;
     if (Math.abs(indexToRow(square) - indexToRow(from)) > 2) continue;
@@ -714,7 +735,7 @@ function getLVA(
   }
 
   // Bishops/Diagonals (and Archbishop, Queen, Angel)
-  const diagResult = findRayLVA(board, square, BISHOP_OFFSETS, attackerColor, usedSquares, [
+  const diagResult = findRayLVA(board, square, bishopOffsets(), attackerColor, usedSquares, [
     PIECE_BISHOP,
     PIECE_ARCHBISHOP,
     PIECE_QUEEN,
@@ -723,7 +744,7 @@ function getLVA(
   if (diagResult) return diagResult;
 
   // Rooks/Orthogonals (and Chancellor, Queen, Angel)
-  const orthResult = findRayLVA(board, square, ROOK_OFFSETS, attackerColor, usedSquares, [
+  const orthResult = findRayLVA(board, square, rookOffsets(), attackerColor, usedSquares, [
     PIECE_ROOK,
     PIECE_CHANCELLOR,
     PIECE_QUEEN,
@@ -732,7 +753,7 @@ function getLVA(
   if (orthResult) return orthResult;
 
   // King (always last, highest value among simple attackers)
-  for (const offset of KING_OFFSETS) {
+  for (const offset of kingOffsets()) {
     const from = square + offset;
     if (!isValidSquare(from) || usedSquares.has(from)) continue;
     if (Math.abs(indexToCol(square) - indexToCol(from)) > 1) continue;
@@ -801,8 +822,16 @@ function findRayLVA(
   return bestLVA;
 }
 
-function isValidSquare(idx: number): boolean {
-  return idx >= 0 && idx < SQUARE_COUNT;
+function isValidSquare(idx: number, from?: number): boolean {
+  const size = getCurrentBoardSize();
+  if (idx < 0 || idx >= size * size) return false;
+  if (from !== undefined) {
+    // Prevent column wrap: a legal move may change the file by at most 2
+    // (knight); any larger delta means it wrapped across the board edge.
+    const fileDelta = Math.abs((idx % size) - (from % size));
+    if (fileDelta > 2) return false;
+  }
+  return true;
 }
 
 /**
@@ -848,7 +877,7 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
   const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
 
   // Iterate all pieces of the given color
-  for (let from = 0; from < SQUARE_COUNT; from++) {
+  for (let from = 0; from < getCurrentBoardSize() * getCurrentBoardSize(); from++) {
     const piece = board[from];
     if (piece === PIECE_NONE) continue;
     if ((piece & COLOR_MASK) !== color) continue;
@@ -858,8 +887,8 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
     // Pawn threats
     if (type === PIECE_PAWN) {
       // Pawn attacks (no X-ray for pawns)
-      const forward = color === COLOR_WHITE ? UP : DOWN;
-      const captureOffsets = [forward + LEFT, forward + RIGHT];
+      const forward = color === COLOR_WHITE ? up() : down();
+      const captureOffsets = [forward + left(), forward + right()];
       for (const offset of captureOffsets) {
         const to = from + offset;
         if (!isValidSquare(to)) continue;
@@ -887,9 +916,9 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
       type === PIECE_ARCHBISHOP ||
       type === PIECE_CHANCELLOR ||
       type === PIECE_ANGEL
-        ? KNIGHT_OFFSETS
+        ? knightOffsets()
         : type === PIECE_KING
-          ? KING_OFFSETS
+          ? kingOffsets()
           : null;
 
     if (steppingOffsets) {
@@ -941,7 +970,7 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
       type === PIECE_QUEEN ||
       type === PIECE_ANGEL
     ) {
-      offsets.push(...BISHOP_OFFSETS);
+      offsets.push(...bishopOffsets());
     }
     if (
       type === PIECE_ROOK ||
@@ -949,10 +978,10 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
       type === PIECE_QUEEN ||
       type === PIECE_ANGEL
     ) {
-      offsets.push(...ROOK_OFFSETS);
+      offsets.push(...rookOffsets());
     }
     if (type === PIECE_NIGHTRIDER) {
-      offsets.push(...KNIGHT_OFFSETS);
+      offsets.push(...knightOffsets());
     }
 
     // Scan each ray
@@ -970,7 +999,7 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
         const pr = indexToRow(prev);
         const pc = indexToCol(prev);
 
-        if (KNIGHT_OFFSETS.includes(offset)) {
+        if (knightOffsets().includes(offset)) {
           const dr = Math.abs(cr - pr);
           const dc = Math.abs(cc - pc);
           if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
@@ -1040,7 +1069,7 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
         const pr = indexToRow(prev);
         const pc = indexToCol(prev);
 
-        if (KNIGHT_OFFSETS.includes(offset)) {
+        if (knightOffsets().includes(offset)) {
           const dr = Math.abs(cr - pr);
           const dc = Math.abs(cc - pc);
           if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
@@ -1098,7 +1127,7 @@ export function getAllThreats(board: BoardStorage, color: number): ThreatInfo[] 
               const bpr = indexToRow(bprev);
               const bpc = indexToCol(bprev);
 
-              if (KNIGHT_OFFSETS.includes(offset)) {
+              if (knightOffsets().includes(offset)) {
                 const dr = Math.abs(br - bpr);
                 const dc = Math.abs(bc - bpc);
                 if (!((dr === 2 && dc === 1) || (dr === 1 && dc === 2))) break;
@@ -1160,7 +1189,7 @@ export function getKingThreats(board: BoardStorage, color: number): ThreatInfo[]
   // Find enemy king
   let enemyKingSquare = -1;
   const enemyColor = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
-  for (let i = 0; i < SQUARE_COUNT; i++) {
+  for (let i = 0; i < getCurrentBoardSize() * getCurrentBoardSize(); i++) {
     const p = board[i];
     if (p !== PIECE_NONE && (p & COLOR_MASK) === enemyColor && (p & TYPE_MASK) === PIECE_KING) {
       enemyKingSquare = i;

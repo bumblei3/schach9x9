@@ -9,21 +9,26 @@ Changes since `v1.6.1`.
 
 ### Bug Fixes
 
+- **8x8-Modus repariert — Move-Generierung size-aware (gemessen, 2936 Tests grün).**
+  Der `standard8x8`-Modus war fundamental broken: `genLegalInt`/MoveGenerator war
+  hart auf 9x9 codiert (SQUARE_COUNT=81, fixe Offsets UP=-9, isValidSquare ohne
+  Wrap-Schutz, indexToRow/Col mit /9) → `getAllLegalMoves` auf 8x8 lieferte 19/38
+  out-of-range Züge, Engine konnte nicht legal ziehen. Repair: Offsets +
+  SQUARE_COUNT + isValidSquare (Spalten-Wrap) + indexToRow/Col aus
+  `getCurrentBoardSize()` abgeleitet (lazy, nicht beim Modul-Laden — sonst
+  Load-Order-Crash via circular import). Bei size=9 exakt No-Op (keine 9x9-
+  Regression). 8x8 liefert jetzt korrekte 20 Startzüge, 0 out-of-range. Der
+  absolute Stockfish-Match (README-Lücke) ist damit wieder möglich. (2026-08-02)
 - **analysis:** repair live analysis entry, arrow + remaining pipeline bugs (#153) (#153) (13c3d7e)
 - **analysis:** repair live engine analysis pipeline (3 bugs) (#152) (113359d)
 - **engine:** respect explicit search depth in benchmarks + add depth-aware harness (#148) (ac1391b)
 
 ### Documentation
 
-- **8x8-Modus broken — absoluter Stockfish-Match gescheitert (gemessen).**
-  Versuch, die Engine im `standard8x8`-Modus gegen Stockfish-WASM (npm
-  `stockfish@18`) zu matchen (absolute Stärke, README-Lücke). Scheiterte:
-  `genLegalInt` (Move-Generierung) ist hart auf 9x9 codiert — `getAllLegalMoves`
-  auf 8x8 liefert 19/38 Züge mit out-of-range Koordinaten. Ein `size=9`-Fix in
-  `convertMoveToResult` heilt das nicht (Index selbst 9x9-basiert). Der
-  `standard8x8`-Modus kann nicht legal ziehen; absoluter Match nur mit
-  8x8-Reparatur der Move-Generierung möglich. Versuchs-Artefakte radikal
-  entfernt. (2026-08-02)
+- **8x8-Modus repariert (siehe Bug Fixes).** Vorheriger Eintrag "8x8-Modus broken
+  — absoluter Stockfish-Match gescheitert" wird hiermit durch den erfolgreichen
+  Repair ersetzt: die Move-Generierung ist jetzt size-aware, der `standard8x8`-
+  Modus funktional. (2026-08-02)
 
 ### Performance
 

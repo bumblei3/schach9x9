@@ -61,17 +61,19 @@ export function isBlack(piece: number): boolean {
   return (piece & COLOR_BLACK) !== 0;
 }
 
-// Coordinate conversions
+// Coordinate conversions — size-aware via config (9x9 default, 8 for STANDARD_8X8)
+import { getCurrentBoardSize } from '../config.js';
+
 export function indexToRow(index: number): number {
-  return Math.floor(index / BOARD_SIZE);
+  return Math.floor(index / getCurrentBoardSize());
 }
 
 export function indexToCol(index: number): number {
-  return index % BOARD_SIZE;
+  return index % getCurrentBoardSize();
 }
 
 export function coordsToIndex(r: number, c: number): number {
-  return r * BOARD_SIZE + c;
+  return r * getCurrentBoardSize() + c;
 }
 
 // Piece type -> index lookup table for Zobrist hashing (O(1) instead of linear search)
