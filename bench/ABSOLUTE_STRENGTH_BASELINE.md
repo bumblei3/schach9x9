@@ -37,30 +37,29 @@ npx tsx tools/stockfish-match.ts --games=4 --depth=3 --sf-depth=4 --quiet
 child process** (UCI over stdin/stdout). In-process `engine.print` hooks do not
 work with the npm package — do not "fix" that.
 
-### Rule symmetry (important)
+### Rule set (standard 8×8)
 
-The integer search board does **not** track castling rights or en passant.
-Both sides therefore play with:
+Integer engine `RuleState` tracks castling rights + EP target. Both sides play
+full standard chess:
 
-- empty castling rights in every FEN sent to SF (`-` instead of `KQkq`)
-- empty EP square
-- auto-queen promotion only
+- castling KQkq when rights remain
+- en passant after double pushes
+- auto-queen promotion
 
-If SF still returns a move illegal under our generator (residual mismatch),
-the game is scored **draw / `illegal-sf`** — never as a free win.
+FEN sent to SF includes rights/EP from the same state. Residual illegal SF
+moves (should be rare) are scored **draw / `illegal-sf`**, never as a free win.
 
-### Baseline results (2026-08-02, main + local 8×8 rule fixes)
+### Baseline results (2026-08-02)
 
 | Setup | n | W–D–L (ours) | Score | Elo vs SF≈ | Notes |
 |-------|---|--------------|-------|------------|-------|
-| depth=2 vs SF d2 full | 2 | 0–0–2 | 0.00 | ≲ −1200 | smoke; SF mates |
-| depth=3 vs SF d4 full | 6 | 0–0–6 | 0.00 | ≲ −1200 | full SF far stronger |
-| depth=4 vs SF d8 **Elo 1400** | 8 | 1–3–4* | ~0.31 | ~−137 | *1× later rescored as void; order of magnitude only |
+| depth=2 vs SF d2 full | 2 | 0–0–2 | 0.00 | ≲ −1200 | smoke; full rules (castle+EP) |
+| depth=3 vs SF d4 full | 6 | 0–0–6 | 0.00 | ≲ −1200 | pre-castling series; SF mates |
+| depth=4 vs SF d8 **Elo 1400** | 8 | ~1–3–4 | ~0.31 | ~−137 | pre-castling; order of magnitude |
 
 **Reading:** At search depth 3–4 the 8×8 engine is clearly weaker than
-Stockfish-lite even when SF is limited to ~1400 Elo. Useful as a floor, not a
-claim of near-master strength. Re-run after castling/EP (or deeper search) and
-replace this table.
+Stockfish-lite even when SF is limited to ~1400 Elo. Re-run with n≥20 after
+major search changes.
 
 ### Re-run checklist (before claiming a strength gain)
 

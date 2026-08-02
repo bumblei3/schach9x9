@@ -9,6 +9,11 @@ Changes since `v1.6.1`.
 
 ### Bug Fixes
 
+- **8x8 full standard rules on integer engine: castling + en passant +
+  double-push + auto-queen.** `RuleState` (`setRules`/`getRules`) tracks
+  castling rights + EP square; `makeMove`/`undoMove` update and restore them.
+  9×9 default remains rights=0 (no behaviour change without opt-in). Double-push
+  ranks size-aware. (2026-08-02)
 - **8x8 pawn double-push + auto-queen promotion (Integer-Engine).**
   Doppelzug-Startreihen waren hardcodiert (weiß rank 6 / schwarz rank 2) und
   passten nicht zu `gameEngine` (weiß `size-2`, schwarz rank 1) — nach e2e4

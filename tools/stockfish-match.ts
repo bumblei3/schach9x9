@@ -7,10 +7,8 @@
  * Stockfish WASM (`stockfish@18`) for an *absolute* strength baseline.
  *
  * Protocol notes (fairness):
- *  - Castling / en passant are NOT in the integer search board state. Both
- *    sides play with empty castling + EP rights in every FEN we send to SF,
- *    and our engine never generates castling/EP. That keeps rules symmetric.
- *  - Pawn promotion is auto-queen on both sides.
+ *  - Full standard chess rules on 8×8: castling, en passant, auto-queen
+ *    promotion (via RuleState in MoveGenerator + FEN with KQkq/ep for SF).
  *  - Opening book is disabled (depth search only).
  *
  * Usage:
@@ -37,6 +35,13 @@ import {
   getAllLegalMoves,
   makeMove,
   isInCheck,
+  setRules,
+  getRules,
+  CR_ALL,
+  CR_WK,
+  CR_WQ,
+  CR_BK,
+  CR_BQ,
   type Move,
 } from '../js/ai/MoveGenerator.js';
 import {
@@ -157,10 +162,21 @@ function parseUciMove(uci: string): Move {
   return { from, to, promotion };
 }
 
-/**
- * FEN without castling rights and without EP — keeps SF and our engine under
- * the same reduced rule set (see file header).
- */
+function castlingFen(cr: number): string {
+  let s = '';
+  if (cr & CR_WK) s += 'K';
+  if (cr & CR_WQ) s += 'Q';
+  if (cr & CR_BK) s += 'k';
+  if (cr & CR_BQ) s += 'q';
+  return s || '-';
+}
+
+function epFen(ep: number): string {
+  if (ep < 0) return '-';
+  return squareToUci(ep);
+}
+
+/** Standard FEN including castling rights + EP from module RuleState. */
 function boardToFen(board: IntBoard, turn: 'white' | 'black', halfmove = 0, fullmove = 1): string {
   const ranks: string[] = [];
   for (let r = 0; r < SIZE; r++) {
@@ -184,8 +200,8 @@ function boardToFen(board: IntBoard, turn: 'white' | 'black', halfmove = 0, full
     ranks.push(row);
   }
   const stm = turn === 'white' ? 'w' : 'b';
-  // empty castling, empty EP
-  return `${ranks.join('/')} ${stm} - - ${halfmove} ${fullmove}`;
+  const r = getRules();
+  return `${ranks.join('/')} ${stm} ${castlingFen(r.castling)} ${epFen(r.ep)} ${halfmove} ${fullmove}`;
 }
 
 function materialCount(board: IntBoard): number {
@@ -359,8 +375,8 @@ async function ourBestMove(
   depth: number
 ): Promise<Move | null> {
   const search = createJsSearch({ personality: 'NORMAL' });
-  // Fresh TT each call via createJsSearch — intentional isolation.
-  const result = await search.run(board, turn, depth);
+  // Pass current castling/EP so search can castle and capture EP.
+  const result = await search.run(board, turn, depth, { ...getRules() });
   return result.move;
 }
 
@@ -397,6 +413,7 @@ async function playGame(
   quiet: boolean
 ): Promise<GameResult> {
   const board = initialBoard8x8();
+  setRules({ castling: CR_ALL, ep: -1 });
   let turn: 'white' | 'black' = 'white';
   let plies = 0;
   let fullmove = 1;
@@ -574,8 +591,9 @@ async function main(): Promise<void> {
     throw new Error(`expected board size 8, got ${getCurrentBoardSize()}`);
   }
 
-  // Sanity: startpos must have 20 legal moves each side after e2e4 still ~20.
+  // Sanity: startpos 20 moves; after e2e4 still 20; castling present when rights set.
   {
+    setRules({ castling: CR_ALL, ep: -1 });
     const b = initialBoard8x8();
     const w = getAllLegalMoves(b, 'white');
     if (w.length !== 20) {
@@ -588,6 +606,21 @@ async function main(): Promise<void> {
     if (bl.length !== 20) {
       throw new Error(`after e2e4 black legal expected 20, got ${bl.length}`);
     }
+    // Clear path for white O-O and ensure castling is generated
+    const castleBoard = initialBoard8x8();
+    setRules({ castling: CR_ALL, ep: -1 });
+    // Remove pieces between king and h-rook: f1=61, g1=62 are empty at start;
+    // need knights/bishops gone for a clean test — remove g1-path by clearing
+    // knight and bishop: b1 empty already path... start has N on g1? g1 is empty,
+    // pieces on f1 none, g1 none, but knight is on g1? Wait: back rank is
+    // a1=r b1=n c1=b d1=q e1=k f1=b g1=n h1=r — f1 and g1 occupied.
+    // Clear f1,g1 for O-O test:
+    castleBoard[61] = 0;
+    castleBoard[62] = 0;
+    const castles = getAllLegalMoves(castleBoard, 'white').filter(m => m.flags === 'castle-k');
+    if (castles.length !== 1) {
+      throw new Error(`expected 1 kingside castle after clearing f1/g1, got ${castles.length}`);
+    }
   }
 
   console.log('=== schach9x9 absolute strength vs Stockfish (8×8) ===');
@@ -596,7 +629,7 @@ async function main(): Promise<void> {
       (args.sfElo != null ? ` sfElo=${args.sfElo}` : ' sfElo=full') +
       ` engine=${args.sfEngine} maxPlies=${args.maxPlies}`
   );
-  console.log('rules: no castling, no EP, auto-queen promo (symmetric)');
+  console.log('rules: full standard (castling + EP + auto-queen promo)');
 
   const sf = await startStockfish(args.sfEngine);
   await configureStockfish(sf, { elo: args.sfElo });

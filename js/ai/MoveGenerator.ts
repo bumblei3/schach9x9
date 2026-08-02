@@ -44,9 +44,47 @@ import {
 
 export type BoardStorage = number[] | Int8Array;
 
+/** Castling rights bits (standard 8×8 only). */
+export const CR_WK = 1;
+export const CR_WQ = 2;
+export const CR_BK = 4;
+export const CR_BQ = 8;
+export const CR_ALL = CR_WK | CR_WQ | CR_BK | CR_BQ;
+
+/**
+ * Side-car rule state for the integer engine: castling rights + en-passant square.
+ * Default is all rights off / no EP so 9×9 search behaviour is unchanged until
+ * a caller opts in via setRules().
+ */
+export interface RuleState {
+  castling: number;
+  /** EP target square (landing square for the capturer), or -1. */
+  ep: number;
+}
+
+let rules: RuleState = { castling: 0, ep: -1 };
+
+export function getRules(): RuleState {
+  return rules;
+}
+
+export function setRules(next: RuleState): void {
+  rules = { castling: next.castling | 0, ep: next.ep | 0 };
+}
+
+export function resetRules(): void {
+  rules = { castling: 0, ep: -1 };
+}
+
 /**
  * Represents a chess move in the integer board engine.
  * Squares are stored as flat indices (0-80) into the 9x9 board.
+ *
+ * flags:
+ *  - 'double'   pawn double push
+ *  - 'ep'       en-passant capture
+ *  - 'castle-k' kingside castling
+ *  - 'castle-q' queenside castling
  */
 export interface Move {
   from: number;
@@ -66,6 +104,12 @@ export interface UndoInfo {
   move: Move;
   captured: number;
   piece: number;
+  castling: number;
+  ep: number;
+  epVictimSq: number;
+  epVictimPiece: number;
+  rookFrom: number;
+  rookTo: number;
 }
 
 // Offsets — size-aware, evaluated lazily (per call, not at module load) so the
@@ -120,6 +164,11 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): Move[]
     } else {
       generatePieceMoves(board, from, type, color, moves);
     }
+  }
+
+  // Castling (8×8 only, rights from rule state)
+  if (getCurrentBoardSize() === 8) {
+    generateCastlingMoves(board, color, moves);
   }
 
   // 2. Filter Illegal Moves (Checks)
@@ -239,6 +288,106 @@ function generatePawnMoves(board: BoardStorage, from: number, color: number, mov
       const target = board[captureRight];
       if (target !== PIECE_NONE && (target & COLOR_MASK) !== color) {
         pushMove(captureRight);
+      }
+    }
+  }
+
+  // En passant (only when rule state has an EP target)
+  if (rules.ep >= 0) {
+    const ep = rules.ep;
+    if (
+      isValidSquare(ep) &&
+      Math.abs(indexToCol(from) - indexToCol(ep)) === 1 &&
+      indexToRow(ep) === indexToRow(from) + (color === COLOR_WHITE ? -1 : 1) &&
+      board[ep] === PIECE_NONE
+    ) {
+      // Victim sits on the square the double-pushed pawn landed on.
+      const victimSq = ep - direction;
+      const victim = board[victimSq];
+      if (
+        victim !== PIECE_NONE &&
+        (victim & TYPE_MASK) === PIECE_PAWN &&
+        (victim & COLOR_MASK) !== color
+      ) {
+        moves.push({ from, to: ep, flags: 'ep' });
+      }
+    }
+  }
+}
+
+/**
+ * Standard 8×8 castling. King/rook start squares assume row0=rank8 layout.
+ * Rights come from module rule state (setRules).
+ */
+function generateCastlingMoves(board: BoardStorage, color: number, moves: Move[]): void {
+  if (rules.castling === 0) return;
+  const enemy = color === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
+
+  // Squares: white king e1=60, black king e8=4
+  if (color === COLOR_WHITE) {
+    const kFrom = 60;
+    if ((board[kFrom] & TYPE_MASK) !== PIECE_KING || (board[kFrom] & COLOR_MASK) !== COLOR_WHITE) {
+      return;
+    }
+    if (isSquareAttacked(board, kFrom, enemy)) return;
+
+    // Kingside: e1-g1, rook h1-f1; through f1
+    if (rules.castling & CR_WK) {
+      if (
+        board[61] === PIECE_NONE &&
+        board[62] === PIECE_NONE &&
+        (board[63] & TYPE_MASK) === PIECE_ROOK &&
+        (board[63] & COLOR_MASK) === COLOR_WHITE &&
+        !isSquareAttacked(board, 61, enemy) &&
+        !isSquareAttacked(board, 62, enemy)
+      ) {
+        moves.push({ from: kFrom, to: 62, castling: true, flags: 'castle-k' });
+      }
+    }
+    // Queenside: e1-c1, rook a1-d1; through d1,c1; b1 empty
+    if (rules.castling & CR_WQ) {
+      if (
+        board[59] === PIECE_NONE &&
+        board[58] === PIECE_NONE &&
+        board[57] === PIECE_NONE &&
+        (board[56] & TYPE_MASK) === PIECE_ROOK &&
+        (board[56] & COLOR_MASK) === COLOR_WHITE &&
+        !isSquareAttacked(board, 59, enemy) &&
+        !isSquareAttacked(board, 58, enemy)
+      ) {
+        moves.push({ from: kFrom, to: 58, castling: true, flags: 'castle-q' });
+      }
+    }
+  } else {
+    const kFrom = 4;
+    if ((board[kFrom] & TYPE_MASK) !== PIECE_KING || (board[kFrom] & COLOR_MASK) !== COLOR_BLACK) {
+      return;
+    }
+    if (isSquareAttacked(board, kFrom, enemy)) return;
+
+    if (rules.castling & CR_BK) {
+      if (
+        board[5] === PIECE_NONE &&
+        board[6] === PIECE_NONE &&
+        (board[7] & TYPE_MASK) === PIECE_ROOK &&
+        (board[7] & COLOR_MASK) === COLOR_BLACK &&
+        !isSquareAttacked(board, 5, enemy) &&
+        !isSquareAttacked(board, 6, enemy)
+      ) {
+        moves.push({ from: kFrom, to: 6, castling: true, flags: 'castle-k' });
+      }
+    }
+    if (rules.castling & CR_BQ) {
+      if (
+        board[3] === PIECE_NONE &&
+        board[2] === PIECE_NONE &&
+        board[1] === PIECE_NONE &&
+        (board[0] & TYPE_MASK) === PIECE_ROOK &&
+        (board[0] & COLOR_MASK) === COLOR_BLACK &&
+        !isSquareAttacked(board, 3, enemy) &&
+        !isSquareAttacked(board, 2, enemy)
+      ) {
+        moves.push({ from: kFrom, to: 2, castling: true, flags: 'castle-q' });
       }
     }
   }
@@ -402,9 +551,37 @@ function generateSlidingMoves(
 
 export function makeMove(board: BoardStorage, move: Move): UndoInfo {
   const piece = board[move.from];
-  const captured = board[move.to];
+  const prevCastling = rules.castling;
+  const prevEp = rules.ep;
+  let captured = board[move.to];
+  let epVictimSq = -1;
+  let epVictimPiece = 0;
+  let rookFrom = -1;
+  let rookTo = -1;
 
-  // Deep state (hasMoved / castling rights / EP) is not tracked on the int board.
+  // --- En passant: capture the pawn that double-pushed ---
+  if (move.flags === 'ep') {
+    const direction = (piece & COLOR_MASK) === COLOR_WHITE ? up() : down();
+    // Victim is on the double-push landing square (EP target − pawn direction).
+    epVictimSq = move.to - direction;
+    epVictimPiece = board[epVictimSq] ?? 0;
+    board[epVictimSq] = PIECE_NONE;
+    captured = epVictimPiece; // report as capture for SEE/ordering
+  }
+
+  // --- Castling: move rook as well ---
+  if (move.flags === 'castle-k' || move.flags === 'castle-q') {
+    if (move.flags === 'castle-k') {
+      rookFrom = move.from + 3; // h-file rook
+      rookTo = move.from + 1; // f-file
+    } else {
+      rookFrom = move.from - 4; // a-file rook
+      rookTo = move.from - 1; // d-file
+    }
+    board[rookTo] = board[rookFrom]!;
+    board[rookFrom] = PIECE_NONE;
+  }
+
   // Promotion: replace the moving piece with the promo type, keeping color.
   if (move.promotion) {
     board[move.to] = (piece & COLOR_MASK) | (move.promotion & TYPE_MASK);
@@ -413,14 +590,75 @@ export function makeMove(board: BoardStorage, move: Move): UndoInfo {
   }
   board[move.from] = PIECE_NONE;
 
-  return { move, captured, piece };
+  // --- Update castling rights ---
+  let cr = rules.castling;
+  const from = move.from;
+  const to = move.to;
+  // King moved (or castled)
+  if ((piece & TYPE_MASK) === PIECE_KING) {
+    if ((piece & COLOR_MASK) === COLOR_WHITE) cr &= ~(CR_WK | CR_WQ);
+    else cr &= ~(CR_BK | CR_BQ);
+  }
+  // Rook moved from its corner
+  if ((piece & TYPE_MASK) === PIECE_ROOK) {
+    if (from === 63) cr &= ~CR_WK;
+    else if (from === 56) cr &= ~CR_WQ;
+    else if (from === 7) cr &= ~CR_BK;
+    else if (from === 0) cr &= ~CR_BQ;
+  }
+  // Rook captured on its corner (normal capture or EP never captures a rook on corner with ep)
+  if (captured && (captured & TYPE_MASK) === PIECE_ROOK) {
+    const capSq = move.flags === 'ep' ? epVictimSq : to;
+    if (capSq === 63) cr &= ~CR_WK;
+    else if (capSq === 56) cr &= ~CR_WQ;
+    else if (capSq === 7) cr &= ~CR_BK;
+    else if (capSq === 0) cr &= ~CR_BQ;
+  }
+  rules.castling = cr;
+
+  // --- Update EP target ---
+  if (move.flags === 'double' && (piece & TYPE_MASK) === PIECE_PAWN) {
+    // Landing square of the capturer is the skipped square.
+    const direction = (piece & COLOR_MASK) === COLOR_WHITE ? up() : down();
+    rules.ep = move.from + direction;
+  } else {
+    rules.ep = -1;
+  }
+
+  return {
+    move,
+    captured: move.flags === 'ep' ? 0 : captured, // board[to] was empty for EP
+    piece,
+    castling: prevCastling,
+    ep: prevEp,
+    epVictimSq,
+    epVictimPiece,
+    rookFrom,
+    rookTo,
+  };
 }
 
 export function undoMove(board: BoardStorage, undoInfo: UndoInfo): void {
-  const { move, captured, piece } = undoInfo;
-  // Restore the original moving piece (pre-promotion), not the promo piece on `to`.
+  const { move, captured, piece, castling, ep, epVictimSq, epVictimPiece, rookFrom, rookTo } =
+    undoInfo;
+
+  // Restore king/piece (pre-promotion)
   board[move.from] = piece;
   board[move.to] = captured;
+
+  // Undo castling rook
+  if (rookFrom >= 0 && rookTo >= 0) {
+    board[rookFrom] = board[rookTo]!;
+    board[rookTo] = PIECE_NONE;
+  }
+
+  // Undo EP victim
+  if (epVictimSq >= 0) {
+    board[epVictimSq] = epVictimPiece;
+  }
+
+  rules.castling = castling;
+  rules.ep = ep;
 }
 
 export function isSquareAttacked(

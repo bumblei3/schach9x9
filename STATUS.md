@@ -23,8 +23,9 @@ npm run match:stockfish -- --games=8 --depth=4 --sf-depth=8 --sf-elo=1400
 
 - Tool: `tools/stockfish-match.ts` (Child-Process UCI, `stockfish@18` devDep)
 - Doku + Zahlen: `bench/ABSOLUTE_STRENGTH_BASELINE.md`
-- Regeln (symmetrisch): **keine Rochade, kein EP**, Auto-Dame-Promotion
+- Regeln: **volle Standard-8×8** (Rochade + EP + Auto-Dame) via `RuleState`
 - Erste Messung: vs SF full d4 → 0–0–6; vs SF Elo1400 d4 → grob ~−140 Elo (kleine n)
+- Smoke mit Castle/EP: 2 Partien d2, 0× `illegal-sf`
 
 ## Engine-Stärkung 9×9 — feature-complete / geparkt
 

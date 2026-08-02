@@ -28,6 +28,9 @@ import {
   undoMove as undoMoveInt,
   getAllCaptureMoves,
   isInCheck as checkInt,
+  getRules,
+  setRules,
+  type RuleState,
 } from './ai/MoveGenerator';
 import { evaluate, type EvalConfig } from './evaluate';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
@@ -340,11 +343,20 @@ interface JsSearchResult {
 
 export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' }) {
   return {
+    /**
+     * @param rules Optional castling/EP state. When omitted, uses the current
+     *   module rule state (default: no castling/EP). Search make/undo mutates
+     *   and restores rules via UndoInfo, so the state at return matches entry.
+     */
     async run(
       board: IntBoard,
       turnColor: 'white' | 'black',
-      maxDepth: number
+      maxDepth: number,
+      rules?: RuleState
     ): Promise<JsSearchResult> {
+      if (rules) setRules(rules);
+      // Snapshot so a mid-search abort cannot leak partial rights (defensive).
+      const rulesAtEntry = { ...getRules() };
       const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
       const start = performance.now();
       let nodes = 0;
@@ -477,9 +489,10 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               // --- Late Move Reductions (LMR) ---
               let reduction = 0;
-              const isCapture = b[move.to] !== PIECE_NONE;
+              const isCapture = b[move.to] !== PIECE_NONE || move.flags === 'ep';
               const isPromotion = move.promotion !== undefined;
               const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
+              const isCastle = move.flags === 'castle-k' || move.flags === 'castle-q';
 
               // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
               if (
@@ -487,6 +500,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 movesSearched > LMR_MOVE_COUNT &&
                 !isCapture &&
                 !isPromotion &&
+                !isCastle &&
                 !isTTMove &&
                 !inCheck
               ) {
@@ -522,7 +536,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               alpha = Math.max(alpha, result.score);
               if (beta <= alpha) {
                 flag = 'lower';
-                if (b[move.to] === PIECE_NONE) {
+                if (b[move.to] === PIECE_NONE && move.flags !== 'ep') {
                   const k = killers[d];
                   if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
                     k[1] = k[0];
@@ -570,9 +584,10 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               // --- Late Move Reductions (LMR) ---
               let reduction = 0;
-              const isCapture = b[move.to] !== PIECE_NONE;
+              const isCapture = b[move.to] !== PIECE_NONE || move.flags === 'ep';
               const isPromotion = move.promotion !== undefined;
               const isTTMove = ttBest && move.from === ttBest.from && move.to === ttBest.to;
+              const isCastle = move.flags === 'castle-k' || move.flags === 'castle-q';
 
               // Conditions for LMR: depth >= 3, not first few moves, not capture, not promotion, not TT move, not in check
               if (
@@ -580,6 +595,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 movesSearched > LMR_MOVE_COUNT &&
                 !isCapture &&
                 !isPromotion &&
+                !isCastle &&
                 !isTTMove &&
                 !inCheck
               ) {
@@ -614,7 +630,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               beta = Math.min(beta, result.score);
               if (beta <= alpha) {
                 flag = 'upper';
-                if (b[move.to] === PIECE_NONE) {
+                if (b[move.to] === PIECE_NONE && move.flags !== 'ep') {
                   const k = killers[d];
                   if (k && !(k[0] && k[0].from === move.from && k[0].to === move.to)) {
                     k[1] = k[0];
@@ -754,6 +770,8 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         }
       }
 
+      // Restore entry rights (make/undo should already have; defensive).
+      setRules(rulesAtEntry);
       return { move: bestResult.bestMove, score: bestResult.score, nodes, depth: maxDepth };
     },
   };
