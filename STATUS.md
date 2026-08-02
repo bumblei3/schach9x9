@@ -40,18 +40,18 @@ WTFPL (Commit 8ec8ceb).
 
 ## Offene Punkte
 
-- **2/20 illegal-sf** unter vollen Regeln — Rest-Mismatch (loggen/fixen wenn Rate steigt).
-- **Absolute Stärke:** Gate steht; Engine klar unter SF-1400 bei d4.
+- **illegal-sf behoben:** Ursache war **Unterpromotion** (SF `c7c8b`, wir nur `…q`).
+  Move-Gen erzeugt jetzt q/r/b/n; n=20 Re-Run → 0 illegal-sf.
+- **Absolute Stärke:** Gate steht; Engine klar unter SF-1400 bei d4 (Score 0.075).
 - **TypeScript 7:** blockiert durch typescript-eslint v8 → TS 6.0.3.
 - **Multiplayer:** bewusst nicht geplant.
 
 ## Nächster sinnvoller Schritt
 
 1. Solo-UX (Puzzle/Trainer/Post-Game) — Produkt-Wert ohne Elo-Blindflug
-2. Engine-Hebel **nur** wenn Score vs kanonischer Baseline steigt (n≥20, gleiche Flags)
-3. optional: illegal-sf-Ursachen debuggen; SF Elo 1600-Leiter
+2. Engine-Hebel **nur** wenn Score vs kanonischer Baseline (0.075 / n=20) steigt
+3. optional: SF Elo 1600-Leiter
 4. TS 7 warten auf eslint-Support
-5. 3+ lokale Commits pushen wenn Remote gewünscht
 
-9×9-Engine feature-complete; aktiver Strang war **8×8 absolute Messung** — Baseline
-jetzt gesetzt. Nächster Produkt-Hebel eher Solo-UX als weiteres Tuning.
+9×9-Engine feature-complete; 8×8 absolute Baseline + illegal-sf-Fix stehen.
+Nächster Produkt-Hebel eher Solo-UX als weiteres Tuning.
