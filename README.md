@@ -272,4 +272,4 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 
 ## 📄 Lizenz
 
-Dieses Projekt ist unter der MIT Lizenz veröffentlicht.
+WTFPL – Do What The F*** You Want To Public License. Siehe [LICENSE](./LICENSE).
