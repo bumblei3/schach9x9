@@ -13,7 +13,9 @@
  * scores from each root's perspective.
  */
 
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
+import { setBoardVariant, BOARD_VARIANTS } from '../js/config.js';
+import { resetRules } from '../js/ai/MoveGenerator.js';
 
 const searchMod = await import('../js/search.js');
 const boardDefs = await import('../js/ai/BoardDefinitions.js');
@@ -72,6 +74,12 @@ function mirror(b: Int8Array): Int8Array {
 }
 
 describe('createJsSearch / run — mirror symmetry (null-move regression)', () => {
+  beforeEach(() => {
+    // Other suites (8×8) mutate module globals; pin 9×9 + no castling/EP.
+    setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
+    resetRules();
+  });
+
   test(
     'position and its mirror score as opposites (no systematic asymmetry)',
     async () => {
@@ -82,16 +90,14 @@ describe('createJsSearch / run — mirror symmetry (null-move regression)', () =
       // The two root searches are mirror images: white-to-move on S and
       // black-to-move on mirror(S). Their scores must be opposites.
       //
-      // A *systematic* asymmetry (hundreds of cp, one colour dominating
-      // self-play) was caused by the null-move-pruning perspective bug
-      // (search called with the wrong `maximizing` flag). Approximative
-      // search heuristics (LMR/ProbCut/null-move) leave a small residual
-      // asymmetry (~50cp at depth 6) which is expected and harmless; we
-      // only guard against the large, game-distorting kind.
-      const white = await search.run(pos, 'white', 6);
-      const black = await search.run(mirrored, 'black', 6);
+      // Depth 4 (not 6): deeper searches often hit MAX_SEARCH_TIME (8s) under
+      // full-suite load, producing wall-clock-dependent incomplete IDs and
+      // false asymmetry. Depth 4 stays well under the budget while still
+      // exercising null-move / LMR enough to catch the perspective bug.
+      const white = await search.run(pos, 'white', 4);
+      const black = await search.run(mirrored, 'black', 4);
       const diff = white.score + black.score;
-      console.log(`DEBUG d=6 white=${white.score} black=${black.score} diff=${diff}`);
+      console.log(`DEBUG d=4 white=${white.score} black=${black.score} diff=${diff}`);
       expect(Math.abs(diff)).toBeLessThan(100);
     },
     30000

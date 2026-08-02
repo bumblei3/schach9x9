@@ -965,7 +965,9 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <button type="button" class="gamemode-card" data-init-mode="standard8x8" data-init-points="0" data-mode="standard8x8">
                       <div class="card-icon">♟️</div>
                       <div class="card-title">Standard 8×8</div>
-                      <div class="card-desc">Klassisches Schachbrett, aber mit 9×9-Regeln.</div>
+                      <div class="card-desc">
+                        Klassisches Schach (8×8) mit Rochade, En passant und KI-Eröffnungsbuch.
+                      </div>
                     </button>
 
                     <button type="button" class="gamemode-card" data-init-mode="puzzle" data-init-points="0" data-mode="puzzle">

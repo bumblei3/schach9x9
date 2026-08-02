@@ -23,48 +23,49 @@ vi.mock('../../js/aiEngine.js', () => ({
   convertBoardToInt: vi.fn(() => new Int32Array(81)),
 }));
 
-// Mock Worker
-class MockWorker {
-  _onmessage: ((e: any) => void) | null = null;
-  _listeners: Record<string, ((e: any) => void)[]> = {};
+// Mock Worker — must match `import AIWorker from './ai/aiWorker.ts?worker'`
+// vi.mock is hoisted; define the class via vi.hoisted so the factory can close over it.
+const { MockWorker } = vi.hoisted(() => {
+  class MockWorker {
+    _onmessage: ((e: any) => void) | null = null;
+    onerror: ((e: any) => void) | null = null;
+    _listeners: Record<string, ((e: any) => void)[]> = {};
 
-  set onmessage(handler: any) {
-    this._onmessage = handler;
-  }
-  get onmessage() {
-    return this._onmessage;
-  }
-  postMessage = vi.fn();
-  terminate = vi.fn();
+    set onmessage(handler: any) {
+      this._onmessage = handler;
+    }
+    get onmessage() {
+      return this._onmessage;
+    }
+    postMessage = vi.fn();
+    terminate = vi.fn();
 
-  addEventListener(type: string, handler: any) {
-    console.log(`[DEBUG] MockWorker addEventListener: ${type}`);
-    if (!this._listeners[type]) this._listeners[type] = [];
-    this._listeners[type].push(handler);
-  }
+    addEventListener(type: string, handler: any) {
+      if (!this._listeners[type]) this._listeners[type] = [];
+      this._listeners[type].push(handler);
+    }
 
-  removeEventListener(type: string, handler: any) {
-    console.log(`[DEBUG] MockWorker removeEventListener: ${type}`);
-    if (!this._listeners[type]) return;
-    this._listeners[type] = this._listeners[type].filter(h => h !== handler);
-  }
+    removeEventListener(type: string, handler: any) {
+      if (!this._listeners[type]) return;
+      this._listeners[type] = this._listeners[type].filter(h => h !== handler);
+    }
 
-  // Helper to trigger messages in test
-  emit(type: string, data: any) {
-    console.log(`[DEBUG] MockWorker emit: ${type}`);
-    const event = { data };
-    if (type === 'message') {
-      if (this.onmessage) {
-        console.log('[DEBUG] MockWorker calling onmessage');
-        this.onmessage(event);
-      }
-      if (this._listeners['message']) {
-        console.log(`[DEBUG] MockWorker calling ${this._listeners['message'].length} listeners`);
-        this._listeners['message'].forEach(h => h(event));
+    emit(type: string, data: any) {
+      const event = { data };
+      if (type === 'message') {
+        if (this.onmessage) this.onmessage(event);
+        if (this._listeners['message']) {
+          this._listeners['message'].forEach(h => h(event));
+        }
       }
     }
   }
-}
+  return { MockWorker };
+});
+
+vi.mock('../../js/ai/aiWorker.ts?worker', () => ({
+  default: MockWorker,
+}));
 
 // @ts-ignore
 global.Worker = MockWorker;
@@ -207,12 +208,15 @@ describe('AIController Coverage Boost', () => {
     controller.initWorkerPool();
     const worker = controller.aiWorkers[0] as any;
     (mockEval as any).mockResolvedValue(0);
+    // initWorkerPool already posts setBoardVariant/shape — count only new posts
+    const postsBefore = worker.postMessage.mock.calls.length;
 
     // Start aiMove
     const movePromise = controller.aiMove();
 
-    // Wait for search to be dispatched (listener attached and postMessage called)
-    while (worker.postMessage.mock.calls.length === 0) {
+    // Wait for search dispatch (getBestMove postMessage after listener attach)
+    const deadline = Date.now() + 5000;
+    while (worker.postMessage.mock.calls.length <= postsBefore && Date.now() < deadline) {
       await new Promise(r => setTimeout(r, 10));
     }
 
@@ -302,19 +306,13 @@ describe('AIController Coverage Boost', () => {
     // Fire and forget, catch potential rejection
     controller.aiMove().catch(() => {});
 
-    // Wait for listener
-    while (worker.postMessage.mock.calls.length === 0) {
+    // Wait until aiMove assigns onerror (search dispatched)
+    const deadline = Date.now() + 5000;
+    while ((!worker.onerror || worker.postMessage.mock.calls.length === 0) && Date.now() < deadline) {
       await new Promise(r => setTimeout(r, 10));
     }
 
-    // Trigger error
-    if (worker.onerror) {
-      worker.onerror(new Error('Test Worker Error'));
-    }
-
-    // It should proceed/resolve (fallback or others)
-    // Since we only have 1 worker in this mock setup (wait, initWorkerPool makes hardwareConcurrency=4),
-    // we need to error ALL workers or just verify error logging.
+    expect(typeof worker.onerror).toBe('function');
     expect(() => worker.onerror(new Error('Test Worker Error'))).not.toThrow();
   });
 

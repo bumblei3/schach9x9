@@ -1,7 +1,7 @@
 /**
  * 8×8 integer move-gen invariants needed for absolute Stockfish matches.
  */
-import { describe, expect, test, beforeEach } from 'vitest';
+import { describe, expect, test, beforeEach, afterEach } from 'vitest';
 import { setBoardVariant, BOARD_VARIANTS } from '../js/config.js';
 import {
   getAllLegalMoves,
@@ -47,6 +47,12 @@ function startpos(): Int8Array {
 describe('MoveGenerator 8x8', () => {
   beforeEach(() => {
     setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
+    resetRules();
+  });
+
+  afterEach(() => {
+    // Do not leak 8×8 geometry into later suites (search.symmetry, etc.).
+    setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
     resetRules();
   });
 
