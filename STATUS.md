@@ -42,21 +42,21 @@ WTFPL (Commit 8ec8ceb) — einheitlich mit trischach.
 
 ## Offene Punkte
 
-- **8x8-Regeln unvollständig für Standard-Chess:** Doppelzug size-aware +
-  Auto-Queen erledigt; **Rochade + En passant fehlen** im Integer-Board →
-  gelegentlich `illegal-sf` (wird als Remis/void gewertet, nicht als Win).
+- **8x8-Regeln:** Doppelzug, Auto-Queen, **Rochade, En passant** im Integer-
+  Board (`setRules` / `RuleState`). 9×9 default bleibt rights=0 (kein Verhalten
+  ohne Opt-in).
 - **Absolute Stärke:** Messlatte steht; Engine klar unter SF-1400 bei d4.
-  Nächster Engine-Schritt: Regeln vervollständigen, dann neu baselinen — nicht
-  blind weitere 9×9-Hebel.
+  Nächster Engine-Schritt: n≥20 neu baselinen, dann gezielte Hebel — nicht blind
+  9×9-Tuning.
 - **TypeScript 7:** blockiert durch typescript-eslint v8 → bleibt TS 6.0.3.
 - **Multiplayer:** bewusst nicht geplant.
 
 ## Nächster sinnvoller Schritt
 
-1. **Rochade (+ EP)** im 8×8 Integer-Move-Gen → faire SF-Partien
-2. Baseline n≥20 vs SF Elo 1400/1600 wiederholen
-3. Solo-UX (Puzzle/Trainer/Post-Game) parallel möglich
+1. Baseline n≥20 vs SF Elo 1400/1600 (volle Regeln)
+2. Solo-UX (Puzzle/Trainer/Post-Game) parallel möglich
+3. Engine-Hebel nur mit Gate gegen diese Baseline
 4. TS 7 warten auf eslint-Support
 
 Im Unterschied zu trischach (aktive 3P-Hebel) ist 9×9-Engine feature-complete;
-der neue aktive Strang ist **8×8 absolute Messung + Regelvollständigkeit**.
+der aktive Strang ist **8×8 absolute Messung** (Regeln jetzt vollständig).
