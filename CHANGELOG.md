@@ -9,6 +9,10 @@ Changes since `v1.6.1`.
 
 ### Bug Fixes
 
+- **Standard 8×8 Solo-UX: AI geometry + opening book.** Workers now receive
+  `setBoardVariant` (8×8 move-gen + castling/EP rules); `opening-book-8x8.json`
+  shipped under `public/`; menu copy no longer claims “9×9 rules”. Main-thread
+  book loader can switch files. (2026-08-02)
 - **8x8 underpromotion (illegal-sf root cause).** Pawn promotions now generate
   all of q/r/b/n (queen first for ordering). Stockfish underpromotions such as
   `c7c8b` no longer void match games; n=20 SF Elo1400 re-run → 0 illegal-sf.

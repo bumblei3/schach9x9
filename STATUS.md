@@ -46,12 +46,16 @@ WTFPL (Commit 8ec8ceb).
 - **TypeScript 7:** blockiert durch typescript-eslint v8 → TS 6.0.3.
 - **Multiplayer:** bewusst nicht geplant.
 
+## Solo-UX (2026-08-02)
+
+- **Standard 8×8 spielbar:** Menü-Text korrigiert; `opening-book-8x8.json` in `public/`;
+  AI-Worker bekommen `setBoardVariant` (8×8-Geometrie + Castling/EP) — vorher
+  suchten Worker weiter auf 9×9.
+- Kanonische Engine-Baseline unverändert (siehe Track B).
+
 ## Nächster sinnvoller Schritt
 
-1. Solo-UX (Puzzle/Trainer/Post-Game) — Produkt-Wert ohne Elo-Blindflug
+1. Post-Game / Puzzle / Trainer weiter polieren
 2. Engine-Hebel **nur** wenn Score vs kanonischer Baseline (0.075 / n=20) steigt
 3. optional: SF Elo 1600-Leiter
 4. TS 7 warten auf eslint-Support
-
-9×9-Engine feature-complete; 8×8 absolute Baseline + illegal-sf-Fix stehen.
-Nächster Produkt-Hebel eher Solo-UX als weiteres Tuning.

@@ -285,8 +285,15 @@ export function setOpeningBook(bookData: BookData): void {
  * from the served static assets exactly once (only if still empty) and populates
  * the singleton via setOpeningBook. Safe to call repeatedly; no-op once loaded.
  */
+/** Which static book file currently populates the main-thread singleton. */
+let loadedBookFile: string | null = null;
+
 export async function ensureOpeningBookLoaded(bookFile = 'opening-book.json'): Promise<void> {
-  if (Object.keys(openingBook.data.positions).length > 0) {
+  // Allow switching 9×9 ↔ 8×8 books (previous no-op after first load stuck the wrong book).
+  if (
+    loadedBookFile === bookFile &&
+    Object.keys(openingBook.data.positions).length > 0
+  ) {
     return;
   }
   try {
@@ -296,8 +303,12 @@ export async function ensureOpeningBookLoaded(bookFile = 'opening-book.json'): P
     }
     const book = (await res.json()) as BookData;
     setOpeningBook(book);
+    loadedBookFile = bookFile;
+    logger.info(
+      `[OpeningBook] loaded ${bookFile} (${Object.keys(book.positions || {}).length} positions)`
+    );
   } catch (err) {
-    logger.error('[OpeningBook] could not load default opening book:', err);
+    logger.error(`[OpeningBook] could not load ${bookFile}:`, err);
   }
 }
 

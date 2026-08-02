@@ -24,7 +24,7 @@ import {
   type Phase,
 } from './config.js';
 import { RulesEngine } from './RulesEngine.js';
-// import { makeMove } from './ai/MoveGenerator.js';
+import { setRules, resetRules, CR_ALL } from './ai/MoveGenerator.js';
 import type { Player, Square, Piece, PuzzleState } from './types/game.js';
 import type { GameController } from './gameController.js';
 import type { AIController } from './aiController.ts';
@@ -232,8 +232,12 @@ export class Game {
     // Set board variant based on mode
     if (mode === 'standard8x8' || mode === 'upgrade8x8') {
       setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
+      // Integer search (hints / main-thread AI) needs castling+EP rights for 8×8.
+      // 9×9 keeps rights off (fairy layout, no standard castling).
+      setRules({ castling: CR_ALL, ep: -1 });
     } else {
       setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
+      resetRules();
     }
 
     // Store board size as instance property

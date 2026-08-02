@@ -152,9 +152,15 @@ export class App {
     // Initialize GameController logic
     this.game.gameController!.initGame(initialPoints, mode as GameMode);
 
-    // Broadcast boardShape to AI workers for cross-shaped board filtering
-    if (this.game.boardShape && this.aiController) {
-      this.aiController.setBoardShapeForWorkers(this.game.boardShape);
+    // Broadcast board geometry to AI workers (8×8 vs 9×9 + cross shape).
+    // Workers default to 9×9; without this, standard8x8 AI uses wrong move gen.
+    if (this.aiController) {
+      const is8 =
+        mode === 'standard8x8' || mode === 'upgrade8x8' || this.game.boardSize === 8;
+      this.aiController.setBoardVariantForWorkers(is8 ? '8x8' : '9x9');
+      if (this.game.boardShape) {
+        this.aiController.setBoardShapeForWorkers(this.game.boardShape);
+      }
     }
 
     // Initialize 3D Battle Chess mode

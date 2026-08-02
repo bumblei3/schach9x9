@@ -4,7 +4,13 @@
  */
 
 import { logger } from '../logger.js';
-import { setCurrentBoardShape, type BoardShape } from '../config.js';
+import {
+  setCurrentBoardShape,
+  setBoardVariant,
+  BOARD_VARIANTS,
+  type BoardShape,
+  type BoardVariant,
+} from '../config.js';
 import {
   getBestMoveDetailed,
   getTopMoves,
@@ -14,6 +20,7 @@ import {
   type AIProgressData,
   type SearchResult,
 } from '../aiEngine.js';
+import { setRules, resetRules, CR_ALL } from './MoveGenerator.js';
 
 const workerSelf: Worker = self as unknown as Worker;
 
@@ -75,6 +82,24 @@ self.onmessage = async function (e: MessageEvent) {
           setCurrentBoardShape(shape);
           logger.debug('[AI Worker] Board shape set to:', shape);
         }
+        break;
+      }
+
+      case 'setBoardVariant': {
+        // Critical for standard8x8: workers default to 9×9 module state.
+        // Without this, move gen / search use wrong geometry on 8×8 boards.
+        const raw = data?.variant as string | undefined;
+        const variant: BoardVariant =
+          raw === BOARD_VARIANTS.STANDARD_8X8 || raw === '8x8'
+            ? BOARD_VARIANTS.STANDARD_8X8
+            : BOARD_VARIANTS.SCHACH9X9;
+        setBoardVariant(variant);
+        if (variant === BOARD_VARIANTS.STANDARD_8X8) {
+          setRules({ castling: CR_ALL, ep: -1 });
+        } else {
+          resetRules();
+        }
+        logger.debug('[AI Worker] Board variant set to:', variant);
         break;
       }
 

@@ -73,6 +73,24 @@ export class AIController {
     });
   }
 
+  /**
+   * Sync board variant (9×9 vs 8×8) + castling/EP rule state into all AI workers.
+   * Must be called when starting standard8x8 / upgrade8x8 (workers default to 9×9).
+   */
+  public setBoardVariantForWorkers(variant: '9x9' | '8x8' | string): void {
+    const payload = { type: 'setBoardVariant', data: { variant } };
+    if (this.aiWorker) {
+      this.aiWorker.postMessage(payload);
+    }
+    this.aiWorkers.forEach(w => {
+      w.postMessage(payload);
+    });
+  }
+
+  private is8x8Mode(): boolean {
+    return this.game.mode === 'standard8x8' || this.game.mode === 'upgrade8x8';
+  }
+
   public toggleAnalysisMode(): boolean {
     this.analysisActive = !this.analysisActive;
 
@@ -464,12 +482,10 @@ export class AIController {
     this.aiWorkers = [];
     this.currentBookMode = this.game.mode;
 
-    const bookFile =
-      this.game.mode === 'standard8x8' || this.game.mode === 'upgrade8x8'
-        ? 'opening-book-8x8.json'
-        : 'opening-book.json';
+    const bookFile = this.is8x8Mode() ? 'opening-book-8x8.json' : 'opening-book.json';
+    const boardVariant = this.is8x8Mode() ? '8x8' : '9x9';
 
-    // Load opening book once
+    // Load opening book once (8×8 book is small; 9×9 is the fairy book)
     fetch(bookFile)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
@@ -477,13 +493,13 @@ export class AIController {
       })
       .then(book => {
         logger.info(
-          `[AIController] Opening book loaded successfully. Positions: ${Object.keys(book.positions || {}).length}`
+          `[AIController] Opening book loaded (${bookFile}). Positions: ${Object.keys(book.positions || {}).length}`
         );
         this.openingBookData = book;
         this.aiWorkers.forEach(w => w.postMessage({ type: 'loadBook', data: { book } }));
       })
       .catch(err => {
-        logger.error('[AIController] Could not load opening-book.json:', err);
+        logger.error(`[AIController] Could not load ${bookFile}:`, err);
       });
 
     for (let i = 0; i < numWorkers; i++) {
@@ -493,6 +509,9 @@ export class AIController {
 
         // Dedicated message handler per worker
         worker.onmessage = (e: MessageEvent) => this.handleWorkerMessage(e, i);
+
+        // Board geometry + castling/EP before any search
+        worker.postMessage({ type: 'setBoardVariant', data: { variant: boardVariant } });
 
         // Send boardShape to worker immediately after creation
         if (this.game.boardShape) {

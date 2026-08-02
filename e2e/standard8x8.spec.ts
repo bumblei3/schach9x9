@@ -10,19 +10,13 @@ test.describe('Standard 8x8 Mode', () => {
   test('should start standard 8x8 chess', async ({ page }) => {
     // Click "Standard (8x8)" card via the stable data-mode attribute
     const standardCard = page.locator('.gamemode-card[data-mode="standard8x8"]');
-
-    // Note: If the UI card doesn't exist, we might fail here.
-    // Assuming standard 8x8 is available in the menu based on the codebase supporting it.
-    if ((await standardCard.count()) === 0) {
-      test.skip(true, 'Standard 8x8 card not found in main menu - feature might be hidden');
-      return;
-    }
+    await expect(standardCard).toBeVisible();
+    await expect(standardCard.locator('.card-desc')).toContainText('Klassisches Schach');
 
     await standardCard.click();
 
     const mainMenu = page.locator('#main-menu');
     await expect(mainMenu).not.toHaveClass(/active/);
-    // await expect(mainMenu).not.toBeVisible(); // Flaky due to opacity < 0.01 but > 0
     await expect(mainMenu).toHaveCSS('pointer-events', 'none');
 
     // Check 8x8 grid
@@ -32,6 +26,8 @@ test.describe('Standard 8x8 Mode', () => {
     // Check board setup
     // White King at 7,4 (standard chess e1 is 7,4 index)
     await expect(page.locator('.cell[data-r="7"][data-c="4"]')).toHaveAttribute('data-piece', 'k');
+    // Black king on e8
+    await expect(page.locator('.cell[data-r="0"][data-c="4"]')).toHaveAttribute('data-piece', 'k');
   });
 
   test('should start 8x8 with upgrades if configured', async ({ page }) => {
