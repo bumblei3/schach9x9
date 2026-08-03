@@ -40,7 +40,7 @@
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "jsdoc": "^4.0.5",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "stockfish": "^18.0.8",
     "ts-jest": "^29.4.12",
