@@ -25,9 +25,9 @@
     "postinstall": "npm rebuild rolldown vite || true"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.0",
+    "@playwright/test": "^1.62.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "@types/three": "^0.185.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
