@@ -472,7 +472,7 @@ export class AnalysisUI {
   private replayPrevBound: (() => void) | null = null;
   private replayNextBound: (() => void) | null = null;
   private replayCloseBound: (() => void) | null = null;
-  private replayKeyHandlerBound: ((e: KeyboardEvent) => void) | null = null;
+  private replayKeyHandlerBound: ((_e: KeyboardEvent) => void) | null = null;
 
   private populateBestMoveCache(): void {
     this.bestMoveCache.clear();
@@ -702,7 +702,7 @@ export class AnalysisUI {
     this.renderReplayBoard(move);
   }
 
-  private renderReplayBoard(move: MoveHistoryEntry): void {
+  private renderReplayBoard(_move: MoveHistoryEntry): void {
     const game = this.game;
     if (!game || !game.moveHistory) return;
 
