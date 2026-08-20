@@ -3,10 +3,11 @@
  */
 import { showModal, closeModal, updateMoveHistoryUI, renderEvalGraph } from '../ui.js';
 import * as PostGameAnalyzer from '../tutor/PostGameAnalyzer.js';
-import type { Game } from '../gameEngine.js';
+import type { Game, Piece } from '../gameEngine.js';
 import type { AIProgressData } from '../aiEngine';
 import type { MoveHistoryEntry } from '../gameEngine.js';
-import type { Piece } from '../types/core.js';
+import { renderBoard } from './BoardRenderer.js';
+import { updateStatus } from './GameStatusUI.js';
 
 interface AnalysisResult {
   score?: number;
@@ -24,16 +25,8 @@ interface PlayerStats {
   counts: Record<string, number>;
 }
 
-interface GameControllerMinimal {
-  jumpToMove: (_n: number) => void;
-}
-
 interface AppWithGame {
-  game: {
-    moveHistory: MoveHistoryEntry[];
-    playerColor: 'white' | 'black';
-    gameController?: GameControllerMinimal;
-  };
+  game: Game | { moveHistory: MoveHistoryEntry[]; playerColor?: 'white' | 'black'; gameController?: unknown };
 }
 
 export class AnalysisUI {
@@ -79,7 +72,7 @@ export class AnalysisUI {
   }
 
   get game(): Game {
-    return this.app.game as Game;
+    return this.app.game as unknown as Game;
   }
 
   update(analysis: AnalysisResult): void {
@@ -498,45 +491,6 @@ export class AnalysisUI {
     return meta?.color ?? '#6b7280';
   }
 
-  private formatMoveNotation(move: MoveHistoryEntry): string {
-    if (move.specialMove) {
-      if (move.specialMove.type === 'castling') {
-        return move.specialMove.kingSide ? '0-0' : '0-0-0';
-      }
-      if (move.specialMove.type === 'enPassant') {
-        return 'ep';
-      }
-    }
-
-    const pieceChar = (move.piece?.type ?? '?');
-    const promoChar = move.promotion ?? null;
-    const files = 'abcdefgh';
-    const fromCol = move.from?.c;
-    const toCol = move.to?.c;
-
-    let base = '';
-    if (pieceChar === 'p') {
-      if (promoChar) {
-        const promoPiece = String.fromCharCode(97 + promoChar);
-        base = files[fromCol ?? 0] + 'x' + files[toCol ?? 0] + '=' + promoPiece.toUpperCase();
-      } else {
-        base = files[fromCol ?? 0] + 'x' + files[toCol ?? 0];
-      }
-    } else {
-      base = pieceChar.toUpperCase() + (move.captured ? 'x' : '') + files[toCol ?? 0];
-    }
-
-    if (move.check) base += '+';
-    if (move.checkmate) base += '#';
-
-    return base;
-  }
-
-  private getTargetSquareForMove(move: MoveHistoryEntry): string | null {
-    if (!move.to) return null;
-    const files = 'abcdefgh';
-    return files[move.to.c ?? 0] + (move.to.r + 1);
-  }
 
   enterReplayMode(): void {
     if (this.replayActive) return;
@@ -709,7 +663,7 @@ export class AnalysisUI {
     const history = game.moveHistory;
     const targetIdx = this.replayPosition;
 
-    game.moveController?.reconstructBoardAtMove(targetIdx);
+    game.moveController?.reconstructBoardAtMove?.(targetIdx);
     game.replayPosition = targetIdx;
     game.turn = targetIdx % 2 === 0 ? 'white' : 'black';
     if (targetIdx < history.length) {
@@ -718,15 +672,15 @@ export class AnalysisUI {
         game.lastMove = {
           from: targetMove.from,
           to: targetMove.to,
-          move: targetMove.moveNumber,
+          piece: (targetMove.piece ?? null) as Piece,
         };
       }
     } else {
       game.lastMove = null;
     }
 
-    UI.renderBoard(game);
-    UI.updateStatus(game);
+    renderBoard(game);
+    updateStatus(game);
 
     if (this.replayBoardEl) {
       const existing = this.replayBoardEl.querySelector('#board');
@@ -759,7 +713,7 @@ export class AnalysisUI {
     const game = this.game;
     game.replayPosition = -1;
     game.lastMove = null;
-    UI.renderBoard(game);
-    UI.updateStatus(game);
+    renderBoard(game);
+    updateStatus(game);
   }
 }

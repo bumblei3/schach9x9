@@ -168,6 +168,7 @@ export class Game {
   moveController?: {
     undoMove: () => void;
     redoMove: () => void;
+    reconstructBoardAtMove?: (_moveIndex: number) => void;
   };
   aiController?: AIController;
   aiMove?: () => void;
