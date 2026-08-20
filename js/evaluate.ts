@@ -238,6 +238,8 @@ export function evaluate(
   const blackPawnFiles = new Set<number>();
   const whitePawnsPerFile: number[] = new Array(9).fill(0);
   const blackPawnsPerFile: number[] = new Array(9).fill(0);
+  let whiteBishops = 0;
+  let blackBishops = 0;
 
   // Personality weights
   const weights = getPersonalityWeights(evalConfig.personality);
@@ -297,6 +299,8 @@ export function evaluate(
       case PIECE_BISHOP:
         mgPos = BISHOP_TABLE[sqIdx];
         egPos = BISHOP_TABLE[sqIdx] * 1.1;
+        if (isWhitePiece) whiteBishops++;
+        else blackBishops++;
         break;
       case PIECE_ROOK:
         mgPos = ROOK_TABLE[sqIdx];
@@ -385,6 +389,17 @@ export function evaluate(
     }
   }
 
+  // --- Bishop pair bonus ---
+  const BISHOP_PAIR_BONUS = 30;
+  if (whiteBishops >= 2) {
+    mgScore += BISHOP_PAIR_BONUS;
+    egScore += BISHOP_PAIR_BONUS;
+  }
+  if (blackBishops >= 2) {
+    mgScore -= BISHOP_PAIR_BONUS;
+    egScore -= BISHOP_PAIR_BONUS;
+  }
+
   // --- King positional (tapered) ---
   if (whiteKingSq >= 0) {
     const wkr = indexToRow(whiteKingSq);
@@ -447,7 +462,7 @@ export function evaluate(
       }
       if (passed) {
         mgScore += PASSED_PAWN_BONUS[row] * 0.8 * weights.pawnStructureWeight;
-        egScore += PASSED_PAWN_BONUS[row] * 1.5 * weights.pawnStructureWeight;
+        egScore += PASSED_PAWN_BONUS[row] * 2.0 * weights.pawnStructureWeight;
       }
     } else {
       let passed = true;
@@ -465,7 +480,7 @@ export function evaluate(
       }
       if (passed) {
         mgScore -= PASSED_PAWN_BONUS[8 - row] * 0.8 * weights.pawnStructureWeight;
-        egScore -= PASSED_PAWN_BONUS[8 - row] * 1.5 * weights.pawnStructureWeight;
+        egScore -= PASSED_PAWN_BONUS[8 - row] * 2.0 * weights.pawnStructureWeight;
       }
     }
   }
@@ -484,6 +499,74 @@ export function evaluate(
     if (blackPawnsPerFile[bkc] === 0) {
       mgScore += shieldPenalty;
       egScore += shieldPenalty * 0.5;
+    }
+  }
+
+  // --- Rook activity in endgame: rooks on 7th rank (2nd rank from own side) ---
+  // White: row 1 (2. rank from white's side); Black: row 7 (2nd rank from black's side)
+  const ROOK_7TH_BONUS = 50;
+  if (c === COLOR_WHITE) {
+    for (let c2 = 0; c2 < 9; c2++) {
+      const sq = 1 * 9 + c2; // row 1
+      const p = b[sq];
+      if (p === (PIECE_ROOK | COLOR_WHITE)) {
+        // Check if file is open (no pawn on this file)
+        let fileOpen = true;
+        for (let r2 = 2; r2 <= 7; r2++) {
+          if (b[r2 * 9 + c2] !== PIECE_NONE && (b[r2 * 9 + c2] & TYPE_MASK) === PIECE_PAWN) {
+            fileOpen = false;
+            break;
+          }
+        }
+        mgScore += fileOpen ? ROOK_7TH_BONUS + 40 : ROOK_7TH_BONUS;
+        egScore += fileOpen ? (ROOK_7TH_BONUS + 40) * 2 : ROOK_7TH_BONUS * 2;
+      }
+    }
+    for (let c2 = 0; c2 < 9; c2++) {
+      const sq = 7 * 9 + c2; // row 7 (black rook on opponent's 7th)
+      const p = b[sq];
+      if (p === (PIECE_ROOK | COLOR_BLACK)) {
+        let fileOpen = true;
+        for (let r2 = 0; r2 <= 6; r2++) {
+          if (b[r2 * 9 + c2] !== PIECE_NONE && (b[r2 * 9 + c2] & TYPE_MASK) === PIECE_PAWN) {
+            fileOpen = false;
+            break;
+          }
+        }
+        mgScore -= fileOpen ? ROOK_7TH_BONUS + 40 : ROOK_7TH_BONUS;
+        egScore -= fileOpen ? (ROOK_7TH_BONUS + 40) * 2 : ROOK_7TH_BONUS * 2;
+      }
+    }
+  } else {
+    for (let c2 = 0; c2 < 9; c2++) {
+      const sq = 7 * 9 + c2; // row 7 (black rook on 7th from black's perspective)
+      const p = b[sq];
+      if (p === (PIECE_ROOK | COLOR_BLACK)) {
+        let fileOpen = true;
+        for (let r2 = 0; r2 <= 6; r2++) {
+          if (b[r2 * 9 + c2] !== PIECE_NONE && (b[r2 * 9 + c2] & TYPE_MASK) === PIECE_PAWN) {
+            fileOpen = false;
+            break;
+          }
+        }
+        mgScore += fileOpen ? ROOK_7TH_BONUS + 40 : ROOK_7TH_BONUS;
+        egScore += fileOpen ? (ROOK_7TH_BONUS + 40) * 2 : ROOK_7TH_BONUS * 2;
+      }
+    }
+    for (let c2 = 0; c2 < 9; c2++) {
+      const sq = 1 * 9 + c2; // row 1 (white rook on opponent's 7th)
+      const p = b[sq];
+      if (p === (PIECE_ROOK | COLOR_WHITE)) {
+        let fileOpen = true;
+        for (let r2 = 2; r2 <= 7; r2++) {
+          if (b[r2 * 9 + c2] !== PIECE_NONE && (b[r2 * 9 + c2] & TYPE_MASK) === PIECE_PAWN) {
+            fileOpen = false;
+            break;
+          }
+        }
+        mgScore -= fileOpen ? ROOK_7TH_BONUS + 40 : ROOK_7TH_BONUS;
+        egScore -= fileOpen ? (ROOK_7TH_BONUS + 40) * 2 : ROOK_7TH_BONUS * 2;
+      }
     }
   }
 
