@@ -8,7 +8,7 @@ Engine-Strärkung: Eval-Patches bleiben, LMR_MAX_REDUCTION wird von 2 auf 3 reve
 
 ### Behalten
 - Eval-Patch (59164cf): Bishop-Paar-Bonus (+30 cp), Passed-Pawn-Endspiel-Multiplikator (2.0×), Turm 7. Reihe-Endspiel-Bonus mit offenem/geschlossenem Datei-Scaling
-- Revert LMR_MAX_REDUCTION 2→3 (d37b282 reverted): Regression auf Tiefe 4 gemessen (−53 cp statt +9 cp mit LMR=3)
+- Revert LMR_MAX_REDUCTION 2→3: Regression auf Tiefe 4 gemessen (−53 cp statt +9 cp mit LMR=3)
 
 ### Nicht im Release
 - LMR_REDUCTION=2: revertiert nach Regression; Messung zeigt −53 cp auf Tiefe 4 (vs +9 cp mit LMR=3)
