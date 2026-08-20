@@ -1103,7 +1103,49 @@
           </div>
         </div>
 
-        <!-- Generic Modal (used by OverlayManager) -->
+        <!-- Replay Overlay -->
+        <div id="replay-overlay" class="fullscreen-overlay hidden">
+          <div class="replay-content">
+            <div class="replay-header">
+              <h2>Partie durchgehen</h2>
+              <button id="replay-close-btn" class="close-icon-btn">×</button>
+            </div>
+            <div class="replay-body">
+              <div class="replay-board-section">
+                <div class="replay-board-placeholder" id="replay-board"></div>
+              </div>
+              <div class="replay-side-panel">
+                <div class="replay-step-info">
+                  <div class="replay-step-header">
+                    <span class="replay-step-label">Schritt</span>
+                    <span class="replay-step-number" id="replay-step-number">0 / 0</span>
+                  </div>
+                  <div class="replay-move-info">
+                    <div class="replay-move-number-label">Zug</div>
+                    <div class="replay-move-number" id="replay-move-number">—</div>
+                  </div>
+                  <div class="replay-classification" id="replay-classification">
+                    <span class="replay-class-badge" id="replay-class-badge">—</span>
+                    <span class="replay-class-label" id="replay-class-label">—</span>
+                  </div>
+                  <div class="replay-eval-row">
+                    <span class="replay-eval-label">Bewertung</span>
+                    <span class="replay-eval-value" id="replay-eval-value">—</span>
+                  </div>
+                </div>
+                <div class="replay-better-move" id="replay-better-move">
+                  <div class="replay-better-header">Besser alternativ</div>
+                  <div class="replay-better-content" id="replay-better-content">—</div>
+                </div>
+                <div class="replay-navigation">
+                  <button id="replay-prev-btn" class="btn-secondary replay-nav-btn">◀ Zurück</button>
+                  <button id="replay-next-btn" class="btn-secondary replay-nav-btn">Weiter ▶</button>
+                </div>
+                <div class="replay-keyboard-hint">Tastatur: ← / → oder J / L</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="generic-modal" class="modal-overlay hidden">
           <div class="modal-content">
             <h2 id="modal-title">Titel</h2>

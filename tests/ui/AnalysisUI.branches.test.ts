@@ -318,8 +318,15 @@ describe('AnalysisUI branch coverage', () => {
 
   // --- showSummaryModal ---
   test('showSummaryModal opens modal and wires "durchsehen" callback', () => {
-    const jumpToMove = vi.fn();
-    analysisUI.app.game = { gameController: { jumpToMove } };
+    const enterReplayMode = vi.fn();
+    analysisUI.app.game = {
+      moveHistory: [
+        { from: { r: 4, c: 4 }, to: { r: 4, c: 5 }, piece: { type: 'p', color: 'white' } },
+        { from: { r: 0, c: 4 }, to: { r: 0, c: 5 }, piece: { type: 'p', color: 'black' } },
+      ],
+      gameController: {},
+    } as any;
+    (analysisUI as any).enterReplayMode = enterReplayMode;
     analysisUI.showSummaryModal(
       { accuracy: 90, counts: { best: 2 } },
       { accuracy: 50, counts: { blunder: 1 } }
@@ -331,7 +338,7 @@ describe('AnalysisUI branch coverage', () => {
     const buttons = (ui.showModal as any).mock.calls[0][2];
     const review = buttons.find((b: any) => b.text.includes('durchsehen'));
     review.callback();
-    expect(jumpToMove).toHaveBeenCalledWith(0);
+    expect(enterReplayMode).toHaveBeenCalled();
   });
 
   test('showSummaryModal accuracy class thresholds', () => {

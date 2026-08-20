@@ -430,9 +430,7 @@ export class AnalysisUI {
         text: 'Partie durchsehen',
         class: 'btn-primary',
         callback: () => {
-          if (this.game.gameController && this.game.gameController.jumpToMove) {
-            this.game.gameController.jumpToMove(0);
-          }
+          this.enterReplayMode();
         },
       },
     ]);
@@ -450,5 +448,318 @@ export class AnalysisUI {
       `
       )
       .join('');
+  }
+
+  // === Replay Overlay (Post-Game Interactive Replay) ===
+
+  private bestMoveCache: Map<number, { notation: string; score: number }> = new Map();
+
+  private replayPosition: number = -1;
+  private replayTotal: number = 0;
+  private replayActive: boolean = false;
+
+  private replayBoardEl: HTMLElement | null = null;
+  private replayStepNumberEl: HTMLElement | null = null;
+  private replayMoveNumberEl: HTMLElement | null = null;
+  private replayClassBadgeEl: HTMLElement | null = null;
+  private replayClassLabelEl: HTMLElement | null = null;
+  private replayEvalValueEl: HTMLElement | null = null;
+  private replayBetterContentEl: HTMLElement | null = null;
+  private replayPrevBtnEl: HTMLElement | null = null;
+  private replayNextBtnEl: HTMLElement | null = null;
+  private replayCloseBtnEl: HTMLElement | null = null;
+
+  private replayPrevBound: (() => void) | null = null;
+  private replayNextBound: (() => void) | null = null;
+  private replayCloseBound: (() => void) | null = null;
+  private replayKeyHandlerBound: ((e: KeyboardEvent) => void) | null = null;
+
+  private populateBestMoveCache(): void {
+    this.bestMoveCache.clear();
+    const history = this.game.moveHistory;
+    if (!history || history.length === 0) return;
+
+    for (let i = 0; i < history.length; i++) {
+      const move = history[i];
+      const classification = (move as { classification?: PostGameAnalyzer.MoveQuality }).classification;
+      const evalScore = (move as { evalScore?: number }).evalScore;
+
+      if (classification !== undefined) {
+        const meta = PostGameAnalyzer.QUALITY_METADATA[classification];
+        if (meta) {
+          this.bestMoveCache.set(i, { notation: meta.symbol + ' ' + meta.label, score: evalScore ?? 0 });
+        }
+      }
+    }
+  }
+
+  private classifyBadgeColor(classification: PostGameAnalyzer.MoveQuality): string {
+    const meta = PostGameAnalyzer.QUALITY_METADATA[classification];
+    return meta?.color ?? '#6b7280';
+  }
+
+  private formatMoveNotation(move: MoveHistoryEntry): string {
+    if (move.specialMove) {
+      if (move.specialMove.type === 'castling') {
+        return move.specialMove.kingSide ? '0-0' : '0-0-0';
+      }
+      if (move.specialMove.type === 'enPassant') {
+        return 'ep';
+      }
+    }
+
+    const pieceChar = (move.piece?.type ?? '?');
+    const promoChar = move.promotion ?? null;
+    const files = 'abcdefgh';
+    const fromCol = move.from?.c;
+    const toCol = move.to?.c;
+
+    let base = '';
+    if (pieceChar === 'p') {
+      if (promoChar) {
+        const promoPiece = String.fromCharCode(97 + promoChar);
+        base = files[fromCol ?? 0] + 'x' + files[toCol ?? 0] + '=' + promoPiece.toUpperCase();
+      } else {
+        base = files[fromCol ?? 0] + 'x' + files[toCol ?? 0];
+      }
+    } else {
+      base = pieceChar.toUpperCase() + (move.captured ? 'x' : '') + files[toCol ?? 0];
+    }
+
+    if (move.check) base += '+';
+    if (move.checkmate) base += '#';
+
+    return base;
+  }
+
+  private getTargetSquareForMove(move: MoveHistoryEntry): string | null {
+    if (!move.to) return null;
+    const files = 'abcdefgh';
+    return files[move.to.c ?? 0] + (move.to.r + 1);
+  }
+
+  enterReplayMode(): void {
+    if (this.replayActive) return;
+
+    const history = this.game.moveHistory;
+    if (!history || history.length === 0) return;
+
+    this.replayActive = true;
+    this.replayPosition = 0;
+    this.replayTotal = history.length;
+
+    this.replayBoardEl = document.getElementById('replay-board');
+    this.replayStepNumberEl = document.getElementById('replay-step-number');
+    this.replayMoveNumberEl = document.getElementById('replay-move-number');
+    this.replayClassBadgeEl = document.getElementById('replay-class-badge');
+    this.replayClassLabelEl = document.getElementById('replay-class-label');
+    this.replayEvalValueEl = document.getElementById('replay-eval-value');
+    this.replayBetterContentEl = document.getElementById('replay-better-content');
+    this.replayPrevBtnEl = document.getElementById('replay-prev-btn');
+    this.replayNextBtnEl = document.getElementById('replay-next-btn');
+    this.replayCloseBtnEl = document.getElementById('replay-close-btn');
+
+    this.populateBestMoveCache();
+
+    document.getElementById('replay-overlay')?.classList.remove('hidden');
+
+    this.attachReplayHandlers();
+    this.updateReplayStep();
+  }
+
+  private attachReplayHandlers(): void {
+    if (this.replayPrevBtnEl) {
+      this.replayPrevBound = () => this.replayPrev();
+      this.replayPrevBtnEl.addEventListener('click', this.replayPrevBound);
+    }
+    if (this.replayNextBtnEl) {
+      this.replayNextBound = () => this.replayNext();
+      this.replayNextBtnEl.addEventListener('click', this.replayNextBound);
+    }
+    if (this.replayCloseBtnEl) {
+      this.replayCloseBound = () => this.exitReplayMode();
+      this.replayCloseBtnEl.addEventListener('click', this.replayCloseBound);
+    }
+
+    this.replayKeyHandlerBound = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'j' || e.key === 'J') {
+        e.preventDefault();
+        this.replayPrev();
+      } else if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        this.replayNext();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        this.exitReplayMode();
+      }
+    };
+    document.addEventListener('keydown', this.replayKeyHandlerBound);
+  }
+
+  private detachReplayHandlers(): void {
+    if (this.replayPrevBtnEl && this.replayPrevBound) {
+      this.replayPrevBtnEl.removeEventListener('click', this.replayPrevBound);
+    }
+    if (this.replayNextBtnEl && this.replayNextBound) {
+      this.replayNextBtnEl.removeEventListener('click', this.replayNextBound);
+    }
+    if (this.replayCloseBtnEl && this.replayCloseBound) {
+      this.replayCloseBtnEl.removeEventListener('click', this.replayCloseBound);
+    }
+    if (this.replayKeyHandlerBound) {
+      document.removeEventListener('keydown', this.replayKeyHandlerBound);
+    }
+    this.replayPrevBound = null;
+    this.replayNextBound = null;
+    this.replayCloseBound = null;
+    this.replayKeyHandlerBound = null;
+  }
+
+  private replayPrev(): void {
+    if (this.replayPosition > 0) {
+      this.replayPosition--;
+      this.updateReplayStep();
+    }
+  }
+
+  private replayNext(): void {
+    if (this.replayPosition < this.replayTotal - 1) {
+      this.replayPosition++;
+      this.updateReplayStep();
+    }
+  }
+
+  private updateReplayStep(): void {
+    if (!this.replayActive) return;
+
+    const history = this.game.moveHistory;
+    if (!history || this.replayPosition < 0 || this.replayPosition >= history.length) return;
+
+    const move = history[this.replayPosition];
+    this.updateReplayNavigationButtons();
+    this.updateReplaySidePanel(move);
+  }
+
+  private updateReplayNavigationButtons(): void {
+    if (this.replayPrevBtnEl) {
+      this.replayPrevBtnEl.classList.toggle('opacity-40', this.replayPosition <= 0);
+    }
+    if (this.replayNextBtnEl) {
+      this.replayNextBtnEl.classList.toggle('opacity-40', this.replayPosition >= this.replayTotal - 1);
+    }
+  }
+
+  private updateReplaySidePanel(move: MoveHistoryEntry): void {
+    if (this.replayStepNumberEl) {
+      this.replayStepNumberEl.textContent = `${this.replayPosition + 1} / ${this.replayTotal}`;
+    }
+
+    if (this.replayMoveNumberEl) {
+      const moveNumber = this.replayPosition + 1;
+      this.replayMoveNumberEl.textContent = `Zug ${moveNumber}`;
+    }
+
+    const classification = (move as { classification?: PostGameAnalyzer.MoveQuality }).classification;
+    const evalScore = (move as { evalScore?: number }).evalScore;
+
+    if (this.replayClassBadgeEl && this.replayClassLabelEl && classification !== undefined) {
+      const meta = PostGameAnalyzer.QUALITY_METADATA[classification];
+      this.replayClassBadgeEl.style.backgroundColor = this.classifyBadgeColor(classification);
+      this.replayClassBadgeEl.textContent = meta?.symbol ?? '—';
+      this.replayClassLabelEl.textContent = meta?.label ?? '—';
+    } else {
+      if (this.replayClassBadgeEl) {
+        this.replayClassBadgeEl.style.backgroundColor = '#374151';
+        this.replayClassBadgeEl.textContent = '?';
+      }
+      if (this.replayClassLabelEl) {
+        this.replayClassLabelEl.textContent = 'ohne Analyse';
+      }
+    }
+
+    if (this.replayEvalValueEl && evalScore !== undefined) {
+      const display = evalScore > 0 ? '+' : '';
+      this.replayEvalValueEl.textContent = `${display}${(evalScore / 100).toFixed(2)}`;
+      this.replayEvalValueEl.style.color = evalScore > 0 ? '#4ade80' : evalScore < 0 ? '#f87171' : '#94a3b8';
+    } else {
+      if (this.replayEvalValueEl) {
+        this.replayEvalValueEl.textContent = '—';
+        this.replayEvalValueEl.style.color = '#94a3b8';
+      }
+    }
+
+    if (this.replayBetterContentEl) {
+      const cached = this.bestMoveCache.get(this.replayPosition);
+      if (cached && cached.notation !== '?') {
+        this.replayBetterContentEl.textContent = cached.notation;
+        this.replayBetterContentEl.classList.remove('empty');
+      } else {
+        this.replayBetterContentEl.textContent = 'Keine bessere Alternative bekannt';
+        this.replayBetterContentEl.classList.add('empty');
+      }
+    }
+
+    this.renderReplayBoard(move);
+  }
+
+  private renderReplayBoard(move: MoveHistoryEntry): void {
+    const game = this.game;
+    if (!game || !game.moveHistory) return;
+
+    const history = game.moveHistory;
+    const targetIdx = this.replayPosition;
+
+    game.moveController?.reconstructBoardAtMove(targetIdx);
+    game.replayPosition = targetIdx;
+    game.turn = targetIdx % 2 === 0 ? 'white' : 'black';
+    if (targetIdx < history.length) {
+      const targetMove = history[targetIdx];
+      if (targetMove.from && targetMove.to) {
+        game.lastMove = {
+          from: targetMove.from,
+          to: targetMove.to,
+          move: targetMove.moveNumber,
+        };
+      }
+    } else {
+      game.lastMove = null;
+    }
+
+    UI.renderBoard(game);
+    UI.updateStatus(game);
+
+    if (this.replayBoardEl) {
+      const existing = this.replayBoardEl.querySelector('#board');
+      if (existing) {
+        this.replayBoardEl.innerHTML = '';
+        this.replayBoardEl.appendChild(existing);
+      } else {
+        const boardContainer = document.getElementById('board-container');
+        if (boardContainer) {
+          this.replayBoardEl.innerHTML = '';
+          const clone = boardContainer.cloneNode(true) as HTMLElement;
+          this.replayBoardEl.appendChild(clone);
+        }
+      }
+    }
+  }
+
+  exitReplayMode(): void {
+    if (!this.replayActive) return;
+
+    this.detachReplayHandlers();
+    this.replayActive = false;
+    this.replayPosition = -1;
+    this.replayTotal = 0;
+    this.bestMoveCache.clear();
+
+    const overlay = document.getElementById('replay-overlay');
+    if (overlay) overlay.classList.add('hidden');
+
+    const game = this.game;
+    game.replayPosition = -1;
+    game.lastMove = null;
+    UI.renderBoard(game);
+    UI.updateStatus(game);
   }
 }
