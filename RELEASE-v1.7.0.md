@@ -1,35 +1,80 @@
-# Release v1.7.0 — 2026-08-20 (MESZ)
+---
+title: Release v1.7.0 — Engine-Evaluation-Verbesserungen & LMR-Rückkehr
+tags: [release, engine, lmr, evaluation, benchmark]
+---
 
-## Zusammenfassung
+# Release v1.7.0
 
-Engine-Strärkung: Eval-Patches bleiben, LMR_MAX_REDUCTION wird von 2 auf 3 revertiert (Regression bei Messung auf Tiefe 4). Release-Validierung: SF-Match gegen SF≈1400, d4, n=20 (läuft im Hintergrund, ~12 Minuten).
+Datum: 20. August 2026
 
-## Engine-Änderungen
+## Was ist drin
 
-### Behalten
-- Eval-Patch (59164cf): Bishop-Paar-Bonus (+30 cp), Passed-Pawn-Endspiel-Multiplikator (2.0×), Turm 7. Reihe-Endspiel-Bonus mit offenem/geschlossenem Datei-Scaling
-- Revert LMR_MAX_REDUCTION 2→3: Regression auf Tiefe 4 gemessen (−53 cp statt +9 cp mit LMR=3)
+### Engine-Evaluation-Verbesserungen
 
-### Nicht im Release
-- LMR_REDUCTION=2: revertiert nach Regression; Messung zeigt −53 cp auf Tiefe 4 (vs +9 cp mit LMR=3)
-- Tiefe-5-Benchmark (d5, LMR=2): −147 cp; Interpretation offen (Zeitmangel, avgMaxDepth nur 4.8)
+- Bishop-Paar-Bonus (zentrale, unbelädete Paare)
+- Passed-Pawn-Endspiel-Bewertung (schachkompatibel 2.0×)
+- Turm 7. Reihe mit File-Scaling (offene Datei → Bonus)
+- Commit: 59164cf
 
-## Benchmark-Ergebnisse (n=40, jeweils balanced@e2500 vs aggressive@e2500)
+### LMR-Rückkehr
 
-| Konfiguration | W–D–L | EloDiff (balanciert über aggressiv) |
-|---|---|---|
-| LMR=3, eval-patch, d4 (nach Revert) | 1–39–0 | +9 cp |
-| LMR=2, eval-patch, d4 (vor Revert) | 7–20–13 | −53 cp |
-| LMR=2, eval-patch, d5 (Diagnose) | 7–10–23 | −147 cp |
+- LMR_MAX_REDUCTION von 2 auf 3 zurückgesetzt
+- Motivation: gemessene Regression auf d4 (−53 cp) bei REDUCTION=2; +9 cp bei REDUCTION=3
+- Commit: 8b84535 / 5cd2324
 
-## Nächste Hebel (nach Release)
-- SF-Match-Validierung: absolute Stärke vs SF≈1400 (läuft, ~12 Min.)
-- Eval-Verbesserungen: Springer-Entwicklung, Königssicherheit Endspiel, Passed-Pawn-Progressiv-Bonus
-- Tiefe-5-Zeitsteuerungs-Diagnose: adaptive Zeitallokation, NPS-Monitoring, Suchskalierung
-- OpeningBookTrainer: Optional, aber ohne stärkere Engine wenig Sinn
+## Benchmark-Ergebnisse (wie gemessen)
 
-## Gates (alle grün vor Release)
-- `npx tsc --noEmit`: OK
-- `npx eslint .`: OK (0 Warnungen)
-- `npm test`: 2944 Tests in 237 Files, OK (80s)
-- CI: ausstehend (nach Push)
+### LMR-Vergleich auf d3 (n=40 je)
+
+| Konfiguration           | W   | B   | D   | EloDiff |
+| ----------------------- | --- | --- | --- | ------- |
+| LMR=2 (nach Eval-Patch) | 2   | 0   | 38  | +9 cp   |
+| LMR=3 (nach Eval-Patch) | 1   | 3   | 36  | −17 cp  |
+
+→ Auf d3 unsignifikant; LMR=2 leicht besser, aber innerhalb des Rauschens.
+
+### LMR-Vergleich auf d4 (n=40 je)
+
+| Konfiguration           | W   | B   | D   | EloDiff |
+| ----------------------- | --- | --- | --- | ------- |
+| LMR=2 (nach Eval-Patch) | 7   | 13  | 20  | −53 cp  |
+| LMR=3 (nach Eval-Patch) | 1   | 0   | 39  | +9 cp   |
+
+→ Regression mit REDUCTION=2 auf d4 klar messbar → Revert-Entscheidung.
+
+### Tiefe-5-Benchmark (n=40, LMR=2, nach Eval-Patch)
+
+- W=7 B=23 D=10, EloDiff −147 cp
+- avgMaxDepth=4.8, avgNps=9993, avgMoves=32.7
+- Signal: Zeitmangel bei 8s/Zug auf d5 — Engine sucht im Schnitt nur bis Tiefe 4.8
+
+### SF-Match-Validierung (v1.7.0, Release-Check)
+
+- 20 Spiele, volle Regeln (Rochade, En-passant, auto-Queen-Promotion)
+- Engine-Tiefe 4 vs SF-Tiefe 8, SF-Elo 1400
+- Ergebnis: W=0 D=1 L=19
+- Score 0.025, Elo vs SF≈1400: −636 cp (95% CI: −1200 .. −395)
+- 19 Checkmates, 1 max-plies-Draw
+
+## Kontext & Einordnung
+
+- Historische Baseline (2026-08-02): 0–3–17, Score 0.075, −436 cp
+- v1.7.0 Release-Check: 0–1–19, 0.025, −636 cp
+- Same-harness A/B (2026-08-20, gleiche Flags):
+  - pre-eval `fbba0c8`: 1–2–17, 0.100, −382
+  - `v1.7.0` rerun: 0–5–15, **0.125**, **−338**
+- Die −200 cp sind **n=20-Rauschen**. Eval-Patch nicht zurückdrehen.
+
+## Treiber für 1.8.0 (geparkt)
+
+- SF-Match künftig n≥40 (n=20 trägt keine 200-cp-Claims)
+- Tiefe-5-Diagnose (Zeitsteuerung, NPS) — Suche erreicht Tiefe 5 nicht
+- Keine weiteren Eval-Terme, OpeningBookTrainer oder NNUE
+
+## Dateien
+
+- `js/search.ts` — LMR_MAX_REDUCTION = 3
+- `js/evaluate.ts` — Eval-Patch (Bishop-Paar, Passed-Pawn, Turm 7. Reihe)
+- `package.json` — Version 1.7.0
+- `RELEASE-v1.7.0.md` — Release-Notizen
+- `bench/sf_match_v170.log` — SF-Match-Rohdaten

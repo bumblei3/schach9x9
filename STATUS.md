@@ -1,38 +1,52 @@
-# schach9x9 — Status (Stand: 2026-08-02)
+# schach9x9 — Status (Stand: 2026-08-20)
 
-Laufender Zustand des Repos `bumblei3/schach9x9` (branch `main`).
+Laufender Zustand des Repos `bumblei3/schach9x9` (branch `main`, tag `v1.7.0`).
 Gehalten von Hermes; bei jeder "wie weiter verbessern"-Run neu verifiziert.
 
 ## Gesundheit
 
-| Gate      | Befehl             | Ergebnis                                           |
-| --------- | ------------------ | -------------------------------------------------- |
-| Tests     | `npx vitest run`   | historisch 2936; Spot-Checks 8x8/engine grün nach SF-Arbeit |
-| Typecheck | `npx tsc --noEmit` | grün (historisch)                                  |
-| Lint      | `npx eslint .`     | grün (historisch)                                  |
-| Build     | `npx vite build`   | `dist/` vorhanden/ok                               |
-| Security  | CodeQL             | keine offenen Alerts (letzte Fixes #169/#170/#171) |
+| Gate      | Befehl             | Ergebnis                                                                 |
+| --------- | ------------------ | ------------------------------------------------------------------------ |
+| Tests     | `npx vitest run`   | 2944 Tests in 237 Files — grün (Release-Zeitpunkt v1.7.0)                |
+| Typecheck | `npx tsc --noEmit` | grün (nach v1.7.0, Commit `fbba0c8`)                                     |
+| Lint      | `npx eslint .`     | grün (0 Warnungen nach v1.7.0)                                           |
+| Build     | `npx vite build`   | `dist/` vorhanden/ok                                                     |
+| Security  | CodeQL             | keine offenen Alerts (letzte Fixes #169/#170/#171)                       |
+| CI        | GitHub Actions     | LINT + TEST + BUILD + CI-Gate grün; E2E/Lighthouse/Security non-blocking |
 
-## Absolute Strength — Track B (kanonische Baseline)
+## Absolute Strength — Track B
 
 ```bash
 npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --quiet
 ```
 
-| | |
-|--|--|
-| **n** | 20 (volle Regeln: Rochade + EP + q/r/b/n-Promo) |
-| **W–D–L (wir)** | **0–3–17** |
-| **Score** | **0.075** |
-| **Elo vs SF≈1400** | **≈ −436** |
-| Term | matt 17 · max-plies 3 · **illegal-sf 0** |
+| Messung                                     | W–D–L (wir) | Score     | Elo vs SF≈1400 |
+| ------------------------------------------- | ----------- | --------- | -------------- |
+| 2026-08-02 (post-underpromo)                | 0–3–17      | 0.075     | ≈ −436         |
+| v1.7.0 Release-Check                        | 0–1–19      | 0.025     | ≈ −636         |
+| A/B pre-eval `fbba0c8` (heute)              | 1–2–17      | 0.100     | ≈ −382         |
+| A/B `v1.7.0` rerun (heute, gleiche Harness) | 0–5–15      | **0.125** | **≈ −338**     |
+
+**Die −200 cp (0.075 → 0.025) sind Rauschen bei n=20, kein Eval-Rückschritt.**
+Gleicher Harness, gleicher Tag: v1.7.0 **0.125** vs pre-eval **0.100**. 95%-CIs
+überlappen alle (−1200 .. ca. −170). illegal-sf = 0.
+
+n=20 kann 200-cp-Claims nicht tragen. Merge-Gate: gleiche Flags, Score im
+Rauschband (~0.00–0.15), kein Win gegen eine Einzelzahl (weder 0.025 noch
+0.075). Für echte Hebel: **n≥40**.
 
 Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
+· Logs: `bench/sf_match_v170.log`, `bench/sf_match_v170_rerun.log`,
+`bench/sf_match_preeval_fbba0c8.log`
 
 ## Engine-Stärkung 9×9 — feature-complete / geparkt
 
 Alle Such-Hebel gemergt, bei fester Zeit/Depth **nicht messbar stärker**.
 Relative 9×9-Messung: `js/matchRefs.ts` (Track A).
+
+v1.7.0 (8×8/9×9-Eval): Läuferpaar, Freibauer-Endspiel, Turm 7. Reihe;
+LMR_MAX_REDUCTION zurück auf 3 nach d4-Regression bei 2 (−53 cp).
+d5-Diagnose intern: avgMaxDepth 4.8 bei 8 s/Zug — Suche skaliert nicht.
 
 ## Lizenz
 
@@ -40,22 +54,22 @@ WTFPL (Commit 8ec8ceb).
 
 ## Offene Punkte
 
-- **illegal-sf behoben:** Ursache war **Unterpromotion** (SF `c7c8b`, wir nur `…q`).
-  Move-Gen erzeugt jetzt q/r/b/n; n=20 Re-Run → 0 illegal-sf.
-- **Absolute Stärke:** Gate steht; Engine klar unter SF-1400 bei d4 (Score 0.075).
+- **illegal-sf behoben:** Ursache war Unterpromotion (SF `c7c8b`, wir nur `…q`).
+- **Absolute Stärke:** klar unter SF-1400 bei d4. Eval-Patch von v1.7.0 ist
+  **kein** gemessener Rückschritt. Keine neuen Eval-Terme — n=20 sieht sie nicht.
 - **TypeScript 7:** blockiert durch typescript-eslint v8 → TS 6.0.3.
 - **Multiplayer:** bewusst nicht geplant.
 
-## Solo-UX (2026-08-02)
+## Solo-UX
 
-- **Standard 8×8 spielbar:** Menü-Text korrigiert; `opening-book-8x8.json` in `public/`;
-  AI-Worker bekommen `setBoardVariant` (8×8-Geometrie + Castling/EP) — vorher
-  suchten Worker weiter auf 9×9.
-- Kanonische Engine-Baseline unverändert (siehe Track B).
+- Standard 8×8 spielbar (Worker + Opening Book + volle Regeln).
+- Post-Game-Replay-Overlay in v1.7.0.
+- Position teilen per Link.
 
 ## Nächster sinnvoller Schritt
 
-1. Post-Game / Puzzle / Trainer weiter polieren
-2. Engine-Hebel **nur** wenn Score vs kanonischer Baseline (0.075 / n=20) steigt
-3. optional: SF Elo 1600-Leiter
-4. TS 7 warten auf eslint-Support
+1. Engine-Hebel nur mit **n≥40** derselben Flags; Ziel ist nicht 0.075
+   „zurückzuholen“. Nächster technischer Hebel: Zeitsteuerung (d5 kommt nicht
+   über Tiefe 4.8), nicht neue Eval-Terme.
+2. TS 7 warten auf eslint-Support.
+3. NNUE / OpeningBookTrainer / SF-1600 parken.

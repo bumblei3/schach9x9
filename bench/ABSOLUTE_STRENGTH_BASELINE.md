@@ -2,10 +2,10 @@
 
 ## Two measurement tracks
 
-| Track | Board | Opponent | Purpose |
-|-------|-------|----------|---------|
-| **A. Relative (9×9)** | 9×9 fairy | frozen git ref via `js/matchRefs.ts` | Did a lever help/hurt vs previous build? |
-| **B. Absolute (8×8)** | standard 8×8 | Stockfish WASM (`stockfish@18`) | How strong is the engine in absolute terms? |
+| Track                 | Board        | Opponent                             | Purpose                                     |
+| --------------------- | ------------ | ------------------------------------ | ------------------------------------------- |
+| **A. Relative (9×9)** | 9×9 fairy    | frozen git ref via `js/matchRefs.ts` | Did a lever help/hurt vs previous build?    |
+| **B. Absolute (8×8)** | standard 8×8 | Stockfish WASM (`stockfish@18`)      | How strong is the engine in absolute terms? |
 
 9×9 cannot use Stockfish fairly (Archbishop / Chancellor / Engel). Absolute
 Elo only makes sense after the **size-aware 8×8 move gen** repair (2026-08-02)
@@ -23,15 +23,15 @@ npm run match:stockfish -- --games=8 --depth=4 --sf-depth=8 --sf-elo=1400
 npx tsx tools/stockfish-match.ts --games=4 --depth=3 --sf-depth=4 --quiet
 ```
 
-| Flag | Default | Meaning |
-|------|---------|---------|
-| `--games=N` | 4 | games with alternating colors |
-| `--depth=N` | 3 | our fixed search depth |
-| `--sf-depth=N` | 4 | Stockfish fixed depth |
-| `--sf-elo=N` | (full) | UCI_LimitStrength + UCI_Elo |
-| `--sf-engine=` | `lite-single` | WASM flavor under `stockfish/bin` |
-| `--max-plies=N` | 200 | hard cap → draw |
-| `--quiet` | off | less logging |
+| Flag            | Default       | Meaning                           |
+| --------------- | ------------- | --------------------------------- |
+| `--games=N`     | 4             | games with alternating colors     |
+| `--depth=N`     | 3             | our fixed search depth            |
+| `--sf-depth=N`  | 4             | Stockfish fixed depth             |
+| `--sf-elo=N`    | (full)        | UCI_LimitStrength + UCI_Elo       |
+| `--sf-engine=`  | `lite-single` | WASM flavor under `stockfish/bin` |
+| `--max-plies=N` | 200           | hard cap → draw                   |
+| `--quiet`       | off           | less logging                      |
 
 **Dependency:** `stockfish@18` (devDependency). Engine is spawned as a **Node
 child process** (UCI over stdin/stdout). In-process `engine.print` hooks do not
@@ -49,7 +49,7 @@ full standard chess:
 FEN sent to SF includes rights/EP from the same state. Residual illegal SF
 moves (should be rare) are scored **draw / `illegal-sf`**, never as a free win.
 
-### Baseline results (2026-08-02)
+### Baseline results (2026-08-02 / v1.7.0)
 
 #### Canonical row (use this for regressions)
 
@@ -57,22 +57,28 @@ moves (should be rare) are scored **draw / `illegal-sf`**, never as a free win.
 npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --quiet
 ```
 
-| Metric | Value |
-|--------|--------|
-| **Date** | 2026-08-02 (post underpromo fix) |
-| **Rules** | full standard (castle + EP + **q/r/b/n promotions**) |
-| **n** | **20** (alt. colors) |
-| **W–D–L (ours)** | **0–3–17** |
-| **Score** | **0.075** |
-| **Elo vs SF≈1400** | **≈ −436** (95% CI rough: −1200 … −251) |
-| **Terminations** | checkmate=17, max-plies=3, **illegal-sf=0** |
+**n=20 is a noise band, not a 200-cp yardstick.** Same flags, four runs:
 
-Raw one-liner:
-`RESULT oursW=0 sfW=17 D=3 score=0.0750 elo=-436.4 depth=4 sfDepth=8`
+| Run                                 | W–D–L (ours) | Score     | Elo vs SF≈1400 | Log                                  |
+| ----------------------------------- | ------------ | --------- | -------------- | ------------------------------------ |
+| 2026-08-02 post-underpromo          | 0–3–17       | 0.075     | ≈ −436         | (historical)                         |
+| v1.7.0 release-check                | 0–1–19       | 0.025     | ≈ −636         | `bench/sf_match_v170.log`            |
+| A/B pre-eval `fbba0c8` (2026-08-20) | 1–2–17       | 0.100     | ≈ −382         | `bench/sf_match_preeval_fbba0c8.log` |
+| A/B `v1.7.0` rerun (2026-08-20)     | 0–5–15       | **0.125** | **≈ −338**     | `bench/sf_match_v170_rerun.log`      |
 
-**Reading:** At fixed depth 4 the engine scores ~7.5% against Stockfish-lite
-UCI Elo 1400 (SF depth 8). Clear gap — the regression floor. Openings at d4
-are shallow (flank pawn pushes common).
+Raw one-liners:
+
+```
+RESULT oursW=0 sfW=17 D=3 score=0.0750 elo=-436.4 depth=4 sfDepth=8
+RESULT oursW=0 sfW=19 D=1 score=0.0250 elo=-636.4 depth=4 sfDepth=8
+RESULT oursW=1 sfW=17 D=2 score=0.1000 elo=-381.7 depth=4 sfDepth=8
+RESULT oursW=0 sfW=15 D=5 score=0.1250 elo=-338.0 depth=4 sfDepth=8
+```
+
+**Reading:** The −200 cp “drop” (0.075 → 0.025) did **not** reproduce. On the
+same machine/harness, v1.7.0 scored _higher_ than pre-eval. All 95% CIs overlap.
+Do not revert the eval patch. Do not gate merges on a single n=20 point
+estimate. Future claims: **n≥40**, same flags. Openings at d4 are shallow.
 
 ##### illegal-sf root cause (fixed)
 
@@ -82,14 +88,15 @@ Move gen now emits all four promotion pieces; re-run shows **0 illegal-sf**.
 
 #### Older / smoke rows
 
-| Setup | n | W–D–L (ours) | Score | Elo vs SF≈ | Notes |
-|-------|---|--------------|-------|------------|-------|
-| depth=4 vs SF d8 Elo1400 (queen-only promo) | 20 | 0–4–16 | 0.10 | ≈−382 | 2 illegal-sf voids; superseded |
-| depth=2 vs SF d2 full | 2 | 0–0–2 | 0.00 | ≲ −1200 | smoke |
-| depth=3 vs SF d4 full | 6 | 0–0–6 | 0.00 | ≲ −1200 | full SF |
+| Setup                                       | n   | W–D–L (ours) | Score | Elo vs SF≈ | Notes                          |
+| ------------------------------------------- | --- | ------------ | ----- | ---------- | ------------------------------ |
+| depth=4 vs SF d8 Elo1400 (queen-only promo) | 20  | 0–4–16       | 0.10  | ≈−382      | 2 illegal-sf voids; superseded |
+| depth=2 vs SF d2 full                       | 2   | 0–0–2        | 0.00  | ≲ −1200    | smoke                          |
+| depth=3 vs SF d4 full                       | 6   | 0–0–6        | 0.00  | ≲ −1200    | full SF                        |
 
-**Any claimed strength gain must beat the canonical n=20 row** (higher score
-or Elo with same flags, ideally n≥20).
+**Any claimed strength gain must use the same flags and n≥40.** A single n=20
+score in 0.00–0.15 is indistinguishable from noise. Do not claim a win against
+0.025 or 0.075.
 
 ### Re-run checklist (before claiming a strength gain)
 
@@ -116,12 +123,12 @@ NEW_REF=/tmp/s9-new OLD_REF=/tmp/s9-old \
 
 ### Historical relative results (2026-07-31)
 
-| Match | NEW | OLD | D | n | Reading |
-|-------|-----|-----|---|---|---------|
-| main+H-P1 vs v1.5.0 | 5 | 10 | 9 | 24 | NEW weaker |
-| main vs pre-H-P1 | 5 | 8 | 7 | 20 | H-P1 cluster weaker |
-| hand-tuned PSQT vs H-P1 | 6 | 5 | 9 | 20 | H-P1 rejected |
-| hand-tuned vs v1.5.0 | 5 | 7 | 12 | 24 | closer to parity |
+| Match                   | NEW | OLD | D   | n   | Reading             |
+| ----------------------- | --- | --- | --- | --- | ------------------- |
+| main+H-P1 vs v1.5.0     | 5   | 10  | 9   | 24  | NEW weaker          |
+| main vs pre-H-P1        | 5   | 8   | 7   | 20  | H-P1 cluster weaker |
+| hand-tuned PSQT vs H-P1 | 6   | 5   | 9   | 20  | H-P1 rejected       |
+| hand-tuned vs v1.5.0    | 5   | 7   | 12  | 24  | closer to parity    |
 
 H-P1 was reverted; see `bench/NEGATIVE_RESULTS.md`.
 
@@ -129,7 +136,8 @@ H-P1 was reverted; see `bench/NEGATIVE_RESULTS.md`.
 
 ## Next levers (honest)
 
-1. **Castling + en passant** on the int board (8×8) → fewer voids, fairer SF games
-2. Re-baseline vs SF Elo 1400 / 1600 at fixed depth
-3. Only then consider search/eval changes gated by this table
-4. 9×9 remains feature-complete / parked for relative levers only
+1. Strength claims only with n≥40 (n=20 cannot resolve ~200 cp).
+2. No new eval terms — the v1.7.0 eval patch is not a measured regression.
+3. Time management if pursuing depth (d5 avgMaxDepth 4.8 at 8s/move).
+4. 9×9 remains feature-complete / parked for relative levers only.
+   Castling + EP on 8×8 already shipped.

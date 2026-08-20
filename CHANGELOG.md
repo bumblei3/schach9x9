@@ -3,6 +3,42 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.7.0] – 2026-08-20
+
+Changes since `v1.6.2`.
+
+### Engine
+
+- **Static eval:** Läuferpaar (zentrale, unbelastete Paare), Freibauer-Endspiel
+  (2.0×), Turm auf der 7. Reihe mit File-Scaling. (`59164cf`)
+- **LMR_MAX_REDUCTION 2 → 3.** LMR=2 war auf d4 eine Regression (−53 cp vs
+  +9 cp bei LMR=3, n=40). d3 innerhalb des Rauschens. (`8b84535` / `5cd2324`)
+- **Track B (8×8 vs SF Elo 1400, d4 vs SF d8, n=20):** Release-Check 0–1–19 /
+  0.025 / −636. Same-harness A/B danach: pre-eval `fbba0c8` 0.100 (−382),
+  v1.7.0-Rerun 0.125 (−338). Die −200 cp vs. der August-Baseline sind
+  **n=20-Rauschen**, kein Eval-Rückschritt. Logs unter `bench/sf_match_*.log`.
+
+### Added
+
+- **Interaktiver Post-Game-Replay-Overlay.** Partie nach dem Ende Zug für Zug
+  nachspielen. (`d6f0b3f`)
+- **Position teilen per Link.** (`f418f44`)
+
+### Fixed
+
+- TypeScript-Fehler im Replay-Overlay (`AnalysisUI.ts`). (`fbba0c8`)
+- Lint: ungenutzte Replay-Handler-Parameter. (`ff07329`)
+
+### Notes
+
+- 8×8-Regel-Repair (Rochade, EP, Unterpromotion, size-aware Move-Gen) und
+  Worker/Opening-Book für Standardschach sind im 1.6.2-Abschnitt dokumentiert
+  (Commits nach dem 1.6.2-Tag, vor 1.7.0).
+- d5-Diagnose (LMR=2, n=40): EloDiff −147 cp, avgMaxDepth 4.8 bei 8 s/Zug —
+  Suche erreicht die angeforderte Tiefe nicht. Keine neuen Eval-Terme; n=20
+  kann 200-cp-Claims nicht tragen (n≥40 für künftige Hebel).
+- 9×9-Such-Hebel bleiben feature-complete / geparkt.
+
 ## [1.6.2] – 2026-07-20
 
 Changes since `v1.6.1`.
