@@ -70,11 +70,12 @@ Erste Suchstrategie-Hypothese mit klarer Verbesserung: LMR später starten
 (= weniger aggressive Reduktion ab Tiefe 4) hebt die effektive Tiefe in den
 kritischen Layern. Merge-würdig — Commit `LMR_BASE_DEPTH=4` pending.
 
-**Tiefe 5 + LMR_BASE_DEPTH=4 + LMR_MAX_RED=2 (n=40):** Score 0.125 (≈ −338 cp),
-identisch mit D5_v2 (kein Gewinn vs Baseline), Regression ~−53 cp gegen
-LMR_BASE_DEPTH=4. Hypothese verworfen — weniger Max-Reduktion allein hilft
-nicht, wenn LMR_BASE_DEPTH=4 schon gelegt ist. Revert von LMR_MAX_REDUCTION
-auf 3, aber LMR_BASE_DEPTH=4 bleibt (Gewinner).
+**Tiefe 5 + LMR_BASE_DEPTH=4 + PROBCUT_RED=2 (n=40):** Score 0.150 (≈ −301 cp),
+CI −555..−181, illegal-ours=3. Nicht besser als Gewinner LMR_BASE_DEPTH=4
+(≈ −285, CI −518..−167) — CI überlappend, kein klarer Gewinn. Nicht besser als
+D5_v2, nicht schlechter als D5_v2: neutral. Hypothese nicht merge-würdig
+(Konfiguration besser mit PROBCUT_REDUCTION=3). Revert nicht nötig —
+PROBCUT_REDUCTION=3 bleibt, LMR_BASE_DEPTH=4 bleibt (beide Gewinner).
 
 Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
 · Logs: `bench/sf_match_v170.log`, `bench/sf_match_v170_rerun.log`,
