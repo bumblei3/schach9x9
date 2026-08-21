@@ -33,8 +33,23 @@ sessions don't waste time re-testing them.
 - Conclusion: do **not** wire production tables to `buildCenteredPST`.
   Helper may stay exported for experiments. Hand-tuned tables restored.
 
+## Eval-Term experiments (n=40 vs SF-1400, 2026-08-21) — do NOT re-attempt
+- mobilityWeight 1.0→1.2 → score 0.063 (≈ −470). Reverted.
+- pawn=110 → score 0.100 (≈ −382). Reverted.
+- TEMPO_BONUS 10→20 → score 0.125 (≈ −338), n.s. Reverted.
+- eg passed-pawn 2.5× → not better than 2.0×. Reverted.
+
+## Search-knob experiments (d5, n=40, 2026-08-21)
+- LMR_MAX_REDUCTION 3→2 → score 0.125, same as untuned d5. Keep 3.
+- PROBCUT_REDUCTION 3→2 → score 0.150 vs 0.163 (LMR4 winner). Keep 3.
+- Pure depth 5 without search retune → 0.125, *worse* than d4 0.138.
+
+## Keepers (for v1.8 freeze, see docs/ROADMAP.md M0)
+- LMR_BASE_DEPTH=4 → 0.163 / ≈ −285
+- NULL_MOVE_R=1 (with LMR4) → **0.175 / ≈ −269** (best Track B)
+
 ## What this means
-The engine is well-calibrated at the current eval weights. Remaining strength
-gains would require structural eval changes (king-safety/endgame rework) with
-NO guaranteed Elo payoff — treat as speculative, gate behind a real benchmark.
-H-P1 is closed as a negative result (same class as Mobility).
+Cheap eval terms and extra pruning knobs are exhausted. Remaining strength
+gains are structural: incremental Zobrist (full 81-square rehash per node
+today) and actually reaching depth 5. H-P1 is closed as a negative result
+(same class as Mobility). Do not add eval terms until avgMaxDepth ≥ 5.0.

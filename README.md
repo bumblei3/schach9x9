@@ -187,6 +187,11 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 
 ## 🗺️ Roadmap / In Arbeit
 
+Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
+Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
+
+**Als Nächstes:** M0 Engine Freeze → **v1.8.0** (`LMR_BASE_DEPTH=4` + `NULL_MOVE_R=1`, Track B ≈ −269 vs SF-1400). Danach M1 inkrementeller Zobrist (Suche skaliert nicht: avgMaxDepth 4.8 bei 8 s). Parallel: Kampagne Akt II / Fairy-Puzzles (M2).
+
 **Bereits released (in v1.1.0–v1.3.0):**
 
 - **Eröffnungs-Trainer (v1.1.0):** Solo-Spielmodus — eine Stellung aus dem
@@ -226,23 +231,18 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - [✅] **Variant-Tree Panel** — Top-Engine-Kandidaten + Best-Reply-Fortsetzung
   nach Solo-Spielende (`buildVariantTree` + `#variant-tree`, PR #144)
 
-**Nächste Schritte (offen):**
+**Nächste Schritte (offen) — Details in [`docs/ROADMAP.md`](docs/ROADMAP.md):**
 
-- **Engine-Stärkung:** tieferer Suchbaum / Quiescence-Tuning / besseres
-  Move-Ordering für einen stärkeren Solo-Gegner.
-  _Status: **feature-complete / geparkt.** H3 (MAX_SEARCH_TIME 3s→5s→8s,
-  #114/#149), H-Q1 Delta-Pruning (#115), H-Q2 Check-Extension (#116, dann
-  **revertiert** — Engine schwächer bei fester Zeit, #130), LMR-Skala 2.0
-  (v1.4.0), IIR-Skip (#111), H4 time-probe 256 (#135), H-P1 zentrierte PSQT
-  (ad1b658) — alle gemergt. Match-Infra zeigt: Hebel sind **sound, aber bei
-  fester Zeit/Depth nicht messbar stärker** (40 Partien 15:15 equal)._
-  - **Mobility-Lever:** ❌ **abgelehnt** (chore #151) — negative
-    Engine-Tuning-Messung, kein Elo-Gewinn.
-  - **NNUE:** ⏸️ **geparkt** (2026-07-17) — sucht sich nicht als lohnend.
-  - _Verbleibende echte Lücke: die **absolute** Engine-Stärke ist unbekannt —
-    alle Benchmarks sind Self-Play bzw. 15:15 equal bei Depth 5. Ein Match
-    gegen eine **fixe externe Referenz** (z.B. Stockfish niedrige Tiefe)
-    steht noch aus._
+- **Engine-Stärkung (Such-*parameter*):** feature-complete / geparkt.
+  H3, H-Q1, LMR-Skala, IIR-Skip, H4, H-P1 (revertiert). Eval-Terme
+  (mobility/pawn/tempo/eg-passpawn) auf n=40 **verworfen**.
+  _Offen ist nicht „noch ein Knob“, sondern **M1 Suche skaliert**
+  (inkrementeller Zobrist) und **M0 Freeze** der Gewinner
+  `LMR_BASE_DEPTH=4` + `NULL_MOVE_R=1`._
+  - **Absolute Stärke (Track B):** vs SF Elo 1400 gemessen. Best: Score
+    0.175 / ≈ −269 (d5, LMR4, NMP R=1, n=40). Nicht mehr „unbekannt“.
+  - **Mobility-Lever:** ❌ **abgelehnt** (chore #151).
+  - **NNUE:** ⏸️ **geparkt** (2026-07-17).
 - **H-P1 — PSQT für 9x9 zentrieren:** ↩️ **reverted 2026-07-31.**
   `buildCenteredPST` blieb als Experiment-Helper, Produktion nutzt wieder
   handgetunte Tabellen. Gate: `bench/ABSOLUTE_STRENGTH_BASELINE.md`

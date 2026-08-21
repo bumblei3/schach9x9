@@ -1,5 +1,9 @@
 # Verbesserungsvorschläge für Schach 9x9
 
+> **Historisch.** Kanonische Planung: [`ROADMAP.md`](ROADMAP.md) (2026-08-21).
+> Die meisten Punkte hier sind erledigt (TS, PGN, Themes, Drag&Drop, Opening Book,
+> Analyse, PWA) oder bewusst abgelehnt (Multiplayer). Nicht als Backlog nutzen.
+
 ## 🎮 UX/UI Verbesserungen
 
 ### 1. **Drag & Drop für Figuren** ✅
