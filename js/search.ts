@@ -372,7 +372,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const ASPIRATION_WINDOW = 50;
 
       // Late Move Reductions (LMR) constants
-      const LMR_BASE_DEPTH = 3; // Minimum depth for LMR
+      const LMR_BASE_DEPTH = 4; // Minimum depth for LMR — start later, less aggressive at d5
       const LMR_MOVE_COUNT = 3; // First N moves not reduced
       const LMR_MAX_REDUCTION = 3; // Max reduction
 
