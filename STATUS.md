@@ -26,8 +26,10 @@ npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --qui
 | v1.7.0 Release-Check                        | 0–1–19      | 0.025     | ≈ −636         |
 | A/B pre-eval `fbba0c8` (heute)              | 1–2–17      | 0.100     | ≈ −382         |
 | A/B `v1.7.0` rerun (heute, gleiche Harness) | 0–5–15      | **0.125** | **≈ −338**     |
-| `v1.7.0` **Tages-Run n=40** (2026-08-21)    | 4–3–33      | **0.138** | **≈ −319**    |
-| mob=1.2 Exp (2026-08-21, verworfen)         | 1–3–36      | 0.063     | ≈ −470        |
+|| `v1.7.0` **Tages-Run n=40** (2026-08-21)    | 4–3–33      | **0.138** | **≈ −319**    |
+|| D5_v1 partial (2026-08-21, unterbrochen)    | 3–4–20      | ~0.185    | ≈ −210 (vors.) |
+|| **D5_v2 n=40 (2026-08-21, gleiche Params)** | **2–6–32**  | **0.125** | **≈ −338**    |
+|| mob=1.2 Exp (2026-08-21, verworfen)         | 1–3–36      | 0.063     | ≈ −470        |
 
 **Die −200 cp (0.075 → 0.025) sind Rauschen bei n=20, kein Eval-Rückschritt.**
 Gleicher Harness, gleicher Tag: v1.7.0 **0.125** vs pre-eval **0.100**. 95%-CIs
@@ -53,6 +55,12 @@ weder Gewinn noch klarer Verlust. Revert auf tempo=10, nicht gemergt.
 n=20 kann 200-cp-Claims nicht tragen. Merge-Gate: gleiche Flags, Score im
 Rauschband (~0.00–0.15), kein Win gegen eine Einzelzahl (weder 0.025 noch
 0.075). Für echte Hebel: **n≥40**.
+
+**Tiefe 5 ohne Suchparameter-Tuning (D5_v2, n=40):** Score 0.125 (≈ −338 cp),
+nicht besser als D4 Baseline (0.138, −319). Delta ~−19 cp, CI weit überlappend.
+**Erkenntnis:** mehr Tiefe mit alten Parametern = schlechter, nicht besser.
+Suchstrategie (LMR/Probcut/Null-Move) ist der Hebel, nicht Eval-Terme.
+Nächster Hebel: **LMR_MAX_REDUCTION 3→2** bei Tiefe 5 (isolierte Änderung).
 
 Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
 · Logs: `bench/sf_match_v170.log`, `bench/sf_match_v170_rerun.log`,
