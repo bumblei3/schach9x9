@@ -182,7 +182,7 @@ const EVAL_VALUES: Record<number, number> = {
 // Only applied when depth >= PROBCUT_DEPTH and score is near beta.
 
 const PROBCUT_DEPTH = 5;
-const PROBCUT_REDUCTION = 3; // How much to reduce depth
+const PROBCUT_REDUCTION = 2; // How much to reduce depth — test hypothesis: less aggressive probcut at d5
 const PROBCUT_BETA_MARGIN = 150; // Beta margin for probcut (beta - margin)
 
 function probcut(
