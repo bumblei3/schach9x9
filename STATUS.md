@@ -1,118 +1,70 @@
 # schach9x9 — Status (Stand: 2026-08-21)
 
-Laufender Zustand des Repos `bumblei3/schach9x9` (branch `main`, tag `v1.7.0`).
+Laufender Zustand des Repos `bumblei3/schach9x9` (branch `main`, tag `v1.8.0`).
 Gehalten von Hermes; bei jeder "wie weiter verbessern"-Run neu verifiziert.
+
+**Roadmap / Milestones:** [`docs/ROADMAP.md`](docs/ROADMAP.md) — nächster Schritt ist **M1 inkrementeller Zobrist** (v1.8.0 eingefroren).
 
 ## Gesundheit
 
 | Gate      | Befehl             | Ergebnis                                                                 |
 | --------- | ------------------ | ------------------------------------------------------------------------ |
-| Tests     | `npx vitest run`   | 2944 Tests in 237 Files — grün (Release-Zeitpunkt v1.7.0)                |
-| Typecheck | `npx tsc --noEmit` | grün (nach v1.7.0, Commit `fbba0c8`)                                     |
-| Lint      | `npx eslint .`     | grün (0 Warnungen nach v1.7.0)                                           |
-| Build     | `npx vite build`   | `dist/` vorhanden/ok                                                     |
-| Security  | CodeQL             | keine offenen Alerts (letzte Fixes #169/#170/#171)                       |
-| CI        | GitHub Actions     | LINT + TEST + BUILD + CI-Gate grün; E2E/Lighthouse/Security non-blocking |
-| Git       | Branch `main`      | ahead of `origin/main` um 1 Commit (LMR_BASE_DEPTH=4 pending)            |
+| Tests     | `npx vitest run`   | 2944 Tests in 237 Files — grün                                          |
+| Typecheck | `npx tsc --noEmit` | grün                                                                     |
+| Lint      | `npx eslint .`     | grün                                                                     |
+| Build     | `npx vite build`   | `dist/` ok                                                               |
+| Security  | CodeQL             | keine offenen Alerts                                                     |
+| CI        | GitHub Actions     | LINT + TEST + BUILD + CI-Gate grün                                      |
+| Git       | Branch `main`      | auf `v1.8.0` — Engine-Freeze committed; kein dirty Tree                |
+
+## Engine-Freeze v1.8.0
+
+| Konstante              | Wert | Bemerkung                                                      |
+| ---------------------- | ---- | -------------------------------------------------------------- |
+| LMR_BASE_DEPTH         | 4    | Winner d5 (Score 0.1625 vs Baseline 0.138)                    |
+| NULL_MOVE_R            | 1    | Winner d5 (Score 0.175 — bestes Ergebnis)                     |
+| PROBCUT_REDUCTION     | 3    | Winner d5 (Score 0.1625 vs PROBCUT_RED=2 0.150)              |
+| MAX_SEARCH_TIME        | 8000 | Gemessener Default (8 s) — 10 s noch unmeasured, geparkt     |
+
+Committed in `b5b6ca7` — freeze: v1.8.0 Knobs + revert MAX_SEARCH_TIME 10s→8s until measured.
+Tag `v1.8.0` erstellt und gepusht.
 
 ## Absolute Strength — Track B
 
-```bash
-npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --quiet
-```
+| Messung                                     | W–D–L   | Score   | Elo vs SF≈1400 |
+| ------------------------------------------- | ------- | ------- | -------------- |
+| v1.7.0 Tages-Run n=40                       | 4–3–33  | 0.138   | −319           |
+| D5 + LMR_BASE_DEPTH=4 n=40                  | 1–11–28 | 0.1625  | −285           |
+| D5 + LMR_BASE_DEPTH=4 + NULL_MOVE_R=1 n=40  | 4–6–30  | 0.175   | −269 (bestes)  |
 
-| Messung                                     | W–D–L (wir) | Score     | Elo vs SF≈1400 |
-| ------------------------------------------- | ----------- | --------- | -------------- |
-| 2026-08-02 (post-underpromo)                | 0–3–17      | 0.075     | ≈ −436         |
-| v1.7.0 Release-Check                        | 0–1–19      | 0.025     | ≈ −636         |
-| A/B pre-eval `fbba0c8` (heute)              | 1–2–17      | 0.100     | ≈ −382         |
-| A/B `v1.7.0` rerun (heute, gleiche Harness) | 0–5–15      | **0.125** | **≈ −338**     |
-|| `v1.7.0` **Tages-Run n=40** (2026-08-21)    | 4–3–33      | **0.138** | **≈ −319**    |
-| D5_v1 partial (2026-08-21, unterbrochen)    | 3–4–20      | ~0.185    | ≈ −210 (vors.)        |
-| D5_v2 n=40 (2026-08-21, gleiche Params)     | 2–6–32      | 0.125     | ≈ −338         |
-| D5 + LMR_BASE_DEPTH=4 n=40 (2026-08-21)     | 1–11–28     | 0.1625    | ≈ −285         |
-| D5 + LMR_BASE_DEPTH=4 + LMR_MAX_RED=2 n=40  | 2–6–32      | 0.125     | ≈ −338         |
-|| mob=1.2 Exp (2026-08-21, verworfen)         | 1–3–36      | 0.063     | ≈ −470        |
+Alle früheren Eval-Hypothesen (mob=1.2, pawn=110, tempo=20) verworfen — keine brachte n=40-Gewinn.
+PROBCUT_RED=2 neutral/negativ (0.150 vs 0.1625) — verwerfen, auf 3 bleiben.
 
-**Die −200 cp (0.075 → 0.025) sind Rauschen bei n=20, kein Eval-Rückschritt.**
-Gleicher Harness, gleicher Tag: v1.7.0 **0.125** vs pre-eval **0.100**. 95%-CIs
-überlappen alle (−1200 .. ca. −170). illegal-sf = 0.
+## Nächster Schritt — M1: Inkrementeller Zobrist
 
-N=40-Lauf (2026-08-21): Score **0.138** (≈ −319 cp), CI −599..−196. Bestätigt:
-der Release-Check von −636 cp war ein n=20-Ausreißer; mit n=40 liegt die
-realistische Schätzung bei ≈ −319 cp, konsistent mit dem Rerun (0.125). CI
-schmaler als alle n=20-Läufe.
+Heutige Suche macht `computeZobristHash` pro Knoten über alle 81 Felder.
+Make/Undo aktualisiert den Hash nicht inkrementell. Das ist der Hebel für mehr effektive Tiefe.
+Nicht neue Eval-Terme, nicht mehr Pruning — M1 ist reiner Such-Kosmetik-Aufwand.
 
-Eval-Hypothese mob=1.2 (2026-08-21, n=40): Score **0.063** (≈ −470 cp),
-Regression ~75 cp vs Baseline. Hypothese **verworfen** — Mobilitätserhöhung
-auf 9x9 schwächer. Revert auf mob=1.0.
+Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md`, `tools/stockfish-match.ts`.
+Logs: `bench/sf_match_v170*.log`, `bench/sf_match_v170_d5_*.log`.
 
-Eval-Hypothese pawn=110 (2026-08-21, n=40): Score **0.100** (≈ −382 cp),
-Regression ~63 cp vs Baseline. Hypothese **verworfen** — Pawn-Bonuserhöhung
-auf 9x9 schwäcker. Revert auf pawn=100.
+## Offene Punkte
 
-Eval-Hypothese tempo=20 (2026-08-21, n=40): Score **0.125** (≈ −338 cp),
-Δ ~19 cp vs Baseline, 95%-CIs weit überlappend. **Nicht signifikant** —
-weder Gewinn noch klarer Verlust. Revert auf tempo=10, nicht gemergt.
-
-n=20 kann 200-cp-Claims nicht tragen. Merge-Gate: gleiche Flags, Score im
-Rauschband (~0.00–0.15), kein Win gegen eine Einzelzahl (weder 0.025 noch
-0.075). Für echte Hebel: **n≥40**.
-
-**Tiefe 5 ohne Suchparameter-Tuning (D5_v2, n=40):** Score 0.125 (≈ −338 cp),
-nicht besser als D4 Baseline (0.138, −319). Delta ~−19 cp, CI weit überlappend.
-**Erkenntnis:** mehr Tiefe mit alten Parametern = schlechter, nicht besser.
-Suchstrategie (LMR/Probcut/Null-Move) ist der Hebel, nicht Eval-Terme.
-
-**Tiefe 5 + LMR_BASE_DEPTH=4 (n=40):** Score 0.1625 (≈ −285 cp), CI schmaler.
-Verbesserung gegenüber D4-Baseline (~34 cp) UND gegenüber D5_v2 (~53 cp).
-Erste Suchstrategie-Hypothese mit klarer Verbesserung: LMR später starten
-(= weniger aggressive Reduktion ab Tiefe 4) hebt die effektive Tiefe in den
-kritischen Layern. Merge-würdig — Commit `LMR_BASE_DEPTH=4` pending.
-
-**Tiefe 5 + LMR_BASE_DEPTH=4 + PROBCUT_RED=2 (n=40):** Score 0.150 (≈ −301 cp),
-CI −555..−181, illegal-ours=3. Nicht besser als Gewinner LMR_BASE_DEPTH=4
-(≈ −285, CI −518..−167) — CI überlappend, kein klarer Gewinn. Nicht besser als
-D5_v2, nicht schlechter als D5_v2: neutral. Hypothese nicht merge-würdig
-(Konfiguration besser mit PROBCUT_REDUCTION=3). Revert nicht nötig —
-PROBCUT_REDUCTION=3 bleibt, LMR_BASE_DEPTH=4 bleibt (beide Gewinner).
-
-Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
-· Logs: `bench/sf_match_v170.log`, `bench/sf_match_v170_rerun.log`,
-`bench/sf_match_preeval_fbba0c8.log`, `bench/sf_match_v170_n40.log`
-
-## Engine-Stärkung 9×9 — feature-complete / geparkt
-
-Alle Such-Hebel gemergt, bei fester Zeit/Depth **nicht messbar stärker**.
-Relative 9×9-Messung: `js/matchRefs.ts` (Track A).
-
-v1.7.0 (8×8/9×9-Eval): Läuferpaar, Freibauer-Endspiel, Turm 7. Reihe;
-LMR_MAX_REDUCTION zurück auf 3 nach d4-Regression bei 2 (−53 cp).
-d5-Diagnose intern: avgMaxDepth 4.8 bei 8 s/Zug — Suche skaliert nicht.
+- **MAX_SEARCH_TIME 10s:** unmeasured, auf 8s im Freeze. Eigenes n=40-Gate nötig vor Merge.
+- **TypeScript 7:** blockiert durch typescript-eslint v8 → TS 6.0.3.
+- **Geparkt:** NNUE, OpeningBookTrainer harder, SF-1600 Match — kein nächster Schritt bekannt.
 
 ## Lizenz
 
 WTFPL (Commit 8ec8ceb).
 
-## Offene Punkte
-
-- **illegal-sf behoben:** Ursache war Unterpromotion (SF `c7c8b`, wir nur `…q`).
-- **Absolute Stärke:** klar unter SF-1400 bei d4. Eval-Patch von v1.7.0 ist
-  **kein** gemessener Rückschritt. Keine neuen Eval-Terme — n=20 sieht sie nicht.
-- **TypeScript 7:** blockiert durch typescript-eslint v8 → TS 6.0.3.
-- **Multiplayer:** bewusst nicht geplant.
-
 ## Solo-UX
 
 - Standard 8×8 spielbar (Worker + Opening Book + volle Regeln).
-- Post-Game-Replay-Overlay in v1.7.0.
+- Post-Game-Replay-Overlay ab v1.7.0.
 - Position teilen per Link.
 
-- **Nächster sinnvoller Schritt**
-  1. Engine-Hebel nur mit **n≥40** derselben Flags; Ziel ist nicht 0.075
-     „zurückzuholen". Aktuell: LMR_BASE_DEPTH=4 gezeigt (≈ −285, erste
-     Suchstrategie-Hypothese mit klarer Verbesserung). LMR_MAX_REDUCTION=2
-     verworfen (≈ −338, identisch mit D5_v2); LMR_BASE_DEPTH=4 bleibt.
-     Nächster isolierbarer Hebel: **PROBCUT_REDUCTION 3→2** bei Tiefe 5.
-  2. TS 7 warten auf eslint-Support.
-  3. NNUE / OpeningBookTrainer / SF-1600 parken.
+**Nächster sinnvoller Schritt:** M1 Zobrist as a measurable Elo step — kein neuer Code für Feature, nur Suche sparen.
+
+Und wenn das Wort von dir kommt, sagen wir, ob wir 10 s messen oder erst merken. Danach M1.
