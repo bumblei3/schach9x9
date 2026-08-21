@@ -27,6 +27,7 @@ npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --qui
 | A/B pre-eval `fbba0c8` (heute)              | 1–2–17      | 0.100     | ≈ −382         |
 | A/B `v1.7.0` rerun (heute, gleiche Harness) | 0–5–15      | **0.125** | **≈ −338**     |
 | `v1.7.0` **Tages-Run n=40** (2026-08-21)    | 4–3–33      | **0.138** | **≈ −319**    |
+| mob=1.2 Exp (2026-08-21, verworfen)         | 1–3–36      | 0.063     | ≈ −470        |
 
 **Die −200 cp (0.075 → 0.025) sind Rauschen bei n=20, kein Eval-Rückschritt.**
 Gleicher Harness, gleicher Tag: v1.7.0 **0.125** vs pre-eval **0.100**. 95%-CIs
@@ -36,6 +37,18 @@ N=40-Lauf (2026-08-21): Score **0.138** (≈ −319 cp), CI −599..−196. Best
 der Release-Check von −636 cp war ein n=20-Ausreißer; mit n=40 liegt die
 realistische Schätzung bei ≈ −319 cp, konsistent mit dem Rerun (0.125). CI
 schmaler als alle n=20-Läufe.
+
+Eval-Hypothese mob=1.2 (2026-08-21, n=40): Score **0.063** (≈ −470 cp),
+Regression ~75 cp vs Baseline. Hypothese **verworfen** — Mobilitätserhöhung
+auf 9x9 schwächer. Revert auf mob=1.0.
+
+Eval-Hypothese pawn=110 (2026-08-21, n=40): Score **0.100** (≈ −382 cp),
+Regression ~63 cp vs Baseline. Hypothese **verworfen** — Pawn-Bonuserhöhung
+auf 9x9 schwäcker. Revert auf pawn=100.
+
+Eval-Hypothese tempo=20 (2026-08-21, n=40): Score **0.125** (≈ −338 cp),
+Δ ~19 cp vs Baseline, 95%-CIs weit überlappend. **Nicht signifikant** —
+weder Gewinn noch klarer Verlust. Revert auf tempo=10, nicht gemergt.
 
 n=20 kann 200-cp-Claims nicht tragen. Merge-Gate: gleiche Flags, Score im
 Rauschband (~0.00–0.15), kein Win gegen eine Einzelzahl (weder 0.025 noch
