@@ -366,7 +366,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       for (let i = 0; i <= maxDepth; i++) killers[i] = [null, null];
       const history = new Int32Array(81 * 81);
 
-      const NULL_MOVE_R = 2;
+      const NULL_MOVE_R = 1; // Null move reduction — test hypothesis: less null-move pruning at d5 (d5 tests)
       const FUTILITY_MARGIN = 200;
       const RAZOR_MARGIN = 400;
       const ASPIRATION_WINDOW = 50;
