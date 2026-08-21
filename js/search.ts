@@ -425,8 +425,13 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
             }
           }
           if (hasMaterial) {
-            const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing);
-            if (nullScore.score >= beta) return { score: beta, bestMove: null };
+            if (maximizing) {
+              const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing);
+              if (nullScore.score >= beta) return { score: beta, bestMove: null };
+            } else {
+              const nullScore = search(b, d - 1 - NULL_MOVE_R, alpha, alpha + 1, !maximizing);
+              if (nullScore.score <= alpha) return { score: alpha, bestMove: null };
+            }
           }
         }
 
@@ -516,15 +521,15 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               if (reduction > 0) {
                 // Reduced search first
-                result = search(b, d - 1 - reduction, alpha, beta, false, false);
+                result = search(b, d - 1 - reduction, alpha, beta, !maximizing, false);
 
                 // If reduced search fails high (>= beta), re-search at full depth
                 if (result.score >= beta) {
-                  result = search(b, d - 1, alpha, beta, false, false);
+                  result = search(b, d - 1, alpha, beta, !maximizing, false);
                 }
               } else {
                 // Full depth search
-                result = search(b, d - 1, alpha, beta, false, false);
+                result = search(b, d - 1, alpha, beta, !maximizing, false);
               }
 
               undoMoveInt(board, undo);
@@ -568,7 +573,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               ) {
                 // Re-search best move with depth + 1
                 const undo = makeMoveInt(board, bestMove);
-                const extResult = search(board, d, alpha, beta, false);
+                const extResult = search(board, d, alpha, beta, !maximizing);
                 undoMoveInt(board, undo);
                 // If extension improves score, use it
                 if (extResult.score > bestScore) {
@@ -610,15 +615,15 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
               if (reduction > 0) {
                 // Reduced search first
-                result = search(b, d - 1 - reduction, alpha, beta, true, false);
+                result = search(b, d - 1 - reduction, alpha, beta, !maximizing, false);
 
                 // If reduced search fails high (>= beta), re-search at full depth
                 if (result.score >= beta) {
-                  result = search(b, d - 1, alpha, beta, true, false);
+                  result = search(b, d - 1, alpha, beta, !maximizing, false);
                 }
               } else {
                 // Full depth search
-                result = search(b, d - 1, alpha, beta, true, false);
+                result = search(b, d - 1, alpha, beta, !maximizing, false);
               }
 
               undoMoveInt(board, undo);
@@ -662,7 +667,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
               ) {
                 // Re-search best move with depth + 1
                 const undo = makeMoveInt(board, bestMove);
-                const extResult = search(board, d, alpha, beta, true, false);
+                const extResult = search(board, d, alpha, beta, !maximizing);
                 undoMoveInt(board, undo);
                 if (extResult.score < bestScore) {
                   bestScore = extResult.score;
