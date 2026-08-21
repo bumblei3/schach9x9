@@ -42,7 +42,7 @@ import type { IntBoard } from './evaluate';
 // =====================================================================
 const MATE_SCORE = 20000;
 const INFINITY = 30000;
-const MAX_SEARCH_TIME = 10000; // 10 seconds max per search — test hypothesis: more time at d5 (with LMR_BASE_DEPTH=4 + NULL_MOVE_R=1)
+const MAX_SEARCH_TIME = 8000; // 8 seconds max per search (measured default, unchanged from v1.7.0)
 
 // =====================================================================
 // Quiescence search — resolve captures to avoid horizon effect
@@ -182,7 +182,7 @@ const EVAL_VALUES: Record<number, number> = {
 // Only applied when depth >= PROBCUT_DEPTH and score is near beta.
 
 const PROBCUT_DEPTH = 5;
-const PROBCUT_REDUCTION = 2; // How much to reduce depth — test hypothesis: less aggressive probcut at d5
+const PROBCUT_REDUCTION = 3; // Default (winner at d5: Score 0.1625 vs 0.150 for PROBCUT_RED=2); frozen for v1.8.0
 const PROBCUT_BETA_MARGIN = 150; // Beta margin for probcut (beta - margin)
 
 function probcut(
@@ -372,7 +372,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const ASPIRATION_WINDOW = 50;
 
       // Late Move Reductions (LMR) constants
-      const LMR_BASE_DEPTH = 4; // Minimum depth for LMR — start later, less aggressive at d5
+      const LMR_BASE_DEPTH = 4; // Frozen for v1.8.0 (winner at d5: Score 0.1625 vs 0.138 baseline)
       const LMR_MOVE_COUNT = 3; // First N moves not reduced
       const LMR_MAX_REDUCTION = 3; // Max reduction
 
