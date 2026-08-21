@@ -31,6 +31,7 @@ npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --qui
 | D5_v1 partial (2026-08-21, unterbrochen)    | 3–4–20      | ~0.185    | ≈ −210 (vors.)        |
 | D5_v2 n=40 (2026-08-21, gleiche Params)     | 2–6–32      | 0.125     | ≈ −338         |
 | D5 + LMR_BASE_DEPTH=4 n=40 (2026-08-21)     | 1–11–28     | 0.1625    | ≈ −285         |
+| D5 + LMR_BASE_DEPTH=4 + LMR_MAX_RED=2 n=40  | 2–6–32      | 0.125     | ≈ −338         |
 || mob=1.2 Exp (2026-08-21, verworfen)         | 1–3–36      | 0.063     | ≈ −470        |
 
 **Die −200 cp (0.075 → 0.025) sind Rauschen bei n=20, kein Eval-Rückschritt.**
@@ -65,10 +66,15 @@ Suchstrategie (LMR/Probcut/Null-Move) ist der Hebel, nicht Eval-Terme.
 
 **Tiefe 5 + LMR_BASE_DEPTH=4 (n=40):** Score 0.1625 (≈ −285 cp), CI schmaler.
 Verbesserung gegenüber D4-Baseline (~34 cp) UND gegenüber D5_v2 (~53 cp).
-**Erste Suchstrategie-Hypothese mit klarer Verbesserung:** LMR später starten
+Erste Suchstrategie-Hypothese mit klarer Verbesserung: LMR später starten
 (= weniger aggressive Reduktion ab Tiefe 4) hebt die effektive Tiefe in den
 kritischen Layern. Merge-würdig — Commit `LMR_BASE_DEPTH=4` pending.
-Nächster Hebel: **LMR_MAX_REDUCTION 3→2** bei Tiefe 5 (isolierte Änderung).
+
+**Tiefe 5 + LMR_BASE_DEPTH=4 + LMR_MAX_RED=2 (n=40):** Score 0.125 (≈ −338 cp),
+identisch mit D5_v2 (kein Gewinn vs Baseline), Regression ~−53 cp gegen
+LMR_BASE_DEPTH=4. Hypothese verworfen — weniger Max-Reduktion allein hilft
+nicht, wenn LMR_BASE_DEPTH=4 schon gelegt ist. Revert von LMR_MAX_REDUCTION
+auf 3, aber LMR_BASE_DEPTH=4 bleibt (Gewinner).
 
 Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
 · Logs: `bench/sf_match_v170.log`, `bench/sf_match_v170_rerun.log`,
@@ -104,7 +110,8 @@ WTFPL (Commit 8ec8ceb).
 - **Nächster sinnvoller Schritt**
   1. Engine-Hebel nur mit **n≥40** derselben Flags; Ziel ist nicht 0.075
      „zurückzuholen". Aktuell: LMR_BASE_DEPTH=4 gezeigt (≈ −285, erste
-     Suchstrategie-Hypothese mit klarer Verbesserung). Nächster isolierbarer
-     Hebel: LMR_MAX_REDUCTION 3→2 bei Tiefe 5.
+     Suchstrategie-Hypothese mit klarer Verbesserung). LMR_MAX_REDUCTION=2
+     verworfen (≈ −338, identisch mit D5_v2); LMR_BASE_DEPTH=4 bleibt.
+     Nächster isolierbarer Hebel: **PROBCUT_REDUCTION 3→2** bei Tiefe 5.
   2. TS 7 warten auf eslint-Support.
   3. NNUE / OpeningBookTrainer / SF-1600 parken.
