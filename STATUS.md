@@ -1,4 +1,4 @@
-# schach9x9 — Status (Stand: 2026-08-20)
+# schach9x9 — Status (Stand: 2026-08-21)
 
 Laufender Zustand des Repos `bumblei3/schach9x9` (branch `main`, tag `v1.7.0`).
 Gehalten von Hermes; bei jeder "wie weiter verbessern"-Run neu verifiziert.
@@ -26,10 +26,16 @@ npm run match:stockfish -- --games=20 --depth=4 --sf-depth=8 --sf-elo=1400 --qui
 | v1.7.0 Release-Check                        | 0–1–19      | 0.025     | ≈ −636         |
 | A/B pre-eval `fbba0c8` (heute)              | 1–2–17      | 0.100     | ≈ −382         |
 | A/B `v1.7.0` rerun (heute, gleiche Harness) | 0–5–15      | **0.125** | **≈ −338**     |
+| `v1.7.0` **Tages-Run n=40** (2026-08-21)    | 4–3–33      | **0.138** | **≈ −319**    |
 
 **Die −200 cp (0.075 → 0.025) sind Rauschen bei n=20, kein Eval-Rückschritt.**
 Gleicher Harness, gleicher Tag: v1.7.0 **0.125** vs pre-eval **0.100**. 95%-CIs
 überlappen alle (−1200 .. ca. −170). illegal-sf = 0.
+
+N=40-Lauf (2026-08-21): Score **0.138** (≈ −319 cp), CI −599..−196. Bestätigt:
+der Release-Check von −636 cp war ein n=20-Ausreißer; mit n=40 liegt die
+realistische Schätzung bei ≈ −319 cp, konsistent mit dem Rerun (0.125). CI
+schmaler als alle n=20-Läufe.
 
 n=20 kann 200-cp-Claims nicht tragen. Merge-Gate: gleiche Flags, Score im
 Rauschband (~0.00–0.15), kein Win gegen eine Einzelzahl (weder 0.025 noch
@@ -37,7 +43,7 @@ Rauschband (~0.00–0.15), kein Win gegen eine Einzelzahl (weder 0.025 noch
 
 Details: `bench/ABSOLUTE_STRENGTH_BASELINE.md` · Tool: `tools/stockfish-match.ts`
 · Logs: `bench/sf_match_v170.log`, `bench/sf_match_v170_rerun.log`,
-`bench/sf_match_preeval_fbba0c8.log`
+`bench/sf_match_preeval_fbba0c8.log`, `bench/sf_match_v170_n40.log`
 
 ## Engine-Stärkung 9×9 — feature-complete / geparkt
 

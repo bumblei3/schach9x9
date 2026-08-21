@@ -3,6 +3,7 @@ node_modules/
 
 # Logs
 *.log
+!bench/*.log
 npm-debug.log*
 
 # OS files
