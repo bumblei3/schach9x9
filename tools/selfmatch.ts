@@ -17,6 +17,7 @@
 
 import { setBoardVariant, BOARD_VARIANTS, getCurrentBoardSize } from '../js/config.js';
 import { createJsSearch } from '../js/search.js';
+import { preloadNnueWeights } from '../js/evaluate.js';
 import {
   getAllLegalMoves,
   makeMove,
@@ -206,6 +207,12 @@ async function main(): Promise<void> {
 
   setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
   if (getCurrentBoardSize() !== 9) throw new Error(`expected size 9, got ${getCurrentBoardSize()}`);
+
+  // Preload NNUE weights if either side uses them
+  const nnuePath = whiteCfg.nnue?.weightsPath ?? blackCfg.nnue?.weightsPath;
+  if (whiteCfg.nnue || blackCfg.nnue) {
+    preloadNnueWeights(nnuePath ?? 'data/nnue_weights.json');
+  }
 
   console.log('=== schach9x9 self-match (native 9×9) ===');
   console.log(`white=${whiteName}(d${whiteCfg.depth ?? depth}) black=${blackName}(d${blackCfg.depth ?? depth}) games=${games} maxPlies=${maxPlies}`);
