@@ -38,6 +38,8 @@ interface SideConfig {
   personality: 'NORMAL' | 'AGGRESSIVE' | 'SOLID' | 'GENTLE' | 'BALANCED';
   /** optional per-side depth override; default = --depth */
   depth?: number;
+  /** optional eval knobs (single-variable experiments) */
+  eval?: { bishopPairBonus?: number };
 }
 
 const CONFIGS: Record<string, SideConfig> = {
@@ -48,6 +50,8 @@ const CONFIGS: Record<string, SideConfig> = {
   /** depth-gap calibration references (sanity: d4 should beat d3 clearly) */
   'd3': { personality: 'NORMAL', depth: 3 },
   'd4': { personality: 'NORMAL', depth: 4 },
+  /** E1: bishop pair 30 → 50 (single variable) */
+  'bp50': { personality: 'NORMAL', eval: { bishopPairBonus: 50 } },
 };
 
 function getConfig(name: string): SideConfig {
@@ -105,8 +109,14 @@ async function playGame(
   let plies = 0;
   const t0 = Date.now();
 
-  const whiteSearch = createJsSearch({ personality: whiteCfg.personality as never });
-  const blackSearch = createJsSearch({ personality: blackCfg.personality as never });
+  const whiteSearch = createJsSearch({
+    personality: whiteCfg.personality as never,
+    ...whiteCfg.eval,
+  });
+  const blackSearch = createJsSearch({
+    personality: blackCfg.personality as never,
+    ...blackCfg.eval,
+  });
 
   while (plies < maxPlies) {
     const legal = getAllLegalMoves(board, turn);

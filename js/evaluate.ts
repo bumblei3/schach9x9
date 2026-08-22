@@ -37,6 +37,8 @@ export type Personality = 'NORMAL' | 'AGGRESSIVE' | 'SOLID' | 'GENTLE';
 export interface EvalConfig {
   personality: Personality;
   elo?: number;
+  /** Single-variable experiment knob: bishop pair bonus in cp (default 30). */
+  bishopPairBonus?: number;
 }
 
 function getPersonalityWeights(personality: Personality): {
@@ -390,7 +392,7 @@ export function evaluate(
   }
 
   // --- Bishop pair bonus ---
-  const BISHOP_PAIR_BONUS = 30;
+  const BISHOP_PAIR_BONUS = evalConfig.bishopPairBonus ?? 30;
   if (whiteBishops >= 2) {
     mgScore += BISHOP_PAIR_BONUS;
     egScore += BISHOP_PAIR_BONUS;
