@@ -1,0 +1,37 @@
+=== schach9x9 self-match (native 9×9) ===
+white=pp25(d3) black=baseline(d3) games=15 maxPlies=300
+Game 1/30 → second-named (checkmate) plies=72 54570ms
+Game 2/30 → first-named (checkmate) plies=158 17602ms
+Game 3/30 → second-named (checkmate) plies=156 24670ms
+Game 4/30 → second-named (checkmate) plies=149 16194ms
+Game 5/30 → first-named (checkmate) plies=279 43694ms
+Game 6/30 → draw (max-plies) plies=300 42673ms
+Game 7/30 → second-named (checkmate) plies=74 18301ms
+Game 8/30 → draw (max-plies) plies=300 63936ms
+Game 9/30 → second-named (checkmate) plies=114 21813ms
+Game 10/30 → second-named (checkmate) plies=19 4831ms
+Game 11/30 → first-named (checkmate) plies=71 37580ms
+Game 12/30 → draw (max-plies) plies=300 14735ms
+Game 13/30 → draw (max-plies) plies=300 38589ms
+Game 14/30 → second-named (checkmate) plies=33 34110ms
+Game 15/30 → draw (max-plies) plies=300 29017ms
+Game 16/30 → draw (max-plies) plies=300 26830ms
+Game 17/30 → second-named (checkmate) plies=116 24521ms
+Game 18/30 → first-named (checkmate) plies=50 33227ms
+Game 19/30 → first-named (checkmate) plies=141 24019ms
+Game 20/30 → draw (max-plies) plies=300 40109ms
+Game 21/30 → first-named (checkmate) plies=227 40757ms
+Game 22/30 → second-named (checkmate) plies=243 50390ms
+Game 23/30 → draw (max-plies) plies=300 65947ms
+Game 24/30 → second-named (checkmate) plies=291 24445ms
+Game 25/30 → second-named (checkmate) plies=54 23648ms
+Game 26/30 → draw (max-plies) plies=300 57102ms
+Game 27/30 → second-named (checkmate) plies=194 56342ms
+Game 28/30 → first-named (checkmate) plies=118 48602ms
+Game 29/30 → second-named (checkmate) plies=72 16682ms
+Game 30/30 → first-named (checkmate) plies=114 41402ms
+=== SUMMARY ===
+W-D-L (pp25): 8-9-13  (n=30)
+score: 0.417  Elo(pp25 vs baseline): -58.5  [95% ~ -200 .. 65]
+term breakdown: checkmate=21 max-plies=9
+RESULT firstW=8 secondW=13 D=9 score=0.4167 elo=-58.5 depth=3
