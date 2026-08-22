@@ -79,6 +79,9 @@ function initZobrist(): void {
 // Initialize on load
 initZobrist();
 
+// Exported for incremental hash updates in search.ts (M1.1)
+export { zobristTable, sideToMoveValue };
+
 /**
  * Compute Zobrist hash for a given board and optionally side to move.
  * @param board Int8Array board representation (0 for empty, piece encoded)

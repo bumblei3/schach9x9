@@ -6,6 +6,14 @@
 
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as AIEngine from '../js/aiEngine.js';
+
+// queryOpeningBook is bound directly inside aiEngine.ts, so a namespace spyOn cannot
+// intercept it. Mock the OpeningBook module itself instead.
+const bookMocks = vi.hoisted(() => ({ queryOpeningBook: vi.fn() }));
+vi.mock('../js/ai/OpeningBook.js', () => ({
+  queryOpeningBook: bookMocks.queryOpeningBook,
+  setOpeningBook: vi.fn(),
+}));
 import { createEmptyBoard } from '../js/gameEngine.js';
 import type { Board, PieceType, Player } from '../js/types/game.js';
 import { EVAL_VALUES } from '../js/evaluate.js';
@@ -112,9 +120,13 @@ describe('AI Engine - Coverage for Untested Paths', () => {
   // ============================================================
 
   describe('Opening Book Integration', () => {
+    beforeEach(() => {
+      bookMocks.queryOpeningBook.mockReset();
+    });
+
     test('getBestMoveDetailed should query opening book early in game', async () => {
       const mockBookMove = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
-      vi.spyOn(AIEngine, 'queryOpeningBook').mockImplementation(() => mockBookMove);
+      bookMocks.queryOpeningBook.mockReturnValue(mockBookMove);
 
       const testBoard = createMinimalBoard();
       testBoard[6][4] = { type: 'p', color: 'white', hasMoved: false };
@@ -129,7 +141,7 @@ describe('AI Engine - Coverage for Untested Paths', () => {
     });
 
     test('getBestMoveDetailed should NOT query opening book after move 22', async () => {
-      const spy = vi.spyOn(AIEngine, 'queryOpeningBook').mockReturnValue(null);
+      const spy = bookMocks.queryOpeningBook.mockReturnValue(null);
 
       const testBoard = createMinimalBoard();
       await AIEngine.getBestMoveDetailed(testBoard, 'white', 4, {}, 25);
@@ -138,7 +150,7 @@ describe('AI Engine - Coverage for Untested Paths', () => {
 
     test('getTopMoves should include book move as first result', async () => {
       const mockBookMove = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
-      vi.spyOn(AIEngine, 'queryOpeningBook').mockImplementation(() => mockBookMove);
+      bookMocks.queryOpeningBook.mockReturnValue(mockBookMove);
 
       const testBoard = createMinimalBoard();
       testBoard[6][4] = { type: 'p', color: 'white', hasMoved: false };
@@ -270,7 +282,7 @@ describe('AI Engine - Coverage for Untested Paths', () => {
 
     test('should respect count parameter after book move', async () => {
       const mockBookMove = { from: { r: 6, c: 4 }, to: { r: 4, c: 4 } };
-      vi.spyOn(AIEngine, 'queryOpeningBook').mockImplementation(() => mockBookMove);
+      bookMocks.queryOpeningBook.mockReturnValue(mockBookMove);
 
       const testBoard = createMinimalBoard();
       testBoard[6][4] = { type: 'p', color: 'white', hasMoved: false };

@@ -16,6 +16,7 @@ import {
   PIECE_ARCHBISHOP,
   PIECE_CHANCELLOR,
   PIECE_ANGEL,
+  PIECE_TYPE_INDEX,
   TYPE_MASK,
   COLOR_MASK,
   COLOR_WHITE,
@@ -33,7 +34,7 @@ import {
   type RuleState,
 } from './ai/MoveGenerator';
 import { evaluate, type EvalConfig } from './evaluate';
-import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
+import { computeZobristHash, TranspositionTable, zobristTable, sideToMoveValue } from './ai/transpositionTable';
 import { progressCallback, type AIProgressData } from './aiEngine';
 import type { IntBoard } from './evaluate';
 
@@ -376,20 +377,57 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const LMR_MOVE_COUNT = 3; // First N moves not reduced
       const LMR_MAX_REDUCTION = 3; // Max reduction
 
+      function zobVal(piece: number, sq: number): number {
+        const type = piece & TYPE_MASK;
+        const color = piece & COLOR_MASK;
+        const ti = PIECE_TYPE_INDEX[type];
+        if (ti === -1) return 0;
+        return zobristTable[sq][ti][color === COLOR_WHITE ? 0 : 1];
+      }
+
+      // Pure incremental Zobrist update (M1.1): computes the child hash WITHOUT
+      // mutating the board. Must be called BEFORE makeMoveInt applies `move`.
+      function makeMoveHash(b: IntBoard, move: Move, hash: number): number {
+        let h = hash;
+        const piece = b[move.from];
+        h ^= zobVal(piece, move.from);
+        if (move.flags === 'ep') {
+          // EP victim sits on the mover's rank, victim's file = destination file.
+          const width = Math.sqrt(b.length) | 0;
+          const victimSq = move.from + ((move.to % width) - (move.from % width));
+          const victim = b[victimSq];
+          if (victim !== 0) h ^= zobVal(victim, victimSq);
+          h ^= zobVal(piece, move.to); // EP never promotes
+        } else {
+          if (move.flags === 'castle-k' || move.flags === 'castle-q') {
+            const rookFrom = move.flags === 'castle-k' ? move.from + 3 : move.from - 4;
+            const rookTo = move.flags === 'castle-k' ? move.from + 1 : move.from - 1;
+            h ^= zobVal(b[rookFrom], rookFrom);
+            h ^= zobVal(b[rookTo], rookTo);
+          }
+          const newPiece = move.promotion ? (piece & COLOR_MASK) | (move.promotion & TYPE_MASK) : piece;
+          const captured = b[move.to];
+          if (captured !== 0) h ^= zobVal(captured, move.to);
+          h ^= zobVal(newPiece, move.to);
+        }
+        h ^= sideToMoveValue;
+        return h;
+      }
+
       function search(
         b: IntBoard,
         d: number,
         alpha: number,
         beta: number,
         maximizing: boolean,
-        isRoot: boolean = false
+        isRoot: boolean = false,
+        hash: number = 0
       ): { score: number; bestMove: Move | null } {
         nodes++;
         if (nodes % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
           return { score: evaluate(b, color, evalConfig), bestMove: null };
         }
 
-        const hash = computeZobristHash(b, maximizing ? color : color ^ COLOR_MASK);
         const ttEntry = tt.probe(hash, d);
         let ttBest: Move | null = null;
 
@@ -403,7 +441,13 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         }
 
         if (d === 0) {
-          const qScore = quiesce(b, alpha, beta, color, start, { count: 0 }, evalConfig);
+          const activeColor = maximizing ? color : color ^ COLOR_MASK;
+          const qScore = maximizing
+            ? quiesce(b, alpha, beta, activeColor, start, { count: 0 }, evalConfig)
+            : -quiesce(b, -beta, -alpha, activeColor, start, { count: 0 }, evalConfig);
+          // quiesce returns the score from the side-to-move's perspective; the caller
+          // expects the ROOT color's perspective. For minimizing nodes: negamax-style
+          // negation WITH a flipped window (-beta, -alpha).
           return { score: qScore, bestMove: null };
         }
 
@@ -426,10 +470,10 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           }
           if (hasMaterial) {
             if (maximizing) {
-              const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing);
+              const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing, false, hash ^ sideToMoveValue);
               if (nullScore.score >= beta) return { score: beta, bestMove: null };
             } else {
-              const nullScore = search(b, d - 1 - NULL_MOVE_R, alpha, alpha + 1, !maximizing);
+              const nullScore = search(b, d - 1 - NULL_MOVE_R, alpha, alpha + 1, !maximizing, false, hash ^ sideToMoveValue);
               if (nullScore.score <= alpha) return { score: alpha, bestMove: null };
             }
           }
@@ -439,16 +483,17 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         // Skip at root: razoring returns bestMove: null, which would lose the
         // actual move the root must report back to the caller.
         if (!isRoot && d <= 2 && d >= 1 && !checkInt(b, maximizing ? color : color ^ COLOR_MASK)) {
-          const standPat = evaluate(b, color, evalConfig);
+          const activeColor = maximizing ? color : color ^ COLOR_MASK;
+          const standPat = evaluate(b, activeColor, evalConfig);
           const margin = d === 2 ? RAZOR_MARGIN : FUTILITY_MARGIN;
           if (maximizing) {
             if (standPat + margin < alpha) {
-              const qScore = quiesce(b, alpha, beta, color, start, { count: 0 }, evalConfig);
+              const qScore = quiesce(b, alpha, beta, activeColor, start, { count: 0 }, evalConfig);
               return { score: qScore, bestMove: null };
             }
           } else {
             if (standPat - margin > beta) {
-              const qScore = quiesce(b, alpha, beta, color, start, { count: 0 }, evalConfig);
+              const qScore = -quiesce(b, -beta, -alpha, activeColor, start, { count: 0 }, evalConfig);
               return { score: qScore, bestMove: null };
             }
           }
@@ -516,20 +561,21 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 reduction = Math.max(1, reduction); // At least 1 ply reduction
               }
 
+              const childHash = makeMoveHash(b, move, hash);
               const undo = makeMoveInt(b, move);
               let result: { score: number; bestMove: Move | null };
 
               if (reduction > 0) {
                 // Reduced search first
-                result = search(b, d - 1 - reduction, alpha, beta, !maximizing, false);
+                result = search(b, d - 1 - reduction, alpha, beta, !maximizing, false, childHash);
 
                 // If reduced search fails high (>= beta), re-search at full depth
                 if (result.score >= beta) {
-                  result = search(b, d - 1, alpha, beta, !maximizing, false);
+                  result = search(b, d - 1, alpha, beta, !maximizing, false, childHash);
                 }
               } else {
                 // Full depth search
-                result = search(b, d - 1, alpha, beta, !maximizing, false);
+                result = search(b, d - 1, alpha, beta, !maximizing, false, childHash);
               }
 
               undoMoveInt(board, undo);
@@ -572,8 +618,9 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 )
               ) {
                 // Re-search best move with depth + 1
+                const childHash = makeMoveHash(board, bestMove, hash);
                 const undo = makeMoveInt(board, bestMove);
-                const extResult = search(board, d, alpha, beta, !maximizing);
+                const extResult = search(board, d, alpha, beta, !maximizing, false, childHash);
                 undoMoveInt(board, undo);
                 // If extension improves score, use it
                 if (extResult.score > bestScore) {
@@ -610,20 +657,21 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 reduction = Math.max(1, reduction);
               }
 
+              const childHash = makeMoveHash(b, move, hash);
               const undo = makeMoveInt(b, move);
               let result: { score: number; bestMove: Move | null };
 
               if (reduction > 0) {
                 // Reduced search first
-                result = search(b, d - 1 - reduction, alpha, beta, !maximizing, false);
+                result = search(b, d - 1 - reduction, alpha, beta, !maximizing, false, childHash);
 
                 // If reduced search fails high (>= beta), re-search at full depth
                 if (result.score >= beta) {
-                  result = search(b, d - 1, alpha, beta, !maximizing, false);
+                  result = search(b, d - 1, alpha, beta, !maximizing, false, childHash);
                 }
               } else {
                 // Full depth search
-                result = search(b, d - 1, alpha, beta, !maximizing, false);
+                result = search(b, d - 1, alpha, beta, !maximizing, false, childHash);
               }
 
               undoMoveInt(board, undo);
@@ -666,8 +714,9 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
                 )
               ) {
                 // Re-search best move with depth + 1
+                const childHash = makeMoveHash(board, bestMove, hash);
                 const undo = makeMoveInt(board, bestMove);
-                const extResult = search(board, d, alpha, beta, !maximizing);
+                const extResult = search(board, d, alpha, beta, !maximizing, false, childHash);
                 undoMoveInt(board, undo);
                 if (extResult.score < bestScore) {
                   bestScore = extResult.score;
@@ -691,6 +740,9 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const IIR_STABILITY_THRESHOLD = 50; // Score delta considered "stable" (centipawns)
       let iirStableCount = 0;
       let iirUnstableCount = 0;
+
+      // M1.1: incremental hash — initialize once via full recompute at the root.
+      const rootHash = computeZobristHash(board, color);
 
       for (let d = 1; d <= maxDepth; d++) {
         if (performance.now() - start > MAX_SEARCH_TIME * 0.8) break;
@@ -720,16 +772,16 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
 
         let a = prevScore - ASPIRATION_WINDOW * aspirationMult;
         let be = prevScore + ASPIRATION_WINDOW * aspirationMult;
-        let result = search(board, d, a, be, true, true);
+        let result = search(board, d, a, be, true, true, rootHash);
 
         if (result.score <= a) {
           a = prevScore - ASPIRATION_WINDOW * 10;
           if (a < -INFINITY + 100) a = -INFINITY + 100;
-          result = search(board, d, a, be, true, true);
+          result = search(board, d, a, be, true, true, rootHash);
         } else if (result.score >= be) {
           be = prevScore + ASPIRATION_WINDOW * 10;
           if (be > INFINITY - 100) be = INFINITY - 100;
-          result = search(board, d, a, be, true, true);
+          result = search(board, d, a, be, true, true, rootHash);
         }
 
         // Track scores for IIR
