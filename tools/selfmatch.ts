@@ -39,7 +39,7 @@ interface SideConfig {
   /** optional per-side depth override; default = --depth */
   depth?: number;
   /** optional eval knobs (single-variable experiments) */
-  eval?: { bishopPairBonus?: number };
+  eval?: { bishopPairBonus?: number; passedPawnEgMult?: number };
 }
 
 const CONFIGS: Record<string, SideConfig> = {
@@ -50,8 +50,10 @@ const CONFIGS: Record<string, SideConfig> = {
   /** depth-gap calibration references (sanity: d4 should beat d3 clearly) */
   'd3': { personality: 'NORMAL', depth: 3 },
   'd4': { personality: 'NORMAL', depth: 4 },
-  /** E1: bishop pair 30 → 50 (single variable) */
+  /** E1: bishop pair 30 → 50 — GEMESSEN n=30: Elo -47 [-185..+78] → verworfen */
   'bp50': { personality: 'NORMAL', eval: { bishopPairBonus: 50 } },
+  /** E2: passed-pawn EG multiplier 2.0 → 2.5 (single variable) */
+  'pp25': { personality: 'NORMAL', eval: { passedPawnEgMult: 2.5 } },
 };
 
 function getConfig(name: string): SideConfig {

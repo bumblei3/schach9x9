@@ -39,6 +39,8 @@ export interface EvalConfig {
   elo?: number;
   /** Single-variable experiment knob: bishop pair bonus in cp (default 30). */
   bishopPairBonus?: number;
+  /** Single-variable experiment knob: passed-pawn endgame multiplier (default 2.0). */
+  passedPawnEgMult?: number;
 }
 
 function getPersonalityWeights(personality: Personality): {
@@ -463,8 +465,9 @@ export function evaluate(
         if (!passed) break;
       }
       if (passed) {
+        const PP_EG_MULT = evalConfig.passedPawnEgMult ?? 2.0;
         mgScore += PASSED_PAWN_BONUS[row] * 0.8 * weights.pawnStructureWeight;
-        egScore += PASSED_PAWN_BONUS[row] * 2.0 * weights.pawnStructureWeight;
+        egScore += PASSED_PAWN_BONUS[row] * PP_EG_MULT * weights.pawnStructureWeight;
       }
     } else {
       let passed = true;
@@ -482,7 +485,7 @@ export function evaluate(
       }
       if (passed) {
         mgScore -= PASSED_PAWN_BONUS[8 - row] * 0.8 * weights.pawnStructureWeight;
-        egScore -= PASSED_PAWN_BONUS[8 - row] * 2.0 * weights.pawnStructureWeight;
+        egScore -= PASSED_PAWN_BONUS[8 - row] * (evalConfig.passedPawnEgMult ?? 2.0) * weights.pawnStructureWeight;
       }
     }
   }
