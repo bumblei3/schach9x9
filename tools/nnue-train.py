@@ -107,7 +107,11 @@ class MLP:
 
 
 def main():
-    args = dict(a.split("=", 1) for a in sys.argv[1:] if a.startswith("--"))
+    args = {}
+    for a in sys.argv[1:]:
+        if a.startswith("--") and "=" in a:
+            k, v = a.split("=", 1)
+            args[k.lstrip("-")] = v
     epochs = int(args.get("epochs", 40))
     data_path = args.get("data", "data/nnue_gen0_d3.jsonl")
 
