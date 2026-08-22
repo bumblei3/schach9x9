@@ -5,6 +5,7 @@
  * Supports personality-based weight adjustments.
  */
 
+import { readFileSync } from 'node:fs';
 import {
   SQUARE_COUNT,
   PIECE_NONE,
@@ -41,6 +42,10 @@ export interface EvalConfig {
   bishopPairBonus?: number;
   /** Single-variable experiment knob: passed-pawn endgame multiplier (default 2.0). */
   passedPawnEgMult?: number;
+  /** NNUE blend weight 0..1 (default 0 = pure PST). Gate before raising! */
+  nnueWeight?: number;
+  /** Path to exported NNUE weights JSON (loaded lazily on first eval). */
+  nnueWeightsPath?: string;
 }
 
 function getPersonalityWeights(personality: Personality): {
@@ -589,7 +594,27 @@ export function evaluate(
     egScore -= TEMPO_BONUS;
   }
 
-  return Math.round((mgScore * phase + egScore * (maxPhase - phase)) / maxPhase);
+  const pstScore = Math.round((mgScore * phase + egScore * (maxPhase - phase)) / maxPhase);
+
+  // --- NNUE blend (off by default; gated via selfmatch before enabling) ---
+  if (evalConfig.nnueWeight && evalConfig.nnueWeight > 0) {
+    // evaluate() is sync; weights must be preloaded via preloadNnueWeights().
+    if (!nnueState.weights) {
+      throw new Error('nnueWeight>0 but NNUE weights not loaded — call preloadNnueWeights(path) first');
+    }
+    const x = encodeBoard(b, c === COLOR_WHITE);
+    const nnueCp = probToCp(nnueEvalProb(x, nnueState.weights));
+    return Math.round((1 - evalConfig.nnueWeight) * pstScore + evalConfig.nnueWeight * nnueCp);
+  }
+
+  return pstScore;
+}
+
+// --- NNUE lazy state (kept here so evaluate() stays sync) ---
+import { loadNnueWeights, encodeBoard, nnueEvalProb, probToCp, type NnueWeights } from './ai/nnue.js';
+const nnueState: { weights: NnueWeights | null } = { weights: null };
+export function preloadNnueWeights(path: string): void {
+  nnueState.weights = loadNnueWeights(path);
 }
 
 // =====================================================================

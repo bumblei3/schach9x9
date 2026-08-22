@@ -42,6 +42,8 @@ interface SideConfig {
   eval?: { bishopPairBonus?: number; passedPawnEgMult?: number };
   /** optional search knobs (single-variable experiments) */
   search?: { lmrBaseDepth?: number; nullMoveR?: number; probcutReduction?: number };
+  /** optional NNUE blend (gate experiment) */
+  nnue?: { weight: number; weightsPath?: string };
 }
 
 const CONFIGS: Record<string, SideConfig> = {
@@ -60,6 +62,10 @@ const CONFIGS: Record<string, SideConfig> = {
   'lmr3': { personality: 'NORMAL', search: { lmrBaseDepth: 3 } },
   'lmr5': { personality: 'NORMAL', search: { lmrBaseDepth: 5 } },
   'nmr2': { personality: 'NORMAL', search: { nullMoveR: 2 } },
+  /** N1: NNUE blend gate — 30% nnue + 70% PST */
+  'nnue30': { personality: 'NORMAL', nnue: { weight: 0.3 } },
+  /** N2: NNUE blend gate — 50/50 */
+  'nnue50': { personality: 'NORMAL', nnue: { weight: 0.5 } },
 };
 
 function getConfig(name: string): SideConfig {
@@ -120,10 +126,12 @@ async function playGame(
   const whiteSearch = createJsSearch({
     personality: whiteCfg.personality as never,
     ...whiteCfg.eval,
+    ...(whiteCfg.nnue ? { nnueWeight: whiteCfg.nnue.weight, nnueWeightsPath: whiteCfg.nnue.weightsPath ?? 'data/nnue_weights.json' } : {}),
   }, whiteCfg.search);
   const blackSearch = createJsSearch({
     personality: blackCfg.personality as never,
     ...blackCfg.eval,
+    ...(blackCfg.nnue ? { nnueWeight: blackCfg.nnue.weight, nnueWeightsPath: blackCfg.nnue.weightsPath ?? 'data/nnue_weights.json' } : {}),
   }, blackCfg.search);
 
   while (plies < maxPlies) {
