@@ -183,7 +183,7 @@ const EVAL_VALUES: Record<number, number> = {
 // Only applied when depth >= PROBCUT_DEPTH and score is near beta.
 
 const PROBCUT_DEPTH = 5;
-const PROBCUT_REDUCTION = 3; // Default (winner at d5: Score 0.1625 vs 0.150 for PROBCUT_RED=2); frozen for v1.8.0
+let PROBCUT_REDUCTION = 3; // Default (winner at d5: Score 0.1625 vs 0.150 for PROBCUT_RED=2); frozen for v1.8.0; knob-able via createJsSearch
 const PROBCUT_BETA_MARGIN = 150; // Beta margin for probcut (beta - margin)
 
 function probcut(
@@ -342,7 +342,17 @@ interface JsSearchResult {
   depth: number;
 }
 
-export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' }) {
+export interface SearchKnobs {
+  /** LMR: minimum depth before late-move reductions apply (default 4). */
+  lmrBaseDepth?: number;
+  /** Null-move reduction R (default 1). */
+  nullMoveR?: number;
+  /** ProbCut reduction ply (default 3). */
+  probcutReduction?: number;
+}
+
+export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' }, knobs: SearchKnobs = {}) {
+  if (knobs.probcutReduction != null) PROBCUT_REDUCTION = knobs.probcutReduction;
   return {
     /**
      * @param rules Optional castling/EP state. When omitted, uses the current
@@ -367,13 +377,13 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       for (let i = 0; i <= maxDepth; i++) killers[i] = [null, null];
       const history = new Int32Array(81 * 81);
 
-      const NULL_MOVE_R = 1; // Null move reduction — test hypothesis: less null-move pruning at d5 (d5 tests)
+      const NULL_MOVE_R = knobs.nullMoveR ?? 1; // Null move reduction — test hypothesis: less null-move pruning at d5 (d5 tests)
       const FUTILITY_MARGIN = 200;
       const RAZOR_MARGIN = 400;
       const ASPIRATION_WINDOW = 50;
 
       // Late Move Reductions (LMR) constants
-      const LMR_BASE_DEPTH = 4; // Frozen for v1.8.0 (winner at d5: Score 0.1625 vs 0.138 baseline)
+      const LMR_BASE_DEPTH = knobs.lmrBaseDepth ?? 4; // Frozen for v1.8.0 (winner at d5: Score 0.1625 vs 0.138 baseline)
       const LMR_MOVE_COUNT = 3; // First N moves not reduced
       const LMR_MAX_REDUCTION = 3; // Max reduction
 

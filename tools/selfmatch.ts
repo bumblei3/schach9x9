@@ -40,6 +40,8 @@ interface SideConfig {
   depth?: number;
   /** optional eval knobs (single-variable experiments) */
   eval?: { bishopPairBonus?: number; passedPawnEgMult?: number };
+  /** optional search knobs (single-variable experiments) */
+  search?: { lmrBaseDepth?: number; nullMoveR?: number; probcutReduction?: number };
 }
 
 const CONFIGS: Record<string, SideConfig> = {
@@ -52,8 +54,12 @@ const CONFIGS: Record<string, SideConfig> = {
   'd4': { personality: 'NORMAL', depth: 4 },
   /** E1: bishop pair 30 → 50 — GEMESSEN n=30: Elo -47 [-185..+78] → verworfen */
   'bp50': { personality: 'NORMAL', eval: { bishopPairBonus: 50 } },
-  /** E2: passed-pawn EG multiplier 2.0 → 2.5 (single variable) */
+  /** E2: passed-pawn EG multiplier 2.0 → 2.5 — GEMESSEN n=30: Elo -58 [-200..+65] → verworfen */
   'pp25': { personality: 'NORMAL', eval: { passedPawnEgMult: 2.5 } },
+  // --- Such-Knobs (nativ re-kalibrieren; v1.8.0-Freeze war nur 8×8-SF-gemessen) ---
+  'lmr3': { personality: 'NORMAL', search: { lmrBaseDepth: 3 } },
+  'lmr5': { personality: 'NORMAL', search: { lmrBaseDepth: 5 } },
+  'nmr2': { personality: 'NORMAL', search: { nullMoveR: 2 } },
 };
 
 function getConfig(name: string): SideConfig {
@@ -114,11 +120,11 @@ async function playGame(
   const whiteSearch = createJsSearch({
     personality: whiteCfg.personality as never,
     ...whiteCfg.eval,
-  });
+  }, whiteCfg.search);
   const blackSearch = createJsSearch({
     personality: blackCfg.personality as never,
     ...blackCfg.eval,
-  });
+  }, blackCfg.search);
 
   while (plies < maxPlies) {
     const legal = getAllLegalMoves(board, turn);
