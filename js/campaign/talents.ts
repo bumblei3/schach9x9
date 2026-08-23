@@ -86,7 +86,69 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
   r: { unitType: 'r', talents: [] },
   q: { unitType: 'q', talents: [] },
   k: { unitType: 'k', talents: [] },
-  a: { unitType: 'a', talents: [] }, // Erzbischof
-  c: { unitType: 'c', talents: [] }, // Kanzler
-  e: { unitType: 'e', talents: [] }, // Engel
+  a: {
+    unitType: 'a',
+    talents: [
+      {
+        id: 'a_gabelmeister',
+        name: 'Gabelmeister',
+        description:
+          'Erzbischof-Schläge bringen Bonus-Gold beim Schlagen (+2 Gold pro Schlag).',
+        tier: 1,
+        reqLevel: 3,
+        cost: 100,
+        icon: '⚔️',
+        effectType: 'passive_gold',
+        effectValue: 2,
+      },
+    ],
+  }, // Erzbischof
+  c: {
+    unitType: 'c',
+    talents: [
+      {
+        id: 'c_xrayauge',
+        name: 'Röntgenblick',
+        description: 'Kanzler-Schläge geben +5 XP pro Schlag (schnellere Unit-Levels).',
+        tier: 1,
+        reqLevel: 3,
+        cost: 100,
+        icon: '👁️',
+        effectType: 'stat_boost',
+        effectValue: 5,
+      },
+    ],
+  }, // Kanzler
+  e: {
+    unitType: 'e',
+    talents: [
+      {
+        id: 'e_engelsfluegel',
+        name: 'Engelsflügel',
+        description: 'Engel-Schläge bringen Bonus-Gold beim Schlagen (+3 Gold pro Schlag).',
+        tier: 1,
+        reqLevel: 3,
+        cost: 125,
+        icon: '🪽',
+        effectType: 'passive_gold',
+        effectValue: 3,
+      },
+    ],
+  }, // Engel
+  j: {
+    unitType: 'j',
+    talents: [
+      {
+        id: 'j_spurwechsel',
+        name: 'Spurwechsel',
+        description: 'Nachtreiter-Schläge geben +5 XP pro Schlag.',
+        tier: 1,
+        reqLevel: 3,
+        cost: 100,
+        icon: '🐎',
+        effectType: 'stat_boost',
+        effectValue: 5,
+      },
+    ],
+  }, // Nachtreiter
 };

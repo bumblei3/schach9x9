@@ -143,6 +143,23 @@ export async function executeMove(
         notificationUI.show(`Plünderer: +${bonus} Gold gefunden!`, 'success', 'Talent');
       }
     }
+
+    // Fairy talents (M2.5): each fairy piece has one talent with a real effect.
+    if (game.campaignMode && piece.color === game.playerColor && targetPiece) {
+      const FAIRY_GOLD_TALENTS: Record<string, { id: string; gold: number }> = {
+        a: { id: 'a_gabelmeister', gold: 2 },
+        e: { id: 'e_engelsfluegel', gold: 3 },
+      };
+      const goldTalent = FAIRY_GOLD_TALENTS[piece.type];
+      if (goldTalent && campaignManager.isTalentUnlocked(goldTalent.id)) {
+        campaignManager.addGold(goldTalent.gold);
+        notificationUI.show(
+          `Talent: +${goldTalent.gold} Gold durch ${piece.type === 'a' ? 'Gabelmeister' : 'Engelsflügel'}!`,
+          'success',
+          'Talent'
+        );
+      }
+    }
   } else if (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant') {
     const capturerColor = piece.color;
     game.capturedPieces[capturerColor].push(moveRecord.specialMove!.capturedPawn as Piece);
@@ -160,6 +177,19 @@ export async function executeMove(
     // Talent: Veteran (Pawn) - +20% XP
     if (piece.type === 'p' && campaignManager.isTalentUnlocked('p_veteran')) {
       xpAmount += 2;
+    }
+
+    // Fairy talents (M2.5): chancellor & nightrider captures give +5 XP.
+    const FAIRY_XP_TALENTS: Record<string, string> = {
+      c: 'c_xrayauge',
+      j: 'j_spurwechsel',
+    };
+    if (
+      targetPiece &&
+      FAIRY_XP_TALENTS[piece.type] &&
+      campaignManager.isTalentUnlocked(FAIRY_XP_TALENTS[piece.type])
+    ) {
+      xpAmount += 5;
     }
 
     const oldLevel = campaignManager.getUnitXp(piece.type).level;

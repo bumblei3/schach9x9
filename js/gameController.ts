@@ -923,6 +923,15 @@ export class GameController {
       return;
     }
 
+    // Campaign mode: hints are a perk (taktik_genie), not free (M2.4).
+    if (this.game.campaignMode && !campaignManager.isPerkUnlocked('taktik_genie')) {
+      notificationUI.show(
+        'Tipps sind in der Kampagne gesperrt. Schalte den Perk „Taktik-Genie" frei!',
+        'warning'
+      );
+      return;
+    }
+
     // 1. Prioritize TutorController (New System with Overlay)
     if (this.game.tutorController) {
       notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
