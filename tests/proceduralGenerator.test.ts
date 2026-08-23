@@ -38,7 +38,7 @@ describe('ProceduralGenerator', () => {
 
     expect(puzzle).not.toBeNull();
     expect(puzzle.id).toMatch(/^proc-/);
-    expect(puzzle.difficulty).toBe('Easy');
+    expect(puzzle.difficulty).toBe('Einfach');
     expect(puzzle.solution).toHaveLength(1);
   });
 
