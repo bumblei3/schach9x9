@@ -84,10 +84,6 @@ test.describe('Accessibility Scans @a11y', () => {
         'page-has-heading-one',
         'scrollable-region-focusable',
         'landmark-no-duplicate-main',
-        'color-contrast',
-        'label',
-        'select-name',
-        'nested-interactive',
       ])
       .analyze();
 
