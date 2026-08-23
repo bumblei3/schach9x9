@@ -32,17 +32,13 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
       Content-Security-Policy (defense-in-depth, per trischach hardening).
       script-src:
         'self'        -> app modules (js/main.ts, scripts/debug.ts)
-        'unsafe-inline' -> the <script type="importmap"> block below is an
-                           inline script and cannot use a nonce on static
-                           GitHub Pages (no server-side header injection).
-        https://cdn.jsdelivr.net -> Three.js loaded via the import map.
-      This blocks eval(), data:/blob: script injection and any third-party
-      CDN other than jsDelivr. frame-ancestors is intentionally omitted: it
+      This blocks eval(), data:/blob: script injection and all third-party
+      script CDNs. Three.js r185 is bundled by Vite (self-hosted). frame-ancestors is intentionally omitted: it
       is ignored when delivered via a <meta> element (HTTP-header only).
       To drop 'unsafe-inline' later, self-host Three.js and remove the
       import map.
     -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'">
     <title>Schach 9x9</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="/schach9x9/icon-192.png">
@@ -56,15 +52,6 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
     <link rel="stylesheet" href="css/skins.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&amp;display=swap" rel="stylesheet">
 
-    <!-- Import Map for Three.js (using jsDelivr CDN for better reliability) -->
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
-          "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js"
-        }
-      }
-    </script>
   
 
   
@@ -573,7 +560,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
 
                   <div class="setting-row">
                     <label>Brett-Design</label>
-                    <select id="theme-select" class="menu-select">
+                    <select id="theme-select" class="menu-select" aria-label="Brett-Design">
                       <option value="classic">Klassisch</option>
                       <option value="blue">Blau</option>
                       <option value="green">Grün</option>
@@ -583,7 +570,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
                   <div class="setting-row">
                     <label>Schwierigkeit</label>
-                    <select id="difficulty-select" class="menu-select">
+                    <select id="difficulty-select" class="menu-select" aria-label="Schwierigkeit">
                       <option value="beginner">Anfänger</option>
                       <option value="easy">Einfach</option>
                       <option value="medium">Mittel</option>
@@ -605,10 +592,10 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <label>Sound</label>
                     <div class="volume-control">
                       <label class="toggle-switch">
-                        <input type="checkbox" id="sound-toggle" checked="">
+                        <input type="checkbox" id="sound-toggle" checked="" aria-label="Sound an/aus">
                         <span class="toggle-slider"></span>
                       </label>
-                      <input type="range" id="volume-slider" min="0" max="100" value="30" class="volume-slider">
+                      <input type="range" id="volume-slider" aria-label="Lautstärke" min="0" max="100" value="30" class="volume-slider">
                       <span id="volume-value">30%</span>
                     </div>
                   </div>
@@ -623,7 +610,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
 
                   <div class="setting-row">
                     <label>KI-Mentor (Warnstufe)</label>
-                    <select id="ki-mentor-level-select" class="menu-select">
+                    <select id="ki-mentor-level-select" class="menu-select" aria-label="KI-Mentor-Level">
                       <option value="OFF">Aus</option>
                       <option value="STANDARD" selected="">Standard (Nur Patzer)</option>
                       <option value="STRICT">Streng (Auch Fehler)</option>
@@ -636,7 +623,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
                   <div class="setting-row">
                     <label>KI-Persönlichkeit</label>
-                    <select id="ai-personality-select" class="menu-select">
+                    <select id="ai-personality-select" class="menu-select" aria-label="KI-Persönlichkeit">
                       <option value="balanced">⚖️ Ausgeglichen</option>
                       <option value="aggressive">⚔️ Aggressiv</option>
                       <option value="defensive">🛡️ Defensiv</option>
@@ -1054,7 +1041,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <h3>Darstellung</h3>
                     <div class="setting-row">
                       <label>Brett-Design</label>
-                      <select id="theme-select" class="menu-select">
+                      <select id="theme-select" class="menu-select" aria-label="Brett-Design">
                         <option value="classic">Klassisch</option>
                         <option value="blue">Blau</option>
                         <option value="green">Grün</option>
@@ -1064,7 +1051,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>Figuren-Skin</label>
-                      <select id="skin-selector-menu" class="menu-select" onchange="
+                      <select id="skin-selector-menu" aria-label="Skin" class="menu-select" onchange="
                           document.getElementById('skin-selector').value = this.value;
                           document
                             .getElementById('skin-selector')
@@ -1088,18 +1075,18 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                       <label>Sound</label>
                       <div class="volume-control">
                         <label class="toggle-switch">
-                          <input type="checkbox" id="sound-toggle" checked="">
+                          <input type="checkbox" id="sound-toggle" checked="" aria-label="Sound an/aus">
                           <span class="toggle-slider"></span>
                         </label>
                       </div>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>Lautstärke</label>
-                      <input type="range" id="volume-slider" min="0" max="100" value="30" class="volume-slider">
+                      <input type="range" id="volume-slider" aria-label="Lautstärke" min="0" max="100" value="30" class="volume-slider">
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>Schwierigkeit</label>
-                      <select id="difficulty-select" class="menu-select">
+                      <select id="difficulty-select" class="menu-select" aria-label="Schwierigkeit">
                         <option value="beginner">Anfänger</option>
                         <option value="easy">Einfach</option>
                         <option value="medium">Mittel</option>
@@ -1113,7 +1100,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <h3>KI &amp; Hilfe</h3>
                     <div class="setting-row">
                       <label>KI-Persönlichkeit</label>
-                      <select id="ai-personality-select" class="menu-select">
+                      <select id="ai-personality-select" class="menu-select" aria-label="KI-Persönlichkeit">
                         <option value="balanced">⚖️ Ausgeglichen</option>
                         <option value="aggressive">⚔️ Aggressiv</option>
                         <option value="defensive">🛡️ Defensiv</option>
@@ -1122,7 +1109,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>KI-Mentor</label>
-                      <select id="ki-mentor-level-select" class="menu-select">
+                      <select id="ki-mentor-level-select" class="menu-select" aria-label="KI-Mentor-Level">
                         <option value="OFF">Aus</option>
                         <option value="STANDARD" selected="">Standard (Nur Patzer)</option>
                         <option value="STRICT">Streng (Auch Fehler)</option>

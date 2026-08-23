@@ -57,16 +57,24 @@ describe('SoundManager — settings persistence', () => {
   });
 
   test('loadSettings reads saved enabled/volume', () => {
-    // The constructor clears persisted settings by design, so seed storage
-    // *after* construction, then invoke loadSettings explicitly.
+    // Settings persist across reloads (M4.3): a fresh instance picks up
+    // whatever a previous instance saved.
     const sm = new SoundManager();
+    sm.setEnabled(false);
+    sm.setVolume(70);
+    const reloaded = new SoundManager();
+    expect(reloaded.enabled).toBe(false);
+    expect(reloaded.volume).toBeCloseTo(0.7);
+  });
+
+  test('loadSettings reads explicitly seeded storage', () => {
     localStorage.setItem(
       'chess9x9-sound-settings',
-      JSON.stringify({ enabled: false, volume: 0.7 })
+      JSON.stringify({ enabled: true, volume: 0.4 })
     );
-    sm.loadSettings();
-    expect(sm.enabled).toBe(false);
-    expect(sm.volume).toBeCloseTo(0.7);
+    const sm = new SoundManager();
+    expect(sm.enabled).toBe(true);
+    expect(sm.volume).toBeCloseTo(0.4);
   });
 
   test('loadSettings falls back to defaults on missing entry', () => {

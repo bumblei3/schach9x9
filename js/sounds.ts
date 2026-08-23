@@ -5,8 +5,7 @@ class SoundManager {
   public volume: number = 0.3;
 
   constructor() {
-    // Ensure a clean state for each instance by removing any persisted settings
-    localStorage.removeItem('chess9x9-sound-settings');
+    // Settings persist across reloads: load from localStorage (M4.3).
     this.loadSettings();
   }
 

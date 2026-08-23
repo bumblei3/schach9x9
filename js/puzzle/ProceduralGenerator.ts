@@ -37,9 +37,9 @@ export class ProceduralGenerator {
       if (solution) {
         return {
           id: `proc-${Date.now()}-${i}`,
-          title: `Generated ${difficulty === 'easy' ? 'Mate in 1' : 'Mate in 2'}`,
-          description: `White to move. Find the checkmate in ${depth} move${depth > 1 ? 's' : ''}.`,
-          difficulty: difficulty === 'easy' ? 'Easy' : 'Medium',
+          title: `Generiert: ${difficulty === 'easy' ? 'Matt in 1' : 'Matt in 2'}`,
+          description: `Weiß am Zug. Finde das Matt in ${depth} ${depth > 1 ? 'Zügen' : 'Zug'}.`,
+          difficulty: difficulty === 'easy' ? 'Einfach' : 'Mittel',
           setupStr: PuzzleGenerator.boardToString(board, 'white'),
           solution: solution,
         };
