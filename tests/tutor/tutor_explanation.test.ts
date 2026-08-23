@@ -14,6 +14,7 @@ vi.mock('../../js/tutor/TacticsDetector.js', () => ({
     { piece: { type: 'n', color: 'white' }, pos: { r: 4, c: 4 }, warning: 'Springer hängt ungedeckt!' },
   ]),
   isTactical: vi.fn().mockReturnValue(false),
+  detectFairyPatterns: vi.fn().mockReturnValue([]),
   detectTacticalPatterns: vi.fn().mockReturnValue([
     {
       type: 'fork',

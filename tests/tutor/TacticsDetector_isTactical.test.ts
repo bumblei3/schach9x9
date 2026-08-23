@@ -103,6 +103,10 @@ describe('canPieceMove — direction contract (lock already-covered primitive)',
     expect(canPieceMove('n', 2, 1)).toBe(false);
     expect(canPieceMove('k', 1, 0)).toBe(false);
     expect(canPieceMove('p', 1, 0)).toBe(false);
-    expect(canPieceMove('e', 1, 0)).toBe(false);
+    // angel is a queen-ray slider since the fairy-pattern work (M3.1):
+    expect(canPieceMove('e', 1, 0)).toBe(true);
+    // nightrider slides along knight rays:
+    expect(canPieceMove('j', 2, 1)).toBe(true);
+    expect(canPieceMove('j', 1, 1)).toBe(false);
   });
 });

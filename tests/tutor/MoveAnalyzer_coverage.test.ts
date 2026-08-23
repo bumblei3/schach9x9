@@ -8,6 +8,7 @@ vi.mock('../../js/tutor/TacticsDetector.js', () => ({
   detectThreatsAfterMove: vi.fn().mockReturnValue([]),
   isTactical: vi.fn().mockReturnValue(false),
   detectTacticalPatterns: vi.fn().mockReturnValue([]),
+  detectFairyPatterns: vi.fn().mockReturnValue([]),
 }));
 
 vi.mock('../../js/aiEngine.js', () => ({

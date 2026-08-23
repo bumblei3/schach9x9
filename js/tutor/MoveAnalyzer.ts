@@ -1,7 +1,7 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import type { GameLike, Piece, Player } from '../types/core.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
-import { detectThreatsAfterMove, isTactical, detectTacticalPatterns } from './TacticsDetector.js';
+import { detectThreatsAfterMove, isTactical, detectTacticalPatterns, detectFairyPatterns } from './TacticsDetector.js';
 import type { Analyzer } from './TacticsDetector.js';
 import { evaluatePosition, getTopMoves } from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
@@ -398,6 +398,13 @@ export function analyzeMoveWithExplanation(
     if (pattern.question) questions.push(pattern.question);
   });
 
+  // Fairy tactics (M3.1/M3.2): named 9x9 patterns with proper piece names.
+  const fairyPatterns = detectFairyPatterns(game, analyzer, move);
+  fairyPatterns.forEach(fp => {
+    tacticalExplanations.unshift(fp.explanation); // fairy names first — they are the headline
+    questions.push(`Nutzt du die Stärke des ${fp.pieceName} voll aus?`);
+  });
+
   // Analyze strategic value (piece may already sit on `to` after the move)
   const strategic = analyzeStrategicValue(game, move);
   strategic.forEach(s => {
@@ -651,6 +658,7 @@ export function getPieceName(type: string): string {
     a: 'Erzbischof',
     c: 'Kanzler',
     e: 'Engel',
+    j: 'Nachtreiter',
   };
   return names[type] || type;
 }

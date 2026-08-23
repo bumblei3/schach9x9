@@ -289,7 +289,7 @@ export function detectSkewers(
   const skewers: Skewer[] = [];
   const piece = game.board[pos.r][pos.c];
 
-  if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
+  if (!piece || !['r', 'b', 'q', 'a', 'c', 'e'].includes(piece.type)) {
     return skewers; // Only sliding pieces can skewer
   }
 
@@ -507,7 +507,7 @@ export function detectPins(
   const pinned: PinnedPiece[] = [];
   const piece = game.board[pos.r][pos.c];
 
-  if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) {
+  if (!piece || !['r', 'b', 'q', 'a', 'c', 'e'].includes(piece.type)) {
     return pinned; // Only sliding pieces can pin
   }
 
@@ -571,7 +571,7 @@ export function detectDiscoveredAttacks(
     for (let c = 0; c < BOARD_SIZE; c++) {
       const piece = game.board[r][c];
       if (!piece || piece.color !== attackerColor) continue;
-      if (!['r', 'b', 'q', 'a', 'c'].includes(piece.type)) continue;
+      if (!['r', 'b', 'q', 'a', 'c', 'e'].includes(piece.type)) continue;
       if (r === from.r && c === from.c) continue; // Skip the moving piece
 
       // Check if 'from' is blocking this piece's attack
@@ -633,9 +633,15 @@ export function canPieceMove(type: string, dr: number, dc: number): boolean {
     // Bishop/Archbishop: diagonal
     return Math.abs(dr) === Math.abs(dc) && dr !== 0;
   }
-  if (type === 'q') {
-    // Queen: both orthogonal and diagonal rays
+  if (type === 'q' || type === 'e') {
+    // Queen/Angel: both orthogonal and diagonal rays
     return dr !== 0 || dc !== 0;
+  }
+  if (type === 'j') {
+    // Nightrider: slides along knight-ray directions (±1,±2 / ±2,±1)
+    const absDr = Math.abs(dr);
+    const absDc = Math.abs(dc);
+    return (absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2);
   }
   return false;
 }
@@ -948,7 +954,7 @@ export function detectBattery(
 ): Battery[] {
   const batteries: Battery[] = [];
   const piece = game.board[pos.r][pos.c];
-  if (!piece || !['r', 'b', 'q', 'a', 'c'].includes(piece.type)) return batteries;
+  if (!piece || !['r', 'b', 'q', 'a', 'c', 'e'].includes(piece.type)) return batteries;
 
   // Check all 8 directions for a friendly sliding piece
   // Orthogonal: R, Q, C
@@ -991,11 +997,112 @@ export function detectBattery(
     });
   };
 
-  const isOrthogonal = ['r', 'q', 'c'].includes(piece.type);
-  const isDiagonal = ['b', 'q', 'a'].includes(piece.type);
+  const isOrthogonal = ['r', 'q', 'c', 'e'].includes(piece.type);
+  const isDiagonal = ['b', 'q', 'a', 'e'].includes(piece.type);
 
-  if (isOrthogonal) checkDirs(ort, ['r', 'q', 'c']);
-  if (isDiagonal) checkDirs(diag, ['b', 'q', 'a']);
+  if (isOrthogonal) checkDirs(ort, ['r', 'q', 'c', 'e']);
+  if (isDiagonal) checkDirs(diag, ['b', 'q', 'a', 'e']);
 
   return batteries;
+}
+
+/** A named fairy-piece tactic (M3.1) */
+export interface FairyPattern {
+  /** e.g. 'archbishop_fork', 'chancellor_skewer', 'angel_battery', 'nightrider_fork' */
+  type: string;
+  pieceType: string;
+  pieceName: string;
+  explanation: string;
+  targets: Pos[];
+}
+
+const FAIRY_PIECE_NAMES: Record<string, string> = {
+  a: 'Erzbischof',
+  c: 'Kanzler',
+  e: 'Engel',
+  j: 'Nachtreiter',
+};
+
+/**
+ * Detects named fairy-piece tactics for a move (M3.1):
+ * - Erzbischof-Gabel: archbishop attacks 2+ valuable pieces
+ * - Kanzler-Spieß: chancellor skewer along a rook line
+ * - Engel-Batterie: angel aligned with a friendly slider
+ * - Nachtreiter-Gabel: nightrider attacks 2+ valuable pieces
+ * Complements the generic detectors by speaking the language of 9x9.
+ */
+export function detectFairyPatterns(
+  game: GameLike,
+  analyzer: Analyzer,
+  move: { from: Pos; to: Pos }
+): FairyPattern[] {
+  const patterns: FairyPattern[] = [];
+  if (!move || !move.from || !move.to) return patterns;
+  const from = move.from;
+  const to = move.to;
+  const piece = game.board[from.r][from.c];
+  if (!piece) return patterns;
+
+  const pieceType = piece.type;
+  const pieceName = FAIRY_PIECE_NAMES[pieceType];
+  if (!pieceName) return patterns; // not a fairy piece
+
+  // Simulate the move temporarily (same pattern as detectTacticalPatterns)
+  const capturedPiece = game.board[to.r][to.c];
+  game.board[to.r][to.c] = piece;
+  game.board[from.r][from.c] = null;
+
+  try {
+    // Fork detection via the existing threatened-pieces helper.
+    if (pieceType === 'a' || pieceType === 'j') {
+      const threatened = getThreatenedPieces(game, analyzer, to, piece.color);
+      const valuable = threatened.filter((t: { type: string }) => t.type !== 'p');
+      if (valuable.length >= 2) {
+        const names = valuable.map((t: { name: string }) => t.name).join(' und ');
+        patterns.push({
+          type: pieceType === 'a' ? 'archbishop_fork' : 'nightrider_fork',
+          pieceType,
+          pieceName,
+          explanation: `🍴 ${pieceName}-Gabel! ${pieceName} bedroht ${names} gleichzeitig.`,
+          targets: valuable.map((t: { pos: Pos }) => t.pos),
+        });
+      }
+    }
+
+    // Skewer detection along the chancellor's rook lines.
+    if (pieceType === 'c') {
+      const skewers = detectSkewers(game, analyzer, to, piece.color);
+      if (skewers.length > 0) {
+        const s = skewers[0];
+        patterns.push({
+          type: 'chancellor_skewer',
+          pieceType,
+          pieceName,
+          explanation: `🍢 Kanzler-Spieß! ${s.frontName} muss weichen und entblößt ${s.behindName}.`,
+          targets: [s.frontPos, s.behindPos],
+        });
+      }
+    }
+
+    // Battery detection with the angel as front piece.
+    if (pieceType === 'e') {
+      const batteries = detectBattery(game, analyzer, to, piece.color);
+      if (batteries.length > 0) {
+        const b = batteries[0];
+        patterns.push({
+          type: 'angel_battery',
+          pieceType,
+          pieceName,
+          explanation: `🔋 Engel-Batterie! ${b.frontName} und ${b.behindName} verstärken sich gegenseitig.`,
+          targets: [b.behindPos],
+        });
+      }
+    }
+  } finally {
+    // Restore board
+    game.board[from.r][from.c] = piece;
+    game.board[to.r][to.c] = capturedPiece;
+  }
+
+  return patterns;
 }
