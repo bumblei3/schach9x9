@@ -951,6 +951,33 @@ export class DOMHandler {
         showToast(msg, level !== 'OFF' ? 'success' : 'neutral');
       });
     }
+
+    // Auto-Hint after blunder (M3.3) — persisted, default off
+    const autoHintBoxes = document.querySelectorAll<HTMLInputElement>(
+      '#auto-hint-blunder'
+    );
+    if (autoHintBoxes.length > 0) {
+      const savedAutoHint = localStorage.getItem('auto_hint_blunder') === 'true';
+      const syncBoxes = (checked: boolean) => {
+        autoHintBoxes.forEach(box => {
+          box.checked = checked;
+        });
+      };
+      syncBoxes(savedAutoHint);
+      autoHintBoxes.forEach(box => {
+        box.addEventListener('change', () => {
+          const enabled = box.checked;
+          localStorage.setItem('auto_hint_blunder', String(enabled));
+          syncBoxes(enabled);
+          showToast(
+            enabled
+              ? 'Auto-Hinweis nach Patzer aktiviert'
+              : 'Auto-Hinweis nach Patzer deaktiviert',
+            enabled ? 'success' : 'neutral'
+          );
+        });
+      });
+    }
   }
 
   private toggleFullscreen(): void {
