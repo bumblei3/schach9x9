@@ -1,0 +1,24 @@
+=== schach9x9 self-match (native 9×9) ===
+white=nnue30(d3) black=baseline(d3) games=15 maxPlies=300
+Game 1/30 → second-named (checkmate) plies=112 46812ms
+Game 2/30 → second-named (checkmate) plies=119 132681ms
+Game 3/30 → draw (max-plies) plies=300 160107ms
+Game 4/30 → draw (max-plies) plies=300 277993ms
+Game 5/30 → second-named (checkmate) plies=86 61100ms
+Game 6/30 → second-named (checkmate) plies=115 126714ms
+Game 7/30 → second-named (checkmate) plies=18 19519ms
+Game 8/30 → second-named (checkmate) plies=53 65168ms
+Game 9/30 → draw (max-plies) plies=300 126460ms
+Game 10/30 → draw (max-plies) plies=300 193332ms
+Game 11/30 → second-named (checkmate) plies=78 39319ms
+Game 12/30 → second-named (checkmate) plies=169 220809ms
+Game 13/30 → draw (max-plies) plies=300 173084ms
+Game 14/30 → second-named (checkmate) plies=175 73077ms
+Game 15/30 → draw (max-plies) plies=300 48222ms
+Game 16/30 → draw (max-plies) plies=300 237409ms
+Game 17/30 → second-named (checkmate) plies=184 27819ms
+Game 18/30 → second-named (checkmate) plies=201 53510ms
+Game 19/30 → second-named (checkmate) plies=104 119031ms
+Game 20/30 → draw (max-plies) plies=300 67477ms
+Game 21/30 → second-named (checkmate) plies=42 99746ms
+Game 22/30 → draw (max-plies) plies=300 186580ms

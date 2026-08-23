@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-08-21 · Basis: `v1.7.0` + 15 Commits Engine-Experimente auf `main` · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-08-23 · Basis: `v1.8.0` + M1.1 gemergt (+230 Elo) + NNUE-Pipeline auf `main` · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -83,7 +83,7 @@ npm run match:stockfish -- --games=40 --depth=5 --sf-depth=8 --sf-elo=1400 --qui
 | `LMR_MAX_REDUCTION=2`        | −53 cp auf d4                                            |
 | `PROBCUT_REDUCTION=2`        | neutral/schlechter als 3                                 |
 | Opening-Book auf Engine-PV   | zerstört das Vielfalt-Buch (#146)                        |
-| NNUE                         | geparkt 2026-07-17; erst nach NPS-Sprung neu bewerten    |
+| NNUE                         | geparkt 2026-08-23; Gate negativ (−132 Elo vs PST)       |
 | Coverage-Ziel 85 % Branches  | diminishing returns bei 7000+ Branches                   |
 | TypeScript 7 jetzt           | typescript-eslint v8 blockiert                           |
 
@@ -113,19 +113,19 @@ Aufwand ist Kalenderzeit bei fokussierter Arbeit, nicht Story-Points. Akzeptanz 
 
 ---
 
-### M1 — Suche skaliert (der echte Elo-Hebel)
+### M1 — Suche skaliert (der echte Elo-Hebel) — ✅ 1.1 ERLEDIGT 2026-08-22
 
-**Ziel:** Tiefe 5 ist keine Lüge mehr. Mehr Knoten in derselben Wandzeit.
-
-**Dauer:** 1–2 Wochen.
+**Status:** M1.1 (inkrementeller Zobrist + Quiesce-Negamax-Fix) ist gemergt
+(commit f91e116). n40 vs SF-1400: **0.575 / Elo +52 → ~+230 gesamt**.
+MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt.
 
 | # | Arbeit | Warum | Akzeptanz |
 | - | ------ | ----- | --------- |
-| 1.1 | **Inkrementeller Zobrist-Hash** in `makeMove`/`undoMove` | Heute O(81) Hash pro Knoten — der größte verschenkte NPS | Unit-Tests: Hash nach make+undo == vorher; nach Zugfolge == Full-Recompute. Bench: `avgNps` ≥ 3× vs v1.8 |
+| ~~1.1~~ | ✅ Inkrementeller Zobrist-Hash **gemergt (+ Quiesce-Fix, +230)** | — | — |
 | 1.2 | Hash-Keys für Rochade/EP (8×8) | TT-Kollisionen bei RuleState | Kein illegal-ours-Anstieg auf Track B |
 | 1.3 | 64-bit Zobrist (BigInt oder zwei Int32) | 32-bit Hash + 1M TT = Kollisionen bei d5+ | Track A 9×9 unverändert oder besser |
 | 1.4 | Optional: Killer/History/Counter Move bleiben; **kein** neues Pruning | Pruning ist kalibriert | — |
-| 1.5 | Track B nach 1.1: **n=40, d5, gleiche Knobs** | Messung, kein Glauben | Ziel: Score ≥ **0.30** (≈ −150 Elo vs SF-1400) oder klarer NPS-Beweis + Score ≥ 0.22 |
+| 1.5 | Track B nach 1.1: **n=40, d5, gleiche Knobs** | Messung, kein Glauben | Teilweise erfüllt (n40-Merge-Messung liegt vor); Ziel 0.30 nicht erreicht |
 
 **Parken bis nach 1.1:** Bitboards, Magic Bitboards, SSE, WASM-Rewrite. Erst messen, ob inkrementeller Hash reicht.
 
@@ -190,7 +190,7 @@ Erst anfassen, wenn M1 das Score-Ziel (0.30) **oder** klaren NPS-Beweis geliefer
 | ----- | ---- | ----- |
 | SF Elo 1600 / höhere SF-Tiefe | Track B Score ≥ 0.30 bei Elo 1400 | Parken |
 | Syzygy/Endgame-TBs 8×8 | NPS-Sprung da, Endspiele verlieren Track-B-Partien | 9×9 hat keine TBs — nur 8×8-Kalibrierung |
-| NNUE | M1 fertig + Trainingspipeline skizziert | Bleibt geparkt |
+| NNUE | Pipeline steht, Netze bei ~72% Agreement | GEMESSEN 2026-08-23: Gate −132 Elo → geparkt |
 | TypeScript 7 | typescript-eslint ≥ v9 | Warten |
 | Desktop-Hülle (Tauri) | M4 a11y + PWA stabil | Unnötig für Web-first |
 | GIF/PGN-Replay-Export | M3 Coach steht | Nice-to-have |
@@ -215,9 +215,9 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
 
 Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand entscheidet:
 
-1. **Zeitbudget KI:** Default **8 s** (H3-Stand). 10 s nur mit n=40-Gewinn und bewusstem UI-OK.
-2. **Nach v1.8 zuerst M1 oder M2?** Default **M1 zuerst** (ein Hebel, große Elo-Chance), M2 parallel sobald Freeze getaggt ist.
-3. **Ist 8×8-Elo die Nordstern-Metrik?** Ja als *Regression-Gate*. Spielerwert kommt aus M2/M3. Ein −269-Engine-Sprung auf −150 hilft nur, wenn der Gegner auf 9×9 auch spürbar besser spielt (Track A).
+1. **Zeitbudget KI:** **8 s gemessen bestätigt** (10s: −44) — abgehakt.
+2. ~~**Nach v1.8 zuerst M1 oder M2?**~~ M1.1 ist gemergt (+230). Nächster Hebel: NNUE-Blend-Gate.
+3. **Ist 8×8-Elo die Nordstern-Metrik?** Ja als *Regression-Gate*. Spielerwert kommt aus M2/M3.
 
 ---
 
@@ -226,8 +226,9 @@ Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand e
 | Version | Inhalt |
 | ------- | ------ |
 | **v1.7.0** | Eval-Patch, Replay, Share-Link, 8×8-Regeln — **released** |
-| **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline |
-| **v1.9.0** | M1: inkrementeller Hash, messbarer NPS/Elo |
+| **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline — **released/getaggt** |
+| **main (post-v1.8.0)** | M1.1 inkrementeller Hash + Quiesce-Fix (+230 Elo), NNUE-Pipeline — noch nicht als Release getaggt |
+| **v1.9.0** | Kandidat: Tag des aktuellen main-Stands (M1.1 + ggf. NNUE-Gate-Ergebnis) |
 | **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Coach — das eigentliche 9×9-Spiel |
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.

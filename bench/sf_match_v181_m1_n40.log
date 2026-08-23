@@ -1,0 +1,4 @@
+=== schach9x9 absolute strength vs Stockfish (8×8) ===
+games=40 ourDepth=5 sfDepth=8 sfElo=1400 engine=lite-single maxPlies=200
+rules: full standard (castling + EP + auto-queen promo)
+Game 1/40 — we play white...

@@ -57,7 +57,7 @@ def load(path):
 
 
 class MLP:
-    def __init__(self, sizes=(PLANES * SQ, 256, 32, 1)):
+    def __init__(self, sizes=(PLANES * SQ, 256, 256, 32, 1)):
         self.w, self.b = [], []
         for i in range(len(sizes) - 1):
             fan_in = sizes[i]
