@@ -5,7 +5,6 @@
  * Supports personality-based weight adjustments.
  */
 
-import { readFileSync } from 'node:fs';
 import {
   SQUARE_COUNT,
   PIECE_NONE,
