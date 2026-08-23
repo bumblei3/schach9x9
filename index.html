@@ -12,19 +12,15 @@
       Content-Security-Policy (defense-in-depth, per trischach hardening).
       script-src:
         'self'        -> app modules (js/main.ts, scripts/debug.ts)
-        'unsafe-inline' -> the <script type="importmap"> block below is an
-                           inline script and cannot use a nonce on static
-                           GitHub Pages (no server-side header injection).
-        https://cdn.jsdelivr.net -> Three.js loaded via the import map.
-      This blocks eval(), data:/blob: script injection and any third-party
-      CDN other than jsDelivr. frame-ancestors is intentionally omitted: it
+      This blocks eval(), data:/blob: script injection and all third-party
+      script CDNs. Three.js r185 is bundled by Vite (self-hosted). frame-ancestors is intentionally omitted: it
       is ignored when delivered via a <meta> element (HTTP-header only).
       To drop 'unsafe-inline' later, self-host Three.js and remove the
       import map.
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'"
     />
     <title>Schach 9x9</title>
     <link rel="manifest" href="manifest.json" />
@@ -42,15 +38,6 @@
       rel="stylesheet"
     />
 
-    <!-- Import Map for Three.js (using jsDelivr CDN for better reliability) -->
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
-          "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js"
-        }
-      }
-    </script>
   </head>
 
   <body>
