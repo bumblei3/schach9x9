@@ -16,7 +16,8 @@ import type { Square, Piece } from '../../types/game.js';
 export class PieceManager3D {
   public sceneManager: SceneManager3D;
   public pieces: Record<string, THREE.Group>;
-  public highlights: THREE.Mesh[];
+  public highlights: THREE.Mesh[] = [];
+  public lastMoveHighlights: THREE.Mesh[] = [];
   public battleAnimator: BattleAnimator | null;
   public animating: boolean;
   public currentSkin: string;
@@ -63,6 +64,44 @@ export class PieceManager3D {
       `[PieceManager3D] Created ${count} pieces in ${(performance.now() - start).toFixed(2)}ms`
     );
     this.updateSetupHighlights(game);
+    this.highlightLastMove(game);
+  }
+
+  /**
+   * Show the last move as a two-square highlight (from + to) so the player
+   * can follow the game without watching every animation (M4.4).
+   */
+  highlightLastMove(game: Game): void {
+    if (!this.sceneManager.scene) return;
+
+    // Remove previous last-move markers
+    this.lastMoveHighlights.forEach(h => {
+      if (this.sceneManager.scene) this.sceneManager.scene.remove(h);
+    });
+    this.lastMoveHighlights = [];
+
+    const history = game.moveHistory;
+    if (!history || history.length === 0) return;
+    const last = history[history.length - 1];
+    if (!last?.from || !last?.to) return;
+
+    const geometry = new THREE.PlaneGeometry(0.9, 0.9);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xfacc15, // yellow/gold — distinct from green move hints
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.35,
+    });
+
+    for (const sq of [last.from, last.to]) {
+      const marker = new THREE.Mesh(geometry, material);
+      const pos = this.sceneManager.boardToWorld(sq.r, sq.c);
+      marker.position.set(pos.x, 0.02, pos.z);
+      marker.rotation.x = -Math.PI / 2;
+      marker.userData = { type: 'last-move', row: sq.r, col: sq.c };
+      this.sceneManager.scene.add(marker);
+      this.lastMoveHighlights.push(marker);
+    }
   }
 
   updateSetupHighlights(game: Game): void {

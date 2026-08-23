@@ -190,7 +190,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Aktuell: v1.9.0** — M1.1 inkrementeller Zobrist + Quiesce-Fix (**+230 Elo**, Track B n=40: 0.575 / +52 vs SF-1400). NNUE-Track nach negativem Gate (−132 Elo, n=80) geparkt. Als Nächstes: M2 Kampagne Akt II / Fairy-Puzzles, dann M3 Coach.
+**Aktuell: v2.0.0** — M2 komplett (Kampagne Akt II Kap. 7–12, Fairy-Puzzles, Perks, Feen-Talente) + M3 Coach-Kern (Feenmuster-Detektion, Tutor spricht 9×9). NNUE-Track nach negativem Gate (−132 Elo, n=80) geparkt. Offen: M3-Rest (Auto-Hint, Lehrbuch).
 
 **Bereits released (in v1.1.0–v1.3.0):**
 

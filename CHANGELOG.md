@@ -3,6 +3,44 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [2.0.0] – 2026-08-23
+
+Changes since `v1.9.0`. Der Meilenstein-Release: **M2 9×9-Identität komplett +
+M3 Coach-Kern** — laut Roadmap „das eigentliche 9×9-Spiel".
+
+### Kampagne (M2.1)
+
+- **Akt II — Feenfiguren-Kapitel 7–12**: Erzbischof-Gabel, Kanzler-Spieß,
+  Engel vs Dame, Nachtreiter-Linien, Feenrat (alle 4 Figuren), Imperator-Finale
+  (Budget-Setup). Zweig startet bei Kapitel 6, parallel zu den Endspielen.
+
+### Taktik (M2.2)
+
+- **8 handgemachte Fairy-Puzzles** (3× Erzbischof, 3× Engel, 2× Kanzlerin),
+  jede Lösung engine-verifiziert Matt in 1; Test-Suite `fairyPuzzles.test.ts`.
+
+### Fortschritt (M2.4/M2.5)
+
+- **Perk taktik_genie wirksam**: Tipps in Kampagnen-Missionen nur mit gekauftem
+  Perk (alle 3 Perks kaufbar + nachweisbar).
+- **Ein Talent pro Feenfigur** mit echtem Effekt: Gabelmeister (+2 Gold),
+  Röntgenblick (+5 XP), Engelsflügel (+3 Gold), Spurwechsel (+5 XP).
+
+### Coach (M3.1/M3.2)
+
+- **Feenmuster-Detektion**: `detectFairyPatterns` erkennt und benennt
+  Erzbischof-Gabel, Kanzler-Spieß, Engel-Batterie und Nachtreiter-Gabel.
+- Engel in allen Slider-Detektoren (Pin/Skewer/Battery/Discovered);
+  Nightrider-Bewegungsgeometrie modelliert.
+- Tutor spricht Figurennamen (inkl. Nachtreiter); Feenmuster als Headline im
+  Move-Feedback.
+
+### 3D / Polish (M4.4)
+
+- **Letzter Zug sichtbar** im 3D-Board: gelbes Zwei-Felder-Highlight
+  (from + to) nach jedem Zug. Capture-Juice (BattleAnimator + Screen-Shake)
+  war bereits vorhanden.
+
 ## [1.9.0] – 2026-08-23
 
 Changes since `v1.8.0`.
