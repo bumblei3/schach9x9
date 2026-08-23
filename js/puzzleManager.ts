@@ -101,6 +101,163 @@ export class PuzzleManager {
           { from: { r: 3, c: 1 }, to: { r: 0, c: 1 } }, // White Rook 2 (Mate)
         ],
       },
+      // =====================================================================
+      // Feenfiguren-Taktik (M2.2) — jede Lösung ist engine-verifiziert Matt
+      // in 1 (PuzzleGenerator.findMateSequence).
+      // =====================================================================
+      {
+        id: 'fairy-archbishop-corner',
+        title: 'Feenpuzzle 1: Erzbischof am Rand',
+        description:
+          'Der Erzbischof greift diagonal und per Springersprung an. Setze matt!',
+        difficulty: 'Mittel',
+        setupStr:
+          'bk....wa..........' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          'wk................' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 0, c: 3 }, to: { r: 2, c: 2 } }],
+      },
+      {
+        id: 'fairy-archbishop-center',
+        title: 'Feenpuzzle 2: Der lange Arm des Erzbischofs',
+        description: 'Der Erzbischof braucht nur einen Zug — findest du ihn?',
+        difficulty: 'Schwer',
+        setupStr:
+          'bk................' +
+          '..................' +
+          '..............wr..' +
+          '..................' +
+          '........wa........' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '................wk' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 4, c: 4 }, to: { r: 2, c: 2 } }],
+      },
+      {
+        id: 'fairy-archbishop-end',
+        title: 'Feenpuzzle 3: Spieß von hinten',
+        description: 'Nutze die doppelte Natur des Erzbischofs für das Matt.',
+        difficulty: 'Schwer',
+        setupStr:
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '........wa........' +
+          '..................' +
+          '..wr..............' +
+          '..................' +
+          'wk..............bk' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 4, c: 4 }, to: { r: 6, c: 6 } }],
+      },
+      {
+        id: 'fairy-angel-basic',
+        title: 'Feenpuzzle 4: Der Engel greift an',
+        description: 'Königin plus Springer: Der Engel mattiert in einem Zug.',
+        difficulty: 'Mittel',
+        setupStr:
+          'bk....we..........' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          'wk................' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 0, c: 3 }, to: { r: 2, c: 2 } }],
+      },
+      {
+        id: 'fairy-angel-mirror',
+        title: 'Feenpuzzle 5: Engel von der anderen Seite',
+        description: 'Diesmal von rechts — wo landet der Mattzug?',
+        difficulty: 'Mittel',
+        setupStr:
+          '..........we....bk' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '................wk' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 0, c: 5 }, to: { r: 2, c: 6 } }],
+      },
+      {
+        id: 'fairy-angel-shield',
+        title: 'Feenpuzzle 6: Bauernschild durchbrechen',
+        description: 'Ein Bauer schützt den König — der Engel kümmert sich drum.',
+        difficulty: 'Schwer',
+        setupStr:
+          'wk................' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '........we........' +
+          '..................' +
+          '................wr' +
+          '..............bp..' +
+          '................bk' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 4, c: 4 }, to: { r: 3, c: 2 } }],
+      },
+      {
+        id: 'fairy-chancellor-rookline',
+        title: 'Feenpuzzle 7: Kanzlerin auf der Linie',
+        description: 'Turm-Linie + Springer-Sprung: Die Kanzlerin setzt matt.',
+        difficulty: 'Mittel',
+        setupStr:
+          'bk................' +
+          '......wr..........' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '..........wc......' +
+          '..................' +
+          '..................' +
+          '................wk' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 5, c: 5 }, to: { r: 0, c: 5 } }],
+      },
+      {
+        id: 'fairy-chancellor-mirror',
+        title: 'Feenpuzzle 8: Kanzlerin spiegelt',
+        description: 'Gleiche Idee, gespiegeltes Brett — sitzt das Matt?',
+        difficulty: 'Mittel',
+        setupStr:
+          '................bk' +
+          '..........wr......' +
+          '..................' +
+          '..................' +
+          '..................' +
+          '......wc..........' +
+          '..................' +
+          '..................' +
+          'wk................' +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 5, c: 3 }, to: { r: 0, c: 3 } }],
+      },
     ];
   }
 
