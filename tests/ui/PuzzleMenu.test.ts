@@ -11,6 +11,24 @@ vi.mock('../../js/puzzleManager.js', () => ({
       { id: 'p2', title: 'Puzzle 2', difficulty: 'Mittel', description: 'Test 2' },
     ]),
     isSolved: vi.fn().mockReturnValue(false),
+    getDifficulties: vi.fn().mockReturnValue(['Einfach', 'Mittel']),
+    getFilteredPuzzles: vi.fn().mockImplementation(function (
+      this: unknown,
+      difficulty?: string,
+      fairy?: boolean
+    ) {
+      const all = [
+        { id: 'p1', title: 'Puzzle 1', difficulty: 'Einfach', description: 'Test 1' },
+        { id: 'p2', title: 'Puzzle 2', difficulty: 'Mittel', description: 'Test 2' },
+      ];
+      return all
+        .map((puzzle, index) => ({ index, puzzle }))
+        .filter(
+          ({ puzzle }) =>
+            (difficulty === undefined || puzzle.difficulty === difficulty) &&
+            (fairy === undefined || puzzle.id.startsWith('fairy-') === fairy)
+        );
+    }),
   },
 }));
 

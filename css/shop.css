@@ -355,6 +355,54 @@
   }
 }
 
+/* --- Puzzle Filter Bar --- */
+.puzzle-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.puzzle-filter-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.puzzle-filter-chip:hover {
+  border-color: var(--accent-primary);
+}
+
+.puzzle-filter-chip.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.puzzle-filter-cat {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.puzzle-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted, #94a3b8);
+  padding: 2rem 0;
+}
+
 /* --- Puzzle Menu (Selection) --- */
 #puzzle-menu-overlay {
   z-index: 2000;

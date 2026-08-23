@@ -381,6 +381,35 @@ export class PuzzleManager {
     return this.puzzles;
   }
 
+  /**
+   * Filter puzzles by difficulty and/or fairy-piece category.
+   * `fairy: true` → only fairy puzzles (id starts with 'fairy-');
+   * `fairy: false` → only classic puzzles; undefined → both.
+   * Returns the ORIGINAL indices alongside each puzzle so callers can load
+   * the right entry via `loadPuzzle(index)`.
+   */
+  public getFilteredPuzzles(
+    difficulty?: string,
+    fairy?: boolean
+  ): Array<{ index: number; puzzle: Puzzle }> {
+    const result: Array<{ index: number; puzzle: Puzzle }> = [];
+    this.puzzles.forEach((puzzle, index) => {
+      if (difficulty !== undefined && puzzle.difficulty !== difficulty) return;
+      if (fairy !== undefined && (puzzle.id.startsWith('fairy-') !== fairy)) return;
+      result.push({ index, puzzle });
+    });
+    return result;
+  }
+
+  /** Distinct difficulty levels in embedded order of first appearance. */
+  public getDifficulties(): string[] {
+    const seen: string[] = [];
+    for (const p of this.puzzles) {
+      if (!seen.includes(p.difficulty)) seen.push(p.difficulty);
+    }
+    return seen;
+  }
+
   public isSolved(id: string): boolean {
     try {
       const solved = JSON.parse(localStorage.getItem('schach_solved_puzzles') || '[]');
