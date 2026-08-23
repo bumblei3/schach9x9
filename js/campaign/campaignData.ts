@@ -1,6 +1,6 @@
 import { Level, Perk } from './types.js';
 
-export const CAMPAIGN_LEVELS: Level[] = [
+const CAMPAIGN_LEVELS_BASE: Level[] = [
   {
     id: 'peasant_revolt',
     title: 'Kapitel 1: Der Aufstand',
@@ -128,7 +128,7 @@ export const CAMPAIGN_LEVELS: Level[] = [
       type: 'checkmate',
       drawCountsAsWin: true,
     },
-    unlocks: ['endgame_rook'],
+    unlocks: ['endgame_rook', 'archbishop_gabel'],
     goals: {
       2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
       3: { type: 'promotion', value: 1, description: 'Befördere einen Bauern zum Kanzler' },
@@ -243,6 +243,152 @@ export const CAMPAIGN_LEVELS: Level[] = [
     },
     goldReward: 50,
   },
+];
+
+// ============================================================================
+// Akt II — Feenfiguren-Kampagne (M2.1): jede Mission stellt eine Feenfigur
+// ins Zentrum. Zweig startet nach final_battle, parallel zu den Endspielen.
+// ============================================================================
+
+const CAMPAIGN_LEVELS_AKT2: Level[] = [
+  {
+    id: 'archbishop_gabel',
+    title: 'Kapitel 7: Die Gabel des Erzbischofs',
+    description:
+      'Der Erzbischof vereint Läufer und Springer in einer Figur. Nutze seine Reichweite, um zwei Ziele gleichzeitig anzugreifen!',
+    opponentName: 'Erzbischof Wolfram',
+    opponentPersonality: 'balanced',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/pp2pppp1/9/9/9/9/9/PPPPPPPPP/3A1K3 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['chancellor_xray'],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 60,
+  },
+  {
+    id: 'chancellor_xray',
+    title: 'Kapitel 8: Der Stachel der Kanzlerin',
+    description:
+      'Die Kanzlerin kombiniert Turm und Springer. Ihre Linien sehen durch — Spieße und X-Ray-Angriffe sind ihre Waffe.',
+    opponentName: 'Kanzlerin Adelheid',
+    opponentPersonality: 'positional',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/9/ppppppppp/9/9/9/9/PPPPPPPPP/3C1K3 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['angel_vs_queen'],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 70,
+  },
+  {
+    id: 'angel_vs_queen',
+    title: 'Kapitel 9: Der Engel und die Königin',
+    description:
+      'Dein Engel ist der Königin ebenbürtig — mit einem extra Springersprung. Zeige, dass die Feenfigur die klassische Dame schlägt!',
+    opponentName: 'Königin Isolde',
+    opponentPersonality: 'expert',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '3q1k3/ppppppppp/9/9/9/9/9/PPPPPPPPP/3E1K3 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['nightrider_lines'],
+    goals: {
+      2: { type: 'moves', value: 35, description: 'Sieg in unter 35 Zügen' },
+      3: { type: 'material', value: 3, description: 'Gewinne mit +3 Materialvorteil' },
+    },
+    goldReward: 90,
+  },
+  {
+    id: 'nightrider_lines',
+    title: 'Kapitel 10: Der Nachtreiter-Sturm',
+    description:
+      'Nachtreiter reiten in Springer-Sprüngen über das ganze Brett. Kontrolliere die Linien, bevor sie dich erreichen!',
+    opponentName: 'Reitermeister Falk',
+    opponentPersonality: 'aggressive',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/9/pjppp2pp/9/9/9/9/PPPPPPPPP/2J1K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['fairy_battle'],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 80,
+  },
+  {
+    id: 'fairy_battle',
+    title: 'Kapitel 11: Der Rat der Feen',
+    description:
+      'Alle vier Feenfiguren auf einmal! Koordiniere Erzbischof, Kanzlerin, Engel und Nachtreiter gegen die Elite des Imperators.',
+    opponentName: 'Feenrat Vex',
+    opponentPersonality: 'balanced',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: 'rnbkcbnrj/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBKCEARJ w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['boss_emperor_return'],
+    goals: {
+      2: { type: 'moves', value: 40, description: 'Sieg in unter 40 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
+    },
+    goldReward: 120,
+  },
+  {
+    id: 'boss_emperor_return',
+    title: 'Kapitel 12: Die Rückkehr des Imperators',
+    description:
+      'Der Imperator ist zurück — mit einer Feenarmee. Der finale Kampf um das Schicksal des 9x9-Reiches!',
+    opponentName: 'Imperator Maximus',
+    opponentPersonality: 'expert',
+    difficulty: 'expert',
+    setupType: 'budget',
+    playerBudget: 60,
+    playerColor: 'white',
+    fen: 'rnbakcber/ppppppppp/9/9/9/9/9/9/9 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 35, description: 'Sieg in unter 35 Zügen' },
+      3: { type: 'promotion', value: 1, description: 'Befördere einen Bauern zum Erzbischof' },
+    },
+    goldReward: 200,
+  },
+];
+
+export const CAMPAIGN_LEVELS: Level[] = [
+  ...CAMPAIGN_LEVELS_BASE,
+  ...CAMPAIGN_LEVELS_AKT2,
 ];
 
 export const CAMPAIGN_PERKS: Perk[] = [
