@@ -3,6 +3,41 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [1.9.0] – 2026-08-23
+
+Changes since `v1.8.0`.
+
+### Engine
+
+- **M1.1: Inkrementeller Zobrist-Hash + Quiesce-Negamax-Fix** (Fenster +
+  Perspektive gekoppelt). Track B n=40 vs SF-1400 (d5 vs SF d8): 0.575 /
+  Elo +52 → **~+230 Elo gegenüber der v1.8.0-Baseline**. (`f91e116`)
+- NMP-Symmetrie + Maximizing-Handoff im rekursiven Suchpfad gefixt. (`5c07f0a`)
+
+### Added
+
+- **NNUE-Pipeline** (Datagen-Tool, NumPy-Trainer, JS-Inference, Eval-Blend-Hook
+  default-off, Selfmatch-Wiring). (`9526e9e`…`e5b4e81`)
+- **selfmatch.ts:** nativer 9×9-Selbstspiel-Match-Runner mit Elo + binomialem
+  95%-CI — kalibriert d4-vs-d3 n=30: +280 Elo. (`7e9133a`)
+- Eval-Knobs als `EvalConfig`-Optionen: bishopPairBonus, passedPawnEgMult;
+  SearchKnobs (lmrBaseDepth, nullMoveR, probcutReduction). Defaults unverändert.
+- NNUE v2-Netz (2×256 hidden, 39.5k Samples): 72.8% Agreement.
+
+### Measured / Negative Results
+
+- E1 bishopPairBonus 50: −47 [−185..+78] → keep 30. E2 passedPawnEgMult 2.5:
+  −58 [−200..+65] → keep 2.0. S1 lmrBaseDepth 3: −280 → keep 4. S2 lmr5,
+  S3 nmr2: neutral. MAX_SEARCH_TIME 10s: −44 → keep 8s. Alle nativ selfmatch
+  n=30/40; Logs unter `bench/`.
+- **NNUE-Gate NEGATIV:** blend w=0.3 n=80 d3 → −132 Elo [−223..−55] vs PST.
+  Blend bleibt default-off, Track geparkt. (`473765c`)
+
+### Fixed
+
+- Datagen argv-Parsing-Bug (`--data=x` wurde nie erkannt). (`0bc36a2`)
+- Lint: ungenutzter `readFileSync`-Import in evaluate.ts (CI-Gate). (`568f253`)
+
 ## [1.7.0] – 2026-08-20
 
 Changes since `v1.6.2`.

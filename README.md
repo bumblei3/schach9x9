@@ -190,7 +190,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Als Nächstes:** M0 Engine Freeze → **v1.8.0** (`LMR_BASE_DEPTH=4` + `NULL_MOVE_R=1`, Track B ≈ −269 vs SF-1400). Danach M1 inkrementeller Zobrist (Suche skaliert nicht: avgMaxDepth 4.8 bei 8 s). Parallel: Kampagne Akt II / Fairy-Puzzles (M2).
+**Aktuell: v1.9.0** — M1.1 inkrementeller Zobrist + Quiesce-Fix (**+230 Elo**, Track B n=40: 0.575 / +52 vs SF-1400). NNUE-Track nach negativem Gate (−132 Elo, n=80) geparkt. Als Nächstes: M2 Kampagne Akt II / Fairy-Puzzles, dann M3 Coach.
 
 **Bereits released (in v1.1.0–v1.3.0):**
 
