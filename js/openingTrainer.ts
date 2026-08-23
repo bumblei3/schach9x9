@@ -4,6 +4,7 @@
  */
 
 import { OpeningBook } from './ai/OpeningBook.js';
+import { TEXTBOOK_LINES } from './ai/textbook.js';
 import type { Square, Piece } from './gameEngine.js';
 
 export interface TrainerProgress {
@@ -115,6 +116,20 @@ export class OpeningTrainerManager {
     if (positions.length === 0) return null;
     const index = Math.floor(Math.random() * positions.length);
     return positions[index];
+  }
+
+  /**
+   * Lehrbuch-Modus (M3.4): handkuratierte Linien statt Buch-Gewichtungen.
+   * Liefert pro Linie den ersten Zug als Trainingsaufgabe; der Hash ist die
+   * stabile Line-ID, damit der Fortschritt im bestehenden solvedHashes-Format
+   * persistiert.
+   */
+  listTextbookPositions(): TrainerPosition[] {
+    return TEXTBOOK_LINES.map(line => ({
+      hash: `textbook:${line.id}:0`,
+      expectedMove: { from: line.moves[0].from, to: line.moves[0].to },
+      seenCount: line.moves.length,
+    }));
   }
 
   submitMove(pos: TrainerPosition, move: { from: Square; to: Square }): MoveResult {

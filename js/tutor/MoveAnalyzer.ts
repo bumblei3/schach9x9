@@ -860,6 +860,19 @@ export async function checkBlunder(
     tutorController.showBlunderWarning(analysis, () => {});
   }
 
+  // Auto-hint after a blunder (M3.3): proactive tutor tip with the better
+  // move — opt-in via settings, default off.
+  if (
+    analysis.category === 'blunder' &&
+    typeof localStorage !== 'undefined' &&
+    localStorage.getItem('auto_hint_blunder') === 'true'
+  ) {
+    const betterText = analysis.betterMove
+      ? `Besser wäre ${getMoveNotation(game, analysis.betterMove)}.`
+      : 'Schau dir die Stellung noch einmal an.';
+    showToast(`💡 Auto-Hinweis: ${analysis.qualityLabel} — ${betterText}`, 'warning');
+  }
+
   game.lastEval = currentEval;
 }
 
