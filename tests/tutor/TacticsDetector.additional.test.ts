@@ -533,9 +533,9 @@ describe('TacticsDetector - Additional Coverage', () => {
       expect(TacticsDetector.canPieceMove('q', 2, 3)).toBe(true);
     });
 
-    test('should validate angel (not directly in canPieceMove)', () => {
-      expect(TacticsDetector.canPieceMove('e', 1, 0)).toBe(false);
-      expect(TacticsDetector.canPieceMove('e', 1, 1)).toBe(false);
+    test('angel is a slider (queen rays) since fairy-pattern work (M3.1)', () => {
+      expect(TacticsDetector.canPieceMove('e', 1, 0)).toBe(true);
+      expect(TacticsDetector.canPieceMove('e', 1, 1)).toBe(true);
     });
   });
 

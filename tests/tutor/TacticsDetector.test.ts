@@ -76,7 +76,8 @@ describe('canPieceMove', () => {
     expect(td.canPieceMove('n', 2, 1)).toBe(false); // knight
     expect(td.canPieceMove('k', 1, 0)).toBe(false); // king
     expect(td.canPieceMove('p', 1, 0)).toBe(false); // pawn
-    expect(td.canPieceMove('e', 1, 0)).toBe(false); // angel
+    // angel IS a slider (queen rays) since the fairy-pattern work (M3.1):
+    expect(td.canPieceMove('e', 1, 0)).toBe(true);
   });
 });
 
