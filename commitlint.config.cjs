@@ -25,6 +25,9 @@ module.exports = {
     'subject-empty': [2, 'never'],
     'subject-full-stop': [2, 'never', '.'],
     'header-max-length': [2, 'always', 100],
+    // Dependabot commit bodies exceed 100 chars by design (release notes,
+    // updated-dependency metadata) — enforcing this only breaks dep PRs.
+    'body-max-line-length': [0],
     'body-leading-blank': [1, 'always'],
     'footer-leading-blank': [1, 'always'],
   },
