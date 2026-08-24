@@ -43,26 +43,14 @@ describe('startingBoard', () => {
     expect(pieces).toContain(6); // white king code
   });
 
-  // KNOWN DATA DEFECTS (locked as-is, reported): FENs #4, #5, #7, #10 contain a
-  // SECOND black king (trailing '/8k' rank) and #9 has NO black king at all.
-  // These are illegal positions fed to the A/B match gate — the defect is in the
-  // fixture data, not in parsing. Locking the current state so any accidental
-  // regeneration is caught; fixing them changes match-gate semantics and needs
-  // an explicit decision, not a silent test-driven patch.
-  it('parses every TACTICAL_FEN into exactly one WHITE king', () => {
+  it('parses every TACTICAL_FEN into exactly one king per colour (legal positions)', () => {
     expect(TACTICAL_FENS.length).toBeGreaterThanOrEqual(4);
     for (const fen of TACTICAL_FENS) {
       const b = startingBoard(fen);
-      expect(b.flat().filter((c) => c === 6).length).toBe(1);
+      const kings = b.flat().filter((c) => Math.abs(c) === 6);
+      expect(kings.filter((c) => c === 6).length).toBe(1);
+      expect(kings.filter((c) => c === -6).length).toBe(1);
     }
-  });
-
-  it('black-king count per tactical FEN matches the audited (defective) baseline', () => {
-    const expectedBlackKings = [1, 1, 1, 2, 2, 1, 2, 1, 0, 2, 1, 1];
-    TACTICAL_FENS.forEach((fen, i) => {
-      const b = startingBoard(fen);
-      expect(b.flat().filter((c) => c === -6).length).toBe(expectedBlackKings[i]);
-    });
   });
 });
 

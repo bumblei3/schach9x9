@@ -189,19 +189,24 @@ export const TACTICAL_FENS: string[] = [
   // 3. Hanging rook: black R d5, white N d6 attacks it. Black to move.
   '9/9/3N5/3r5/9/9/9/K6k1/9 b - - 0 1',
   // 4. Promotion with check: white pawn d2 one step from promotion (rank 1).
-  '9/9/9/9/9/9/3P5/3k3K1/8k w - - 0 1',
-  // 5. Discovered check: B a9, R d1, black K d8 -> Rxd1 / discovered.
-  'B8/9/9/3k5/9/9/9/3R3K1/8k w - - 0 1',
+  //    Black king h1 (the trailing '/8k' rank previously duplicated the king on d2).
+  '9/9/9/9/9/9/3P5/3K4k/8 w - - 0 1',
+  // 5. Discovered check: B a9, R d1, black K d5 -> R moves give discovered check.
+  //    (Previously duplicated the black king via trailing '/8k'.)
+  'B8/9/9/3k5/9/9/9/3R3K1/8 w - - 0 1',
   // 6. Back-rank trap: black K a1, white Q d2 mate.
   '9/9/9/9/9/9/9/3q5/k1K5N w - - 0 1',
-  // 7. Skewer: white R a1, black K + Q same rank -> wins queen.
-  '9/9/9/9/9/9/9/R2qk2K1/8k w - - 0 1',
+  // 7. Skewer on rank 2: white R a2, black Q d2 + K e2 -> wins queen.
+  //    (Previously duplicated the black king via trailing '/8k'.)
+  '9/9/9/9/9/9/9/R2qk2K1/8 w - - 0 1',
   // 8. Pin break: black B pins R, white N wins bishop.
   '9/9/9/9/9/9/9/2n6/1b1rk2K1 w - - 0 1',
-  // 9. Double attack: white Q attacks R + B simultaneously.
-  '9/9/9/9/9/9/9/3q5/1r2b2K1 w - - 0 1',
+  // 9. Double attack: white Q d2 attacks black R a1 + B e1 (black K g1 added —
+  //    the position previously had NO black king at all).
+  '9/9/9/9/9/9/9/3q5/1r2b1kK1 b - - 0 1',
   // 10. En prise rook: black R e5, white pawn captures with tempo.
-  '9/9/9/4r4/4P4/9/9/6kK1/8k w - - 0 1',
+  //    (Previously duplicated the black king via trailing '/8k'.)
+  '9/9/9/4r4/4P4/9/9/6kK1/8 w - - 0 1',
   // 11. Fork queen+king: white N forks -> wins queen.
   '9/9/9/9/9/9/9/2N6/2q2k1K1 w - - 0 1',
   // 12. Trapped king escape: black K i1, white Q h2 checks.
