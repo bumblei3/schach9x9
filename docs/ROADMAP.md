@@ -216,7 +216,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
 Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand entscheidet:
 
 1. **Zeitbudget KI:** **8 s gemessen bestätigt** (10s: −44) — abgehakt.
-2. ~~**Nach v1.8 zuerst M1 oder M2?**~~ M1.1 ist gemergt (+230). Nächster Hebel: NNUE-Blend-Gate.
+2. ~~**Nach v1.8 zuerst M1 oder M2?**~~ M1.1 ist gemergt (+230 Elo, das strukturelle Fundament von v2.0.0). **NNUE ist geparkt** — Gate war negativ (−132 Elo vs PST, n=80, 72.8% Agreement reicht nicht; PST-Eval schlägt das Netz). Es gibt aktuell **keinen offenen Engine-Hebel**, der nicht schon gemessen negativ/neutral ist. Nächster Raum ist entweder M1-Rest (M1.2 Hash-Keys für Rochade/EP + M1.3 64-bit Zobrist — nur messbar, wenn man bereit ist, 0-cp-Ergebnis zu akzeptieren) oder M2/M3/M4 (Kampagne, Coach, Polish) — die Engine ist nicht der Hebel mehr.
 3. **Ist 8×8-Elo die Nordstern-Metrik?** Ja als *Regression-Gate*. Spielerwert kommt aus M2/M3.
 
 ---
