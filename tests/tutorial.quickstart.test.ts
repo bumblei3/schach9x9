@@ -32,13 +32,14 @@ describe('Tutorial quick-start (Phase A)', () => {
     document.body.innerHTML = '';
   });
 
-  test('quick mode has exactly 3 steps covering pieces, setup, shop', () => {
+  test('quick mode has exactly 4 steps covering pieces, setup, shop, controls', () => {
     const t = new Tutorial({ mode: 'quick' });
-    expect(t.steps).toHaveLength(3);
+    expect(t.steps).toHaveLength(4);
     const blob = t.steps.map(s => s.title + s.content).join(' ');
     expect(blob).toMatch(/Erzbischof|Feenfiguren/i);
     expect(blob).toMatch(/König|Setup/i);
     expect(blob).toMatch(/Shop|Upgrade/i);
+    expect(blob).toMatch(/Spielbedienung|Ziehen|Tastatur/i);
   });
 
   test('full mode still includes fairy demos', () => {

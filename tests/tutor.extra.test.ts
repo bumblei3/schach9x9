@@ -2,18 +2,22 @@ import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { PHASES } from '../js/config.js';
 
 // Mock UI and other dependencies
-(global as any).document = {
-  getElementById: vi.fn(() => ({
-    textContent: '',
-    appendChild: vi.fn(),
-    innerHTML: '',
-    style: {},
-    classList: { add: vi.fn(), remove: vi.fn() },
-  })),
-  body: {
-    appendChild: vi.fn(),
+// vitest 5: document is a read-only getter on window — use defineProperty
+Object.defineProperty(global, 'document', {
+  value: {
+    getElementById: vi.fn(() => ({
+      textContent: '',
+      appendChild: vi.fn(),
+      innerHTML: '',
+      style: {},
+      classList: { add: vi.fn(), remove: vi.fn() },
+    })),
+    body: {
+      appendChild: vi.fn(),
+    },
   },
-};
+  configurable: true,
+});
 
 vi.mock('../js/ui.js', () => ({
   showToast: vi.fn(),

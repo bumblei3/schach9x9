@@ -34,7 +34,17 @@ import {
   type RuleState,
 } from './ai/MoveGenerator';
 import { evaluate, type EvalConfig } from './evaluate';
-import { computeZobristHash, TranspositionTable, zobristTable, sideToMoveValue } from './ai/transpositionTable';
+import {
+  computeZobristHash,
+  TranspositionTable,
+  zobristTable,
+  sideToMoveValue,
+  castlingWKValue,
+  castlingWQValue,
+  castlingBKValue,
+  castlingBQValue,
+  enPassantValue,
+} from './ai/transpositionTable';
 import { progressCallback, type AIProgressData } from './aiEngine';
 import type { IntBoard } from './evaluate';
 
@@ -395,12 +405,14 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         return zobristTable[sq][ti][color === COLOR_WHITE ? 0 : 1];
       }
 
-      // Pure incremental Zobrist update (M1.1): computes the child hash WITHOUT
+      // Pure incremental Zobrist update (M1.1, M1.2): computes the child hash WITHOUT
       // mutating the board. Must be called BEFORE makeMoveInt applies `move`.
       function makeMoveHash(b: IntBoard, move: Move, hash: number): number {
         let h = hash;
         const piece = b[move.from];
         h ^= zobVal(piece, move.from);
+
+        // EP: clear previous EP flag, then set new one after move
         if (move.flags === 'ep') {
           // EP victim sits on the mover's rank, victim's file = destination file.
           const width = Math.sqrt(b.length) | 0;
@@ -408,13 +420,43 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           const victim = b[victimSq];
           if (victim !== 0) h ^= zobVal(victim, victimSq);
           h ^= zobVal(piece, move.to); // EP never promotes
+          // Set new EP file
+          h ^= enPassantValue;
         } else {
+          // Clear any previous EP flag
+          h ^= enPassantValue;
+
+          // Castling: update castling rights hash
           if (move.flags === 'castle-k' || move.flags === 'castle-q') {
+            // Remove old castling rights
+            h ^= castlingWKValue;
+            h ^= castlingWQValue;
+            // Rook move (part of castling)
             const rookFrom = move.flags === 'castle-k' ? move.from + 3 : move.from - 4;
             const rookTo = move.flags === 'castle-k' ? move.from + 1 : move.from - 1;
             h ^= zobVal(b[rookFrom], rookFrom);
             h ^= zobVal(b[rookTo], rookTo);
+          } else {
+            // King move removes both castling rights
+            if (piece === (PIECE_KING | COLOR_WHITE)) {
+              h ^= castlingWKValue;
+              h ^= castlingWQValue;
+            }
+            if (piece === (PIECE_KING | COLOR_BLACK)) {
+              h ^= castlingBKValue;
+              h ^= castlingBQValue;
+            }
+            // Rook move from starting square removes that castling right
+            if (piece === (PIECE_ROOK | COLOR_WHITE)) {
+              if (move.from === 64) h ^= castlingWKValue; // h1
+              if (move.from === 56) h ^= castlingWQValue; // a1
+            }
+            if (piece === (PIECE_ROOK | COLOR_BLACK)) {
+              if (move.from === 0) h ^= castlingBKValue; // h8
+              if (move.from === 7) h ^= castlingBQValue; // a8
+            }
           }
+
           const newPiece = move.promotion ? (piece & COLOR_MASK) | (move.promotion & TYPE_MASK) : piece;
           const captured = b[move.to];
           if (captured !== 0) h ^= zobVal(captured, move.to);

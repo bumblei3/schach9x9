@@ -66,7 +66,7 @@ export function setupJSDOM(): void {
 /**
  * Creates a mock game object with common methods and properties.
  */
-export function createMockGame(overrides: Record<string, any> = {}) {
+export function createMockGame(overrides: Record<string, any> = {}): Record<string, any> {
   const PHASES = {
     PLAY: 'play',
     SETUP_WHITE_KING: 'setup_white_king',
@@ -122,7 +122,7 @@ export function createMockGame(overrides: Record<string, any> = {}) {
 /**
  * Mocks Three.js basics for testing 3D components without loading the full library.
  */
-export function mockThreeJS() {
+export function mockThreeJS(): Record<string, any> {
   const mockScene = { add: vi.fn(), remove: vi.fn(), traverse: vi.fn() };
   const mockCamera = {
     position: { set: vi.fn() },

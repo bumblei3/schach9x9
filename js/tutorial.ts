@@ -99,6 +99,18 @@ export class Tutorial {
             <li>Im <strong>Upgrade-Modus</strong> verbesserst du Figuren (z. B. Springer → Nachtreiter)</li>
             <li>Kosten = Differenz der Figurenwerte</li>
           </ul>
+        `,
+      },
+      {
+        title: '🎮 Spielbedienung',
+        content: `
+          <p>So spielst du:</p>
+          <ul style="text-align:left; line-height:1.6;">
+            <li><strong>Ziehen:</strong> Figur antippen → Ziel antippen</li>
+            <li><strong>Tastatur:</strong> <code>B</code> = bester Zug, <code>H</code> = Tipp, <code>U</code> = Rückgängig, <code>A</code> = Analyse</li>
+            <li><strong>3D-Ansicht:</button> im Spiel umschalten</li>
+            <li><strong>Timers:</strong> oben links / rechts</li>
+          </ul>
           <p style="margin-top:1rem;text-align:center;font-size:1.1em;color:#4ecca3;"><strong>Viel Erfolg am Brett! ♟️</strong></p>
         `,
       },

@@ -24,20 +24,24 @@ vi.mock('../js/logger.js', () => ({ logger }));
 const { AchievementsManager } = await import('../js/achievements');
 
 // Provide a fresh localStorage for each test
+// vitest 5: localStorage is a read-only getter on window — use defineProperty
 function freshStorage() {
   const store: Record<string, string> = {};
-  (globalThis as any).localStorage = {
-    getItem: (k: string) => (k in store ? store[k] : null),
-    setItem: (k: string, v: string) => {
-      store[k] = v;
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: {
+      getItem: (k: string) => (k in store ? store[k] : null),
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+      clear: () => {
+        for (const k of Object.keys(store)) delete store[k];
+      },
     },
-    removeItem: (k: string) => {
-      delete store[k];
-    },
-    clear: () => {
-      for (const k of Object.keys(store)) delete store[k];
-    },
-  };
+    configurable: true,
+  });
 }
 
 describe('AchievementsManager', () => {
