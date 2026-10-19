@@ -55,7 +55,7 @@
   },
   "license": "WTFPL",
   "overrides": {
-    "undici": "^7.29.0",
+    "undici": "^7.30.0",
     "brace-expansion": "^2.1.2",
     "eslint": {
       "js-yaml": "5.3.0"
