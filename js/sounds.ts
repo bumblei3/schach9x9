@@ -550,6 +550,96 @@ class SoundManager {
     osc.start(this.audioContext.currentTime);
     osc.stop(this.audioContext.currentTime + 0.3);
   }
+
+  // --- UI Sounds ---
+
+  /** Short click for buttons and menu interactions. */
+  public playUIClick(): void {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, this.audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, this.audioContext.currentTime + 0.06);
+
+    gain.gain.setValueAtTime(this.volume * 0.25, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.06);
+
+    osc.start(this.audioContext.currentTime);
+    osc.stop(this.audioContext.currentTime + 0.07);
+  }
+
+  /** Soft blip when a hint is shown. */
+  public playHint(): void {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(520, this.audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(780, this.audioContext.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(this.volume * 0.3, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.12);
+
+    osc.start(this.audioContext.currentTime);
+    osc.stop(this.audioContext.currentTime + 0.13);
+  }
+
+  /** Wood-block style click for setup phase piece placement. */
+  public playSetup(): void {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(350, this.audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(280, this.audioContext.currentTime + 0.05);
+
+    gain.gain.setValueAtTime(this.volume * 0.35, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.08);
+
+    osc.start(this.audioContext.currentTime);
+    osc.stop(this.audioContext.currentTime + 0.09);
+  }
+
+  /** Reverse swish for undo. */
+  public playUndo(): void {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(500, this.audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(250, this.audioContext.currentTime + 0.12);
+
+    gain.gain.setValueAtTime(this.volume * 0.3, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.14);
+
+    osc.start(this.audioContext.currentTime);
+    osc.stop(this.audioContext.currentTime + 0.15);
+  }
 }
 
 // Global instance
