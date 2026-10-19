@@ -63,8 +63,28 @@ export class ProceduralGenerator {
     } while (Math.abs(wk.r - bk.r) <= 1 && Math.abs(wk.c - bk.c) <= 1);
     board[wk.r][wk.c] = { type: 'k', color: 'white', hasMoved: true };
 
-    const pieces = _difficulty === 'easy' ? ['q', 'r'] : ['r', 'b'];
+    // Easy: classic pieces only (queen, rook, bishop, knight, pawn)
+    // Medium: classic + one fairy piece
+    // Hard: classic + two fairy pieces
+    const classicPieces = ['q', 'r', 'b', 'n', 'p', 'r', 'b'];
+    const fairyPieces = ['a', 'c', 'j', 'e'];
+    const pieces: string[] = [];
 
+    // Pick 2-3 classic pieces
+    const classicCount = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < classicCount; i++) {
+      const type = classicPieces[Math.floor(Math.random() * classicPieces.length)];
+      pieces.push(type);
+    }
+
+    // Pick 1-2 fairy pieces based on difficulty
+    const fairyCount = _difficulty === 'easy' ? 0 : _difficulty === 'hard' ? 2 : 1;
+    for (let i = 0; i < fairyCount; i++) {
+      const type = fairyPieces[Math.floor(Math.random() * fairyPieces.length)];
+      pieces.push(type);
+    }
+
+    // Place all pieces on the board
     for (const type of pieces) {
       let pos;
       do {
@@ -73,6 +93,7 @@ export class ProceduralGenerator {
       board[pos.r][pos.c] = { type: type as Piece['type'], color: 'white', hasMoved: true };
     }
 
+    // Add black defender (pawn) with 50% chance
     if (Math.random() > 0.5) {
       let pos;
       do {
