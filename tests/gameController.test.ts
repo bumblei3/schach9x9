@@ -11,6 +11,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { updateStatus } from '../js/ui.js';
 
 // --- Mock all heavy / IO dependencies of the controller -------------------
 vi.mock('../js/statisticsManager.js', () => ({
@@ -200,7 +201,7 @@ describe('acceptDraw', () => {
     expect(game.phase).toBe(PHASES.GAME_OVER);
     expect(game.drawOffered).toBe(false);
     expect(game.drawOfferedBy).toBeNull();
-    expect(controller.saveGameToStatistics).toHaveBeenCalledWith('draw', null);
+    expect(controller.handleGameEnd).toHaveBeenCalledWith('draw', null);
   });
 
   test('no-op when no draw is pending', () => {
@@ -208,6 +209,38 @@ describe('acceptDraw', () => {
     controller.acceptDraw();
     expect(game.phase).not.toBe(PHASES.GAME_OVER);
     expect(controller.saveGameToStatistics).not.toHaveBeenCalled();
+  });
+});
+
+describe('restartCurrentMode', () => {
+  test('re-inits the same mode instead of reloading', () => {
+    game.mode = 'classic';
+    game.initialPoints = 0;
+    game.campaignMode = false;
+    game.phase = PHASES.GAME_OVER;
+    game._forceFullRender = false;
+    game._previousBoardState = [[{ type: 'k', color: 'white' }]];
+    game.moveHistory = [{ from: { r: 1, c: 0 }, to: { r: 2, c: 0 } }];
+    vi.mocked(updateStatus).mockClear();
+    const spy = vi.spyOn(controller, 'initGame').mockImplementation(() => {});
+    controller.restartCurrentMode();
+    expect(spy).toHaveBeenCalledWith(0, 'classic');
+    expect(game.moveHistory).toEqual([]);
+    expect(game.phase).toBe(PHASES.PLAY);
+    expect(game._forceFullRender).toBe(true);
+    expect(game._previousBoardState).toBeUndefined();
+    expect(updateStatus).toHaveBeenCalledWith(game);
+  });
+
+  test('a campaign chapter returns to the menu', () => {
+    game.mode = 'campaign';
+    game.campaignMode = true;
+    const reload = vi.fn();
+    vi.stubGlobal('location', { reload });
+    const spy = vi.spyOn(controller, 'initGame').mockImplementation(() => {});
+    controller.restartCurrentMode();
+    expect(reload).toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
 });
 

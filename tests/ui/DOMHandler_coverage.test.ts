@@ -104,6 +104,7 @@ describe('DOMHandler Comprehensive Coverage', () => {
         toggleContinuousAnalysis: vi.fn(),
         loadGame: vi.fn(),
         offerDraw: vi.fn(),
+        restartCurrentMode: vi.fn(),
       },
       battleChess3D: { enabled: false },
     };
@@ -441,12 +442,11 @@ describe('DOMHandler Comprehensive Coverage', () => {
       expect(app.gameController.finishSetupPhase).toHaveBeenCalled();
     });
 
-    it('restart overlay button hides overlay and reloads', () => {
+    it('restart overlay button starts the same mode again', () => {
       domHandler.init();
-      const overlay = document.getElementById('game-over-overlay')!;
       document.getElementById('restart-btn-overlay')!.click();
-      expect(overlay.classList.contains('hidden')).toBe(true);
-      expect(location.reload).toHaveBeenCalled();
+      expect(app.gameController.restartCurrentMode).toHaveBeenCalled();
+      expect(location.reload).not.toHaveBeenCalled();
     });
 
     it('close game-over button hides overlay', () => {

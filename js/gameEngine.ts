@@ -142,6 +142,8 @@ export class Game {
   clockInterval: ReturnType<typeof setInterval> | null;
   lastMoveTime: number;
   _forceFullRender?: boolean;
+  /** Last painted piece per square. Cleared when the board DOM is rebuilt. */
+  _previousBoardState?: (Piece | null)[][];
   replayMode: boolean;
   replayPosition: number;
   savedGameState: SavedGameState | null;
