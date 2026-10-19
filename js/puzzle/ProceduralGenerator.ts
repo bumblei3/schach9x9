@@ -63,33 +63,34 @@ export class ProceduralGenerator {
     } while (Math.abs(wk.r - bk.r) <= 1 && Math.abs(wk.c - bk.c) <= 1);
     board[wk.r][wk.c] = { type: 'k', color: 'white', hasMoved: true };
 
-    // Easy: classic pieces only (queen, rook, bishop, knight, pawn)
-    // Medium: classic + one fairy piece
-    // Hard: classic + two fairy pieces
-    const classicPieces = ['q', 'r', 'b', 'n', 'p', 'r', 'b'];
+    // Base pieces are guaranteed per difficulty so the structural invariants
+    // hold: easy always has a white queen + rook, hard always a rook + bishop.
+    const basePieces = _difficulty === 'easy' ? ['q', 'r'] : ['r', 'b'];
     const fairyPieces = ['a', 'c', 'j', 'e'];
-    const pieces: string[] = [];
+    const pieces: string[] = [...basePieces];
 
-    // Pick 2-3 classic pieces
-    const classicCount = 2 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < classicCount; i++) {
-      const type = classicPieces[Math.floor(Math.random() * classicPieces.length)];
-      pieces.push(type);
+    // Add 0-2 extra classic pieces for variety. The pool excludes the base
+    // pieces so the invariant "exactly one queen + one rook" (easy) /
+    // "exactly one rook + one bishop" (hard) still holds.
+    const extraPool = _difficulty === 'easy' ? ['b', 'n', 'p'] : ['q', 'n', 'p'];
+    const extraClassic = Math.floor(Math.random() * 3);
+    for (let i = 0; i < extraClassic; i++) {
+      pieces.push(extraPool[Math.floor(Math.random() * extraPool.length)]);
     }
 
-    // Pick 1-2 fairy pieces based on difficulty
+    // Fairy pieces: easy 0, medium 1, hard 2.
     const fairyCount = _difficulty === 'easy' ? 0 : _difficulty === 'hard' ? 2 : 1;
     for (let i = 0; i < fairyCount; i++) {
-      const type = fairyPieces[Math.floor(Math.random() * fairyPieces.length)];
-      pieces.push(type);
+      pieces.push(fairyPieces[Math.floor(Math.random() * fairyPieces.length)]);
     }
 
-    // Place all pieces on the board
+    // Place all pieces on the board. Pawns may never land on a promotion rank
+    // (0 or 8) — same rule as the black defender below.
     for (const type of pieces) {
       let pos;
       do {
         pos = this.randomSquare();
-      } while (board[pos.r][pos.c] !== null);
+      } while (board[pos.r][pos.c] !== null || (type === 'p' && (pos.r === 0 || pos.r === 8)));
       board[pos.r][pos.c] = { type: type as Piece['type'], color: 'white', hasMoved: true };
     }
 
