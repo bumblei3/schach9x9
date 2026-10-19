@@ -593,7 +593,7 @@ describe('MoveController', () => {
 
     it('should handle missing save data', () => {
       // Ensure getItem returns null (already default, but explicit)
-      (Storage.prototype.getItem as unknown as MockInstance).mockReturnValueOnce(null);
+      (localStorage.getItem as unknown as MockInstance).mockReturnValueOnce(null);
 
       moveController.loadGame();
 
@@ -612,7 +612,7 @@ describe('MoveController', () => {
         difficulty: 'medium',
       };
 
-      (Storage.prototype.getItem as unknown as MockInstance).mockReturnValue(
+      (localStorage.getItem as unknown as MockInstance).mockReturnValue(
         JSON.stringify(savedState)
       );
 
@@ -652,7 +652,7 @@ describe('MoveController', () => {
     });
 
     it('should handle corrupt save data', () => {
-      (Storage.prototype.getItem as unknown as MockInstance).mockReturnValue('invalid-json');
+      (localStorage.getItem as unknown as MockInstance).mockReturnValue('invalid-json');
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const success = moveController.loadGame();
@@ -840,7 +840,7 @@ describe('MoveController', () => {
 
     it('setTheme should update theme and localStorage', () => {
       // Spy on the mock function directly
-      const setItemSpy = Storage.prototype.setItem;
+      const setItemSpy = localStorage.setItem;
 
       // Mock document.body.setAttribute
       document.body.setAttribute = vi.fn();

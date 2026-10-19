@@ -35,3 +35,24 @@ if (!window.matchMedia) {
     dispatchEvent: vi.fn(),
   }));
 }
+
+// jsdom in this Vitest version lacks localStorage; many UI modules
+// (BoardRenderer skin, SoundManager, GameController save/load) call it.
+// Provide an in-memory mock so tests don't crash with
+// "Cannot read properties of undefined (reading 'getItem')".
+// Use vi.fn() so tests can spy on setItem/getItem calls.
+if (typeof localStorage === 'undefined') {
+  const storage = new Map<string, string>();
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: {
+      getItem: vi.fn((key: string) => storage.get(key) ?? null),
+      setItem: vi.fn((key: string, value: string) => void storage.set(key, String(value))),
+      removeItem: vi.fn((key: string) => void storage.delete(key)),
+      clear: vi.fn(() => storage.clear()),
+      key: vi.fn((index: number) => [...storage.keys()][index] ?? null),
+      get length() { return storage.size; },
+    },
+    writable: true,
+    configurable: true,
+  });
+}
