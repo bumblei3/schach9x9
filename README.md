@@ -263,6 +263,11 @@ Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RE
   daher kein hartes Ziel mehr. Gezielte Branch-Tests für gameController/
   aiController landed in v1.5.x (Branch 82.27%)._
 
+## 💬 Feedback
+
+Hast du einen Fehler gefunden, eine Idee oder einen Verbesserungsvorschlags?
+Besuche unsere [GitHub Discussions](https://github.com/bumblei3/schach9x9/discussions) — wir freuen uns über dein Feedback!
+
 ## 📌 Bekannte Einschränkungen / Offen
 
 - **TypeScript 7:** aktuell auf `^6.0.3` fixiert — `typescript-eslint` v8
