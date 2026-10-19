@@ -353,6 +353,10 @@ export class DOMHandler {
     const restartBtnOverlay = document.getElementById('restart-btn-overlay');
     if (restartBtnOverlay) {
       restartBtnOverlay.addEventListener('click', () => {
+        if (this.gameController?.restartCurrentMode) {
+          this.gameController.restartCurrentMode();
+          return;
+        }
         document.getElementById('game-over-overlay')?.classList.add('hidden');
         hidePostGameStats();
         window.location.reload();

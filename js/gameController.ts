@@ -24,7 +24,7 @@ import { campaignManager } from './campaign/CampaignManager.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { getHeatmapUI, HeatmapUI } from './ui/HeatmapUI.js';
-import { showPostGameStats } from './ui/PostGameAnalysisUI.js';
+import { hidePostGameStats, showPostGameStats } from './ui/PostGameAnalysisUI.js';
 import { renderMaterialGraph, renderMoveTimeGraph, renderVariantTree } from './ui/GameStatusUI.js';
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
@@ -495,8 +495,9 @@ export class GameController {
     if (winnerText) winnerText.textContent = 'Remis vereinbart';
     if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
 
-    // Save game to statistics
-    this.saveGameToStatistics('draw', null);
+    this.stopClock();
+    // Same end-of-game path as mate and stalemate: stats, book, analysis.
+    this.handleGameEnd('draw', null);
   }
 
   declineDraw(): void {
@@ -790,6 +791,79 @@ export class GameController {
     }
   }
 
+  /**
+   * "Neues Spiel" on the game-over dialog. Same mode again.
+   * A campaign chapter stays put: that button returns to the menu.
+   */
+  restartCurrentMode(): void {
+    const mode = this.game.mode;
+    if (this.game.campaignMode || mode === 'campaign') {
+      this.reloadPage();
+      return;
+    }
+
+    const points = this.game.initialPoints ?? 0;
+    this.stopClock();
+    document.getElementById('game-over-overlay')?.classList.add('hidden');
+    hidePostGameStats();
+    this.heatmapUI?.hide();
+    for (const id of [
+      'material-graph-container',
+      'move-time-graph-container',
+      'variant-tree-container',
+      'eval-graph-container',
+    ]) {
+      document.getElementById(id)?.classList.add('hidden');
+    }
+    document.getElementById('arrow-layer')?.remove?.();
+    const logPanel = document.getElementById('log-panel');
+    if (logPanel) logPanel.textContent = '';
+    const historyEl = document.getElementById('move-history');
+    if (historyEl) historyEl.textContent = '';
+
+    const size = this.game.boardSize || 9;
+    this.game.board = Array.from({ length: size }, () => Array(size).fill(null));
+    this.game.moveHistory = [];
+    this.game.redoStack = [];
+    this.game.positionHistory = [];
+    this.game.capturedPieces = { white: [], black: [] };
+    this.game.halfMoveClock = 0;
+    this.game.selectedSquare = null;
+    this.game.validMoves = null;
+    this.game.lastMove = null;
+    this.game.lastMoveHighlight = null;
+    this.game.drawOffered = false;
+    this.game.drawOfferedBy = null;
+    this.game.puzzleState = null;
+    this.game.turn = 'white';
+    this.game.stats = {
+      totalMoves: 0,
+      playerMoves: 0,
+      playerBestMoves: 0,
+      captures: 0,
+      promotions: 0,
+      accuracies: [],
+    };
+
+    // initBoardUI rebuilds empty cells. The render cache still matches the
+    // opening position, so a classic rematch would skip every square.
+    // Phase is still GAME_OVER; ClassicMode sets PLAY without refreshing
+    // the status line, which would stay on "Spiel vorbei".
+    this.game._forceFullRender = true;
+    this.game._previousBoardState = undefined;
+    this.game.phase = PHASES.PLAY;
+
+    this.initGame(points, mode ?? 'classic');
+    UI.updateStatus(this.game);
+  }
+
+  private syncGameOverRestartLabel(): void {
+    const btn = document.getElementById('restart-btn-overlay');
+    if (!btn) return;
+    btn.textContent =
+      this.game.campaignMode || this.game.mode === 'campaign' ? 'Zum Menü' : 'Neues Spiel';
+  }
+
   reloadPage(): void {
     location.reload();
   }
@@ -1055,6 +1129,8 @@ export class GameController {
   }
 
   handleGameEnd(result: 'win' | 'draw', winnerColor: Player | null): void {
+    this.syncGameOverRestartLabel();
+
     // Save stats
     let saveColorArg: Player | null = null;
 
