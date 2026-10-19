@@ -342,7 +342,6 @@ export async function completeMoveExecution(
         soundManager.playError();
       }, 500);
     } else if (result === 'solved') {
-      UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
       soundManager.playSuccess();
       if (game.mode === 'daily-puzzle') {
         dailyPuzzle.markSolvedToday();
@@ -350,8 +349,11 @@ export async function completeMoveExecution(
         const streakLabel = dailyPuzzle.formatStreakLabel();
         UI.updatePuzzleStatus(
           'success',
-          streakLabel ? `Richtig! Puzzle gelöst — ${streakLabel}` : 'Richtig! Puzzle gelöst!'
+          streakLabel ? `Richtig! Puzzle gelöst — ${streakLabel}` : 'Richtig! Puzzle gelöst!',
+          false
         );
+      } else {
+        UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
       }
     } else {
       UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');

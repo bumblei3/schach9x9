@@ -652,6 +652,9 @@ export class GameController {
   }
 
   nextPuzzle(): void {
+    // The daily card is one position per day. The catalog's "next" stays on
+    // the regular puzzle mode.
+    if (this.game.mode === 'daily-puzzle') return;
     const puzzle = puzzleManager.nextPuzzle(this.game);
     if (puzzle && typeof puzzle !== 'boolean') {
       UI.showPuzzleOverlay(puzzle);
@@ -667,20 +670,17 @@ export class GameController {
   }
 
   /**
-   * Daily Puzzle mode: load the day-rotating puzzle through the shared
-   * `puzzleManager` pipeline. `loadPuzzle` resets `game.mode = 'puzzle'`, so we
-   * restore `'daily-puzzle'` afterward to keep this mode distinguishable.
+   * Daily Puzzle mode: today's position on the board, with the puzzle panel.
+   * The catalog (`puzzleMenu`) belongs to the regular Puzzle card.
+   * `loadPuzzle` resets `game.mode = 'puzzle'`, so we restore `'daily-puzzle'`
+   * afterward to keep this mode distinguishable.
    */
   startDailyPuzzleMode(): void {
-    this.game.mode = 'daily-puzzle';
-    this.game.phase = PHASES.PLAY;
-    UI.hidePuzzleOverlay();
+    this.showShop(false);
     const idx = dailyPuzzle.getDailyPuzzleIndex();
-    puzzleManager.loadPuzzle(this.game, idx);
+    this.loadPuzzle(idx);
     this.game.mode = 'daily-puzzle';
-    this.puzzleMenu.show();
-    UI.renderBoard(this.game);
-    UI.updateStatus(this.game);
+    this.puzzleMenu.hide();
   }
 
   exitPuzzleMode(): void {
