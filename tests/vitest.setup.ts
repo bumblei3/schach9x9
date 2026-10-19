@@ -36,23 +36,34 @@ if (!window.matchMedia) {
   }));
 }
 
-// jsdom in this Vitest version lacks localStorage; many UI modules
-// (BoardRenderer skin, SoundManager, GameController save/load) call it.
-// Provide an in-memory mock so tests don't crash with
-// "Cannot read properties of undefined (reading 'getItem')".
-// Use vi.fn() so tests can spy on setItem/getItem calls.
-if (typeof localStorage === 'undefined') {
-  const storage = new Map<string, string>();
-  Object.defineProperty(globalThis, 'localStorage', {
-    value: {
-      getItem: vi.fn((key: string) => storage.get(key) ?? null),
-      setItem: vi.fn((key: string, value: string) => void storage.set(key, String(value))),
-      removeItem: vi.fn((key: string) => void storage.delete(key)),
-      clear: vi.fn(() => storage.clear()),
-      key: vi.fn((index: number) => [...storage.keys()][index] ?? null),
-      get length() { return storage.size; },
+// localStorage must be an in-memory mock in every environment, not just when
+// the global happens to be undefined.
+//
+// Node >= 22 exposes an experimental `localStorage` on globalThis as an
+// accessor: in the jsdom test environment `typeof localStorage === 'object'`
+// even though plain Node reports `undefined`. Depending on the host made this
+// suite environment-dependent in two ways:
+//   1. a `typeof localStorage === 'undefined'` guard skipped the mock, so
+//      js/storage.ts talked to a real (throwing) storage instead of the
+//      in-memory one, and
+//   2. `vi.spyOn(localStorage, 'setItem')` recorded 0 calls, because every
+//      `localStorage` access goes through the getter and yields a fresh
+//      object, so the spied function was never the one being called.
+//
+// Define the mock unconditionally (the property is configurable, so this
+// replaces Node's accessor) and make it a vi.fn() so tests can still spy.
+const storage = new Map<string, string>();
+Object.defineProperty(globalThis, 'localStorage', {
+  value: {
+    getItem: vi.fn((key: string) => storage.get(key) ?? null),
+    setItem: vi.fn((key: string, value: string) => void storage.set(key, String(value))),
+    removeItem: vi.fn((key: string) => void storage.delete(key)),
+    clear: vi.fn(() => storage.clear()),
+    key: vi.fn((index: number) => [...storage.keys()][index] ?? null),
+    get length() {
+      return storage.size;
     },
-    writable: true,
-    configurable: true,
-  });
-}
+  },
+  writable: true,
+  configurable: true,
+});
