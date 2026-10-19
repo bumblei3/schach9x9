@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-08-23 · Basis: `v1.8.0` + M1.1 gemergt (+230 Elo) + NNUE-Pipeline auf `main` · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-10-19 · `main` `fb20831` (v2.0.0 + TS 7 #214 + M1.3 #215) · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -25,23 +25,21 @@ Vier Qualitätsmaßstäbe:
 
 ## Ist-Stand (ehrlich)
 
-Das Produkt ist **feature-reich und engine-satt**. Die letzten Wochen waren ein Such-Parameter-Tunnel. Billige Eval-Terme und Knob-Tweaks sind aufgebraucht; der nächste Elo-Gewinn ist strukturell.
+Das Produkt ist **feature-reich**. Billige Eval-Terme sind aufgebraucht (`bench/NEGATIVE_RESULTS.md`). Der Hash-Hebel M1.1 ist gemergt und gemessen. M1.3 ist gemergt, die Wiederholungsmessung läuft.
 
 ### Was bereits gut ist
 
 - **Regeln:** 9×9 + Standard-8×8 (Rochade, EP, Unterpromotion) in derselben Integer-Engine.
-- **Modi:** Classic 9×9, Standard 8×8, Setup/Shop, Upgrade, Cross, Kampagne, Puzzle, Daily Puzzle, Opening-Trainer, Analyse, 3D.
-- **KI-Infrastruktur:** Alpha-Beta + LMR/NMP/ProbCut/QSearch/TT, 5 Persönlichkeiten, Worker, Track-A (`matchRefs`) und Track-B (`match:stockfish`).
-- **Solo-UX:** Tutorial, Replay, Position-teilen, Variant-Tree, Heatmap, Post-Game-Analyse, PWA/Offline.
-- **Qualität:** 2944 Tests, tsc/eslint grün, Coverage global >90 %.
+- **Modi:** Classic 9×9, Standard 8×8, Setup/Shop, Upgrade, Cross, Kampagne Akt II, Fairy-Tactics, Daily Puzzle, Opening-Trainer, Analyse, 3D, Tutor mit Figurennamen.
+- **KI-Infrastruktur:** Alpha-Beta + LMR/NMP/ProbCut/QSearch/TT, inkrementeller Zobrist, 64-bit-Hash auf `main`, 5 Persönlichkeiten, Worker, Track-A (`matchRefs`) und Track-B (`match:stockfish`).
+- **Solo-UX:** Tutorial (inkl. Nachtreiter und Upgrade-Pfad), Replay, Position-teilen, Variant-Tree, Heatmap, Post-Game-Analyse, PWA/Offline, Sound-Settings persistent, Three.js self-hosted.
+- **Qualität:** CI auf #215 grün (3070 Tests im Commit `80171dd`). A11y-Regeln `color-contrast`, `label`, `select-name`, `nested-interactive` sind an. TypeScript 7 läuft über den Side-by-Side-Alias (#214).
 
 ### Wo es wirklich hakt
 
-1. **Suche skaliert nicht.** Bei 8 s/Zug `avgMaxDepth ≈ 4.8`, `avgNps ≈ 10k`. Tiefe 5 ohne Such-Tuning war *schwächer* als Tiefe 4. Ursache: `computeZobristHash` läuft **pro Knoten über alle 81 Felder** (`js/search.ts` → `js/ai/transpositionTable.ts`). Make/Undo aktualisiert den Hash nicht inkrementell.
-2. **Absolute Stärke.** Bestes gemessenes Ergebnis vs Stockfish Elo 1400 (d5 vs SF d8, n=40): **4–6–30, Score 0.175, ≈ −269 Elo**. Solide Richtung, aber kein gleichwertiger Gegner.
-3. **Kampagne ist dünn.** 6 Story-Kapitel + 5 Endspiel-Drills. Featured im Menü, Inhalt reicht für einen Nachmittag.
-4. **Lernen ist 8×8-lastig.** Procedural Puzzles sind zufällige Matt-in-1/2-Stellungen, nicht Feenfiguren-Taktik (Gabel mit Erzbischof, X-Ray mit Kanzler).
-5. **Engine-Ast ist unaufgeräumt.** `main` ist 15 Commits voraus, `js/search.ts` hat Test-Kommentare und eine uncommittete `PROBCUT_REDUCTION`-Korrektur. Kein Release seit v1.7.0.
+1. **Die Stärkezahl ist ein Lauf mit breitem Intervall.** Kanonisch: `bench/sf_match_m1_symfix_n40.log`, 17–12–11, Score 0.575, +52 Elo gegen Stockfish 1400, Intervall etwa −55..+171, 0 `illegal-ours`. Die Zeile „−269 Elo“ weiter unten ist v1.8.0, nicht der Ist-Stand.
+2. **M1.3 ist ungemessen.** 64-bit-Zobrist ist auf `main` (`fb20831`). Derselbe Lauf schreibt `bench/sf_match_m13_n40.log`.
+3. **Der Wiederkommen-Anker ist ein Modus unter mehreren.** Daily Puzzle existiert und ist deterministisch. Er ist nicht der Einstieg der Sitzung.
 
 ### Track B — gemessene Hebel (n=40, gleiche Flags)
 
@@ -55,10 +53,13 @@ npm run match:stockfish -- --games=40 --depth=5 --sf-depth=8 --sf-elo=1400 --qui
 | D5 ohne Tuning                                     | 0.125  | ≈ −338         | Tiefe allein ≠ +Elo |
 | D5 + `LMR_BASE_DEPTH=4`                            | 0.163  | ≈ −285         | **behalten**      |
 | D5 + LMR4 + `PROBCUT_REDUCTION=2`                  | 0.150  | ≈ −301         | verwerfen, bleibt 3 |
-| D5 + LMR4 + `NULL_MOVE_R=1`                        | **0.175** | **≈ −269**  | **behalten**      |
+| D5 + LMR4 + `NULL_MOVE_R=1`                        | **0.175** | **≈ −269**  | **behalten** (v1.8-Freeze) |
 | mob=1.2 / pawn=110 / tempo=20 / eg-passpawn 2.5    | 0.06–0.13 | schlechter  | **nie wieder**    |
+| M1.1 inkrementeller Hash + Quiesce-Fix             | **0.575** | **≈ +52**   | Ist-Stand, Log `sf_match_m1_symfix_n40` |
 
-`MAX_SEARCH_TIME` 8s→10s ist committed als Experiment, **nicht** gegen n=40 gemessen. UI-Trade-off, kein Merge ohne Messung.
+`MAX_SEARCH_TIME` 10s ist gemessen (−44, 2026-08-22). Default bleibt 8s.
+
+Das M1.1-Intervall (−55..+171) enthält die 0. Ein einzelner Lauf trägt keine Behauptung „ebenbürtig mit Stockfish 1400“. Der M1.3-Lauf ist die Wiederholung auf dem aktuellen `main`.
 
 ---
 
@@ -66,7 +67,7 @@ npm run match:stockfish -- --games=40 --depth=5 --sf-depth=8 --sf-elo=1400 --qui
 
 1. **Ein Hebel, eine Messung.** Isoliert, `n≥40`, gleiche Flags. n=20 trägt keine 200-cp-Claims.
 2. **Negative Results nicht wiederholen.** Liste: `bench/NEGATIVE_RESULTS.md` + Tabelle oben.
-3. **Keine Eval-Terme mehr**, bis die Suche Tiefe 5 *tatsächlich* erreicht (avgMaxDepth ≥ 5.0 bei gesetztem Depth-5).
+3. **Keine Eval-Terme mehr.** Tiefe 5 ist seit M1.1 das Messprotokoll.
 4. **Kein Double-DSP der Engine:** nicht LMR + NMP + ProbCut + Zeit gleichzeitig drehen.
 5. **9×9 zuerst, 8×8 ist Kalibrierung.** Track B (SF) misst absolute Stärke; Track A (9×9 `matchRefs`) muss nach jedem Engine-Merge grün bleiben.
 6. **Multiplayer bleibt draußen.**
@@ -85,7 +86,7 @@ npm run match:stockfish -- --games=40 --depth=5 --sf-depth=8 --sf-elo=1400 --qui
 | Opening-Book auf Engine-PV   | zerstört das Vielfalt-Buch (#146)                        |
 | NNUE                         | geparkt 2026-08-23; Gate negativ (−132 Elo vs PST)       |
 | Coverage-Ziel 85 % Branches  | diminishing returns bei 7000+ Branches                   |
-| TypeScript 7 jetzt           | typescript-eslint v8 blockiert                           |
+| TypeScript 7 nochmal aufrollen | erledigt in #214 (tsc 7, Linter auf TS-6-API)          |
 
 ---
 
@@ -115,21 +116,20 @@ Aufwand ist Kalenderzeit bei fokussierter Arbeit, nicht Story-Points. Akzeptanz 
 
 ### M1 — Suche skaliert (der echte Elo-Hebel) — ✅ 1.1 ERLEDIGT 2026-08-22
 
-**Status:** M1.1 (inkrementeller Zobrist + Quiesce-Negamax-Fix) ist gemergt
-(commit f91e116). n40 vs SF-1400: **0.575 / Elo +52 → ~+230 gesamt**.
-MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt.
+**Status:** M1.1 ist gemergt (`f91e116`). Kanonisch `sf_match_m1_symfix_n40.log`:
+**0.575 / +52 Elo**, Intervall etwa −55..+171, 0 `illegal-ours`.
+Die ältere „+230 gesamt“-Notiz lässt sich aus −269 und +52 nicht ableiten.
+MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 ist gemergt, Lauf läuft.
 
 | # | Arbeit | Warum | Akzeptanz |
 | - | ------ | ----- | --------- |
-| ~~1.1~~ | ✅ Inkrementeller Zobrist-Hash **gemergt (+ Quiesce-Fix, +230)** | — | — |
-| 1.2 | Hash-Keys für Rochade/EP (8×8) | TT-Kollisionen bei RuleState | Kein illegal-ours-Anstieg auf Track B |
-| 1.3 | 64-bit Zobrist (BigInt oder zwei Int32) | 32-bit Hash + 1M TT = Kollisionen bei d5+ | Track A 9×9 unverändert oder besser |
+| ~~1.1~~ | ✅ Inkrementeller Zobrist-Hash gemergt (Quiesce-Fix, Log +52 Elo) | — | — |
+| 1.2 | Hash-Keys für Rochade/EP (8×8) | TT-Kollisionen bei RuleState | Nur wenn `sf_match_m13_n40` wieder `illegal-ours` zeigt. Symfix-Lauf: 0 |
+| ~~1.3~~ | ✅ 64-bit Zobrist gemergt (`fb20831`, #215). Messung: `bench/sf_match_m13_n40.log` | — | — |
 | 1.4 | Optional: Killer/History/Counter Move bleiben; **kein** neues Pruning | Pruning ist kalibriert | — |
-| 1.5 | Track B nach 1.1: **n=40, d5, gleiche Knobs** | Messung, kein Glauben | Teilweise erfüllt (n40-Merge-Messung liegt vor); Ziel 0.30 nicht erreicht |
+| 1.5 | Track B nach 1.1: **n=40, d5, gleiche Knobs** | Messung, kein Glauben | Score 0.575, Gate 0.30 erreicht. Intervall enthält die 0; M1.3-Lauf ist die Wiederholung |
 
-**Parken bis nach 1.1:** Bitboards, Magic Bitboards, SSE, WASM-Rewrite. Erst messen, ob inkrementeller Hash reicht.
-
-**Reihenfolge intern:** 1.1 allein mergen und messen. 1.2/1.3 nur wenn 1.1 den NPS-Sprung bringt und Track B nicht regressiert.
+**Weiter geparkt:** Bitboards, Magic Bitboards, SSE, WASM. Erst anfassen, wenn `sf_match_m13_n40` deutlich unter dem Symfix-Lauf liegt. Dann ein Hebel: Zuggenerierung, n≥40.
 
 ---
 
@@ -191,7 +191,7 @@ Erst anfassen, wenn M1 das Score-Ziel (0.30) **oder** klaren NPS-Beweis geliefer
 | SF Elo 1600 / höhere SF-Tiefe | Track B Score ≥ 0.30 bei Elo 1400 | Parken |
 | Syzygy/Endgame-TBs 8×8 | NPS-Sprung da, Endspiele verlieren Track-B-Partien | 9×9 hat keine TBs — nur 8×8-Kalibrierung |
 | NNUE | Pipeline steht, Netze bei ~72% Agreement | GEMESSEN 2026-08-23: Gate −132 Elo → geparkt |
-| TypeScript 7 | typescript-eslint ≥ v9 | Warten |
+| TypeScript 7 | — | erledigt #214 |
 | Desktop-Hülle (Tauri) | M4 a11y + PWA stabil | Unnötig für Web-first |
 | GIF/PGN-Replay-Export | M3 Coach steht | Nice-to-have |
 
@@ -207,7 +207,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** M0. Ohne Freeze bleiben 15 Experiment-Commits und Test-Konstanten die Baseline verwischen — jede spätere Messung ist dann wertlos.
+**Nächster konkreter Schritt:** M1.3-Lauf (`bench/sf_match_m13_n40.log`) zu Ende, `RESULT` in `STATUS.md`. Liegt das Intervall klar über 0, ist der nächste Schnitt das Tagespuzzle als Einstieg, danach PGN-Export. Fällt der Score Richtung 0,2, ist der nächste einzelne Hebel die Zuggenerierung.
 
 ---
 
@@ -216,7 +216,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
 Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand entscheidet:
 
 1. **Zeitbudget KI:** **8 s gemessen bestätigt** (10s: −44) — abgehakt.
-2. ~~**Nach v1.8 zuerst M1 oder M2?**~~ M1.1 ist gemergt (+230 Elo, das strukturelle Fundament von v2.0.0). **NNUE ist geparkt** — Gate war negativ (−132 Elo vs PST, n=80, 72.8% Agreement reicht nicht; PST-Eval schlägt das Netz). Es gibt aktuell **keinen offenen Engine-Hebel**, der nicht schon gemessen negativ/neutral ist. Nächster Raum ist entweder M1-Rest (M1.2 Hash-Keys für Rochade/EP + M1.3 64-bit Zobrist — nur messbar, wenn man bereit ist, 0-cp-Ergebnis zu akzeptieren) oder M2/M3/M4 (Kampagne, Coach, Polish) — die Engine ist nicht der Hebel mehr.
+2. **Nach v2.0.0:** M2/M3/M4 sind im Release bzw. auf `main` (A11y-Regeln an, TS 7, M1.3). **NNUE bleibt geparkt** (−132 Elo vs PST, n=80). Offener Engine-Rest ist nur noch M1.2, und nur bei `illegal-ours`. Die Richtung nach dem M1.3-Lauf steht in `STATUS.md`.
 3. **Ist 8×8-Elo die Nordstern-Metrik?** Ja als *Regression-Gate*. Spielerwert kommt aus M2/M3.
 
 ---
@@ -227,8 +227,8 @@ Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand e
 | ------- | ------ |
 | **v1.7.0** | Eval-Patch, Replay, Share-Link, 8×8-Regeln — **released** |
 | **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline — **released/getaggt** |
-| **main (post-v1.8.0)** | M1.1 inkrementeller Hash + Quiesce-Fix (+230 Elo), NNUE-Pipeline — noch nicht als Release getaggt |
-| **v1.9.0** | Kandidat: Tag des aktuellen main-Stands (M1.1 + ggf. NNUE-Gate-Ergebnis) |
-| **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Coach — das eigentliche 9×9-Spiel |
+| **v1.9.0** | M1.1 + NNUE-Pipeline (Gate negativ, geparkt) — **released** |
+| **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Coach — **released** |
+| **main (2026-10-19)** | v2.0.0 + Vitest 5 + TS 7 (#214) + M1.3 (#215). Kein neuer Tag, bis der Bestätigungslauf da ist |
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.

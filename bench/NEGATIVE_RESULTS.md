@@ -49,7 +49,17 @@ sessions don't waste time re-testing them.
 - NULL_MOVE_R=1 (with LMR4) → **0.175 / ≈ −269** (best Track B)
 
 ## What this means
-Cheap eval terms and extra pruning knobs are exhausted. Remaining strength
-gains are structural: incremental Zobrist (full 81-square rehash per node
-today) and actually reaching depth 5. H-P1 is closed as a negative result
-(same class as Mobility). Do not add eval terms until avgMaxDepth ≥ 5.0.
+Cheap eval terms and extra pruning knobs are exhausted. H-P1 is closed
+(same class as Mobility). Do not re-open the rows above.
+
+Structural follow-ups, already done or in flight (do not re-test the knobs):
+
+- M1.1 incremental Zobrist + quiescence fix is merged (`f91e116`). The
+  per-node 81-square rehash is gone. Canonical Track B:
+  `bench/sf_match_m1_symfix_n40.log` — 17–12–11, score 0.575, +52 Elo
+  vs SF 1400 (d5 vs d8, colors alternate, 0 illegal-ours, CI about −55..+171).
+  The “−269 Elo” figure is the v1.8.0 row above, not the current engine.
+- M1.3 64-bit Zobrist is merged (`fb20831`, #215). Confirmation match uses
+  the same protocol: `bench/sf_match_m13_n40.log`.
+- M1.2 (castling/en-passant hash keys) stays closed unless that log shows
+  `illegal-ours` again.
