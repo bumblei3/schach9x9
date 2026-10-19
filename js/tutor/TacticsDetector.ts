@@ -1098,6 +1098,53 @@ export function detectFairyPatterns(
         });
       }
     }
+
+    // Skewer detection along the archbishop's bishop lines.
+    if (pieceType === 'a') {
+      const skewers = detectSkewers(game, analyzer, to, piece.color);
+      if (skewers.length > 0) {
+        const s = skewers[0];
+        patterns.push({
+          type: 'archbishop_skewer',
+          pieceType,
+          pieceName,
+          explanation: `🍢 Erzbischof-Spieß! ${s.frontName} muss weichen und entblößt ${s.behindName}.`,
+          targets: [s.frontPos, s.behindPos],
+        });
+      }
+    }
+
+    // Fork detection for chancellor (rook + knight = powerful fork potential).
+    if (pieceType === 'c') {
+      const threatened = getThreatenedPieces(game, analyzer, to, piece.color);
+      const valuable = threatened.filter((t: { type: string }) => t.type !== 'p');
+      if (valuable.length >= 2) {
+        const names = valuable.map((t: { name: string }) => t.name).join(' und ');
+        patterns.push({
+          type: 'chancellor_fork',
+          pieceType,
+          pieceName,
+          explanation: `🍴 Kanzler-Gabel! ${pieceName} bedroht ${names} gleichzeitig.`,
+          targets: valuable.map((t: { pos: Pos }) => t.pos),
+        });
+      }
+    }
+
+    // Fork detection for angel (premium piece with high mobility).
+    if (pieceType === 'e') {
+      const threatened = getThreatenedPieces(game, analyzer, to, piece.color);
+      const valuable = threatened.filter((t: { type: string }) => t.type !== 'p');
+      if (valuable.length >= 2) {
+        const names = valuable.map((t: { name: string }) => t.name).join(' und ');
+        patterns.push({
+          type: 'angel_fork',
+          pieceType,
+          pieceName,
+          explanation: `🍴 Engel-Gabel! ${pieceName} bedroht ${names} gleichzeitig.`,
+          targets: valuable.map((t: { pos: Pos }) => t.pos),
+        });
+      }
+    }
   } finally {
     // Restore board
     game.board[from.r][from.c] = piece;
