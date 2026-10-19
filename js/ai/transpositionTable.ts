@@ -43,8 +43,14 @@ let zobristTable: number[][][] = [];
 // Side to move random value
 let sideToMoveValue: number = 0;
 
-// Castling rights not implemented in current board representation (no castling rights stored)
-// If needed later, extend.
+// Castling rights: 4 independent keys (WK, WQ, BK, BQ)
+let castlingWKValue: number = 0;
+let castlingWQValue: number = 0;
+let castlingBKValue: number = 0;
+let castlingBQValue: number = 0;
+
+// En passant: 1 key (file where EP is possible, or a generic key)
+let enPassantValue: number = 0;
 
 /**
  * Initialize Zobrist random numbers with a fixed seed for reproducibility.
@@ -74,13 +80,28 @@ function initZobrist(): void {
     }
   }
   sideToMoveValue = nextRand();
+
+  // Castling rights and EP keys
+  castlingWKValue = nextRand();
+  castlingWQValue = nextRand();
+  castlingBKValue = nextRand();
+  castlingBQValue = nextRand();
+  enPassantValue = nextRand();
 }
 
 // Initialize on load
 initZobrist();
 
-// Exported for incremental hash updates in search.ts (M1.1)
-export { zobristTable, sideToMoveValue };
+// Exported for incremental hash updates in search.ts (M1.1, M1.2)
+export {
+  zobristTable,
+  sideToMoveValue,
+  castlingWKValue,
+  castlingWQValue,
+  castlingBKValue,
+  castlingBQValue,
+  enPassantValue,
+};
 
 /**
  * Compute Zobrist hash for a given board and optionally side to move.
@@ -88,7 +109,12 @@ export { zobristTable, sideToMoveValue };
  * @param sideToMove COLOR_WHITE or COLOR_BLACK; if undefined, side is not included in hash
  * @returns 32-bit signed hash
  */
-export function computeZobristHash(board: Int8Array, sideToMove?: number): number {
+export function computeZobristHash(
+  board: Int8Array,
+  sideToMove?: number,
+  castlingRights?: { wk: boolean; wq: boolean; bk: boolean; bq: boolean },
+  epFile?: number | null
+): number {
   let h = 0;
   for (let sq = 0; sq < SQUARE_COUNT; sq++) {
     const piece = board[sq];
@@ -107,6 +133,17 @@ export function computeZobristHash(board: Int8Array, sideToMove?: number): numbe
     if (sideToMove === COLOR_BLACK) {
       h ^= sideToMoveValue;
     }
+  }
+  // XOR castling rights if provided
+  if (castlingRights) {
+    if (castlingRights.wk) h ^= castlingWKValue;
+    if (castlingRights.wq) h ^= castlingWQValue;
+    if (castlingRights.bk) h ^= castlingBKValue;
+    if (castlingRights.bq) h ^= castlingBQValue;
+  }
+  // XOR en passant file if provided
+  if (epFile !== null && epFile !== undefined) {
+    h ^= enPassantValue;
   }
   // Return as signed 32-bit to match previous behavior
   return h | 0;
