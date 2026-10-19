@@ -59,7 +59,9 @@ Structural follow-ups, already done or in flight (do not re-test the knobs):
   `bench/sf_match_m1_symfix_n40.log` — 17–12–11, score 0.575, +52 Elo
   vs SF 1400 (d5 vs d8, colors alternate, 0 illegal-ours, CI about −55..+171).
   The “−269 Elo” figure is the v1.8.0 row above, not the current engine.
-- M1.3 64-bit Zobrist is merged (`fb20831`, #215). Confirmation match uses
-  the same protocol: `bench/sf_match_m13_n40.log`.
-- M1.2 (castling/en-passant hash keys) stays closed unless that log shows
-  `illegal-ours` again.
+- M1.3 64-bit Zobrist is merged (`fb20831`, #215) and measured.
+  `bench/sf_match_m13_n40.log`: 19–6–15, score 0.550, +35 Elo
+  (CI about −73..+151), 0 illegal-ours. Within noise of the M1.1 log.
+  Not an Elo lever.
+- M1.2 (castling/en-passant hash keys) stays closed. Both n=40 logs have
+  0 illegal-ours.
