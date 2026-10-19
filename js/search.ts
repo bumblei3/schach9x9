@@ -44,6 +44,7 @@ import {
   castlingBKValue,
   castlingBQValue,
   enPassantValue,
+  type Hash64,
 } from './ai/transpositionTable';
 import { progressCallback, type AIProgressData } from './aiEngine';
 import type { IntBoard } from './evaluate';
@@ -397,20 +398,23 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const LMR_MOVE_COUNT = 3; // First N moves not reduced
       const LMR_MAX_REDUCTION = 3; // Max reduction
 
-      function zobVal(piece: number, sq: number): number {
+      function zobVal(piece: number, sq: number): [number, number] {
         const type = piece & TYPE_MASK;
         const color = piece & COLOR_MASK;
         const ti = PIECE_TYPE_INDEX[type];
-        if (ti === -1) return 0;
+        if (ti === -1) return [0, 0];
         return zobristTable[sq][ti][color === COLOR_WHITE ? 0 : 1];
       }
 
-      // Pure incremental Zobrist update (M1.1, M1.2): computes the child hash WITHOUT
+      // Pure incremental Zobrist update (M1.1, M1.2, M1.3): computes the child hash WITHOUT
       // mutating the board. Must be called BEFORE makeMoveInt applies `move`.
-      function makeMoveHash(b: IntBoard, move: Move, hash: number): number {
-        let h = hash;
+      function makeMoveHash(b: IntBoard, move: Move, hash: Hash64): Hash64 {
+        let low = hash.low;
+        let high = hash.high;
         const piece = b[move.from];
-        h ^= zobVal(piece, move.from);
+        const [zl, zh] = zobVal(piece, move.from);
+        low ^= zl;
+        high ^= zh;
 
         // EP: clear previous EP flag, then set new one after move
         if (move.flags === 'ep') {
@@ -418,52 +422,67 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           const width = Math.sqrt(b.length) | 0;
           const victimSq = move.from + ((move.to % width) - (move.from % width));
           const victim = b[victimSq];
-          if (victim !== 0) h ^= zobVal(victim, victimSq);
-          h ^= zobVal(piece, move.to); // EP never promotes
+          if (victim !== 0) {
+            const [vl, vh] = zobVal(victim, victimSq);
+            low ^= vl;
+            high ^= vh;
+          }
+          const [pl, ph] = zobVal(piece, move.to);
+          low ^= pl;
+          high ^= ph; // EP never promotes
           // Set new EP file
-          h ^= enPassantValue;
+          low ^= enPassantValue[0];
+          high ^= enPassantValue[1];
         } else {
           // Clear any previous EP flag
-          h ^= enPassantValue;
+          low ^= enPassantValue[0];
+          high ^= enPassantValue[1];
 
           // Castling: update castling rights hash
           if (move.flags === 'castle-k' || move.flags === 'castle-q') {
             // Remove old castling rights
-            h ^= castlingWKValue;
-            h ^= castlingWQValue;
+            low ^= castlingWKValue[0]; high ^= castlingWKValue[1];
+            low ^= castlingWQValue[0]; high ^= castlingWQValue[1];
             // Rook move (part of castling)
             const rookFrom = move.flags === 'castle-k' ? move.from + 3 : move.from - 4;
             const rookTo = move.flags === 'castle-k' ? move.from + 1 : move.from - 1;
-            h ^= zobVal(b[rookFrom], rookFrom);
-            h ^= zobVal(b[rookTo], rookTo);
+            const [rl1, rh1] = zobVal(b[rookFrom], rookFrom);
+            low ^= rl1; high ^= rh1;
+            const [rl2, rh2] = zobVal(b[rookTo], rookTo);
+            low ^= rl2; high ^= rh2;
           } else {
             // King move removes both castling rights
             if (piece === (PIECE_KING | COLOR_WHITE)) {
-              h ^= castlingWKValue;
-              h ^= castlingWQValue;
+              low ^= castlingWKValue[0]; high ^= castlingWKValue[1];
+              low ^= castlingWQValue[0]; high ^= castlingWQValue[1];
             }
             if (piece === (PIECE_KING | COLOR_BLACK)) {
-              h ^= castlingBKValue;
-              h ^= castlingBQValue;
+              low ^= castlingBKValue[0]; high ^= castlingBKValue[1];
+              low ^= castlingBQValue[0]; high ^= castlingBQValue[1];
             }
             // Rook move from starting square removes that castling right
             if (piece === (PIECE_ROOK | COLOR_WHITE)) {
-              if (move.from === 64) h ^= castlingWKValue; // h1
-              if (move.from === 56) h ^= castlingWQValue; // a1
+              if (move.from === 64) { low ^= castlingWKValue[0]; high ^= castlingWKValue[1]; } // h1
+              if (move.from === 56) { low ^= castlingWQValue[0]; high ^= castlingWQValue[1]; } // a1
             }
             if (piece === (PIECE_ROOK | COLOR_BLACK)) {
-              if (move.from === 0) h ^= castlingBKValue; // h8
-              if (move.from === 7) h ^= castlingBQValue; // a8
+              if (move.from === 0) { low ^= castlingBKValue[0]; high ^= castlingBKValue[1]; } // h8
+              if (move.from === 7) { low ^= castlingBQValue[0]; high ^= castlingBQValue[1]; } // a8
             }
           }
 
           const newPiece = move.promotion ? (piece & COLOR_MASK) | (move.promotion & TYPE_MASK) : piece;
           const captured = b[move.to];
-          if (captured !== 0) h ^= zobVal(captured, move.to);
-          h ^= zobVal(newPiece, move.to);
+          if (captured !== 0) {
+            const [cl, ch] = zobVal(captured, move.to);
+            low ^= cl; high ^= ch;
+          }
+          const [nl, nh] = zobVal(newPiece, move.to);
+          low ^= nl; high ^= nh;
         }
-        h ^= sideToMoveValue;
-        return h;
+        low ^= sideToMoveValue[0];
+        high ^= sideToMoveValue[1];
+        return { low, high };
       }
 
       function search(
@@ -473,14 +492,14 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         beta: number,
         maximizing: boolean,
         isRoot: boolean = false,
-        hash: number = 0
+        hash: Hash64 = { low: 0, high: 0 }
       ): { score: number; bestMove: Move | null } {
         nodes++;
         if (nodes % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
           return { score: evaluate(b, color, evalConfig), bestMove: null };
         }
 
-        const ttEntry = tt.probe(hash, d);
+        const ttEntry = tt.probe(hash.low, hash.high, d);
         let ttBest: Move | null = null;
 
         if (ttEntry && ttEntry.depth >= d) {
@@ -521,11 +540,12 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
             }
           }
           if (hasMaterial) {
+            const nullHash: Hash64 = { low: hash.low ^ sideToMoveValue[0], high: hash.high ^ sideToMoveValue[1] };
             if (maximizing) {
-              const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing, false, hash ^ sideToMoveValue);
+              const nullScore = search(b, d - 1 - NULL_MOVE_R, beta - 1, beta, !maximizing, false, nullHash);
               if (nullScore.score >= beta) return { score: beta, bestMove: null };
             } else {
-              const nullScore = search(b, d - 1 - NULL_MOVE_R, alpha, alpha + 1, !maximizing, false, hash ^ sideToMoveValue);
+              const nullScore = search(b, d - 1 - NULL_MOVE_R, alpha, alpha + 1, !maximizing, false, nullHash);
               if (nullScore.score <= alpha) return { score: alpha, bestMove: null };
             }
           }
@@ -779,7 +799,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           }
         } // end of move loop
 
-        tt.store(hash, d, bestScore, flag, bestMove);
+        tt.store(hash.low, hash.high, d, bestScore, flag, bestMove);
         return { score: bestScore, bestMove };
       }
 

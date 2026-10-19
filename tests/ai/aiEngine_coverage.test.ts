@@ -124,6 +124,6 @@ describe('AIEngine Coverage Boost', () => {
   });
 
   test('computeZobristHash coverage', () => {
-    expect(aiEngine.computeZobristHash(board, COLOR_WHITE)).toBe(0);
+    expect(aiEngine.computeZobristHash(board, COLOR_WHITE)).toEqual({ low: 0, high: 0 });
   });
 });
