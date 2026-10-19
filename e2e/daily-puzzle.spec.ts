@@ -9,6 +9,29 @@ test.describe('Daily Puzzle Mode (browser)', () => {
     await helper.goto();
   });
 
+  test('unsolved daily card leads the featured modes', async ({ page }) => {
+    const modes = page.locator('.gamemode-grid-featured > .gamemode-card:not(.hidden)');
+    await expect(modes.nth(0)).toHaveAttribute('data-mode', 'daily-puzzle');
+    await expect(modes.nth(1)).toHaveAttribute('id', 'campaign-start-btn');
+    await expect(modes.nth(2)).toHaveAttribute('data-mode', 'classic');
+  });
+
+  test('solved daily card sits behind Klassisch', async ({ page }) => {
+    await page.addInitScript(() => {
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      localStorage.setItem(`dailyPuzzle.solved.${now.getFullYear()}-${month}-${day}`, '1');
+    });
+    await helper.goto();
+
+    const modes = page.locator('.gamemode-grid-featured > .gamemode-card:not(.hidden)');
+    await expect(modes.nth(0)).toHaveAttribute('id', 'campaign-start-btn');
+    await expect(modes.nth(1)).toHaveAttribute('data-mode', 'classic');
+    await expect(modes.nth(2)).toHaveAttribute('data-mode', 'daily-puzzle');
+    await expect(page.locator('#daily-puzzle-badge')).toBeVisible();
+  });
+
   test('loads a daily puzzle with pieces and shows the puzzle menu', async ({ page }) => {
     await helper.startGame('daily-puzzle');
 
