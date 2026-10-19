@@ -4,6 +4,7 @@ import * as UI from '../ui.js';
 import { soundManager } from '../sounds.js';
 import { puzzleManager } from '../puzzleManager.js';
 import { dailyPuzzle } from '../dailyPuzzle.js';
+import { syncDailyPuzzleMenu } from '../ui/dailyPuzzleMenu.js';
 import { evaluatePosition } from '../aiEngine.js';
 import * as MoveValidator from './MoveValidator.js';
 import { confettiSystem } from '../effects.js';
@@ -341,24 +342,18 @@ export async function completeMoveExecution(
         soundManager.playError();
       }, 500);
     } else if (result === 'solved') {
-      UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
       soundManager.playSuccess();
       if (game.mode === 'daily-puzzle') {
         dailyPuzzle.markSolvedToday();
-        // Reflect the "Heute gelöst" badge + streak immediately.
-        const badge = document.getElementById('daily-puzzle-badge');
-        if (badge) badge.style.display = 'inline-block';
-        const streakEl = document.getElementById('daily-puzzle-streak');
-        if (streakEl) {
-          const label = dailyPuzzle.formatStreakLabel();
-          streakEl.textContent = label;
-          streakEl.style.display = label ? 'inline-block' : 'none';
-        }
+        syncDailyPuzzleMenu();
         const streakLabel = dailyPuzzle.formatStreakLabel();
         UI.updatePuzzleStatus(
           'success',
-          streakLabel ? `Richtig! Puzzle gelöst — ${streakLabel}` : 'Richtig! Puzzle gelöst!'
+          streakLabel ? `Richtig! Puzzle gelöst — ${streakLabel}` : 'Richtig! Puzzle gelöst!',
+          false
         );
+      } else {
+        UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
       }
     } else {
       UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');

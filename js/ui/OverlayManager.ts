@@ -198,14 +198,14 @@ export function hidePuzzleOverlay(): void {
 /**
  * Aktualisiert den Status im Puzzle-Overlay.
  */
-export function updatePuzzleStatus(status: string, message: string): void {
+export function updatePuzzleStatus(status: string, message: string, showNext = true): void {
   const statusEl = document.getElementById('puzzle-status');
   if (!statusEl) return;
   statusEl.textContent = message;
   statusEl.className = `puzzle-status ${status}`;
   if (status === 'success') {
     const nextBtn = document.getElementById('puzzle-next-btn');
-    if (nextBtn) nextBtn.classList.remove('hidden');
+    if (nextBtn) nextBtn.classList.toggle('hidden', !showNext);
   }
 }
 

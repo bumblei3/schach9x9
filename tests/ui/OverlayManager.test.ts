@@ -219,6 +219,13 @@ describe('OverlayManager', () => {
       expect(document.getElementById('puzzle-next-btn')!.classList.contains('hidden')).toBe(false);
     });
 
+    test('updatePuzzleStatus keeps next hidden when showNext is false', () => {
+      const nextBtn = document.getElementById('puzzle-next-btn')!;
+      nextBtn.classList.remove('hidden');
+      OverlayManager.updatePuzzleStatus('success', 'Heute gelöst', false);
+      expect(nextBtn.classList.contains('hidden')).toBe(true);
+    });
+
     test('showPuzzleOverlay returns early if overlay missing', () => {
       document.body.innerHTML = '';
       OverlayManager.showPuzzleOverlay({

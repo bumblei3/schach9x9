@@ -16,6 +16,7 @@ import { CampaignUI } from './CampaignUI.js';
 import { AnalysisUI } from './AnalysisUI.js';
 import { OpeningBookUI } from './OpeningBookUI.js';
 import { hidePostGameStats } from './PostGameAnalysisUI.js';
+import { syncDailyPuzzleMenu } from './dailyPuzzleMenu.js';
 import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
@@ -425,6 +426,7 @@ export class DOMHandler {
     this.initAnalysisHandlers();
     this.initPuzzleHandlers();
     this.initContinueButton();
+    syncDailyPuzzleMenu();
   }
 
   private initContinueButton(): void {

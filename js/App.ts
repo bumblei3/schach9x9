@@ -9,7 +9,7 @@ import type { EvaluationBar } from './ui/EvaluationBar.js';
 import type { Player, Square, Piece, GameMode } from './types/game.js';
 import type { Game, MoveHistoryEntry, PieceWithMoved } from './gameEngine.js';
 import type { GameController } from './gameController.js';
-import { dailyPuzzle } from './dailyPuzzle.js';
+import { syncDailyPuzzleMenu } from './ui/dailyPuzzleMenu.js';
 import type { MoveController } from './moveController.js';
 import type { AIController } from './aiController.js';
 import type { TutorController } from './tutorController.js';
@@ -194,18 +194,9 @@ export class App {
     // so importing it above is enough to wire up [data-tooltip] hints.
   }
 
-  /** Show/hide the "Heute gelöst" badge + streak readout on the daily-puzzle card. */
+  /** Badge, streak, and featured-card order for today's daily puzzle. */
   private refreshDailyPuzzleBadge(): void {
-    const badge = document.getElementById('daily-puzzle-badge');
-    const streakEl = document.getElementById('daily-puzzle-streak');
-    if (badge) {
-      badge.style.display = dailyPuzzle.isSolvedToday() ? 'inline-block' : 'none';
-    }
-    if (streakEl) {
-      const label = dailyPuzzle.formatStreakLabel();
-      streakEl.textContent = label;
-      streakEl.style.display = label ? 'inline-block' : 'none';
-    }
+    syncDailyPuzzleMenu();
   }
 
   public async init3D(): Promise<void> {

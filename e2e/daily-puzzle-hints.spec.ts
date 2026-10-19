@@ -22,10 +22,9 @@ test.describe('Daily Puzzle: engine hints / move suggestions (browser)', () => {
   test('hint control surfaces engine move suggestions during a daily puzzle', async ({ page }) => {
     await helper.startGame('daily-puzzle');
 
-    // Daily puzzle first shows the puzzle menu; pick the first puzzle to enter PLAY.
-    const puzzleMenu = page.locator('#puzzle-menu-overlay');
-    await expect(puzzleMenu).toBeVisible({ timeout: 10000 });
-    await page.locator('.puzzle-card').first().click();
+    // Today's position is already on the board. The catalog stays closed.
+    await expect(page.locator('#puzzle-menu-overlay')).toBeHidden();
+    await expect(page.locator('#puzzle-overlay')).toBeVisible();
 
     // Board must render a real position (not blank) and be in a puzzle play state.
     await expect(page.locator('.cell[data-piece]').first()).toBeVisible({ timeout: 10000 });
