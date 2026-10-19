@@ -230,7 +230,7 @@ export class PieceManager3D {
     fromCol: number,
     toRow: number,
     toCol: number,
-    _captured: boolean = false
+    captured: boolean = false
   ): Promise<void> {
     const key = `${fromRow},${fromCol}`;
     const piece = this.pieces[key];
@@ -265,6 +265,11 @@ export class PieceManager3D {
           delete this.pieces[key];
           this.pieces[`${toRow},${toCol}`] = piece;
 
+          // Capture-Juice: spawn particles on capture
+          if (captured) {
+            this.spawnCaptureParticles(toPos);
+          }
+
           this.animating = false;
           resolve();
         }
@@ -272,6 +277,66 @@ export class PieceManager3D {
 
       moveAnimation();
     });
+  }
+
+  /**
+   * Spawn particle burst at capture position (Capture-Juice).
+   * Small spheres that rise and fade out over ~600ms.
+   */
+  private spawnCaptureParticles(pos: { x: number; z: number }): void {
+    if (!this.sceneManager.scene) return;
+
+    const particleCount = 12;
+    const particles: THREE.Mesh[] = [];
+    const startTime = Date.now();
+    const duration = 600;
+
+    for (let i = 0; i < particleCount; i++) {
+      const geometry = new THREE.SphereGeometry(0.06, 8, 8);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xff6b6b,
+        transparent: true,
+        opacity: 1,
+      });
+      const particle = new THREE.Mesh(geometry, material);
+
+      const angle = (i / particleCount) * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 1.5;
+      particle.position.set(pos.x, 0.1, pos.z);
+      particle.userData = {
+        vx: Math.cos(angle) * speed,
+        vy: 2 + Math.random() * 2,
+        vz: Math.sin(angle) * speed,
+      };
+
+      if (this.sceneManager.scene) this.sceneManager.scene.add(particle);
+      particles.push(particle);
+    }
+
+    const animateParticles = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      particles.forEach(p => {
+        const { vx, vy, vz } = p.userData;
+        p.position.x += vx * 0.016;
+        p.position.y += vy * 0.016;
+        p.position.z += vz * 0.016;
+        (p.material as THREE.MeshBasicMaterial).opacity = 1 - progress;
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(animateParticles);
+      } else {
+        particles.forEach(p => {
+          if (this.sceneManager.scene) this.sceneManager.scene.remove(p);
+          p.geometry.dispose();
+          (p.material as THREE.Material).dispose();
+        });
+      }
+    };
+
+    animateParticles();
   }
 
   async playBattleSequence(
