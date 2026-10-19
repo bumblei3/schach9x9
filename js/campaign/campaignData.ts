@@ -386,9 +386,151 @@ const CAMPAIGN_LEVELS_AKT2: Level[] = [
   },
 ];
 
+// ============================================================================
+// Akt III — Feen-Tiefe (M2.1 Fortsetzung): jede Mission kombiniert zwei
+// Feenfiguren oder stellt eine einzelne in den Fokus.
+// ============================================================================
+
+const CAMPAIGN_LEVELS_AKT3: Level[] = [
+  {
+    id: 'archbishop_solo',
+    title: 'Kapitel 13: Der Erzbischof-Solitär',
+    description:
+      'Ein einzelner Erzbischof gegen eine ganze Armee. Seine Gabelkraft aus Läufer und Springer reicht aus — wenn du ihn richtig führst.',
+    opponentName: 'Erzbischof-Wettstreiter',
+    opponentPersonality: 'aggressive',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/4K2A w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['chancellor_lines'],
+    goals: {
+      2: { type: 'moves', value: 35, description: 'Sieg in unter 35 Zügen' },
+      3: { type: 'material', value: 6, description: 'Gewinne mit +6 Materialvorteil' },
+    },
+    goldReward: 70,
+  },
+  {
+    id: 'chancellor_lines',
+    title: 'Kapitel 14: Die Linien der Kanzlerin',
+    description:
+      'Die Kanzlerin beherrscht Linien und Reihen. Nutze ihre Turm-Schärfe, um den Gegner in die Enge zu treiben.',
+    opponentName: 'Kanzlerin Lutgard',
+    opponentPersonality: 'positional',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/9/9/9/ppppppppp/9/9/PPPPPPPPP/3K2C1 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['angel_storm'],
+    goals: {
+      2: { type: 'moves', value: 35, description: 'Sieg in unter 35 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
+    },
+    goldReward: 75,
+  },
+  {
+    id: 'angel_storm',
+    title: 'Kapitel 15: Der Engel-Sturm',
+    description:
+      'Der Engel ist die stärkste Feenfigur. Führe ihn an die Front und zerreiße die feindlichen Linien!',
+    opponentName: 'Engel-Fürst',
+    opponentPersonality: 'aggressive',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/3E1K3 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['nightrider_speed'],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 85,
+  },
+  {
+    id: 'nightrider_speed',
+    title: 'Kapitel 16: Der Nachtreiter-Sprint',
+    description:
+      'Der Nachtreiter überrascht durch seine Geschwindigkeit. Nutze seine Springer-Sprünge, um den Gegner zu überrumpeln.',
+    opponentName: 'Reitermeister Blitz',
+    opponentPersonality: 'aggressive',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/9/pjppp2pp/9/9/9/9/PPPPPPPPP/2J1K4 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['fairy_synergy'],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
+    },
+    goldReward: 80,
+  },
+  {
+    id: 'fairy_synergy',
+    title: 'Kapitel 17: Feen-Synergie',
+    description:
+      'Erzbischof und Kanzlerin arbeiten zusammen. Läufer + Springer + Turm = unaufhaltbare Gabeln!',
+    opponentName: 'Feen-Duo',
+    opponentPersonality: 'balanced',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/3AC1K3 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: ['fairy_master'],
+    goals: {
+      2: { type: 'moves', value: 35, description: 'Sieg in unter 35 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
+    },
+    goldReward: 100,
+  },
+  {
+    id: 'fairy_master',
+    title: 'Kapitel 18: Der Feen-Meister',
+    description:
+      'Alle vier Feenfiguren auf einmal gegen eine Elite-Armee. Der ultimative Test deiner 9x9-Kunst!',
+    opponentName: 'Feen-Meister Thorin',
+    opponentPersonality: 'expert',
+    difficulty: 'expert',
+    setupType: 'budget',
+    playerBudget: 55,
+    playerColor: 'white',
+    fen: 'rnbkcbnrj/ppppppppp/9/9/9/9/9/9/9 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 40, description: 'Sieg in unter 40 Zügen' },
+      3: { type: 'material', value: 6, description: 'Gewinne mit +6 Materialvorteil' },
+    },
+    goldReward: 150,
+  },
+];
+
 export const CAMPAIGN_LEVELS: Level[] = [
   ...CAMPAIGN_LEVELS_BASE,
   ...CAMPAIGN_LEVELS_AKT2,
+  ...CAMPAIGN_LEVELS_AKT3,
 ];
 
 export const CAMPAIGN_PERKS: Perk[] = [
