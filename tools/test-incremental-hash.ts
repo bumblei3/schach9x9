@@ -17,6 +17,7 @@ import {
   computeZobristHash,
   zobristTable,
   sideToMoveValue,
+  type Hash64,
 } from '../js/ai/transpositionTable.js';
 import {
   TYPE_MASK,
@@ -26,42 +27,68 @@ import {
 
 setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
 
-function zobVal(piece: number, sq: number): number {
+function zobVal(piece: number, sq: number): [number, number] {
   const type = piece & TYPE_MASK;
   const color = piece & COLOR_MASK;
   const ti = PIECE_TYPE_INDEX[type];
-  if (ti === -1) return 0;
+  if (ti === -1) return [0, 0];
   return zobristTable[sq][ti][color === COLOR_WHITE ? 0 : 1];
 }
 
 // Incremental hash after a sequence of moves — mirrors search.ts makeMoveHash.
-function incrementalHash(startBoard: Int8Array, moves: any[], startSide: number): { hash: number; board: Int8Array; side: number } {
+function incrementalHash(startBoard: Int8Array, moves: any[], startSide: number): { hash: Hash64; board: Int8Array; side: number } {
   const bb = startBoard.slice();
-  let hash = computeZobristHash(bb, startSide);
+  const initialHash = computeZobristHash(bb, startSide);
+  let hashLow = initialHash.low;
+  let hashHigh = initialHash.high;
   let side = startSide;
   for (const mv of moves) {
     const piece = bb[mv.from];
-    hash ^= zobVal(piece, mv.from);
+    const [zl, zh] = zobVal(piece, mv.from);
+    hashLow ^= zl;
+    hashHigh ^= zh;
     if (mv.flags === 'ep') {
-      const undo = makeMove(bb, mv);
-      if (undo.epVictimSq >= 0) hash ^= zobVal(undo.epVictimPiece, undo.epVictimSq);
+      // EP victim sits on the mover's rank, victim's file = destination file.
+      const width = Math.sqrt(bb.length) | 0;
+      const victimSq = mv.from + ((mv.to % width) - (mv.from % width));
+      const victim = bb[victimSq];
+      if (victim !== 0) {
+        const [vl, vh] = zobVal(victim, victimSq);
+        hashLow ^= vl;
+        hashHigh ^= vh;
+      }
+      const [pl, ph] = zobVal(piece, mv.to);
+      hashLow ^= pl;
+      hashHigh ^= ph;
+      makeMove(bb, mv);
     } else {
       if (mv.flags === 'castle-k' || mv.flags === 'castle-q') {
         const rookFrom = mv.flags === 'castle-k' ? mv.from + 3 : mv.from - 4;
         const rookTo = mv.flags === 'castle-k' ? mv.from + 1 : mv.from - 1;
-        hash ^= zobVal(bb[rookFrom], rookFrom);
-        hash ^= zobVal(bb[rookTo], rookTo);
+        const [rl1, rh1] = zobVal(bb[rookFrom], rookFrom);
+        hashLow ^= rl1;
+        hashHigh ^= rh1;
+        const [rl2, rh2] = zobVal(bb[rookTo], rookTo);
+        hashLow ^= rl2;
+        hashHigh ^= rh2;
       }
       const newPiece = mv.promotion ? (piece & COLOR_MASK) | (mv.promotion & TYPE_MASK) : piece;
       const captured = bb[mv.to];
-      if (captured !== 0) hash ^= zobVal(captured, mv.to);
-      hash ^= zobVal(newPiece, mv.to);
+      if (captured !== 0) {
+        const [cl, ch] = zobVal(captured, mv.to);
+        hashLow ^= cl;
+        hashHigh ^= ch;
+      }
+      const [nl, nh] = zobVal(newPiece, mv.to);
+      hashLow ^= nl;
+      hashHigh ^= nh;
       makeMove(bb, mv);
     }
-    hash ^= sideToMoveValue;
+    hashLow ^= sideToMoveValue[0];
+    hashHigh ^= sideToMoveValue[1];
     side = side === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
   }
-  return { hash, board: bb, side };
+  return { hash: { low: hashLow, high: hashHigh }, board: bb, side };
 }
 
 function initialBoard8x8(): Int8Array {
@@ -99,10 +126,10 @@ function main() {
     const inc = incrementalHash(fresh, moves, COLOR_WHITE);
     const full = computeZobristHash(inc.board, inc.side);
     tests++;
-    if (inc.hash !== full) {
+    if (inc.hash.low !== full.low || inc.hash.high !== full.high) {
       fails++;
       if (fails <= 3) {
-        console.log(`!!! trial ${t} MISMATCH inc=${inc.hash} full=${full} plies=${moves.length}`);
+        console.log(`!!! trial ${t} MISMATCH inc=${inc.hash.low},${inc.hash.high} full=${full.low},${full.high} plies=${moves.length}`);
       }
     }
   }

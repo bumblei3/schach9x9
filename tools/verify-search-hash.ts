@@ -12,7 +12,7 @@ import {
   COLOR_WHITE,
   COLOR_BLACK,
 } from '../js/ai/MoveGenerator.js';
-import { computeZobristHash, zobristTable, sideToMoveValue } from '../js/ai/transpositionTable.js';
+import { computeZobristHash, zobristTable, sideToMoveValue, type Hash64 } from '../js/ai/transpositionTable.js';
 import { TYPE_MASK, COLOR_MASK, PIECE_TYPE_INDEX } from '../js/ai/BoardDefinitions.js';
 
 setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
@@ -30,38 +30,58 @@ function startBoard(): Int8Array {
   }
   return b;
 }
-function zobVal(piece: number, sq: number): number {
+function zobVal(piece: number, sq: number): [number, number] {
   const type = piece & TYPE_MASK;
   const color = piece & COLOR_MASK;
   const ti = PIECE_TYPE_INDEX[type];
-  if (ti === -1) return 0;
+  if (ti === -1) return [0, 0];
   return zobristTable[sq][ti][color === COLOR_WHITE ? 0 : 1];
 }
-// mirror of search.ts pure makeMoveHash
-function makeMoveHash(b: Int8Array, move: any, hash: number): number {
-  let h = hash;
+// mirror of search.ts pure makeMoveHash (64-bit)
+function makeMoveHash(b: Int8Array, move: any, hash: Hash64): Hash64 {
+  let hLow = hash.low;
+  let hHigh = hash.high;
   const piece = b[move.from];
-  h ^= zobVal(piece, move.from);
+  const [zl, zh] = zobVal(piece, move.from);
+  hLow ^= zl;
+  hHigh ^= zh;
   if (move.flags === 'ep') {
     const width = Math.sqrt(b.length) | 0;
     const victimSq = move.from + ((move.to % width) - (move.from % width));
     const victim = b[victimSq];
-    if (victim !== 0) h ^= zobVal(victim, victimSq);
-    h ^= zobVal(piece, move.to);
+    if (victim !== 0) {
+      const [vl, vh] = zobVal(victim, victimSq);
+      hLow ^= vl;
+      hHigh ^= vh;
+    }
+    const [pl, ph] = zobVal(piece, move.to);
+    hLow ^= pl;
+    hHigh ^= ph;
   } else {
     if (move.flags === 'castle-k' || move.flags === 'castle-q') {
       const rookFrom = move.flags === 'castle-k' ? move.from + 3 : move.from - 4;
       const rookTo = move.flags === 'castle-k' ? move.from + 1 : move.from - 1;
-      h ^= zobVal(b[rookFrom], rookFrom);
-      h ^= zobVal(b[rookTo], rookTo);
+      const [rl1, rh1] = zobVal(b[rookFrom], rookFrom);
+      hLow ^= rl1;
+      hHigh ^= rh1;
+      const [rl2, rh2] = zobVal(b[rookTo], rookTo);
+      hLow ^= rl2;
+      hHigh ^= rh2;
     }
     const newPiece = move.promotion ? (piece & COLOR_MASK) | (move.promotion & TYPE_MASK) : piece;
     const captured = b[move.to];
-    if (captured !== 0) h ^= zobVal(captured, move.to);
-    h ^= zobVal(newPiece, move.to);
+    if (captured !== 0) {
+      const [cl, ch] = zobVal(captured, move.to);
+      hLow ^= cl;
+      hHigh ^= ch;
+    }
+    const [nl, nh] = zobVal(newPiece, move.to);
+    hLow ^= nl;
+    hHigh ^= nh;
   }
-  h ^= sideToMoveValue;
-  return h;
+  hLow ^= sideToMoveValue[0];
+  hHigh ^= sideToMoveValue[1];
+  return { low: hLow, high: hHigh };
 }
 
 // multi-move sequence test
@@ -75,21 +95,24 @@ function seq(): void {
     let side = trial % 2 === 0 ? COLOR_WHITE : COLOR_BLACK;
     setRules({ castling: 15, ep: -1 } as any);
     let legal = getAllLegalMoves(b, side === COLOR_WHITE ? 'white' : 'black');
-    let h = computeZobristHash(b, side);
+    const initialHash = computeZobristHash(b, side);
+    let hLow = initialHash.low;
+    let hHigh = initialHash.high;
     const plies = 2 + Math.floor(rnd() * 6);
     for (let i = 0; i < plies && legal.length > 0; i++) {
       const mv = legal[Math.floor(rnd() * legal.length)];
-      const child = makeMoveHash(b, mv, h);
+      const child = makeMoveHash(b, mv, { low: hLow, high: hHigh });
+      hLow = child.low;
+      hHigh = child.high;
       makeMove(b, mv);
       total++;
       const opp = side === COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
       const fullOk = computeZobristHash(b, opp);
-      if (child !== fullOk) {
+      if (hLow !== fullOk.low || hHigh !== fullOk.high) {
         fails++;
-        console.log(`MISMATCH trial=${trial} ply=${i} flags=${mv.flags} inc=${child} full=${fullOk}`);
+        console.log(`MISMATCH trial=${trial} ply=${i} flags=${mv.flags} inc=${hLow},${hHigh} full=${fullOk.low},${fullOk.high}`);
         break;
       }
-      h = child;
       side = opp;
       legal = getAllLegalMoves(b, side === COLOR_WHITE ? 'white' : 'black');
     }
