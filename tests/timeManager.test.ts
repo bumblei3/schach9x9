@@ -37,13 +37,17 @@ describe('TimeManager', () => {
     };
 
     // Mock document elements
-    (global as any).document = {
-      getElementById: vi.fn(() => ({
-        classList: { add: vi.fn(), remove: vi.fn() },
-        textContent: '',
-        innerHTML: '',
-      })),
-    };
+    // vitest 5: document is a read-only getter on window — use defineProperty
+    Object.defineProperty(global, 'document', {
+      value: {
+        getElementById: vi.fn(() => ({
+          classList: { add: vi.fn(), remove: vi.fn() },
+          textContent: '',
+          innerHTML: '',
+        })),
+      },
+      configurable: true,
+    });
 
     timeManager = new TimeManager(mockGame, mockController);
   });
@@ -176,7 +180,10 @@ describe('TimeManager', () => {
       const clockEl = {
         classList: { add: vi.fn(), remove: vi.fn() },
       };
-      (global as any).document = { getElementById: vi.fn(() => clockEl) };
+      Object.defineProperty(global, 'document', {
+        value: { getElementById: vi.fn(() => clockEl) },
+        configurable: true,
+      });
 
       timeManager.updateClockVisibility();
 
@@ -189,7 +196,10 @@ describe('TimeManager', () => {
       const clockEl = {
         classList: { add: vi.fn(), remove: vi.fn() },
       };
-      (global as any).document = { getElementById: vi.fn(() => clockEl) };
+      Object.defineProperty(global, 'document', {
+        value: { getElementById: vi.fn(() => clockEl) },
+        configurable: true,
+      });
 
       timeManager.updateClockVisibility();
 

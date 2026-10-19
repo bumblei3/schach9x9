@@ -12,11 +12,15 @@ describe('ShopManager', () => {
 
   beforeEach(() => {
     // Mock document
-    (global as any).document = {
-      querySelectorAll: vi.fn(() => []),
-      querySelector: vi.fn(() => null),
-      getElementById: vi.fn(() => null),
-    } as any;
+    // vitest 5: document is a read-only getter on window — use defineProperty
+    Object.defineProperty(global, 'document', {
+      value: {
+        querySelectorAll: vi.fn(() => []),
+        querySelector: vi.fn(() => null),
+        getElementById: vi.fn(() => null),
+      },
+      configurable: true,
+    });
 
     // Mock window
     global.window = {

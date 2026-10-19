@@ -47,13 +47,17 @@ function makeGame(overrides: any = {}) {
 }
 
 // Stub document so querySelectorAll/getElementById calls don't throw.
+// vitest 5: document is a read-only getter on window — use defineProperty
 const els: Record<string, any> = {};
 const fakeEl = { classList: { add: vi.fn(), remove: vi.fn() }, innerHTML: '', textContent: '' };
-(globalThis as any).document = {
-  querySelectorAll: () => [] as any[],
-  querySelector: () => fakeEl,
-  getElementById: (id: string) => (els[id] ??= { ...fakeEl }),
-};
+Object.defineProperty(globalThis, 'document', {
+  value: {
+    querySelectorAll: () => [] as any[],
+    querySelector: () => fakeEl,
+    getElementById: (id: string) => (els[id] ??= { ...fakeEl }),
+  },
+  configurable: true,
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
