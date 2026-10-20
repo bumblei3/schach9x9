@@ -258,6 +258,35 @@ export class PuzzleManager {
         fen: '',
         solution: [{ from: { r: 5, c: 3 }, to: { r: 0, c: 3 } }],
       },
+      {
+        id: 'mate-in-1-backrank',
+        title: 'Puzzle 12: Grundlinienmatt',
+        description: 'Weiß zieht und setzt in 1 Zug matt (Grundlinienmatt).',
+        difficulty: 'Einfach',
+        setupStr:
+          '..'.repeat(4) +
+          'bk' +
+          '..'.repeat(4) +
+          '..'.repeat(3) +
+          'bp' +
+          'bp' +
+          'bp' +
+          '..'.repeat(3) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          'wq' +
+          '..'.repeat(8) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          '..'.repeat(4) +
+          'wr' +
+          '..'.repeat(4) +
+          '..'.repeat(9) +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 7, c: 4 }, to: { r: 0, c: 4 } }],
+      },
     ];
   }
 
