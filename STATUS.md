@@ -8,7 +8,7 @@ Release-Tag bleibt `v2.0.0`. `main` ist `a9b1e0e` (Tagespuzzle als Sitzungseinst
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `a9b1e0e` | 253 Dateien, 3089/3089 |
+| Tests | lokal, Node 26, Stand `9d70cd0` (`fix/pwa-offline-aktiv`) | 255 Dateien, 3124/3124 |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
