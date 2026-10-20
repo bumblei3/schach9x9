@@ -529,6 +529,7 @@ export class DOMHandler {
     const exitBtn = document.getElementById('puzzle-exit-btn');
     const nextBtn = document.getElementById('puzzle-next-btn');
     const hintBtn = document.getElementById('puzzle-hint-btn');
+    const randomBtn = document.getElementById('puzzle-random-btn');
     const menuCloseBtn = document.getElementById('puzzle-menu-close-btn');
 
     if (exitBtn) {
@@ -540,6 +541,12 @@ export class DOMHandler {
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
         this.gameController?.nextPuzzle();
+      });
+    }
+
+    if (randomBtn) {
+      randomBtn.addEventListener('click', () => {
+        this.gameController?.randomPuzzle();
       });
     }
 

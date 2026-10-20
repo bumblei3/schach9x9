@@ -621,6 +621,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <button id="puzzle-menu-close-btn" class="close-icon-btn">×</button>
               </div>
               <div id="puzzle-menu-filters" class="puzzle-filter-bar"></div>
+              <div id="puzzle-progress" style="margin: 0.5rem 0; font-weight: bold; opacity: 0.8;"></div>
               <div id="puzzle-menu-list" class="puzzle-grid">
                 <!-- Puzzles injected by JS -->
               </div>
@@ -662,6 +663,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
               <p id="puzzle-description">Beschreibung...</p>
               <div class="puzzle-status" id="puzzle-status">Weiß am Zug</div>
               <div class="puzzle-buttons">
+                <button id="puzzle-random-btn" class="btn-secondary">🎲 Zufällig</button>
                 <button id="puzzle-hint-btn" class="btn-secondary">💡 Hinweis</button>
                 <button id="puzzle-next-btn" class="btn-primary hidden">Nächstes Puzzle</button>
                 <button id="puzzle-exit-btn" class="btn-secondary">Beenden</button>

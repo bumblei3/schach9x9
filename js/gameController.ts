@@ -659,6 +659,18 @@ export class GameController {
     }
   }
 
+  randomPuzzle(): void {
+    const puzzle = puzzleManager.randomPuzzle(this.game);
+    if (puzzle && typeof puzzle !== 'boolean') {
+      UI.showPuzzleOverlay(puzzle);
+      UI.renderBoard(this.game);
+      UI.updateStatus(this.game);
+      if (window.battleChess3D && window.battleChess3D.enabled) {
+        window.battleChess3D.updateFromGameState(this.game);
+      }
+    }
+  }
+
   nextPuzzle(): void {
     // The daily card is one position per day. The catalog's "next" stays on
     // the regular puzzle mode.

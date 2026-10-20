@@ -355,6 +355,17 @@ export class PuzzleManager {
     }
   }
 
+  public randomPuzzle(game: GameLike): Puzzle | boolean {
+    if (this.puzzles.length === 0) return false;
+    // Prefer unsolved puzzles
+    const unsolved = this.puzzles
+      .map((p, i) => ({ p, i }))
+      .filter(({ p }) => !this.isSolved(p.id));
+    const pool = unsolved.length > 0 ? unsolved : this.puzzles.map((p, i) => ({ p, i }));
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    return this.loadPuzzle(game, pick.i);
+  }
+
   public nextPuzzle(game: GameLike): Puzzle | boolean {
     const nextIndex = this.currentPuzzleIndex + 1;
     return this.loadPuzzle(game, nextIndex);
