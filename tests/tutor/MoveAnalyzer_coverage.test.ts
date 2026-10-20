@@ -13,6 +13,13 @@ vi.mock('../../js/tutor/TacticsDetector.js', () => ({
 
 vi.mock('../../js/aiEngine.js', () => ({
   evaluatePosition: vi.fn(),
+  // The pre-move penalty now runs a static exchange evaluation on the simulated
+  // position instead of summing the raw value of every attacked piece.
+  getAllThreats: vi.fn().mockReturnValue([]),
+  see: vi.fn().mockReturnValue(0),
+  convertBoardToInt: vi.fn().mockReturnValue(new Int8Array(81)),
+  COLOR_WHITE: 16,
+  COLOR_BLACK: 32,
 }));
 
 describe('MoveAnalyzer Coverage', () => {
