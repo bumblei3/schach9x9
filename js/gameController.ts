@@ -165,9 +165,11 @@ export class GameController {
     this.game.points = initialPoints;
     this.game.initialPoints = initialPoints;
 
-    // Hotseat mode: respect the "AI opponent" setting
+    // Hotseat mode: respect the "AI opponent" setting (only override if explicitly saved)
     const aiOpponent = localStorage.getItem('chess_ai_opponent');
-    this.game.isAI = aiOpponent === null ? true : aiOpponent === 'true';
+    if (aiOpponent !== null) {
+      this.game.isAI = aiOpponent === 'true';
+    }
 
     // Initialize basic stuff common to all
     UI.initBoardUI(this.game);
