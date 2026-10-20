@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-10-20 · `main` `a9b1e0e` (v2.0.0 + TS 7 #214 + M1.3 #215 + Tagespuzzle-Einstieg #217/#219 + Rematch #218) · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-10-20 · `main` `1a3947d` (v2.0.0 + TS 7 #214 + M1.3 #215 + Tagespuzzle-Einstieg #217 + Rematch #218 + PWA-Registrierung #219 + toter Settings-Store entfernt) · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 

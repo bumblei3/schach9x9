@@ -1,21 +1,23 @@
 # schach9x9 — Status (Stand: 2026-10-20)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `a9b1e0e` (Tagespuzzle als Sitzungseinstieg, #217/#218/#219).
+Release-Tag bleibt `v2.0.0`. `main` ist `1a3947d` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt).
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `9d70cd0` (`fix/pwa-offline-aktiv`) | 255 Dateien, 3124/3124 |
+| Tests | lokal, Node 26, Stand `1a3947d` | 255 Dateien, 3124/3124 |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
 | E2E + Lighthouse | CI auf `main` | grün |
 | Security | CodeQL auf `main` | grün |
 | CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `a9b1e0e` | Tagespuzzle als Einstieg gemergt. Tag bleibt `v2.0.0` |
+| Git | `main` `1a3947d` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt. Tag bleibt `v2.0.0` |
+
+Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
 Bestätigungslauf: `bench/sf_match_m13_n40.log`, gleiches Protokoll wie `bench/sf_match_m1_symfix_n40.log`. Dependabot #198 und #199 sind geschlossen (Vitest 5 kam über #212).
 
@@ -128,7 +130,7 @@ v2.0.0 ist das erste Release, das die 9×9-Identität ernst nimmt — nicht nur 
 - NNUE-Gate: n=80 Selbstmatch, −132 Elo gegen PST.
 - CI auf #214 und #215: Lint, Tests, Build, E2E, Lighthouse, CodeQL, CI-Gate grün.
 - M4.1: `e2e/accessibility.spec.ts` lässt `color-contrast`, `label`, `select-name` und `nested-interactive` an. Aus sind nur `landmark-unique`, `page-has-heading-one`, `scrollable-region-focusable`, `landmark-no-duplicate-main`. E2E auf #215 grün, inklusive der A11y-Label-Fixes vom 2026-10-19.
-- PWA/Offline: behauptet seit v2.0.0, war aber nie aktiv — der Registrierungsaufruf in `main.ts` steckte kommentiert, `public/service-worker.js` wurde lediglich nach `dist/` kopiert. Behoben in `fix/pwa-offline-aktiv` (`js/serviceWorkerRegistration.ts`): Guard auf Produktions-Build + `navigator.webdriver` (Playwright/Lighthouse) + `?disable-sw`. Der tote Doppelgänger `service-worker.ts` im Repo-Root ist gelöscht; `tests/serviceWorker.test.ts` testet das ausgelieferte Worker-File.
+- PWA/Offline: behauptet seit v2.0.0, war aber nie aktiv — der Registrierungsaufruf in `main.ts` steckte kommentiert, `public/service-worker.js` wurde lediglich nach `dist/` kopiert. Behoben und gemergt (PR #219, `f491a2b`, `js/serviceWorkerRegistration.ts`): Guard auf Produktions-Build + `navigator.webdriver` (Playwright/Lighthouse) + `?disable-sw`. Der tote Doppelgänger `service-worker.ts` im Repo-Root ist gelöscht; `tests/serviceWorker.test.ts` testet das ausgelieferte Worker-File.
 
 **Zwei Läufe, dieselbe Aussage:**
 - 32-bit (Symfix) 0.575 / +52 und 64-bit (M1.3) 0.550 / +35. Beide Intervalle enthalten die 0 und schließen einen Einbruch auf 0,2 aus. „Ebenbürtig mit Stockfish 1400“ schreiben wir nicht fest. „Wieder bei −269“ ist widerlegt.
