@@ -1,23 +1,25 @@
 # schach9x9 — Status (Stand: 2026-10-20)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `1a3947d` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt).
+Release-Tag bleibt `v2.0.0`. `main` ist `182c923` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt #220).
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `1a3947d` | 255 Dateien, 3124/3124 |
+| Tests | lokal, Node 26, Stand `182c923` | 256 Dateien, 3129/3129 |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
 | E2E + Lighthouse | CI auf `main` | grün |
 | Security | CodeQL auf `main` | grün |
 | CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `1a3947d` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt. Tag bleibt `v2.0.0` |
+| Git | `main` `182c923` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt (#220). Tag bleibt `v2.0.0` |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
+
+Tutor-Warndialog 2026-10-20 (#220, `182c923`): Der Vorab-Dialog („Grober Fehler?") nannte denselben Grund einmal pro bedrohter Figur und behauptete danach „Kein konkretes taktisches Motiv erkannt". Fix: `uniqueReasons()` in `js/tutor/MoveAnalyzer.ts` entdoppelt `warnings`/`tacticalExplanations`/`strategicExplanations`; der „kein Motiv"-Satz greift nur noch, wenn wirklich nichts gefunden wurde; die Zusammenfassung fällt im Dialog weg. Gefunden nur durch Dogfooding der Live-Seite, kein Test deckte es ab.
 
 Bestätigungslauf: `bench/sf_match_m13_n40.log`, gleiches Protokoll wie `bench/sf_match_m1_symfix_n40.log`. Dependabot #198 und #199 sind geschlossen (Vitest 5 kam über #212).
 
@@ -164,4 +166,6 @@ WTFPL (Commit 8ec8ceb, 2026-08-02). Einheitlich mit trischach.
 - PGN-Export (Copy + Download).
 - PWA/Offline-fähig.
 
-**Nächster sinnvoller Schritt:** M6 ist vollständig (`js/types/` konsolidiert, `js/matchRefs.ts` 28,2 % → 71,7 %, tote Dependencies weg). NNUE bleibt geparkt. M1.2 bleibt zu.
+**Nächster sinnvoller Schritt (belegt, offen):** Vorab-Warnung kalibrieren. `analyzePlayerMovePreExecution` summiert in `js/tutor/MoveAnalyzer.ts` für *jede* von `detectThreatsAfterMove` gemeldete Figur ihren vollen Materialwert als Penalty, ohne zu prüfen, ob die Figur gedeckt ist. Der Warndialog schlägt deshalb schon auf normale Eröffnungszüge an (e2-e4 → 2.9 Bauern) und blockiert den Zug — reproduziert über `e2e/ai-move.spec.ts`. Ursache, warum das bisher unauffällig blieb: `detectThreatsAfterMove` zählt die Verteidiger am Feld `from`, das nach der Zugsimulation *leer* ist, also faktisch nie korrekt. Reihenfolge: erst Penalty verteidiger-bewusst machen (nur echter Materialverlust zählt), dann die Verortung am Figurenfeld (zurückgerollt in `e5104af`) wieder einbauen und mit dem bereits geschriebenen Regressionstest absichern.
+
+**Danach:** E2E-Lücke schließen — kein Spec spielt einen normalen Eröffnungszug und asserted, dass *kein* Warndialog erscheint. M6 ist vollständig, NNUE bleibt geparkt, M1.2 bleibt zu.
