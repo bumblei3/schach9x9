@@ -10,6 +10,8 @@ import type { Game } from '../gameEngine.js';
 export class KeyboardManager {
   private app: App;
   private boundHandleKeyDown: (_event: KeyboardEvent) => Promise<void>;
+  private pendingFile: string | null = null;
+  private pendingFileTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(app: App) {
     this.app = app;
@@ -38,6 +40,45 @@ export class KeyboardManager {
     const key = event.key.toLowerCase();
     const ctrl = event.ctrlKey || event.metaKey;
     const shift = event.shiftKey;
+
+    // Field selection by typing: Shift + letter (a-i) then number (1-9).
+    // E.g. Shift+E then 4 selects e4. Avoids clashing with single-key shortcuts.
+    const files = 'abcdefghi';
+    if (shift && files.includes(key) && key.length === 1) {
+      event.preventDefault();
+      this.pendingFile = key;
+      if (this.pendingFileTimer) clearTimeout(this.pendingFileTimer);
+      this.pendingFileTimer = setTimeout(() => {
+        this.pendingFile = null;
+        this.pendingFileTimer = null;
+      }, 2000);
+      showToast(`Feld: ${key.toUpperCase()}…`, 'info');
+      return;
+    }
+    if (this.pendingFile && /^[1-9]$/.test(key)) {
+      event.preventDefault();
+      const col = files.indexOf(this.pendingFile);
+      const rank = parseInt(key, 10);
+      const row = 9 - rank; // rank 1 -> row 8, rank 9 -> row 0
+      const piece = g.board[row]?.[col];
+      g.selectedSquare = { r: row, c: col };
+      g.validMoves = piece ? (g.getValidMoves(row, col, piece) ?? []) : [];
+      const game = this.app.game;
+      if (game) renderBoard(game);
+      if (g.selectedSquare) {
+        showToast(`${this.pendingFile.toUpperCase()}${key} ausgewählt`, 'info');
+      }
+      if (this.pendingFileTimer) clearTimeout(this.pendingFileTimer);
+      this.pendingFile = null;
+      this.pendingFileTimer = null;
+      return;
+    }
+    // Any other key cancels a pending file selection.
+    if (this.pendingFile) {
+      if (this.pendingFileTimer) clearTimeout(this.pendingFileTimer);
+      this.pendingFile = null;
+      this.pendingFileTimer = null;
+    }
 
     // Undo: Ctrl+Z or 'u'
     if ((ctrl && key === 'z' && !shift) || key === 'u') {
@@ -129,6 +170,9 @@ export class KeyboardManager {
     // Escape: Cancel selection / Close modals
     if (key === 'escape') {
       event.preventDefault();
+      if (this.pendingFileTimer) clearTimeout(this.pendingFileTimer);
+      this.pendingFile = null;
+      this.pendingFileTimer = null;
 
       closeModal();
 
