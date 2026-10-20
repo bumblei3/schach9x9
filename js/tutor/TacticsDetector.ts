@@ -697,6 +697,11 @@ export function detectThreatsAfterMove(
 
     // For each of our pieces, check if it's threatened
     for (const [sq, { piece: ownPiece }] of ourPieces) {
+      // The threatened piece's own square — NOT the square the analysed move
+      // started from, which is empty after the simulation above.
+      const pieceR = Math.floor(sq / BOARD_SIZE);
+      const pieceC = sq % BOARD_SIZE;
+
       // Direct attacks on this piece
       const directAttacks = directThreats.filter(t => t.targetSquare === sq);
       // X-ray attacks on this piece (through another of our pieces)
@@ -705,9 +710,22 @@ export function detectThreatsAfterMove(
       const allAttacksOnThisPiece = [...directAttacks, ...xrayAttacks];
 
       if (allAttacksOnThisPiece.length > 0) {
-        // Count defenders and attackers using existing logic (but now we have richer info)
-        const defenders = countDefenders(game, from.r, from.c, playerColor);
-        const attackers = allAttacksOnThisPiece.length; // Simplified: each threat = 1 attacker
+        // Is the piece really at risk? `countDefenders` cannot answer that for
+        // an occupied square (no piece may move onto a square of its own
+        // colour), so ask the attack detector plus a static exchange evaluation
+        // — the same notion the "Drohungen" overlay uses (js/AnalysisManager.ts).
+        const defended = aiEngine.isSquareAttacked(game.board, pieceR, pieceC, playerColor);
+        const worstGain = allAttacksOnThisPiece.reduce((worst, t) => {
+          const attackerR = Math.floor(t.attackerSquare / BOARD_SIZE);
+          const attackerC = t.attackerSquare % BOARD_SIZE;
+          if (!game.board[attackerR]?.[attackerC]) return worst;
+          const gain = aiEngine.see(
+            game.board,
+            { r: attackerR, c: attackerC },
+            { r: pieceR, c: pieceC }
+          );
+          return gain > worst ? gain : worst;
+        }, 0);
 
         // Determine threat severity and type
         const isXray = xrayAttacks.length > 0;
@@ -720,8 +738,8 @@ export function detectThreatsAfterMove(
         );
         const isPinned = pinThreats.length > 0;
 
-        // Only warn if undefended or pinned
-        if (attackers > defenders || isPinned) {
+        // Only warn when the piece is really hanging, profitably attacked or pinned.
+        if (!defended || worstGain > 0 || isPinned) {
           let warning = '';
           const pieceName = analyzer.getPieceName(ownPiece.type);
 
@@ -744,7 +762,7 @@ export function detectThreatsAfterMove(
 
           threats.push({
             piece: ownPiece,
-            pos: { r: from.r, c: from.c },
+            pos: { r: pieceR, c: pieceC },
             warning,
           });
         }
