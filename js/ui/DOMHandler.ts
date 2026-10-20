@@ -371,6 +371,12 @@ export class DOMHandler {
       });
     }
 
+    // Critical error overlay "Neustarten" (was inline onclick="location.reload()").
+    const criticalRestartBtn = document.getElementById('critical-restart-btn');
+    if (criticalRestartBtn) {
+      criticalRestartBtn.addEventListener('click', () => window.location.reload());
+    }
+
     // Toggle 3D
     const toggle3D = document.getElementById('toggle-3d-btn');
     if (toggle3D) {
@@ -463,6 +469,7 @@ export class DOMHandler {
   private initPuzzleHandlers(): void {
     const exitBtn = document.getElementById('puzzle-exit-btn');
     const nextBtn = document.getElementById('puzzle-next-btn');
+    const hintBtn = document.getElementById('puzzle-hint-btn');
     const menuCloseBtn = document.getElementById('puzzle-menu-close-btn');
 
     if (exitBtn) {
@@ -474,6 +481,20 @@ export class DOMHandler {
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
         this.gameController?.nextPuzzle();
+      });
+    }
+
+    if (hintBtn) {
+      hintBtn.addEventListener('click', () => {
+        const game = this.game;
+        if (!game?.puzzleState?.active) return;
+        const move = game.puzzleState.solution?.[game.puzzleState.currentMoveIndex];
+        if (!move) return;
+        game.selectedSquare = { r: move.from.r, c: move.from.c };
+        const piece = game.board?.[move.from.r]?.[move.from.c];
+        game.validMoves = piece ? (game.getValidMoves(move.from.r, move.from.c, piece) ?? []) : [];
+        UI.renderBoard(game);
+        showToast('Hinweis: diese Figur ziehen', 'info');
       });
     }
 
@@ -890,6 +911,17 @@ export class DOMHandler {
         skinSelector.value = savedSkin;
         setPieceSkin(savedSkin);
       }
+    }
+
+    const skinSelectorMenu = document.getElementById('skin-selector-menu') as HTMLSelectElement | null;
+    if (skinSelectorMenu) {
+      skinSelectorMenu.addEventListener('change', () => {
+        const display = document.getElementById('skin-selector') as HTMLSelectElement;
+        if (display) {
+          display.value = skinSelectorMenu.value;
+          display.dispatchEvent(new Event('change'));
+        }
+      });
     }
 
     const soundToggle = document.getElementById('sound-toggle') as HTMLInputElement | null;
