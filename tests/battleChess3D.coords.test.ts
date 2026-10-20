@@ -54,7 +54,7 @@ vi.mock('three', () => {
     SphereGeometry: vi.fn(),
     MeshBasicMaterial: vi.fn(),
     RingGeometry: vi.fn(),
-    PCFSoftShadowMap: 'PCFSoftShadowMap',
+    PCFShadowMap: 'PCFShadowMap',
     DoubleSide: 'DoubleSide',
   };
 });

@@ -8,6 +8,16 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { BOARD_SIZE } from '../../config.js';
 import { logger } from '../../logger.js';
 
+/**
+ * Shadow map type for the WebGL renderer.
+ *
+ * three.js removed `PCFSoftShadowMap` in r186: assigning it logs
+ * "PCFSoftShadowMap has been removed. Using PCFShadowMap instead." on every
+ * page load (the renderer is built eagerly) and then silently falls back
+ * anyway. Name the type we actually get.
+ */
+export const SHADOW_MAP_TYPE = THREE.PCFShadowMap;
+
 export class SceneManager3D {
   public container: HTMLElement;
   public scene: THREE.Scene | null;
@@ -110,7 +120,7 @@ export class SceneManager3D {
       this.renderer.setSize(width, height);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       this.renderer.shadowMap.enabled = true;
-      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      this.renderer.shadowMap.type = SHADOW_MAP_TYPE;
       this.renderer.setClearColor(0x000000, 0); // Transparent clear color
 
       // Clear container
