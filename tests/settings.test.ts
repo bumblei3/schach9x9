@@ -37,7 +37,7 @@ describe('settings store', () => {
 
     expect(getSettings().aiDifficulty).toBe('expert');
     expect(getSettings().soundEnabled).toBe(DEFAULT_SETTINGS.soundEnabled);
-    expect(getSettings().hintsAutoBlunder).toBe(DEFAULT_SETTINGS.hintsAutoBlunder);
+    expect(getSettings().tutorialCompleted).toBe(DEFAULT_SETTINGS.tutorialCompleted);
   });
 
   it('gespeicherte Werte bleiben über zwei Aufrufe hinweg erhalten', async () => {

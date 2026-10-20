@@ -19,7 +19,6 @@ import type { KeyboardManager } from './input/KeyboardManager.js';
 import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
 import * as UI from './ui.js';
-import { storeInit } from './settings.js';
 // Side-effect import: TooltipManager is a module-level singleton that wires
 // up [data-tooltip] hints on construction (used by the action bar, etc.).
 import './ui/TooltipManager.js';
@@ -83,8 +82,6 @@ export class App {
     this.game = new Game(initialPoints, mode as GameMode);
     window.game = this.game;
 
-    // Store Initialisierung mit defaults, falls leer
-    storeInit();
 
     window.app = this;
 
