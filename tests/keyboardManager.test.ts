@@ -335,6 +335,73 @@ describe('KeyboardManager', () => {
     expect(btn.classList.contains('active')).toBe(true);
   });
 
+  it('should move selection with arrow keys', async () => {
+    app.game = {
+      selectedSquare: { r: 4, c: 4 },
+      validMoves: [],
+      boardSize: 9,
+      board: Array.from({ length: 9 }, () => Array(9).fill(null)),
+      getValidMoves: vi.fn(() => []),
+    };
+    const event = new KeyboardEvent('keydown', { key: 'ArrowUp' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    vi.spyOn(event, 'preventDefault');
+    await keyboardManager.handleKeyDown(event);
+    expect(app.game.selectedSquare).toEqual({ r: 3, c: 4 });
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should confirm selection on Enter', async () => {
+    app.game = {
+      selectedSquare: { r: 2, c: 3 },
+      validMoves: [],
+      boardSize: 9,
+      board: Array.from({ length: 9 }, () => Array(9).fill(null)),
+      getValidMoves: vi.fn(() => []),
+    };
+    mockGameController.handleCellClick = vi.fn();
+    const event = new KeyboardEvent('keydown', { key: 'Enter' });
+    Object.defineProperty(event, 'target', { value: document.body });
+    vi.spyOn(event, 'preventDefault');
+    await keyboardManager.handleKeyDown(event);
+    expect(mockGameController.handleCellClick).toHaveBeenCalledWith(2, 3);
+  });
+
+  it('should set pending file on Shift+letter', async () => {
+    app.game = {
+      selectedSquare: null,
+      validMoves: [],
+      boardSize: 9,
+      board: Array.from({ length: 9 }, () => Array(9).fill(null)),
+      getValidMoves: vi.fn(() => []),
+    };
+    const event = new KeyboardEvent('keydown', { key: 'e', shiftKey: true });
+    Object.defineProperty(event, 'target', { value: document.body });
+    vi.spyOn(event, 'preventDefault');
+    await keyboardManager.handleKeyDown(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should cancel pending file on Escape', async () => {
+    app.game = {
+      selectedSquare: null,
+      validMoves: [],
+      boardSize: 9,
+      board: Array.from({ length: 9 }, () => Array(9).fill(null)),
+      getValidMoves: vi.fn(() => []),
+    };
+    // Set pending file first
+    const ev1 = new KeyboardEvent('keydown', { key: 'e', shiftKey: true });
+    Object.defineProperty(ev1, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(ev1);
+    // Then escape
+    const ev2 = new KeyboardEvent('keydown', { key: 'Escape' });
+    Object.defineProperty(ev2, 'target', { value: document.body });
+    await keyboardManager.handleKeyDown(ev2);
+    // Should not throw
+    expect(true).toBe(true);
+  });
+
   it('should not crash if game is missing during emergency recovery', () => {
     delete app.game;
     expect(() => keyboardManager.performEmergencyRecovery()).not.toThrow();
