@@ -100,7 +100,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'service-worker.ts'],
+    files: ['vite.config.ts', 'vitest.config.ts', 'playwright.config.ts'],
     languageOptions: {
       parserOptions: {
         project: null,
