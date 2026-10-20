@@ -99,7 +99,7 @@ const mockThree = {
     return { x, y };
   }),
   DoubleSide: 2,
-  PCFSoftShadowMap: 1,
+  PCFShadowMap: 1,
 };
 
 vi.mock('three', () => mockThree);
