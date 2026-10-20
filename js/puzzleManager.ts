@@ -287,6 +287,32 @@ export class PuzzleManager {
         fen: '',
         solution: [{ from: { r: 7, c: 4 }, to: { r: 0, c: 4 } }],
       },
+      {
+        id: 'mate-in-1-backrank2',
+        title: 'Puzzle 13: Grundlinienmatt (Turm + Läufer)',
+        description: 'Weiß zieht und setzt in 1 Zug matt (Grundlinienmatt mit Läufer-Deckung).',
+        difficulty: 'Einfach',
+        setupStr:
+          'bk' +
+          '..'.repeat(8) +
+          'bp' +
+          'bp' +
+          '..'.repeat(7) +
+          '..'.repeat(2) +
+          'wb' +
+          '..'.repeat(6) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          '..'.repeat(9) +
+          'wr' +
+          '..'.repeat(8) +
+          '..'.repeat(9) +
+          'w',
+        fen: '',
+        solution: [{ from: { r: 7, c: 0 }, to: { r: 0, c: 0 } }],
+      },
     ];
   }
 
