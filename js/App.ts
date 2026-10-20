@@ -76,6 +76,7 @@ export class App {
     const { KeyboardManager } = await import('./input/KeyboardManager.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = UI;
+    window.UI = UI_MODULE;
     await import('./ui/AchievementUI'); // Initialize achievements UI (only once via dynamic import)
 
     this.Game_Class = Game;
