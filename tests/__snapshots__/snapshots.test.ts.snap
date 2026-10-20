@@ -55,6 +55,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
   
 
   
+    <a href="#board-wrapper" class="skip-link">Zum Schachbrett springen</a>
     <!-- Hidden H1 for Accessibility -->
     <h1 class="hidden">Schach 9x9</h1>
 
