@@ -1,21 +1,21 @@
 # schach9x9 — Status (Stand: 2026-10-20)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `182c923` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt #220).
+Release-Tag bleibt `v2.0.0`. `main` ist `162df4b` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt #220, Vorab-Warnung kalibriert #221).
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `182c923` | 256 Dateien, 3129/3129 |
+| Tests | lokal, Node 26, Stand `162df4b` | 257 Dateien, 3134/3134 |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
 | E2E + Lighthouse | CI auf `main` | grün |
 | Security | CodeQL auf `main` | grün |
 | CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `182c923` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt (#220). Tag bleibt `v2.0.0` |
+| Git | `main` `162df4b` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt (#220), Vorab-Warnung kalibriert (#221). Tag bleibt `v2.0.0` |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
@@ -166,6 +166,8 @@ WTFPL (Commit 8ec8ceb, 2026-08-02). Einheitlich mit trischach.
 - PGN-Export (Copy + Download).
 - PWA/Offline-fähig.
 
-**Nächster sinnvoller Schritt (belegt, offen):** Vorab-Warnung kalibrieren. `analyzePlayerMovePreExecution` summiert in `js/tutor/MoveAnalyzer.ts` für *jede* von `detectThreatsAfterMove` gemeldete Figur ihren vollen Materialwert als Penalty, ohne zu prüfen, ob die Figur gedeckt ist. Der Warndialog schlägt deshalb schon auf normale Eröffnungszüge an (e2-e4 → 2.9 Bauern) und blockiert den Zug — reproduziert über `e2e/ai-move.spec.ts`. Ursache, warum das bisher unauffällig blieb: `detectThreatsAfterMove` zählt die Verteidiger am Feld `from`, das nach der Zugsimulation *leer* ist, also faktisch nie korrekt. Reihenfolge: erst Penalty verteidiger-bewusst machen (nur echter Materialverlust zählt), dann die Verortung am Figurenfeld (zurückgerollt in `e5104af`) wieder einbauen und mit dem bereits geschriebenen Regressionstest absichern.
+**Erledigt 2026-10-20 (#221, `162df4b`):** Vorab-Warnung kalibriert. `analyzePlayerMovePreExecution` zählt nicht mehr den vollen Materialwert jeder bedrohten Figur, sondern eine statische Tauscheinschätzung (`staticExchangePenalty` über `aiEngine.getAllThreats` + `aiEngine.see`) auf der simulierten Stellung. Gedeckte Figur = 0, hängende = echter Wert. Vorher schlug der Dialog schon auf `e2-e4` an („2.9 Bauern“, Schwelle 200 cp) und blockierte den Zug. Zwei Fehler maskierten sich dabei gegenseitig: die Summenregel und der Verteidiger-Zähler, der am leeren `from`-Feld lief.
 
-**Danach:** E2E-Lücke schließen — kein Spec spielt einen normalen Eröffnungszug und asserted, dass *kein* Warndialog erscheint. M6 ist vollständig, NNUE bleibt geparkt, M1.2 bleibt zu.
+Belegt durch `tests/tutor/premoveWarning.penalty.test.ts` (5) und `e2e/tutor-premove-warning.spec.ts` (neu: ein normaler Eröffnungszug wird nicht abgefangen). Lokal `vitest` 257/3134, `tsc`/`eslint`/`prettier` sauber, `ai-move.spec.ts` + neuer Spec 3 passed; CI grün inkl. E2E.
+
+**Nächster sinnvoller Schritt (offen, klein):** `detectThreatsAfterMove` aufräumen — `pos` zeigt auf das Startfeld und der Verteidiger-Zähler läuft dort, obwohl `pos` von keinem Aufrufer gelesen wird (totes Datum). Zusammen mit dem Verteidiger-Zähler ein eigener, kleinerer Schnitt; seit #221 blockiert er keinen Zug mehr. M6 ist vollständig, NNUE bleibt geparkt, M1.2 bleibt zu.
