@@ -26,19 +26,9 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { parseFEN } from './utils.js';
-import type { Piece } from './types/game.js';
+import { pieceToCode } from './pieceCodes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-/** Piece type -> internal board code (mirror of engineNode.pieceToCode). */
-function pieceToCode(p: Piece | null): number {
-  if (!p) return 0;
-  const typeCode: Record<string, number> = {
-    p: 1, n: 2, b: 3, r: 4, q: 5, k: 6, a: 7, c: 8, e: 9, j: 10,
-  };
-  const base = typeCode[p.type] ?? 0;
-  return p.color === 'white' ? base : -base;
-}
 
 interface NodeResponse {
   gameNumber: number;
@@ -54,7 +44,8 @@ interface EngineHandle {
   seq: number;
 }
 
-function startEngine(worktreeDir: string): EngineHandle {
+/** @internal Test hook: spawn an engine node and wire its line protocol. */
+export function startEngine(worktreeDir: string): EngineHandle {
   const proc = spawn('npx', ['tsx', resolve(worktreeDir, 'js/engineNode.ts')], {
     cwd: worktreeDir,
     stdio: ['pipe', 'pipe', 'inherit'],
@@ -84,7 +75,8 @@ function startEngine(worktreeDir: string): EngineHandle {
   return handle;
 }
 
-function askMove(
+/** @internal Test hook: send one position to an engine and await its reply. */
+export function askMove(
   h: EngineHandle,
   board: number[][],
   turn: 'white' | 'black',
@@ -132,15 +124,19 @@ export function startingBoard(fen?: string): number[][] {
   return fen ? boardFromFen(fen) : initialBoard();
 }
 
-function applyMove(board: number[][], move: NonNullable<NodeResponse['move']>): void {
+/** @internal Test hook: apply a move in place, including promotion. */
+export function applyMove(board: number[][], move: NonNullable<NodeResponse['move']>): void {
   const piece = board[move.from.r][move.from.c];
   board[move.to.r][move.to.c] = piece;
   board[move.from.r][move.from.c] = 0;
   // Promotion: a pawn reaching the last rank becomes the chosen piece
-  // (archbishop/chancellor/queen). `promotion` is a piece letter or PieceType.
+  // (archbishop/chancellor/queen). `promotion` arrives from the engine as a
+  // single piece letter (see TYPE_INT_TO_STR in aiEngine.ts), so the map is
+  // keyed by letter — including the fairy pieces, which the engine can also
+  // promote to outside classic mode.
   if (move.promotion) {
     const promoType = String(move.promotion).toLowerCase();
-    const typeCode: Record<string, number> = { a: 7, c: 8, q: 5, r: 4, b: 3, n: 2 };
+    const typeCode: Record<string, number> = { a: 7, c: 8, q: 5, r: 4, b: 3, n: 2, e: 9, j: 10 };
     const code = typeCode[promoType];
     if (code) {
       const colorSign = piece > 0 ? 1 : -1;
@@ -213,7 +209,8 @@ export const TACTICAL_FENS: string[] = [
   '9/9/9/9/9/9/9/7q1/6kK1 w - - 0 1',
 ];
 
-async function playGame(
+/** @internal Test hook: play one game to mate or to the material decision. */
+export async function playGame(
   newH: EngineHandle,
   oldH: EngineHandle,
   elo: number,
@@ -258,6 +255,17 @@ const PIECE_VALUE: Record<number, number> = {
   1: 100, 2: 320, 3: 330, 4: 500, 5: 900, 6: 20000, 7: 950, 8: 950, 9: 1100, 10: 1100,
 };
 
+/**
+ * Verdict line for the match summary. Extracted so the win-share wording is
+ * testable without spawning two engine processes.
+ */
+export function verdict(newWins: number, oldWins: number, total: number): string {
+  const newPct = ((newWins / total) * 100).toFixed(1);
+  if (newWins > oldWins) return `VERDICT: NEW stronger (${newPct}% win share).`;
+  if (newWins < oldWins) return 'VERDICT: NEW weaker - REVERT lever.';
+  return 'VERDICT: equal - no measurable delta at this sample.';
+}
+
 async function main(): Promise<void> {
   const newDir = process.env.NEW_REF || __dirname;
   const oldDir = process.env.OLD_REF || '/tmp/s9-baseline';
@@ -300,10 +308,7 @@ async function main(): Promise<void> {
   console.log('');
   console.log('=== MATCH REFS RESULT (NEW vs OLD) ===');
   console.log('NEW wins: ' + newWins + ' | OLD wins: ' + oldWins + ' | Draws: ' + draws + ' (of ' + total + ')');
-  const newPct = ((newWins / total) * 100).toFixed(1);
-  if (newWins > oldWins) console.log('VERDICT: NEW stronger (' + newPct + '% win share).');
-  else if (newWins < oldWins) console.log('VERDICT: NEW weaker - REVERT lever.');
-  else console.log('VERDICT: equal - no measurable delta at this sample.');
+  console.log(verdict(newWins, oldWins, total));
 }
 
 // Only auto-run when executed directly (not when imported by tests).

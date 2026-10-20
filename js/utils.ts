@@ -3,7 +3,7 @@
  * Add helper functions here (e.g., deep copy, coordinate conversion).
  */
 
-import type { Piece, Player } from './types/game.js';
+import type { Piece, Player } from './types/core.js';
 
 /**
  * Deep copy an object using JSON serialization

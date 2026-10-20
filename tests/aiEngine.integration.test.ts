@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import * as AIEngine from '../js/aiEngine.js';
 import { Game } from '../js/gameEngine.js';
-import type { Piece } from '../js/types/game.js';
+import type { Piece } from '../js/types/core.js';
 
 describe('AIEngine Integration', () => {
   let game: Game;

@@ -1,8 +1,4 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-/**
- * @jest-environment jsdom
- */
-
 import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 

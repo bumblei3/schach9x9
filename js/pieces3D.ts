@@ -151,11 +151,6 @@ export const SKIN_PRESETS: Record<string, SkinPreset> = {
   },
 };
 
-// Legacy color export for backwards compatibility
-export const PIECE_COLORS = {
-  white: 0xf0f0f0,
-  black: 0x1a1a1a,
-};
 
 /**
  * Create a 3D chess piece

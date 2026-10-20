@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-10-19 · `main` `fb20831` (v2.0.0 + TS 7 #214 + M1.3 #215) · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-10-20 · `main` `a9b1e0e` (v2.0.0 + TS 7 #214 + M1.3 #215 + Tagespuzzle-Einstieg #217/#219 + Rematch #218) · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -39,7 +39,7 @@ Das Produkt ist **feature-reich**. Billige Eval-Terme sind aufgebraucht (`bench/
 
 1. **Die Stärkezahl ist ein Lauf mit breitem Intervall.** Kanonisch: `bench/sf_match_m1_symfix_n40.log`, 17–12–11, Score 0.575, +52 Elo gegen Stockfish 1400, Intervall etwa −55..+171, 0 `illegal-ours`. Die Zeile „−269 Elo“ weiter unten ist v1.8.0, nicht der Ist-Stand.
 2. **M1.3 ist neutral.** `bench/sf_match_m13_n40.log`: 19–6–15, Score 0.550, +35 Elo, Intervall etwa −73..+151, 0 `illegal-ours`. Gegen +52 aus dem Symfix-Lauf ist das Rauschen.
-3. **Der Wiederkommen-Anker ist ein Modus unter mehreren.** Daily Puzzle existiert und ist deterministisch. Er ist nicht der Einstieg der Sitzung. Das ist der nächste Schnitt.
+3. **Der Wiederkommen-Anker ist jetzt der Einstieg.** War bis `fb20831` offen; in #217/#219 (`a9b1e0e`) verschiebt `syncDailyPuzzleMenu()` die Tagespuzzle-Karte je nach gelöst/ungelöst an die Sitzungsposition. E2E-Assert in `e2e/daily-puzzle.spec.ts`. Damit ist dieser Schnitt erledigt — der nächste ist strukturell (siehe Milestones).
 
 ### Track B — gemessene Hebel (n=40, gleiche Flags)
 
@@ -134,7 +134,7 @@ MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 gemessen: 0.550 / +35, n
 
 ---
 
-### M2 — 9×9-Identität (Content)
+### M2 — 9×9-Identität (Content) — ✅ ERLEDIGT in v2.0.0 (PR #185/#186/#188)
 
 **Ziel:** Das Featured-Menü hält, was es verspricht. Feenfiguren sind lern- und spielbar.
 
@@ -152,7 +152,7 @@ MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 gemessen: 0.550 / +35, n
 
 ---
 
-### M3 — Coach, der 9×9 spricht
+### M3 — Coach, der 9×9 spricht — ✅ ERLEDIGT in v2.0.0 (PR #187/#189)
 
 **Ziel:** Nach einem Zug versteht der Spieler *warum*, in der Sprache dieses Spiels.
 
@@ -180,6 +180,9 @@ MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 gemessen: 0.550 / +35, n
 | 4.3 | Sound-Settings persistieren (`sounds.ts` löscht den Key im Konstruktor und lädt danach) | Volume/Mute überlebt Reload |
 | 4.4 | 3D: Capture-Juice + letzter Zug sichtbar ohne Overlay-Raten | Visueller Playwright-Snapshot |
 | 4.5 | Deutsche Microcopy-Lücken (Puzzle-Generator ist noch englisch: „White to move. Find the checkmate…“) | Kein User-facing English außer Eigennamen |
+| 4.6 | **PWA/Offline tatsächlich aktiv schalten** | Registrierung läuft (Produktions-Build, nicht im Dev-Server, nicht unter Automation); SW-Test gegen das ausgelieferte File |
+
+**Stand M4 (2026-10-20):** 4.1–4.5 erledigt und verifiziert. 4.6 war als „PWA/Offline-fähig“ behauptet, aber der Registrierungsaufruf steckte kommentiert in `main.ts` — `public/service-worker.js` wurde nur nach `dist/` kopiert und nie aktiviert. In `fix/pwa-offline-aktiv` behoben: `js/serviceWorkerRegistration.ts` mit Guard auf Produktions-Build + `navigator.webdriver` (Playwright/Lighthouse) + `?disable-sw`, `tests/serviceWorker.test.ts` gegen das ausgelieferte Worker-File, toter Doppelgänger `service-worker.ts` gelöscht.
 
 ---
 
@@ -198,6 +201,24 @@ Erst anfassen, wenn M1 das Score-Ziel (0.30) **oder** klaren NPS-Beweis geliefer
 
 ---
 
+### M6 — Struktur (nach M4, vor neuen Features)
+
+**Ziel:** Das Repo darf nicht weiter wachsen, ohne dass die Grundform mitkommt. Kein Feature, nur Wartbarkeit — deshalb ohne Elo-Gate.
+
+**Dauer:** 1–2 Tage.
+
+| # | Arbeit | Akzeptanz |
+| - | ------ | --------- |
+| 6.1 | ~~`js/types/` konsolidieren: `core.ts`, `game.ts`, `ui.ts` tragen ~40 doppelte Typen. `game.ts` hat 29 Importer, `core.ts` 8~~ **Erledigt** | Ein Definitions-Ort pro Domäne, 0 doppelte Typnamen — `game.ts`/`ui.ts`/`ai.ts`/`campaign.ts` sind in `core.ts` aufgegangen (402 Zeilen weg), `index.ts` auf den einen Export reduziert |
+| 6.2 | Coverage von `js/matchRefs.ts` anheben (28 % Statements — niedrigste Datei im Repo) | Track-A-Harness, der jede Stärke-Aussage trägt, ist gegen Regressionen getestet |
+| 6.3 | `tools/` und `js/` auf totem Export prüfen (`npx knip`) | Keine ungenutzten Dev-Dependencies (`jest`, `ts-jest`, `husky`, `jsdoc`) |
+
+**Stand M6 (2026-10-20):** 6.1 erledigt — `js/types/` ist jetzt ein Definitions-Ort: `core.ts` (53 Export-Sätze) plus das Blatt `gameMode.ts`. Die vier parallelen Dateien `game.ts`, `ui.ts`, `ai.ts`, `campaign.ts` (402 Zeilen) sind aufgegangen, 26 Importer umgestellt, `tsc`/`eslint`/`vitest`/`build` grün. 6.2 erledigt — `js/matchRefs.ts` 28,2 % → 71,7 % Statements, `tests/matchRefs.protocol.test.ts` (26 Tests) gegen das Line-Protokoll, `applyMove`/Promotion, `playGame`-Urteile und das moveNumber-100-Limit. Nebenbei: die Figurencode-Mapping existierte doppelt (`engineNode.ts` privat + „mirror" in `matchRefs.ts`) und ist jetzt `js/pieceCodes.ts`; die Promotionstabelle kannte `e`/`j` nicht und ließe ein Feen-Promotion im Harness als Bauer durchgehen. 6.3 erledigt — Jest-Überreste und `jsdoc` entfernt, `npm ci --legacy-peer-deps` sauber.
+
+**Nicht:** Umschreiben der Engine, neue Eval-Terme, NNUE.
+
+---
+
 ## Empfohlene Reihenfolge
 
 ```
@@ -208,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** Tagespuzzle als Einstieg der Sitzung, danach PGN-Export. Die Engine bleibt eingefroren.
+**Nächster konkreter Schritt:** M6 Struktur ist vollständig (6.1 `js/types/`, 6.2 `matchRefs.ts`, 6.3 tote Dependencies). Tagespuzzle-Einstieg und PGN-Export sind erledigt. Die Engine bleibt eingefroren.
 
 ---
 
@@ -230,6 +251,6 @@ Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand e
 | **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline — **released/getaggt** |
 | **v1.9.0** | M1.1 + NNUE-Pipeline (Gate negativ, geparkt) — **released** |
 | **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Coach — **released** |
-| **main (2026-10-19)** | v2.0.0 + Vitest 5 + TS 7 (#214) + M1.3 (#215, gemessen neutral). Kein neuer Tag |
+| **main (2026-10-20)** | v2.0.0 + Vitest 5 + TS 7 (#214) + M1.3 (#215, gemessen neutral) + Tagespuzzle-Einstieg (#217/#219) + Rematch (#218). Kein neuer Tag |
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.

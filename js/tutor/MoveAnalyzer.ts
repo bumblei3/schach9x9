@@ -231,7 +231,7 @@ export function showTutorMoveFeedback(analysis: MoveExplanation): void {
  * Draw a green "better move" arrow + cell highlights.
  * Accepts game when available (arrowRenderer); falls back to cell CSS only.
  */
-export function showBetterMoveArrow(
+function showBetterMoveArrow(
   game: GameLike | null | undefined,
   better: BetterMoveSuggestion
 ): void {
@@ -263,7 +263,7 @@ export function showBetterMoveArrow(
   }
 }
 
-export function clearBetterMoveHighlights(): void {
+function clearBetterMoveHighlights(): void {
   document
     .querySelectorAll('.cell.better-move-from, .cell.better-move-to')
     .forEach(el => el.classList.remove('better-move-from', 'better-move-to'));
@@ -272,7 +272,7 @@ export function clearBetterMoveHighlights(): void {
 /**
  * Compact persistent feedback in #tutor-feedback (created if missing).
  */
-export function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): void {
+function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): void {
   let panel = document.getElementById('tutor-feedback');
   if (!panel) {
     panel = document.createElement('div');

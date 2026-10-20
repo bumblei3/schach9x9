@@ -6,7 +6,7 @@ import { PHASES, type Game } from './gameEngine.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
 
-import type { Player } from './types/game.js';
+import type { Player } from './types/core.js';
 
 export interface TimeControlMode {
   base: number;

@@ -15,7 +15,7 @@ vi.mock('../js/ai/OpeningBook.js', () => ({
   setOpeningBook: vi.fn(),
 }));
 import { createEmptyBoard } from '../js/gameEngine.js';
-import type { Board, PieceType, Player } from '../js/types/game.js';
+import type { Board, PieceType, Player } from '../js/types/core.js';
 import { EVAL_VALUES } from '../js/evaluate.js';
 
 // Make EVAL_VALUES available globally for quickEval in aiEngine.ts

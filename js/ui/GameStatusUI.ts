@@ -11,7 +11,7 @@ import { computeMaterialSeries } from '../analyze/materialSeries.js';
 import { buildVariantTree } from '../analyze/variantTree.js';
 import type { Piece } from '../types/core.js';
 import { moveToAlgebraic } from '../openingTrainer.js';
-import type { Square } from '../types/game.js';
+import type { Square } from '../types/core.js';
 
 interface SavedGameState {
   board: (PieceWithMoved | null)[][];

@@ -6,7 +6,7 @@
 import { BOARD_SIZE } from './config.js';
 import * as AIEngine from './aiEngine.js';
 import { deepCopy } from './utils.js';
-import type { Board, Player, Piece, PieceType } from './types/game.js';
+import type { Board, Player, Piece, PieceType } from './types/core.js';
 import type { MoveResult } from './aiEngine.js';
 
 export class PuzzleGenerator {

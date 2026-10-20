@@ -6,7 +6,7 @@
  */
 
 import { PHASES, AI_DELAY_MS, type Game, type PieceWithMoved } from './gameEngine.js';
-import type { PuzzleState } from './types/game.js';
+import type { PuzzleState } from './types/core.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
@@ -29,7 +29,7 @@ import { renderMaterialGraph, renderMoveTimeGraph, renderVariantTree } from './u
 import { PuzzleMenu } from './ui/PuzzleMenu.js';
 import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
-import type { Player } from './types/game.js';
+import type { Player } from './types/core.js';
 import type { GameMode } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
@@ -1118,7 +1118,7 @@ export class GameController {
       result: playerResult,
       playerColor: playerColor,
       opponent: opponent,
-      moveHistory: (this.game.moveHistory || []) as unknown as import('./types/game.js').Move[],
+      moveHistory: (this.game.moveHistory || []) as unknown as import('./types/core.js').Move[],
       duration: Date.now() - this.gameStartTime,
       finalPosition: JSON.stringify(this.game.board),
     };

@@ -40,8 +40,6 @@ export const BLACK_ROOK = COLOR_BLACK | PIECE_ROOK;
 export const BLACK_QUEEN = COLOR_BLACK | PIECE_QUEEN;
 export const BLACK_KING = COLOR_BLACK | PIECE_KING;
 export const BLACK_ARCHBISHOP = COLOR_BLACK | PIECE_ARCHBISHOP;
-export const BLACK_CHANCELLOR = COLOR_BLACK | PIECE_CHANCELLOR;
-export const BLACK_ANGEL = COLOR_BLACK | PIECE_ANGEL;
 export const BLACK_NIGHTRIDER = COLOR_BLACK | PIECE_NIGHTRIDER;
 
 // Helper Functions
@@ -112,17 +110,3 @@ export function pieceToString(piece: number): string {
   return color === COLOR_WHITE ? char.toUpperCase() : char;
 }
 
-// Direction constants for move generation
-export const UP = -9; // North (decrease row)
-export const DOWN = 9; // South (increase row)
-export const LEFT = -1; // West (decrease col)
-export const RIGHT = 1; // East (increase col)
-
-// Diagonal directions
-export const UP_LEFT = -10;
-export const UP_RIGHT = -8;
-export const DOWN_LEFT = 8;
-export const DOWN_RIGHT = 10;
-
-// Knight moves (offsets on 9x9 board)
-export const KNIGHT_OFFSETS = [-19, -17, -11, -7, 7, 11, 17, 19];

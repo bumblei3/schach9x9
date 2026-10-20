@@ -13,7 +13,7 @@ import {
 } from './aiEngine.js';
 import { isInCheck, COLOR_WHITE, COLOR_BLACK } from './ai/MoveGenerator.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
-import type { Piece } from './types/game.js';
+import type { Piece } from './types/core.js';
 
 interface MoveRecord {
   moveNumber: number;

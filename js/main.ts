@@ -3,6 +3,8 @@
  * Application entry point.
  */
 
+import { registerServiceWorker } from './serviceWorkerRegistration.js';
+
 const init = async () => {
   try {
     const { App } = await import('./App.js');
@@ -20,16 +22,7 @@ if (document.readyState === 'loading') {
   init();
 }
 
-// Register Service Worker for PWA (DISABLED in E2E to avoid interference)
-// if ('serviceWorker' in navigator && !window.location.search.includes('disable-sw')) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker
-//       .register('service-worker.js')
-//       .then(registration => {
-//         console.log('SW registered: ', registration);
-//       })
-//       .catch(err => {
-//         console.log('SW registration failed: ', err);
-//       });
-//   });
-// }
+// Register the Service Worker for PWA/offline support. Guarded internally:
+// dev server, `?disable-sw`, and automation contexts (Playwright, Lighthouse)
+// are all skipped, which is what the old commented-out block could not express.
+registerServiceWorker();

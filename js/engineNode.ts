@@ -16,7 +16,8 @@
  */
 
 import { getBestMoveDetailed, type MoveResult } from './aiEngine.js';
-import type { Piece } from './types/game.js';
+import type { Piece } from './types/core.js';
+import { pieceToCode } from './pieceCodes.js';
 import { parseFEN } from './utils.js';
 
 function pieceCodeToPiece(code: number): Piece | null {
@@ -43,16 +44,6 @@ function pieceCodeToPiece(code: number): Piece | null {
     case -10: return { type: 'j', color: 'black', hasMoved: false };
     default: return null;
   }
-}
-
-/** Piece type -> internal board code (matches Piece|null)[][] convention. */
-function pieceToCode(p: Piece | null): number {
-  if (!p) return 0;
-  const typeCode: Record<string, number> = {
-    p: 1, n: 2, b: 3, r: 4, q: 5, k: 6, a: 7, c: 8, e: 9, j: 10,
-  };
-  const base = typeCode[p.type] ?? 0;
-  return p.color === 'white' ? base : -base;
 }
 
 /** Parse a 9x9 FEN into the number[][] board + turn used by evaluatePosition. */

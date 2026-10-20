@@ -2,7 +2,7 @@
  * RulesEngine.ts
  * Handles move validation, check detection, and game end conditions.
  */
-import type { Player, Square, Piece } from './types/game.js';
+import type { Player, Square, Piece } from './types/core.js';
 import { isBlockedCell, BoardShape } from './config';
 
 export interface GameWithBoard {

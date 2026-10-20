@@ -1,7 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 /**
  * Tests for the Tutorial first-run gating (show once, then persist).
- * @jest-environment jsdom
  */
 import { Tutorial } from '../js/tutorial.js';
 

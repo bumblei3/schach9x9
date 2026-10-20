@@ -6,7 +6,7 @@ import { logger } from './logger.js';
 import { DOMHandler } from './ui/DOMHandler.js';
 import { errorManager } from './utils/ErrorManager.js';
 import type { EvaluationBar } from './ui/EvaluationBar.js';
-import type { Player, Square, Piece, GameMode } from './types/game.js';
+import type { Player, Square, Piece, GameMode } from './types/core.js';
 import type { Game, MoveHistoryEntry, PieceWithMoved } from './gameEngine.js';
 import type { GameController } from './gameController.js';
 import { syncDailyPuzzleMenu } from './ui/dailyPuzzleMenu.js';
@@ -19,6 +19,7 @@ import type { KeyboardManager } from './input/KeyboardManager.js';
 import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
 import * as UI from './ui.js';
+import { storeInit } from './settings.js';
 // Side-effect import: TooltipManager is a module-level singleton that wires
 // up [data-tooltip] hints on construction (used by the action bar, etc.).
 import './ui/TooltipManager.js';
@@ -75,13 +76,16 @@ export class App {
     const { KeyboardManager } = await import('./input/KeyboardManager.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = UI;
-    await import('./ui/AchievementUI.js'); // Initialize achievements UI
-    // Expose to window for legacy/debug access
     window.UI = UI_MODULE;
+    await import('./ui/AchievementUI'); // Initialize achievements UI (only once via dynamic import)
 
     this.Game_Class = Game;
     this.game = new Game(initialPoints, mode as GameMode);
     window.game = this.game;
+
+    // Store Initialisierung mit defaults, falls leer
+    storeInit();
+
     window.app = this;
 
     // Initialize controllers
@@ -155,8 +159,7 @@ export class App {
     // Broadcast board geometry to AI workers (8×8 vs 9×9 + cross shape).
     // Workers default to 9×9; without this, standard8x8 AI uses wrong move gen.
     if (this.aiController) {
-      const is8 =
-        mode === 'standard8x8' || mode === 'upgrade8x8' || this.game.boardSize === 8;
+      const is8 = mode === 'standard8x8' || mode === 'upgrade8x8' || this.game.boardSize === 8;
       this.aiController.setBoardVariantForWorkers(is8 ? '8x8' : '9x9');
       if (this.game.boardShape) {
         this.aiController.setBoardShapeForWorkers(this.game.boardShape);

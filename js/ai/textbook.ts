@@ -9,7 +9,7 @@
 
 import { BOARD_SIZE } from '../gameEngine.js';
 import { RulesEngine } from '../RulesEngine.js';
-import type { Piece } from '../types/game.js';
+import type { Piece } from '../types/core.js';
 
 export interface TextbookLine {
   id: string;

@@ -1,5 +1,5 @@
 import { PHASES, type Game } from './gameEngine.js';
-import type { Player } from './types/game.js';
+import type { Player } from './types/core.js';
 import {
   DRAW_OFFER_THRESHOLD_LOW,
   DRAW_OFFER_THRESHOLD_HIGH,
@@ -25,7 +25,6 @@ import type { MoveResult, SearchResult } from './aiEngine.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 
-// @ts-expect-error - Vite worker import (.ts extension)
 import AIWorker from './ai/aiWorker.ts?worker';
 
 // Piece values for shop

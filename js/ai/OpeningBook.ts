@@ -5,7 +5,7 @@
 
 import { logger } from '../logger.js';
 import type { Square, Piece } from '../gameEngine.js';
-import { PieceType, Player } from '../types/game.js';
+import { PieceType, Player } from '../types/core.js';
 
 interface BookMove {
   from: Square;
