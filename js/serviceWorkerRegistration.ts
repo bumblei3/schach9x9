@@ -58,12 +58,15 @@ export function shouldRegisterServiceWorker(env: ServiceWorkerEnvironment): bool
  * Register the service worker.
  *
  * No-op unless `shouldRegisterServiceWorker()` passes, so callers can invoke
- * this unconditionally at startup.
+ * this unconditionally at startup. The environment is injectable so the guard
+ * branches are testable without stubbing `import.meta.env`.
  */
-export function registerServiceWorker(): void {
+export function registerServiceWorker(
+  env: ServiceWorkerEnvironment = readServiceWorkerEnvironment()
+): void {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
   if (!('serviceWorker' in navigator)) return;
-  if (!shouldRegisterServiceWorker(readServiceWorkerEnvironment())) return;
+  if (!shouldRegisterServiceWorker(env)) return;
 
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').catch((err: unknown) => {

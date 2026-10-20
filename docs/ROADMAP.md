@@ -213,6 +213,8 @@ Erst anfassen, wenn M1 das Score-Ziel (0.30) **oder** klaren NPS-Beweis geliefer
 | 6.2 | Coverage von `js/matchRefs.ts` anheben (28 % Statements — niedrigste Datei im Repo) | Track-A-Harness, der jede Stärke-Aussage trägt, ist gegen Regressionen getestet |
 | 6.3 | `tools/` und `js/` auf totem Export prüfen (`npx knip`) | Keine ungenutzten Dev-Dependencies (`jest`, `ts-jest`, `husky`, `jsdoc`) |
 
+**Stand M6 (2026-10-20):** 6.2 erledigt — `js/matchRefs.ts` 28,2 % → 71,7 % Statements, `tests/matchRefs.protocol.test.ts` (26 Tests) gegen das Line-Protokoll, `applyMove`/Promotion, `playGame`-Urteile und das moveNumber-100-Limit. Nebenbei: die Figurencode-Mapping existierte doppelt (`engineNode.ts` privat + „mirror" in `matchRefs.ts`) und ist jetzt `js/pieceCodes.ts`; die Promotionstabelle kannte `e`/`j` nicht und ließe ein Feen-Promotion im Harness als Bauer durchgehen. 6.3 erledigt — Jest-Überreste und `jsdoc` entfernt, `npm ci --legacy-peer-deps` sauber. 6.1 (`js/types/`) bleibt offen.
+
 **Nicht:** Umschreiben der Engine, neue Eval-Terme, NNUE.
 
 ---

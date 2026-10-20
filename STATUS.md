@@ -147,7 +147,7 @@ v2.0.0 ist das erste Release, das die 9×9-Identität ernst nimmt — nicht nur 
 2. ~~Nächster Schnitt ist das Tagespuzzle als Einstieg der Sitzung.~~ **Erledigt** in #217/#219 (`a9b1e0e`): `syncDailyPuzzleMenu()` platziert die Karte je nach gelöst/ungelöst.
 3. ~~Danach PGN-Export der gespielten Partie.~~ **Erledigt**: `#export-pgn-btn` (Copy + Download) über `js/utils/PGNGenerator.ts`, getestet in `tests/pgnGenerator*.test.ts`.
 4. Offen: `js/types/` hat drei parallele Definitionsdateien (`core.ts`, `game.ts`, `ui.ts`) mit ~40 doppelten Typen. Konsolidieren wäre der nächste strukturelle Schnitt — `types/game.ts` trägt 29 Importer, `types/core.ts` 8.
-5. Offen: `js/matchRefs.ts` (Track-A-Messharness) hat mit 28 % die niedrigste Statement-Coverage im Repo. Der Harness, der alle Stärke-Aussagen trägt, ist die am wenigsten geprüfte Datei.
+5. ~~Offen: `js/matchRefs.ts` mit 28 % die niedrigste Coverage im Repo.~~ **Erledigt:** 28,2 % → 71,7 % Statements; der Track-A-Harness hat jetzt einen eigenen Protocol-Test.
 
 ## Lizenz
 
