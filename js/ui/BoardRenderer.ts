@@ -153,6 +153,7 @@ export function initBoardUI(game: GameLike): void {
       cell.dataset.r = r.toString();
       cell.dataset.c = c.toString();
       cell.setAttribute('role', 'gridcell');
+      cell.setAttribute('tabindex', '-1');
       const file = String.fromCharCode(97 + c); // a-i
       const rank = size - r; // 1-9
       cell.setAttribute('aria-label', `${file}${rank}`);

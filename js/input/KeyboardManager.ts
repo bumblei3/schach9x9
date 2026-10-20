@@ -156,6 +156,9 @@ export class KeyboardManager {
       g.validMoves = piece ? (g.getValidMoves(r, c, piece as Piece) ?? []) : [];
       const game = this.app.game;
       if (game) renderBoard(game);
+      // Move DOM focus to the selected cell for keyboard/screen-reader users.
+      const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`) as HTMLElement | null;
+      if (cell) cell.focus();
       return;
     }
 

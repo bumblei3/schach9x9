@@ -199,6 +199,12 @@ body.mode-3d #board-wrapper {
   border-bottom: 4px solid var(--grid-line-color);
 }
 
+.cell:focus-visible {
+  outline: 3px solid #4a90e2;
+  outline-offset: -3px;
+  z-index: 2;
+}
+
 .cell.selected {
   box-shadow: inset 0 0 0 4px var(--accent-primary);
 }
