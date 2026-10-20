@@ -1,188 +1,51 @@
 # Verbesserungsvorschläge für Schach 9x9
 
-> **Historisch.** Kanonische Planung: [`ROADMAP.md`](ROADMAP.md) (2026-08-21).
-> Die meisten Punkte hier sind erledigt (TS, PGN, Themes, Drag&Drop, Opening Book,
-> Analyse, PWA) oder bewusst abgelehnt (Multiplayer). Nicht als Backlog nutzen.
+> **Aktualisiert 2026-10.** Kanonische Planung: [`ROADMAP.md`](ROADMAP.md).
+> TypeScript-Migration, PGN, Themes, Drag&Drop, Opening Book, Analyse, PWA,
+> Service Worker, Auto-Save, Sound-Settings-Persistenz und CSP-Cleanups sind
+> **erledigt**. Multiplayer ist bewusst abgelehnt (lokales Spiel).
 
-## 🎮 UX/UI Verbesserungen
+## ✅ Erledigt (historische Liste, als Referenz)
 
-### 1. **Drag & Drop für Figuren** ✅
+- Drag & Drop, Mobile-Optimierung, Themes, PGN Export/Import, Service Worker
+- TypeScript-Migration (komplett), Unit-Tests (3138 Tests), E2E-Suite (91 Specs)
+- KI-Analyse-Modus (Live + Post-Game), Sound-Volume-Slider, Auto-Save
+- CSP-Inline-Handler entfernt (index.html, ErrorManager, ShopManager, debug.ts)
 
-- [x] Figuren per Drag & Drop verschieben
-- [x] Visuelles Feedback während des Ziehens
-- Ungültige Züge visuell markieren (z.B. rotes X)
+## 🎯 Offene, konkrete Verbesserungen (priorisiert)
 
-### 2. **Bessere visuelle Feedback-Mechanismen**
+### A. Hoch — Sofort umsetzbar
+1. **Docs aktualisieren** — `ROADMAP.md`, `STATUS.md` und diese Datei hinken `main` hinterher (letzter Stand ROADMAP `1a3947d`). Test-/Coverage-Zahlen aktualisieren (91 E2E, 3138 Unit, Statements 90 %).
+2. **Draw-Offer vs. Mensch** — braucht ein 2-Player/Hotseat-E2E-Setup (aktuell keiner vorhanden). E2E-Spec + Hotseat-Modus.
+3. **Coverage-Lücken schließen** — `js/ui/3d` (Statements 80 % / Branches 61 %) und `js/ui/eManager3D.ts` (69 % / 54 %).
 
-- Hover-Effekte auf Feldern zeigen mögliche Züge
-- Animationen für Schach/Checkmate
-- Pulsierende Animation für den König im Schach
-- Sanftere Übergänge bei Zug-Highlights
+### B. Mittel — Nächste Version
+4. **Erweiterte Statistiken** — Zug-Zeit-Tracking, Material-Verlauf-Grafik, Heatmap genutzter Felder.
+5. **Bessere visuelle Feedback-Mechanismen** — Hover-Effekte, Schach/Checkmate-Animationen, pulsierender König im Schach.
+6. **Tastatursteuerung erweitern** — Feldauswahl per "e4", Escape zum Abwählen, Tastenkürzel (U/H/S).
 
-### 3. **Erweiterte Tastatursteuerung**
+### C. Niedrig — Zukünftig
+7. **Puzzle-Modus erweitern** — taktische Aufgaben, Schwierigkeitsgrade, Fortschritt speichern.
+8. **Eröffnungs-Trainer** — Eröffnungen aus dem Buch trainieren, richtigen Zug finden.
+9. **Erweiterte Analyse** — Varianten-Baum ("was wäre wenn"), Zug-Kommentare.
+10. **Barrierefreiheit** — Screen Reader, Hoher Kontrast, vollständige Tastatur-Navigation.
+11. **Social Features** — Spiel teilen (Link mit Position), Leaderboard (lokal), Achievements.
 
-- Buchstaben/Zahlen für direkte Feldauswahl (z.B. "e4")
-- Tastenkürzel für häufige Aktionen (U=Undo, H=Hint, S=Save)
-- Escape-Taste zum Abwählen
+## 📈 Priorisierung (aktualisiert)
 
-### 4. **Mobile Optimierung** ✅
+### Phase 1 (Hoch — Sofort)
+- Docs aktualisieren
+- Coverage-Lücken schließen (3d, eManager3D)
+- Draw-Offer vs. Mensch (Hotseat-E2E)
 
-- [x] Touch-Gesten für Züge
-- [x] Responsive Layout für kleinere Bildschirme
-
-### 5. **Bessere Tutor-Integration**
-
-- Automatische Hints bei schlechten Zügen (optional)
-- Erklärung warum ein Zug gut/schlecht ist
-- Visuelle Anzeige der Bedrohung (z.B. rote Linien)
-
-### 6. **Erweiterte Statistiken**
-
-- Zug-Zeit-Tracking pro Zug
-- Heatmap der am meisten genutzten Felder
-- Durchschnittliche Zugzeit
-- Material-Verlauf über Zeit (Grafik)
-
-## 🤖 KI Verbesserungen
-
-### 7. **Bessere KI-Strategien**
-
-- Opening Book für erste Züge
-- Endgame Tablebases (für Endspiele)
-- Transposition Table für Minimax (Performance)
-- Move Ordering (bessere Züge zuerst prüfen)
-
-### 8. **Anpassbare KI-Stärke**
-
-- Einstellbare Tiefe (1-5+)
-- Zufälligkeitsfaktor für "menschlichere" Züge
-- Verschiedene Spielstile (aggressiv, defensiv, balanciert)
-
-### 9. **KI-Analyse-Modus**
-
-- KI zeigt beste Züge nach jedem Zug
-- Bewertung der aktuellen Position
-- Vorhersage der nächsten Züge
-
-## ⚡ Performance Optimierungen
-
-### 10. **Rendering-Optimierungen**
-
-- Virtual DOM oder Canvas-basiertes Rendering
-- Nur geänderte Felder neu rendern (nicht das ganze Brett)
-- Debouncing für Tutor-Updates
-- Web Workers für KI-Berechnungen
-
-### 11. **Caching & Memoization**
-
-- Caching von Zug-Berechnungen
-- Memoization für Position-Bewertungen
-- Lazy Loading für Sounds/Assets
-
-### 12. **Code-Optimierungen**
-
-- Minimax mit Iterative Deepening
-- Frühe Abbruchbedingungen
-- Optimierte Datenstrukturen für Brett-Zustand
-
-## 🎨 Design & Theming
-
-### 13. **Mehr Themes** ✅
-
-- [x] Custom Color Schemes (Classic, Blue, Green)
-- [x] CSS Variables für einfaches Theming
-- Minimalistisches Theme
-
-### 14. **Figuren-Darstellung**
-
-- Option für 3D-Figuren
-- Verschiedene Figuren-Sets (Klassisch, Modern, Fantasy)
-- Größenanpassung der Figuren
-
-## 📊 Features & Funktionalität
-
-### 15. **Spiel-Modi**
-
-- Turnier-Modus (mehrere Spiele)
-- Puzzle-Modus (taktische Aufgaben)
-- Training-Modus (spezifische Situationen üben)
-- Online-Multiplayer (WebSocket)
-
-### 16. **Erweiterte Analyse**
-
-- PGN Export/Import
-- Zug-Analyse mit Engine
-- Zug-Historie mit Kommentaren
-- Varianten-Baum (was wäre wenn...)
-
-### 17. **Social Features**
-
-- Spiel teilen (Link mit Position)
-- Leaderboard (lokal)
-- Achievements/Trophäen
-- Spiel-Replay als Video/GIF exportieren
-
-### 18. **Barrierefreiheit**
-
-- Screen Reader Support
-- Hoher Kontrast
-- Tastatur-Navigation vollständig
-- Sprachausgabe für Züge
-
-## 🔧 Technische Verbesserungen
-
-### 19. **Code-Qualität**
-
-- TypeScript Migration (wie in technical_improvements.md erwähnt)
-- Bessere Fehlerbehandlung
-- Unit Tests für kritische Logik
-- Integration Tests für Spielablauf
-
-### 20. **Daten-Persistenz**
-
-- Mehrere Save-Slots
-- Auto-Save während des Spiels
-- Cloud-Sync (optional)
-- Export als JSON/PNG
-
-### 21. **Offline-Funktionalität** ✅
-
-- [x] Service Worker für vollständiges Offline-Spiel
-- [x] Cache-Strategie für Assets
-- Lokale Datenbank für Historie
-
-## 🎯 Quick Wins (Schnell umsetzbar)
-
-1. **Tastenkürzel hinzufügen** ✅ (U=Undo, H=Hint, etc.)
-2. **Bessere Fehlermeldungen** (benutzerfreundlicher)
-3. **Auto-Save** ✅
-4. **PGN Export** ✅
-5. **Mehr Themes** ✅
-6. **Bessere Animationen** ✅
-7. **Tooltips** ✅
-8. **Konfetti-Animation** ✅
-9. **Sound-Volume-Slider** ✅
-10. **Fullscreen-Modus** ✅
-
-## 📈 Priorisierung
-
-### Phase 1 (Hoch - Sofort)
-
-- Tastenkürzel
-- Bessere visuelle Feedback
-- Performance-Optimierungen (Rendering)
-- Mobile Optimierung
-
-### Phase 2 (Mittel - Nächste Version)
-
-- Drag & Drop
+### Phase 2 (Mittel — Nächste Version)
 - Erweiterte Statistiken
-- Mehr Themes
-- PGN Export
+- Bessere visuelle Feedback-Mechanismen
+- Tastatursteuerung erweitern
 
-### Phase 3 (Niedrig - Zukünftig)
-
-- Online Multiplayer
-- TypeScript Migration
-- Puzzle-Modus
-- Cloud-Sync
+### Phase 3 (Niedrig — Zukünftig)
+- Puzzle-Modus erweitern
+- Eröffnungs-Trainer
+- Erweiterte Analyse (Varianten-Baum)
+- Barrierefreiheit
+- Social Features
