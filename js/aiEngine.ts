@@ -18,16 +18,11 @@ import {
   getAllLegalMoves as genLegalInt,
   makeMove as makeMoveInt,
   undoMove as undoMoveInt,
-  getAllCaptureMoves,
   isInCheck as checkInt,
   isSquareAttacked as isSquareAttackedInt,
   findKing as findKingInt,
   see as seeInt,
   getAllThreats,
-  getKingThreats,
-  getXRayThreats,
-  getDiscoveredAttackPotential,
-  type ThreatInfo,
   // Note: Piece constants (PIECE_*, COLOR_*) are re-exported from BoardDefinitions below
 } from './ai/MoveGenerator';
 import {
@@ -49,16 +44,16 @@ import {
   COLOR_MASK,
 } from './ai/BoardDefinitions';
 import type { Player, Square, Piece, PieceType } from './types/core.js';
-import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
+import { computeZobristHash } from './ai/transpositionTable';
 
 // Re-export evaluate module
-export { evaluate, EVAL_VALUES, type IntBoard, type EvalConfig } from './evaluate';
+export { evaluate, type IntBoard } from './evaluate';
 import { evaluate, EVAL_VALUES, type EvalConfig } from './evaluate';
 
 // Re-export search module
 import { createJsSearch } from './search';
 
-export { computeZobristHash, TranspositionTable };
+export { computeZobristHash };
 
 // --- Types ---
 
@@ -546,15 +541,9 @@ export function setProgressCallback(_cb: ((_progress: AIProgressData) => void) |
 
 // Re-exports
 export {
-  logger,
   setOpeningBook,
   queryOpeningBook,
-  getAllCaptureMoves,
   getAllThreats,
-  getKingThreats,
-  getXRayThreats,
-  getDiscoveredAttackPotential,
-  type ThreatInfo,
   PIECE_KING,
   PIECE_QUEEN,
   COLOR_WHITE,

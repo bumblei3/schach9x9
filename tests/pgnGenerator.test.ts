@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { moveToNotation, generatePGN } from '../js/utils/PGNGenerator.js';

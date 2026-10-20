@@ -39,7 +39,6 @@ import {
   isBlockedSquare,
   getCurrentBoardShape,
   getCurrentBoardSize,
-  type BoardShape,
 } from '../config.js';
 
 export type BoardStorage = number[] | Int8Array;
@@ -140,12 +139,6 @@ const rookOffsets = () => {
 /**
  * Generate all legal moves for position
  */
-
-export function getPseudoLegalMoves(): Move[] {
-  // Legacy stub for 8x8 tests compatibility
-  return [];
-}
-
 export function getAllLegalMoves(board: BoardStorage, turnColor: string): Move[] {
   const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
   const enemyColor = turnColor === 'white' ? COLOR_BLACK : COLOR_WHITE;
@@ -203,24 +196,6 @@ export function getAllLegalMoves(board: BoardStorage, turnColor: string): Move[]
   }
 
   return legalMoves;
-}
-
-/**
- * Get all legal moves with blocked square filtering for cross-shaped board
- */
-export function getAllLegalMovesFiltered(
-  board: BoardStorage,
-  turnColor: string,
-  boardShape?: BoardShape
-): Move[] {
-  const moves = getAllLegalMoves(board, turnColor);
-
-  // Filter out blocked squares for cross-shaped board
-  if (boardShape && boardShape !== 'standard') {
-    return moves.filter(move => !isBlockedSquare(move.to, boardShape));
-  }
-
-  return moves;
 }
 
 export function getAllCaptureMoves(board: BoardStorage, turnColor: string): Move[] {

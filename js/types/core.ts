@@ -83,24 +83,6 @@ export interface MoveRecord {
 // Game State & Extensions
 // ============================================================================
 
-export interface GameState {
-  board: Board;
-  turn: Player;
-  phase: GamePhase;
-  mode: GameMode;
-  moveHistory: Move[];
-  selectedSquare: Square | null;
-  validMoves: Square[];
-  points: number;
-  whiteKingPos: Square | null;
-  blackKingPos: Square | null;
-  isCheck: boolean;
-  isCheckmate: boolean;
-  isStalemate: boolean;
-  halfMoveClock: number;
-  fullMoveNumber: number;
-}
-
 export interface CapturedPieces {
   white: Piece[];
   black: Piece[];
@@ -116,22 +98,6 @@ export interface GameStats {
   blackTime: number;
   clockEnabled: boolean;
   timeControl: { base: number; increment: number };
-}
-
-export interface ShopItem {
-  piece: PieceType;
-  cost: number;
-  available: boolean;
-}
-
-export interface CampaignLevel {
-  id: string;
-  name: string;
-  description: string;
-  unlocked: boolean;
-  completed: boolean;
-  stars: number;
-  maxStars: number;
 }
 
 export interface PuzzleState {
@@ -185,50 +151,14 @@ export interface ToastOptions {
   type?: 'info' | 'success' | 'warning' | 'error';
 }
 
-export interface ModalOptions {
-  title: string;
-  message: string;
-  buttons?: ModalButton[];
-}
-
 export interface ModalButton {
   text: string;
   class?: string;
   callback?: () => void;
 }
 
-export interface BoardRendererOptions {
-  highlightLastMove?: boolean;
-  highlightCheck?: boolean;
-  showCoordinates?: boolean;
-  animate?: boolean;
-  pieceSkin?: PieceSkin;
-  boardTheme?: BoardTheme;
-}
-
 export type BoardTheme = 'classic' | 'blue' | 'green' | 'wooden' | 'dark';
 export type PieceSkin = 'classic' | 'modern' | 'pixel' | 'medieval';
-
-export interface DragState {
-  active: boolean;
-  fromSquare: Square | null;
-  element: HTMLElement | null;
-}
-
-export interface AnimationState {
-  active: boolean;
-  from: Square | null;
-  to: Square | null;
-  piece: Piece | null;
-  startTime: number;
-  duration: number;
-}
-
-export interface OverlayState {
-  visible: boolean;
-  type: OverlayType | null;
-  data: unknown;
-}
 
 export type OverlayType =
   | 'promotion'
@@ -242,18 +172,6 @@ export type OverlayType =
   | 'analysis'
   | 'talentTree'
   | 'openingBook';
-
-export interface SettingsState {
-  soundEnabled: boolean;
-  musicEnabled: boolean;
-  animationsEnabled: boolean;
-  showCoordinates: boolean;
-  showMoveHints: boolean;
-  boardTheme: BoardTheme;
-  pieceSkin: PieceSkin;
-  clockFormat: 'digital' | 'analog';
-  language: 'de' | 'en';
-}
 
 // ============================================================================
 // GameLike Interface (for UI/rendering modules - avoids circular deps)
@@ -343,17 +261,6 @@ export interface GameControllerInterface {
 
 export type AIPersonality = 'balanced' | 'aggressive' | 'defensive' | 'tactical' | 'positional';
 
-export interface AIConfig {
-  depth: number;
-  timeLimit: number;
-  useOpeningBook: boolean;
-  useTablebases: boolean;
-  personality: AIPersonality;
-  skillLevel?: number;
-  threads?: number;
-  hashSize?: number;
-}
-
 export interface SearchResult {
   bestMove: Move | null;
   score: number;
@@ -364,55 +271,12 @@ export interface SearchResult {
   stoppedEarly: boolean;
 }
 
-export interface EvaluationResult {
-  score: number;
-  details: {
-    material: number;
-    positional: number;
-    kingSafety: number;
-    pawnStructure: number;
-    mobility: number;
-  };
-}
-
-export interface TranspositionEntry {
-  key: bigint;
-  depth: number;
-  score: number;
-  flag: 'exact' | 'lower' | 'upper';
-  bestMove?: Move;
-  age: number;
-}
-
-export interface OpeningBookEntry {
-  moves: Array<{
-    from: Square;
-    to: Square;
-    weight: number;
-    games: number;
-  }>;
-  seenCount: number;
-}
-
-export interface AnalysisLine {
-  moves: Move[];
-  score: number;
-  depth: number;
-}
-
 export interface ThreatInfo {
   square: Square;
   piece: Piece;
   attackers: Square[];
   value: number;
   type: 'direct' | 'xray' | 'discovered';
-}
-
-export interface OpportunityInfo {
-  square: Square;
-  target: Square;
-  type: 'capture' | 'fork' | 'pin' | 'skewer' | 'mate';
-  value: number;
 }
 
 // ============================================================================
@@ -427,24 +291,6 @@ export interface CampaignGoal {
   description: string;
 }
 
-export interface CampaignLevelRaw {
-  id: string;
-  name: string;
-  description: string;
-  difficulty: CampaignDifficulty;
-  initialFen?: string;
-  goals: CampaignGoal[];
-  opponent: {
-    personality: AIPersonality;
-    elo?: number;
-    timeLimit?: number;
-  };
-  rewards: {
-    stars: number;
-    unlocks?: string[];
-  };
-}
-
 export interface LevelStats {
   attempts: number;
   wins: number;
@@ -452,13 +298,6 @@ export interface LevelStats {
   draws: number;
   bestTime?: number;
   starsEarned: number;
-}
-
-export interface LevelProgress {
-  levelId: string;
-  stats: LevelStats;
-  completed: boolean;
-  unlocked: boolean;
 }
 
 // ============================================================================

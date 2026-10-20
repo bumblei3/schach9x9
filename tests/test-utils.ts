@@ -120,27 +120,6 @@ export function createMockGame(overrides: Record<string, any> = {}): Record<stri
 }
 
 /**
- * Mocks Three.js basics for testing 3D components without loading the full library.
- */
-export function mockThreeJS(): Record<string, any> {
-  const mockScene = { add: vi.fn(), remove: vi.fn(), traverse: vi.fn() };
-  const mockCamera = {
-    position: { set: vi.fn() },
-    lookAt: vi.fn(),
-    updateProjectionMatrix: vi.fn(),
-  };
-  const mockRenderer = {
-    setSize: vi.fn(),
-    setPixelRatio: vi.fn(),
-    render: vi.fn(),
-    dispose: vi.fn(),
-    domElement: document.createElement('canvas'),
-  };
-
-  return { mockScene, mockCamera, mockRenderer };
-}
-
-/**
  * Creates a simple seeded pseudo-random number generator.
  * @param seed
  * @returns A random function and a reset function

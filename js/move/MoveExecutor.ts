@@ -294,7 +294,7 @@ export async function executeMove(
 /**
  * Completes the move execution (evaluation, history, status, turn switch)
  */
-export async function completeMoveExecution(
+async function completeMoveExecution(
   game: Game,
   moveController: MoveController,
   moveRecord: MoveHistoryEntry

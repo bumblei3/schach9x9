@@ -1,8 +1,4 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-/**
- * @jest-environment jsdom
- */
-
 // Mock BoardRenderer
 vi.mock('../../js/ui/BoardRenderer.js', () => ({
   renderBoard: vi.fn(),

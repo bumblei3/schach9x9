@@ -1,8 +1,4 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-/**
- * @jest-environment jsdom
- */
-
 // Tests for App.js new features: volume slider, fullscreen, puzzle mode, game over overlay
 describe('App Feature Tests', () => {
   beforeEach(() => {

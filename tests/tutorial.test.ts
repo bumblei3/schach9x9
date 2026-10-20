@@ -1,7 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 /**
  * Tests for Tutorial System
- * @jest-environment jsdom
  */
 
 import { Tutorial } from '../js/tutorial.js';

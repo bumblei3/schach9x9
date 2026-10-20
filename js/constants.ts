@@ -29,19 +29,7 @@ export const EVAL_WINNING_THRESHOLD = 300;
 
 // ===== Board =====
 
-/** Standard-Zellengröße für ArrowRenderer (px) */
-export const DEFAULT_CELL_SIZE = 64;
-
-/** Arrow-Verkürzungsfaktor (25% kürzer an jedem Ende) */
-export const ARROW_SHORTEN_FACTOR = 0.25;
-
 // ===== Animation =====
 
 /** Drag-Image Versteck-Offset (px) — negative Y-Position */
 export const DRAG_IMAGE_HIDDEN_OFFSET = -1000;
-
-// ===== Sound =====
-
-/** Min/Max Werte für Lautstärke-Slider */
-export const VOLUME_MIN = 0;
-export const VOLUME_MAX = 100;

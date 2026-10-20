@@ -299,11 +299,6 @@ export const AI_DIFFICULTY_TIMEOUT_MS: Record<string, number> = {
 };
 
 /**
- * Auto-save interval
- */
-export const AUTO_SAVE_INTERVAL = 5; // Auto-save every N moves
-
-/**
  * Mentor level configuration
  */
 export interface MentorLevelConfig {
@@ -320,9 +315,3 @@ export const MENTOR_LEVELS: Record<string, MentorLevelConfig> = {
   STANDARD: { id: 'STANDARD', threshold: 200, name: 'Standard (Nur Patzer)' },
   OFF: { id: 'OFF', threshold: Infinity, name: 'Aus' },
 };
-
-export const MENTOR_SETTINGS = {
-  FAST_DEPTH: 6, // Depth for quick pre-move analysis
-} as const;
-
-export const DEFAULT_MENTOR_LEVEL = 'STANDARD';
