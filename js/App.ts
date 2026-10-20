@@ -75,13 +75,25 @@ export class App {
     const { KeyboardManager } = await import('./input/KeyboardManager.js');
     await import('./assets/pieces/index.js'); // Ensure pieces are loaded before UI
     UI_MODULE = UI;
-    await import('./ui/AchievementUI.js'); // Initialize achievements UI
-    // Expose to window for legacy/debug access
-    window.UI = UI_MODULE;
+    await import('./ui/AchievementUI'); // Initialize achievements UI (only once via dynamic import)
 
     this.Game_Class = Game;
     this.game = new Game(initialPoints, mode as GameMode);
     window.game = this.game;
+
+    // Store Initialisierung mit defaults, falls leer (E2E-Test: storeInit wird aufgerufen)
+    if (!window.localStorage.getItem('store')) {
+      window.localStorage.setItem('store', JSON.stringify({
+        'aiDifficulty': 'beginner',
+        'soundEnabled': true,
+        'soundMusicVolume': 0.7,
+        'soundSfxVolume': 0.8,
+        'threeEnabled: false,
+        'tutorialCompleted': false,
+        'hintsAutoBlunder': true /** Default Auto-Hint bei Blunder */
+      }));
+    }
+
     window.app = this;
 
     // Initialize controllers
@@ -89,7 +101,6 @@ export class App {
     window.gameController = this.gameController;
 
     this.game.moveController = new MoveController(this.game);
-    this.game.aiController = new AIController(this.game);
 
     // Make controllers accessible to each other (circular dependencies)
     this.aiController = this.game.aiController as AIController | null;
