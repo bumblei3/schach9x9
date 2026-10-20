@@ -33,7 +33,7 @@ export interface ServiceWorkerEnvironment {
 }
 
 /** Read the registration environment. Separated so the predicate is testable. */
-export function readServiceWorkerEnvironment(): ServiceWorkerEnvironment {
+function readServiceWorkerEnvironment(): ServiceWorkerEnvironment {
   const search = typeof window !== 'undefined' ? window.location.search : '';
   const nav = typeof navigator !== 'undefined' ? navigator : undefined;
 
