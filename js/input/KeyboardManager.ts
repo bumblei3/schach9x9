@@ -5,7 +5,7 @@
  */
 import { showToast, closeModal, renderBoard, updateStatus } from '../ui.js';
 import type { App } from '../App.js';
-import type { Game } from '../gameEngine.js';
+import type { Game, Piece } from '../gameEngine.js';
 
 export class KeyboardManager {
   private app: App;
@@ -137,6 +137,36 @@ export class KeyboardManager {
         showToast(active ? 'Bester Zug AN' : 'Bester Zug AUS', 'info');
         const btn = document.getElementById('best-move-btn');
         if (btn) btn.classList.toggle('active', active);
+      }
+      return;
+    }
+
+    // Arrow-key navigation: move the selection on the board.
+    if (key === 'arrowup' || key === 'arrowdown' || key === 'arrowleft' || key === 'arrowright') {
+      event.preventDefault();
+      const size = (g as { boardSize?: number }).boardSize || 9;
+      let r = g.selectedSquare ? g.selectedSquare.r : Math.floor(size / 2);
+      let c = g.selectedSquare ? g.selectedSquare.c : Math.floor(size / 2);
+      if (key === 'arrowup') r = Math.max(0, r - 1);
+      if (key === 'arrowdown') r = Math.min(size - 1, r + 1);
+      if (key === 'arrowleft') c = Math.max(0, c - 1);
+      if (key === 'arrowright') c = Math.min(size - 1, c + 1);
+      const piece = g.board?.[r]?.[c];
+      g.selectedSquare = { r, c };
+      g.validMoves = piece ? (g.getValidMoves(r, c, piece as Piece) ?? []) : [];
+      const game = this.app.game;
+      if (game) renderBoard(game);
+      return;
+    }
+
+    // Enter/Space: confirm selection (click the selected cell).
+    if (key === 'enter' || key === ' ') {
+      event.preventDefault();
+      if (g.selectedSquare) {
+        const gc = this.app.gameController as { handleCellClick?: (_r: number, _c: number) => void } | null;
+        if (gc?.handleCellClick) {
+          gc.handleCellClick(g.selectedSquare.r, g.selectedSquare.c);
+        }
       }
       return;
     }
