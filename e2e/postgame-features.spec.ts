@@ -186,6 +186,28 @@ test('resign button ends the game', async ({ page }) => {
   expect(dialogs.some((m) => /Wirklich aufgeben/.test(m))).toBe(true);
 });
 
+test('draw offer keeps the game running without crashing', async ({ page }) => {
+  const helper = new E2EHelper(page);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await helper.goto();
+  await helper.startGame('classic');
+  await waitGame(page);
+  await playOneMove(helper, page);
+
+  await page.locator('#action-more-btn').click();
+  await expect(page.locator('#draw-offer-btn')).toBeVisible();
+  await page.locator('#draw-offer-btn').click();
+
+  // vs AI the offer is registered and the engine evaluates; the board must stay
+  // alive and no game-over overlay may appear (that would mean the engine died).
+  await expect(page.locator('#game-over-overlay')).not.toBeVisible({ timeout: 5000 });
+  await page.waitForTimeout(1500);
+  await expect(page.locator('#game-over-overlay')).not.toBeVisible({ timeout: 5000 });
+  expect(errors).toEqual([]);
+});
+
 test.describe('Post-game replay overlay', () => {
   test('opens from the analysis modal and steps through the game', async ({ page }) => {
     const helper = new E2EHelper(page);
