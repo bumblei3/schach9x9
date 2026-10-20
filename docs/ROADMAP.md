@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-10-20 · `main` `1a3947d` (v2.0.0 + TS 7 #214 + M1.3 #215 + Tagespuzzle-Einstieg #217 + Rematch #218 + PWA-Registrierung #219 + toter Settings-Store entfernt) · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-10-20 · `main` `88840a0` (v2.0.0 + Vitest 5 + TS 7 #214 + M1.3 #215 + Tagespuzzle-Einstieg #217 + Rematch #218 + PWA-Registrierung #219 + toter Settings-Store entfernt + Sound-Settings-Persistenz + CSP-Cleanups + analysis-live E2E-Fix) · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -251,6 +251,6 @@ Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand e
 | **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline — **released/getaggt** |
 | **v1.9.0** | M1.1 + NNUE-Pipeline (Gate negativ, geparkt) — **released** |
 | **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Coach — **released** |
-| **main (2026-10-20)** | v2.0.0 + Vitest 5 + TS 7 (#214) + M1.3 (#215, gemessen neutral) + Tagespuzzle-Einstieg (#217/#219) + Rematch (#218). Kein neuer Tag |
+| **main (2026-10-20)** | v2.0.0 + Vitest 5 + TS 7 (#214) + M1.3 (#215, gemessen neutral) + Tagespuzzle-Einstieg (#217/#219) + Rematch (#218) + Sound-Settings-Persistenz + CSP-Cleanups + analysis-live E2E-Fix. Kein neuer Tag |
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.
