@@ -173,6 +173,9 @@ export function showPuzzleOverlay(puzzle: Puzzle): void {
   if (titleEl) titleEl.textContent = puzzle.title;
   if (descEl) descEl.textContent = puzzle.description;
 
+  const diffEl = document.getElementById('puzzle-difficulty');
+  if (diffEl) diffEl.textContent = `Schwierigkeit: ${puzzle.difficulty}`;
+
   const statusEl = document.getElementById('puzzle-status');
   if (statusEl) {
     statusEl.textContent = 'Weiß am Zug';
