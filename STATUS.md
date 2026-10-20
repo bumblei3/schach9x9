@@ -146,7 +146,7 @@ v2.0.0 ist das erste Release, das die 9×9-Identität ernst nimmt — nicht nur 
 1. Engine-Hebel bleiben zu. Zwei n=40-Läufe liegen beieinander, M1.3 ist etwa 0 cp, `illegal-ours` bleibt 0. Zuggenerierung, Bitboards und NNUE bleiben geparkt.
 2. ~~Nächster Schnitt ist das Tagespuzzle als Einstieg der Sitzung.~~ **Erledigt** in #217/#219 (`a9b1e0e`): `syncDailyPuzzleMenu()` platziert die Karte je nach gelöst/ungelöst.
 3. ~~Danach PGN-Export der gespielten Partie.~~ **Erledigt**: `#export-pgn-btn` (Copy + Download) über `js/utils/PGNGenerator.ts`, getestet in `tests/pgnGenerator*.test.ts`.
-4. ~~Offen: `js/types/` hat drei parallele Definitionsdateien (`core.ts`, `game.ts`, `ui.ts`) mit ~40 doppelten Typen.~~ **Erledigt (M6.1):** `js/types/` ist jetzt ein Definitions-Ort — `core.ts` (54 Exports) + das Blatt `gameMode.ts`; `game.ts`, `ui.ts`, `ai.ts`, `campaign.ts` (402 Zeilen) sind hineingemündet, 26 Importer umgestellt.
+4. ~~Offen: `js/types/` hat drei parallele Definitionsdateien (`core.ts`, `game.ts`, `ui.ts`) mit ~40 doppelten Typen.~~ **Erledigt (M6.1):** `js/types/` ist jetzt ein Definitions-Ort — `core.ts` (53 Export-Sätze) + das Blatt `gameMode.ts`; `game.ts`, `ui.ts`, `ai.ts`, `campaign.ts` (402 Zeilen) sind hineingemündet, 26 Importer umgestellt.
 5. ~~Offen: `js/matchRefs.ts` mit 28 % die niedrigste Coverage im Repo.~~ **Erledigt:** 28,2 % → 71,7 % Statements; der Track-A-Harness hat jetzt einen eigenen Protocol-Test.
 
 ## Lizenz
