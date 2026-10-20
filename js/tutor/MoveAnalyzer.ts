@@ -1,7 +1,12 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import type { GameLike, Piece, Player } from '../types/core.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
-import { detectThreatsAfterMove, isTactical, detectTacticalPatterns, detectFairyPatterns } from './TacticsDetector.js';
+import {
+  detectThreatsAfterMove,
+  isTactical,
+  detectTacticalPatterns,
+  detectFairyPatterns,
+} from './TacticsDetector.js';
 import type { Analyzer } from './TacticsDetector.js';
 import { evaluatePosition, getTopMoves } from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
@@ -144,9 +149,27 @@ export async function analyzePlayerMovePreExecution(
 }
 
 /**
+ * Drop duplicate reason lines (detectors can report the same motif once per
+ * piece) while keeping the original order. Used for every user-facing list.
+ */
+export function uniqueReasons(list: string[] | undefined): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of list || []) {
+    const text = (raw || '').replace(/\s+/g, ' ').trim();
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    out.push(text);
+  }
+  return out;
+}
+
+/**
  * Builds a short human-readable summary from analysis parts (max 2 reasons).
  */
-export function buildTutorSummary(analysis: Omit<MoveExplanation, 'summary'> | MoveExplanation): string {
+export function buildTutorSummary(
+  analysis: Omit<MoveExplanation, 'summary'> | MoveExplanation
+): string {
   const reasons: string[] = [];
   const push = (text: string | undefined) => {
     if (!text) return;
@@ -240,17 +263,21 @@ function showBetterMoveArrow(
   const fromCell = document.querySelector(
     `.cell[data-r="${better.from.r}"][data-c="${better.from.c}"]`
   );
-  const toCell = document.querySelector(
-    `.cell[data-r="${better.to.r}"][data-c="${better.to.c}"]`
-  );
+  const toCell = document.querySelector(`.cell[data-r="${better.to.r}"][data-c="${better.to.c}"]`);
   fromCell?.classList.add('better-move-from');
   toCell?.classList.add('better-move-to');
 
-  const ar = game && (game as GameLike & { arrowRenderer?: {
-    clearArrows: () => void;
-    drawArrow: (_fr: number, _fc: number, _tr: number, _tc: number, _color?: string) => void;
-    updateCellSize?: () => void;
-  } }).arrowRenderer;
+  const ar =
+    game &&
+    (
+      game as GameLike & {
+        arrowRenderer?: {
+          clearArrows: () => void;
+          drawArrow: (_fr: number, _fc: number, _tr: number, _tc: number, _color?: string) => void;
+          updateCellSize?: () => void;
+        };
+      }
+    ).arrowRenderer;
 
   if (ar?.drawArrow) {
     try {
@@ -294,7 +321,9 @@ function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): 
   panel.hidden = false;
 
   const text = summary || analysis.summary || buildTutorSummary(analysis);
-  const notation = analysis.notation ? `<span class="tutor-feedback-move">${escapeHtml(analysis.notation)}</span>` : '';
+  const notation = analysis.notation
+    ? `<span class="tutor-feedback-move">${escapeHtml(analysis.notation)}</span>`
+    : '';
   const betterHtml = analysis.betterMove
     ? `<div class="tutor-feedback-better">
          <span class="tutor-feedback-better-label">Besser war:</span>
@@ -427,9 +456,10 @@ export function analyzeMoveWithExplanation(
     score,
     category,
     qualityLabel,
-    tacticalExplanations,
-    strategicExplanations,
-    warnings,
+    // De-duplicated: the same motif is reported once per affected piece.
+    tacticalExplanations: uniqueReasons(tacticalExplanations),
+    strategicExplanations: uniqueReasons(strategicExplanations),
+    warnings: uniqueReasons(warnings),
     tacticalPatterns: patterns,
     strategicValue: strategic,
     questions,
@@ -734,13 +764,7 @@ export async function findBetterAlternative(
       (navigator.webdriver === true ||
         (window as Window & { __PLAYWRIGHT__?: boolean }).__PLAYWRIGHT__ === true);
 
-    const top = await getTopMoves(
-      board,
-      turn,
-      2,
-      isTestEnv ? 1 : 2,
-      isTestEnv ? 400 : 1200
-    );
+    const top = await getTopMoves(board, turn, 2, isTestEnv ? 1 : 2, isTestEnv ? 400 : 1200);
     if (!top?.length || !top[0]?.move) return null;
 
     const best = top[0].move as MoveInfo & { from: Square; to: Square };
@@ -814,8 +838,7 @@ export async function checkBlunder(
       : prevEval;
 
   // For white, higher eval is better; for black invert comparison baseline
-  const playerBest =
-    turn === 'white' ? (bestScore ?? prevEval) : -(bestScore ?? prevEval);
+  const playerBest = turn === 'white' ? (bestScore ?? prevEval) : -(bestScore ?? prevEval);
   const playerScore = turn === 'white' ? currentEvalNum : -currentEvalNum;
 
   const analysis = analyzeMoveWithExplanation(
@@ -888,19 +911,35 @@ export function showBlunderWarning(
   analysis: MoveExplanation,
   proceedCallback: (() => void) | null = null
 ): void {
-  const warnings = analysis.warnings.join('\n');
+  const warnings = uniqueReasons(analysis.warnings).join('\n');
+  const tactical = uniqueReasons(analysis.tacticalExplanations);
+  // The reasons are listed verbatim below, so a summary line would repeat them.
+  const detail = [warnings, tactical.join('\n')].filter(part => part.trim().length > 0).join('\n');
+  // Only claim "no motif" when nothing at all was found — the warnings list can
+  // itself carry tactical motifs (hanging piece, discovered attack).
   const explanation =
-    analysis.tacticalExplanations.join('\n') ||
+    detail ||
     'Kein konkretes taktisches Motiv erkannt, aber die Stellung verschlechtert sich deutlich.';
 
   const isPreMove = !!proceedCallback;
   const title = isPreMove ? '⚠️ Warnung: Grober Fehler?' : '⚠️ Schwerer Fehler (Blunder)';
   const diff = (analysis.scoreDiff / -100).toFixed(1);
 
-  const summary = analysis.summary || buildTutorSummary(analysis);
-  const message = isPreMove
-    ? `Dieser Zug würde deine Stellung um ${diff} Bauern verschlechtern.\n\n${summary}\n\n${warnings}\n\n${explanation}\n\nMöchtest du diesen Zug wirklich ausführen?`
-    : `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.\n\nWarum: ${summary}\n\n${warnings}\n\n${explanation}\n\nMöchtest du den Zug zurücknehmen?`;
+  const message = (
+    isPreMove
+      ? [
+          `Dieser Zug würde deine Stellung um ${diff} Bauern verschlechtern.`,
+          explanation,
+          'Möchtest du diesen Zug wirklich ausführen?',
+        ]
+      : [
+          `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.`,
+          explanation,
+          'Möchtest du den Zug zurücknehmen?',
+        ]
+  )
+    .filter(part => part && part.trim().length > 0)
+    .join('\n\n');
 
   const buttons = isPreMove
     ? [
