@@ -1,14 +1,14 @@
-# schach9x9 — Status (Stand: 2026-10-20)
+# schach9x9 — Status (Stand: 2026-10-21)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `eab8ad0` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt #220, Vorab-Warnung kalibriert #221, Bedrohungs-Erkennung konsistent #222, 3D-Schatten-Typ korrigiert #223).
+Release-Tag bleibt `v2.0.0`. `main` ist `cf60705` (v2.0.0 + Vitest 5 + TS 7 + M1.3 + Tagespuzzle-Einstieg + Rematch + PWA + Sound-Settings-Persistenz + CSP-Cleanups + a11y (ARIA, Skip-Link, Tastaturnavigation) + Hotseat-Modus + Bestenliste + Puzzle-Features (Zufall, Hinweis, Schwierigkeit, 2 neue Puzzles) + Zug-Zeiten + 3D-Tests).
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `eab8ad0` | 259 Dateien, 3138/3138 |
+| Tests | lokal, Node 26, Stand `cf60705` | 262 Dateien, 3173/3173 |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
