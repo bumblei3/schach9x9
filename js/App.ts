@@ -19,6 +19,7 @@ import type { KeyboardManager } from './input/KeyboardManager.js';
 import type { BattleChess3D } from './battleChess3D.js';
 import type * as UIImport from './ui.js';
 import * as UI from './ui.js';
+import { storeInit } from './settings.js';
 // Side-effect import: TooltipManager is a module-level singleton that wires
 // up [data-tooltip] hints on construction (used by the action bar, etc.).
 import './ui/TooltipManager.js';
@@ -81,18 +82,8 @@ export class App {
     this.game = new Game(initialPoints, mode as GameMode);
     window.game = this.game;
 
-    // Store Initialisierung mit defaults, falls leer (E2E-Test: storeInit wird aufgerufen)
-    if (!window.localStorage.getItem('store')) {
-      window.localStorage.setItem('store', JSON.stringify({
-        'aiDifficulty': 'beginner',
-        'soundEnabled': true,
-        'soundMusicVolume': 0.7,
-        'soundSfxVolume': 0.8,
-        'threeEnabled: false,
-        'tutorialCompleted': false,
-        'hintsAutoBlunder': true /** Default Auto-Hint bei Blunder */
-      }));
-    }
+    // Store Initialisierung mit defaults, falls leer
+    storeInit();
 
     window.app = this;
 
@@ -101,6 +92,7 @@ export class App {
     window.gameController = this.gameController;
 
     this.game.moveController = new MoveController(this.game);
+    this.game.aiController = new AIController(this.game);
 
     // Make controllers accessible to each other (circular dependencies)
     this.aiController = this.game.aiController as AIController | null;
@@ -166,8 +158,7 @@ export class App {
     // Broadcast board geometry to AI workers (8×8 vs 9×9 + cross shape).
     // Workers default to 9×9; without this, standard8x8 AI uses wrong move gen.
     if (this.aiController) {
-      const is8 =
-        mode === 'standard8x8' || mode === 'upgrade8x8' || this.game.boardSize === 8;
+      const is8 = mode === 'standard8x8' || mode === 'upgrade8x8' || this.game.boardSize === 8;
       this.aiController.setBoardVariantForWorkers(is8 ? '8x8' : '9x9');
       if (this.game.boardShape) {
         this.aiController.setBoardShapeForWorkers(this.game.boardShape);
