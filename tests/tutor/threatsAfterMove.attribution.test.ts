@@ -1,0 +1,86 @@
+/**
+ * Regression: `detectThreatsAfterMove` reported every threat at the square the
+ * analysed move started from and counted defenders of *that* square instead of
+ * the threatened piece's own square.
+ *
+ * Two visible consequences in the tutor dialog:
+ *  - the reported position pointed at the wrong piece;
+ *  - defenders of the moved-from square were used for every other piece, so a
+ *    defended piece was announced as "hanging" (and an undefended one could be
+ *    missed whenever the from-square happened to be defended).
+ */
+
+import { describe, test, expect, beforeEach, vi } from 'vitest';
+import * as TacticsDetector from '../../js/tutor/TacticsDetector.js';
+import * as aiEngine from '../../js/aiEngine.js';
+
+// BOARD_SIZE lives in config.ts and is re-exported by gameEngine.ts — the
+// factory must provide it or `TacticsDetector` computes squares with undefined.
+vi.mock('../../js/config.js', () => ({
+  isBlockedCell: vi.fn(),
+  getCurrentBoardShape: vi.fn(() => 'standard'),
+  BOARD_SIZE: 9,
+}));
+
+const BOARD = 9;
+
+const MOVER = { type: 'r', color: 'white', hasMoved: true };
+const THREATENED_PAWN = { type: 'p', color: 'white', hasMoved: false };
+const DEFENDER = { type: 'n', color: 'white', hasMoved: false };
+
+/** UI-board stub; `getValidMoves` decides who counts as a defender. */
+function makeGame(getValidMoves: (r: number, c: number, piece: unknown) => unknown[]) {
+  return {
+    board: Array(BOARD)
+      .fill(null)
+      .map(() => Array(BOARD).fill(null)),
+    getValidMoves: vi.fn(getValidMoves),
+    isSquareUnderAttack: vi.fn(),
+    isInCheck: vi.fn(),
+    boardShape: 'standard',
+  };
+}
+
+const analyzer = {
+  getPieceName: (t: string) => ({ p: 'Bauer', n: 'Springer', r: 'Turm' })[t] || t,
+};
+
+const MOVE = { from: { r: 4, c: 4 }, to: { r: 4, c: 6 } };
+const THREATENED_SQUARE = 2 * BOARD + 3; // 21 -> (2,3)
+
+describe('detectThreatsAfterMove — square attribution', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  test('reports the threatened piece square, not the square the move came from', () => {
+    const game = makeGame(() => []);
+    game.board[4][4] = MOVER;
+    game.board[2][3] = THREATENED_PAWN;
+
+    vi.spyOn(aiEngine, 'getAllThreats').mockReturnValue([
+      { isDirect: true, targetSquare: THREATENED_SQUARE, type: 'p' },
+    ] as never);
+
+    const threats = TacticsDetector.detectThreatsAfterMove(game as never, analyzer, MOVE);
+
+    expect(threats).toHaveLength(1);
+    expect(threats[0].pos).toEqual({ r: 2, c: 3 });
+  });
+
+  test('does not report a piece as hanging when it is defended on its own square', () => {
+    // Only the knight on (7,7) can move onto the threatened pawn's square.
+    const game = makeGame((r: number, c: number) => (r === 7 && c === 7 ? [{ r: 2, c: 3 }] : []));
+    game.board[4][4] = MOVER;
+    game.board[2][3] = THREATENED_PAWN;
+    game.board[7][7] = DEFENDER;
+
+    vi.spyOn(aiEngine, 'getAllThreats').mockReturnValue([
+      { isDirect: true, targetSquare: THREATENED_SQUARE, type: 'p' },
+    ] as never);
+
+    const threats = TacticsDetector.detectThreatsAfterMove(game as never, analyzer, MOVE);
+
+    expect(threats).toEqual([]);
+  });
+});
