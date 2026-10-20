@@ -878,6 +878,20 @@ export class DOMHandler {
       });
     }
 
+    const acceptDrawBtn = document.getElementById('accept-draw-btn');
+    if (acceptDrawBtn) {
+      acceptDrawBtn.addEventListener('click', () => {
+        if (this.gameController) this.gameController.acceptDraw();
+      });
+    }
+
+    const declineDrawBtn = document.getElementById('decline-draw-btn');
+    if (declineDrawBtn) {
+      declineDrawBtn.addEventListener('click', () => {
+        if (this.gameController) this.gameController.declineDraw();
+      });
+    }
+
     const puzzleBtn = document.getElementById('puzzle-mode-btn');
     if (puzzleBtn) {
       puzzleBtn.addEventListener('click', () => {
