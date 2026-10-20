@@ -182,7 +182,7 @@ MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 gemessen: 0.550 / +35, n
 | 4.5 | Deutsche Microcopy-Lücken (Puzzle-Generator ist noch englisch: „White to move. Find the checkmate…“) | Kein User-facing English außer Eigennamen |
 | 4.6 | **PWA/Offline tatsächlich aktiv schalten** | Registrierung läuft (Produktions-Build, nicht im Dev-Server, nicht unter Automation); SW-Test gegen das ausgelieferte File |
 
-**Stand M4 (2026-10-20):** 4.1–4.5 erledigt und verifiziert. 4.6 war als „PWA/Offline-fähig“ behauptet, aber der Registrierungsaufruf steckte kommentiert in `main.ts` — `public/service-worker.js` wurde nur nach `dist/` kopiert und nie aktiviert. In `fix/pwa-offline-aktiv` behoben: `js/serviceWorkerRegistration.ts` mit Guard auf Produktions-Build + `navigator.webdriver` (Playwright/Lighthouse) + `?disable-sw`, `tests/serviceWorker.test.ts` gegen das ausgelieferte Worker-File, toter Doppelgänger `service-worker.ts` gelöscht.
+**Stand M4 (2026-10-20):** 4.1–4.6 erledigt und verifiziert. 4.6 war als „PWA/Offline-fähig“ behauptet, aber der Registrierungsaufruf steckte kommentiert in `main.ts` — `public/service-worker.js` wurde nur nach `dist/` kopiert und nie aktiviert. Behoben und über PR #219 gemergt (`f491a2b`): `js/serviceWorkerRegistration.ts` mit Guard auf Produktions-Build + `navigator.webdriver` (Playwright/Lighthouse) + `?disable-sw`, `tests/serviceWorker.test.ts` gegen das ausgelieferte Worker-File, toter Doppelgänger `service-worker.ts` gelöscht.
 
 ---
 
