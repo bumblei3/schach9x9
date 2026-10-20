@@ -152,6 +152,10 @@ export function initBoardUI(game: GameLike): void {
       }
       cell.dataset.r = r.toString();
       cell.dataset.c = c.toString();
+      cell.setAttribute('role', 'gridcell');
+      const file = String.fromCharCode(97 + c); // a-i
+      const rank = size - r; // 1-9
+      cell.setAttribute('aria-label', `${file}${rank}`);
 
       // Mark blocked squares for cross-shaped board
       if (game.boardShape && isBlockedCell(r, c, game.boardShape)) {
@@ -494,9 +498,16 @@ export function renderBoard(game: GameLike): void {
     if (piece) {
       cell.dataset.piece = piece.type;
       cell.dataset.color = piece.color;
+      const file = String.fromCharCode(97 + c);
+      const rank = size - r;
+      const pieceName = piece.color === 'white' ? piece.type : piece.type.toUpperCase();
+      cell.setAttribute('aria-label', `${file}${rank}: ${pieceName}`);
     } else {
       delete cell.dataset.piece;
       delete cell.dataset.color;
+      const file = String.fromCharCode(97 + c);
+      const rank = size - r;
+      cell.setAttribute('aria-label', `${file}${rank}`);
     }
     cell.classList.remove(
       'highlight',
