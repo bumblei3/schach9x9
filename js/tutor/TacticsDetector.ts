@@ -697,10 +697,6 @@ export function detectThreatsAfterMove(
 
     // For each of our pieces, check if it's threatened
     for (const [sq, { piece: ownPiece }] of ourPieces) {
-      // Square of the piece under attack — NOT the square the analysed move
-      // came from. Defenders must be counted on the piece's own square, too.
-      const piecePos = { r: Math.floor(sq / BOARD_SIZE), c: sq % BOARD_SIZE };
-
       // Direct attacks on this piece
       const directAttacks = directThreats.filter(t => t.targetSquare === sq);
       // X-ray attacks on this piece (through another of our pieces)
@@ -710,7 +706,7 @@ export function detectThreatsAfterMove(
 
       if (allAttacksOnThisPiece.length > 0) {
         // Count defenders and attackers using existing logic (but now we have richer info)
-        const defenders = countDefenders(game, piecePos.r, piecePos.c, playerColor);
+        const defenders = countDefenders(game, from.r, from.c, playerColor);
         const attackers = allAttacksOnThisPiece.length; // Simplified: each threat = 1 attacker
 
         // Determine threat severity and type
@@ -748,7 +744,7 @@ export function detectThreatsAfterMove(
 
           threats.push({
             piece: ownPiece,
-            pos: piecePos,
+            pos: { r: from.r, c: from.c },
             warning,
           });
         }
