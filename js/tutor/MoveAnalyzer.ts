@@ -7,8 +7,15 @@ import {
   detectTacticalPatterns,
   detectFairyPatterns,
 } from './TacticsDetector.js';
-import type { Analyzer } from './TacticsDetector.js';
-import { evaluatePosition, getTopMoves } from '../aiEngine.js';
+import {
+  evaluatePosition,
+  getTopMoves,
+  getAllThreats,
+  see,
+  convertBoardToInt,
+  COLOR_BLACK,
+  COLOR_WHITE,
+} from '../aiEngine.js';
 import { MENTOR_LEVELS } from '../config.js';
 
 // --- Type definitions ---
@@ -64,12 +71,6 @@ export interface MoveRecord {
   captured?: Piece | null;
 }
 
-interface ThreatInfo {
-  piece: Piece;
-  pos: { r: number; c: number };
-  warning: string;
-}
-
 /**
  * Analyzes a move BEFORE it is executed to provide proactive warnings
  * @param {Object} game
@@ -86,40 +87,25 @@ export async function analyzePlayerMovePreExecution(
   const piece = game.board[from.r][from.c];
   if (!piece) return Promise.resolve(null);
 
+  const turn = piece.color;
+
   // 1. Get current evaluation
   const currentEval = await evaluatePosition(game.board, 'white');
 
-  // 🎯 Add tactical penalty for hanging pieces
-  const threats = detectThreatsAfterMove(
-    game,
-    { getPieceName: (t: string) => t } as Analyzer,
-    move
-  );
-  let penalty = 0;
-  threats.forEach((t: ThreatInfo) => {
-    const val: Record<string, number> = {
-      p: 100,
-      n: 320,
-      b: 330,
-      r: 500,
-      q: 900,
-      k: 20000,
-      a: 650,
-      c: 850,
-      e: 1220,
-    };
-    penalty += val[t.piece.type] || 0;
-  });
-
-  // 2. Simulate move for static evaluation
+  // 2. Simulate the move first — the penalty has to be measured on the position
+  //    the player actually reaches, not on the one they come from.
   const originalTarget = game.board[to.r][to.c];
   game.board[to.r][to.c] = piece;
   game.board[from.r][from.c] = null;
 
+  // 🎯 Material the opponent actually wins by capturing (static exchange
+  //    evaluation). A piece that is merely attacked — or attacked but defended
+  //    with equal value — costs nothing and must not count as a blunder.
+  const penalty = staticExchangePenalty(game, turn);
+
   // 3. Evaluate resulting position
   let newEval = await evaluatePosition(game.board, 'white');
 
-  const turn = piece.color;
   if (turn === 'white') newEval -= penalty;
   else newEval += penalty;
 
@@ -146,6 +132,47 @@ export async function analyzePlayerMovePreExecution(
   }
 
   return null;
+}
+
+/**
+ * Material the opponent actually wins by capturing, summed over our attacked
+ * pieces (static exchange evaluation).
+ *
+ * The previous heuristic added the *full* value of every attacked piece, so a
+ * defended pawn "under attack" counted as 100 cp lost and the pre-move dialog
+ * fired on ordinary developing moves. SEE resolves the capture sequence: a
+ * defended piece costs nothing, a hanging one costs what it is really worth.
+ */
+function staticExchangePenalty(game: GameLike, moverColor: Player): number {
+  const aiOpponentColor = moverColor === 'white' ? COLOR_BLACK : COLOR_WHITE;
+  const intBoard = convertBoardToInt(game.board);
+  const threats = getAllThreats(intBoard, aiOpponentColor);
+
+  // Several attackers can hit the same square; SEE already resolves the whole
+  // capture sequence for one attacker, so keep the worst case per square.
+  const worstPerSquare = new Map<number, number>();
+
+  for (const threat of threats) {
+    const targetR = Math.floor(threat.targetSquare / BOARD_SIZE);
+    const targetC = threat.targetSquare % BOARD_SIZE;
+    const target = game.board[targetR]?.[targetC];
+    // Only our own, non-royal pieces can be won.
+    if (!target || target.color !== moverColor || target.type === 'k') continue;
+
+    const attackerR = Math.floor(threat.attackerSquare / BOARD_SIZE);
+    const attackerC = threat.attackerSquare % BOARD_SIZE;
+    if (!game.board[attackerR]?.[attackerC]) continue;
+
+    const gain = see(game.board, { r: attackerR, c: attackerC }, { r: targetR, c: targetC });
+    if (gain <= 0) continue;
+
+    const previous = worstPerSquare.get(threat.targetSquare) ?? 0;
+    if (gain > previous) worstPerSquare.set(threat.targetSquare, gain);
+  }
+
+  let penalty = 0;
+  for (const gain of worstPerSquare.values()) penalty += gain;
+  return penalty;
 }
 
 /**
