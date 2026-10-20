@@ -33,6 +33,7 @@ import type { Player } from './types/core.js';
 import type { GameMode } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
+import { leaderboardManager } from './leaderboard.js';
 import { openingBook } from './ai/OpeningBook.js';
 import { ensureOpeningBookLoaded } from './ai/OpeningBook.js';
 import {
@@ -1150,6 +1151,14 @@ export class GameController {
     let playerResult: 'win' | 'loss' | 'draw' = 'draw';
     if (result === 'win') {
       playerResult = winnerColor === this.game.playerColor ? 'win' : 'loss';
+    }
+
+    // Leaderboard entry
+    try {
+      const moveCount = Math.ceil(this.game.stats?.totalMoves / 2) || 0;
+      leaderboardManager.add(playerResult, moveCount, this.game.difficulty || 'medium');
+    } catch {
+      /* ignore */
     }
 
     // Check achievements

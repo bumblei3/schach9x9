@@ -13,6 +13,7 @@ import { generatePGN, copyPGNToClipboard, downloadPGN } from '../utils/PGNGenera
 import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
+import { leaderboardManager } from '../leaderboard.js';
 import { AnalysisUI } from './AnalysisUI.js';
 import { OpeningBookUI } from './OpeningBookUI.js';
 import { hidePostGameStats } from './PostGameAnalysisUI.js';
@@ -450,6 +451,7 @@ export class DOMHandler {
     this.initMenuHandlers();
     this.initAnalysisHandlers();
     this.initPuzzleHandlers();
+    this.initLeaderboardHandlers();
     this.initContinueButton();
     syncDailyPuzzleMenu();
   }
@@ -479,6 +481,48 @@ export class DOMHandler {
         this.app.gameController.loadGame();
       }
     });
+  }
+
+  private initLeaderboardHandlers(): void {
+    const btn = document.getElementById('leaderboard-btn');
+    const overlay = document.getElementById('leaderboard-overlay');
+    const closeBtn = document.getElementById('leaderboard-close-btn');
+    const clearBtn = document.getElementById('leaderboard-clear-btn');
+    const listEl = document.getElementById('leaderboard-list');
+
+    const render = () => {
+      if (!listEl) return;
+      const entries = leaderboardManager.getAll();
+      if (entries.length === 0) {
+        listEl.innerHTML = '<p style="opacity:0.7">Noch keine Partien gespielt.</p>';
+        return;
+      }
+      listEl.innerHTML = entries
+        .map(
+          (e, i) =>
+            `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+              <strong>${i + 1}.</strong> ${e.result === 'win' ? '🏆 Sieg' : e.result === 'draw' ? '🤝 Remis' : '❌ Niederlage'}
+              — ${e.moveCount} Züge — ${e.difficulty} — ${e.date}
+            </div>`
+        )
+        .join('');
+    };
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        render();
+        overlay?.classList.remove('hidden');
+      });
+    }
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => overlay?.classList.add('hidden'));
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        leaderboardManager.clear();
+        render();
+      });
+    }
   }
 
   private initPuzzleHandlers(): void {

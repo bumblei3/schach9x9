@@ -991,7 +991,15 @@
           </div>
         </div>
 
-        <!-- Help Overlay -->
+        <!-- Leaderboard Overlay -->
+        <div id="leaderboard-overlay" class="fullscreen-overlay hidden">
+          <div class="menu-content">
+            <button id="leaderboard-close-btn" class="close-icon-btn">×</button>
+            <h2>🏆 Bestenliste</h2>
+            <div id="leaderboard-list" style="margin-top: 1rem;"></div>
+            <button id="leaderboard-clear-btn" class="btn-secondary" style="margin-top: 1rem;">Zurücksetzen</button>
+          </div>
+        </div>
         <div id="help-overlay" class="fullscreen-overlay hidden">
           <div class="info-content">
             <div class="menu-header">
@@ -1344,6 +1352,18 @@
                       <div class="card-title">Eröffnungs-Trainer</div>
                       <div class="card-desc">
                         Trainiere Eröffnungen aus dem Buch – finde den richtigen Zug.
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="gamemode-card"
+                      id="leaderboard-btn"
+                    >
+                      <div class="card-icon">🏆</div>
+                      <div class="card-title">Bestenliste</div>
+                      <div class="card-desc">
+                        Deine besten Partien und Ergebnisse.
                       </div>
                     </button>
                   </div>
