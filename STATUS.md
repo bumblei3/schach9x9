@@ -1,21 +1,21 @@
 # schach9x9 — Status (Stand: 2026-10-20)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `1d6eebc` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt #220, Vorab-Warnung kalibriert #221, Bedrohungs-Erkennung konsistent #222).
+Release-Tag bleibt `v2.0.0`. `main` ist `eab8ad0` (Tagespuzzle als Sitzungseinstieg #217/#218, PWA-Registrierung #219, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt #220, Vorab-Warnung kalibriert #221, Bedrohungs-Erkennung konsistent #222, 3D-Schatten-Typ korrigiert #223).
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `1d6eebc` | 258 Dateien, 3136/3136 |
+| Tests | lokal, Node 26, Stand `eab8ad0` | 259 Dateien, 3138/3138 |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
 | E2E + Lighthouse | CI auf `main` | grün |
 | Security | CodeQL auf `main` | grün |
 | CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `1d6eebc` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt (#220), Vorab-Warnung kalibriert (#221), Bedrohungs-Erkennung konsistent (#222). Tag bleibt `v2.0.0` |
+| Git | `main` `eab8ad0` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt (#220), Vorab-Warnung kalibriert (#221), Bedrohungs-Erkennung konsistent (#222), 3D-Schatten-Typ korrigiert (#223). Tag bleibt `v2.0.0` |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
@@ -172,4 +172,12 @@ Belegt durch `tests/tutor/premoveWarning.penalty.test.ts` (5) und `e2e/tutor-pre
 
 **Erledigt 2026-10-20 (#222, `1d6eebc`):** `detectThreatsAfterMove` korrigiert. `pos` ist jetzt das Feld der bedrohten Figur (vorher das Startfeld — nach der Simulation leer), und die Deckung kommt aus `aiEngine.isSquareAttacked` + `aiEngine.see` statt aus `countDefenders`. `countDefenders` prüft `getValidMoves` und kann eine belegte Figur grundsätzlich nicht als gedeckt melden — deshalb meldete der Detektor gedeckte Figuren als „wird ungeschützt angegriffen!", eine falsche Coach-Aussage an den Spieler. Beide Fehler waren auf `main` reproduzierbar (2 rote Tests), jetzt grün. Der Detektor teilt sich das Kriterium mit dem Drohungen-Overlay (`js/AnalysisManager.ts`).
 
-**Nächster sinnvoller Schritt (kein offener Hebel bekannt):** Die Engine bleibt eingefroren, alle Milestones M0–M6 sind durch. Der ertragreichste Weg war bisher gezieltes Dogfooding des Coach-Pfads — beide echten Bugs dieser Runde (#220, #222) und die falsche Warnschwelle (#221) wurden so gefunden, nicht durch Tests oder Coverage. Als nächstes also: weitere Modi der Live-Seite durchspielen (Setup/Shop, Kampagne, Opening-Trainer, 3D) und gefundene Abweichungen sofort in einen Regressionstest giessen. NNUE bleibt geparkt, M1.2 bleibt zu.
+**Erledigt 2026-10-20 (#223, `eab8ad0`):** 3D-Schatten-Typ korrigiert. `SceneManager3D` wies `THREE.PCFSoftShadowMap` zu — in three.js r186 entfernt. Der Renderer wird beim Laden des 3D-Moduls aufgebaut, deshalb meldete three.js die Warnung bei *jedem* Seitenaufruf, auch ohne geöffnete 3D-Ansicht:
+
+```
+THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.
+```
+
+Fix: benannte Konstante `SHADOW_MAP_TYPE = THREE.PCFShadowMap` mit Begründung; `tests/ui/3d/shadowMapType.test.ts` hält das fest; die unvollständigen `three`-Mocks in `tests/battleChess3D.{boost,coords,dynamic}.test.ts` kannten nur den alten Namen. Gefunden durch Mitschreiben der Browser-Konsole auf der Live-Seite — kein Test und kein Coverage-Werkzeug zeigte es. Browser-Gegenprobe: Live-Build warnt, lokaler Build nicht.
+
+**Nächster sinnvoller Schritt (kein offener Hebel bekannt):** Die Engine bleibt eingefroren, alle Milestones M0–M6 sind durch. Der ertragreichste Weg ist gezieltes Dogfooding der Live-Seite — alle drei echten Bugs dieser Runde (#220, #222, #223) und die falsche Warnschwelle (#221) wurden so gefunden, nicht durch Tests oder Coverage. 3D ist durchgespielt (fand #223: entfernter `PCFSoftShadowMap`). Offen zum Durchspielen: Setup/Shop, Kampagne, Opening-Trainer — jeweils Konsole mitschreiben und gefundene Abweichungen sofort in einen Regressionstest giessen. NNUE bleibt geparkt, M1.2 bleibt zu.
