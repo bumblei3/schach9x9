@@ -71,6 +71,17 @@ export function updateMoveHistoryUI(game: Game): void {
       }
       moveEl.textContent = `${index + 1}. ${moveText}`;
 
+      // Add per-move time if recorded
+      if (move.timeUsed !== undefined) {
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'move-time';
+        timeSpan.style.opacity = '0.6';
+        timeSpan.style.fontSize = '0.8em';
+        timeSpan.style.marginLeft = '4px';
+        timeSpan.textContent = `(${(move.timeUsed / 1000).toFixed(1)}s)`;
+        moveEl.appendChild(timeSpan);
+      }
+
       // Add quality badge if analyzed
       const classification = move.classification;
       if (classification && qualityMeta[classification]) {
