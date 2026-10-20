@@ -187,8 +187,14 @@ self.onmessage = async function (e: MessageEvent) {
         // timeParams means an UNBOUNDED search, and at analysis depth (12 for
         // the live overlay) that hangs on a 9x9 board and the worker never
         // posts a result back (live analysis never populates).
-        const topMoves = await getTopMoves(board, color, topMovesCount, depth, 8000, 0);
-
+        let topMoves: Awaited<ReturnType<typeof getTopMoves>>;
+        try {
+          topMoves = await getTopMoves(board, color, topMovesCount, depth, 8000, 0);
+        } catch (e) {
+          console.error('[AI Worker] analyze getTopMoves threw:', e);
+          workerSelf.postMessage({ type: 'analysis', id, data: { score: 0, depth, nodes: 0, topMoves: [] } });
+          break;
+        }
         const best = topMoves[0];
         workerSelf.postMessage({
           type: 'analysis',

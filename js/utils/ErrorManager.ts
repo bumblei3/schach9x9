@@ -100,8 +100,8 @@ class ErrorManager {
              </p>
              <div class="error-details-box" id="error-details-content"></div>
              <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1rem;">
-               <button class="btn-primary" onclick="location.reload()">Neustarten</button>
-               <button class="btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('error-details-content').innerText); alert('Kopiert!')">Kopieren</button>
+               <button class="btn-primary" data-action="reload">Neustarten</button>
+               <button class="btn-secondary" data-action="copy">Kopieren</button>
              </div>
         </div>
       `;
@@ -110,6 +110,21 @@ class ErrorManager {
     const detailsBox = document.getElementById('error-details-content');
     if (detailsBox) {
       detailsBox.textContent = `${displayMsg}\n\n${error instanceof Error && error.stack ? error.stack : ''}`;
+    }
+
+    // Wire up buttons (CSP-compliant: no inline onclick handlers).
+    const reloadBtn = contentContainer.querySelector('[data-action="reload"]');
+    const copyBtn = contentContainer.querySelector('[data-action="copy"]');
+    if (reloadBtn) {
+      reloadBtn.addEventListener('click', () => location.reload());
+    }
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const details = document.getElementById('error-details-content');
+        if (details) {
+          navigator.clipboard.writeText(details.innerText).then(() => alert('Kopiert!')).catch(() => {});
+        }
+      });
     }
 
     errorOverlay.classList.remove('hidden');

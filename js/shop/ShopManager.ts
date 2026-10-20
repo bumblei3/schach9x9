@@ -168,7 +168,7 @@ export class ShopManager {
         <button class="btn upgrade-btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
                 style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; text-align: left;"
                 ${!canAfford ? 'disabled' : ''}
-                onclick="if(window.app && window.app.gameController) { window.app.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); } else if(window.gameController) { window.gameController.shopManager.performUpgrade(${r}, ${c}, '${up.symbol}'); }">
+                data-r="${r}" data-c="${c}" data-symbol="${up.symbol}">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 32px; height: 32px;">${PIECE_SVGS[piece.color as 'white' | 'black'][up.symbol]}</div>
             <div>
@@ -185,6 +185,15 @@ export class ShopManager {
     UI.showModal(modalTitle, content, [
       { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
     ]);
+    // Wire up upgrade buttons (CSP-compliant: no inline onclick handlers).
+    document.querySelectorAll('.upgrade-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const r = parseInt(btn.getAttribute('data-r') || '0', 10);
+        const c = parseInt(btn.getAttribute('data-c') || '0', 10);
+        const symbol = btn.getAttribute('data-symbol') || '';
+        this.performUpgrade(r, c, symbol);
+      });
+    });
   }
 
   /**

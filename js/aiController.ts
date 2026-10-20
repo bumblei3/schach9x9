@@ -948,8 +948,11 @@ export class AIController {
     // produced empty top-moves in the live analysis overlay.
     const boardUi = this.game.board;
 
-    // Deep analysis depth
-    const analysisDepth = this.game.analysisMode ? 12 : 8;
+    // Deep analysis depth. Keep the live overlay (analysis mode) at a modest
+    // depth so the time-bounded getTopMoves loop (8 candidates) finishes well
+    // within the 30s E2E budget; depth 12 made a single candidate run for
+    // 30-60s and blew the test timeout. Hints use requestTopMoves separately.
+    const analysisDepth = this.game.analysisMode ? 8 : 6;
 
     worker.postMessage({
       type: 'analyze',

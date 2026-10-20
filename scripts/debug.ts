@@ -67,9 +67,9 @@ export class DebugConsole {
       <div class="debug-header">
         <h3>🛠️ Debug Console</h3>
         <div class="debug-header-actions">
-          <button class="debug-btn small" onclick="window.debugConsole.exportLogs()" title="Export Logs">📥</button>
-          <button class="debug-btn small" onclick="window.debugConsole.clearLogs()" title="Clear Logs">🗑️</button>
-          <button class="debug-close" onclick="window.debugConsole.toggle()">✕</button>
+          <button class="debug-btn small" data-dbg="exportLogs()" title="Export Logs">📥</button>
+          <button class="debug-btn small" data-dbg="clearLogs()" title="Clear Logs">🗑️</button>
+          <button class="debug-close" data-dbg="toggle()">✕</button>
         </div>
       </div>
       
@@ -84,7 +84,7 @@ export class DebugConsole {
         <!-- LOGS TAB -->
         <div id="debug-tab-logs" class="debug-tab-content active">
           <div class="debug-filters">
-            <input type="text" id="debug-search" placeholder="🔍 Suchen..." oninput="window.debugConsole.onSearch(this.value)">
+            <input type="text" id="debug-search" placeholder="🔍 Suchen...">
             <div class="debug-filter-btns">
               <button class="debug-filter active" data-filter="all">Alle</button>
               <button class="debug-filter" data-filter="error">❌ Error</button>
@@ -175,7 +175,7 @@ export class DebugConsole {
                 <span id="state-mat-black">-</span>
               </div>
             </div>
-            <button class="debug-btn" onclick="window.debugConsole.copyBoardFEN()">📋 Board kopieren</button>
+            <button class="debug-btn" data-dbg="copyBoardFEN()">📋 Board kopieren</button>
           </div>
           <div class="debug-section">
             <h4>📋 Board Snapshot</h4>
@@ -188,38 +188,38 @@ export class DebugConsole {
           <div class="debug-section">
             <h4>🛒 Shop Testen</h4>
             <div class="debug-buttons">
-              <button onclick="window.debugConsole.testShopPiece('p')">♟️ Bauer</button>
-              <button onclick="window.debugConsole.testShopPiece('n')">♞ Springer</button>
-              <button onclick="window.debugConsole.testShopPiece('b')">♝ Läufer</button>
-              <button onclick="window.debugConsole.testShopPiece('r')">♜ Turm</button>
-              <button onclick="window.debugConsole.testShopPiece('a')">🏰 Erzbischof</button>
-              <button onclick="window.debugConsole.testShopPiece('c')">⚖️ Kanzler</button>
-              <button onclick="window.debugConsole.testShopPiece('q')">♛ Dame</button>
+              <button data-dbg="testShopPiece('p')">♟️ Bauer</button>
+              <button data-dbg="testShopPiece('n')">♞ Springer</button>
+              <button data-dbg="testShopPiece('b')">♝ Läufer</button>
+              <button data-dbg="testShopPiece('r')">♜ Turm</button>
+              <button data-dbg="testShopPiece('a')">🏰 Erzbischof</button>
+              <button data-dbg="testShopPiece('c')">⚖️ Kanzler</button>
+              <button data-dbg="testShopPiece('q')">♛ Dame</button>
             </div>
           </div>
           <div class="debug-section">
             <h4>💰 Punkte</h4>
             <div class="debug-buttons">
-              <button onclick="window.debugConsole.setPoints(5)">5</button>
-              <button onclick="window.debugConsole.setPoints(10)">10</button>
-              <button onclick="window.debugConsole.setPoints(15)">15</button>
-              <button onclick="window.debugConsole.setPoints(50)">50</button>
+              <button data-dbg="setPoints(5)">5</button>
+              <button data-dbg="setPoints(10)">10</button>
+              <button data-dbg="setPoints(15)">15</button>
+              <button data-dbg="setPoints(50)">50</button>
             </div>
           </div>
           <div class="debug-section">
             <h4>🔄 Spielzustand</h4>
             <div class="debug-buttons">
-              <button onclick="window.debugConsole.resetBoard()">🔄 Reload</button>
-              <button onclick="window.debugConsole.forceAIMove()">🤖 AI Zug</button>
-              <button onclick="window.debugConsole.toggleAnalysis()">🔍 Analyse</button>
+              <button data-dbg="resetBoard()">🔄 Reload</button>
+              <button data-dbg="forceAIMove()">🤖 AI Zug</button>
+              <button data-dbg="toggleAnalysis()">🔍 Analyse</button>
             </div>
           </div>
           <div class="debug-section">
             <h4>🏆 Kampagne</h4>
             <div class="debug-buttons">
-              <button onclick="window.debugConsole.unlockAllLevels()">🔓 Alle freischalten</button>
-              <button onclick="window.debugConsole.completeCurrentLevel()">✅ Level beenden</button>
-              <button onclick="window.debugConsole.resetCampaign()">❌ Reset</button>
+              <button data-dbg="unlockAllLevels()">🔓 Alle freischalten</button>
+              <button data-dbg="completeCurrentLevel()">✅ Level beenden</button>
+              <button data-dbg="resetCampaign()">❌ Reset</button>
             </div>
           </div>
         </div>
@@ -243,6 +243,37 @@ export class DebugConsole {
         }
       });
     });
+
+    // Wire up debug action buttons (CSP-compliant: delegated handlers instead of inline onclick).
+    panel.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest('[data-dbg]') as HTMLElement | null;
+      if (!target) return;
+      const call = target.getAttribute('data-dbg') || '';
+      const m = call.match(/^(\w+)\((.*)\)$/);
+      if (!m) return;
+      const method = m[1];
+      const argsStr = m[2].trim();
+      const dc = (window as any).debugConsole;
+      if (!dc || typeof dc[method] !== 'function') return;
+      let args: any[] = [];
+      if (argsStr) {
+        const num = Number(argsStr);
+        if (argsStr !== '' && !isNaN(num)) {
+          args = [num];
+        } else if (/^['"].*['"]$/.test(argsStr)) {
+          args = [argsStr.slice(1, -1)];
+        } else {
+          args = [argsStr];
+        }
+      }
+      dc[method](...args);
+    });
+
+    // Wire up search input (CSP-compliant: no inline oninput).
+    const searchInput = panel.querySelector('#debug-search') as HTMLInputElement | null;
+    if (searchInput) {
+      searchInput.addEventListener('input', () => this.onSearch(searchInput.value));
+    }
 
     this.setupErrorLogging();
 

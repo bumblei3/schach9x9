@@ -125,6 +125,14 @@ export class PuzzleMenu {
     const container = document.getElementById('puzzle-menu-list');
     if (!container) return;
 
+    // Progress summary
+    const allPuzzles = puzzleManager.puzzles || [];
+    const solvedCount = allPuzzles.filter(p => puzzleManager.isSolved(p.id)).length;
+    const progressEl = document.getElementById('puzzle-progress');
+    if (progressEl) {
+      progressEl.textContent = `Fortschritt: ${solvedCount}/${allPuzzles.length} gelöst`;
+    }
+
     container.innerHTML = '';
     const filtered = puzzleManager.getFilteredPuzzles(
       this.filterDifficulty ?? undefined,
