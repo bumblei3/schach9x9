@@ -296,6 +296,21 @@ export class DOMHandler {
       });
     }
 
+    // AI Opponent Toggle (Hotseat mode when off)
+    const aiOpponentToggle = document.getElementById('ai-opponent-toggle') as HTMLInputElement | null;
+    if (aiOpponentToggle) {
+      // Restore from localStorage
+      const saved = localStorage.getItem('chess_ai_opponent');
+      if (saved !== null) {
+        aiOpponentToggle.checked = saved === 'true';
+      }
+      aiOpponentToggle.addEventListener('change', () => {
+        localStorage.setItem('chess_ai_opponent', String(aiOpponentToggle.checked));
+        if (this.game) {
+          this.game.isAI = aiOpponentToggle.checked;
+        }
+      });
+    }
     // AI Difficulty Selector (handles both in-game menu and main menu)
     const difficultySelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
     difficultySelects.forEach(select => {

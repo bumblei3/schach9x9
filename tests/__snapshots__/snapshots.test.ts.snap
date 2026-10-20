@@ -1023,6 +1023,15 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   <div class="setting-group">
                     <h3>KI &amp; Hilfe</h3>
                     <div class="setting-row">
+                      <label>AI-Gegner</label>
+                      <div class="volume-control">
+                        <label class="toggle-switch">
+                          <input type="checkbox" id="ai-opponent-toggle" checked="" aria-label="AI-Gegner an/aus">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="setting-row" style="margin-top: 10px">
                       <label>KI-Persönlichkeit</label>
                       <select id="ai-personality-select" class="menu-select" aria-label="KI-Persönlichkeit">
                         <option value="balanced">⚖️ Ausgeglichen</option>
