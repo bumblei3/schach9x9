@@ -9,7 +9,7 @@
 
 import { describe, test, expect } from 'vitest';
 import { RulesEngine } from '../js/RulesEngine.js';
-import type { Piece } from '../js/types/game.js';
+import type { Piece } from '../js/types/core.js';
 
 const SIZE = 9;
 

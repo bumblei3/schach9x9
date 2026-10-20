@@ -16,7 +16,7 @@
  */
 
 import { getBestMoveDetailed, type MoveResult } from './aiEngine.js';
-import type { Piece } from './types/game.js';
+import type { Piece } from './types/core.js';
 import { pieceToCode } from './pieceCodes.js';
 import { parseFEN } from './utils.js';
 

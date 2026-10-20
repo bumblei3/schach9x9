@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { PuzzleManager } from '../js/puzzleManager.js';
-import type { GameLike, PieceType } from '../js/types/game.js';
+import type { GameLike, PieceType } from '../js/types/core.js';
 
 // `PuzzleManager.checkMove` is DOM-free pure logic: it compares a played
 // move against the current expected solution step (read from

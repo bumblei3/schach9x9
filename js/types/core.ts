@@ -5,19 +5,14 @@
 
 import type { MoveResult } from '../aiEngine.js';
 import type { TimeParams } from '../aiEngine.js';
-
-// ============================================================================
-// Basic Types
-// ============================================================================
+import type { GameMode } from './gameMode.js';
+export type { GameMode };
 
 export type Player = 'white' | 'black';
 
 export type PieceType = 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | 'e' | 'a' | 'c' | 'j' | null;
 
 export type GamePhase = 'SETUP' | 'PLAY' | 'END';
-
-import type { GameMode } from './gameMode.js';
-export type { GameMode };
 
 export type BoardShape = 'standard' | 'cross';
 

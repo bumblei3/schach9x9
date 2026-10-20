@@ -48,7 +48,7 @@ import {
   TYPE_MASK,
   COLOR_MASK,
 } from './ai/BoardDefinitions';
-import type { Player, Square, Piece, PieceType } from './types/game';
+import type { Player, Square, Piece, PieceType } from './types/core.js';
 import { computeZobristHash, TranspositionTable } from './ai/transpositionTable';
 
 // Re-export evaluate module

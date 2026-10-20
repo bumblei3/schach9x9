@@ -15,7 +15,7 @@
 import { getTopMoves } from '../js/aiEngine.js';
 import { OpeningBook } from '../js/ai/OpeningBook.js';
 import { BOARD_SIZE } from '../js/config.js';
-import type { Piece, PieceType } from '../js/types/game.js';
+import type { Piece, PieceType } from '../js/types/core.js';
 import * as fs from 'fs';
 import * as path from 'path';
 

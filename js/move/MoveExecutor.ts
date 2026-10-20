@@ -8,7 +8,7 @@ import { syncDailyPuzzleMenu } from '../ui/dailyPuzzleMenu.js';
 import { evaluatePosition } from '../aiEngine.js';
 import * as MoveValidator from './MoveValidator.js';
 import { confettiSystem } from '../effects.js';
-import type { Square, Player, Piece, MoveRecord, MoveResult, PieceType } from '../types/game.js';
+import type { Square, Player, Piece, MoveRecord, MoveResult, PieceType } from '../types/core.js';
 import type { PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
 import { notificationUI } from '../ui/NotificationUI.js';

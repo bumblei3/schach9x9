@@ -5,7 +5,7 @@
 import { BOARD_SIZE } from '../config.js';
 import { PuzzleGenerator } from '../puzzleGenerator.js';
 import type { MoveResult } from '../aiEngine.js';
-import type { Piece } from '../types/game.js';
+import type { Piece } from '../types/core.js';
 
 type Board = (Piece | null)[][];
 

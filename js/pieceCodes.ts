@@ -12,7 +12,7 @@
  * e=angel, j=nightrider).
  */
 
-import type { Piece } from './types/game.js';
+import type { Piece } from './types/core.js';
 
 /** Piece letter -> unsigned code. */
 export const PIECE_TYPE_CODE: Record<string, number> = {

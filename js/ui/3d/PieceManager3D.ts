@@ -11,7 +11,7 @@ import { BOARD_SIZE, PHASES } from '../../config.js';
 import { logger } from '../../logger.js';
 import type { SceneManager3D } from './SceneManager3D.js';
 import type { Game } from '../../gameEngine.js';
-import type { Square, Piece } from '../../types/game.js';
+import type { Square, Piece } from '../../types/core.js';
 
 export class PieceManager3D {
   public sceneManager: SceneManager3D;

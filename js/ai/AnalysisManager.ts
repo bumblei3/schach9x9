@@ -1,6 +1,6 @@
 import { logger } from '../logger.js';
 import { drawArrow } from '../ui/ArrowRenderer.js';
-import type { Square } from '../types/game.js';
+import type { Square } from '../types/core.js';
 
 export interface RatedMove {
   moveNumber: number;

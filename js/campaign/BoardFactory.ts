@@ -1,4 +1,4 @@
-import { Board, PieceType } from '../types/game.js';
+import { Board, PieceType } from '../types/core.js';
 
 export class BoardFactory {
   static createEmptyBoard(rows: number = 9, cols: number = 9): Board {

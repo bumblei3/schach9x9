@@ -11,7 +11,7 @@ export * from './ui/OverlayManager.js';
 export * from './ui/GameStatusUI.js';
 export * from './ui/OpeningBookUI.js';
 
-import type { Player, GameLike } from './types/game.js';
+import type { Player, GameLike } from './types/core.js';
 import * as AIEngine from './aiEngine.js';
 import { confettiSystem } from './effects.js';
 import { updateStatus } from './ui/GameStatusUI.js';

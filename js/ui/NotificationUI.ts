@@ -3,7 +3,7 @@
  * Manages Toast Notifications for user feedback.
  */
 
-import type { ToastOptions } from '../types/ui.js';
+import type { ToastOptions } from '../types/core.js';
 
 export class NotificationUI {
   private container: HTMLElement | null = null;

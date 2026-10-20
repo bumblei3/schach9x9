@@ -12,7 +12,7 @@ import {
 } from '../js/aiEngine';
 import { createJsSearch } from '../js/search';
 import { createEmptyBoard } from '../js/gameEngine';
-import type { Board } from '../js/types/game';
+import type { Board } from '../js/types/core.js';
 
 describe('AI Engine', () => {
   let board: Board;

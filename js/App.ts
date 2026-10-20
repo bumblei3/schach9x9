@@ -6,7 +6,7 @@ import { logger } from './logger.js';
 import { DOMHandler } from './ui/DOMHandler.js';
 import { errorManager } from './utils/ErrorManager.js';
 import type { EvaluationBar } from './ui/EvaluationBar.js';
-import type { Player, Square, Piece, GameMode } from './types/game.js';
+import type { Player, Square, Piece, GameMode } from './types/core.js';
 import type { Game, MoveHistoryEntry, PieceWithMoved } from './gameEngine.js';
 import type { GameController } from './gameController.js';
 import { syncDailyPuzzleMenu } from './ui/dailyPuzzleMenu.js';

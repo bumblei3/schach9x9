@@ -1,7 +1,7 @@
 import { PuzzleGenerator } from './puzzleGenerator.js';
 import { ProceduralGenerator } from './puzzle/ProceduralGenerator.js';
 import type { MoveResult } from './aiEngine.js';
-import type { GameLike, PieceType } from './types/game.js';
+import type { GameLike, PieceType } from './types/core.js';
 
 export interface Puzzle {
   id: string;

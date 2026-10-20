@@ -1,4 +1,4 @@
-import { Board } from '../types/game.js';
+import { Board } from '../types/core.js';
 
 export interface Perk {
   id: string;

@@ -5,7 +5,7 @@
  */
 
 import { logger } from './logger.js';
-import type { Player, Piece, Square } from './types/game.js';
+import type { Player, Piece, Square } from './types/core.js';
 import type { Phase, AIDifficulty, BoardShape } from './config.js';
 import { setCurrentBoardShape } from './config.js';
 

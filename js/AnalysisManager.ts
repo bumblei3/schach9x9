@@ -1,6 +1,6 @@
 import * as TacticsDetector from './tutor/TacticsDetector.js';
 import * as aiEngine from './aiEngine.js';
-import type { Player, Piece } from './types/game.js';
+import type { Player, Piece } from './types/core.js';
 import type { Analyzer } from './tutor/TacticsDetector.js';
 import { Game } from './gameEngine.js';
 

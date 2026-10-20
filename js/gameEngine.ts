@@ -25,7 +25,7 @@ import {
 } from './config.js';
 import { RulesEngine } from './RulesEngine.js';
 import { setRules, resetRules, CR_ALL } from './ai/MoveGenerator.js';
-import type { Player, Square, Piece, PuzzleState } from './types/game.js';
+import type { Player, Square, Piece, PuzzleState } from './types/core.js';
 import type { GameController } from './gameController.js';
 import type { AIController } from './aiController.ts';
 import type { AnalysisManager } from './AnalysisManager.js';

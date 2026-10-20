@@ -5,7 +5,7 @@
 
 import { logger } from './logger.js';
 import { safeJSONParse } from './utils.js';
-import type { Move, Player } from './types/game.js';
+import type { Move, Player } from './types/core.js';
 
 const STORAGE_KEY = 'chess9x9-game-history';
 

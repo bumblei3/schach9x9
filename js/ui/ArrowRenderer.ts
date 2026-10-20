@@ -3,7 +3,7 @@
  * Similar to Lichess/Chess.com last move arrows
  */
 
-import type { Square } from '../types/game.js';
+import type { Square } from '../types/core.js';
 
 interface ArrowOptions {
   from: Square;

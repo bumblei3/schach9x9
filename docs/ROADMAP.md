@@ -209,11 +209,11 @@ Erst anfassen, wenn M1 das Score-Ziel (0.30) **oder** klaren NPS-Beweis geliefer
 
 | # | Arbeit | Akzeptanz |
 | - | ------ | --------- |
-| 6.1 | `js/types/` konsolidieren: `core.ts`, `game.ts`, `ui.ts` tragen ~40 doppelte Typen. `game.ts` hat 29 Importer, `core.ts` 8 | Ein Definitions-Ort pro Domäne, 0 doppelte Typnamen |
+| 6.1 | ~~`js/types/` konsolidieren: `core.ts`, `game.ts`, `ui.ts` tragen ~40 doppelte Typen. `game.ts` hat 29 Importer, `core.ts` 8~~ **Erledigt** | Ein Definitions-Ort pro Domäne, 0 doppelte Typnamen — `game.ts`/`ui.ts`/`ai.ts`/`campaign.ts` sind in `core.ts` aufgegangen (402 Zeilen weg), `index.ts` auf den einen Export reduziert |
 | 6.2 | Coverage von `js/matchRefs.ts` anheben (28 % Statements — niedrigste Datei im Repo) | Track-A-Harness, der jede Stärke-Aussage trägt, ist gegen Regressionen getestet |
 | 6.3 | `tools/` und `js/` auf totem Export prüfen (`npx knip`) | Keine ungenutzten Dev-Dependencies (`jest`, `ts-jest`, `husky`, `jsdoc`) |
 
-**Stand M6 (2026-10-20):** 6.2 erledigt — `js/matchRefs.ts` 28,2 % → 71,7 % Statements, `tests/matchRefs.protocol.test.ts` (26 Tests) gegen das Line-Protokoll, `applyMove`/Promotion, `playGame`-Urteile und das moveNumber-100-Limit. Nebenbei: die Figurencode-Mapping existierte doppelt (`engineNode.ts` privat + „mirror" in `matchRefs.ts`) und ist jetzt `js/pieceCodes.ts`; die Promotionstabelle kannte `e`/`j` nicht und ließe ein Feen-Promotion im Harness als Bauer durchgehen. 6.3 erledigt — Jest-Überreste und `jsdoc` entfernt, `npm ci --legacy-peer-deps` sauber. 6.1 (`js/types/`) bleibt offen.
+**Stand M6 (2026-10-20):** 6.1 erledigt — `js/types/` ist jetzt ein Definitions-Ort: `core.ts` (54 Exports) plus das Blatt `gameMode.ts`. Die vier parallelen Dateien `game.ts`, `ui.ts`, `ai.ts`, `campaign.ts` (402 Zeilen) sind aufgegangen, 26 Importer umgestellt, `tsc`/`eslint`/`vitest`/`build` grün. 6.2 erledigt — `js/matchRefs.ts` 28,2 % → 71,7 % Statements, `tests/matchRefs.protocol.test.ts` (26 Tests) gegen das Line-Protokoll, `applyMove`/Promotion, `playGame`-Urteile und das moveNumber-100-Limit. Nebenbei: die Figurencode-Mapping existierte doppelt (`engineNode.ts` privat + „mirror" in `matchRefs.ts`) und ist jetzt `js/pieceCodes.ts`; die Promotionstabelle kannte `e`/`j` nicht und ließe ein Feen-Promotion im Harness als Bauer durchgehen. 6.3 erledigt — Jest-Überreste und `jsdoc` entfernt, `npm ci --legacy-peer-deps` sauber.
 
 **Nicht:** Umschreiben der Engine, neue Eval-Terme, NNUE.
 
@@ -229,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** M6 Struktur (6.1 `js/types/` konsolidieren, 6.2 `matchRefs.ts`-Coverage). Tagespuzzle-Einstieg und PGN-Export sind erledigt. Die Engine bleibt eingefroren.
+**Nächster konkreter Schritt:** M6 Struktur ist vollständig (6.1 `js/types/`, 6.2 `matchRefs.ts`, 6.3 tote Dependencies). Tagespuzzle-Einstieg und PGN-Export sind erledigt. Die Engine bleibt eingefroren.
 
 ---
 

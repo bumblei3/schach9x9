@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { PuzzleManager } from '../js/puzzleManager.js';
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
-import type { GameLike } from '../js/types/game.js';
+import type { GameLike } from '../js/types/core.js';
 
 const FAIRY_IDS = [
   'fairy-archbishop-corner',

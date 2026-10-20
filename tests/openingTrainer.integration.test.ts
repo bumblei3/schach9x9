@@ -3,7 +3,7 @@ import { OpeningTrainerManager } from '../js/openingTrainer.js';
 import { OpeningBook } from '../js/ai/OpeningBook.js';
 import { OpeningTrainerMenu } from '../js/ui/OpeningTrainerMenu.js';
 import { reconstructBoardFromHash } from '../js/openingTrainer.js';
-import type { Player } from '../js/types/game.js';
+import type { Player } from '../js/types/core.js';
 
 describe('opening-trainer integration', () => {
   beforeEach(() => {

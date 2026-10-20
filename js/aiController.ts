@@ -1,5 +1,5 @@
 import { PHASES, type Game } from './gameEngine.js';
-import type { Player } from './types/game.js';
+import type { Player } from './types/core.js';
 import {
   DRAW_OFFER_THRESHOLD_LOW,
   DRAW_OFFER_THRESHOLD_HIGH,

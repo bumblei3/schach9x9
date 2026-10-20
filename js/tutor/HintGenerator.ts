@@ -11,7 +11,7 @@ import {
 } from '../ui.js';
 import type { TutorHint } from '../ui.js';
 import { analyzeMoveWithExplanation, getMoveNotation } from './MoveAnalyzer.js';
-import type { Piece } from '../types/game.js';
+import type { Piece } from '../types/core.js';
 import * as aiEngine from '../aiEngine.js';
 
 interface TacticalPattern {

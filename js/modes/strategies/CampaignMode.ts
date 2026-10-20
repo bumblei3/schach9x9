@@ -1,6 +1,6 @@
 import type { GameModeStrategy } from '../GameModeStrategy.js';
 import type { GameExtended, GameController } from '../../gameController.js';
-import type { Player } from '../../types/game.js';
+import type { Player } from '../../types/core.js';
 import type { PieceWithMoved } from '../../gameEngine.js';
 import { PHASES } from '../../config.js';
 import * as UI from '../../ui.js';

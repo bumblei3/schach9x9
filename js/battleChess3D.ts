@@ -10,7 +10,7 @@ import { SceneManager3D } from './ui/3d/SceneManager3D.js';
 import { PieceManager3D } from './ui/3d/PieceManager3D.js';
 import { InputHandler3D } from './ui/3d/InputHandler3D.js';
 import type { Game, Piece } from './gameEngine.js';
-import type { Square } from './types/game.js';
+import type { Square } from './types/core.js';
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { BattleAnimator } from './battleAnimations.js';
