@@ -164,6 +164,28 @@ test.describe('Sound settings persistence', () => {
   });
 });
 
+test('resign button ends the game', async ({ page }) => {
+  const helper = new E2EHelper(page);
+  const dialogs: string[] = [];
+  page.on('dialog', async (d) => {
+    dialogs.push(d.message());
+    await d.accept(); // accept "Wirklich aufgeben?" so the resign proceeds
+  });
+
+  await helper.goto();
+  await helper.startGame('classic');
+  await waitGame(page);
+
+  // The in-game action bar (with the overflow menu) only renders after the
+  // player has made a move.
+  await playOneMove(helper, page);
+  await page.locator('#action-more-btn').click();
+  await expect(page.locator('#resign-btn')).toBeVisible();
+  await page.locator('#resign-btn').click();
+  await expect(page.locator('#game-over-overlay')).toBeVisible({ timeout: 10000 });
+  expect(dialogs.some((m) => /Wirklich aufgeben/.test(m))).toBe(true);
+});
+
 test.describe('Post-game replay overlay', () => {
   test('opens from the analysis modal and steps through the game', async ({ page }) => {
     const helper = new E2EHelper(page);
