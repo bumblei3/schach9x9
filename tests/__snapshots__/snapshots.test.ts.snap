@@ -50,7 +50,13 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
     <link rel="stylesheet" href="css/menu.css">
     <link rel="stylesheet" href="css/tutorial.css">
     <link rel="stylesheet" href="css/skins.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
   
 

@@ -14,6 +14,8 @@ import type { GameLike, MoveRecord, Puzzle, ModalAction } from '../types/core.js
  * @param {string} message - Die Nachricht
  * @param {Array<{text: string, class?: string, callback?: Function}>} actions - Buttons
  */
+let _prevFocus: HTMLElement | null = null;
+
 export function showModal(
   title: string,
   message: string,
@@ -50,8 +52,11 @@ export function showModal(
     actionsEl.appendChild(btn);
   });
 
+  _prevFocus = (document.activeElement as HTMLElement) || null;
   modal.classList.remove('hidden');
   modal.style.display = 'flex';
+  const firstBtn = actionsEl.querySelector('button') as HTMLButtonElement | null;
+  if (firstBtn) firstBtn.focus();
   console.log('[OverlayManager] Modal visibility set to flex');
 }
 
@@ -63,6 +68,8 @@ export function closeModal(): void {
   if (modal) {
     modal.classList.add('hidden');
     modal.style.display = 'none';
+    if (_prevFocus && typeof _prevFocus.focus === 'function') _prevFocus.focus();
+    _prevFocus = null;
     console.log('[OverlayManager] Modal closed');
   }
 }
