@@ -616,6 +616,28 @@ const CAMPAIGN_LEVELS_AKT4: Level[] = [
     },
     goldReward: 80,
   },
+  {
+    id: 'archbishop_chancellor_duo',
+    title: 'Kapitel 23: Erzbischof + Kanzler: Doppelwirkung',
+    description:
+      'Zwei Feenfiguren koordinieren sich: der Erzbischof deckt diagonal, die Kanzlerin linear. Gemeinsam sind sie unaufhaltbar.',
+    opponentName: 'Feen-Duo Konrad & Adelheid',
+    opponentPersonality: 'balanced',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: 'r3k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/A.K...C.. w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 35, description: 'Sieg in unter 35 Zügen' },
+      3: { type: 'material', value: 5, description: 'Gewinne mit +5 Materialvorteil' },
+    },
+    goldReward: 100,
+  },
 ];
 
 export const CAMPAIGN_LEVELS: Level[] = [
