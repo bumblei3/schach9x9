@@ -2,6 +2,8 @@ import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import { reconstructBoardAtMove } from '../move/GameStateManager.js';
 import { getPieceText } from '../ui/BoardRenderer.js';
 import type { GameLike } from '../types/core.js';
+import type { Game } from '../gameEngine.js';
+import type { Board } from '../types/core.js';
 
 const CELL = 60;
 
@@ -11,7 +13,7 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
     return;
   }
 
-  const size = (game as any).boardSize || 9;
+  const size = game.boardSize || 9;
   const canvasSize = size * CELL;
   const canvas = document.createElement('canvas');
   canvas.width = canvasSize;
@@ -20,16 +22,17 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
   if (!ctx) return;
 
   // Save state
-  const savedBoard = JSON.parse(JSON.stringify(game.board));
+  const savedBoard = JSON.parse(JSON.stringify(game.board)) as Board;
   const savedTurn = game.turn;
   const savedSelected = game.selectedSquare;
   const savedValid = game.validMoves;
   const savedHighlight = game.lastMoveHighlight;
-  const savedReplay = (game as any).replayMode;
-  const savedSavedState = (game as any).savedGameState;
+  const savedReplay = game.replayMode;
+  const gameExt = game as GameLike & { savedGameState?: unknown };
+  const savedSavedState = gameExt.savedGameState;
 
   // Enter replay-like state
-  (game as any).savedGameState = {
+  gameExt.savedGameState = {
     board: JSON.parse(JSON.stringify(game.board)),
     turn: game.turn,
     selectedSquare: game.selectedSquare,
@@ -41,7 +44,7 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
 
 
   for (let i = -1; i < game.moveHistory.length; i++) {
-    reconstructBoardAtMove(game as any, i);
+    reconstructBoardAtMove(game as unknown as Game, i);
 
     // Draw board
     ctx.fillStyle = '#f0d9b5';
@@ -55,7 +58,7 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
 
         const piece = game.board?.[r]?.[c];
         if (piece) {
-          const symbol = getPieceText(piece as any);
+          const symbol = getPieceText(piece);
           ctx.fillStyle = piece.color === 'white' ? '#ffffff' : '#000000';
           ctx.font = `${CELL * 0.7}px serif`;
           ctx.textAlign = 'center';
@@ -98,11 +101,11 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
   URL.revokeObjectURL(url);
 
   // Restore state
-  game.board = savedBoard as any;
+  game.board = savedBoard;
   game.turn = savedTurn;
   game.selectedSquare = savedSelected;
   game.validMoves = savedValid;
   game.lastMoveHighlight = savedHighlight;
-  (game as any).replayMode = savedReplay;
-  (game as any).savedGameState = savedSavedState;
+  game.replayMode = savedReplay;
+  gameExt.savedGameState = savedSavedState;
 }
