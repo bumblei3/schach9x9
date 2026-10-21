@@ -132,6 +132,10 @@ describe('GIFExporter', () => {
     expect(game.board[5][0]?.hasMoved).toBe(true);
   });
 
+  it('throws when there are no moves', async () => {
+    await expect(renderReplayGifBytes({ moveHistory: [] } as unknown as GameLike)).rejects.toThrow('Keine Züge zum Exportieren');
+  });
+
   it('warns instead of alerting when there are no moves', async () => {
     const show = vi.spyOn(notificationUI, 'show').mockImplementation(() => {});
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
@@ -142,5 +146,31 @@ describe('GIFExporter', () => {
     expect(show).toHaveBeenCalledWith('Keine Züge zum Exportieren!', 'warning');
     show.mockRestore();
     alertSpy.mockRestore();
+  });
+
+  it('exports a GIF via download when there are moves', async () => {
+    const show = vi.spyOn(notificationUI, 'show').mockImplementation(() => {});
+    const click = vi.fn();
+    const appendChild = vi.spyOn(document.body, 'appendChild').mockImplementation(() => null as any);
+    const removeChild = vi.spyOn(document.body, 'removeChild').mockImplementation(() => null as any);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+    const origCreate = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      if (tag === 'a') return { href: '', download: '', click } as unknown as HTMLAnchorElement;
+      if (tag === 'canvas') return origCreate('canvas');
+      return origCreate(tag);
+    });
+
+    await exportReplayGIF(twoMoveGame() as unknown as GameLike);
+
+    expect(click).toHaveBeenCalled();
+    expect(show).toHaveBeenCalledWith('GIF exportiert!', 'success');
+
+    show.mockRestore();
+    appendChild.mockRestore();
+    removeChild.mockRestore();
+    (document.createElement as any).mockRestore?.();
   });
 });
