@@ -660,6 +660,28 @@ const CAMPAIGN_LEVELS_AKT4: Level[] = [
     },
     goldReward: 100,
   },
+  {
+    id: 'fairy_sacrifice',
+    title: 'Kapitel 25: Feen-Opfer',
+    description:
+      'Ein spektakuläres Opfer des Erzbischofs öffnet das Mattnetz. Mut und Berechnung — der Höhepunkt der Feen-Taktik.',
+    opponentName: 'Feen-Opfermeister Theobald',
+    opponentPersonality: 'aggressive',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: 'r3k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/..K.A.... w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 100,
+  },
 ];
 
 export const CAMPAIGN_LEVELS: Level[] = [
