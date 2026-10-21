@@ -682,6 +682,29 @@ const CAMPAIGN_LEVELS_AKT4: Level[] = [
     },
     goldReward: 100,
   },
+  {
+    id: 'fairy_master_2',
+    title: 'Kapitel 26: Der Feen-Meister II',
+    description:
+      'Alle vier Feenfiguren auf einmal gegen eine Elite-Armee. Der ultimative Test deiner 9x9-Kunst — schwieriger als je zuvor.',
+    opponentName: 'Feen-Meister Thorin II',
+    opponentPersonality: 'expert',
+    difficulty: 'expert',
+    setupType: 'budget',
+    playerBudget: 55,
+    playerColor: 'white',
+    fen: 'rnbkcbnrj/ppppppppp/9/9/9/9/9/9/9 w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 40, description: 'Sieg in unter 40 Zügen' },
+      3: { type: 'material', value: 6, description: 'Gewinne mit +6 Materialvorteil' },
+    },
+    goldReward: 150,
+  },
 ];
 
 export const CAMPAIGN_LEVELS: Level[] = [
