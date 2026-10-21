@@ -185,8 +185,8 @@ describe('loadNnueWeights', () => {
         shape: [2, 2, 2],
       }),
     );
-    const first = loadNnueWeights(path);
-    const second = loadNnueWeights(path);
+    const first = await loadNnueWeights(path);
+    const second = await loadNnueWeights(path);
     expect(second).toBe(first); // cached identity — no re-read
     expect(first.w0).toBeInstanceOf(Float32Array);
     expect(first.shape).toEqual([2, 2, 2]);

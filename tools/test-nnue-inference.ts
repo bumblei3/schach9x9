@@ -2,7 +2,7 @@ import { loadNnueWeights, encodeBoard, nnueEvalProb, probToCp } from '../js/ai/n
 import { setBoardVariant, BOARD_VARIANTS } from '../js/config.js';
 
 setBoardVariant(BOARD_VARIANTS.SCHACH9X9);
-const w = loadNnueWeights('data/nnue_weights.json');
+const w = await loadNnueWeights('data/nnue_weights.json');
 // start position
 const b = new Int8Array(81);
 const back = [4, 2, 3, 5, 6, 3, 2, 4, 7];

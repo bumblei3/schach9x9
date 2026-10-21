@@ -9,8 +9,6 @@
  * w_nnue=0 keeps pure PST behavior (default until the selfmatch gate passes).
  */
 
-import { readFileSync } from 'node:fs';
-
 export interface NnueWeights {
   w0: Float32Array; // (1134, hidden0) flattened
   b0: Float32Array;
@@ -28,9 +26,15 @@ const SQ = 81;
 let cached: NnueWeights | null = null;
 
 /** Load weights from a JSON file produced by tools/nnue-export-weights.py. */
-export function loadNnueWeights(path: string): NnueWeights {
+export async function loadNnueWeights(path: string): Promise<NnueWeights> {
   if (cached) return cached;
-  const raw = JSON.parse(readFileSync(path, 'utf8'));
+  let raw: any;
+  if (typeof process !== 'undefined' && (process as any).versions?.node) {
+    const fs = await import('node:fs');
+    raw = JSON.parse(fs.readFileSync(path, 'utf8'));
+  } else {
+    throw new Error('loadNnueWeights is not available in the browser; preload weights via fetch instead.');
+  }
   const arr = (a: number[] | Float32Array) => Float32Array.from(a);
   cached = {
     w0: arr(raw.w0), b0: arr(raw.b0),

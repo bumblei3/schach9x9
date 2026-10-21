@@ -612,8 +612,8 @@ export function evaluate(
 // --- NNUE lazy state (kept here so evaluate() stays sync) ---
 import { loadNnueWeights, encodeBoard, nnueEvalProb, probToCp, type NnueWeights } from './ai/nnue.js';
 const nnueState: { weights: NnueWeights | null } = { weights: null };
-export function preloadNnueWeights(path: string): void {
-  nnueState.weights = loadNnueWeights(path);
+export async function preloadNnueWeights(path: string): Promise<void> {
+  nnueState.weights = await loadNnueWeights(path);
 }
 
 // =====================================================================
