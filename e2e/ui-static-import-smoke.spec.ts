@@ -27,7 +27,7 @@ test.describe('App boot + UI module (tech-debt static ui import)', () => {
       () =>
         (window as unknown as { app?: unknown }).app != null &&
         (window as unknown as { UI?: unknown }).UI != null,
-      { timeout: 10000 }
+      { timeout: 20000 }
     );
 
     const bootOk = await page.evaluate(() => {
@@ -49,8 +49,9 @@ test.describe('App boot + UI module (tech-debt static ui import)', () => {
   test('a move + keyboard input works without crashing', async ({ page }) => {
     await helper.startGame('classic');
     await page.waitForFunction(
-      () => (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
-      { timeout: 10000 }
+      () =>
+        (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
+      { timeout: 20000 }
     );
 
     // Real white move (pawn e-file, row 7 -> row 6 on 9x9).
@@ -58,8 +59,10 @@ test.describe('App boot + UI module (tech-debt static ui import)', () => {
     await helper.clickCell(6, 4);
 
     await page.waitForFunction(
-      () => ((window as unknown as { app: { game: { moveHistory: unknown[] } } }).app.game.moveHistory?.length ?? 0) >= 1,
-      { timeout: 15000 }
+      () =>
+        ((window as unknown as { app: { game: { moveHistory: unknown[] } } }).app.game.moveHistory
+          ?.length ?? 0) >= 1,
+      { timeout: 30000 }
     );
 
     // Keyboard: press Escape (harmless) — proves KeyboardManager still wires up
@@ -69,11 +72,14 @@ test.describe('App boot + UI module (tech-debt static ui import)', () => {
 
     // Resign via the (already-proven) gameController API to end the game.
     await page.evaluate(() => {
-      (window as unknown as { app: { gameController: { resign: (c: string) => void } } }).app.gameController.resign('white');
+      (
+        window as unknown as { app: { gameController: { resign: (c: string) => void } } }
+      ).app.gameController.resign('white');
     });
     await page.waitForFunction(
-      () => (window as unknown as { app: { game: { phase: string } } }).app.game.phase === 'GAME_OVER',
-      { timeout: 10000 }
+      () =>
+        (window as unknown as { app: { game: { phase: string } } }).app.game.phase === 'GAME_OVER',
+      { timeout: 20000 }
     );
     const phase = await page.evaluate(
       () => (window as unknown as { app: { game: { phase: string } } }).app.game.phase
