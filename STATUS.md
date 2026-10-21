@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-10-21)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `1d8a658`. Die Messzeile unten nennt noch den älteren Zählpunkt `c53213d`; sie ist hier nicht neu gezählt. Akt IV (Kapitel 19–25) ist im Arbeitsbaum eine Folge von Mattaufgaben, nicht mehr ein Stellungstext.
+Release-Tag bleibt `v2.0.0`. `main` ist `942a547` (share/FEN-Coverage committed). Die Messzeile unten nennt noch den älteren Zählpunkt `c53213d`; sie ist hier nicht neu gezählt. Akt IV (Kapitel 19–25) ist im Arbeitsbaum eine Folge von Mattaufgaben, nicht mehr ein Stellungstext.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
