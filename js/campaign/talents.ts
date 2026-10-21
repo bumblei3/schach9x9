@@ -31,17 +31,6 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
         effectValue: 2,
       },
       {
-        id: 'p_shieldwall',
-        name: 'Schildwall',
-        description: 'Bauernstruktur wird von der Analyse positiver bewertet (+0.2 Eval).',
-        tier: 2,
-        reqLevel: 7,
-        cost: 150,
-        icon: '🛡️',
-        effectType: 'stat_boost',
-        effectValue: 20,
-      },
-      {
         id: 'p_veteran',
         name: 'Veteran',
         description: 'Startet Missionen mit 1 freiem Bauern-Upgrade (falls verfügbar).',
@@ -54,33 +43,7 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       },
     ],
   },
-  n: {
-    unitType: 'n',
-    talents: [
-      {
-        id: 'n_agile',
-        name: 'Flinkheit',
-        description: '+10% Chance, dass ein Springer einen Angriff "überlebt" (RPG-Mechanik).',
-        tier: 1,
-        reqLevel: 3,
-        cost: 75,
-        icon: '🐎',
-        effectType: 'mechanic', // Placeholder for now
-        effectValue: 10,
-      },
-      {
-        id: 'n_outpost',
-        name: 'Vorposten',
-        description: 'Springer im Zentrum generieren +1 XP pro Runde.',
-        tier: 2,
-        reqLevel: 7,
-        cost: 200,
-        icon: 'd4',
-        effectType: 'mechanic',
-        effectValue: 1,
-      },
-    ],
-  },
+  n: { unitType: 'n', talents: [] },
   // Add basic defaults for others to avoid errors
   b: { unitType: 'b', talents: [] },
   r: { unitType: 'r', talents: [] },

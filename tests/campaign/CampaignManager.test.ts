@@ -197,9 +197,9 @@ describe('talent unlocking', () => {
 
   test('valid unlock deducts cost and records the talent', () => {
     const tree: any = UNIT_TALENT_TREES;
-    const talent = tree.n.talents[0]; // e.g. 'n_agile', cost 75
+    const talent = tree.p.talents[0]; // e.g. 'p_scavenger', cost 50
     const before = cm.getGold();
-    const ok = cm.unlockTalent('n', talent.id, talent.cost);
+    const ok = cm.unlockTalent('p', talent.id, talent.cost);
     expect(ok).toBe(true);
     expect(cm.isTalentUnlocked(talent.id)).toBe(true);
     expect(cm.getGold()).toBe(before - talent.cost);
@@ -207,10 +207,10 @@ describe('talent unlocking', () => {
 
   test('unlocking an already-unlocked talent is a no-op returning true', () => {
     const tree: any = UNIT_TALENT_TREES;
-    const talent = tree.n.talents[0];
-    cm.unlockTalent('n', talent.id, talent.cost);
+    const talent = tree.p.talents[0];
+    cm.unlockTalent('p', talent.id, talent.cost);
     const goldBefore = cm.getGold();
-    expect(cm.unlockTalent('n', talent.id, talent.cost)).toBe(true);
+    expect(cm.unlockTalent('p', talent.id, talent.cost)).toBe(true);
     expect(cm.getGold()).toBe(goldBefore); // not charged twice
   });
 });
