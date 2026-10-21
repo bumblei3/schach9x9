@@ -106,6 +106,19 @@ describe('registerServiceWorker', () => {
     expect(register).not.toHaveBeenCalled();
   });
 
+  test('reads environment from globals when no env is passed (dev build is a no-op)', () => {
+    const register = vi.fn();
+    stubNavigator({ register });
+    const addEventListener = vi.spyOn(window, 'addEventListener').mockImplementation(() => {});
+
+    // No explicit env → readServiceWorkerEnvironment() runs with import.meta.env.PROD
+    // (false under Vitest), so registration is skipped without touching the DOM.
+    registerServiceWorker();
+
+    expect(addEventListener).not.toHaveBeenCalled();
+    expect(register).not.toHaveBeenCalled();
+  });
+
   test('logs a warning and stays alive when registration fails', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     stubNavigator({ register: vi.fn(() => Promise.reject(new Error('no service worker'))) });
@@ -115,5 +128,14 @@ describe('registerServiceWorker', () => {
     handlers[0]();
 
     await vi.waitFor(() => expect(warn).toHaveBeenCalled());
+  });
+
+  test('does nothing when navigator has no serviceWorker support', () => {
+    vi.stubGlobal('navigator', { webdriver: false });
+    const addEventListener = vi.spyOn(window, 'addEventListener').mockImplementation(() => {});
+
+    registerServiceWorker(PROD_BROWSER);
+
+    expect(addEventListener).not.toHaveBeenCalled();
   });
 });
