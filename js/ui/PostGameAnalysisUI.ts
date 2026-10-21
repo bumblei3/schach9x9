@@ -4,6 +4,7 @@
 import * as PostGameAnalyzerModule from '../tutor/PostGameAnalyzer.js';
 import { analyzeGame } from '../tutor/PostGameAnalyzer.js';
 import type { MoveHistoryEntry } from '../gameEngine.js';
+import { AnalysisUI } from './AnalysisUI.js';
 
 /**
  * Displays game stats and shows the "Nachspiel-Analyse" button
@@ -99,9 +100,6 @@ async function showPostGameAnalysis(game: {
   playerColor: 'white' | 'black';
   gameController?: { jumpToMove: (_n: number) => void };
 }): Promise<void> {
-  // Import dynamically to avoid circular deps
-  const mod = await import('./AnalysisUI.js');
-
   // Create a minimal app object that satisfies AnalysisUI's requirements
   const app = {
     game: {
@@ -120,7 +118,6 @@ async function showPostGameAnalysis(game: {
     };
   };
 
-  const AnalysisUI = mod.AnalysisUI;
   const analysisUI = new AnalysisUI(app);
 
   // Use existing AnalysisUI method to show summary
@@ -128,9 +125,8 @@ async function showPostGameAnalysis(game: {
     showSummaryModal: (_w: unknown, _b: unknown) => void;
   };
 
-  const { analyzeGame: analyzeGameLocal } = await import('../tutor/PostGameAnalyzer.js');
-  const whiteStats = analyzeGameLocal(app.game.moveHistory, 'white');
-  const blackStats = analyzeGameLocal(app.game.moveHistory, 'black');
+  const whiteStats = analyzeGame(app.game.moveHistory, 'white');
+  const blackStats = analyzeGame(app.game.moveHistory, 'black');
 
   analysisUI_.showSummaryModal(whiteStats, blackStats);
 }

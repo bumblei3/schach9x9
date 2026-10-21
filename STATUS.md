@@ -1,21 +1,21 @@
 # schach9x9 — Status (Stand: 2026-10-21)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `cf60705` (v2.0.0 + Vitest 5 + TS 7 + M1.3 + Tagespuzzle-Einstieg + Rematch + PWA + Sound-Settings-Persistenz + CSP-Cleanups + a11y (ARIA, Skip-Link, Tastaturnavigation) + Hotseat-Modus + Bestenliste + Puzzle-Features (Zufall, Hinweis, Schwierigkeit, 2 neue Puzzles) + Zug-Zeiten + 3D-Tests).
+Release-Tag bleibt `v2.0.0`. `main` ist `c53213d` (v2.0.0 + Vitest 5 + TS 7 + M1.3 + Tagespuzzle-Einstieg + Rematch + PWA + Sound-Settings-Persistenz + CSP-Cleanups + a11y (ARIA, Skip-Link, Tastaturnavigation) + Hotseat-Modus + Bestenliste + Puzzle-Features (Zufall, Hinweis, Schwierigkeit, 2 neue Puzzles) + Zug-Zeiten + 3D-Tests + Draw-Offer-Buttons verdrahtet + gebundener Resize-Handler).
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `cf60705` | 262 Dateien, 3173/3173 |
+| Tests | lokal, Node 26, Stand `c53213d` | 262 Dateien, 3173/3173 (Build+tsc+eslint grün) |
 | Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
 | Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
 | Build | CI „Production Build“ auf `main` | grün |
 | E2E + Lighthouse | CI auf `main` | grün |
 | Security | CodeQL auf `main` | grün |
 | CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `eab8ad0` | Tagespuzzle-Einstieg, PWA-Fix, toter Settings-Store entfernt, Tutor-Warndialog entdoppelt (#220), Vorab-Warnung kalibriert (#221), Bedrohungs-Erkennung konsistent (#222), 3D-Schatten-Typ korrigiert (#223). Tag bleibt `v2.0.0` |
+| Git | `main` `c53213d` | ... wie oben + Draw-Offer-Buttons verdrahtet + gebundener Resize-Handler (Dispose entfernt Listener jetzt wirklich). Tag bleibt `v2.0.0` |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
