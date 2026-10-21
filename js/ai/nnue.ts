@@ -28,19 +28,25 @@ let cached: NnueWeights | null = null;
 /** Load weights from a JSON file produced by tools/nnue-export-weights.py. */
 export async function loadNnueWeights(path: string): Promise<NnueWeights> {
   if (cached) return cached;
-  let raw: any;
-  if (typeof process !== 'undefined' && (process as any).versions?.node) {
+  let raw: unknown;
+  if (typeof process !== 'undefined' && (process as { versions?: { node?: string } }).versions?.node) {
     const fs = await import('node:fs');
     raw = JSON.parse(fs.readFileSync(path, 'utf8'));
   } else {
     throw new Error('loadNnueWeights is not available in the browser; preload weights via fetch instead.');
   }
+  const data = raw as {
+    w0: number[]; b0: number[];
+    w1: number[]; b1: number[];
+    w2: number[]; b2: number[];
+    shape: number[];
+  };
   const arr = (a: number[] | Float32Array) => Float32Array.from(a);
   cached = {
-    w0: arr(raw.w0), b0: arr(raw.b0),
-    w1: arr(raw.w1), b1: arr(raw.b1),
-    w2: arr(raw.w2), b2: arr(raw.b2),
-    shape: raw.shape,
+    w0: arr(data.w0), b0: arr(data.b0),
+    w1: arr(data.w1), b1: arr(data.b1),
+    w2: arr(data.w2), b2: arr(data.b2),
+    shape: data.shape,
   };
   return cached;
 }

@@ -11,6 +11,8 @@ export default tseslint.config(
       'coverage/**',
       'docs/**',
       'engine-wasm/pkg/**',
+      'src-tauri/target/**',
+      'src-tauri/gen/**',
       '*.cjs',
       '**/*.cjs',
       'commitlint.config.js',
