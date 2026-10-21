@@ -50,11 +50,6 @@ async function playOneMove(helper: E2EHelper, page: PWPage) {
 test.describe('PGN export', () => {
   test('copies a well-formed PGN of the played game to the clipboard', async ({ page }) => {
     const helper = new E2EHelper(page);
-    const dialogs: string[] = [];
-    page.on('dialog', async (d) => {
-      dialogs.push(d.message());
-      await d.dismiss();
-    });
     await page.addInitScript(() => {
       const w = window as unknown as { __pgn?: string };
       const orig = navigator.clipboard?.writeText?.bind(navigator.clipboard);
@@ -83,16 +78,11 @@ test.describe('PGN export', () => {
     expect(pgn).toContain('[Event "Schach 9x9 Game"]');
     expect(pgn).toMatch(/\[Result/);
     expect(pgn).toContain('1. e4');
-    expect(dialogs.some((m) => /Zwischenablage/.test(m))).toBe(true);
+    await expect(page.locator('#toast-container')).toContainText('Zwischenablage');
   });
 
   test('refuses to export when there are no moves', async ({ page }) => {
     const helper = new E2EHelper(page);
-    const dialogs: string[] = [];
-    page.on('dialog', async (d) => {
-      dialogs.push(d.message());
-      await d.dismiss();
-    });
     await helper.goto();
     await helper.startGame('classic');
     await waitGame(page);
@@ -100,7 +90,7 @@ test.describe('PGN export', () => {
     await expect(page.locator('#export-pgn-btn')).toBeVisible();
     await domClick(page, '#export-pgn-btn');
     await page.waitForTimeout(300);
-    expect(dialogs.some((m) => /Keine Züge/.test(m))).toBe(true);
+    await expect(page.locator('#toast-container')).toContainText('Keine Züge');
   });
 });
 
