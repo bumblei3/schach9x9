@@ -161,6 +161,22 @@ export async function executeMove(
         );
       }
     }
+
+    // Standard unit gold talents
+    if (game.campaignMode && piece.color === game.playerColor && targetPiece) {
+      const STANDARD_GOLD_TALENTS: Record<string, { id: string; gold: number; name: string }> = {
+        n: { id: 'n_taktiker', gold: 2, name: 'Taktiker' },
+        b: { id: 'b_pfeilschnell', gold: 2, name: 'Pfeilschnell' },
+        r: { id: 'r_belagerer', gold: 3, name: 'Belagerer' },
+        q: { id: 'q_majestaet', gold: 4, name: 'Majestät' },
+        k: { id: 'k_aura', gold: 2, name: 'Aura' },
+      };
+      const stdGold = STANDARD_GOLD_TALENTS[piece.type];
+      if (stdGold && campaignManager.isTalentUnlocked(stdGold.id)) {
+        campaignManager.addGold(stdGold.gold);
+        notificationUI.show(`Talent: +${stdGold.gold} Gold (${stdGold.name})!`, 'success', 'Talent');
+      }
+    }
   } else if (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant') {
     const capturerColor = piece.color;
     game.capturedPieces[capturerColor].push(moveRecord.specialMove!.capturedPawn as Piece);
@@ -191,6 +207,20 @@ export async function executeMove(
       campaignManager.isTalentUnlocked(FAIRY_XP_TALENTS[piece.type])
     ) {
       xpAmount += 5;
+    }
+
+    // Standard unit XP talents
+    const STANDARD_XP_TALENTS: Record<string, { id: string; xp: number }> = {
+      p: { id: 'p_marsch', xp: 3 },
+      n: { id: 'n_sprungfeder', xp: 5 },
+      b: { id: 'b_diagonal', xp: 5 },
+      r: { id: 'r_festung', xp: 5 },
+      q: { id: 'q_inspiration', xp: 5 },
+      k: { id: 'k_fuehrung', xp: 5 },
+    };
+    const stdXp = STANDARD_XP_TALENTS[piece.type];
+    if (stdXp && campaignManager.isTalentUnlocked(stdXp.id)) {
+      xpAmount += stdXp.xp;
     }
 
     const oldLevel = campaignManager.getUnitXp(piece.type).level;

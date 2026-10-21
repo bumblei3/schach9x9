@@ -77,6 +77,10 @@ export class TalentTreeUI {
       { id: 'r', icon: '♜', name: 'Turm' },
       { id: 'q', icon: '♛', name: 'Dame' },
       { id: 'k', icon: '♚', name: 'König' },
+      { id: 'a', icon: '♝', name: 'Erzbischof' },
+      { id: 'c', icon: '♜', name: 'Kanzler' },
+      { id: 'e', icon: '♝', name: 'Engel' },
+      { id: 'j', icon: '♞', name: 'Nachtreiter' },
       // Special units can be added later
     ];
 
@@ -136,7 +140,9 @@ export class TalentTreeUI {
           // And we could check specific parent dependency if we wanted a real tree connected structure.
           // For now: Level Requirement is the main gate.
           const isLevelMet = unitXp.level >= t.reqLevel;
-          const isAvailable = !isUnlocked && isLevelMet;
+          const prereq = tree.talents.find(pt => pt.tier === t.tier - 1);
+          const prereqMet = !prereq || campaignManager.isTalentUnlocked(prereq.id);
+          const isAvailable = !isUnlocked && isLevelMet && prereqMet;
           let statusClass = 'locked';
           if (isUnlocked) statusClass = 'unlocked';
           else if (isAvailable) statusClass = 'available';
@@ -174,12 +180,16 @@ export class TalentTreeUI {
     const unitXp = campaignManager.getUnitXp(this.currentUnitType);
     const canAfford = campaignManager.getGold() >= talent.cost;
     const levelMet = unitXp.level >= talent.reqLevel;
+    const prereqNode = tree.talents.find(pt => pt.tier === talent.tier - 1);
+    const prereqLocked = !!prereqNode && !campaignManager.isTalentUnlocked(prereqNode.id);
 
     let actionButton = '';
     if (isUnlocked) {
       actionButton = '<span style="color: #ffd700; font-weight: bold;">Bereits erlernt</span>';
     } else if (!levelMet) {
       actionButton = `<span style="color: #666;">Benötigt Level ${talent.reqLevel}</span>`;
+    } else if (prereqLocked && prereqNode) {
+      actionButton = `<span style="color: #666;">Benötigt Talent: ${prereqNode.name}</span>`;
     } else {
       const btnClass = canAfford ? 'btn-primary' : 'btn-secondary disabled';
       actionButton = `<button class="${btnClass} buy-talent-btn" ${!canAfford ? 'disabled' : ''}>Lernen (${talent.cost} Gold)</button>`;

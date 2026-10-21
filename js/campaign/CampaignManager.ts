@@ -34,6 +34,7 @@ export class CampaignManager {
           a: { xp: 0, level: 1, captures: 0 },
           c: { xp: 0, level: 1, captures: 0 },
           e: { xp: 0, level: 1, captures: 0 },
+        j: { xp: 0, level: 1, captures: 0 },
         },
         unlockedTalentIds: [],
         championType: null,
@@ -54,6 +55,7 @@ export class CampaignManager {
             a: { xp: 0, level: 1, captures: 0 },
             c: { xp: 0, level: 1, captures: 0 },
             e: { xp: 0, level: 1, captures: 0 },
+        j: { xp: 0, level: 1, captures: 0 },
           };
         }
         if (parsed.championType === undefined) {
@@ -94,6 +96,7 @@ export class CampaignManager {
         a: { xp: 0, level: 1, captures: 0 },
         c: { xp: 0, level: 1, captures: 0 },
         e: { xp: 0, level: 1, captures: 0 },
+        j: { xp: 0, level: 1, captures: 0 },
       },
       unlockedTalentIds: [],
       championType: null,
@@ -367,6 +370,7 @@ export class CampaignManager {
         a: { xp: 0, level: 1, captures: 0 },
         c: { xp: 0, level: 1, captures: 0 },
         e: { xp: 0, level: 1, captures: 0 },
+        j: { xp: 0, level: 1, captures: 0 },
       },
       unlockedTalentIds: [],
       championType: null,
