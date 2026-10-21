@@ -550,6 +550,28 @@ const CAMPAIGN_LEVELS_AKT4: Level[] = [
     },
     goldReward: 80,
   },
+  {
+    id: 'chancellor_xray_2',
+    title: 'Kapitel 20: Der Kanzler-Spieß',
+    description:
+      'Die Kanzlerin kombiniert Turm und Springer. Ihre Linien sehen durch — der Spieß durchdringt jede Deckung.',
+    opponentName: 'Kanzlerin Adelheid II',
+    opponentPersonality: 'positional',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: 'r3k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/..K...C.. w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 80,
+  },
 ];
 
 export const CAMPAIGN_LEVELS: Level[] = [
