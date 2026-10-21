@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-10-21)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `c53213d` (v2.0.0 + Vitest 5 + TS 7 + M1.3 + Tagespuzzle-Einstieg + Rematch + PWA + Sound-Settings-Persistenz + CSP-Cleanups + a11y (ARIA, Skip-Link, Tastaturnavigation) + Hotseat-Modus + Bestenliste + Puzzle-Features (Zufall, Hinweis, Schwierigkeit, 2 neue Puzzles) + Zug-Zeiten + 3D-Tests + Draw-Offer-Buttons verdrahtet + gebundener Resize-Handler).
+Release-Tag bleibt `v2.0.0`. `main` ist `1d8a658`. Die Messzeile unten nennt noch den älteren Zählpunkt `c53213d`; sie ist hier nicht neu gezählt. Akt IV (Kapitel 19–25) ist im Arbeitsbaum eine Folge von Mattaufgaben, nicht mehr ein Stellungstext.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
@@ -15,7 +15,7 @@ Release-Tag bleibt `v2.0.0`. `main` ist `c53213d` (v2.0.0 + Vitest 5 + TS 7 + M1
 | E2E + Lighthouse | CI auf `main` | grün |
 | Security | CodeQL auf `main` | grün |
 | CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `c53213d` | ... wie oben + Draw-Offer-Buttons verdrahtet + gebundener Resize-Handler (Dispose entfernt Listener jetzt wirklich). Tag bleibt `v2.0.0` |
+| Git | `main` `1d8a658` | Tag bleibt `v2.0.0`. Akt IV, Talent-Schlag und GIF-Kopie liegen im Arbeitsbaum, nicht in diesem Commit. |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
@@ -180,4 +180,4 @@ THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap inst
 
 Fix: benannte Konstante `SHADOW_MAP_TYPE = THREE.PCFShadowMap` mit Begründung; `tests/ui/3d/shadowMapType.test.ts` hält das fest; die unvollständigen `three`-Mocks in `tests/battleChess3D.{boost,coords,dynamic}.test.ts` kannten nur den alten Namen. Gefunden durch Mitschreiben der Browser-Konsole auf der Live-Seite — kein Test und kein Coverage-Werkzeug zeigte es. Browser-Gegenprobe: Live-Build warnt, lokaler Build nicht.
 
-**Nächster sinnvoller Schritt (kein offener Hebel bekannt):** Die Engine bleibt eingefroren, alle Milestones M0–M6 sind durch. Der ertragreichste Weg ist gezieltes Dogfooding der Live-Seite — alle drei echten Bugs dieser Runde (#220, #222, #223) und die falsche Warnschwelle (#221) wurden so gefunden, nicht durch Tests oder Coverage. 3D ist durchgespielt (fand #223: entfernter `PCFSoftShadowMap`). Offen zum Durchspielen: Setup/Shop, Kampagne, Opening-Trainer — jeweils Konsole mitschreiben und gefundene Abweichungen sofort in einen Regressionstest giessen. NNUE bleibt geparkt, M1.2 bleibt zu.
+**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. Akt IV ist umgesetzt: Kapitel 19–25 sind stille Mattaufgaben (`solution`, Sterne über `moves`, `tests/campaign/akt4Positions.test.ts`). Kapitel 26 ist raus. Talentkarten hängen am Schlag-Haken in `MoveExecutor` (`effectValue`, Prozent nur bei `n_meister` und `q_omnipraesenz`). Der GIF-Export zeichnet eine Kopie und fasst die Live-Stellung nicht an. Als Nächstes die Live-Seite durchspielen: Setup/Shop, das neue Kapitel 19, Opening-Trainer. Jede Konsolen-Abweichung am selben Tag als Regressionstest. Kein Tag v2.1. NNUE bleibt geparkt, M1.2 bleibt zu.

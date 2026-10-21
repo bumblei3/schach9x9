@@ -6,7 +6,7 @@ export interface TalentNode {
   reqLevel: number; // e.g. 3, 7, 10
   cost: number; // One-time gold cost or skill points (using Gold for now)
   icon: string;
-  effectType: 'passive_gold' | 'stat_boost' | 'mechanic' | 'setup_bonus';
+  effectType: 'passive_gold' | 'stat_boost' | 'mechanic';
   effectValue?: number;
 }
 
@@ -44,13 +44,13 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'p_veteran',
         name: 'Veteran',
-        description: 'Startet Missionen mit 1 freiem Bauern-Upgrade (falls verfügbar).',
+        description: 'Bauern-Schläge geben +2 XP.',
         tier: 3,
         reqLevel: 10,
         cost: 300,
         icon: '🎖️',
-        effectType: 'setup_bonus',
-        effectValue: 1,
+        effectType: 'stat_boost',
+        effectValue: 2,
       },
     ],
   },
@@ -120,13 +120,13 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'b_lichtbringer',
         name: 'Lichtbringer',
-        description: 'Startet Missionen mit 1 freiem Läufer-Upgrade.',
+        description: 'Läufer-Schläge bringen +2 Gold.',
         tier: 3,
         reqLevel: 10,
         cost: 300,
         icon: '✨',
-        effectType: 'setup_bonus',
-        effectValue: 1,
+        effectType: 'passive_gold',
+        effectValue: 2,
       },
     ],
   },
@@ -158,13 +158,13 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'r_zitadelle',
         name: 'Zitadelle',
-        description: 'Startet Missionen mit 1 freiem Turm-Upgrade.',
+        description: 'Turm-Schläge geben +4 XP.',
         tier: 3,
         reqLevel: 10,
         cost: 325,
         icon: '🛡️',
-        effectType: 'setup_bonus',
-        effectValue: 1,
+        effectType: 'stat_boost',
+        effectValue: 4,
       },
     ],
   },
@@ -234,13 +234,13 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'k_koenig',
         name: 'König',
-        description: 'Startet Missionen mit 1 freiem König-Upgrade.',
+        description: 'König-Schläge geben +4 XP.',
         tier: 3,
         reqLevel: 10,
         cost: 320,
         icon: '👑',
-        effectType: 'setup_bonus',
-        effectValue: 1,
+        effectType: 'stat_boost',
+        effectValue: 4,
       },
     ],
   },

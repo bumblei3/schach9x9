@@ -3,6 +3,7 @@ import { executeMove } from '../../js/move/MoveExecutor';
 import { Game } from '../../js/gameEngine';
 import { campaignManager } from '../../js/campaign/CampaignManager';
 import { notificationUI } from '../../js/ui/NotificationUI';
+import { UNIT_TALENT_TREES } from '../../js/campaign/talents';
 
 // Mock dependencies
 vi.mock('../../js/campaign/CampaignManager', () => ({
@@ -82,6 +83,7 @@ describe('MoveExecutor - Campaign Mechanics', () => {
     await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
 
     expect(campaignManager.addUnitXp).toHaveBeenCalledWith('p', 10);
+    expect(campaignManager.addGold).not.toHaveBeenCalled();
     expect(notificationUI.show).toHaveBeenCalledWith(
       expect.stringContaining('XP'),
       'success',
@@ -89,7 +91,7 @@ describe('MoveExecutor - Campaign Mechanics', () => {
     );
   });
 
-  it('should apply Veteran talent bonus (+20% XP)', async () => {
+  it('should apply Veteran talent bonus (+2 XP)', async () => {
     // Setup: Veteran Pawn captures
     (campaignManager.isTalentUnlocked as any).mockImplementation(
       (id: string) => id === 'p_veteran'
@@ -180,4 +182,65 @@ describe('MoveExecutor - Campaign Mechanics', () => {
       5000
     );
   });
+});
+
+const PERCENT_XP = new Set(['n_meister', 'q_omnipraesenz']);
+
+const talentCases = Object.values(UNIT_TALENT_TREES).flatMap(tree =>
+  tree.talents.map(talent => ({
+    id: talent.id,
+    unit: tree.unitType,
+    effectType: talent.effectType,
+    effectValue: talent.effectValue ?? 0,
+  }))
+);
+
+describe('every talent id is applied on capture', () => {
+  let game: any;
+  let moveController: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    game = new Game();
+    game.campaignMode = true;
+    game.playerColor = 'white';
+    game.board = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(null));
+    game.stats = { captures: 0, promotions: 0, totalMoves: 0 };
+    game.capturedPieces = { white: [], black: [] };
+    game.moveHistory = [];
+    game.turn = 'white';
+    game.positionHistory = [];
+    moveController = { updateUndoRedoButtons: vi.fn() };
+    (campaignManager.getUnitXp as any).mockReturnValue({ level: 1 });
+  });
+
+  it.each(talentCases)(
+    '$id applies effectValue $effectValue',
+    async ({ id, unit, effectType, effectValue }) => {
+      (campaignManager.isTalentUnlocked as any).mockImplementation((tid: string) => tid === id);
+      game.board[4][4] = { type: unit, color: 'white', hasMoved: false };
+      game.board[3][3] = { type: 'p', color: 'black' };
+
+      await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
+
+      if (effectType === 'passive_gold') {
+        expect(campaignManager.addGold).toHaveBeenCalledWith(effectValue);
+        expect(campaignManager.addUnitXp).toHaveBeenCalledWith(unit, 10);
+      } else if (PERCENT_XP.has(id)) {
+        expect(campaignManager.addGold).not.toHaveBeenCalled();
+        expect(campaignManager.addUnitXp).toHaveBeenCalledWith(
+          unit,
+          Math.round(10 * (1 + effectValue / 100))
+        );
+      } else if (effectType === 'stat_boost') {
+        expect(campaignManager.addGold).not.toHaveBeenCalled();
+        expect(campaignManager.addUnitXp).toHaveBeenCalledWith(unit, 10 + effectValue);
+      } else {
+        expect(campaignManager.addGold).not.toHaveBeenCalled();
+        expect(campaignManager.addUnitXp).toHaveBeenCalledWith(unit, 10);
+      }
+    }
+  );
 });

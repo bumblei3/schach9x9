@@ -242,7 +242,8 @@ describe('DOMHandler Comprehensive Coverage', () => {
     domHandler.init();
     window.alert = vi.fn();
     document.getElementById('export-pgn-btn')!.click();
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Keine Züge'));
+    expect(window.alert).not.toHaveBeenCalled();
+    expect(document.body.textContent).toContain('Keine Züge');
   });
 
   it('Edge Case: should reload page on restart button confirm', () => {

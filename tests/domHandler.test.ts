@@ -446,7 +446,8 @@ describe('DOMHandler', () => {
     (window as any).alert = vi.fn();
 
     exportBtn.click();
-    expect((window as any).alert).toHaveBeenCalledWith('Keine Züge zum Exportieren!');
+    expect((window as any).alert).not.toHaveBeenCalled();
+    expect(document.body.textContent).toContain('Keine Züge zum Exportieren!');
   });
 
   test('should handle standard 8x8 mode start', () => {

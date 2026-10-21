@@ -939,13 +939,13 @@ export class DOMHandler {
     if (exportPgnBtn) {
       exportPgnBtn.addEventListener('click', async () => {
         if (!this.game || !this.game.moveHistory || this.game.moveHistory.length === 0) {
-          alert('Keine Züge zum Exportieren!');
+          showToast('Keine Züge zum Exportieren!', 'warning');
           return;
         }
         const pgn = generatePGN(this.game);
         const copied = await copyPGNToClipboard(pgn);
         if (copied) {
-          alert('PGN in die Zwischenablage kopiert!');
+          showToast('PGN in die Zwischenablage kopiert!', 'success');
         } else {
           downloadPGN(pgn);
         }
@@ -959,15 +959,14 @@ export class DOMHandler {
     if (exportGifBtn) {
       exportGifBtn.addEventListener('click', async () => {
         if (!this.game || !this.game.moveHistory || this.game.moveHistory.length === 0) {
-          alert('Keine Züge zum Exportieren!');
+          showToast('Keine Züge zum Exportieren!', 'warning');
           return;
         }
         try {
           await exportReplayGIF(this.game);
-          alert('GIF exportiert!');
         } catch (e) {
           console.error('GIF export failed:', e);
-          alert('GIF-Export fehlgeschlagen.');
+          showToast('GIF-Export fehlgeschlagen.', 'error');
         }
         if (mainMenu) {
           mainMenu.classList.remove('active');

@@ -28,6 +28,8 @@ export interface Level {
   playerBudget?: number; // Core budget (normally 15 or 5)
   boardSetup?: Board; // Pre-filled board for fixed scenarios
   fen?: string;
+  /** Attacker moves of a short forced mate. Empty for long campaign games. */
+  solution?: Array<{ from: { r: number; c: number }; to: { r: number; c: number } }>;
 
   // Custom Rules
   winCondition: {

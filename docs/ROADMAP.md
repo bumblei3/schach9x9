@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-10-20 · `main` `88840a0` (v2.0.0 + Vitest 5 + TS 7 #214 + M1.3 #215 + Tagespuzzle-Einstieg #217 + Rematch #218 + PWA-Registrierung #219 + toter Settings-Store entfernt + Sound-Settings-Persistenz + CSP-Cleanups + analysis-live E2E-Fix) · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-10-21 · `main` `1d8a658` · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -229,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** M6 Struktur ist vollständig (6.1 `js/types/`, 6.2 `matchRefs.ts`, 6.3 tote Dependencies). Tagespuzzle-Einstieg und PGN-Export sind erledigt. Die Engine bleibt eingefroren.
+**Nächster konkreter Schritt:** `main` ist `1d8a658`. Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben; Kapitel 26 gibt es nicht. Talent-Texte entsprechen dem Schlag-Haken. Der GIF-Export läuft auf einer Kopie der Stellung. Danach Dogfood: Setup/Shop, Kapitel 19, Opening-Trainer. Kein Tag v2.1.
 
 ---
 

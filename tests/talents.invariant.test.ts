@@ -13,7 +13,7 @@ import { UNIT_TALENT_TREES, type TalentNode } from '../js/campaign/talents.js';
 
 const TREES = Object.values(UNIT_TALENT_TREES);
 const ALL_TALENTS: TalentNode[] = TREES.flatMap(t => t.talents);
-const ALLOWED_EFFECTS = ['passive_gold', 'stat_boost', 'mechanic', 'setup_bonus'];
+const ALLOWED_EFFECTS = ['passive_gold', 'stat_boost', 'mechanic'];
 // All 9x9 piece types, including the fairy pieces a/c/e.
 const EXPECTED_UNITS = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e'];
 

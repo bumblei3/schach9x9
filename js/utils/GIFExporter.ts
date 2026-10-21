@@ -1,52 +1,61 @@
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import { reconstructBoardAtMove } from '../move/GameStateManager.js';
 import { getPieceText } from '../ui/BoardRenderer.js';
-import type { GameLike } from '../types/core.js';
+import { notificationUI } from '../ui/NotificationUI.js';
+import type { GameLike, Board } from '../types/core.js';
 import type { Game } from '../gameEngine.js';
-import type { Board } from '../types/core.js';
 
 const CELL = 60;
 
-export async function exportReplayGIF(game: GameLike): Promise<void> {
-  if (!game || !game.moveHistory || game.moveHistory.length === 0) {
-    alert('Keine Züge zum Exportieren!');
-    return;
+/**
+ * Deep-copied position for the replay frames.
+ * `moveHistory` is the live array and is only read. `reconstructBoardAtMove`
+ * runs on this shell, never on the live game, so a throw in gifenc cannot
+ * leave `game.board` mid-replay. A try/finally around the live game is
+ * unnecessary for that reason.
+ */
+function replayShell(game: GameLike): Game {
+  const finalBoard = JSON.parse(JSON.stringify(game.board)) as Board;
+  return {
+    board: JSON.parse(JSON.stringify(finalBoard)) as Board,
+    turn: game.turn,
+    selectedSquare: null,
+    validMoves: null,
+    lastMoveHighlight: null,
+    moveHistory: game.moveHistory,
+    boardSize: game.boardSize || 9,
+    savedGameState: {
+      board: finalBoard,
+      turn: game.turn,
+      selectedSquare: null,
+      validMoves: null,
+      lastMoveHighlight: null,
+    },
+  } as unknown as Game;
+}
+
+/** Encode the replay. Does not read or write the live board after the copy. */
+export async function renderReplayGifBytes(game: GameLike): Promise<Uint8Array> {
+  if (!game?.moveHistory?.length) {
+    throw new Error('Keine Züge zum Exportieren');
   }
 
-  const size = game.boardSize || 9;
+  const shell = replayShell(game);
+  const size = shell.boardSize || 9;
   const canvasSize = size * CELL;
   const canvas = document.createElement('canvas');
   canvas.width = canvasSize;
   canvas.height = canvasSize;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  // Save state
-  const savedBoard = JSON.parse(JSON.stringify(game.board)) as Board;
-  const savedTurn = game.turn;
-  const savedSelected = game.selectedSquare;
-  const savedValid = game.validMoves;
-  const savedHighlight = game.lastMoveHighlight;
-  const savedReplay = game.replayMode;
-  const gameExt = game as GameLike & { savedGameState?: unknown };
-  const savedSavedState = gameExt.savedGameState;
-
-  // Enter replay-like state
-  gameExt.savedGameState = {
-    board: JSON.parse(JSON.stringify(game.board)),
-    turn: game.turn,
-    selectedSquare: game.selectedSquare,
-    validMoves: game.validMoves,
-    lastMoveHighlight: game.lastMoveHighlight,
-  };
+  if (!ctx) {
+    throw new Error('Canvas nicht verfügbar');
+  }
 
   const gif = GIFEncoder();
 
+  for (let i = -1; i < shell.moveHistory.length; i++) {
+    reconstructBoardAtMove(shell, i);
 
-  for (let i = -1; i < game.moveHistory.length; i++) {
-    reconstructBoardAtMove(game as unknown as Game, i);
-
-    // Draw board
     ctx.fillStyle = '#f0d9b5';
     ctx.fillRect(0, 0, canvasSize, canvasSize);
 
@@ -56,7 +65,7 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
         ctx.fillStyle = isLight ? '#f0d9b5' : '#b58863';
         ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
 
-        const piece = game.board?.[r]?.[c];
+        const piece = shell.board?.[r]?.[c];
         if (piece) {
           const symbol = getPieceText(piece);
           ctx.fillStyle = piece.color === 'white' ? '#ffffff' : '#000000';
@@ -68,8 +77,7 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
       }
     }
 
-    // Highlight last move
-    const hl = game.lastMoveHighlight;
+    const hl = shell.lastMoveHighlight;
     if (hl) {
       ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
       ctx.fillRect(hl.from.c * CELL, hl.from.r * CELL, CELL, CELL);
@@ -89,7 +97,16 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
   }
 
   gif.finish();
-  const bytes = gif.bytes();
+  return gif.bytes();
+}
+
+export async function exportReplayGIF(game: GameLike): Promise<void> {
+  if (!game?.moveHistory?.length) {
+    notificationUI.show('Keine Züge zum Exportieren!', 'warning');
+    return;
+  }
+
+  const bytes = await renderReplayGifBytes(game);
   const blob = new Blob([bytes as unknown as BlobPart], { type: 'image/gif' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -99,13 +116,5 @@ export async function exportReplayGIF(game: GameLike): Promise<void> {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
-  // Restore state
-  game.board = savedBoard;
-  game.turn = savedTurn;
-  game.selectedSquare = savedSelected;
-  game.validMoves = savedValid;
-  game.lastMoveHighlight = savedHighlight;
-  game.replayMode = savedReplay;
-  gameExt.savedGameState = savedSavedState;
+  notificationUI.show('GIF exportiert!', 'success');
 }

@@ -13,6 +13,16 @@ import type { PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
+import { UNIT_TALENT_TREES } from '../campaign/talents.js';
+
+/** +10% XP talents. effectValue is the percent, applied after flat bonuses. */
+const PERCENT_XP_TALENTS = new Set(['n_meister', 'q_omnipraesenz']);
+
+function unlockedTalents(unitType: string) {
+  const tree = UNIT_TALENT_TREES[unitType];
+  if (!tree) return [];
+  return tree.talents.filter(t => campaignManager.isTalentUnlocked(t.id));
+}
 
 /**
  * Executes a move on the board
@@ -135,48 +145,6 @@ export async function executeMove(
     game.capturedPieces[capturerColor].push(targetPiece);
     UI.updateCapturedUI(game);
 
-    // Talent: Scavenger (Pawn)
-    // Erhalte 1-2 Gold beim Schlagen von Figuren.
-    if (game.campaignMode && piece.color === game.playerColor && piece.type === 'p') {
-      if (campaignManager.isTalentUnlocked('p_scavenger')) {
-        const bonus = Math.floor(Math.random() * 2) + 1; // 1-2 Gold
-        campaignManager.addGold(bonus);
-        notificationUI.show(`Plünderer: +${bonus} Gold gefunden!`, 'success', 'Talent');
-      }
-    }
-
-    // Fairy talents (M2.5): each fairy piece has one talent with a real effect.
-    if (game.campaignMode && piece.color === game.playerColor && targetPiece) {
-      const FAIRY_GOLD_TALENTS: Record<string, { id: string; gold: number }> = {
-        a: { id: 'a_gabelmeister', gold: 2 },
-        e: { id: 'e_engelsfluegel', gold: 3 },
-      };
-      const goldTalent = FAIRY_GOLD_TALENTS[piece.type];
-      if (goldTalent && campaignManager.isTalentUnlocked(goldTalent.id)) {
-        campaignManager.addGold(goldTalent.gold);
-        notificationUI.show(
-          `Talent: +${goldTalent.gold} Gold durch ${piece.type === 'a' ? 'Gabelmeister' : 'Engelsflügel'}!`,
-          'success',
-          'Talent'
-        );
-      }
-    }
-
-    // Standard unit gold talents
-    if (game.campaignMode && piece.color === game.playerColor && targetPiece) {
-      const STANDARD_GOLD_TALENTS: Record<string, { id: string; gold: number; name: string }> = {
-        n: { id: 'n_taktiker', gold: 2, name: 'Taktiker' },
-        b: { id: 'b_pfeilschnell', gold: 2, name: 'Pfeilschnell' },
-        r: { id: 'r_belagerer', gold: 3, name: 'Belagerer' },
-        q: { id: 'q_majestaet', gold: 4, name: 'Majestät' },
-        k: { id: 'k_aura', gold: 2, name: 'Aura' },
-      };
-      const stdGold = STANDARD_GOLD_TALENTS[piece.type];
-      if (stdGold && campaignManager.isTalentUnlocked(stdGold.id)) {
-        campaignManager.addGold(stdGold.gold);
-        notificationUI.show(`Talent: +${stdGold.gold} Gold (${stdGold.name})!`, 'success', 'Talent');
-      }
-    }
   } else if (moveRecord.specialMove && moveRecord.specialMove.type === 'enPassant') {
     const capturerColor = piece.color;
     game.capturedPieces[capturerColor].push(moveRecord.specialMove!.capturedPawn as Piece);
@@ -189,38 +157,25 @@ export async function executeMove(
     piece.color === game.playerColor &&
     (targetPiece || moveRecord.isEnPassant)
   ) {
+    const talents = unlockedTalents(piece.type);
+    const gold = talents
+      .filter(t => t.effectType === 'passive_gold')
+      .reduce((sum, t) => sum + (t.effectValue ?? 0), 0);
+    if (gold > 0) {
+      campaignManager.addGold(gold);
+      notificationUI.show(`Talent: +${gold} Gold`, 'success', 'Talent');
+    }
+
     let xpAmount = 10;
-
-    // Talent: Veteran (Pawn) - +20% XP
-    if (piece.type === 'p' && campaignManager.isTalentUnlocked('p_veteran')) {
-      xpAmount += 2;
+    for (const t of talents) {
+      if (t.effectType === 'stat_boost' && !PERCENT_XP_TALENTS.has(t.id)) {
+        xpAmount += t.effectValue ?? 0;
+      }
     }
-
-    // Fairy talents (M2.5): chancellor & nightrider captures give +5 XP.
-    const FAIRY_XP_TALENTS: Record<string, string> = {
-      c: 'c_xrayauge',
-      j: 'j_spurwechsel',
-    };
-    if (
-      targetPiece &&
-      FAIRY_XP_TALENTS[piece.type] &&
-      campaignManager.isTalentUnlocked(FAIRY_XP_TALENTS[piece.type])
-    ) {
-      xpAmount += 5;
-    }
-
-    // Standard unit XP talents
-    const STANDARD_XP_TALENTS: Record<string, { id: string; xp: number }> = {
-      p: { id: 'p_marsch', xp: 3 },
-      n: { id: 'n_sprungfeder', xp: 5 },
-      b: { id: 'b_diagonal', xp: 5 },
-      r: { id: 'r_festung', xp: 5 },
-      q: { id: 'q_inspiration', xp: 5 },
-      k: { id: 'k_fuehrung', xp: 5 },
-    };
-    const stdXp = STANDARD_XP_TALENTS[piece.type];
-    if (stdXp && campaignManager.isTalentUnlocked(stdXp.id)) {
-      xpAmount += stdXp.xp;
+    for (const t of talents) {
+      if (PERCENT_XP_TALENTS.has(t.id)) {
+        xpAmount = Math.round(xpAmount * (1 + (t.effectValue ?? 0) / 100));
+      }
     }
 
     const oldLevel = campaignManager.getUnitXp(piece.type).level;
