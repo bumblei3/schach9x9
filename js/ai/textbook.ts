@@ -166,4 +166,15 @@ export const TEXTBOOK_LINES: TextbookLine[] = [
       { from: { r: 0, c: 7 }, to: { r: 2, c: 6 } },
     ],
   },
+  {
+    id: 'tb_center_control',
+    name: 'Lehrbuch 9: Zentrumskontrolle',
+    description: 'Zwei Bauern ins Zentrum, statt Flügel-Bauern zu ziehen.',
+    moves: [
+      { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } },
+      { from: { r: 1, c: 4 }, to: { r: 3, c: 4 } },
+      { from: { r: 7, c: 3 }, to: { r: 5, c: 3 } },
+      { from: { r: 1, c: 3 }, to: { r: 3, c: 3 } },
+    ],
+  },
 ];
