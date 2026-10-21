@@ -152,7 +152,7 @@ export class TalentTreeUI {
           else if (isAvailable) statusClass = 'available';
 
           html += `
-                    <div class="talent-node ${statusClass}" data-id="${t.id}">
+                    <div class="talent-node ${statusClass}" data-id="${t.id}" role="button" tabindex="0" aria-label="${t.name} (Tier ${t.tier}, Level ${t.reqLevel})">
                         <div class="talent-icon">${t.icon}</div>
                         ${isUnlocked ? '<div style="position: absolute; bottom: -5px; right: -5px; font-size: 10px;">✅</div>' : ''}
                     </div>
@@ -170,6 +170,14 @@ export class TalentTreeUI {
       node.addEventListener('click', e => {
         const id = (e.currentTarget as HTMLElement).dataset.id;
         if (id) this.selectTalent(id);
+      });
+      node.addEventListener('keydown', e => {
+        const ke = e as KeyboardEvent;
+        if (ke.key === 'Enter' || ke.key === ' ') {
+          ke.preventDefault();
+          const id = (ke.currentTarget as HTMLElement).dataset.id;
+          if (id) this.selectTalent(id);
+        }
       });
     });
   }
