@@ -14,7 +14,12 @@ updates:
       prefix: 'chore(deps)'
       prefix-development: 'chore(deps-dev)'
 
-  # GitHub Actions
+  # Cargo (Tauri) — desktop shell is pinned; auto-updates break the build
+  - package-ecosystem: 'cargo'
+    directory: '/src-tauri'
+    schedule:
+      interval: 'monthly'
+    open-pull-requests-limit: 0
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
