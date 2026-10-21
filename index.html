@@ -46,9 +46,24 @@
       />
     </noscript>
 
-  </head>
+      <style>
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        z-index: 10000;
+        padding: 8px 12px;
+        background: #000;
+        color: #fff;
+      }
+      .skip-link:focus {
+        left: 0;
+      }
+    </style>
+</head>
 
   <body>
+    <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
     <a href="#board-wrapper" class="skip-link">Zum Schachbrett springen</a>
     <!-- Hidden H1 for Accessibility -->
     <h1 class="hidden">Schach 9x9</h1>
@@ -1194,7 +1209,7 @@
             </nav>
 
             <!-- Content Area -->
-            <main class="menu-content-area">
+            <main id="main-content" class="menu-content-area" tabindex="-1">
               <!-- Play View -->
               <div id="view-play" class="menu-view active">
                 <h2 class="section-title">Neues Spiel</h2>
