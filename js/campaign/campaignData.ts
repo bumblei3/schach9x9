@@ -638,6 +638,28 @@ const CAMPAIGN_LEVELS_AKT4: Level[] = [
     },
     goldReward: 100,
   },
+  {
+    id: 'angel_endgame',
+    title: 'Kapitel 24: Der Engel im Endspiel',
+    description:
+      'Der Engel gegen eine einzelne Figur. Seine Reichweite aus Dame und Springer macht ihn im Endspiel unschlagbar — wenn du ihn richtig führst.',
+    opponentName: 'Engel-Wächter Uriel II',
+    opponentPersonality: 'defensive',
+    difficulty: 'hard',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: '4k4/9/9/9/9/9/9/PPPPPPPPP/..K...E.. w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 40, description: 'Sieg in unter 40 Zügen' },
+      3: { type: 'material', value: 6, description: 'Gewinne mit +6 Materialvorteil' },
+    },
+    goldReward: 100,
+  },
 ];
 
 export const CAMPAIGN_LEVELS: Level[] = [
