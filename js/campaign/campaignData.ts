@@ -594,6 +594,28 @@ const CAMPAIGN_LEVELS_AKT4: Level[] = [
     },
     goldReward: 80,
   },
+  {
+    id: 'nightrider_fork',
+    title: 'Kapitel 22: Nachtreiter-Gabel',
+    description:
+      'Der Nachtreiter gleitet wie ein Springer in beliebiger Länge. Seine Gabel auf König und Figur überrascht jeden Gegner.',
+    opponentName: 'Nachtreiter-Reiter Jakob',
+    opponentPersonality: 'aggressive',
+    difficulty: 'medium',
+    setupType: 'fixed',
+    playerColor: 'white',
+    fen: 'r3k4/ppppppppp/9/9/9/9/9/PPPPPPPPP/..K...J.. w - - 0 1',
+    winCondition: {
+      type: 'checkmate',
+      drawCountsAsWin: true,
+    },
+    unlocks: [],
+    goals: {
+      2: { type: 'moves', value: 30, description: 'Sieg in unter 30 Zügen' },
+      3: { type: 'material', value: 4, description: 'Gewinne mit +4 Materialvorteil' },
+    },
+    goldReward: 80,
+  },
 ];
 
 export const CAMPAIGN_LEVELS: Level[] = [
