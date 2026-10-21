@@ -1,3 +1,13 @@
+// Install event: precache core shell
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(['/', '/index.html', '/style.css']).catch(() => {});
+    })
+  );
+  self.skipWaiting();
+});
+
 const CACHE_NAME = 'schach9x9-v8';
 
 // Fetch event: Network-First strategy
