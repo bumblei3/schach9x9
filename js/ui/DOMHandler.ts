@@ -10,6 +10,7 @@ import * as UI from '../ui.js';
 import { clearPieceCache } from '../ui/BoardRenderer.js';
 import { showToast } from '../ui/OverlayManager.js';
 import { generatePGN, copyPGNToClipboard, downloadPGN } from '../utils/PGNGenerator.js';
+import { exportReplayGIF } from '../utils/GIFExporter.js';
 import { soundManager } from '../sounds.js';
 import { setPieceSkin } from '../chess-pieces.js';
 import { CampaignUI } from './CampaignUI.js';
@@ -947,6 +948,26 @@ export class DOMHandler {
           alert('PGN in die Zwischenablage kopiert!');
         } else {
           downloadPGN(pgn);
+        }
+        if (mainMenu) {
+          mainMenu.classList.remove('active');
+        }
+      });
+    }
+
+    const exportGifBtn = document.getElementById('export-gif-btn');
+    if (exportGifBtn) {
+      exportGifBtn.addEventListener('click', async () => {
+        if (!this.game || !this.game.moveHistory || this.game.moveHistory.length === 0) {
+          alert('Keine Züge zum Exportieren!');
+          return;
+        }
+        try {
+          await exportReplayGIF(this.game);
+          alert('GIF exportiert!');
+        } catch (e) {
+          console.error('GIF export failed:', e);
+          alert('GIF-Export fehlgeschlagen.');
         }
         if (mainMenu) {
           mainMenu.classList.remove('active');
