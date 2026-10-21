@@ -129,10 +129,14 @@ export class TalentTreeUI {
     // Group by tier
     const tiers = [1, 2, 3];
     let html = '';
+    let renderedTiers = 0;
 
     tiers.forEach(tier => {
       const talents = tree.talents.filter(t => t.tier === tier);
       if (talents.length > 0) {
+        if (renderedTiers > 0) {
+          html += '<div style="display:flex;justify-content:center;margin:-20px 0 10px;"><div style="width:2px;height:24px;background:#555;"></div></div>';
+        }
         html += `<div class="talent-tier" data-label="Tier ${tier}" style="margin-bottom: 40px; display: flex; gap: 40px; justify-content: center;">`;
         talents.forEach(t => {
           const isUnlocked = campaignManager.isTalentUnlocked(t.id);
@@ -155,6 +159,7 @@ export class TalentTreeUI {
                 `;
         });
         html += '</div>';
+        renderedTiers++;
       }
     });
 
