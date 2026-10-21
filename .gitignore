@@ -48,3 +48,4 @@ build/
 **/*.spec.js
 **/*.spec.js.map
 **/*.spec.d.ts
+src-tauri/target/
