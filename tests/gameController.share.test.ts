@@ -4,7 +4,7 @@
  * Targets the previously-uncovered share/FEN block (getCurrentFEN,
  * getShareUrl, loadSharedPosition, shareCurrentPosition).
  */
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 
 // --- Mocks (mirror gameController.test.ts) ---------------------------------
 vi.mock('../js/statisticsManager.js', () => ({ StatisticsManager: class { constructor() {} } }));
