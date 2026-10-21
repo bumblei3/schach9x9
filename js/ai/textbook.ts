@@ -177,4 +177,15 @@ export const TEXTBOOK_LINES: TextbookLine[] = [
       { from: { r: 1, c: 3 }, to: { r: 3, c: 3 } },
     ],
   },
+  {
+    id: 'tb_flank_develop',
+    name: 'Lehrbuch 10: Flanken-Bauern vermeiden',
+    description: 'Randbauern-Züge entwickeln nichts — hier zum Vergleich mit Zentrumsspiel.',
+    moves: [
+      { from: { r: 7, c: 0 }, to: { r: 6, c: 0 } },
+      { from: { r: 1, c: 4 }, to: { r: 3, c: 4 } },
+      { from: { r: 7, c: 8 }, to: { r: 6, c: 8 } },
+      { from: { r: 3, c: 4 }, to: { r: 4, c: 4 } },
+    ],
+  },
 ];
