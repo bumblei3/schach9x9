@@ -1,21 +1,21 @@
-# schach9x9 — Status (Stand: 2026-10-21)
+# schach9x9 — Status (Stand: 2026-11-10)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `942a547` (share/FEN-Coverage committed). Die Messzeile unten nennt noch den älteren Zählpunkt `c53213d`; sie ist hier nicht neu gezählt. Akt IV (Kapitel 19–25) ist im Arbeitsbaum eine Folge von Mattaufgaben, nicht mehr ein Stellungstext.
+Release-Tag bleibt `v2.0.0`. `main` ist `d1b1e41`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind der letzte gezählte Stand, nicht eine neue Zählung von `d1b1e41`.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | lokal, Node 26, Stand `c53213d` | 262 Dateien, 3173/3173 (Build+tsc+eslint grün) |
-| Tests (CI) | „Unit Tests“ auf `main` | grün. Referenzwert #215: 250 Dateien, 3070/3070 (Node 24) |
-| Typecheck + Lint | CI „Lint & Type Check“ auf `main` | grün |
-| Build | CI „Production Build“ auf `main` | grün |
-| E2E + Lighthouse | CI auf `main` | grün |
-| Security | CodeQL auf `main` | grün |
-| CI | GitHub Actions | #214 (TS 7), #215 (M1.3), #217/#218/#219 komplett SUCCESS. Pages-Deploy läuft nur auf `main` |
-| Git | `main` `1d8a658` | Tag bleibt `v2.0.0`. Akt IV, Talent-Schlag und GIF-Kopie liegen im Arbeitsbaum, nicht in diesem Commit. |
+| Tests | letzter gezählter Lauf, Node 26, `c53213d` | 262 Dateien, 3173/3173. Für `d1b1e41` nicht neu gezählt |
+| Tests (CI) | Referenz #215, nicht der Zähler von `d1b1e41` | 250 Dateien, 3070/3070 (Node 24) |
+| Typecheck + Lint | zuletzt abgelesen vor `d1b1e41` | nicht neu gezählt |
+| Build | zuletzt abgelesen vor `d1b1e41` | nicht neu gezählt |
+| E2E + Lighthouse | zuletzt abgelesen vor `d1b1e41` | nicht neu gezählt |
+| Security | CodeQL, zuletzt abgelesen vor `d1b1e41` | nicht neu gezählt |
+| CI | GitHub Actions | #214–#219 sind die Läufe vom Oktober 2026, nicht der Stand `d1b1e41`. Pages-Deploy läuft nur auf `main` |
+| Git | `main` `d1b1e41` (2026-11-10) | Tag bleibt `v2.0.0`. Arbeitsbaum sauber, kein offener PR. Akt IV, Partieende und der minimatch-Pin sind auf `main`. |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
@@ -31,7 +31,7 @@ Bestätigungslauf: `bench/sf_match_m13_n40.log`, gleiches Protokoll wie `bench/s
 | **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline | released/getaggt |
 | **v1.9.0** | M1.1 (inkrementeller Hash + Quiesce-Fix) | released. Kanonische Stärke ist der Symfix-Log (+52), nicht die alte „+230“-Notiz |
 | **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Tactics + M3 Coach (Feenmuster, Figurennamen-Microcopy) + Daily Puzzle (deterministisch) | released/gemerged (PR #188, 2026-08-23) |
-| **main nach v2.0.0** | A11y-Labels, Vitest 5 (#212), TypeScript 7 Side-by-Side (#214), M1.3 64-bit-Zobrist (#215), Tagespuzzle als Sitzungseinstieg (#217/#219), Neues Spiel startet denselben Modus (#218) | auf `main`, kein neuer Tag |
+| **main nach v2.0.0** | A11y-Labels, Vitest 5 (#212), TypeScript 7 Side-by-Side (#214), M1.3 64-bit-Zobrist (#215), Tagespuzzle als Sitzungseinstieg (#217/#219), Neues Spiel startet denselben Modus (#218), Akt IV, Partieende über `handleGameEnd` | auf `main`, kein neuer Tag |
 
 `main` ist v2.0.0 plus die Zeile oben. Kein v2.1: der M1.3-Lauf ist neutral zur v1.9-Messung.
 
@@ -147,11 +147,7 @@ v2.0.0 ist das erste Release, das die 9×9-Identität ernst nimmt — nicht nur 
 
 ## Nächste Schritte
 
-1. Engine-Hebel bleiben zu. Zwei n=40-Läufe liegen beieinander, M1.3 ist etwa 0 cp, `illegal-ours` bleibt 0. Zuggenerierung, Bitboards und NNUE bleiben geparkt.
-2. ~~Nächster Schnitt ist das Tagespuzzle als Einstieg der Sitzung.~~ **Erledigt** in #217/#219 (`a9b1e0e`): `syncDailyPuzzleMenu()` platziert die Karte je nach gelöst/ungelöst.
-3. ~~Danach PGN-Export der gespielten Partie.~~ **Erledigt**: `#export-pgn-btn` (Copy + Download) über `js/utils/PGNGenerator.ts`, getestet in `tests/pgnGenerator*.test.ts`.
-4. ~~Offen: `js/types/` hat drei parallele Definitionsdateien (`core.ts`, `game.ts`, `ui.ts`) mit ~40 doppelten Typen.~~ **Erledigt (M6.1):** `js/types/` ist jetzt ein Definitions-Ort — `core.ts` (53 Export-Sätze) + das Blatt `gameMode.ts`; `game.ts`, `ui.ts`, `ai.ts`, `campaign.ts` (402 Zeilen) sind hineingemündet, 26 Importer umgestellt.
-5. ~~Offen: `js/matchRefs.ts` mit 28 % die niedrigste Coverage im Repo.~~ **Erledigt:** 28,2 % → 71,7 % Statements; der Track-A-Harness hat jetzt einen eigenen Protocol-Test.
+Erledigt und nicht wieder öffnen: Tagespuzzle-Einstieg (#217/#219, `a9b1e0e`), PGN-Export, `js/types/` in `core.ts`, `matchRefs.ts`-Coverage 71,7 %. Der offene Schritt steht am Ende dieser Datei.
 
 ## Lizenz
 
@@ -180,4 +176,6 @@ THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap inst
 
 Fix: benannte Konstante `SHADOW_MAP_TYPE = THREE.PCFShadowMap` mit Begründung; `tests/ui/3d/shadowMapType.test.ts` hält das fest; die unvollständigen `three`-Mocks in `tests/battleChess3D.{boost,coords,dynamic}.test.ts` kannten nur den alten Namen. Gefunden durch Mitschreiben der Browser-Konsole auf der Live-Seite — kein Test und kein Coverage-Werkzeug zeigte es. Browser-Gegenprobe: Live-Build warnt, lokaler Build nicht.
 
-**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. Akt IV ist umgesetzt: Kapitel 19–25 sind stille Mattaufgaben (`solution`, Sterne über `moves`, `tests/campaign/akt4Positions.test.ts`). Kapitel 26 ist raus. Talentkarten hängen am Schlag-Haken in `MoveExecutor` (`effectValue`, Prozent nur bei `n_meister` und `q_omnipraesenz`). Der GIF-Export zeichnet eine Kopie und fasst die Live-Stellung nicht an. Als Nächstes die Live-Seite durchspielen: Setup/Shop, das neue Kapitel 19, Opening-Trainer. Jede Konsolen-Abweichung am selben Tag als Regressionstest. Kein Tag v2.1. NNUE bleibt geparkt, M1.2 bleibt zu.
+**Seit 2026-10-21 auf `main`:** Akt IV ist committed, nicht mehr nur im Arbeitsbaum. Puzzle 12 und 13 hatten eine leere Reihe zu viel; der Zugmarker wird am String-Ende gelesen (`bbebe3c`), sonst wurde Weiß am Zug als Schwarz gelesen und der Tagespuzzle-Tipp öffnete kein Overlay. Zeitüberschreitung und die Remisregeln (50 Züge, Stellungswiederholung, zu wenig Material) laufen über `handleGameEnd` (`2f38b73`), wie Matt und Patt. Dependabot-Bumps bis three 0.187, Playwright 1.65, Actions 7 und tokio 1.54.1 sind gemergt. `minimatch` 10 unter ESLint und `typescript-estree` ist auf 11.0.5 gepinnt (`d1b1e41`); die 3er-Linie für `eslint-plugin-import` bleibt. Keine offene Dependabot-Meldung.
+
+**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. Als Nächstes die Live-Seite durchspielen: Setup/Shop, Kapitel 19, Opening-Trainer. Der Partieende-Fix soll dabei dieselbe Nachspiel-Ansicht zeigen wie ein Matt. Jede Konsolen-Abweichung am selben Tag als Regressionstest. Kein Tag v2.1. NNUE bleibt geparkt, M1.2 bleibt zu.

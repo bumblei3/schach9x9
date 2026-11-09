@@ -190,7 +190,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Aktuell: v2.0.0** — M2 komplett (Kampagne Akt II Kap. 7–12, Fairy-Puzzles, Perks, Feen-Talente) + M3 Coach-Kern (Feenmuster-Detektion, Tutor spricht 9×9). NNUE-Track nach negativem Gate (−132 Elo, n=80) geparkt. Offen: M3-Rest (Auto-Hint, Lehrbuch).
+**Aktuell: v2.0.0** (`main` `d1b1e41`, 2026-11-10) — M2 und M3 sind im Release. Auf `main` liegen zusätzlich Akt IV (Kapitel 19–25), der Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren, kein Tag v2.1. Nächster Schritt: Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
 
 **Bereits released (in v1.1.0–v1.3.0):**
 
@@ -231,18 +231,9 @@ Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RE
 - [✅] **Variant-Tree Panel** — Top-Engine-Kandidaten + Best-Reply-Fortsetzung
   nach Solo-Spielende (`buildVariantTree` + `#variant-tree`, PR #144)
 
-**Nächste Schritte (offen) — Details in [`docs/ROADMAP.md`](docs/ROADMAP.md):**
+**Nächste Schritte — Details in [`docs/ROADMAP.md`](docs/ROADMAP.md) und [`STATUS.md`](STATUS.md):**
 
-- **Engine-Stärkung (Such-*parameter*):** feature-complete / geparkt.
-  H3, H-Q1, LMR-Skala, IIR-Skip, H4, H-P1 (revertiert). Eval-Terme
-  (mobility/pawn/tempo/eg-passpawn) auf n=40 **verworfen**.
-  _Offen ist nicht „noch ein Knob“, sondern **M1 Suche skaliert**
-  (inkrementeller Zobrist) und **M0 Freeze** der Gewinner
-  `LMR_BASE_DEPTH=4` + `NULL_MOVE_R=1`._
-  - **Absolute Stärke (Track B):** vs SF Elo 1400 gemessen. Best: Score
-    0.175 / ≈ −269 (d5, LMR4, NMP R=1, n=40). Nicht mehr „unbekannt“.
-  - **Mobility-Lever:** ❌ **abgelehnt** (chore #151).
-  - **NNUE:** ⏸️ **geparkt** (2026-07-17).
+- **Engine:** eingefroren. M0 (v1.8.0) und M1.1 (v1.9.0, inkrementeller Zobrist) sind released. Kanonische Stärke ist der Symfix-Lauf, +52 Elo, nicht die v1.8-Zeile −269. M1.3 ist neutral (+35). **NNUE** ist seit dem 23. August 2026 geparkt (−132 Elo, n=80). Mobility-Lever abgelehnt (chore #151).
 - **H-P1 — PSQT für 9x9 zentrieren:** ↩️ **reverted 2026-07-31.**
   `buildCenteredPST` blieb als Experiment-Helper, Produktion nutzt wieder
   handgetunte Tabellen. Gate: `bench/ABSOLUTE_STRENGTH_BASELINE.md`

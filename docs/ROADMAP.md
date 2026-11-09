@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-10-21 · `main` `1d8a658` · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-11-10 · `main` `d1b1e41` · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -30,16 +30,16 @@ Das Produkt ist **feature-reich**. Billige Eval-Terme sind aufgebraucht (`bench/
 ### Was bereits gut ist
 
 - **Regeln:** 9×9 + Standard-8×8 (Rochade, EP, Unterpromotion) in derselben Integer-Engine.
-- **Modi:** Classic 9×9, Standard 8×8, Setup/Shop, Upgrade, Cross, Kampagne Akt II, Fairy-Tactics, Daily Puzzle, Opening-Trainer, Analyse, 3D, Tutor mit Figurennamen.
+- **Modi:** Classic 9×9, Standard 8×8, Setup/Shop, Upgrade, Cross, Kampagne Akt II und Akt IV (Kapitel 19–25), Fairy-Tactics, Daily Puzzle, Opening-Trainer, Analyse, 3D, Tutor mit Figurennamen.
 - **KI-Infrastruktur:** Alpha-Beta + LMR/NMP/ProbCut/QSearch/TT, inkrementeller Zobrist, 64-bit-Hash auf `main`, 5 Persönlichkeiten, Worker, Track-A (`matchRefs`) und Track-B (`match:stockfish`).
 - **Solo-UX:** Tutorial (inkl. Nachtreiter und Upgrade-Pfad), Replay, Position-teilen, Variant-Tree, Heatmap, Post-Game-Analyse, PWA/Offline, Sound-Settings persistent, Three.js self-hosted.
-- **Qualität:** CI auf #215 grün (3070 Tests im Commit `80171dd`). A11y-Regeln `color-contrast`, `label`, `select-name`, `nested-interactive` sind an. TypeScript 7 läuft über den Side-by-Side-Alias (#214).
+- **Qualität:** Der letzte gezählte CI-Referenzwert ist #215 (3070 Tests, `80171dd`). Für `d1b1e41` ist die Zahl nicht neu gezählt. A11y-Regeln `color-contrast`, `label`, `select-name`, `nested-interactive` sind an. TypeScript 7 läuft über den Side-by-Side-Alias (#214).
 
 ### Wo es wirklich hakt
 
 1. **Die Stärkezahl ist ein Lauf mit breitem Intervall.** Kanonisch: `bench/sf_match_m1_symfix_n40.log`, 17–12–11, Score 0.575, +52 Elo gegen Stockfish 1400, Intervall etwa −55..+171, 0 `illegal-ours`. Die Zeile „−269 Elo“ weiter unten ist v1.8.0, nicht der Ist-Stand.
 2. **M1.3 ist neutral.** `bench/sf_match_m13_n40.log`: 19–6–15, Score 0.550, +35 Elo, Intervall etwa −73..+151, 0 `illegal-ours`. Gegen +52 aus dem Symfix-Lauf ist das Rauschen.
-3. **Der Wiederkommen-Anker ist jetzt der Einstieg.** War bis `fb20831` offen; in #217/#219 (`a9b1e0e`) verschiebt `syncDailyPuzzleMenu()` die Tagespuzzle-Karte je nach gelöst/ungelöst an die Sitzungsposition. E2E-Assert in `e2e/daily-puzzle.spec.ts`. Damit ist dieser Schnitt erledigt — der nächste ist strukturell (siehe Milestones).
+3. **Der Wiederkommen-Anker ist der Einstieg.** In #217/#219 (`a9b1e0e`) verschiebt `syncDailyPuzzleMenu()` die Tagespuzzle-Karte je nach gelöst/ungelöst. M6 ist erledigt. Der nächste Schritt ist das Durchspielen der Live-Seite, nicht ein neuer Engine-Hebel.
 
 ### Track B — gemessene Hebel (n=40, gleiche Flags)
 
@@ -179,7 +179,7 @@ MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 gemessen: 0.550 / +35, n
 | 4.2 | Three.js self-hosten (Paket 0.185 vs CDN 0.160 im Import-Map) | Import-Map ohne jsDelivr; CSP ohne fremdes `script-src` für Three |
 | 4.3 | Sound-Settings persistieren (`sounds.ts` löscht den Key im Konstruktor und lädt danach) | Volume/Mute überlebt Reload |
 | 4.4 | 3D: Capture-Juice + letzter Zug sichtbar ohne Overlay-Raten | Visueller Playwright-Snapshot |
-| 4.5 | Deutsche Microcopy-Lücken (Puzzle-Generator ist noch englisch: „White to move. Find the checkmate…“) | Kein User-facing English außer Eigennamen |
+| 4.5 | ~~Deutsche Microcopy-Lücken (Puzzle-Generator war englisch)~~ **Erledigt.** Der Generator sagt „Weiß am Zug. Finde das Matt…“ | Kein User-facing English außer Eigennamen |
 | 4.6 | **PWA/Offline tatsächlich aktiv schalten** | Registrierung läuft (Produktions-Build, nicht im Dev-Server, nicht unter Automation); SW-Test gegen das ausgelieferte File |
 
 **Stand M4 (2026-10-20):** 4.1–4.6 erledigt und verifiziert. 4.6 war als „PWA/Offline-fähig“ behauptet, aber der Registrierungsaufruf steckte kommentiert in `main.ts` — `public/service-worker.js` wurde nur nach `dist/` kopiert und nie aktiviert. Behoben und über PR #219 gemergt (`f491a2b`): `js/serviceWorkerRegistration.ts` mit Guard auf Produktions-Build + `navigator.webdriver` (Playwright/Lighthouse) + `?disable-sw`, `tests/serviceWorker.test.ts` gegen das ausgelieferte Worker-File, toter Doppelgänger `service-worker.ts` gelöscht.
@@ -197,7 +197,7 @@ Erst anfassen, wenn M1 das Score-Ziel (0.30) **oder** klaren NPS-Beweis geliefer
 | NNUE | Pipeline steht, Netze bei ~72% Agreement | GEMESSEN 2026-08-23: Gate −132 Elo → geparkt |
 | TypeScript 7 | — | erledigt #214 |
 | Desktop-Hülle (Tauri) | M4 a11y + PWA stabil | Unnötig für Web-first |
-| GIF/PGN-Replay-Export | M3 Coach steht | Nice-to-have |
+| GIF/PGN-Replay-Export | — | erledigt: PGN-Export und GIF auf einer Stellungskopie |
 
 ---
 
@@ -229,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** `main` ist `1d8a658`. Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben; Kapitel 26 gibt es nicht. Talent-Texte entsprechen dem Schlag-Haken. Der GIF-Export läuft auf einer Kopie der Stellung. Danach Dogfood: Setup/Shop, Kapitel 19, Opening-Trainer. Kein Tag v2.1.
+**Nächster konkreter Schritt:** `main` ist `d1b1e41` (2026-11-10). Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben auf `main`; Kapitel 26 gibt es nicht. Zeitüberschreitung und die Remisregeln laufen über `handleGameEnd`. Danach Dogfood: Setup/Shop, Kapitel 19, Opening-Trainer. Kein Tag v2.1.
 
 ---
 
@@ -238,19 +238,13 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
 Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand entscheidet:
 
 1. **Zeitbudget KI:** **8 s gemessen bestätigt** (10s: −44) — abgehakt.
-2. **Nach v2.0.0:** M2/M3/M4 sind im Release bzw. auf `main` (A11y-Regeln an, TS 7, M1.3). **NNUE bleibt geparkt** (−132 Elo vs PST, n=80). Offener Engine-Rest ist nur noch M1.2, und nur bei `illegal-ours`. Die Richtung nach dem M1.3-Lauf steht in `STATUS.md`.
+2. **Nach v2.0.0:** M2/M3/M4 sind im Release bzw. auf `main` (A11y-Regeln an, TS 7, M1.3). **NNUE bleibt geparkt** (−132 Elo vs PST, n=80). **M1.2 ist zu:** beide Messläufe haben 0 `illegal-ours`. Die Richtung steht in `STATUS.md`.
 3. **Ist 8×8-Elo die Nordstern-Metrik?** Ja als *Regression-Gate*. Spielerwert kommt aus M2/M3.
 
 ---
 
 ## Release-Linie
 
-| Version | Inhalt |
-| ------- | ------ |
-| **v1.7.0** | Eval-Patch, Replay, Share-Link, 8×8-Regeln — **released** |
-| **v1.8.0** | M0: LMR4 + NMP R=1, aufgeräumte Knobs, dokumentierte Baseline — **released/getaggt** |
-| **v1.9.0** | M1.1 + NNUE-Pipeline (Gate negativ, geparkt) — **released** |
-| **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Coach — **released** |
-| **main (2026-10-20)** | v2.0.0 + Vitest 5 + TS 7 (#214) + M1.3 (#215, gemessen neutral) + Tagespuzzle-Einstieg (#217/#219) + Rematch (#218) + Sound-Settings-Persistenz + CSP-Cleanups + analysis-live E2E-Fix. Kein neuer Tag |
+Die Tabelle steht in [`STATUS.md`](../STATUS.md). Kurz: Tag `v2.0.0`, `main` ist `d1b1e41`, kein v2.1.
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.

@@ -14,7 +14,7 @@ den Spielerwert erhöht. Ohne Daten ist jede weitere Verbesserung Spekulation
 |---|---------|------|-----------|
 | 1 | Classic 9×9 (3 Runden) | Regelmäßigkeit spüren | Kommentar-Journal |
 | 2 | Standard 8×8 (3 Runden) | Baseline; 9×9 vergleichen | Kommentar-Journal |
-| 3 | Kampagne Akt IV, Kapitel 19–24 | Content-Tiefe testen | Anzahl gespielte Kapitel, Hunger |
+| 3 | Kampagne Akt IV, Kapitel 19–25 | Content-Tiefe testen | Anzahl gespielte Kapitel, Hunger |
 | 4 | Daily Puzzle oder Setup-Modus | Feeleinzelung testen | Lösungszahl, Zeit |
 | 5 | Replay-GIF-Export nutzen | UI-Flow testen | Kommentar zu Export |
 | 6 | (optional) 3D-Modus anschauen | 3D-Bootszeit + Stabilität | Kommentar |
