@@ -205,7 +205,10 @@ export function updateBestMoves(_game: Game, _tutorController: unknown): void {
 /**
  * Shows tutor suggestions in the UI
  */
-export async function showTutorSuggestions(game: Game): Promise<void> {
+export async function showTutorSuggestions(
+  game: Game,
+  providedHints?: TutorHint[] | null
+): Promise<void> {
   // const isSetup = game.phase && String(game.phase).startsWith('SETUP');
   // Allow empty hints to pass through to UI so it can show "No suggestions" message
   // if (
@@ -213,7 +216,11 @@ export async function showTutorSuggestions(game: Game): Promise<void> {
   //   (!game.bestMoves || (Array.isArray(game.bestMoves) && game.bestMoves.length === 0))
   // )
   //   return;
-  await showTutorSuggestionsUI(game, game.bestMoves as TutorHint[] | null | undefined);
+  const hints =
+    providedHints && providedHints.length > 0
+      ? providedHints
+      : (game.bestMoves as TutorHint[] | null | undefined);
+  await showTutorSuggestionsUI(game, hints);
 }
 
 /**
