@@ -44,7 +44,11 @@ export class PuzzleGenerator {
         } as Piece;
       }
     }
-    const turn: Player = str[162] === 'w' ? 'white' : 'black';
+    // Turn marker is the final character. A fixed index of 162 treats an
+    // extra empty rank (the string is 18 chars too long) as Black to move.
+    const marker = str.length > 0 ? str[str.length - 1] : '';
+    const turnChar = marker === 'w' || marker === 'b' ? marker : str[162];
+    const turn: Player = turnChar === 'w' ? 'white' : 'black';
     return { board, turn };
   }
 

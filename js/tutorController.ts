@@ -38,6 +38,7 @@ import {
 import type { Game } from './gameEngine.js';
 import type { MoveRecord } from './tutor/MoveAnalyzer.js';
 import type { SetupTemplate } from './tutor/HintGenerator.js';
+import type { TutorHint } from './ui/TutorUI.js';
 
 interface TutorControllerLike {
   showBlunderWarning(_analysis: MoveExplanation, _callback: () => void): void;
@@ -90,16 +91,20 @@ export class TutorController implements TutorControllerLike {
     );
   }
 
-  public async showTutorSuggestions(): Promise<void> {
+  public async showTutorSuggestions(providedHints?: TutorHint[] | null): Promise<void> {
+    if (providedHints && providedHints.length > 0) {
+      return showTutorSuggestions(this.game, providedHints);
+    }
     return showTutorSuggestions(this.game);
   }
 
   public async showHint(): Promise<void> {
-    // Force calculation if no hints available
+    // Force calculation if no hints available. Pass the result through so the
+    // overlay does not run a second full search before it can open.
     if (!this.game.bestMoves || this.game.bestMoves.length === 0) {
       this.game.bestMoves = (await this.getTutorHints()) as Game['bestMoves'];
     }
-    await this.showTutorSuggestions();
+    await this.showTutorSuggestions(this.game.bestMoves as TutorHint[]);
   }
 
   public getPieceName(type: string): string {

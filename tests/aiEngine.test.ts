@@ -8,6 +8,7 @@ import {
   getBestMoveDetailed,
   evaluatePosition,
   getAllLegalMoves,
+  getTopMoves,
   convertBoardToInt,
 } from '../js/aiEngine';
 import { createJsSearch } from '../js/search';
@@ -51,6 +52,26 @@ describe('AI Engine', () => {
 
       const score = await evaluatePosition(board, 'white');
       expect(score).toBeGreaterThan(300);
+    });
+  });
+
+  describe('getTopMoves', () => {
+    test('returns within the caller time budget instead of the 8s engine cap', async () => {
+      board[4][4] = { type: 'q', color: 'white', hasMoved: false };
+      board[4][0] = { type: 'q', color: 'black', hasMoved: false };
+      board[6][4] = { type: 'r', color: 'white', hasMoved: false };
+      board[2][4] = { type: 'r', color: 'black', hasMoved: false };
+      board[8][4] = { type: 'k', color: 'white', hasMoved: false };
+      board[0][4] = { type: 'k', color: 'black', hasMoved: false };
+
+      const started = performance.now();
+      const moves = await getTopMoves(board, 'white', 3, 6, 400);
+      const elapsed = performance.now() - started;
+
+      expect(moves.length).toBeGreaterThan(0);
+      // 400ms budget, checked every 256 nodes, plus one follow-up candidate.
+      // An uncapped depth-6 search hits the 8s engine limit.
+      expect(elapsed).toBeLessThan(3000);
     });
   });
 

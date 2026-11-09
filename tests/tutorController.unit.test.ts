@@ -170,4 +170,13 @@ describe('TutorController', () => {
     expect(HintGenerator.getTutorHints).toHaveBeenCalled();
     expect(HintGenerator.showTutorSuggestions).toHaveBeenCalled();
   });
+
+  test('showHint reuses the computed hints instead of searching again', async () => {
+    const hints = [{ notation: 'a4', score: 12 }];
+    vi.mocked(HintGenerator.getTutorHints).mockResolvedValueOnce(hints as never);
+    game.bestMoves = [];
+    await tutorController.showHint();
+    expect(HintGenerator.getTutorHints).toHaveBeenCalledTimes(1);
+    expect(HintGenerator.showTutorSuggestions).toHaveBeenCalledWith(game, hints);
+  });
 });

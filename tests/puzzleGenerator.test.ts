@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { PuzzleGenerator } from '../js/puzzleGenerator.js';
 import { createEmptyBoard } from '../js/gameEngine.js';
+import { puzzleManager } from '../js/puzzleManager.js';
 
 describe('PuzzleGenerator', () => {
   test('boardToString and stringToBoard should be inverse', () => {
@@ -17,6 +18,25 @@ describe('PuzzleGenerator', () => {
     expect(newBoard[4][4]!.color).toBe('white');
     expect(newBoard[0][0]!.type).toBe('r');
     expect(newBoard[0][0]!.color).toBe('black');
+  });
+
+  test('an extra empty rank before the turn marker does not flip the side to move', () => {
+    const board = createEmptyBoard();
+    board[0][0] = { type: 'k', color: 'black' };
+    const padded =
+      PuzzleGenerator.boardToString(board, 'white').slice(0, -1) + '..'.repeat(9) + 'w';
+    const decoded = PuzzleGenerator.stringToBoard(padded);
+    expect(decoded.turn).toBe('white');
+    expect(decoded.board[0][0]?.type).toBe('k');
+  });
+
+  test('every embedded setupStr is 81 squares plus its turn marker', () => {
+    for (const puzzle of puzzleManager.getPuzzles()) {
+      if (!puzzle.setupStr) continue;
+      expect(puzzle.setupStr.length, puzzle.id).toBe(163);
+      const decoded = PuzzleGenerator.stringToBoard(puzzle.setupStr);
+      expect(decoded.turn, puzzle.id).toBe(puzzle.setupStr.endsWith('b') ? 'black' : 'white');
+    }
   });
 
   test('should find Mate in 1', () => {

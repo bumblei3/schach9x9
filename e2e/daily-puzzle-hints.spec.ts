@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { E2EHelper } from './helpers/E2EHelper.js';
+import { E2EHelper, domClick } from './helpers/E2EHelper.js';
 
 /**
  * Verifies the roadmap feature "Daily Puzzle: Engine-Zugvorschläge + Varianten".
@@ -16,10 +16,13 @@ test.describe('Daily Puzzle: engine hints / move suggestions (browser)', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', msg => console.log(`[PAGE LOG] ${msg.type()}: ${msg.text()}`));
     helper = new E2EHelper(page);
-    await helper.goto();
+    // `e2e` forces the shallow tutor budget. Without it a full-depth hint
+    // search can outlive this test on a busy CI runner.
+    await helper.goto('e2e');
   });
 
   test('hint control surfaces engine move suggestions during a daily puzzle', async ({ page }) => {
+    test.setTimeout(60000);
     await helper.startGame('daily-puzzle');
 
     // Today's position is already on the board. The catalog stays closed.
@@ -35,21 +38,13 @@ test.describe('Daily Puzzle: engine hints / move suggestions (browser)', () => {
           (window as unknown as { game: { mode: string } }).game.mode === 'daily-puzzle')
     );
 
-    // Trigger a hint. Prefer the visible button; fall back to the 'h' shortcut.
-    const hintBtn = page.locator('#hint-btn');
-    if (await hintBtn.isVisible().catch(() => false)) {
-      await hintBtn.click();
-    } else {
-      await page.evaluate(() => {
-        window.dispatchEvent(
-          new KeyboardEvent('keydown', { key: 'h', code: 'KeyH', bubbles: true })
-        );
-      });
-    }
+    // DOM click: the puzzle panel can cover the action bar, and a window-level
+    // keydown never reaches the document listener that presses #hint-btn.
+    await domClick(page, '#hint-btn');
 
     // The KI-Tipps overlay must appear and list at least one move suggestion.
     const tutorOverlay = page.locator('#tutor-overlay');
-    await expect(tutorOverlay).toBeVisible({ timeout: 20000 });
+    await expect(tutorOverlay).toBeVisible({ timeout: 30000 });
     await expect(tutorOverlay).not.toHaveClass(/hidden/);
 
     const hintsBody = page.locator('#tutor-hints-body');

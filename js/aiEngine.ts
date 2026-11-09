@@ -330,10 +330,11 @@ async function runJsSearch(
   turnColor: Player,
   maxDepth: number,
   _elo: number,
-  personality: string
+  personality: string,
+  timeLimitMs?: number
 ): Promise<JsSearchResult> {
   const jsSearch = createJsSearch({ personality: personality as EvalConfig['personality'] });
-  const result = await jsSearch.run(board, turnColor, maxDepth);
+  const result = await jsSearch.run(board, turnColor, maxDepth, undefined, timeLimitMs);
   jsNodesEvaluated = result.nodes;
   return result;
 }
@@ -393,12 +394,16 @@ export async function getTopMoves(
   // 1-ply reduction because several candidates are searched in sequence, but
   // the tutor still ends up at least as deep as the opponent (bonus is +2).
   const loopDepth = Math.max(2, searchDepth - 1);
-  // Per-candidate time budget scales with the overall budget across candidates.
-  const perCandidateMs = Math.max(2500, Math.floor(maxTimeMs / 2));
+  // Share the caller's budget across candidates. The old floor of 2500ms was
+  // passed into runJsSearch as the unused elo argument, so every candidate
+  // ran until the 8s engine cap and a hint could outlive maxTimeMs.
+  const sliceMs = Math.min(maxTimeMs, Math.max(250, Math.floor(maxTimeMs / 2)));
   for (const candidate of topCandidates) {
-    if (performance.now() - startTime > maxTimeMs) break;
+    const remaining = maxTimeMs - (performance.now() - startTime);
+    if (remaining < 200) break;
+    const budget = Math.min(sliceMs, remaining);
     try {
-      const jsResult = await runJsSearch(board, turnColor, loopDepth, perCandidateMs, 'NORMAL');
+      const jsResult = await runJsSearch(board, turnColor, loopDepth, 0, 'NORMAL', budget);
       if (jsResult) moveScores.push({ move: candidate.move, score: jsResult.score });
       else moveScores.push({ move: candidate.move, score: candidate.score });
     } catch {

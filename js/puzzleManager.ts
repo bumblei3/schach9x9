@@ -282,7 +282,6 @@ export class PuzzleManager {
           '..'.repeat(4) +
           'wr' +
           '..'.repeat(4) +
-          '..'.repeat(9) +
           'w',
         fen: '',
         solution: [{ from: { r: 7, c: 4 }, to: { r: 0, c: 4 } }],
@@ -308,7 +307,6 @@ export class PuzzleManager {
           '..'.repeat(9) +
           'wr' +
           '..'.repeat(8) +
-          '..'.repeat(9) +
           'w',
         fen: '',
         solution: [{ from: { r: 7, c: 0 }, to: { r: 0, c: 0 } }],

@@ -374,13 +374,17 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       board: IntBoard,
       turnColor: 'white' | 'black',
       maxDepth: number,
-      rules?: RuleState
+      rules?: RuleState,
+      timeLimitMs?: number
     ): Promise<JsSearchResult> {
       if (rules) setRules(rules);
       // Snapshot so a mid-search abort cannot leak partial rights (defensive).
       const rulesAtEntry = { ...getRules() };
       const color = turnColor === 'white' ? COLOR_WHITE : COLOR_BLACK;
       const start = performance.now();
+      // Caller budget (tutor hints). Omitted keeps the measured 8s engine cap.
+      const timeCap =
+        typeof timeLimitMs === 'number' && timeLimitMs > 0 ? timeLimitMs : MAX_SEARCH_TIME;
       let nodes = 0;
       const tt = new TranspositionTable();
 
@@ -495,7 +499,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
         hash: Hash64 = { low: 0, high: 0 }
       ): { score: number; bestMove: Move | null } {
         nodes++;
-        if (nodes % 256 === 0 && performance.now() - start > MAX_SEARCH_TIME) {
+        if (nodes % 256 === 0 && performance.now() - start > timeCap) {
           return { score: evaluate(b, color, evalConfig), bestMove: null };
         }
 
@@ -817,7 +821,7 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       const rootHash = computeZobristHash(board, color);
 
       for (let d = 1; d <= maxDepth; d++) {
-        if (performance.now() - start > MAX_SEARCH_TIME * 0.8) break;
+        if (performance.now() - start > timeCap * 0.8) break;
 
         let prevScore = d === 1 ? 0 : bestResult.score;
         if (Math.abs(prevScore) > MATE_SCORE - 200) prevScore = 0;
@@ -867,12 +871,12 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
           lastScores.length >= 3 &&
           Math.abs(lastScores[lastScores.length - 1] - lastScores[lastScores.length - 2]) < 10 &&
           Math.abs(lastScores[lastScores.length - 2] - lastScores[lastScores.length - 3]) < 10 &&
-          performance.now() - start < MAX_SEARCH_TIME * 0.5;
+          performance.now() - start < timeCap * 0.5;
 
         // Only promote a result that actually carries a move. A null-move or
         // time-abort cutoff at the root can return bestMove === null; never let
         // that clobber a previously good (move-bearing) iteration.
-        if (result.bestMove && performance.now() - start <= MAX_SEARCH_TIME) {
+        if (result.bestMove && performance.now() - start <= timeCap) {
           bestResult = result;
         }
 

@@ -37,7 +37,7 @@ export class E2EHelper {
   /**
    * Navigates to the home page and wait for app to be ready.
    */
-  async goto() {
+  async goto(extraQuery = '') {
     this.page.on('console', msg => {
       console.log(`[PAGE LOG] ${msg.type()}: ${msg.text()}`);
     });
@@ -47,7 +47,8 @@ export class E2EHelper {
       // board/shop and intercepts all pointer events in E2E runs.
       localStorage.setItem('schach9x9_tutorial_seen', '1');
     });
-    await this.page.goto('/?disable-sw');
+    const url = extraQuery ? `/?disable-sw&${extraQuery}` : '/?disable-sw';
+    await this.page.goto(url);
     await this.page.waitForFunction(() => document.body.classList.contains('app-ready'));
     await expect(this.page.locator('#main-menu')).toBeVisible();
   }
