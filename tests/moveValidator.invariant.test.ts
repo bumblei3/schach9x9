@@ -160,6 +160,18 @@ describe('MoveValidator.checkDraw — gameController save dispatch + phase', () 
     expect(saveSpy).toHaveBeenCalledWith('draw', null);
   });
 
+  test('50-move rule prefers handleGameEnd over a direct statistics save', () => {
+    withDom();
+    const g = emptyGame();
+    g.halfMoveClock = 100;
+    const handleGameEnd = vi.fn();
+    const saveSpy = vi.fn();
+    (g as any).gameController = { handleGameEnd, saveGameToStatistics: saveSpy };
+    expect(checkDraw(g)).toBe(true);
+    expect(handleGameEnd).toHaveBeenCalledWith('draw', null);
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+
   test('no draw condition: returns false and leaves phase unchanged', () => {
     withDom();
     const g = emptyGame();

@@ -172,6 +172,14 @@ describe('TimeManager', () => {
       (timeManager as any).handleTimeout('black');
       expect(mockController.saveGameToStatistics).toHaveBeenCalledWith('loss', 'black');
     });
+
+    test('uses handleGameEnd when the controller provides it', () => {
+      mockController.handleGameEnd = vi.fn();
+      mockGame.playerColor = 'white';
+      (timeManager as any).handleTimeout('white');
+      expect(mockController.handleGameEnd).toHaveBeenCalledWith('win', 'black');
+      expect(mockController.saveGameToStatistics).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateClockVisibility', () => {

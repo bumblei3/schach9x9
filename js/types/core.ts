@@ -244,6 +244,7 @@ export interface GameLike {
 
 export interface GameControllerInterface {
   saveGameToStatistics?: (_result: string, _color: Player) => void;
+  handleGameEnd?: (_result: 'win' | 'draw', _winnerColor: Player | null) => void;
   startPuzzleMode?: (_index?: number) => void;
   loadPuzzle?: (_index: number) => void;
   startCampaignLevel?: (_levelId: string) => void;

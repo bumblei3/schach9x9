@@ -1,7 +1,28 @@
 import { PHASES, PIECE_VALUES } from '../gameEngine.js';
 import * as UI from '../ui.js';
 import type { Game } from '../gameEngine.js';
+import type { Player } from '../types/core.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
+
+/**
+ * Rule-draws already painted the overlay. Hand the result to the same
+ * end-of-game path as mate and stalemate. A controller that only knows
+ * saveGameToStatistics still gets the stat line.
+ */
+function recordDraw(game: Game): void {
+  const controller = game.gameController as
+    | {
+        handleGameEnd?: (_result: 'win' | 'draw', _winner: Player | null) => void;
+        saveGameToStatistics?: (_result: string, _winner: string | null) => void;
+      }
+    | undefined;
+  if (!controller) return;
+  if (typeof controller.handleGameEnd === 'function') {
+    controller.handleGameEnd('draw', null);
+    return;
+  }
+  controller.saveGameToStatistics?.('draw', null);
+}
 
 /**
  * Checks if the game is a draw based on various rules
@@ -20,14 +41,7 @@ export function checkDraw(game: Game): boolean {
     if (winnerText) winnerText.textContent = 'Unentschieden (50-Züge-Regel)';
     if (overlay) overlay.classList.remove('hidden');
 
-    // Save to statistics
-    if (game.gameController) {
-      (
-        game.gameController as unknown as {
-          saveGameToStatistics: (_result: string, _winner: string | null) => void;
-        }
-      ).saveGameToStatistics('draw', null);
-    }
+    recordDraw(game);
     return true;
   }
 
@@ -43,14 +57,7 @@ export function checkDraw(game: Game): boolean {
     if (winnerText) winnerText.textContent = 'Unentschieden (Stellungswiederholung)';
     if (overlay) overlay.classList.remove('hidden');
 
-    // Save to statistics
-    if (game.gameController) {
-      (
-        game.gameController as unknown as {
-          saveGameToStatistics: (_result: string, _winner: string | null) => void;
-        }
-      ).saveGameToStatistics('draw', null);
-    }
+    recordDraw(game);
     return true;
   }
 
@@ -64,14 +71,7 @@ export function checkDraw(game: Game): boolean {
     if (winnerText) winnerText.textContent = 'Unentschieden (Ungenügendes Material)';
     if (overlay) overlay.classList.remove('hidden');
 
-    // Save to statistics
-    if (game.gameController) {
-      (
-        game.gameController as unknown as {
-          saveGameToStatistics: (_result: string, _winner: string | null) => void;
-        }
-      ).saveGameToStatistics('draw', null);
-    }
+    recordDraw(game);
     return true;
   }
 

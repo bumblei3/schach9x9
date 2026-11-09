@@ -15,6 +15,7 @@ export interface TimeControlMode {
 
 export interface GameControllerInterface {
   saveGameToStatistics?: (_result: string, _color: Player) => void;
+  handleGameEnd?: (_result: 'win' | 'draw', _winnerColor: Player | null) => void;
 }
 
 const TIME_CONTROLS: Record<string, TimeControlMode> = {
@@ -113,10 +114,14 @@ export class TimeManager {
         overlay.classList.remove('hidden');
       }
     }
-    soundManager.playGameOver(false);
+    const winner: Player = loserColor === 'white' ? 'black' : 'white';
+    soundManager.playGameOver(winner === (this.game.playerColor || 'white'));
 
-    // Save to statistics via gameController
-    if (this.gameController && this.gameController.saveGameToStatistics) {
+    // Same end path as mate: stats, leaderboard, achievements, post-game.
+    // Fall back to the stat line when the controller has no handleGameEnd.
+    if (this.gameController?.handleGameEnd) {
+      this.gameController.handleGameEnd('win', winner);
+    } else if (this.gameController?.saveGameToStatistics) {
       this.gameController.saveGameToStatistics('loss', loserColor);
     }
   }
