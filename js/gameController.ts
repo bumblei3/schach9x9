@@ -131,7 +131,7 @@ export class GameController {
     // its dynamic imports. A stamp from before those awaits keeps that click.
     const mainMenu = document.getElementById('main-menu');
     if (mainMenu) {
-      const current = mainMenu.getAttribute('data-menu-opened-at') ?? '';
+      const current = mainMenu.getAttribute?.('data-menu-opened-at') ?? '';
       if (menuOpenedAt === undefined || current === menuOpenedAt) {
         mainMenu.classList.remove('active');
       }
