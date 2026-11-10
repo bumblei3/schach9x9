@@ -45,6 +45,26 @@ test.describe('Opening-Trainer Mode (browser)', () => {
     expect(boardBox!.width).toBeGreaterThan(containerBox!.width * 0.75);
   });
 
+  test('wide screen grows the board and keeps the action labels readable', async ({ page }) => {
+    await page.setViewportSize({ width: 2560, height: 1080 });
+    await helper.startGame('classic');
+
+    const boardBox = await page.locator('#board').boundingBox();
+    const barBox = await page.locator('.action-bar').boundingBox();
+    expect(boardBox).not.toBeNull();
+    expect(barBox).not.toBeNull();
+    expect(boardBox!.width).toBeGreaterThan(640);
+    expect(barBox!.y).toBeGreaterThanOrEqual(boardBox!.y + boardBox!.height - 2);
+    expect(barBox!.x).toBeGreaterThanOrEqual(boardBox!.x - 8);
+    expect(barBox!.x + barBox!.width).toBeLessThanOrEqual(boardBox!.x + boardBox!.width + 80);
+
+    const clipped = await page.locator('#undo-btn .action-label').evaluate(el => {
+      return el.scrollWidth > el.clientWidth + 1;
+    });
+    expect(clipped).toBe(false);
+    await expect(page.locator('#undo-btn .action-label')).toHaveText('Rückgängig');
+  });
+
   test('two-click move flow triggers trainer feedback', async ({ page }) => {
     await helper.startGame('opening-trainer');
 
