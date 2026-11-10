@@ -55,6 +55,8 @@ export class App {
 
   public async init(initialPoints: number, mode: string = 'setup'): Promise<void> {
     logger.info('App initializing with', initialPoints, 'points in mode:', mode);
+    const menuOpenedAt =
+      document.getElementById('main-menu')?.getAttribute('data-menu-opened-at') ?? '';
 
     // Toggle setup-mode class for CSS styling immediately to unblock E2E tests
     if (mode === 'setup') {
@@ -151,7 +153,7 @@ export class App {
     this.applyDelegates();
 
     // Initialize GameController logic
-    this.game.gameController!.initGame(initialPoints, mode as GameMode);
+    this.game.gameController!.initGame(initialPoints, mode as GameMode, menuOpenedAt);
 
     // Broadcast board geometry to AI workers (8×8 vs 9×9 + cross shape).
     // Workers default to 9×9; without this, standard8x8 AI uses wrong move gen.

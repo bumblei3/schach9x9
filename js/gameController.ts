@@ -122,10 +122,20 @@ export class GameController {
     (this.currentModeStrategy as CampaignModeStrategy).startLevel(this.game, this, levelId);
   }
 
-  initGame(initialPoints: number, mode: GameMode | 'puzzle' = 'setup'): void {
-    // Ensure Main Menu is hidden when starting any game
+  initGame(
+    initialPoints: number,
+    mode: GameMode | 'puzzle' = 'setup',
+    menuOpenedAt?: string
+  ): void {
+    // Hide the menu unless the player reopened it while App.init was awaiting
+    // its dynamic imports. A stamp from before those awaits keeps that click.
     const mainMenu = document.getElementById('main-menu');
-    if (mainMenu) mainMenu.classList.remove('active');
+    if (mainMenu) {
+      const current = mainMenu.getAttribute('data-menu-opened-at') ?? '';
+      if (menuOpenedAt === undefined || current === menuOpenedAt) {
+        mainMenu.classList.remove('active');
+      }
+    }
 
     // Select Strategy
     if (mode === 'setup' || mode === 'upgrade') {

@@ -752,6 +752,15 @@ export class DOMHandler {
     });
   }
 
+  private menuOpenSeq = 0;
+
+  /** Stamp the open so a game init that started earlier does not close it. */
+  private markMenuOpened(mainMenu: HTMLElement): void {
+    this.menuOpenSeq += 1;
+    mainMenu.setAttribute('data-menu-opened-at', String(this.menuOpenSeq));
+    mainMenu.classList.add('active');
+  }
+
   private initMenuHandlers(): void {
     const menuBtn = document.getElementById('menu-btn');
     const mainMenu = document.getElementById('main-menu');
@@ -759,7 +768,7 @@ export class DOMHandler {
     // Header Menu Button
     if (menuBtn && mainMenu) {
       menuBtn.addEventListener('click', () => {
-        mainMenu.classList.add('active');
+        this.markMenuOpened(mainMenu);
         this.updateResumeButton();
       });
     }
@@ -799,7 +808,7 @@ export class DOMHandler {
             if (mainMenu.classList.contains('active')) {
               mainMenu.classList.remove('active');
             } else {
-              mainMenu.classList.add('active');
+              this.markMenuOpened(mainMenu);
               this.updateResumeButton();
             }
           }

@@ -83,6 +83,24 @@ describe('Setup Phase Integration', () => {
     vi.clearAllMocks();
   });
 
+  test('initGame leaves a menu open when it was reopened after the stamp', () => {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div id="main-menu" class="active" data-menu-opened-at="2"></div>'
+    );
+    controller.initGame(20, 'setup', '1');
+    expect(document.getElementById('main-menu')!.classList.contains('active')).toBe(true);
+  });
+
+  test('initGame closes the menu when the open stamp is unchanged', () => {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div id="main-menu" class="active" data-menu-opened-at="1"></div>'
+    );
+    controller.initGame(20, 'setup', '1');
+    expect(document.getElementById('main-menu')!.classList.contains('active')).toBe(false);
+  });
+
   test('should initialize setup phase correctly', () => {
     controller.initGame(20, 'setup');
     expect(game.points).toBe(20);
