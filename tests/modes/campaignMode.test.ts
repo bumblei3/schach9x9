@@ -194,6 +194,33 @@ describe('CampaignModeStrategy', () => {
       expect(mockController.showShop).toHaveBeenCalledWith(true);
     });
 
+    test('adds Elite-Garde only on a budget chapter', async () => {
+      const { campaignManager } = await import('../../js/campaign/CampaignManager.js');
+      (campaignManager.isPerkUnlocked as any).mockImplementation(
+        (id: string) => id === 'elite_garde'
+      );
+
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+      expect(mockGame.points).toBe(30);
+
+      strategy.startLevel(mockGame, mockController, 'level_1');
+      expect(mockGame.points).toBe(0);
+
+      (campaignManager.isPerkUnlocked as any).mockReturnValue(false);
+    });
+
+    test('names the budget in the intro of a hiring chapter', async () => {
+      const { showModal } = await import('../../js/ui.js');
+
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+
+      expect(showModal).toHaveBeenCalledWith(
+        'Budget Level',
+        expect.stringContaining('Budget 20'),
+        expect.any(Array)
+      );
+    });
+
     test('should show intro modal with level info', async () => {
       const { showModal } = await import('../../js/ui.js');
 

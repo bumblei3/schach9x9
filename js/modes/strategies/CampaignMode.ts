@@ -37,12 +37,18 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     game.campaignMode = true;
     game.currentLevelId = levelId;
-    let budget = level.setupType === 'budget' ? level.playerBudget || 0 : 0;
-
-    // Apply Perks
-    if (campaignManager.isPerkUnlocked('elite_garde')) {
-      budget += 10;
-      logger.info('[Campaign] Elite-Garde Perk applied: +10 Budget');
+    let budget = 0;
+    let budgetText = '';
+    if (level.setupType === 'budget') {
+      const base = level.playerBudget || 0;
+      budget = base;
+      if (campaignManager.isPerkUnlocked('elite_garde')) {
+        budget += 10;
+        budgetText = `Budget ${budget} (${base} + 10 Elite-Garde)`;
+        logger.info('[Campaign] Elite-Garde Perk applied: +10 Budget');
+      } else {
+        budgetText = `Budget ${budget}`;
+      }
     }
 
     game.points = budget;
@@ -83,7 +89,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     logger.info(`Started Campaign Level: ${level.title}`);
 
-    this.showIntroModal(level);
+    this.showIntroModal(level, budgetText);
 
     // Update Opponent Name in UI
     const opponentNameEl = document.getElementById('opponent-name');
@@ -119,15 +125,22 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
   }
 
-  private showIntroModal(level: {
-    title: string;
-    description: string;
-    winCondition: { type: string };
-    opponentName?: string;
-  }): void {
+  private showIntroModal(
+    level: {
+      title: string;
+      description: string;
+      winCondition: { type: string };
+      opponentName?: string;
+    },
+    budgetText = ''
+  ): void {
+    const budgetNote = budgetText
+      ? `<p class="campaign-budget" style="font-size: 1.05rem; color: #ffd700; font-weight: bold; margin-bottom: 1rem;">${budgetText}</p>`
+      : '';
     const desc = `
       <div class="campaign-intro">
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">${level.description}</p>
+        ${budgetNote}
         <div class="campaign-goals-box" style="background: rgba(49, 196, 141, 0.1); border: 1px solid rgba(49, 196, 141, 0.3); border-radius: 8px; padding: 1rem;">
           <h4 style="margin-top: 0; color: var(--accent-success); display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.2rem;">🎯</span> Missionsziele

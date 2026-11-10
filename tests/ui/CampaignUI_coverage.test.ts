@@ -186,6 +186,43 @@ describe('CampaignUI', () => {
     // Should have completed class
     expect(levelElement.className).toContain('completed');
   });
+  it('shows only the chapter list in the header', () => {
+    campaignUI.show();
+    expect(document.getElementById('campaign-gold-display')).toBeNull();
+    expect(document.getElementById('campaign-army-toggle')).toBeNull();
+    expect(document.getElementById('campaign-shop-toggle')).toBeNull();
+    expect(document.getElementById('campaign-close-btn')).toBeTruthy();
+  });
+
+  it('prints the hiring budget only on budget chapters', () => {
+    (campaignManager.getAllLevels as any).mockReturnValue([
+      { id: 'boss_1', title: 'Belagerung', difficulty: 'hard', setupType: 'budget', playerBudget: 30 },
+      { id: 'archbishop_fork', title: 'Gabel', difficulty: 'easy', setupType: 'fixed' },
+    ]);
+    (campaignManager.isLevelUnlocked as any).mockReturnValue(true);
+    (campaignManager.isLevelCompleted as any).mockReturnValue(false);
+    (campaignManager.isPerkUnlocked as any).mockReturnValue(false);
+
+    campaignUI.show();
+    const cards = document.getElementById('campaign-levels-grid')!.children;
+    expect(cards[0].textContent).toContain('Budget 30');
+    expect(cards[0].textContent).not.toContain('Elite-Garde');
+    expect(cards[1].querySelector('.level-budget')).toBeNull();
+  });
+
+  it('adds Elite-Garde to the budget line when the perk is owned', () => {
+    (campaignManager.getAllLevels as any).mockReturnValue([
+      { id: 'boss_1', title: 'Belagerung', difficulty: 'hard', setupType: 'budget', playerBudget: 30 },
+    ]);
+    (campaignManager.isLevelUnlocked as any).mockReturnValue(true);
+    (campaignManager.isLevelCompleted as any).mockReturnValue(false);
+    (campaignManager.isPerkUnlocked as any).mockImplementation((id: string) => id === 'elite_garde');
+
+    campaignUI.show();
+    const card = document.getElementById('campaign-levels-grid')!.children[0];
+    expect(card.textContent).toContain('Budget 40 (30 + 10 Elite-Garde)');
+  });
+
   it('should switch to army view', () => {
     campaignUI.show();
     campaignUI.switchView('army');

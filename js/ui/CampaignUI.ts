@@ -26,13 +26,8 @@ export class CampaignUI {
           <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
             <div>
               <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Kampagne</h2>
-              <div id="campaign-gold-display" style="color: #ffd700; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; margin-top: 5px;">
-                <span>💰</span> <span id="campaign-gold-value">0</span> Gold
-              </div>
             </div>
             <div style="display: flex; gap: 1rem;">
-              <button id="campaign-army-toggle" class="btn-secondary" style="background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.2);">⚔️ Deine Armee</button>
-              <button id="campaign-shop-toggle" class="btn-secondary" style="background: rgba(255,215,0,0.1); color: #ffd700; border-color: rgba(255,215,0,0.2);">🛒 Shop</button>
               <button id="campaign-close-btn" class="close-icon-btn">×</button>
             </div>
           </div>
@@ -75,24 +70,10 @@ export class CampaignUI {
         });
       }
 
-      const shopToggle = document.getElementById('campaign-shop-toggle');
-      if (shopToggle) {
-        shopToggle.addEventListener('click', () => {
-          this.toggleShop(true);
-        });
-      }
-
       const shopBack = document.getElementById('campaign-shop-back');
       if (shopBack) {
         shopBack.addEventListener('click', () => {
           this.switchView('levels');
-        });
-      }
-
-      const armyToggle = document.getElementById('campaign-army-toggle');
-      if (armyToggle) {
-        armyToggle.addEventListener('click', () => {
-          this.switchView('army');
         });
       }
 
@@ -222,6 +203,7 @@ export class CampaignUI {
             <span style="color: ${this.getDifficultyColor(level.difficulty)}; font-weight: bold;">${level.difficulty.toUpperCase()}</span>
         </div>
         ${starRating}
+        ${this.budgetLabel(level)}
         ${isCompleted ? '<div style="margin-top: 0.5rem; color: var(--accent-success); font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;"><span>🏆</span> Abgeschlossen</div>' : ''}
       `;
 
@@ -380,6 +362,15 @@ export class CampaignUI {
 
       grid.appendChild(card);
     });
+  }
+
+  private budgetLabel(level: Level): string {
+    if (level.setupType !== 'budget') return '';
+    const base = level.playerBudget || 0;
+    if (campaignManager.isPerkUnlocked('elite_garde')) {
+      return `<div class="level-budget" style="font-size: 0.85rem; color: #ffd700; font-weight: bold;">Budget ${base + 10} (${base} + 10 Elite-Garde)</div>`;
+    }
+    return `<div class="level-budget" style="font-size: 0.85rem; color: #ffd700; font-weight: bold;">Budget ${base}</div>`;
   }
 
   private getDifficultyColor(diff: string): string {
