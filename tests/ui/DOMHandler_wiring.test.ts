@@ -215,6 +215,25 @@ describe('DOMHandler wiring invariants', () => {
     });
   });
 
+  describe('undo button', () => {
+    it('clicking Rückgängig calls undoMove and keeps the icon markup', () => {
+      app.gameController.undoMove = vi.fn();
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `<button id="undo-btn">
+          <svg class="undo-icon"></svg>
+          <span class="action-label">Rückgängig</span>
+        </button>`
+      );
+      handler.init();
+      const btn = document.getElementById('undo-btn')!;
+      btn.click();
+      expect(app.gameController.undoMove).toHaveBeenCalledTimes(1);
+      expect(btn.querySelector('.undo-icon')).not.toBeNull();
+      expect(btn.querySelector('.action-label')!.textContent).toBe('Rückgängig');
+    });
+  });
+
   describe('initContinueButton — autosave gating', () => {
     it('stays hidden when no autosave exists', () => {
       handler.init();

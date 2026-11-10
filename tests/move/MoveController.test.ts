@@ -229,4 +229,23 @@ describe('MoveController.updateUndoRedoButtons', () => {
     expect(undoBtn.textContent).toContain('1');
     vi.unstubAllGlobals();
   });
+
+  test('keeps the icon button markup and writes the count into the label', () => {
+    const game = makeGame({
+      phase: 'PLAY',
+      moveHistory: [{ from: { r: 8, c: 4 }, to: { r: 7, c: 4 } } as any],
+    });
+    document.body.innerHTML = `
+      <button id="undo-btn">
+        <svg class="undo-icon"></svg>
+        <span class="action-label">Rückgängig</span>
+      </button>
+    `;
+    const mc = new MoveController(game as any);
+    mc.updateUndoRedoButtons();
+    const btn = document.getElementById('undo-btn')!;
+    expect(btn.querySelector('.undo-icon')).not.toBeNull();
+    expect(btn.querySelector('.action-label')!.textContent).toBe('Rückgängig (1)');
+    expect((btn as HTMLButtonElement).disabled).toBe(false);
+  });
 });

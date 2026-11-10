@@ -203,11 +203,17 @@ export class MoveController {
     const redoBtn = document.getElementById('redo-btn') as HTMLButtonElement;
 
     if (undoBtn) {
+      const count = this.game.moveHistory.length;
       const canUndo =
-        this.game.moveHistory.length > 0 &&
+        count > 0 &&
         (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
       undoBtn.disabled = !canUndo;
-      undoBtn.textContent = `⏮ Rückgängig${this.game.moveHistory.length > 0 ? ` (${this.game.moveHistory.length})` : ''}`;
+      const label = undoBtn.querySelector?.('.action-label');
+      if (label) {
+        label.textContent = count > 0 ? `Rückgängig (${count})` : 'Rückgängig';
+      } else {
+        undoBtn.textContent = `⏮ Rückgängig${count > 0 ? ` (${count})` : ''}`;
+      }
     }
 
     if (redoBtn) {

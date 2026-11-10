@@ -241,6 +241,13 @@ export class DOMHandler {
       });
     }
 
+    const undoBtn = document.getElementById('undo-btn');
+    if (undoBtn) {
+      undoBtn.addEventListener('click', () => {
+        this.gameController?.undoMove();
+      });
+    }
+
     const analysisBtn = document.getElementById('toggle-analysis-btn');
     if (analysisBtn) {
       analysisBtn.addEventListener('click', () => {
