@@ -34,6 +34,15 @@ test.describe('Opening-Trainer Mode (browser)', () => {
     // The trainer menu + start button must be present (rendered async after
     // the book loads, so allow a short settle).
     await expect(page.locator('#opening-trainer-container button')).toBeVisible({ timeout: 10000 });
+
+    // The menu sits under the board, not inside the square. Inside the flex
+    // row it used to take width away from the 9×9 grid.
+    await expect(page.locator('#board-container #opening-trainer-container')).toHaveCount(0);
+    const boardBox = await page.locator('#board').boundingBox();
+    const containerBox = await page.locator('#board-container').boundingBox();
+    expect(boardBox).not.toBeNull();
+    expect(containerBox).not.toBeNull();
+    expect(boardBox!.width).toBeGreaterThan(containerBox!.width * 0.75);
   });
 
   test('two-click move flow triggers trainer feedback', async ({ page }) => {

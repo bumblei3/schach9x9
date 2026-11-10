@@ -362,7 +362,16 @@
   }
 }
 
-/* Opening trainer menu (Phase A feedback) */
+/* Opening trainer menu (Phase A feedback).
+   The panel sits under the board, not inside the square. An empty node
+   must not add a flex/grid gap in the other modes. */
+#opening-trainer-container:empty {
+  display: none;
+}
+#opening-trainer-container {
+  width: min(100%, 520px);
+  margin-inline: auto;
+}
 .opening-trainer-menu {
   padding: 0.75rem 0;
 }

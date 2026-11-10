@@ -873,6 +873,14 @@
     flex: 1 1 auto;
   }
 
+  #opening-trainer-container:not(:empty) {
+    flex: 0 1 220px;
+    width: min(220px, 30vw);
+    max-height: calc(100dvh - 72px);
+    overflow: auto;
+    align-self: center;
+  }
+
   .action-bar {
     position: fixed;
     bottom: env(safe-area-inset-bottom);
@@ -921,8 +929,16 @@
     margin: 0 auto;
   }
 
+  #opening-trainer-container:not(:empty) {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: center;
+    width: 100%;
+    max-width: 420px;
+  }
+
   .action-bar {
     grid-column: 1 / -1;
-    grid-row: 3;
+    grid-row: 4;
   }
 }
