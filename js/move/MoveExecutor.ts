@@ -506,12 +506,6 @@ export function finishMove(game: Game, lastTo?: Square): void {
     if (game.gameController) {
       const winningColor: Player = opponentColor === 'white' ? 'black' : 'white';
       game.gameController.handleGameEnd('win', winningColor);
-
-      // Award Checkmate XP in Campaign
-      if (game.campaignMode && winningColor === game.playerColor) {
-        campaignManager.addUnitXp('k', 100); // King gets XP for victory leadership
-        notificationUI.show('Mission erfüllt! Bonus: +100 XP für den König!', 'success', 'Triumph');
-      }
     }
     return;
   } else if (game.isStalemate(opponentColor)) {

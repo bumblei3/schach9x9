@@ -162,6 +162,33 @@ describe('Campaign Integration', () => {
     );
   });
 
+  test('first clear gives 100 XP to the king and every friendly piece that moved', () => {
+    game.moveHistory = [
+      { piece: { type: 'b', color: 'white' } },
+      { piece: { type: 'n', color: 'black' } },
+      { piece: { type: 'b', color: 'white' } },
+    ];
+    gameController.startCampaignLevel('level_1');
+    gameController.handleGameEnd('win', 'white');
+
+    expect(campaignManager.getUnitXp('k')).toMatchObject({ xp: 100, level: 2 });
+    expect(campaignManager.getUnitXp('b')).toMatchObject({ xp: 100, level: 2 });
+    expect(campaignManager.getUnitXp('n').xp).toBe(0);
+
+    gameController.handleGameEnd('win', 'white');
+    expect(campaignManager.getUnitXp('b').xp).toBe(100);
+  });
+
+  test('three first clears bring a moved piece to level 3', () => {
+    game.moveHistory = [{ piece: { type: 'a', color: 'white' } }];
+    for (const levelId of ['level_1', 'level_2', 'level_3']) {
+      gameController.startCampaignLevel(levelId);
+      gameController.handleGameEnd('win', 'white');
+    }
+    expect(campaignManager.getUnitXp('a')).toMatchObject({ xp: 300, level: 3 });
+    expect(campaignManager.getUnitXp('k')).toMatchObject({ xp: 300, level: 3 });
+  });
+
   test('handleGameEnd should complete level on victory', () => {
     const levelId = 'level_1';
     gameController.startCampaignLevel(levelId);

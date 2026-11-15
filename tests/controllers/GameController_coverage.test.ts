@@ -34,6 +34,8 @@ vi.mock('../../js/campaign/CampaignManager', () => ({
   campaignManager: {
     getLevel: vi.fn(),
     completeLevel: vi.fn(),
+    getLevelStars: vi.fn(() => 0),
+    addUnitXp: vi.fn(),
     getUnlockedRewards: vi.fn().mockReturnValue([]),
     state: { unlockedRewards: [] },
   },

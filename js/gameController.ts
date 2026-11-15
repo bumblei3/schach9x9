@@ -21,6 +21,7 @@ import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
 import type { AIController } from './aiController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
+import { VICTORY_XP, victoryUnitTypes, victoryXpLine } from './campaign/victoryXp.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { getHeatmapUI, HeatmapUI } from './ui/HeatmapUI.js';
@@ -1275,8 +1276,17 @@ export class GameController {
 
         const levelBefore = level as Level;
         const rewardsBefore = campaignManager.getUnlockedRewards();
+        const firstClear = campaignManager.getLevelStars(this.game.currentLevelId) === 0;
 
         const starsEarned = campaignManager.completeLevel(this.game.currentLevelId, stats);
+
+        if (firstClear) {
+          const types = victoryUnitTypes(this.game.moveHistory, this.game.playerColor || 'white');
+          for (const type of types) {
+            campaignManager.addUnitXp(type, VICTORY_XP);
+          }
+          notificationUI.show(victoryXpLine(types), 'success', 'Erfahrung');
+        }
 
         const rewardsAfter = campaignManager.getUnlockedRewards();
         const newRewards = rewardsAfter.filter((r: string) => !rewardsBefore.includes(r));
