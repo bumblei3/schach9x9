@@ -5,6 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SetupModeStrategy } from '../../js/modes/strategies/SetupMode';
+import { campaignManager } from '../../js/campaign/CampaignManager';
 import { PHASES } from '../../js/config';
 import * as UI from '../../js/ui';
 import { soundManager } from '../../js/sounds';
@@ -13,6 +14,12 @@ vi.mock('../../js/logger', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),
+  },
+}));
+
+vi.mock('../../js/campaign/CampaignManager', () => ({
+  campaignManager: {
+    isPerkUnlocked: vi.fn(() => false),
   },
 }));
 
@@ -77,6 +84,7 @@ describe('SetupModeStrategy - Branch Coverage', () => {
       updateShopUI: vi.fn(),
       autoSave: vi.fn(),
       startClock: vi.fn(),
+      requestHint: vi.fn(),
       gameStartTime: 0,
     };
   });
@@ -256,6 +264,21 @@ describe('SetupModeStrategy - Branch Coverage', () => {
 
       expect(game.phase).toBe(PHASES.PLAY);
       expect(controller.startClock).toHaveBeenCalled();
+      expect(controller.requestHint).not.toHaveBeenCalled();
+    });
+
+    it('asks for one Taktik-Genie tip when a hiring chapter begins', () => {
+      vi.mocked(campaignManager.isPerkUnlocked).mockImplementation(
+        (id: string) => id === 'taktik_genie'
+      );
+      game.campaignMode = true;
+      game.phase = PHASES.SETUP_WHITE_UPGRADES;
+      game.points = 0;
+
+      strategy.onPhaseEnd(game, controller);
+
+      expect(game.phase).toBe(PHASES.PLAY);
+      expect(controller.requestHint).toHaveBeenCalledTimes(1);
     });
 
     it('should upgrade mode transition to black upgrades', () => {

@@ -8,6 +8,8 @@ import { logger } from '../../logger.js';
 import { campaignManager } from '../../campaign/CampaignManager.js';
 import { BoardFactory } from '../../campaign/BoardFactory.js';
 import { SetupModeStrategy } from './SetupMode.js'; // Re-use setup logic if possible or composition
+import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
+import type { Level } from '../../campaign/types.js';
 
 export class CampaignModeStrategy implements GameModeStrategy {
   private setupStrategy = new SetupModeStrategy(); // Delegate for 'budget' setup type
@@ -89,7 +91,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     logger.info(`Started Campaign Level: ${level.title}`);
 
-    this.showIntroModal(level, budgetText);
+    this.showIntroModal(level, controller, budgetText);
 
     // Update Opponent Name in UI
     const opponentNameEl = document.getElementById('opponent-name');
@@ -125,22 +127,18 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
   }
 
-  private showIntroModal(
-    level: {
-      title: string;
-      description: string;
-      winCondition: { type: string };
-      opponentName?: string;
-    },
-    budgetText = ''
-  ): void {
+  private showIntroModal(level: Level, controller: GameController, budgetText = ''): void {
     const budgetNote = budgetText
       ? `<p class="campaign-budget" style="font-size: 1.05rem; color: #ffd700; font-weight: bold; margin-bottom: 1rem;">${budgetText}</p>`
+      : '';
+    const tipNote = campaignManager.isPerkUnlocked('taktik_genie')
+      ? `<p class="taktik-genie-note" style="font-size: 0.95rem; color: #c4b5fd; margin-bottom: 1rem;">Taktik-Genie zeigt einmal den besten Zug, sobald die Mission läuft.</p>`
       : '';
     const desc = `
       <div class="campaign-intro">
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">${level.description}</p>
         ${budgetNote}
+        ${tipNote}
         <div class="campaign-goals-box" style="background: rgba(49, 196, 141, 0.1); border: 1px solid rgba(49, 196, 141, 0.3); border-radius: 8px; padding: 1rem;">
           <h4 style="margin-top: 0; color: var(--accent-success); display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.2rem;">🎯</span> Missionsziele
@@ -155,7 +153,13 @@ export class CampaignModeStrategy implements GameModeStrategy {
     `;
 
     UI.showModal(level.title, desc, [
-      { text: 'Mission starten', class: 'btn-primary', callback: () => {} },
+      {
+        text: 'Mission starten',
+        class: 'btn-primary',
+        callback: () => {
+          if (level.setupType === 'fixed') offerTaktikGenieTip(controller);
+        },
+      },
     ]);
   }
 }

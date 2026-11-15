@@ -4,6 +4,7 @@
  */
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { CampaignModeStrategy } from '../../js/modes/strategies/CampaignMode.js';
+import { campaignManager } from '../../js/campaign/CampaignManager.js';
 import { PHASES } from '../../js/config.js';
 
 // Mock UI module
@@ -106,6 +107,7 @@ describe('CampaignModeStrategy', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(campaignManager.isPerkUnlocked).mockReturnValue(false);
 
     strategy = new CampaignModeStrategy();
 
@@ -231,6 +233,38 @@ describe('CampaignModeStrategy', () => {
         expect.stringContaining('Learn the basics'),
         expect.any(Array)
       );
+    });
+
+    test('Taktik-Genie asks for one tip when a fixed mission starts', async () => {
+      const { showModal } = await import('../../js/ui.js');
+      vi.mocked(campaignManager.isPerkUnlocked).mockImplementation(
+        (id: string) => id === 'taktik_genie'
+      );
+      mockController.requestHint = vi.fn();
+
+      strategy.startLevel(mockGame, mockController, 'level_1');
+
+      const [title, body, actions] = vi.mocked(showModal).mock.calls.at(-1)!;
+      expect(title).toBe('Tutorial Level');
+      expect(body).toContain('Taktik-Genie zeigt einmal den besten Zug');
+      expect(actions?.[0]?.callback).toBeTypeOf('function');
+      actions?.[0]?.callback?.();
+      expect(mockController.requestHint).toHaveBeenCalledTimes(1);
+    });
+
+    test('Taktik-Genie waits until a hiring chapter leaves setup', async () => {
+      const { showModal } = await import('../../js/ui.js');
+      vi.mocked(campaignManager.isPerkUnlocked).mockImplementation(
+        (id: string) => id === 'taktik_genie'
+      );
+      mockController.requestHint = vi.fn();
+
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+
+      const actions = vi.mocked(showModal).mock.calls.at(-1)?.[2];
+      expect(actions?.[0]?.callback).toBeTypeOf('function');
+      actions?.[0]?.callback?.();
+      expect(mockController.requestHint).not.toHaveBeenCalled();
     });
   });
 

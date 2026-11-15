@@ -4,6 +4,7 @@ import { PHASES, AI_DELAY_MS } from '../../config.js';
 import * as UI from '../../ui.js';
 import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
+import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
 
 export class SetupModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
@@ -79,6 +80,7 @@ export class SetupModeStrategy implements GameModeStrategy {
           // In Campaign budget levels, Black setup is already in FEN.
           // Finish White and start the game!
           this.startGame(game, controller);
+          offerTaktikGenieTip(controller);
           game.log('Weiß fertig. Die Schlacht beginnt!');
           return;
         }

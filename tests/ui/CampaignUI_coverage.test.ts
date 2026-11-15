@@ -186,12 +186,24 @@ describe('CampaignUI', () => {
     // Should have completed class
     expect(levelElement.className).toContain('completed');
   });
-  it('shows only the chapter list in the header', () => {
+  it('opens army and shop from the chapter header', () => {
     campaignUI.show();
-    expect(document.getElementById('campaign-gold-display')).toBeNull();
-    expect(document.getElementById('campaign-army-toggle')).toBeNull();
-    expect(document.getElementById('campaign-shop-toggle')).toBeNull();
+    expect(document.getElementById('campaign-gold-value')!.textContent).toBe('150');
     expect(document.getElementById('campaign-close-btn')).toBeTruthy();
+
+    document.getElementById('campaign-army-toggle')!.click();
+    expect(document.getElementById('campaign-army-view')!.classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('campaign-main-view')!.classList.contains('hidden')).toBe(true);
+
+    document.getElementById('campaign-army-back')!.click();
+    expect(document.getElementById('campaign-main-view')!.classList.contains('hidden')).toBe(false);
+
+    document.getElementById('campaign-shop-toggle')!.click();
+    expect(document.getElementById('campaign-shop-view')!.classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('campaign-army-view')!.classList.contains('hidden')).toBe(true);
+
+    document.getElementById('campaign-shop-back')!.click();
+    expect(document.getElementById('campaign-main-view')!.classList.contains('hidden')).toBe(false);
   });
 
   it('prints the hiring budget only on budget chapters', () => {

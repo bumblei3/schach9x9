@@ -23,12 +23,17 @@ export class CampaignUI {
       overlay.className = 'fullscreen-overlay hidden';
       overlay.innerHTML = `
         <div class="campaign-content" style="background: var(--bg-panel); padding: 2rem; border-radius: 1rem; max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
-          <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
+          <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
             <div>
               <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Kampagne</h2>
+              <div id="campaign-gold-display" style="color: #ffd700; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                <span>💰</span> <span id="campaign-gold-value">0</span> Gold
+              </div>
             </div>
-            <div style="display: flex; gap: 1rem;">
-              <button id="campaign-close-btn" class="close-icon-btn">×</button>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <button id="campaign-army-toggle" type="button" class="btn-secondary" style="background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.2);">⚔️ Deine Armee</button>
+              <button id="campaign-shop-toggle" type="button" class="btn-secondary" style="background: rgba(255,215,0,0.1); color: #ffd700; border-color: rgba(255,215,0,0.2);">🛒 Shop</button>
+              <button id="campaign-close-btn" type="button" class="close-icon-btn">×</button>
             </div>
           </div>
 
@@ -70,10 +75,24 @@ export class CampaignUI {
         });
       }
 
+      const shopToggle = document.getElementById('campaign-shop-toggle');
+      if (shopToggle) {
+        shopToggle.addEventListener('click', () => {
+          this.toggleShop(true);
+        });
+      }
+
       const shopBack = document.getElementById('campaign-shop-back');
       if (shopBack) {
         shopBack.addEventListener('click', () => {
           this.switchView('levels');
+        });
+      }
+
+      const armyToggle = document.getElementById('campaign-army-toggle');
+      if (armyToggle) {
+        armyToggle.addEventListener('click', () => {
+          this.switchView('army');
         });
       }
 

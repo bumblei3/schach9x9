@@ -680,14 +680,14 @@ export const CAMPAIGN_PERKS: Perk[] = [
   {
     id: 'elite_garde',
     name: 'Elite-Garde',
-    description: 'Starte Missionen mit +10 zusätzlichem Budget.',
+    description: 'Auf den Anwerbe-Kapiteln 4, 6, 12 und 18 startest du mit +10 Budget.',
     icon: '🎖️',
     cost: 250,
   },
   {
     id: 'taktik_genie',
     name: 'Taktik-Genie',
-    description: 'Schaltet kostenlose Profi-Tipps während der Mission frei.',
+    description: 'Zeigt zu Beginn der Mission einmal den besten Zug.',
     icon: '🧠',
     cost: 200,
   },

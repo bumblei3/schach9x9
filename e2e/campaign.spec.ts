@@ -22,6 +22,25 @@ test.describe('Campaign Mode', () => {
     // Verify Levels are listed
     const levelCards = page.locator('.campaign-level-card');
     await expect(levelCards).not.toHaveCount(0);
+
+    await expect(page.locator('#campaign-gold-display')).toBeVisible();
+    await page.click('#campaign-army-toggle');
+    await expect(page.locator('#campaign-army-view')).toBeVisible();
+    await expect(page.locator('#campaign-army-view')).toContainText('Deine Armee');
+    await page.click('#campaign-army-back');
+    await expect(levelCards.first()).toBeVisible();
+
+    await page.click('#campaign-shop-toggle');
+    await expect(page.locator('#campaign-shop-view')).toBeVisible();
+    await expect(page.locator('#campaign-shop-view')).toContainText('Söldner-Shop');
+    await expect(page.locator('#campaign-shop-view')).toContainText(
+      'Zeigt zu Beginn der Mission einmal den besten Zug.'
+    );
+    await expect(page.locator('#campaign-shop-view')).toContainText(
+      'Auf den Anwerbe-Kapiteln 4, 6, 12 und 18 startest du mit +10 Budget.'
+    );
+    await page.click('#campaign-shop-back');
+    await expect(levelCards.first()).toBeVisible();
   });
 
   test('should start the first campaign level "Der Aufstand"', async ({ page }) => {
@@ -86,5 +105,41 @@ test.describe('Campaign Mode', () => {
     });
 
     expect(gold).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Taktik-Genie', () => {
+  test('opens one tip when the mission starts', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'peasant_revolt',
+          unlockedLevels: ['peasant_revolt'],
+          completedLevels: [],
+          unlockedRewards: [],
+          gold: 500,
+          unlockedPerks: ['taktik_genie'],
+          levelStars: {},
+          unlockedTalentIds: [],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto('e2e');
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card').first().click();
+
+    const start = page.getByRole('button', { name: 'Mission starten' });
+    await expect(start).toBeVisible();
+    await expect(page.locator('.taktik-genie-note')).toBeVisible();
+    await start.click();
+
+    const tutorOverlay = page.locator('#tutor-overlay');
+    await expect(tutorOverlay).toBeVisible({ timeout: 30000 });
+    await expect(tutorOverlay).not.toHaveClass(/hidden/);
   });
 });
