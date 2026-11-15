@@ -19,6 +19,7 @@ import { AnalysisUI } from './AnalysisUI.js';
 import { OpeningBookUI } from './OpeningBookUI.js';
 import { hidePostGameStats } from './PostGameAnalysisUI.js';
 import { syncDailyPuzzleMenu } from './dailyPuzzleMenu.js';
+import { bindIssueReporter } from './issueReporter.js';
 import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
@@ -457,6 +458,7 @@ export class DOMHandler {
     if (overlay) overlay.classList.remove('hidden');
 
     this.initMenuHandlers();
+    bindIssueReporter(() => this.app.game);
     this.initAnalysisHandlers();
     this.initPuzzleHandlers();
     this.initLeaderboardHandlers();

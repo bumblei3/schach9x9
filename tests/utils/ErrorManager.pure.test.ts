@@ -54,6 +54,15 @@ describe('ErrorManager.handleError', () => {
     errorManager.handleError(new Error('x'));
     expect((notificationUI as any).show).toHaveBeenCalledWith('x', 'error', 'Fehler (App)');
   });
+
+  test('keeps only the last eight client errors', () => {
+    for (let i = 0; i < 10; i++)
+      errorManager.handleError(new Error(`ring-${i}`), { context: 'Ring' });
+    const recent = errorManager.recentErrors();
+    expect(recent.length).toBeLessThanOrEqual(8);
+    expect(recent[recent.length - 1]).toContain('ring-9');
+    expect(recent.some(line => line.includes('ring-0'))).toBe(false);
+  });
 });
 
 describe('ErrorManager.warning', () => {

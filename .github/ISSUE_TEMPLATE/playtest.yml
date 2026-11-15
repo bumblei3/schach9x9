@@ -1,0 +1,32 @@
+name: Playtest
+description: Fehler, unklare Stelle oder Vorschlag aus einer Partie
+title: '[Playtest] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Im Spiel unter Einstellungen, Problem melden, ist der gleiche Bericht schon ausgefüllt.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Art
+      options:
+        - Fehler
+        - Unklar
+        - Vorschlag
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Was ist passiert?
+      description: Modus, Kapitel und was du erwartet hast.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Stellung und Fehler
+      description: Aus dem Spiel kopiert, oder leer lassen.
+    validations:
+      required: false

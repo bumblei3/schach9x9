@@ -1139,6 +1139,48 @@
             <div id="modal-actions" class="modal-buttons"></div>
           </div>
         </div>
+        <div
+          id="issue-report-overlay"
+          class="modal-overlay issue-report-overlay hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="issue-report-title"
+        >
+          <div class="modal-content issue-report-content">
+            <h2 id="issue-report-title">Problem melden</h2>
+            <p class="issue-report-hint">
+              Es öffnet sich ein GitHub-Issue. Modus, Stellung und die letzten Fehler hängen an.
+              Kein Name und kein Speicherinhalt.
+            </p>
+            <label class="issue-report-label" for="issue-report-kind">Art</label>
+            <select id="issue-report-kind" class="menu-select">
+              <option value="Fehler">Fehler</option>
+              <option value="Unklar">Unklar</option>
+              <option value="Vorschlag">Vorschlag</option>
+            </select>
+            <label class="issue-report-label" for="issue-report-summary">Kurz</label>
+            <input
+              id="issue-report-summary"
+              class="issue-report-input"
+              type="text"
+              maxlength="120"
+              placeholder="z. B. Matt in Kapitel 19 zählt nicht"
+            />
+            <label class="issue-report-label" for="issue-report-detail">Was ist passiert?</label>
+            <textarea
+              id="issue-report-detail"
+              class="issue-report-input"
+              rows="5"
+              maxlength="2000"
+            ></textarea>
+            <p id="issue-report-error" class="issue-report-error" hidden></p>
+            <div class="modal-buttons issue-report-actions">
+              <button type="button" id="issue-report-cancel" class="btn-secondary">Abbrechen</button>
+              <button type="button" id="issue-report-copy" class="btn-secondary">Kopieren</button>
+              <button type="button" id="issue-report-open" class="btn-primary">Auf GitHub öffnen</button>
+            </div>
+          </div>
+        </div>
 
         <!-- Premium Main Menu -->
         <div id="main-menu" class="active">
@@ -1503,6 +1545,14 @@
                       <input type="checkbox" id="auto-hint-blunder" class="menu-checkbox" />
                     </div>
 
+                  </div>
+
+                  <div class="setting-group">
+                    <h3>Rückmeldung</h3>
+                    <p class="issue-report-hint">
+                      Für Playtester. Die Meldung geht als GitHub-Issue raus, mit der aktuellen Partie.
+                    </p>
+                    <button type="button" id="report-issue-btn" class="btn-secondary">Problem melden</button>
                   </div>
                 </div>
               </div>

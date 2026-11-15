@@ -361,6 +361,49 @@ input:checked + .toggle-slider:before {
   text-align: center;
 }
 
+/* Above #main-menu (z-index 9000) so the form is usable while the menu is open. */
+.issue-report-overlay {
+  z-index: 9500;
+}
+
+.issue-report-content {
+  max-width: 520px;
+  text-align: left;
+}
+
+.issue-report-hint {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.issue-report-label {
+  display: block;
+  margin: 0.75rem 0 0.35rem;
+  font-weight: 600;
+}
+
+.issue-report-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.issue-report-error {
+  color: #f87171;
+  margin: 0.75rem 0 0;
+}
+
+.issue-report-actions {
+  flex-wrap: wrap;
+}
+
 .modal-buttons {
   display: flex;
   gap: 1rem;

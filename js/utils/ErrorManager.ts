@@ -5,11 +5,22 @@
 import { logger } from '../logger.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 
+const RECENT_ERROR_LIMIT = 8;
+
 class ErrorManager {
   private initialized: boolean = false;
+  private recent: string[] = [];
 
   constructor() {
     this.initialized = false;
+  }
+
+  /**
+   * Last client errors, oldest first. The issue reporter attaches these.
+   * Each line is already shortened.
+   */
+  recentErrors(): string[] {
+    return this.recent.slice();
   }
 
   init(): void {
@@ -47,6 +58,8 @@ class ErrorManager {
   ): void {
     const context = options.context || 'App';
     const isCritical = options.critical || false;
+
+    this.remember(context, error);
 
     // Log to internal logger
     logger.error(`[${context}]`, error);
@@ -128,6 +141,19 @@ class ErrorManager {
     }
 
     errorOverlay.classList.remove('hidden');
+  }
+
+  private remember(context: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack =
+      error instanceof Error && error.stack ? error.stack.split('\n').slice(0, 3).join(' | ') : '';
+    const line = (stack ? `[${context}] ${message} | ${stack}` : `[${context}] ${message}`)
+      .replace(/\s+/g, ' ')
+      .slice(0, 400);
+    this.recent.push(line);
+    if (this.recent.length > RECENT_ERROR_LIMIT) {
+      this.recent.splice(0, this.recent.length - RECENT_ERROR_LIMIT);
+    }
   }
 }
 
