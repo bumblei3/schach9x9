@@ -132,7 +132,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
       ? `<p class="campaign-budget" style="font-size: 1.05rem; color: #ffd700; font-weight: bold; margin-bottom: 1rem;">${budgetText}</p>`
       : '';
     const tipNote = campaignManager.isPerkUnlocked('taktik_genie')
-      ? `<p class="taktik-genie-note" style="font-size: 0.95rem; color: #c4b5fd; margin-bottom: 1rem;">Taktik-Genie zeigt einmal den besten Zug, sobald die Mission läuft.</p>`
+      ? '<p class="taktik-genie-note" style="font-size: 0.95rem; color: #c4b5fd; margin-bottom: 1rem;">Taktik-Genie zeigt einmal den besten Zug, sobald die Mission läuft.</p>'
       : '';
     const desc = `
       <div class="campaign-intro">
