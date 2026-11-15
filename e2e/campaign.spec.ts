@@ -47,6 +47,14 @@ test.describe('Campaign Mode', () => {
     await expect(levelCards.first()).toBeVisible();
   });
 
+  test('pawn talent tiers ask for level 5 and 7', async ({ page }) => {
+    await page.click('#campaign-start-btn');
+    await page.click('#campaign-army-toggle');
+    await page.locator('.army-unit-card').filter({ hasText: 'Infanterie' }).locator('.talents-btn').click();
+    await expect(page.getByRole('button', { name: 'Marsch (Tier 2, Level 5)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Veteran (Tier 3, Level 7)' })).toBeVisible();
+  });
+
   test('should start the first campaign level "Der Aufstand"', async ({ page }) => {
     // 1. Open Campaign Menu
     await page.click('#campaign-start-btn');

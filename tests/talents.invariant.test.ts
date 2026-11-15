@@ -91,6 +91,14 @@ describe('progression monotonicity within a tree', () => {
     }
   });
 
+  test('tier 2 is level 5 and tier 3 is level 7', () => {
+    // 25 first clears give 2500 XP, which reaches level 7 and not level 8.
+    for (const talent of ALL_TALENTS) {
+      if (talent.tier === 2) expect(talent.reqLevel).toBe(5);
+      if (talent.tier === 3) expect(talent.reqLevel).toBe(7);
+    }
+  });
+
   test('tiers within a tree are unique (no two talents share a tier)', () => {
     for (const tree of TREES) {
       const tiers = tree.talents.map(t => t.tier);
