@@ -342,6 +342,25 @@
   pointer-events: none;
 }
 
+.cell.piece-talented {
+  box-shadow: inset 0 0 0 2px rgba(78, 205, 196, 0.9);
+}
+
+.cell.piece-talented::after {
+  content: attr(data-talents);
+  top: auto;
+  right: 1px;
+  bottom: 1px;
+  left: 1px;
+  font-size: 0.55rem;
+  line-height: 1;
+  color: #4ecdc4;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* --- Promotion UI Animation --- */
 #promotion-overlay {
   /* Will be animated when .animate-in class is added */

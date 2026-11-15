@@ -8,6 +8,7 @@ import { particleSystem, floatingTextManager, shakeScreen } from '../effects.js'
 import { updateLastMoveArrow, clearArrows } from './ArrowRenderer.js';
 import type { Piece, Player, PieceType, Square, GameLike } from '../types/core.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
+import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
 import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
 
@@ -521,7 +522,8 @@ export function renderBoard(game: GameLike): void {
       'upgradable-piece',
       'piece-veteran',
       'piece-elite',
-      'piece-champion'
+      'piece-champion',
+      'piece-talented'
     );
   }
 
@@ -617,7 +619,7 @@ export function renderBoard(game: GameLike): void {
         if (game.isSquareUnderAttack && game.isSquareUnderAttack(r, c, opponent))
           cell.classList.add('threatened');
 
-        // RPG Highlights: Veteran / Elite / Champion
+        // RPG Highlights: Veteran / Elite / Champion / learned talents
         if (game.mode === 'campaign' && p.color === game.playerColor) {
           const xp = campaignManager.getUnitXp(p.type);
           const state = campaignManager.getState();
@@ -625,6 +627,22 @@ export function renderBoard(game: GameLike): void {
           if (xp.level >= 2) cell.classList.add('piece-veteran');
           if (xp.level >= 3) cell.classList.add('piece-elite');
           if (state.championType === p.type) cell.classList.add('piece-champion');
+
+          cell.classList.remove('piece-talented');
+          delete cell.dataset.talents;
+          const names = learnedTalentNames(p.type);
+          const file = String.fromCharCode(97 + c);
+          const rank = size - r;
+          const pieceName = p.color === 'white' ? p.type : p.type.toUpperCase();
+          const talentSuffix = names.length ? `, ${names.join(', ')}` : '';
+          cell.setAttribute('aria-label', `${file}${rank}: ${pieceName}${talentSuffix}`);
+          if (names.length) {
+            cell.classList.add('piece-talented');
+            cell.dataset.talents = names.join(' · ');
+            cell.title = names.join(' · ');
+          } else {
+            cell.removeAttribute('title');
+          }
         }
       }
     }

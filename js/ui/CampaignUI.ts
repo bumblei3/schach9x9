@@ -1,7 +1,7 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { Level, Perk, UnitXp } from '../campaign/types.js';
 import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
-import { UNIT_TALENT_TREES } from '../campaign/talents.js';
+import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { showToast } from './OverlayManager.js';
 
 interface CampaignUIHost {
@@ -401,11 +401,7 @@ export class CampaignUI {
   }
 
   private learnedTalentLine(unitType: string): string {
-    const tree = UNIT_TALENT_TREES[unitType];
-    if (!tree) return '';
-    const names = tree.talents
-      .filter(talent => campaignManager.isTalentUnlocked(talent.id))
-      .map(talent => talent.name);
+    const names = learnedTalentNames(unitType);
     if (names.length === 0) return '';
     return `<div class="army-talents" style="font-size: 0.8rem; color: #4ecdc4; line-height: 1.3;">${names.join(' · ')}</div>`;
   }

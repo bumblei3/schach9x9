@@ -55,6 +55,32 @@ test.describe('Campaign Mode', () => {
     await expect(page.getByRole('button', { name: 'Veteran (Tier 3, Level 7)' })).toBeVisible();
   });
 
+  test('a learned talent is marked on the piece', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'peasant_revolt',
+          unlockedLevels: ['peasant_revolt'],
+          completedLevels: [],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['p_scavenger'],
+          championType: null,
+        })
+      );
+    });
+    await page.reload();
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card').first().click();
+    const marked = page.locator('.cell.piece-talented').first();
+    await expect(marked).toBeVisible();
+    await expect(marked).toHaveAttribute('data-talents', 'Plünderer');
+    await expect(marked).toHaveAttribute('data-color', 'white');
+  });
+
   test('should start the first campaign level "Der Aufstand"', async ({ page }) => {
     // 1. Open Campaign Menu
     await page.click('#campaign-start-btn');

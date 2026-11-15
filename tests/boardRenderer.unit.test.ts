@@ -1,5 +1,6 @@
 import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 import * as BoardRenderer from '../js/ui/BoardRenderer.js';
+import { campaignManager } from '../js/campaign/CampaignManager.js';
 import { particleSystem } from '../js/effects.js';
 
 // Mock dependencies
@@ -227,6 +228,29 @@ describe('BoardRenderer Full Coverage', () => {
 
     expect(document.body.contains(dragged)).toBe(false);
     expect(cell.classList.contains('dragging')).toBe(false);
+  });
+
+  test('marks a campaign piece with its learned talent name', () => {
+    const unlocked = vi
+      .spyOn(campaignManager, 'isTalentUnlocked')
+      .mockImplementation(id => id === 'p_scavenger');
+    game.mode = 'campaign';
+    game.playerColor = 'white';
+    game.phase = 'play';
+    game.board[7][4] = { type: 'p', color: 'white' };
+    game.board[1][0] = { type: 'p', color: 'black' };
+
+    BoardRenderer.renderBoard(game);
+
+    const whitePawn = document.querySelector('.cell[data-r="7"][data-c="4"]') as HTMLElement;
+    const blackPawn = document.querySelector('.cell[data-r="1"][data-c="0"]') as HTMLElement;
+    expect(whitePawn.classList.contains('piece-talented')).toBe(true);
+    expect(whitePawn.dataset.talents).toBe('Plünderer');
+    expect(whitePawn.getAttribute('aria-label')).toContain('Plünderer');
+    expect(whitePawn.title).toBe('Plünderer');
+    expect(blackPawn.classList.contains('piece-talented')).toBe(false);
+
+    unlocked.mockRestore();
   });
 
   test('renderBoard highlights', () => {
