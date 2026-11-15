@@ -244,13 +244,21 @@ describe('CampaignUI', () => {
     expect(document.getElementById('campaign-shop-view')!.classList.contains('hidden')).toBe(true);
   });
 
-  it('should render army units', () => {
+  it('should render army units', async () => {
     campaignUI.show();
     campaignUI.renderArmy();
 
     const grid = document.getElementById('campaign-army-grid')!;
-    // Should render 6 unit types (p, n, b, r, q, k)
-    expect(grid.children.length).toBe(6);
+    expect(grid.children.length).toBe(10);
+    expect(grid.textContent).toContain('Erzbischof');
+    expect(grid.textContent).toContain('Kanzler');
+    expect(grid.textContent).toContain('Engel');
+    expect(grid.textContent).toContain('Nachtreiter');
+
+    const archbishop = [...grid.children].find(card => card.textContent?.includes('Erzbischof'));
+    (archbishop?.querySelector('.talents-btn') as HTMLElement).click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(talentTreeUI.show).toHaveBeenCalledWith('a');
 
     // Check champion styling
     const championCard = grid.querySelector('.is-champion');

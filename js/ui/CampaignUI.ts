@@ -303,7 +303,7 @@ export class CampaignUI {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const unitTypes = ['p', 'n', 'b', 'r', 'q', 'k'];
+    const unitTypes = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'j'];
     const names: Record<string, string> = {
       p: 'Infanterie (Bauer)',
       n: 'Kavallerie (Springer)',
@@ -311,8 +311,23 @@ export class CampaignUI {
       r: 'Burgwache (Turm)',
       q: 'General (Dame)',
       k: 'König (Anführer)',
+      a: 'Erzbischof',
+      c: 'Kanzler',
+      e: 'Engel',
+      j: 'Nachtreiter',
     };
-    const icons: Record<string, string> = { p: '🛡️', n: '🐎', b: '✨', r: '🏰', q: '👑', k: '🔱' };
+    const icons: Record<string, string> = {
+      p: '🛡️',
+      n: '🐎',
+      b: '✨',
+      r: '🏰',
+      q: '👑',
+      k: '🔱',
+      a: '⛪',
+      c: '🦅',
+      e: '🪽',
+      j: '🌙',
+    };
 
     const state = campaignManager.getState();
 

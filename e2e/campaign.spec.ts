@@ -27,6 +27,10 @@ test.describe('Campaign Mode', () => {
     await page.click('#campaign-army-toggle');
     await expect(page.locator('#campaign-army-view')).toBeVisible();
     await expect(page.locator('#campaign-army-view')).toContainText('Deine Armee');
+    await expect(page.locator('#campaign-army-view')).toContainText('Erzbischof');
+    await expect(page.locator('#campaign-army-view')).toContainText('Kanzler');
+    await expect(page.locator('#campaign-army-view')).toContainText('Engel');
+    await expect(page.locator('#campaign-army-view')).toContainText('Nachtreiter');
     await page.click('#campaign-army-back');
     await expect(levelCards.first()).toBeVisible();
 
