@@ -9,6 +9,7 @@ import { campaignManager } from '../../campaign/CampaignManager.js';
 import { BoardFactory } from '../../campaign/BoardFactory.js';
 import { SetupModeStrategy } from './SetupMode.js'; // Re-use setup logic if possible or composition
 import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
+import { placePlundererPawn } from '../../campaign/plunderer.js';
 import type { Level } from '../../campaign/types.js';
 
 export class CampaignModeStrategy implements GameModeStrategy {
@@ -74,6 +75,14 @@ export class CampaignModeStrategy implements GameModeStrategy {
       game.board = BoardFactory.createEmptyBoard() as (PieceWithMoved | null)[][];
     }
 
+    let plundererNote = '';
+    if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('p_scavenger')) {
+      if (placePlundererPawn(game.board)) {
+        plundererNote =
+          '<p class="plunderer-note" style="font-size: 0.95rem; color: #4ecdc4; margin-bottom: 1rem;">Plünderer stellt einen Extra-Bauern aufs Feld.</p>';
+      }
+    }
+
     if (level.setupType === 'fixed') {
       game.phase = PHASES.PLAY;
       game.captureInitialBoard();
@@ -91,7 +100,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
 
     logger.info(`Started Campaign Level: ${level.title}`);
 
-    this.showIntroModal(level, controller, budgetText);
+    this.showIntroModal(level, controller, budgetText, plundererNote);
 
     // Update Opponent Name in UI
     const opponentNameEl = document.getElementById('opponent-name');
@@ -127,7 +136,12 @@ export class CampaignModeStrategy implements GameModeStrategy {
     }
   }
 
-  private showIntroModal(level: Level, controller: GameController, budgetText = ''): void {
+  private showIntroModal(
+    level: Level,
+    controller: GameController,
+    budgetText = '',
+    plundererNote = ''
+  ): void {
     const budgetNote = budgetText
       ? `<p class="campaign-budget" style="font-size: 1.05rem; color: #ffd700; font-weight: bold; margin-bottom: 1rem;">${budgetText}</p>`
       : '';
@@ -138,6 +152,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
       <div class="campaign-intro">
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">${level.description}</p>
         ${budgetNote}
+        ${plundererNote}
         ${tipNote}
         <div class="campaign-goals-box" style="background: rgba(49, 196, 141, 0.1); border: 1px solid rgba(49, 196, 141, 0.3); border-radius: 8px; padding: 1rem;">
           <h4 style="margin-top: 0; color: var(--accent-success); display: flex; align-items: center; gap: 8px;">

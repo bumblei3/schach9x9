@@ -25,6 +25,8 @@ export interface Piece {
   type: Exclude<PieceType, null>;
   color: Player;
   hasMoved?: boolean;
+  /** Placed by a campaign talent. Setup cannot sell it back for points. */
+  gifted?: boolean;
 }
 
 export type Board = (Piece | null)[][];

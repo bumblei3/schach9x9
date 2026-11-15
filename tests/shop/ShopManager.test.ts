@@ -131,6 +131,15 @@ describe('ShopManager.handleSellPiece', () => {
     expect(game.log).toHaveBeenCalledWith('Figur entfernt, Punkte erstattet.');
   });
 
+  test('refuses to sell the Plünderer pawn', () => {
+    game.board[7][1] = { type: 'p', color: 'white', gifted: true };
+    const before = game.points;
+    sm.handleSellPiece(7, 1);
+    expect(game.board[7][1]).not.toBeNull();
+    expect(game.points).toBe(before);
+    expect(game.log).toHaveBeenCalledWith('Der Plünderer-Bauer bleibt auf dem Feld.');
+  });
+
   test('refuses to sell the king', () => {
     game.board[7][1] = { type: 'k', color: 'white', hasMoved: false };
     const before = game.points;

@@ -91,6 +91,19 @@ describe('progression monotonicity within a tree', () => {
     }
   });
 
+  test('tier 3 beats an earlier talent of the same kind', () => {
+    for (const tree of TREES) {
+      const top = tree.talents.find(talent => talent.tier === 3);
+      if (!top || top.effectValue === undefined) continue;
+      const earlier = tree.talents.filter(
+        talent => talent.tier < 3 && talent.effectType === top.effectType
+      );
+      for (const prev of earlier) {
+        expect(top.effectValue).toBeGreaterThan(prev.effectValue ?? 0);
+      }
+    }
+  });
+
   test('tier 2 is level 5 and tier 3 is level 7', () => {
     // 25 first clears give 2500 XP, which reaches level 7 and not level 8.
     for (const talent of ALL_TALENTS) {

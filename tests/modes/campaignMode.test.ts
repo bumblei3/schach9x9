@@ -70,6 +70,7 @@ vi.mock('../../js/campaign/CampaignManager.js', () => ({
       return null;
     }),
     isPerkUnlocked: vi.fn(() => false),
+    isTalentUnlocked: vi.fn(() => false),
   },
 }));
 
@@ -108,6 +109,7 @@ describe('CampaignModeStrategy', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(campaignManager.isPerkUnlocked).mockReturnValue(false);
+    vi.mocked(campaignManager.isTalentUnlocked).mockReturnValue(false);
 
     strategy = new CampaignModeStrategy();
 
@@ -209,6 +211,27 @@ describe('CampaignModeStrategy', () => {
       expect(mockGame.points).toBe(0);
 
       (campaignManager.isPerkUnlocked as any).mockReturnValue(false);
+    });
+
+    test('Plünderer places one free pawn on a hiring chapter', async () => {
+      const { showModal } = await import('../../js/ui.js');
+      vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+        (id: string) => id === 'p_scavenger'
+      );
+
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+
+      const pawns = mockGame.board.flat().filter((piece: { type?: string; gifted?: boolean } | null) => piece?.gifted);
+      expect(pawns).toHaveLength(1);
+      expect(pawns[0]).toMatchObject({ type: 'p', color: 'white', gifted: true });
+      expect(showModal).toHaveBeenCalledWith(
+        'Budget Level',
+        expect.stringContaining('Extra-Bauern'),
+        expect.any(Array)
+      );
+
+      strategy.startLevel(mockGame, mockController, 'level_1');
+      expect(mockGame.board.flat().some((piece: { gifted?: boolean } | null) => piece?.gifted)).toBe(false);
     });
 
     test('names the budget in the intro of a hiring chapter', async () => {

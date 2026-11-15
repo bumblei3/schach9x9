@@ -70,6 +70,10 @@ export class ShopManager {
     const color = isWhiteTurn ? 'white' : 'black';
 
     // Can only remove own non-king pieces
+    if (piece && piece.gifted) {
+      if (this.game.log) this.game.log('Der Plünderer-Bauer bleibt auf dem Feld.');
+      return;
+    }
     if (piece && piece.color === color && piece.type !== 'k') {
       // Look up piece value
       const pieceEntry = Object.values(SHOP_PIECES).find(p => p.symbol === piece.type);

@@ -91,7 +91,7 @@ describe('MoveExecutor - Campaign Mechanics', () => {
     );
   });
 
-  it('should apply Veteran talent bonus (+2 XP)', async () => {
+  it('should apply Veteran talent bonus (+5 XP)', async () => {
     // Setup: Veteran Pawn captures
     (campaignManager.isTalentUnlocked as any).mockImplementation(
       (id: string) => id === 'p_veteran'
@@ -102,12 +102,11 @@ describe('MoveExecutor - Campaign Mechanics', () => {
 
     await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
 
-    // Default 10 + 2 bonus = 12
-    expect(campaignManager.addUnitXp).toHaveBeenCalledWith('p', 12);
+    // Default 10 + 5 bonus = 15
+    expect(campaignManager.addUnitXp).toHaveBeenCalledWith('p', 15);
   });
 
-  it('should apply Scavenger talent bonus (Gold on capture)', async () => {
-    // Setup: Scavenger Pawn captures
+  it('does not pay gold when Plünderer only grants a hiring pawn', async () => {
     (campaignManager.isTalentUnlocked as any).mockImplementation(
       (id: string) => id === 'p_scavenger'
     );
@@ -117,12 +116,8 @@ describe('MoveExecutor - Campaign Mechanics', () => {
 
     await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
 
-    expect(campaignManager.addGold).toHaveBeenCalled();
-    expect(notificationUI.show).toHaveBeenCalledWith(
-      expect.stringContaining('Gold'),
-      'success',
-      'Talent'
-    );
+    expect(campaignManager.addGold).not.toHaveBeenCalled();
+    expect(campaignManager.addUnitXp).toHaveBeenCalledWith('p', 10);
   });
 
   it('should NOT award XP if not player piece', async () => {

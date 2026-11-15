@@ -52,7 +52,10 @@ test.describe('Campaign Mode', () => {
     await page.click('#campaign-army-toggle');
     await page.locator('.army-unit-card').filter({ hasText: 'Infanterie' }).locator('.talents-btn').click();
     await expect(page.getByRole('button', { name: 'Marsch (Tier 2, Level 5)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Veteran (Tier 3, Level 7)' })).toBeVisible();
+    const veteran = page.locator('.talent-node[data-id="p_veteran"]');
+    await expect(veteran).toBeVisible();
+    await veteran.dispatchEvent('click');
+    await expect(page.locator('.talent-desc')).toHaveText('Bauern-Schläge geben +5 XP.');
   });
 
   test('a learned talent is marked on the piece', async ({ page }) => {
@@ -171,6 +174,35 @@ test.describe('Army talents', () => {
     await page.click('#campaign-army-toggle');
     const pawn = page.locator('.army-unit-card').filter({ hasText: 'Infanterie' });
     await expect(pawn.locator('.army-talents')).toHaveText('Plünderer');
+  });
+});
+
+test.describe('Plünderer', () => {
+  test('puts a free pawn on the next hiring chapter', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'boss_1',
+          unlockedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge', 'boss_1'],
+          completedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge'],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['p_scavenger'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card', { hasText: 'Kapitel 4' }).click();
+    await expect(page.locator('.plunderer-note')).toContainText('Extra-Bauern');
+    const gifted = page.locator('.cell[data-piece="p"][data-color="white"]');
+    await expect(gifted).toHaveCount(1);
   });
 });
 
