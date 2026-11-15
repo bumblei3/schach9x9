@@ -1,6 +1,7 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { Level, Perk, UnitXp } from '../campaign/types.js';
 import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
+import { UNIT_TALENT_TREES } from '../campaign/talents.js';
 import { showToast } from './OverlayManager.js';
 
 interface CampaignUIHost {
@@ -357,7 +358,8 @@ export class CampaignUI {
         <div style="font-size: 2rem; margin-bottom: 0.2rem;">${icons[type]}</div>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-main);">${names[type]}</div>
         <div style="font-size: 0.85rem; color: #818cf8; font-weight: bold;">LEVEL ${xp.level} ${xp.level >= 2 ? (xp.level >= 3 ? '(ELITE)' : '(VETERAN)') : ''}</div>
-        
+        ${this.learnedTalentLine(type)}
+
         <div class="xp-bar-container" style="background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
            <div class="xp-bar-fill" style="background: linear-gradient(90deg, #818cf8, #6366f1); height: 100%; width: ${progressPercent}%;"></div>
         </div>
@@ -396,6 +398,16 @@ export class CampaignUI {
 
       grid.appendChild(card);
     });
+  }
+
+  private learnedTalentLine(unitType: string): string {
+    const tree = UNIT_TALENT_TREES[unitType];
+    if (!tree) return '';
+    const names = tree.talents
+      .filter(talent => campaignManager.isTalentUnlocked(talent.id))
+      .map(talent => talent.name);
+    if (names.length === 0) return '';
+    return `<div class="army-talents" style="font-size: 0.8rem; color: #4ecdc4; line-height: 1.3;">${names.join(' · ')}</div>`;
   }
 
   private budgetLabel(level: Level): string {

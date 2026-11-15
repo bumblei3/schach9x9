@@ -112,6 +112,34 @@ test.describe('Campaign Mode', () => {
   });
 });
 
+test.describe('Army talents', () => {
+  test('shows a learned talent on the unit card', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'peasant_revolt',
+          unlockedLevels: ['peasant_revolt'],
+          completedLevels: [],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['p_scavenger'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    await page.click('#campaign-army-toggle');
+    const pawn = page.locator('.army-unit-card').filter({ hasText: 'Infanterie' });
+    await expect(pawn.locator('.army-talents')).toHaveText('Plünderer');
+  });
+});
+
 test.describe('Taktik-Genie', () => {
   test('opens one tip when the mission starts', async ({ page }) => {
     test.setTimeout(60000);

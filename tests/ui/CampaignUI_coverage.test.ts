@@ -23,6 +23,7 @@ vi.mock('../../js/campaign/CampaignManager', () => ({
     spendGold: vi.fn(() => true),
     isPerkUnlocked: vi.fn(() => false),
     getUnitXp: vi.fn(() => ({ xp: 50, level: 1, captures: 10 })),
+    isTalentUnlocked: vi.fn(() => false),
     setChampion: vi.fn(),
     getState: vi.fn(() => ({ championType: 'n' })),
     getUnits: vi.fn(() => [
@@ -263,6 +264,21 @@ describe('CampaignUI', () => {
     // Check champion styling
     const championCard = grid.querySelector('.is-champion');
     expect(championCard).toBeTruthy();
+  });
+
+  it('names learned talents under the level', () => {
+    vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+      (id: string) => id === 'p_scavenger' || id === 'p_marsch'
+    );
+    campaignUI.show();
+    campaignUI.renderArmy();
+
+    const grid = document.getElementById('campaign-army-grid')!;
+    const pawn = [...grid.children].find(card => card.textContent?.includes('Infanterie'));
+    expect(pawn?.querySelector('.army-talents')?.textContent).toBe('Plünderer · Marsch');
+
+    const knight = [...grid.children].find(card => card.textContent?.includes('Kavallerie'));
+    expect(knight?.querySelector('.army-talents')).toBeNull();
   });
 
   it('should handle setChampion interaction', () => {
