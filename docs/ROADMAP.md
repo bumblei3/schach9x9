@@ -229,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** `main` ist `d6e49bf` (2026-11-16). Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben auf `main`; Kapitel 26 gibt es nicht. Zeitüberschreitung und die Remisregeln laufen über `handleGameEnd`. Brett, Kreuz-Korridore und KI-Aufstellung sind repariert und verifiziert; offen ist nur noch die Statuspille bei `GAME_OVER` (siehe `STATUS.md`). Der Playtest aus `docs/PLAYTEST_PROTOCOL.md` ist der nächste Datenpunkt. Kein Tag v2.1.
+**Nächster konkreter Schritt:** `main` ist `24eb9b0` (2026-11-16). Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben auf `main`; Kapitel 26 gibt es nicht. Zeitüberschreitung und die Remisregeln laufen über `handleGameEnd`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung und die Statuspille bei `GAME_OVER` sind repariert und live verifiziert. Der Playtest aus `docs/PLAYTEST_PROTOCOL.md` ist der nächste Datenpunkt. Kein Tag v2.1.
 
 ---
 
@@ -245,6 +245,6 @@ Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand e
 
 ## Release-Linie
 
-Die Tabelle steht in [`STATUS.md`](../STATUS.md). Kurz: Tag `v2.0.0`, `main` ist `d6e49bf`, kein v2.1.
+Die Tabelle steht in [`STATUS.md`](../STATUS.md). Kurz: Tag `v2.0.0`, `main` ist `24eb9b0`, kein v2.1.
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.
