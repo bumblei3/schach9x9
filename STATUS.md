@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-11-16)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `98d6f6b`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `98d6f6b`.
+Release-Tag bleibt `v2.0.0`. `main` ist `d6e49bf`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `d6e49bf`.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
@@ -14,8 +14,8 @@ Release-Tag bleibt `v2.0.0`. `main` ist `98d6f6b`. Akt IV (Kapitel 19–25) lieg
 | Build | `98d6f6b` | grün |
 | E2E + Lighthouse | Run 43787689163, `98d6f6b` | grün (E2E, Lighthouse, CI-Gate, Pages-Deploy) |
 | Security | CodeQL, Run 43787689199 | grün |
-| CI | GitHub Actions | #43786828081 (`b8d75d1`) und #43787689163 (`98d6f6b`) komplett grün |
-| Git | `main` `98d6f6b` (2026-11-16) | Tag bleibt `v2.0.0`. Arbeitsbaum sauber, kein offener PR. 3D-Kreuzform ist auf `main`. |
+| CI | GitHub Actions | #43787689163 (`98d6f6b`) komplett grün; Lauf für `d6e49bf` gestartet |
+| Git | `main` `d6e49bf` (2026-11-16) | Tag bleibt `v2.0.0`. 3D-Kreuzform, quadratisches Brett und die Aufstellungs-Fixes sind auf `main`. |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
@@ -180,4 +180,8 @@ Fix: benannte Konstante `SHADOW_MAP_TYPE = THREE.PCFShadowMap` mit Begründung; 
 
 **Seit 2026-11-16 auf `main`:** `d925254` (3D-Brett folgt 8×8/9×9), `b8d75d1` (Fix: `syncToGame` nur mit Partie, Drehung nur bei Feen-Figuren — der Rotlauf d925254 war `TS2345` in `App.ts` plus `rotation` ohne Deckung im Test) und `98d6f6b` (3D-Kreuzform: `ensureBoard`/`createBoard` bekommen `boardShape`, `isBlockedCell` überspringt die vier Ecken, `battleChess3D.fitBoard` leitet Size und Shape weiter). Live gegengeprüft: der Kreuz-Modus erzeugt genau 45 3D-Felder. Konsolen-Abnahme der Live-Seite (Klassisch 9×9, Kreuz, 3D, Eröffnungs-Trainer, Puzzle, Setup, Analyse, Drohungen/Chancen, Eröffnungsbuch, Save/Load, Share, GIF-/PGN-Export): 0 Fehler, 0 Warnungen.
 
-**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. Die Live-Seite ist durchgespielt (s. o.) — der Playtest mit 3–5 Spielern aus `docs/PLAYTEST_PROTOCOL.md` ist der nächste Datenpunkt, nicht weiterer Code. Kein Tag v2.1. NNUE bleibt geparkt, M1.2 bleibt zu.
+**Brett und Aufstellung 2026-11-16 (`d6e49bf`):** Die Eval-Bar ist ein Flex-Kind von `#board-container` und brachte den Brett-Wrapper auf 279×335 — die Zellen wurden 31×37 Rechtecke, in jedem Modus. `#board` trägt jetzt `aspect-ratio: 1` (verifiziert: 279×279, Zellen 31×31). Der Kreuz-Modus bot 27 „wählbare" Korridorfelder an, 18 davon blockierte Ecken, auf die nicht einmal geklickt werden konnte; Korridor-Highlight, `placeKing` und `handleBuyPiece` prüfen jetzt blockierte Felder (verifiziert: genau 9 wählbare Felder, d1–f3). Die KI-Aufstellung legte Bauern auf die Grundreihe (`gambit_15` → Bauer auf r8c5); `getOptimalSquare` meidet die Grundreihe, solange ein anderes Feld frei ist (verifiziert: Bauer auf r7c5). Weiße Korridor-Reihen sind `boardSize`-basiert — 8×8 nutzte vorher nur 6 der 9 Felder und die Grundreihen-Boni wirkten nie.
+
+**Offen (gefunden, nicht gefixt):** `GameStatusUI.ts` Zeile 198 nennt bei `GAME_OVER` den Sieger aus `game.turn` — das ist die *bedrängte* Seite. Weiß setzt matt, `turn` ist schwarz, die Anzeige sagt „Schwarz hat gewonnen!". Der Overlay-Text (`#winner-text`) liegt richtig, nur die Statuspille nicht. Betroffen: Matt, Patt, unzureichendes Material, Zeitüberschreitung — und damit auch die Puzzles, die korrekt „Richtig! Puzzle gelöst!" melden.
+
+**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. Die Live-Seite ist durchgespielt (s. o.) — der Playtest mit 3–5 Spielern aus `docs/PLAYTEST_PROTOCOL.md` ist der nächste Datenpunkt, nicht weiterer Code. Als letztes den Statuspilen-Fix oben angehen. Kein Tag v2.1. NNUE bleibt geparkt, M1.2 bleibt zu.
