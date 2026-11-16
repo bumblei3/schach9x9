@@ -77,6 +77,16 @@ export class TimeManager {
       return;
     }
 
+    // Eine Uhr, die ohne DOM weiterläuft, hat nichts zu aktualisieren. Das
+    // Schloss bleibt sonst als verwaister Timer hängen und feuert, nachdem
+    // jsdom bereits tear-down ist — sichtbar als
+    // "ReferenceError: document is not defined" in TimeManager.updateClockDisplay,
+    // ein Flake, der den Unit-Test-Job in der CI schloss.
+    if (typeof document === 'undefined') {
+      this.stopClock();
+      return;
+    }
+
     const now = Date.now();
     const elapsed = (now - this.game.lastMoveTime) / 1000;
     this.game.lastMoveTime = now;
