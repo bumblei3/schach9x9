@@ -1,21 +1,21 @@
 # schach9x9 — Status (Stand: 2026-11-16)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `24eb9b0`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `24eb9b0`.
+Release-Tag bleibt `v2.0.0`. `main` ist `27021a6`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `27021a6`.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `24eb9b0` | 269 Dateien, 3284/3284 (8,5 s) |
+| Tests | `npx vitest run`, Node 26, `27021a6` | 269 Dateien, 3285/3285 (8,3 s) |
 | Tests (CI) | Run 43787689163, `98d6f6b` | grün, inklusive E2E |
 | Typecheck + Lint | `98d6f6b` | grün (`tsc --noEmit`, `eslint . --ext .ts`) |
 | Build | `98d6f6b` | grün |
 | E2E + Lighthouse | Run 43787689163, `98d6f6b` | grün (E2E, Lighthouse, CI-Gate, Pages-Deploy) |
 | Security | CodeQL, Run 43787689199 | grün |
-| CI | GitHub Actions | Lauf für `24eb9b0` gestartet; `d6e49bf` und `4b1783c` grün |
-| Git | `main` `24eb9b0` (2026-11-16) | Tag bleibt `v2.0.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung und Statuspille sind auf `main`. |
+| CI | GitHub Actions | Lauf für `27021a6` gestartet; `d6e49bf` und `24eb9b0` grün |
+| Git | `main` `27021a6` (2026-11-16) | Tag bleibt `v2.0.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung (weiß wie schwarz) und Statuspille sind auf `main`. |
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
@@ -181,6 +181,8 @@ Fix: benannte Konstante `SHADOW_MAP_TYPE = THREE.PCFShadowMap` mit Begründung; 
 **Seit 2026-11-16 auf `main`:** `d925254` (3D-Brett folgt 8×8/9×9), `b8d75d1` (Fix: `syncToGame` nur mit Partie, Drehung nur bei Feen-Figuren — der Rotlauf d925254 war `TS2345` in `App.ts` plus `rotation` ohne Deckung im Test) und `98d6f6b` (3D-Kreuzform: `ensureBoard`/`createBoard` bekommen `boardShape`, `isBlockedCell` überspringt die vier Ecken, `battleChess3D.fitBoard` leitet Size und Shape weiter). Live gegengeprüft: der Kreuz-Modus erzeugt genau 45 3D-Felder. Konsolen-Abnahme der Live-Seite (Klassisch 9×9, Kreuz, 3D, Eröffnungs-Trainer, Puzzle, Setup, Analyse, Drohungen/Chancen, Eröffnungsbuch, Save/Load, Share, GIF-/PGN-Export): 0 Fehler, 0 Warnungen.
 
 **Brett und Aufstellung 2026-11-16 (`d6e49bf`):** Die Eval-Bar ist ein Flex-Kind von `#board-container` und brachte den Brett-Wrapper auf 279×335 — die Zellen wurden 31×37 Rechtecke, in jedem Modus. `#board` trägt jetzt `aspect-ratio: 1` (verifiziert: 279×279, Zellen 31×31). Der Kreuz-Modus bot 27 „wählbare" Korridorfelder an, 18 davon blockierte Ecken, auf die nicht einmal geklickt werden konnte; Korridor-Highlight, `placeKing` und `handleBuyPiece` prüfen jetzt blockierte Felder (verifiziert: genau 9 wählbare Felder, d1–f3). Die KI-Aufstellung legte Bauern auf die Grundreihe (`gambit_15` → Bauer auf r8c5); `getOptimalSquare` meidet die Grundreihe, solange ein anderes Feld frei ist (verifiziert: Bauer auf r7c5). Weiße Korridor-Reihen sind `boardSize`-basiert — 8×8 nutzte vorher nur 6 der 9 Felder und die Grundreihen-Boni wirkten nie.
+
+**Schwarze KI-Aufstellung 2026-11-16 (`27021a6`):** `aiSetupPieces` fiel bei voller vorderer Reihe auf einen zufälligen freien Platz zurück — inklusive der Grundreihe. Live reproduziert: zwei Schwarze Bauern auf r0/r1, während (1,3) noch frei war. Jetzt greift zuerst ein Nicht-Grundreihen-Fallback; der Zufallsfallback bleibt nur, wenn wirklich nichts mehr frei ist. Verifiziert: 6 Live-Läufe, 0 Bauern auf r0; der neue Test ist ohne den Fix rot.
 
 **Statuspille 2026-11-16 (`24eb9b0`):** `GameStatusUI` leitete den Sieger bei `GAME_OVER` aus `game.turn` ab — das ist am Ende die *bedrängte* Seite. Weiß setzt matt, `turn` ist schwarz, die Pille sagte „Schwarz hat gewonnen!", während das Overlay korrekt „Weiß gewinnt!" zeigte. Neu ist `Game.winner` (`'white' | 'black' | 'draw' | null`), gesetzt an allen neun `GAME_OVER`-Stellen (Matt, Patt, ungenügendes Material, 50-Züge, Stellungswiederholung, Zeitüberschreitung, Aufgabe, Remis) und im Save/Load mitgeführt. Verifiziert am Puzzle `mate-in-1-001`: Pille, Overlay und `winner`-Feld nennen jetzt gleich Weiß. Test gegen die Verwechslung angebunden.
 
