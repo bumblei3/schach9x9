@@ -91,32 +91,38 @@ test.describe('Visual Regression Tests @visual', () => {
   });
 
   test('3D View Static Snapshot', async ({ page }) => {
-    // Skip 3D tests as they are consistently flaky in headless environments due to WebGL context issues
-    test.skip(true, 'Skipping 3D visual test due to headless WebGL inconsistencies');
+    test.slow(); // three.js + WebGL brauchen Zeit im Headless-Runner
 
-    await page.click('.gamemode-card[data-mode="setup"]');
+    await page.click('.gamemode-card[data-mode="classic"]');
+    const playNow = page.locator('#modal-actions .btn-primary');
+    if (
+      await playNow
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      await playNow.click();
+    }
+    await page.waitForFunction(() => document.querySelectorAll('#board .cell').length > 0);
 
-    // Wait for full game initialization before toggling 3D (wait for setup mode)
-    await expect(page.locator('body')).toHaveClass(/setup-mode/);
+    // Beide Knöpfe sitzen in der Aktionsleiste, die Playwrights
+    // Actionability-Prüfung als instabil/außerhalb des Viewports meldet —
+    // domClick umgeht die Pixelprüfung, nicht den Handler.
+    await domClick(page, '#action-more-btn');
+    await domClick(page, '#toggle-3d-btn');
 
-    await page.click('#toggle-3d-btn');
     const container = page.locator('#battle-chess-3d-container');
-
-    // Wait for the active class to be applied and the container to be visible
     await expect(container).toHaveClass(/active/);
-    await expect(container).toBeVisible();
-
-    // Ensure Three.js has initialized (check for canvas)
     await expect(container.locator('canvas')).toBeVisible({ timeout: 20000 });
 
-    // Give Three.js time to render the scene
-    await page.waitForTimeout(2000);
+    // three.js muss die Szene fertig gezeichnet haben, sonst ist der Baseline
+    // ein halb leeres Bild.
+    await page.waitForTimeout(2500);
 
-    // Use threshold and pixel ratio to handle minor WebGL rendering differences
     await expect(container).toHaveScreenshot('3d-view-initial.png', {
-      maxDiffPixelRatio: 0.1, // Allow for some variation in WebGL rendering
+      maxDiffPixelRatio: 0.1,
       animations: 'disabled',
-      scale: 'css', // Ensures dimensions match the baseline
+      scale: 'css',
     });
   });
   test('Pawn Promotion Modal', async ({ page }) => {
