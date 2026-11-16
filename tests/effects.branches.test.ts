@@ -40,7 +40,8 @@ describe('Effects System (branch coverage additions)', () => {
     const ps = new Effects.ParticleSystem();
     ps.spawn(10, 10, 'CAPTURE', '#abc');
     const p = document.querySelector('.particle') as HTMLElement;
-    expect(p.style.boxShadow).toContain('#abc');
+    // jsdom 30 serializes the color verbatim, jsdom >= 31 normalizes it to rgb().
+    expect(p.style.boxShadow).toMatch(/(#abc|rgb\(170, 187, 204\))/);
   });
 
   test('spawn uses document.body when board-container is missing', () => {
@@ -65,7 +66,8 @@ describe('Effects System (branch coverage additions)', () => {
     expect(ps.particles[0].type).toBe('TRAIL');
     expect(ps.animating).toBe(true);
     const p = document.querySelector('.particle') as HTMLElement;
-    expect(p.style.boxShadow).toContain('#fff');
+    // jsdom 30 serializes the color verbatim, jsdom >= 31 normalizes it to rgb().
+    expect(p.style.boxShadow).toMatch(/(#fff|rgb\(255, 255, 255\))/);
   });
 
   test('triggerVibration returns early when navigator.vibrate is unavailable', () => {
