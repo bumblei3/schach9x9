@@ -82,6 +82,12 @@ export async function analyzePlayerMovePreExecution(
 ): Promise<MoveExplanation | null> {
   if (!game.kiMentorEnabled || game.phase !== PHASES.PLAY) return Promise.resolve(null);
 
+  // Der Bedrohungsteil (int-Board, X-Ray, Fesselungen, Eval) ist auf das
+  // 9×9-Raster festgelegt. In den 8×8-Modi erfindet er Warnungen ("Dame ist
+  // GEFESSELT", "8.9 Bauern"), die jeden Zug blockieren — dann lieber keine
+  // Vorab-Warnung. `BOARD_SIZE` geht hier nicht, das liegt in 8×8 ebenfalls auf 8.
+  if (game.mode === 'standard8x8' || game.mode === 'upgrade8x8') return Promise.resolve(null);
+
   const from = move.from;
   const to = move.to;
   const piece = game.board[from.r][from.c];

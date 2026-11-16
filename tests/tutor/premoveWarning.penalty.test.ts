@@ -97,6 +97,17 @@ describe('pre-move warning penalty (static exchange evaluation)', () => {
     expect(result).toBeNull();
   });
 
+  it('does not analyse an 8x8 board — the threat model is 9x9 only', async () => {
+    // Auf 8x8 erfand der int-Board-Pfad "Dame ist GEFESSELT" und "8.9 Bauern"
+    // und blockierte so jeden Zug. Ohne Warnung ist der Zug spielbar.
+    game.mode = 'standard8x8';
+
+    const result = await MoveAnalyzer.analyzePlayerMovePreExecution(game, move);
+
+    expect(result).toBeNull();
+    expect(aiEngine.evaluatePosition).not.toHaveBeenCalled();
+  });
+
   it('does not warn when the exchange only wins a minor amount below the threshold', async () => {
     vi.mocked(aiEngine.see).mockReturnValue(100); // e.g. a pawn, threshold is 200
 
