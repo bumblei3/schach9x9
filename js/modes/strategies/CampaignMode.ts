@@ -93,6 +93,10 @@ export class CampaignModeStrategy implements GameModeStrategy {
       plundererNote +=
         '<p class="festung-note" style="font-size: 0.95rem; color: #fbbf24; margin-bottom: 1rem;">Festung: der Turm kostet 3 Punkte.</p>';
     }
+    if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('q_majestaet')) {
+      plundererNote +=
+        '<p class="majestaet-note" style="font-size: 0.95rem; color: #f0abfc; margin-bottom: 1rem;">Majestät: die Dame kostet 7 Punkte.</p>';
+    }
 
     if (level.setupType === 'fixed') {
       game.phase = PHASES.PLAY;

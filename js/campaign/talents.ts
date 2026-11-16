@@ -177,7 +177,7 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'q_majestaet',
         name: 'Majestät',
-        description: 'Damen-Schläge bringen +4 Gold.',
+        description: 'Damen-Schläge bringen +4 Gold. Im Anwerbe-Shop kostet die Dame 7 Punkte.',
         tier: 1,
         reqLevel: 4,
         cost: 120,

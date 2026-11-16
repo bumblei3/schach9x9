@@ -312,4 +312,32 @@ describe('ShopManager', () => {
       expect(mockGame.points).toBe(30);
     });
   });
+
+  describe('Majestät queen price', () => {
+    beforeEach(() => {
+      mockGame.campaignMode = true;
+      mockGame.currentLevelId = 'boss_1';
+      mockGame.playerColor = 'white';
+      mockGame.phase = PHASES.SETUP_WHITE_PIECES;
+      vi.mocked(campaignManager.getLevel).mockReturnValue({ setupType: 'budget' } as never);
+      vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+        (id: string) => id === 'q_majestaet'
+      );
+    });
+
+    test('buys and refunds a queen for 7 points', () => {
+      mockGame.points = 30;
+      shopManager.selectShopPiece('q');
+      expect(mockGame.selectedShopPiece).toBe('q');
+      expect(document.getElementById('selected-piece-display')?.innerHTML).toContain('(7)');
+
+      shopManager.handleBuyPiece(6, 4);
+      expect(mockGame.board[6][4]).toMatchObject({ type: 'q', color: 'white' });
+      expect(mockGame.points).toBe(23);
+
+      shopManager.handleSellPiece(6, 4);
+      expect(mockGame.board[6][4]).toBeNull();
+      expect(mockGame.points).toBe(30);
+    });
+  });
 });

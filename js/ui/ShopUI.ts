@@ -51,7 +51,7 @@ export function updateShopUI(game: GameLike): void {
   const tutorPointsDisplay = document.getElementById('tutor-points-display');
   if (tutorPointsDisplay) tutorPointsDisplay.textContent = (game.tutorPoints || 0).toString();
 
-  for (const piece of ['b', 'r']) {
+  for (const piece of ['b', 'r', 'q']) {
     const btn = document.querySelector<HTMLElement>(`.shop-item[data-piece="${piece}"]`);
     if (!btn) continue;
     const cost = shopPieceCost(piece, game);

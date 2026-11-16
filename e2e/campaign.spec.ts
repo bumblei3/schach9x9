@@ -365,6 +365,50 @@ test.describe('Festung', () => {
   });
 });
 
+test.describe('Majestät', () => {
+  test('prices the hiring queen at 7 before the purchase', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'boss_1',
+          unlockedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge', 'boss_1'],
+          completedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge'],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['q_majestaet'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card', { hasText: 'Kapitel 4' }).click();
+    await expect(page.locator('.majestaet-note')).toHaveText('Majestät: die Dame kostet 7 Punkte.');
+    const queen = page.locator('.shop-item[data-piece="q"]');
+    await expect(queen.locator('.shop-cost')).toHaveText('7');
+    await expect(queen).toHaveAttribute('data-cost', '7');
+    await expect(page.locator('.shop-item[data-piece="r"] .shop-cost')).toHaveText('5');
+
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Mission starten', exact: true })
+      .click();
+    await page.locator('.cell[data-r="7"][data-c="4"]').click();
+    await expect(page.locator('#points-display')).toHaveText('30');
+    await queen.click();
+    await page.locator('.cell[data-r="6"][data-c="4"]').click();
+    await expect(page.locator('.cell[data-r="6"][data-c="4"]')).toHaveAttribute('data-piece', 'q');
+    await expect(page.locator('#points-display')).toHaveText('23');
+    await page.locator('.cell[data-r="6"][data-c="4"]').click();
+    await expect(page.locator('#points-display')).toHaveText('30');
+  });
+});
+
 test.describe('Taktik-Genie', () => {
   test('opens one tip when the mission starts', async ({ page }) => {
     test.setTimeout(60000);
