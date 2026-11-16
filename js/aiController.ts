@@ -181,6 +181,12 @@ export class AIController {
         candidates = emptySpots.filter(s => s.r > kingPos.r);
         // Sort by closeness to King's column
         candidates.sort((a, b) => Math.abs(a.c - kingPos.c) - Math.abs(b.c - kingPos.c));
+        // Steht die vordere Reihe voll, fällt ein Bauer nie auf die Grundreihe:
+        // dort kann er nichts angreifen und blockiert die eigenen Figuren.
+        // Erst wenn sonst nichts frei ist, greift der Fallback weiter unten.
+        if (candidates.length === 0) {
+          candidates = emptySpots.filter(s => s.r !== rowStart);
+        }
       } else if (symbol === 'r' || symbol === 'q') {
         // Rooks/Queens prefer back rank
         candidates = emptySpots.filter(s => s.r === rowStart);

@@ -380,6 +380,36 @@ describe('AIController Coverage Boost', () => {
       expect(mockGame.gameController.finishSetupPhase).toHaveBeenCalled();
     });
 
+    test('aiSetupPieces - pawns avoid the back rank while another square is free', () => {
+      mockGame.blackCorridor = 3;
+      mockGame.points = 2;
+      // Vordere Reihe (r2) voll, in r1 ist nur (1,3) frei. Die Grundreihe r0
+      // ist zwar leer, darf aber nicht gewählt werden, solange (1,3) offen ist.
+      for (let c = 3; c <= 5; c++) {
+        mockGame.board[2][c] = { type: 'p', color: 'black' };
+      }
+      mockGame.board[1][4] = { type: 'k', color: 'black' };
+      mockGame.board[1][5] = { type: 'n', color: 'black' };
+      (mockGame.findKing as any).mockReturnValue({ r: 1, c: 4 });
+      const placeSpy = vi.fn().mockImplementation((r: number, c: number) => {
+        mockGame.board[r][c] = { type: 'p', color: 'black', hasMoved: false };
+        mockGame.points -= 1;
+      });
+      mockGame.gameController.placeShopPiece = placeSpy;
+      // Erster Aufruf: Figurenwahl (PAWN). Danach: Platzwahl -> Index 0.
+      const randomSpy = vi
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.99)
+        .mockReturnValue(0);
+
+      controller.aiSetupPieces();
+
+      randomSpy.mockRestore();
+      const placed = placeSpy.mock.calls as [number, number][];
+      expect(placed.length).toBeGreaterThan(0);
+      expect(placed[0][0]).not.toBe(0);
+    });
+
     test('aiSetupUpgrades - delegates to shopManager', () => {
       const upgradeSpy = vi.fn();
       mockGame.gameController = {
