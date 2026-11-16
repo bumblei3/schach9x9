@@ -1,5 +1,5 @@
 import { defineConfig, type Plugin } from 'vite';
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 /**
@@ -26,7 +26,6 @@ function injectServiceWorkerPrecache(): Plugin {
     closeBundle() {
       const distDir = resolve(__dirname, 'dist');
       const swPath = join(distDir, 'service-worker.js');
-      if (!existsSync(swPath)) return;
 
       const urls: string[] = [];
       for (const entry of readdirSync(distDir, { withFileTypes: true })) {
@@ -49,7 +48,14 @@ function injectServiceWorkerPrecache(): Plugin {
         urls.push(relative);
       }
 
-      const worker = readFileSync(swPath, 'utf8');
+      // Direkt lesen statt existsSync + readFileSync: CodeQL meldet sonst eine
+      // Race zwischen "existiert die Datei?" und "schreibe sie".
+      let worker: string;
+      try {
+        worker = readFileSync(swPath, 'utf8');
+      } catch {
+        return; // kein Worker in dist/ — nichts zu injizieren
+      }
       const marker = 'const BUILD_PRECACHE = [];';
       if (!worker.includes(marker)) return;
 
