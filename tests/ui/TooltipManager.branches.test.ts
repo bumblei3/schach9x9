@@ -91,7 +91,8 @@ describe('TooltipManager - touch + edge branches', () => {
 
     const tooltip = document.querySelector('.global-tooltip') as HTMLElement;
     expect(tooltip.style.opacity).toBe('1');
-    expect(tooltip.style.transform).toBe('translateY(0)');
+    // jsdom 30 keeps the unitless "translateY(0)", jsdom >= 31 appends "px".
+    expect(tooltip.style.transform).toMatch(/^translateY\(0(px)?\)$/);
 
     el.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
     expect(tooltip.style.opacity).toBe('0');
