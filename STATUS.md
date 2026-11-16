@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-11-16)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag bleibt `v2.0.0`. `main` ist `27021a6`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `27021a6`.
+Release-Tag ist `v2.1.0`. `main` ist `7c68a72`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `27021a6`.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
@@ -32,8 +32,9 @@ Bestätigungslauf: `bench/sf_match_m13_n40.log`, gleiches Protokoll wie `bench/s
 | **v1.9.0** | M1.1 (inkrementeller Hash + Quiesce-Fix) | released. Kanonische Stärke ist der Symfix-Log (+52), nicht die alte „+230“-Notiz |
 | **v2.0.0** | M2+M3: Kampagne Akt II + Fairy-Tactics + M3 Coach (Feenmuster, Figurennamen-Microcopy) + Daily Puzzle (deterministisch) | released/gemerged (PR #188, 2026-08-23) |
 | **main nach v2.0.0** | A11y-Labels, Vitest 5 (#212), TypeScript 7 Side-by-Side (#214), M1.3 64-bit-Zobrist (#215), Tagespuzzle als Sitzungseinstieg (#217/#219), Neues Spiel startet denselben Modus (#218), Akt IV, Partieende über `handleGameEnd`, 3D-Brett folgt 8×8/9×9 und der Kreuz-Form | auf `main`, kein neuer Tag |
+| **v2.1.0** | „Kreuz & Aufstellung": quadratisches Brett, Kreuz-Korridore, KI-Aufstellung (weiß + schwarz) ohne Bauern auf der Grundreihe, Statuspille mit Sieger, 8×8-Korridorrekatur; `Problem melden` já vorbefüllt | released/getaggt (2026-11-16, `7c68a72`) |
 
-`main` ist v2.0.0 plus die Zeile oben. Kein v2.1: der M1.3-Lauf ist neutral zur v1.9-Messung.
+`main` ist v2.1.0 plus die Doku-Commit danach. Der M1.3-Lauf ist neutral zur v1.9-Messung — die Engine bleibt eingefroren.
 
 ## Engine — feature-complete / geparkt
 
