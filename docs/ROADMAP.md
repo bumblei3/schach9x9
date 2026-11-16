@@ -229,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** `main` ist `898a750` (2026-11-16), Tag `v2.1.0` ist draußen („Kreuz & Aufstellung“). Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben auf `main`; Kapitel 26 gibt es nicht. Zeitüberschreitung und die Remisregeln laufen über `handleGameEnd`. Brett-Quadrat, Kreuz-Korridore, die KI-Aufstellung (weiß wie schwarz) und die Statuspille bei `GAME_OVER` sind repariert und live verifiziert. jsdom 31.0.1, vite 8.3.8 und prettier 3.10.1 sind gemergt (#238/#239), die jsdom-31-Serialisierung dreier CSS-Erwartungen ist gefixt (#240), der Promotions-Visual-Test prüft jetzt wirklich (#242). Der Playtest aus `docs/PLAYTEST_PROTOCOL.md` samt [`PLAYTEST_BOBLATT.md`](docs/PLAYTEST_BOBLATT.md) ist der nächste Datenpunkt.
+**Nächster konkreter Schritt:** `main` ist `898a750` (2026-11-16), Tag `v2.1.0` ist draußen („Kreuz & Aufstellung“). Die Engine bleibt eingefroren. Akt IV (Kapitel 19–25) sind Mattaufgaben auf `main`; Kapitel 26 gibt es nicht. Zeitüberschreitung und die Remisregeln laufen über `handleGameEnd`. Brett-Quadrat, Kreuz-Korridore, die KI-Aufstellung (weiß wie schwarz) und die Statuspille bei `GAME_OVER` sind repariert und live verifiziert. jsdom 31.0.1, vite 8.3.8 und prettier 3.10.1 sind gemergt (#238/#239), die jsdom-31-Serialisierung dreier CSS-Erwartungen ist gefixt (#240), der Promotions-Visual-Test prüft jetzt wirklich (#242). Der Playtest aus [`PLAYTEST_PROTOCOL.md`](PLAYTEST_PROTOCOL.md) samt [`PLAYTEST_BOBLATT.md`](PLAYTEST_BOBLATT.md) ist der nächste Datenpunkt.
 
 ---
 
