@@ -5,6 +5,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { ShopManager } from '../../js/shop/ShopManager.js';
 import { PHASES } from '../../js/gameEngine.js';
+import { campaignManager } from '../../js/campaign/CampaignManager.js';
 
 // Mock UI module
 vi.mock('../../js/ui.js', () => ({
@@ -18,6 +19,8 @@ vi.mock('../../js/ui.js', () => ({
 vi.mock('../../js/campaign/CampaignManager.js', () => ({
   campaignManager: {
     isRewardUnlocked: vi.fn().mockReturnValue(true),
+    isTalentUnlocked: vi.fn(() => false),
+    getLevel: vi.fn(() => ({ setupType: 'budget' })),
   },
 }));
 
@@ -243,6 +246,42 @@ describe('ShopManager', () => {
       expect(mockGame.board[0][4].type).not.toBe('p');
       expect(mockGame.points).toBeLessThan(10);
       vi.restoreAllMocks();
+    });
+  });
+
+  describe('Pfeilschnell bishop price', () => {
+    beforeEach(() => {
+      mockGame.campaignMode = true;
+      mockGame.currentLevelId = 'boss_1';
+      mockGame.playerColor = 'white';
+      mockGame.phase = PHASES.SETUP_WHITE_PIECES;
+      vi.mocked(campaignManager.getLevel).mockReturnValue({ setupType: 'budget' } as never);
+      vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+        (id: string) => id === 'b_pfeilschnell'
+      );
+    });
+
+    test('buys and refunds a bishop for 2 points', () => {
+      mockGame.points = 30;
+      shopManager.selectShopPiece('b');
+      expect(mockGame.selectedShopPiece).toBe('b');
+      expect(document.getElementById('selected-piece-display')?.innerHTML).toContain('(2)');
+
+      shopManager.handleBuyPiece(6, 4);
+      expect(mockGame.board[6][4]).toMatchObject({ type: 'b', color: 'white' });
+      expect(mockGame.points).toBe(28);
+
+      shopManager.handleSellPiece(6, 4);
+      expect(mockGame.board[6][4]).toBeNull();
+      expect(mockGame.points).toBe(30);
+    });
+
+    test('keeps the bishop at 3 outside the hiring shop', () => {
+      mockGame.phase = PHASES.SETUP_BLACK_PIECES;
+      mockGame.points = 2;
+      shopManager.selectShopPiece('b');
+      expect(mockGame.selectedShopPiece).toBeNull();
+      expect(mockGame.log).toHaveBeenCalledWith('Nicht genug Punkte!');
     });
   });
 });

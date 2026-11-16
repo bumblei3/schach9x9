@@ -1,6 +1,7 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { Level, Perk, UnitXp } from '../campaign/types.js';
 import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
+import { hiringBudget } from '../campaign/hiringBudget.js';
 import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { showToast } from './OverlayManager.js';
 
@@ -408,11 +409,12 @@ export class CampaignUI {
 
   private budgetLabel(level: Level): string {
     if (level.setupType !== 'budget') return '';
-    const base = level.playerBudget || 0;
-    if (campaignManager.isPerkUnlocked('elite_garde')) {
-      return `<div class="level-budget" style="font-size: 0.85rem; color: #ffd700; font-weight: bold;">Budget ${base + 10} (${base} + 10 Elite-Garde)</div>`;
-    }
-    return `<div class="level-budget" style="font-size: 0.85rem; color: #ffd700; font-weight: bold;">Budget ${base}</div>`;
+    const hire = hiringBudget(
+      level.playerBudget || 0,
+      campaignManager.isPerkUnlocked('elite_garde'),
+      campaignManager.isTalentUnlocked('n_taktiker')
+    );
+    return `<div class="level-budget" style="font-size: 0.85rem; color: #ffd700; font-weight: bold;">${hire.label}</div>`;
   }
 
   private getDifficultyColor(diff: string): string {

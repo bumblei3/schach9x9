@@ -8,6 +8,7 @@ import { logger } from '../../logger.js';
 import { campaignManager } from '../../campaign/CampaignManager.js';
 import { BoardFactory } from '../../campaign/BoardFactory.js';
 import { SetupModeStrategy } from './SetupMode.js'; // Re-use setup logic if possible or composition
+import { hiringBudget } from '../../campaign/hiringBudget.js';
 import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
 import { placePlundererPawn } from '../../campaign/plunderer.js';
 import { placeSprungfederKnight } from '../../campaign/sprungfeder.js';
@@ -45,14 +46,13 @@ export class CampaignModeStrategy implements GameModeStrategy {
     let budgetText = '';
     if (level.setupType === 'budget') {
       const base = level.playerBudget || 0;
-      budget = base;
-      if (campaignManager.isPerkUnlocked('elite_garde')) {
-        budget += 10;
-        budgetText = `Budget ${budget} (${base} + 10 Elite-Garde)`;
-        logger.info('[Campaign] Elite-Garde Perk applied: +10 Budget');
-      } else {
-        budgetText = `Budget ${budget}`;
-      }
+      const elite = campaignManager.isPerkUnlocked('elite_garde');
+      const taktiker = campaignManager.isTalentUnlocked('n_taktiker');
+      const hire = hiringBudget(base, elite, taktiker);
+      budget = hire.total;
+      budgetText = hire.label;
+      if (elite) logger.info('[Campaign] Elite-Garde Perk applied: +10 Budget');
+      if (taktiker) logger.info('[Campaign] Taktiker applied: +5 Budget');
     }
 
     game.points = budget;

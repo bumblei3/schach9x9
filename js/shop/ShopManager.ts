@@ -2,6 +2,7 @@ import { SHOP_PIECES, PIECE_VALUES, type ShopPieceConfig } from '../config.js';
 import { PIECE_SVGS } from '../chess-pieces.js';
 import { PHASES, type Game, type PieceWithMoved } from '../gameEngine.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
+import { shopPieceCost } from '../campaign/pfeilschnell.js';
 import { logger } from '../logger.js';
 import * as UI from '../ui.js';
 
@@ -21,7 +22,7 @@ export class ShopManager {
    */
   selectShopPiece(pieceType: string): void {
     if (!pieceType) return;
-    const cost = PIECE_VALUES[pieceType];
+    const cost = shopPieceCost(pieceType, this.game);
 
     // Check if player has enough points
     if (cost > this.game.points) {
@@ -81,7 +82,8 @@ export class ShopManager {
     if (piece && piece.color === color && piece.type !== 'k') {
       // Look up piece value
       const pieceEntry = Object.values(SHOP_PIECES).find(p => p.symbol === piece.type);
-      const cost = pieceEntry ? pieceEntry.points : 0;
+      const listed = pieceEntry ? pieceEntry.points : 0;
+      const cost = piece.type === 'b' ? shopPieceCost(piece.type, this.game) : listed;
 
       this.game.points += cost;
       this.game.board[r][c] = null;
@@ -122,7 +124,7 @@ export class ShopManager {
       return;
     }
 
-    const cost = PIECE_VALUES[this.game.selectedShopPiece!];
+    const cost = shopPieceCost(this.game.selectedShopPiece!, this.game);
     if (this.game.points >= cost) {
       const pieceType = this.game.selectedShopPiece!;
 

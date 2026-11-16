@@ -236,6 +236,20 @@ describe('CampaignUI', () => {
     expect(card.textContent).toContain('Budget 40 (30 + 10 Elite-Garde)');
   });
 
+  it('adds Taktiker to the budget line on Kapitel 4', () => {
+    (campaignManager.getAllLevels as any).mockReturnValue([
+      { id: 'boss_1', title: 'Belagerung', difficulty: 'hard', setupType: 'budget', playerBudget: 30 },
+    ]);
+    (campaignManager.isLevelUnlocked as any).mockReturnValue(true);
+    (campaignManager.isLevelCompleted as any).mockReturnValue(false);
+    (campaignManager.isPerkUnlocked as any).mockReturnValue(false);
+    (campaignManager.isTalentUnlocked as any).mockImplementation((id: string) => id === 'n_taktiker');
+
+    campaignUI.show();
+    const card = document.getElementById('campaign-levels-grid')!.children[0];
+    expect(card.textContent).toContain('Budget 35 (30 + 5 Taktiker)');
+  });
+
   it('should switch to army view', () => {
     campaignUI.show();
     campaignUI.switchView('army');

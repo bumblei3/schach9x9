@@ -2,6 +2,7 @@
  * Modul für das Shop-System UI.
  * @module ShopUI
  */
+import { shopPieceCost } from '../campaign/pfeilschnell.js';
 import { PIECE_VALUES } from '../config.js';
 import { getPieceText } from './BoardRenderer.js';
 import { updateTutorRecommendations } from './TutorUI.js';
@@ -49,6 +50,14 @@ export function updateShopUI(game: GameLike): void {
 
   const tutorPointsDisplay = document.getElementById('tutor-points-display');
   if (tutorPointsDisplay) tutorPointsDisplay.textContent = (game.tutorPoints || 0).toString();
+
+  const bishopBtn = document.querySelector<HTMLElement>('.shop-item[data-piece="b"]');
+  if (bishopBtn) {
+    const bishopCost = shopPieceCost('b', game);
+    bishopBtn.dataset.cost = String(bishopCost);
+    const bishopLabel = bishopBtn.querySelector('.shop-cost');
+    if (bishopLabel) bishopLabel.textContent = String(bishopCost);
+  }
 
   document.querySelectorAll<HTMLElement>('.shop-item').forEach(btn => {
     const cost = parseInt(btn.dataset.cost || '0');
@@ -102,7 +111,7 @@ export function updateShopUI(game: GameLike): void {
     if (statusDisplay) {
       if (game.selectedShopPiece) {
         const pieceType = game.selectedShopPiece as Exclude<PieceType, null>;
-        statusDisplay.textContent = `Platziere: ${getPieceText({ type: pieceType, color: game.turn })} (${PIECE_VALUES[pieceType as keyof typeof PIECE_VALUES]} Pkt)`;
+        statusDisplay.textContent = `Platziere: ${getPieceText({ type: pieceType, color: game.turn })} (${shopPieceCost(pieceType, game)} Pkt)`;
       } else {
         statusDisplay.textContent = 'Wähle eine Figur zum Kaufen';
       }

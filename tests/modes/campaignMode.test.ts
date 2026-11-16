@@ -259,6 +259,34 @@ describe('CampaignModeStrategy', () => {
       );
     });
 
+    test('Taktiker adds 5 points and names them before the shop', async () => {
+      const { showModal } = await import('../../js/ui.js');
+      vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+        (id: string) => id === 'n_taktiker'
+      );
+
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+
+      expect(mockGame.points).toBe(25);
+      expect(mockGame.initialPoints).toBe(25);
+      expect(showModal).toHaveBeenCalledWith(
+        'Budget Level',
+        expect.stringContaining('Budget 25 (20 + 5 Taktiker)'),
+        expect.any(Array)
+      );
+
+      vi.mocked(campaignManager.isPerkUnlocked).mockImplementation(
+        (id: string) => id === 'elite_garde'
+      );
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+      expect(mockGame.points).toBe(35);
+      expect(showModal).toHaveBeenCalledWith(
+        'Budget Level',
+        expect.stringContaining('Budget 35 (20 + 10 Elite-Garde + 5 Taktiker)'),
+        expect.any(Array)
+      );
+    });
+
     test('names the budget in the intro of a hiring chapter', async () => {
       const { showModal } = await import('../../js/ui.js');
 

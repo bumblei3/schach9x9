@@ -72,7 +72,8 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'n_taktiker',
         name: 'Taktiker',
-        description: 'Springer-Schläge bringen +2 Gold.',
+        description:
+          'Springer-Schläge bringen +2 Gold. Jedes Anwerbe-Kapitel startet mit +5 Budget.',
         tier: 2,
         reqLevel: 5,
         cost: 150,
@@ -99,7 +100,8 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'b_pfeilschnell',
         name: 'Pfeilschnell',
-        description: 'Läufer-Schläge bringen +2 Gold.',
+        description:
+          'Läufer-Schläge bringen +2 Gold. Im Anwerbe-Shop kostet der Läufer 2 Punkte.',
         tier: 1,
         reqLevel: 3,
         cost: 80,

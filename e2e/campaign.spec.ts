@@ -244,6 +244,83 @@ test.describe('Sprungfeder', () => {
   });
 });
 
+test.describe('Taktiker', () => {
+  test('raises the Kapitel 4 purse by 5 before the shop opens', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'boss_1',
+          unlockedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge', 'boss_1'],
+          completedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge'],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['n_taktiker'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    const chapter = page.locator('.campaign-level-card', { hasText: 'Kapitel 4' });
+    await expect(chapter).toContainText('Budget 35 (30 + 5 Taktiker)');
+    await chapter.click();
+    await expect(page.locator('.campaign-budget')).toHaveText('Budget 35 (30 + 5 Taktiker)');
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Mission starten', exact: true })
+      .click();
+    await expect(page.locator('#points-display')).toHaveText('35');
+  });
+});
+
+test.describe('Pfeilschnell', () => {
+  test('prices the hiring bishop at 2 before the purchase', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'boss_1',
+          unlockedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge', 'boss_1'],
+          completedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge'],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['b_pfeilschnell'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card', { hasText: 'Kapitel 4' }).click();
+    const bishop = page.locator('.shop-item[data-piece="b"]');
+    await expect(bishop.locator('.shop-cost')).toHaveText('2');
+    await expect(bishop).toHaveAttribute('data-cost', '2');
+    await expect(page.locator('.shop-item[data-piece="n"] .shop-cost')).toHaveText('3');
+
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Mission starten', exact: true })
+      .click();
+    await page.locator('.cell[data-r="7"][data-c="4"]').click();
+    await expect(page.locator('#points-display')).toHaveText('30');
+    await bishop.click();
+    await page.locator('.cell[data-r="6"][data-c="4"]').click();
+    await expect(page.locator('.cell[data-r="6"][data-c="4"]')).toHaveAttribute('data-piece', 'b');
+    await expect(page.locator('#points-display')).toHaveText('28');
+    await page.locator('.cell[data-r="6"][data-c="4"]').click();
+    await expect(page.locator('#points-display')).toHaveText('30');
+  });
+});
+
 test.describe('Taktik-Genie', () => {
   test('opens one tip when the mission starts', async ({ page }) => {
     test.setTimeout(60000);
