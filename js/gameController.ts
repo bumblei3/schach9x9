@@ -5,7 +5,7 @@
  * and coordinating between game engine, shop, UI, and AI.
  */
 
-import { PHASES, AI_DELAY_MS, type Game, type PieceWithMoved } from './gameEngine.js';
+import { PHASES, AI_DELAY_MS, BOARD_SIZE, type Game, type PieceWithMoved } from './gameEngine.js';
 import type { PuzzleState } from './types/core.js';
 import { storageManager } from './storage.js';
 import * as UI from './ui.js';
@@ -33,6 +33,7 @@ import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
 import type { Player } from './types/core.js';
 import type { GameMode } from './config.js';
+import { isBlockedCell } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
 import { leaderboardManager } from './leaderboard.js';
@@ -273,8 +274,9 @@ export class GameController {
 
   // Helper methods made public for Strategies
   placeKing(r: number, c: number, color: Player): void {
-    // White at bottom (6), Black at top (0)
-    const validRowStart = color === 'white' ? 6 : 0;
+    // White at bottom (last three rows), Black at top (0)
+    const size = this.game.boardSize || BOARD_SIZE;
+    const validRowStart = color === 'white' ? size - 3 : 0;
 
     if (r < validRowStart || r >= validRowStart + 3) {
       this.game.log('Ungültiger Bereich für König!');
@@ -293,6 +295,27 @@ export class GameController {
 
     const colBlock = Math.floor(c / 3);
     const colStart = colBlock * 3;
+
+    // Kreuz-Form: Ein Korridor mit blockierten Feldern existiert nicht. Ohne
+    // diesen Guard landete der König auf einem Eckfeld ohne Zell.
+    let corridorBlocked = false;
+    for (let r = validRowStart; r < validRowStart + 3; r++) {
+      for (let cc = colStart; cc < colStart + 3; cc++) {
+        if (
+          r >= 0 &&
+          r < size &&
+          cc >= 0 &&
+          cc < size &&
+          isBlockedCell(r, cc, this.game.boardShape)
+        ) {
+          corridorBlocked = true;
+        }
+      }
+    }
+    if (corridorBlocked) {
+      this.game.log('In dieser Brettform gibt es nur den Mittelkorridor.');
+      return;
+    }
 
     const kingR = validRowStart + 1;
     const kingC = colStart + 1;

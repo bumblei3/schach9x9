@@ -1,4 +1,4 @@
-import { SHOP_PIECES, PIECE_VALUES, type ShopPieceConfig } from '../config.js';
+import { SHOP_PIECES, PIECE_VALUES, BOARD_SIZE, isBlockedCell, type ShopPieceConfig } from '../config.js';
 import { PIECE_SVGS } from '../chess-pieces.js';
 import { PHASES, type Game, type PieceWithMoved } from '../gameEngine.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
@@ -107,14 +107,18 @@ export class ShopManager {
 
     if (typeof colStart !== 'number') return;
 
-    // Fixed row ranges for 9x9 board
-    // Black: Rows 0-2
-    // White: Rows 6-8
-    const rowStart = isWhiteTurn ? 6 : 0;
+    // Fixed row ranges (9x9: black 0-2, white 6-8; 8x8: black 0-2, white 5-7)
+    const rowStart = isWhiteTurn ? (this.game.boardSize || BOARD_SIZE) - 3 : 0;
 
     // Validate placement area (must be in own corridor)
     if (r < rowStart || r >= rowStart + 3 || c < colStart || c >= colStart + 3) {
       if (this.game.log) this.game.log('Muss im eigenen Korridor platziert werden!');
+      return;
+    }
+
+    // Kreuz-Form: blockierte Felder existieren nicht.
+    if (isBlockedCell(r, c, this.game.boardShape)) {
+      if (this.game.log) this.game.log('Dieses Feld gibt es in dieser Brettform nicht!');
       return;
     }
 

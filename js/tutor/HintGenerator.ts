@@ -1,7 +1,7 @@
 import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import type { MoveInfo } from './MoveAnalyzer.js';
-import { getTutorDepth } from '../config.js';
+import { getTutorDepth, isBlockedCell } from '../config.js';
 import type { SearchResult, MoveResult } from '../aiEngine.js';
 import {
   setTutorLoading,
@@ -295,6 +295,7 @@ export function getSquareScore(
 ): number {
   let score = 0;
 
+  const size = game.boardSize || BOARD_SIZE;
   const corruptedColStart = isWhite ? game.whiteCorridor : game.blackCorridor;
   const isCenterCol = c === corruptedColStart! + 1;
   const isCornerCol = c === corruptedColStart || c === corruptedColStart! + 2;
@@ -304,12 +305,12 @@ export function getSquareScore(
     ? game.availableKingPos
     : game.rulesEngine.findKing(isWhite ? 'white' : 'black');
 
-  // Row definitions relative to player
+  // Row definitions relative to player (8x8 and 9x9 have different back ranks)
   let frontRow: number, middleRow: number, backRow: number;
   if (isWhite) {
-    frontRow = 6;
-    middleRow = 7;
-    backRow = 8;
+    frontRow = size - 3;
+    middleRow = size - 2;
+    backRow = size - 1;
   } else {
     frontRow = 2;
     middleRow = 1;
@@ -380,27 +381,42 @@ export function getOptimalSquare(
   isWhite: boolean
 ): { r: number; c: number } | null {
   const colStart = isWhite ? game.whiteCorridor : game.blackCorridor;
-  const rowStart = isWhite ? 6 : 0;
+  const size = game.boardSize || BOARD_SIZE;
+  const rowStart = isWhite ? size - 3 : 0;
 
-  let bestSquare: { r: number; c: number } | null = null;
-  let maxScore = -Infinity;
+  const isBackRank = (r: number): boolean => (isWhite ? r === size - 1 : r === 0);
 
-  for (let r = rowStart; r < rowStart + 3; r++) {
-    for (let c = colStart!; c < colStart! + 3; c++) {
-      // Check boundaries and occupancy
-      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
-      const piece = game.board[r][c];
-      if (piece) continue; // Skip occupied
+  const search = (allowBackRank: boolean): { r: number; c: number } | null => {
+    let bestSquare: { r: number; c: number } | null = null;
+    let maxScore = -Infinity;
 
-      const score = getSquareScore(r, c, pieceType, isWhite, game);
-      if (score > maxScore) {
-        maxScore = score;
-        bestSquare = { r, c };
+    for (let r = rowStart; r < rowStart + 3; r++) {
+      for (let c = colStart!; c < colStart! + 3; c++) {
+        // Check boundaries and occupancy
+        if (r < 0 || r >= size || c < 0 || c >= size) continue;
+        // Kreuz-Form: blockierte Ecken existieren nicht.
+        if (isBlockedCell(r, c, game.boardShape)) continue;
+        // Bauern gehören nicht auf die Grundreihe — dort können sie nichts
+        // angreifen und blockieren die eigenen Figuren.
+        if (pieceType === 'p' && !allowBackRank && isBackRank(r)) continue;
+        const piece = game.board[r][c];
+        if (piece) continue; // Skip occupied
+
+        const score = getSquareScore(r, c, pieceType, isWhite, game);
+        if (score > maxScore) {
+          maxScore = score;
+          bestSquare = { r, c };
+        }
       }
     }
-  }
 
-  return bestSquare;
+    return bestSquare;
+  };
+
+  const best = search(false);
+  if (best) return best;
+  // Nur wenn sonst kein Feld frei ist, darf ein Bauer die Grundreihe nehmen.
+  return pieceType === 'p' ? search(true) : null;
 }
 
 /**
@@ -774,13 +790,14 @@ export function applySetupTemplate(
   const colStart = isWhite ? game.whiteCorridor : game.blackCorridor;
   if (typeof colStart !== 'number') return;
 
-  const rowStart = isWhite ? 6 : 0;
+  const size = game.boardSize || BOARD_SIZE;
+  const rowStart = isWhite ? size - 3 : 0;
 
   // Clear existing pieces in corridor (except King)
   let kingPos: { r: number; c: number } | null = null;
   for (let r = rowStart; r < rowStart + 3; r++) {
     for (let c = colStart; c < colStart + 3; c++) {
-      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
+      if (r < 0 || r >= size || c < 0 || c >= size) continue;
 
       const piece = game.board[r][c];
       if (piece && piece.type === 'k') {

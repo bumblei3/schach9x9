@@ -571,12 +571,15 @@ export function renderBoard(game: GameLike): void {
       const isHumanSetup =
         game.phase === PHASES.SETUP_WHITE_KING ||
         (game.phase === PHASES.SETUP_BLACK_KING && !game.isAI);
+      const boardSize = game.boardSize || size;
       if (isHumanSetup) {
-        const rowStart = game.phase === PHASES.SETUP_WHITE_KING ? 6 : 0;
+        const rowStart = game.phase === PHASES.SETUP_WHITE_KING ? boardSize - 3 : 0;
         if (
           r >= rowStart &&
           r < rowStart + 3 &&
-          ((c >= 0 && c <= 2) || (c >= 3 && c <= 5) || (c >= 6 && c <= 8))
+          ((c >= 0 && c <= 2) || (c >= 3 && c <= 5) || (c >= 6 && c <= 8)) &&
+          // Kreuz-Form: blockierte Ecken nicht als wählbar anbieten.
+          (!game.boardShape || !isBlockedCell(r, c, game.boardShape))
         ) {
           cell.classList.add('selectable-corridor');
         }
@@ -585,12 +588,24 @@ export function renderBoard(game: GameLike): void {
         typeof game.whiteCorridor === 'number' &&
         (game.phase === PHASES.SETUP_WHITE_PIECES || game.phase === PHASES.SETUP_BLACK_KING)
       ) {
-        if (r >= 6 && r < 9 && c >= game.whiteCorridor && c < game.whiteCorridor + 3) {
+        if (
+          r >= boardSize - 3 &&
+          r < boardSize &&
+          c >= game.whiteCorridor &&
+          c < game.whiteCorridor + 3 &&
+          (!game.boardShape || !isBlockedCell(r, c, game.boardShape))
+        ) {
           cell.classList.add('selectable-corridor');
         }
       }
       if (typeof game.blackCorridor === 'number' && game.phase === PHASES.SETUP_BLACK_PIECES) {
-        if (r >= 0 && r < 3 && c >= game.blackCorridor && c < game.blackCorridor + 3) {
+        if (
+          r >= 0 &&
+          r < 3 &&
+          c >= game.blackCorridor &&
+          c < game.blackCorridor + 3 &&
+          (!game.boardShape || !isBlockedCell(r, c, game.boardShape))
+        ) {
           cell.classList.add('selectable-corridor');
         }
       }
