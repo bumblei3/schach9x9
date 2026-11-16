@@ -25,6 +25,8 @@ export class SceneManager3D {
   public renderer: THREE.WebGLRenderer | null;
   public controls: OrbitControls | null;
   public boardGroup: THREE.Group | null;
+  /** Squares along one edge of the board currently in the scene. */
+  public boardEdge: number | null;
   public squareSize: number;
   public currentTheme: string;
   public boundAnimate: () => void;
@@ -38,6 +40,7 @@ export class SceneManager3D {
     this.renderer = null;
     this.controls = null;
     this.boardGroup = null;
+    this.boardEdge = null;
     this.squareSize = 1;
 
     // Default settings
@@ -204,17 +207,26 @@ export class SceneManager3D {
     return themes[theme] || themes.classic;
   }
 
-  createBoard(): void {
+  /** Rebuild the squares when the active game uses a different edge length. */
+  ensureBoard(size: number): void {
+    if (!this.scene) return;
+    if (this.boardGroup && this.boardEdge === size) return;
+    this.createBoard(size);
+  }
+
+  createBoard(size: number = BOARD_SIZE): void {
     if (!this.scene) return;
 
+    this.disposeBoard();
+    this.boardEdge = size;
     this.boardGroup = new THREE.Group();
     this.currentTheme = localStorage.getItem('chess_theme') || 'classic';
 
     const squareGeometry = new THREE.BoxGeometry(this.squareSize, 0.1, this.squareSize);
     const colors = this.getThemeColors(this.currentTheme);
 
-    for (let row = 0; row < BOARD_SIZE; row++) {
-      for (let col = 0; col < BOARD_SIZE; col++) {
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
         const isLight = (row + col) % 2 === 0;
         const material = new THREE.MeshStandardMaterial({
           color: isLight ? colors.light : colors.dark,
@@ -239,10 +251,11 @@ export class SceneManager3D {
   addCoordinateLabels(): void {
     if (!this.boardGroup) return;
 
-    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'].slice(0, BOARD_SIZE);
-    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].slice(0, BOARD_SIZE);
+    const edge = this.boardEdge ?? BOARD_SIZE;
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'].slice(0, edge);
+    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].slice(0, edge);
 
-    const offset = (BOARD_SIZE * this.squareSize) / 2;
+    const offset = (edge * this.squareSize) / 2;
 
     files.forEach((file, index) => {
       const sprite = this.createTextSprite(file);
@@ -298,7 +311,7 @@ export class SceneManager3D {
   }
 
   boardToWorld(row: number, col: number): { x: number; z: number } {
-    const offset = (BOARD_SIZE - 1) / 2;
+    const offset = ((this.boardEdge ?? BOARD_SIZE) - 1) / 2;
     const x = (col - offset) * this.squareSize;
     const z = (row - offset) * this.squareSize;
     return { x, z };
@@ -343,6 +356,27 @@ export class SceneManager3D {
         mat.color.setHex(isLight ? colors.light : colors.dark);
       }
     });
+  }
+
+  private disposeBoard(): void {
+    if (!this.boardGroup) return;
+    this.scene?.remove(this.boardGroup);
+
+    const geometries = new Set<THREE.BufferGeometry>();
+    const materials = new Set<THREE.Material>();
+    this.boardGroup.traverse(object => {
+      const mesh = object as THREE.Mesh;
+      if (mesh.geometry) geometries.add(mesh.geometry);
+      if (Array.isArray(mesh.material)) mesh.material.forEach(material => materials.add(material));
+      else if (mesh.material) materials.add(mesh.material);
+    });
+    geometries.forEach(geometry => geometry.dispose());
+    materials.forEach(material => {
+      const textured = material as THREE.Material & { map?: THREE.Texture | null };
+      textured.map?.dispose();
+      material.dispose();
+    });
+    this.boardGroup = null;
   }
 
   dispose(): void {

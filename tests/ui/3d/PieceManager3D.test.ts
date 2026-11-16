@@ -80,6 +80,22 @@ describe('PieceManager3D', () => {
     });
   });
 
+  test('white facing pieces turn toward black, black already faces white', async () => {
+    const { createPiece3D } = await import('../../../js/pieces3D.js');
+    vi.mocked(createPiece3D).mockImplementation(() => new THREE.Group());
+
+    pieceManager.addPiece('n', 'white', 8, 4);
+    pieceManager.addPiece('n', 'black', 0, 4);
+    pieceManager.addPiece('q', 'white', 8, 3);
+    pieceManager.addPiece('r', 'black', 0, 3);
+
+    expect(pieceManager.pieces['8,4'].rotation.y).toBe(Math.PI);
+    expect(pieceManager.pieces['0,4'].rotation.y).toBe(0);
+    expect(pieceManager.pieces['8,3'].rotation.y).toBe(0);
+    expect(pieceManager.pieces['0,3'].rotation.y).toBe(0);
+    vi.mocked(createPiece3D).mockReturnValue(new THREE.Group());
+  });
+
   test('removePiece should remove piece from scene and map', () => {
     pieceManager.addPiece('p', 'white', 6, 4);
     const spy = vi.spyOn(mockSceneManager.scene, 'remove');

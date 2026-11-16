@@ -229,6 +229,10 @@ export class App {
         }
       }) as EventListener);
     }
+
+    if (this.battleChess3D?.scene) {
+      this.battleChess3D.syncToGame(this.game);
+    }
   }
 
   private registerServiceWorker(): void {

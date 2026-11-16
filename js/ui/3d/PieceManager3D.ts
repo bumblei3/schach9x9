@@ -13,6 +13,9 @@ import type { SceneManager3D } from './SceneManager3D.js';
 import type { Game } from '../../gameEngine.js';
 import type { Square, Piece } from '../../types/core.js';
 
+/** Meshes face +z, toward white and the camera. These types have a front. */
+const FACING_PIECES = new Set(['n', 'b', 'a', 'c', 'e', 'j']);
+
 export class PieceManager3D {
   public sceneManager: SceneManager3D;
   public pieces: Record<string, THREE.Group>;
@@ -51,8 +54,9 @@ export class PieceManager3D {
     // Add pieces from game board
     let count = 0;
     const start = performance.now();
-    for (let row = 0; row < BOARD_SIZE; row++) {
-      for (let col = 0; col < BOARD_SIZE; col++) {
+    const size = game.boardSize || BOARD_SIZE;
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
         const piece = game.board[row][col];
         if (piece) {
           this.addPiece(piece.type, piece.color, row, col);
@@ -180,6 +184,8 @@ export class PieceManager3D {
 
     const pos = this.sceneManager.boardToWorld(row, col);
     piece3D.position.set(pos.x, 0, pos.z);
+    const faces = FACING_PIECES.has(type.toLowerCase());
+    piece3D.rotation.y = color === 'white' && faces ? Math.PI : 0;
     piece3D.userData = { type, color, row, col };
 
     if (this.sceneManager.scene) this.sceneManager.scene.add(piece3D);

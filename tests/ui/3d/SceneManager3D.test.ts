@@ -18,6 +18,12 @@ vi.mock('../../../js/config.js', () => ({
   getCurrentBoardSize: () => 9,
 }));
 
+function squareMeshes(sm: SceneManager3D): THREE.Mesh[] {
+  return (sm.boardGroup?.children ?? []).filter(
+    child => (child as THREE.Mesh).userData?.type === 'square'
+  ) as THREE.Mesh[];
+}
+
 describe('SceneManager3D', () => {
   let container: HTMLElement;
 
@@ -125,6 +131,38 @@ describe('SceneManager3D', () => {
     Object.defineProperty(container, 'clientHeight', { value: 0, writable: true });
     sm.onWindowResize();
     expect(renderer.setSize).not.toHaveBeenCalled();
+  });
+
+  test('createBoard replaces a 9-square board with 8 squares', () => {
+    const sm = new SceneManager3D(container);
+    sm.scene = new THREE.Scene();
+
+    sm.createBoard(9);
+    expect(squareMeshes(sm)).toHaveLength(81);
+    expect(sm.boardToWorld(0, 0)).toEqual({ x: -4, z: -4 });
+    const firstGroup = sm.boardGroup;
+
+    sm.createBoard(8);
+    expect(sm.boardGroup).not.toBe(firstGroup);
+    expect(sm.scene.children).not.toContain(firstGroup);
+    expect(squareMeshes(sm)).toHaveLength(64);
+    expect(sm.boardToWorld(0, 0)).toEqual({ x: -3.5, z: -3.5 });
+    expect(sm.boardToWorld(7, 7)).toEqual({ x: 3.5, z: 3.5 });
+    expect(Math.max(...squareMeshes(sm).map(mesh => mesh.userData.row as number))).toBe(7);
+  });
+
+  test('ensureBoard keeps the group when the edge length matches', () => {
+    const sm = new SceneManager3D(container);
+    sm.scene = new THREE.Scene();
+    sm.createBoard(8);
+    const group = sm.boardGroup;
+
+    sm.ensureBoard(8);
+    expect(sm.boardGroup).toBe(group);
+
+    sm.ensureBoard(9);
+    expect(sm.boardGroup).not.toBe(group);
+    expect(squareMeshes(sm)).toHaveLength(81);
   });
 
   test('dispose sets enabled to false', () => {

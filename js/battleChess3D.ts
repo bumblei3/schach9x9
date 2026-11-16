@@ -160,7 +160,14 @@ export class BattleChess3D {
    * Update 3D board from game state
    */
   public updateFromGameState(game: Game): void {
+    if (game.boardSize) this.sceneManager.ensureBoard(game.boardSize);
     this.pieceManager.updateFromGameState(game);
+  }
+
+  /** Fit the squares to the game. Refresh pieces only while 3D is on. */
+  public syncToGame(game: Game): void {
+    if (game.boardSize) this.sceneManager.ensureBoard(game.boardSize);
+    if (this.enabled) this.pieceManager.updateFromGameState(game);
   }
 
   /**
