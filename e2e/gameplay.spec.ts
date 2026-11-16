@@ -270,7 +270,11 @@ test.describe('Core Gameplay Loop', () => {
     test.slow();
 
     // 1. Start Classic 9x9 (directly in PLAY phase, no setup)
-    await page.click('.gamemode-card[data-mode="classic"]');
+    await page.click('.gamemode-card[data-mode="classic"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be fully ready
@@ -334,7 +338,11 @@ test.describe('Core Gameplay Loop', () => {
     test.slow();
 
     // 1. Start Classic 9x9 Game (has better persistence support than 8x8)
-    await page.click('.gamemode-card[data-mode="classic"]');
+    await page.click('.gamemode-card[data-mode="classic"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be ready

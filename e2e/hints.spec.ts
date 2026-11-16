@@ -44,7 +44,11 @@ test.describe('Hint Generator Repro', () => {
   test('should show hints in classic mode', async ({ page }) => {
     // 1. Select Classic Mode (9x9) using data-mode attribute to avoid ambiguity
     const classicModeCard = page.locator('.gamemode-card[data-mode="classic"]');
-    await classicModeCard.click();
+    await classicModeCard.click({ force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
 
     // 2. Wait for board
     await expect(page.locator('#board')).toBeVisible();

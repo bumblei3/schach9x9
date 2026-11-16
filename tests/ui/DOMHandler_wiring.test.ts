@@ -10,6 +10,28 @@ vi.mock('../../js/ui.js', () => ({
   showShop: vi.fn(),
   showToast: vi.fn(),
   clearPieceCache: vi.fn(),
+  showModal: (
+    title: string,
+    message: string,
+    actions: Array<{ text: string; class?: string; callback?: () => void }> = []
+  ) => {
+    const modal = document.getElementById('generic-modal');
+    const titleEl = document.getElementById('modal-title');
+    const messageEl = document.getElementById('modal-message');
+    const actionsEl = document.getElementById('modal-actions');
+    if (!modal || !titleEl || !messageEl || !actionsEl) return;
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    actionsEl.replaceChildren();
+    actions.forEach(action => {
+      const btn = document.createElement('button');
+      btn.textContent = action.text;
+      btn.className = action.class || 'btn-secondary';
+      btn.addEventListener('click', () => action.callback?.());
+      actionsEl.appendChild(btn);
+    });
+    modal.classList.remove('hidden');
+  },
 }));
 
 vi.mock('../../js/sounds.js', () => ({
@@ -193,17 +215,43 @@ describe('DOMHandler wiring invariants', () => {
       expect(app.init).toHaveBeenCalledWith(10, 'campaign');
     });
 
-    it('classic card inits with 0 points when data-init-points is "0"', () => {
+    it('classic card asks before starting, and does not hide the menu', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="generic-modal" class="hidden"><h2 id="modal-title"></h2><div id="modal-message"></div><div id="modal-actions"></div></div>'
+      );
+      handler.init();
+      const menu = document.getElementById('main-menu')!;
+      document.querySelector<HTMLElement>('[data-init-mode="classic"]')!.click();
+      expect(app.init).not.toHaveBeenCalled();
+      expect(menu.classList.contains('active')).toBe(true);
+      expect(document.getElementById('modal-title')!.textContent).toBe('Klassisch 9×9');
+
+      const buttons = [...document.querySelectorAll('#modal-actions button')];
+      (buttons.find(btn => btn.textContent === 'Sofort spielen') as HTMLButtonElement).click();
+      expect(app.init).toHaveBeenCalledWith(0, 'classic');
+      expect(menu.classList.contains('active')).toBe(false);
+    });
+
+    it('the upgrade choice starts the classic position with 25 points', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="generic-modal" class="hidden"><h2 id="modal-title"></h2><div id="modal-message"></div><div id="modal-actions"></div></div>'
+      );
       handler.init();
       document.querySelector<HTMLElement>('[data-init-mode="classic"]')!.click();
-      expect(app.init).toHaveBeenCalledWith(0, 'classic');
+      const buttons = [...document.querySelectorAll('#modal-actions button')];
+      (
+        buttons.find(btn => btn.textContent === 'Mit 25 Punkten verbessern') as HTMLButtonElement
+      ).click();
+      expect(app.init).toHaveBeenCalledWith(25, 'upgrade');
     });
 
     it('hides the main menu when a card is clicked', () => {
       handler.init();
       const menu = document.getElementById('main-menu')!;
       expect(menu.classList.contains('active')).toBe(true);
-      document.querySelector<HTMLElement>('[data-init-mode="classic"]')!.click();
+      document.querySelector<HTMLElement>('[data-init-mode="campaign"]')!.click();
       expect(menu.classList.contains('active')).toBe(false);
     });
 

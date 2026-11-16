@@ -19,7 +19,6 @@ import { test, expect, type Page, type ConsoleMessage } from '@playwright/test';
 const ALL_MODES = [
   'classic',
   'setup',
-  'upgrade',
   'cross',
   'standard8x8',
   'puzzle',
@@ -30,7 +29,7 @@ const ALL_MODES = [
 // Modes that drop you straight into a populated board (pieces present).
 // setup/cross start in the placement phase with an intentionally empty board,
 // so they are excluded from the piece-presence check.
-const PLAY_MODES = new Set(['classic', 'upgrade', 'standard8x8']);
+const PLAY_MODES = new Set(['classic', 'standard8x8']);
 
 /**
  * Attach console/error collectors and boot the app to the main menu with a
@@ -103,7 +102,16 @@ test.describe('Smoke: each mode starts with a rendered board', () => {
     test(`mode "${mode}" opens a board without errors`, async ({ page }) => {
       const errors = await bootToMenu(page);
 
-      await page.click(`.gamemode-card[data-mode="${mode}"]`);
+      await page.click(
+        `.gamemode-card[data-mode="${mode}"]`,
+        mode === 'classic' ? { force: true } : undefined
+      );
+      if (mode === 'classic') {
+        await page
+          .locator('#modal-actions')
+          .getByRole('button', { name: 'Sofort spielen', exact: true })
+          .click();
+      }
 
       // Board container becomes visible and is populated with cells.
       await expect(page.locator('#board')).toBeVisible();

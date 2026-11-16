@@ -21,6 +21,10 @@ test.describe('Deep Game Logic @logic', () => {
     // Initialize 9x9 Classic. Use force because clicking the card tears down
     // the main menu (which makes Playwright think the target is unstable).
     await page.click('.gamemode-card[data-mode="classic"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game instance AND full initialization (board + PLAY phase must
@@ -123,6 +127,10 @@ test.describe('Deep Game Logic @logic', () => {
   test('Castling 9x9: King should reach correct square', async ({ page }) => {
     // Initialize 9x9 Classic. Use force: clicking the card tears down the menu.
     await page.click('.gamemode-card[data-mode="classic"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
 
@@ -156,6 +164,10 @@ test.describe('Deep Game Logic @logic', () => {
     test.slow(); // Firefox needs more time
 
     await page.click('.gamemode-card[data-mode="classic"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
     await page.waitForFunction(() => (window as any).game?.phase === 'PLAY', { timeout: 10000 });
@@ -280,6 +292,10 @@ test.describe('Deep Game Logic @logic', () => {
   test('Pawn Promotion 9x9 to Angel (e)', async ({ page }) => {
     // Start 9x9 game
     await page.click('.gamemode-card[data-mode="classic"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be initialized

@@ -349,6 +349,11 @@ input:checked + .toggle-slider:before {
   display: none;
 }
 
+/* #main-menu is 9000. This dialog is a sibling of the menu, so 300 stays underneath it. */
+#generic-modal {
+  z-index: 9100;
+}
+
 .modal-content {
   background: var(--bg-panel);
   backdrop-filter: blur(16px);

@@ -65,8 +65,25 @@ export class E2EHelper {
     console.log(`[E2EHelper] Starting game mode: ${modeOrText}`);
     const card = this.selectModeLocator(modeOrText);
 
-    await expect(card).toBeVisible();
-    await card.click();
+    if (modeOrText === 'upgrade') {
+      const classic = this.selectModeLocator('classic');
+      await expect(classic).toBeVisible();
+      // The dialog covers the card in the same turn, so a normal click keeps retrying.
+      await classic.click({ force: true });
+      await this.page
+        .locator('#modal-actions')
+        .getByRole('button', { name: 'Mit 25 Punkten verbessern', exact: true })
+        .click();
+    } else {
+      await expect(card).toBeVisible();
+      await card.click(modeOrText === 'classic' ? { force: true } : undefined);
+      if (modeOrText === 'classic') {
+        await this.page
+          .locator('#modal-actions')
+          .getByRole('button', { name: 'Sofort spielen', exact: true })
+          .click();
+      }
+    }
     console.log(`[E2EHelper] Clicked card for ${modeOrText}`);
 
     // Wait for menu to disappear

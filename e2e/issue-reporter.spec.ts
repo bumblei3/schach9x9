@@ -26,6 +26,10 @@ test('settings issue reporter prefills a GitHub issue', async ({ page }) => {
 
   await domClick(page, '.menu-tab-btn[data-tab="play"]');
   await domClick(page, '.gamemode-card[data-mode="classic"]');
+  await page
+    .locator('#modal-actions')
+    .getByRole('button', { name: 'Sofort spielen', exact: true })
+    .click();
   await expect(page.locator('#main-menu')).not.toHaveClass(/active/);
   await domClick(page, '#menu-btn');
   await domClick(page, '.menu-tab-btn[data-tab="settings"]');

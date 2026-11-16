@@ -740,18 +740,47 @@ export class DOMHandler {
    * Replaces inline onclick handlers (UI-B a11y + testability).
    */
   private initGameModeCards(): void {
-    const mainMenu = document.getElementById('main-menu');
     document.querySelectorAll<HTMLElement>('[data-init-mode]').forEach(card => {
       card.addEventListener('click', () => {
         const mode = card.getAttribute('data-init-mode');
         if (!mode) return;
+        if (mode === 'classic') {
+          this.offerClassicStart();
+          return;
+        }
         const points = parseInt(card.getAttribute('data-init-points') || '0', 10);
-        if (mainMenu) mainMenu.classList.remove('active');
-        this.app
-          .init(points, mode)
-          .catch((err: unknown) => console.error('[DOMHandler] App init failed:', err));
+        this.startMode(mode, points);
       });
     });
+  }
+
+  private startMode(mode: string, points: number): void {
+    const mainMenu = document.getElementById('main-menu');
+    if (mainMenu) mainMenu.classList.remove('active');
+    this.app
+      .init(points, mode)
+      .catch((err: unknown) => console.error('[DOMHandler] App init failed:', err));
+  }
+
+  /** One Klassisch card. The old upgrade card was the same position plus 25 points. */
+  private offerClassicStart(): void {
+    UI.showModal(
+      'Klassisch 9×9',
+      'Dieselbe Aufstellung. Sofort spielen, oder vorher 25 Punkte zum Verbessern ausgeben.',
+      [
+        {
+          text: 'Sofort spielen',
+          class: 'btn-primary',
+          callback: () => this.startMode('classic', 0),
+        },
+        {
+          text: 'Mit 25 Punkten verbessern',
+          class: 'btn-secondary',
+          callback: () => this.startMode('upgrade', 25),
+        },
+        { text: 'Zurück', class: 'btn-secondary' },
+      ]
+    );
   }
 
   private menuOpenSeq = 0;
