@@ -184,8 +184,9 @@ export class PieceManager3D {
 
     const pos = this.sceneManager.boardToWorld(row, col);
     piece3D.position.set(pos.x, 0, pos.z);
-    const faces = FACING_PIECES.has(type.toLowerCase());
-    piece3D.rotation.y = color === 'white' && faces ? Math.PI : 0;
+    if (color === 'white' && FACING_PIECES.has(type.toLowerCase())) {
+      piece3D.rotation.y = Math.PI;
+    }
     piece3D.userData = { type, color, row, col };
 
     if (this.sceneManager.scene) this.sceneManager.scene.add(piece3D);

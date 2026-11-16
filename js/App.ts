@@ -230,7 +230,7 @@ export class App {
       }) as EventListener);
     }
 
-    if (this.battleChess3D?.scene) {
+    if (this.battleChess3D?.scene && this.game) {
       this.battleChess3D.syncToGame(this.game);
     }
   }
