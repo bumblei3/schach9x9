@@ -256,8 +256,8 @@ Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RE
 
 ## 💬 Feedback
 
-Hast du einen Fehler gefunden, eine Idee oder einen Verbesserungsvorschlags?
-Besuche unsere [GitHub Discussions](https://github.com/bumblei3/schach9x9/discussions) — wir freuen uns über dein Feedback!
+Rückmeldung zu schach9x9 ist ausdrücklich erwünscht.
+Fehler, Unklarheiten und Ideen kannst du als [GitHub-Issue](https://github.com/bumblei3/schach9x9/issues/new) schicken oder in den [Discussions](https://github.com/bumblei3/schach9x9/discussions) schreiben.
 
 ## 📌 Bekannte Einschränkungen / Offen
 

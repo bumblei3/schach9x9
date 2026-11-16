@@ -12,6 +12,40 @@ import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
 import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
 
+const SPOKEN_PIECE: Record<string, string> = {
+  p: 'Bauer',
+  n: 'Springer',
+  b: 'Läufer',
+  r: 'Turm',
+  q: 'Dame',
+  k: 'König',
+  a: 'Erzbischof',
+  c: 'Kanzler',
+  e: 'Engel',
+  j: 'Nachtreiter',
+};
+
+function spokenPiece(type: string, color: string): string {
+  const name = SPOKEN_PIECE[type] ?? type;
+  const feminine = type === 'q';
+  if (color === 'white') return feminine ? `weiße ${name}` : `weißer ${name}`;
+  return feminine ? `schwarze ${name}` : `schwarzer ${name}`;
+}
+
+function pieceAriaLabel(
+  c: number,
+  r: number,
+  size: number,
+  type: string,
+  color: string,
+  talents: string[] = []
+): string {
+  const file = String.fromCharCode(97 + c);
+  const rank = size - r;
+  const talentSuffix = talents.length ? `, ${talents.join(', ')}` : '';
+  return `${file}${rank}: ${spokenPiece(type, color)}${talentSuffix}`;
+}
+
 // Touch-Drag state (module-level for cross-cell touch handling)
 let touchDragElement: HTMLElement | null = null;
 let touchDragOrigin: { r: number; c: number; cellSize: number } | null = null;
@@ -500,10 +534,10 @@ export function renderBoard(game: GameLike): void {
     if (piece) {
       cell.dataset.piece = piece.type;
       cell.dataset.color = piece.color;
-      const file = String.fromCharCode(97 + c);
-      const rank = size - r;
-      const pieceName = piece.color === 'white' ? piece.type : piece.type.toUpperCase();
-      cell.setAttribute('aria-label', `${file}${rank}: ${pieceName}`);
+      cell.setAttribute(
+        'aria-label',
+        pieceAriaLabel(c, r, size, piece.type, piece.color)
+      );
     } else {
       delete cell.dataset.piece;
       delete cell.dataset.color;
@@ -631,11 +665,7 @@ export function renderBoard(game: GameLike): void {
           cell.classList.remove('piece-talented');
           delete cell.dataset.talents;
           const names = learnedTalentNames(p.type);
-          const file = String.fromCharCode(97 + c);
-          const rank = size - r;
-          const pieceName = p.color === 'white' ? p.type : p.type.toUpperCase();
-          const talentSuffix = names.length ? `, ${names.join(', ')}` : '';
-          cell.setAttribute('aria-label', `${file}${rank}: ${pieceName}${talentSuffix}`);
+          cell.setAttribute('aria-label', pieceAriaLabel(c, r, size, p.type, p.color, names));
           if (names.length) {
             cell.classList.add('piece-talented');
             cell.dataset.talents = names.join(' · ');

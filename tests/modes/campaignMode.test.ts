@@ -234,6 +234,31 @@ describe('CampaignModeStrategy', () => {
       expect(mockGame.board.flat().some((piece: { gifted?: boolean } | null) => piece?.gifted)).toBe(false);
     });
 
+    test('Sprungfeder places one free knight on a hiring chapter', async () => {
+      const { showModal } = await import('../../js/ui.js');
+      vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+        (id: string) => id === 'n_sprungfeder'
+      );
+
+      strategy.startLevel(mockGame, mockController, 'level_budget');
+
+      const knights = mockGame.board
+        .flat()
+        .filter((piece: { type?: string; gifted?: boolean } | null) => piece?.gifted);
+      expect(knights).toHaveLength(1);
+      expect(knights[0]).toMatchObject({ type: 'n', color: 'white', gifted: true });
+      expect(showModal).toHaveBeenCalledWith(
+        'Budget Level',
+        expect.stringContaining('Extra-Springer'),
+        expect.any(Array)
+      );
+
+      strategy.startLevel(mockGame, mockController, 'level_1');
+      expect(mockGame.board.flat().some((piece: { gifted?: boolean } | null) => piece?.gifted)).toBe(
+        false
+      );
+    });
+
     test('names the budget in the intro of a hiring chapter', async () => {
       const { showModal } = await import('../../js/ui.js');
 

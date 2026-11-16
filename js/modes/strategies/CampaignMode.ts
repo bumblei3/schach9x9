@@ -10,6 +10,7 @@ import { BoardFactory } from '../../campaign/BoardFactory.js';
 import { SetupModeStrategy } from './SetupMode.js'; // Re-use setup logic if possible or composition
 import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
 import { placePlundererPawn } from '../../campaign/plunderer.js';
+import { placeSprungfederKnight } from '../../campaign/sprungfeder.js';
 import type { Level } from '../../campaign/types.js';
 
 export class CampaignModeStrategy implements GameModeStrategy {
@@ -78,8 +79,14 @@ export class CampaignModeStrategy implements GameModeStrategy {
     let plundererNote = '';
     if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('p_scavenger')) {
       if (placePlundererPawn(game.board)) {
-        plundererNote =
+        plundererNote +=
           '<p class="plunderer-note" style="font-size: 0.95rem; color: #4ecdc4; margin-bottom: 1rem;">Plünderer stellt einen Extra-Bauern aufs Feld.</p>';
+      }
+    }
+    if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('n_sprungfeder')) {
+      if (placeSprungfederKnight(game.board)) {
+        plundererNote +=
+          '<p class="sprungfeder-note" style="font-size: 0.95rem; color: #93c5fd; margin-bottom: 1rem;">Sprungfeder stellt einen Extra-Springer aufs Feld.</p>';
       }
     }
 

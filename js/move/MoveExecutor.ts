@@ -13,7 +13,7 @@ import type { PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
-import { UNIT_TALENT_TREES } from '../campaign/talents.js';
+import { UNIT_TALENT_TREES, type TalentNode } from '../campaign/talents.js';
 
 /** +10% XP talents. effectValue is the percent, applied after flat bonuses. */
 const PERCENT_XP_TALENTS = new Set(['n_meister', 'q_omnipraesenz']);
@@ -22,6 +22,51 @@ function unlockedTalents(unitType: string) {
   const tree = UNIT_TALENT_TREES[unitType];
   if (!tree) return [];
   return tree.talents.filter(t => campaignManager.isTalentUnlocked(t.id));
+}
+
+const PIECE_NAMES: Record<string, { nom: string; acc: string; fem?: boolean }> = {
+  p: { nom: 'Bauer', acc: 'Bauern' },
+  n: { nom: 'Springer', acc: 'Springer' },
+  b: { nom: 'Läufer', acc: 'Läufer' },
+  r: { nom: 'Turm', acc: 'Turm' },
+  q: { nom: 'Dame', acc: 'Dame', fem: true },
+  k: { nom: 'König', acc: 'König' },
+  a: { nom: 'Erzbischof', acc: 'Erzbischof' },
+  c: { nom: 'Kanzler', acc: 'Kanzler' },
+  e: { nom: 'Engel', acc: 'Engel' },
+  j: { nom: 'Nachtreiter', acc: 'Nachtreiter' },
+};
+
+function pieceAccusative(type: string): string {
+  const name = PIECE_NAMES[type];
+  if (!name) return `deinen ${type}`;
+  return `${name.fem ? 'deine' : 'deinen'} ${name.acc}`;
+}
+
+function pieceNominative(type: string): string {
+  const name = PIECE_NAMES[type];
+  if (!name) return `Dein ${type}`;
+  return `${name.fem ? 'Deine' : 'Dein'} ${name.nom}`;
+}
+
+function goldNotice(talents: TalentNode[]): string {
+  return talents.map(t => `${t.name}: +${t.effectValue} Gold`).join(', ');
+}
+
+function xpNotice(type: string, xpAmount: number, talents: TalentNode[]): string {
+  const parts: string[] = [];
+  for (const t of talents) {
+    if (t.effectType === 'stat_boost' && !PERCENT_XP_TALENTS.has(t.id) && (t.effectValue ?? 0) > 0) {
+      parts.push(`${t.name} +${t.effectValue}`);
+    }
+  }
+  for (const t of talents) {
+    if (PERCENT_XP_TALENTS.has(t.id) && (t.effectValue ?? 0) > 0) {
+      parts.push(`${t.name} +${t.effectValue}%`);
+    }
+  }
+  const bonus = parts.length > 0 ? ` (${parts.join(', ')})` : '';
+  return `+${xpAmount} XP für ${pieceAccusative(type)}${bonus}`;
 }
 
 /**
@@ -158,12 +203,13 @@ export async function executeMove(
     (targetPiece || moveRecord.isEnPassant)
   ) {
     const talents = unlockedTalents(piece.type);
-    const gold = talents
-      .filter(t => t.effectType === 'passive_gold')
-      .reduce((sum, t) => sum + (t.effectValue ?? 0), 0);
+    const goldTalents = talents.filter(
+      t => t.effectType === 'passive_gold' && (t.effectValue ?? 0) > 0
+    );
+    const gold = goldTalents.reduce((sum, t) => sum + (t.effectValue ?? 0), 0);
     if (gold > 0) {
       campaignManager.addGold(gold);
-      notificationUI.show(`Talent: +${gold} Gold`, 'success', 'Talent');
+      notificationUI.show(goldNotice(goldTalents), 'success', 'Talent');
     }
 
     let xpAmount = 10;
@@ -182,14 +228,10 @@ export async function executeMove(
     campaignManager.addUnitXp(piece.type, xpAmount);
     const newLevel = campaignManager.getUnitXp(piece.type).level;
 
-    notificationUI.show(
-      `+${xpAmount} XP für deinen ${piece.type === 'p' ? 'Bauern' : piece.type === 'n' ? 'Springer' : 'Krieger'}`,
-      'success',
-      'Erfahrung'
-    );
+    notificationUI.show(xpNotice(piece.type, xpAmount, talents), 'success', 'Erfahrung');
     if (newLevel > oldLevel) {
       notificationUI.show(
-        `LEVEL UP! Dein ${piece.type} ist jetzt Stufe ${newLevel}!`,
+        `LEVEL UP! ${pieceNominative(piece.type)} ist jetzt Stufe ${newLevel}!`,
         'success',
         'Aufstieg',
         5000

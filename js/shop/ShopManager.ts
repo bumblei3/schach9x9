@@ -71,7 +71,11 @@ export class ShopManager {
 
     // Can only remove own non-king pieces
     if (piece && piece.gifted) {
-      if (this.game.log) this.game.log('Der Plünderer-Bauer bleibt auf dem Feld.');
+      const kept =
+        piece.type === 'n'
+          ? 'Der Sprungfeder-Springer bleibt auf dem Feld.'
+          : 'Der Plünderer-Bauer bleibt auf dem Feld.';
+      if (this.game.log) this.game.log(kept);
       return;
     }
     if (piece && piece.color === color && piece.type !== 'k') {

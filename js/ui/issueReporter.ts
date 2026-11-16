@@ -1,7 +1,7 @@
 /**
  * In-game issue reporter.
  *
- * Playtesters describe what happened. The dialog opens a prefilled GitHub
+ * Anyone can describe what happened. The dialog opens a prefilled GitHub
  * issue with mode, position, and the last client errors. There is no
  * backend and no token: GitHub only receives the report after the tester
  * submits it in their own browser.

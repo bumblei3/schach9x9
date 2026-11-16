@@ -274,6 +274,25 @@ describe('placeKing', () => {
     expect(game.log).toHaveBeenCalled();
   });
 
+  test('shifts the Plünderer pawn off the king square', () => {
+    game.board[7][4] = { type: 'p', color: 'white', gifted: true };
+    game.board[8][4] = { type: 'n', color: 'white', gifted: true };
+    controller.placeKing(7, 4, 'white');
+    expect(game.board[7][4]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+    expect(game.board[7][3]).toMatchObject({ type: 'p', color: 'white', gifted: true });
+    expect(game.board[8][4]).toMatchObject({ type: 'n', color: 'white', gifted: true });
+    expect(game.log).toHaveBeenCalledWith(
+      'Der Plünderer-Bauer rückt auf das nächste freie Feld.'
+    );
+  });
+
+  test('leaves the Plünderer pawn when the king uses another corridor', () => {
+    game.board[7][4] = { type: 'p', color: 'white', gifted: true };
+    controller.placeKing(7, 7, 'white');
+    expect(game.board[7][7]).toEqual({ type: 'k', color: 'white', hasMoved: false });
+    expect(game.board[7][4]).toMatchObject({ type: 'p', color: 'white', gifted: true });
+  });
+
   test('removes any pre-existing king of the same color before placing', () => {
     game.board[7][1] = { type: 'k', color: 'white', hasMoved: false };
     controller.placeKing(7, 7, 'white'); // colBlock 2 -> colStart 6 -> kingC 7

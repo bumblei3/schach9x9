@@ -239,16 +239,20 @@ describe('BoardRenderer Full Coverage', () => {
     game.phase = 'play';
     game.board[7][4] = { type: 'p', color: 'white' };
     game.board[1][0] = { type: 'p', color: 'black' };
+    game.board[0][4] = { type: 'q', color: 'black' };
 
     BoardRenderer.renderBoard(game);
 
     const whitePawn = document.querySelector('.cell[data-r="7"][data-c="4"]') as HTMLElement;
     const blackPawn = document.querySelector('.cell[data-r="1"][data-c="0"]') as HTMLElement;
+    const blackQueen = document.querySelector('.cell[data-r="0"][data-c="4"]') as HTMLElement;
     expect(whitePawn.classList.contains('piece-talented')).toBe(true);
     expect(whitePawn.dataset.talents).toBe('Plünderer');
-    expect(whitePawn.getAttribute('aria-label')).toContain('Plünderer');
+    expect(whitePawn.getAttribute('aria-label')).toBe('e2: weißer Bauer, Plünderer');
     expect(whitePawn.title).toBe('Plünderer');
     expect(blackPawn.classList.contains('piece-talented')).toBe(false);
+    expect(blackPawn.getAttribute('aria-label')).toBe('a8: schwarzer Bauer');
+    expect(blackQueen.getAttribute('aria-label')).toBe('e9: schwarze Dame');
 
     unlocked.mockRestore();
   });

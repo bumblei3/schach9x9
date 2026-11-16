@@ -21,6 +21,7 @@ import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
 import type { AIController } from './aiController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
+import { relocateGiftedPiece } from './campaign/plunderer.js';
 import { VICTORY_XP, victoryUnitTypes, victoryXpLine } from './campaign/victoryXp.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
@@ -295,6 +296,18 @@ export class GameController {
 
     const kingR = validRowStart + 1;
     const kingC = colStart + 1;
+    const occupant = this.game.board[kingR]?.[kingC];
+    if (occupant?.gifted && occupant.color === color) {
+      if (!relocateGiftedPiece(this.game.board, kingR, kingC)) {
+        this.game.log('Der Plünderer-Bauer bleibt auf dem Feld.');
+        return;
+      }
+      this.game.log(
+        occupant.type === 'n'
+          ? 'Der Sprungfeder-Springer rückt auf das nächste freie Feld.'
+          : 'Der Plünderer-Bauer rückt auf das nächste freie Feld.'
+      );
+    }
 
     this.game.board[kingR][kingC] = { type: 'k', color: color, hasMoved: false } as PieceWithMoved;
 

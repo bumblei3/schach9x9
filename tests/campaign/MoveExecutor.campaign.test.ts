@@ -104,6 +104,43 @@ describe('MoveExecutor - Campaign Mechanics', () => {
 
     // Default 10 + 5 bonus = 15
     expect(campaignManager.addUnitXp).toHaveBeenCalledWith('p', 15);
+    expect(notificationUI.show).toHaveBeenCalledWith(
+      '+15 XP für deinen Bauern (Veteran +5)',
+      'success',
+      'Erfahrung'
+    );
+  });
+
+  it('names Taktiker on the gold notice', async () => {
+    (campaignManager.isTalentUnlocked as any).mockImplementation(
+      (id: string) => id === 'n_taktiker'
+    );
+
+    game.board[4][4] = { type: 'n', color: 'white' };
+    game.board[3][3] = { type: 'p', color: 'black' };
+
+    await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
+
+    expect(campaignManager.addGold).toHaveBeenCalledWith(2);
+    expect(notificationUI.show).toHaveBeenCalledWith('Taktiker: +2 Gold', 'success', 'Talent');
+  });
+
+  it('names Sprungfeder on the XP line', async () => {
+    (campaignManager.isTalentUnlocked as any).mockImplementation(
+      (id: string) => id === 'n_sprungfeder'
+    );
+
+    game.board[4][4] = { type: 'n', color: 'white' };
+    game.board[3][3] = { type: 'p', color: 'black' };
+
+    await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
+
+    expect(campaignManager.addUnitXp).toHaveBeenCalledWith('n', 15);
+    expect(notificationUI.show).toHaveBeenCalledWith(
+      '+15 XP für deinen Springer (Sprungfeder +5)',
+      'success',
+      'Erfahrung'
+    );
   });
 
   it('does not pay gold when Plünderer only grants a hiring pawn', async () => {
@@ -171,7 +208,39 @@ describe('MoveExecutor - Campaign Mechanics', () => {
     await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
 
     expect(notificationUI.show).toHaveBeenCalledWith(
-      expect.stringContaining('LEVEL UP'),
+      'LEVEL UP! Dein Bauer ist jetzt Stufe 2!',
+      'success',
+      'Aufstieg',
+      5000
+    );
+  });
+
+  it('names the bishop on the XP line', async () => {
+    game.board[4][4] = { type: 'b', color: 'white' };
+    game.board[3][3] = { type: 'p', color: 'black' };
+
+    await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
+
+    expect(notificationUI.show).toHaveBeenCalledWith(
+      '+10 XP für deinen Läufer',
+      'success',
+      'Erfahrung'
+    );
+  });
+
+  it('names the queen with deine on the XP line and Deine on level up', async () => {
+    (campaignManager.getUnitXp as any)
+      .mockReturnValueOnce({ level: 1 })
+      .mockReturnValueOnce({ level: 2 });
+
+    game.board[4][4] = { type: 'q', color: 'white' };
+    game.board[3][3] = { type: 'p', color: 'black' };
+
+    await executeMove(game, moveController, { r: 4, c: 4 }, { r: 3, c: 3 });
+
+    expect(notificationUI.show).toHaveBeenCalledWith('+10 XP für deine Dame', 'success', 'Erfahrung');
+    expect(notificationUI.show).toHaveBeenCalledWith(
+      'LEVEL UP! Deine Dame ist jetzt Stufe 2!',
       'success',
       'Aufstieg',
       5000

@@ -60,7 +60,8 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'n_sprungfeder',
         name: 'Sprungfeder',
-        description: 'Springer-Schläge geben +5 XP (schnellere Unit-Levels).',
+        description:
+          'Jedes Anwerbe-Kapitel beginnt mit einem Extra-Springer. Springer-Schläge geben +5 XP.',
         tier: 1,
         reqLevel: 3,
         cost: 80,

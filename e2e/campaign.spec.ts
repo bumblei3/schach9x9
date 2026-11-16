@@ -203,6 +203,44 @@ test.describe('Plünderer', () => {
     await expect(page.locator('.plunderer-note')).toContainText('Extra-Bauern');
     const gifted = page.locator('.cell[data-piece="p"][data-color="white"]');
     await expect(gifted).toHaveCount(1);
+
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Mission starten', exact: true })
+      .click();
+    await page.locator('.cell[data-r="7"][data-c="4"]').click();
+    await expect(page.locator('.cell[data-r="7"][data-c="4"]')).toHaveAttribute('data-piece', 'k');
+    await expect(page.locator('.cell[data-r="7"][data-c="3"]')).toHaveAttribute('data-piece', 'p');
+    await expect(page.locator('.cell[data-r="7"][data-c="3"]')).toHaveAttribute('data-color', 'white');
+  });
+});
+
+test.describe('Sprungfeder', () => {
+  test('puts a free knight on the next hiring chapter', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'boss_1',
+          unlockedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge', 'boss_1'],
+          completedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge'],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['n_sprungfeder'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card', { hasText: 'Kapitel 4' }).click();
+    await expect(page.locator('.sprungfeder-note')).toContainText('Extra-Springer');
+    await expect(page.locator('.cell[data-r="8"][data-c="4"]')).toHaveAttribute('data-piece', 'n');
+    await expect(page.locator('.cell[data-r="8"][data-c="4"]')).toHaveAttribute('data-color', 'white');
   });
 });
 
