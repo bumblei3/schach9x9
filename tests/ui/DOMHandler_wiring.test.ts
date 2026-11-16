@@ -139,6 +139,7 @@ describe('DOMHandler wiring invariants', () => {
       <button id="toggle-more-modes" aria-expanded="false"></button>
       <button class="points-btn" data-points="15"></button>
       <div data-init-mode="classic" data-init-points="0"></div>
+      <div data-init-mode="standard8x8" data-init-points="0"></div>
       <div data-init-mode="campaign" data-init-points="10"></div>
       <div data-init-mode-no-points="x"></div>
     `;
@@ -233,7 +234,7 @@ describe('DOMHandler wiring invariants', () => {
       expect(menu.classList.contains('active')).toBe(false);
     });
 
-    it('the upgrade choice starts the classic position with 25 points', () => {
+    it('the upgrade choice starts the classic position with 15 points', () => {
       document.body.insertAdjacentHTML(
         'beforeend',
         '<div id="generic-modal" class="hidden"><h2 id="modal-title"></h2><div id="modal-message"></div><div id="modal-actions"></div></div>'
@@ -242,9 +243,41 @@ describe('DOMHandler wiring invariants', () => {
       document.querySelector<HTMLElement>('[data-init-mode="classic"]')!.click();
       const buttons = [...document.querySelectorAll('#modal-actions button')];
       (
-        buttons.find(btn => btn.textContent === 'Mit 25 Punkten verbessern') as HTMLButtonElement
+        buttons.find(btn => btn.textContent === 'Mit 15 Punkten verbessern') as HTMLButtonElement
       ).click();
-      expect(app.init).toHaveBeenCalledWith(25, 'upgrade');
+      expect(app.init).toHaveBeenCalledWith(15, 'upgrade');
+    });
+
+    it('standard 8x8 card asks before starting', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="generic-modal" class="hidden"><h2 id="modal-title"></h2><div id="modal-message"></div><div id="modal-actions"></div></div>'
+      );
+      handler.init();
+      const menu = document.getElementById('main-menu')!;
+      document.querySelector<HTMLElement>('[data-init-mode="standard8x8"]')!.click();
+      expect(app.init).not.toHaveBeenCalled();
+      expect(menu.classList.contains('active')).toBe(true);
+      expect(document.getElementById('modal-title')!.textContent).toBe('Standard 8×8');
+
+      const buttons = [...document.querySelectorAll('#modal-actions button')];
+      (buttons.find(btn => btn.textContent === 'Sofort spielen') as HTMLButtonElement).click();
+      expect(app.init).toHaveBeenCalledWith(0, 'standard8x8');
+      expect(menu.classList.contains('active')).toBe(false);
+    });
+
+    it('the 15 point choice starts the 8x8 position with upgrades', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="generic-modal" class="hidden"><h2 id="modal-title"></h2><div id="modal-message"></div><div id="modal-actions"></div></div>'
+      );
+      handler.init();
+      document.querySelector<HTMLElement>('[data-init-mode="standard8x8"]')!.click();
+      const buttons = [...document.querySelectorAll('#modal-actions button')];
+      (
+        buttons.find(btn => btn.textContent === 'Mit 15 Punkten verbessern') as HTMLButtonElement
+      ).click();
+      expect(app.init).toHaveBeenCalledWith(15, 'upgrade8x8');
     });
 
     it('hides the main menu when a card is clicked', () => {

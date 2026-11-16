@@ -261,8 +261,8 @@ export class Game {
       this.setupStandard8x8Board();
       this.phase = initialPoints > 0 ? PHASES.SETUP_WHITE_UPGRADES : PHASES.PLAY;
     } else if (this.mode === 'upgrade') {
-      this.points = 25;
-      this.initialPoints = 25;
+      this.points = 15;
+      this.initialPoints = 15;
       this.phase = PHASES.SETUP_WHITE_UPGRADES;
       this.setupClassicBoard();
     } else if (this.mode === 'upgrade8x8') {

@@ -98,7 +98,9 @@ describe('ShopUI', () => {
     expect(header?.textContent).toBe('Truppen verbessern');
     expect(shopBtn?.classList.contains('hidden')).toBe(true);
     expect(tutor?.classList.contains('hidden')).toBe(true);
-    expect(status?.textContent).toContain('Klicke auf Figuren');
+    expect(status?.textContent).toBe(
+      'Dame zum Engel 100, Läufer zum Erzbischof 500, Bauer zum Engel 900. Klicke eine Figur auf dem Brett.'
+    );
 
     // Revert to normal
     game.phase = 'SETUP_WHITE_PIECES';

@@ -124,13 +124,13 @@ describe('AIController branch coverage (setup king/pieces/upgrades)', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  test('aiSetupUpgrades: upgrade mode skips upgrades', () => {
+  test('aiSetupUpgrades: upgrade mode spends the purse', () => {
     game.mode = 'upgrade';
     game.gameController = gc;
     const spy = vi.fn();
     gc.shopManager = { aiPerformUpgrades: spy };
     ac.aiSetupUpgrades();
-    expect(spy).not.toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
   });
 
   test('aiSetupUpgrades: classic mode performs upgrades', () => {

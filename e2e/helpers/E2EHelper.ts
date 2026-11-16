@@ -16,6 +16,10 @@ import { Page, expect } from '@playwright/test';
  * the UI-A/UI-B refactor; using it everywhere keeps the intent obvious and the
  * behaviour consistent.
  */
+export async function chooseMenuAction(page: Page, name: string): Promise<void> {
+  await page.locator('#modal-actions').getByRole('button', { name, exact: true }).click();
+}
+
 export async function domClick(page: Page, selector: string): Promise<void> {
   await page.evaluate((sel) => {
     const el = document.querySelector<HTMLElement>(sel);
@@ -65,24 +69,19 @@ export class E2EHelper {
     console.log(`[E2EHelper] Starting game mode: ${modeOrText}`);
     const card = this.selectModeLocator(modeOrText);
 
-    if (modeOrText === 'upgrade') {
-      const classic = this.selectModeLocator('classic');
-      await expect(classic).toBeVisible();
+    if (modeOrText === 'upgrade' || modeOrText === 'upgrade8x8') {
+      const opener = modeOrText === 'upgrade' ? 'classic' : 'standard8x8';
+      const choice = 'Mit 15 Punkten verbessern';
+      const featured = this.selectModeLocator(opener);
+      await expect(featured).toBeVisible();
       // The dialog covers the card in the same turn, so a normal click keeps retrying.
-      await classic.click({ force: true });
-      await this.page
-        .locator('#modal-actions')
-        .getByRole('button', { name: 'Mit 25 Punkten verbessern', exact: true })
-        .click();
+      await featured.click({ force: true });
+      await chooseMenuAction(this.page, choice);
     } else {
       await expect(card).toBeVisible();
-      await card.click(modeOrText === 'classic' ? { force: true } : undefined);
-      if (modeOrText === 'classic') {
-        await this.page
-          .locator('#modal-actions')
-          .getByRole('button', { name: 'Sofort spielen', exact: true })
-          .click();
-      }
+      const asks = modeOrText === 'classic' || modeOrText === 'standard8x8';
+      await card.click(asks ? { force: true } : undefined);
+      if (asks) await chooseMenuAction(this.page, 'Sofort spielen');
     }
     console.log(`[E2EHelper] Clicked card for ${modeOrText}`);
 
@@ -97,17 +96,12 @@ export class E2EHelper {
 
   /**
    * Returns a locator for a game-mode card, preferring the `data-mode`
-   * attribute. For modes without one (`upgrade8x8`, `campaign`) it matches the
-   * card title (or the campaign id) so a copy change elsewhere can't match.
-   *
-   * NOTE: `upgrade8x8` and `campaign` cards have NO `data-mode` attribute in
-   * index.html, so they are matched by exact title (`upgrade8x8`) or by the
-   * stable `id="campaign-start-btn"` (`campaign`).
+   * attribute. `upgrade8x8` opens from the Standard 8×8 card. `campaign`
+   * matches `id="campaign-start-btn"`.
    */
   selectModeLocator(modeOrText: string) {
-    // Modes WITHOUT a data-mode attribute -> match by title / id.
     if (modeOrText === 'upgrade8x8') {
-      return this.page.locator('.gamemode-card[data-init-mode="upgrade8x8"]');
+      return this.page.locator('.gamemode-card[data-mode="standard8x8"]');
     }
     if (modeOrText === 'campaign') {
       return this.page.locator('#campaign-start-btn');

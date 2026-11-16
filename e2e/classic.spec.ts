@@ -9,7 +9,7 @@ test.describe('Classic 9x9 Mode', () => {
     await helper.goto();
   });
 
-  test('asks whether to play at once or spend 25 points', async ({ page }) => {
+  test('asks whether to play at once or spend 15 points', async ({ page }) => {
     await page.locator('.gamemode-card[data-mode="classic"]').click({ force: true });
     await expect(
       page.locator('#modal-actions').getByRole('button', { name: 'Sofort spielen', exact: true })
@@ -17,7 +17,7 @@ test.describe('Classic 9x9 Mode', () => {
     await expect(
       page
         .locator('#modal-actions')
-        .getByRole('button', { name: 'Mit 25 Punkten verbessern', exact: true })
+        .getByRole('button', { name: 'Mit 15 Punkten verbessern', exact: true })
     ).toBeVisible();
     await page
       .locator('#modal-actions')

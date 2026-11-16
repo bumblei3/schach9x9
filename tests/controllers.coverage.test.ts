@@ -344,7 +344,7 @@ describe('Controllers Coverage Expansion', () => {
 
     test('finishSetupPhase should transition from WHITE_UPGRADES to BLACK_UPGRADES in upgrade mode', () => {
       game.mode = 'upgrade';
-      gc.initGame(25, 'upgrade');
+      gc.initGame(15, 'upgrade');
       game.phase = PHASES.SETUP_WHITE_UPGRADES;
       game.points = 0;
 

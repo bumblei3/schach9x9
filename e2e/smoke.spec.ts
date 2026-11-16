@@ -102,11 +102,9 @@ test.describe('Smoke: each mode starts with a rendered board', () => {
     test(`mode "${mode}" opens a board without errors`, async ({ page }) => {
       const errors = await bootToMenu(page);
 
-      await page.click(
-        `.gamemode-card[data-mode="${mode}"]`,
-        mode === 'classic' ? { force: true } : undefined
-      );
-      if (mode === 'classic') {
+      const asks = mode === 'classic' || mode === 'standard8x8';
+      await page.click(`.gamemode-card[data-mode="${mode}"]`, asks ? { force: true } : undefined);
+      if (asks) {
         await page
           .locator('#modal-actions')
           .getByRole('button', { name: 'Sofort spielen', exact: true })

@@ -168,9 +168,8 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
     expect(game.placeShopPiece).toHaveBeenCalled();
   });
 
-  test('aiSetupUpgrades - skips upgrades in upgrade mode', () => {
+  test('aiSetupUpgrades - spends the classic upgrade purse', () => {
     game.mode = 'upgrade';
-    // Mock shopManager
     game.gameController = {
       shopManager: {
         aiPerformUpgrades: vi.fn(),
@@ -178,7 +177,7 @@ describe('AIController Ultimate Precision V5 - Updated', () => {
     };
 
     controller.aiSetupUpgrades();
-    expect(game.gameController.shopManager.aiPerformUpgrades).not.toHaveBeenCalled();
+    expect(game.gameController.shopManager.aiPerformUpgrades).toHaveBeenCalled();
   });
 
   test('aiSetupUpgrades - performs upgrades in other modes', () => {

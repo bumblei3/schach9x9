@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { domClick } from './helpers/E2EHelper.js';
+import { chooseMenuAction, domClick } from './helpers/E2EHelper.js';
 
 test.describe('3D Mode Toggle @3d', () => {
   test.beforeEach(async ({ page }) => {
@@ -14,7 +14,8 @@ test.describe('3D Mode Toggle @3d', () => {
     test.skip(browserName === 'firefox', 'Three.js canvas unreliable in Firefox CI');
     // 3D toggle is available in the action bar.
     // Start a game first (Standard 8x8) to ensure action bar is active
-    await page.click('.gamemode-card[data-mode="standard8x8"]');
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await chooseMenuAction(page, 'Sofort spielen');
 
     // Wait for board to be ready
     await expect(page.locator('#board')).toBeVisible();

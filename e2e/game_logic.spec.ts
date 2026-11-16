@@ -260,6 +260,10 @@ test.describe('Deep Game Logic @logic', () => {
   test('Pawn Promotion 8x8', async ({ page }) => {
     // Start 8x8 game
     await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for game to be initialized
@@ -329,6 +333,10 @@ test.describe('Deep Game Logic @logic', () => {
 
   test('Game Over: Checkmate', async ({ page }) => {
     await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
 
@@ -362,6 +370,10 @@ test.describe('Deep Game Logic @logic', () => {
 
   test('Game Over: Stalemate', async ({ page }) => {
     await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
     await page.waitForFunction(() => (window as any).game !== undefined);
 

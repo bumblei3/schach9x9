@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { chooseMenuAction } from './helpers/E2EHelper.js';
 
 test.describe('Standard 8x8 Mode', () => {
   test.beforeEach(async ({ page }) => {
@@ -7,13 +8,28 @@ test.describe('Standard 8x8 Mode', () => {
     await expect(page.locator('#main-menu')).toBeVisible();
   });
 
+  test('asks whether to play at once or spend 15 points', async ({ page }) => {
+    await page.locator('.gamemode-card[data-mode="standard8x8"]').click({ force: true });
+    await expect(
+      page.locator('#modal-actions').getByRole('button', { name: 'Sofort spielen', exact: true })
+    ).toBeVisible();
+    await expect(
+      page
+        .locator('#modal-actions')
+        .getByRole('button', { name: 'Mit 15 Punkten verbessern', exact: true })
+    ).toBeVisible();
+    await chooseMenuAction(page, 'Zurück');
+    await expect(page.locator('#main-menu')).toHaveClass(/active/);
+    await expect(page.locator('.gamemode-card[data-init-mode="upgrade8x8"]')).toHaveCount(0);
+  });
+
   test('should start standard 8x8 chess', async ({ page }) => {
-    // Click "Standard (8x8)" card via the stable data-mode attribute
     const standardCard = page.locator('.gamemode-card[data-mode="standard8x8"]');
     await expect(standardCard).toBeVisible();
     await expect(standardCard.locator('.card-desc')).toContainText('Klassisches Schach');
 
-    await standardCard.click();
+    await standardCard.click({ force: true });
+    await chooseMenuAction(page, 'Sofort spielen');
 
     const mainMenu = page.locator('#main-menu');
     await expect(mainMenu).not.toHaveClass(/active/);

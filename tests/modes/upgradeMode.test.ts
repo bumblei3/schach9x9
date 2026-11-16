@@ -113,7 +113,7 @@ describe('Troop Upgrade Mode', () => {
 
   beforeEach(async () => {
     // Init Game with 'upgrade' mode
-    game = new Game(0, 'upgrade'); // 0 passed but 'upgrade' sets it to 25 internally in constructor
+    game = new Game(0, 'upgrade'); // 0 passed but 'upgrade' sets it to 15 internally in constructor
 
     // Mock log immediately
     game.log = vi.fn();
@@ -127,7 +127,7 @@ describe('Troop Upgrade Mode', () => {
 
   test('Initial State should be correct', () => {
     expect(game.mode).toBe('upgrade');
-    expect(game.points).toBe(25);
+    expect(game.points).toBe(15);
     expect(game.phase).toBe(PHASES.SETUP_WHITE_UPGRADES);
     // Verify board has pawns (Classic setup)
     expect(game.board[7][4].type).toBe('p'); // White pawn - Row 7 in 9x9
@@ -148,14 +148,14 @@ describe('Troop Upgrade Mode', () => {
     controller.shopManager.performUpgrade(r, c, 'n');
 
     expect(game.board[r][c].type).toBe('n');
-    expect(game.points).toBe(25 - 2); // 23
+    expect(game.points).toBe(15 - 2); // 13
   });
 
   test('Transition to Black Setup works', () => {
     controller.finishSetupPhase();
     // Should go to SETUP_BLACK_UPGRADES
     expect(game.phase).toBe(PHASES.SETUP_BLACK_UPGRADES);
-    expect(game.points).toBe(25); // Reset points for black
+    expect(game.points).toBe(15); // Reset points for black
     expect(game.log).toHaveBeenCalledWith('Weiß fertig. Schwarz rüstet auf.');
   });
 
@@ -170,25 +170,12 @@ describe('Troop Upgrade Mode', () => {
     // ShopManager logic IS real.
     // SetupModeStrategy calls setTimeout -> aiSetupUpgrades
 
-    // We can manually trigger aiPerformUpgrades to verify logic
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.1);
     controller.shopManager.aiPerformUpgrades();
+    random.mockRestore();
 
-    // Black started with 25 points. Should have spent some.
-    expect(game.points).toBeLessThan(25);
-
-    // Black pawns are usually rows 2 or 3 depending on setup
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        const p = game.board[r][c];
-        if (p && p.color === 'black' && p.type !== 'p' && p.type !== 'k') {
-          // Check if it WAS a pawn before?
-          // Classic setup: Row 2 are pawns.
-        }
-      }
-    }
-    // AI might have upgraded knights/rooks too.
-    // Just checking points decreased is enough to prove it did SOMETHING.
-    expect(game.points).toBeLessThan(25);
+    // Black starts with the same 15 points and spends them.
+    expect(game.points).toBeLessThan(15);
   });
 
   test('Play Phase transition', () => {

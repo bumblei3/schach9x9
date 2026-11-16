@@ -125,7 +125,7 @@ describe('GameController Comprehensive Coverage', () => {
     it('should initialize upgrade mode correctly', () => {
       mockGame.mode = 'upgrade'; // Simulate constructor
       controller.initGame(0, 'upgrade');
-      expect(mockGame.points).toBe(25);
+      expect(mockGame.points).toBe(15);
       expect(mockGame.mode).toBe('upgrade');
     });
 

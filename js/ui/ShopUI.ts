@@ -88,8 +88,12 @@ export function updateShopUI(game: GameLike): void {
     if (shopHeader) shopHeader.textContent = 'Truppen verbessern';
     if (shopGrid) shopGrid.classList.add('hidden');
     if (tutorSection) tutorSection.classList.add('hidden');
-    if (statusDisplay)
-      statusDisplay.textContent = 'Klicke auf Figuren auf dem Brett zum Verbessern';
+    if (statusDisplay) {
+      const diff = (from: string, to: string) => PIECE_VALUES[to] - PIECE_VALUES[from];
+      statusDisplay.textContent =
+        `Dame zum Engel ${diff('q', 'e')}, Läufer zum Erzbischof ${diff('b', 'a')}, ` +
+        `Bauer zum Engel ${diff('p', 'e')}. Klicke eine Figur auf dem Brett.`;
+    }
   } else {
     if (shopHeader) shopHeader.textContent = 'Truppen anheuern';
     if (shopGrid) shopGrid.classList.remove('hidden');

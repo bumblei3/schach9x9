@@ -85,7 +85,11 @@ test.describe('Core Gameplay Loop', () => {
 
   test('should verify Game Over (Checkmate) flow', async ({ page }) => {
     // 1. Start Standard Game to skip setup phase
-    await page.click('.gamemode-card[data-mode="standard8x8"]');
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
     await expect(page.locator('#board')).toBeVisible();
 
     // Wait for Game to be fully initialized

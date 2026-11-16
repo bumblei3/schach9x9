@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { domClick } from './helpers/E2EHelper.js';
+import { chooseMenuAction, domClick } from './helpers/E2EHelper.js';
 
 test.describe('Upgrade Modes @upgrade', () => {
   test.beforeEach(async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Upgrade Modes @upgrade', () => {
   test('should start Upgrade Modus (9x9) correctly (Backend)', async ({ page }) => {
     // 1. Initialize 'upgrade' mode programmatically (since UI now uses 'setup' mode for this slot)
     await page.evaluate(() => {
-      (window as any).app.init(25, 'upgrade');
+      (window as any).app.init(15, 'upgrade');
       document.getElementById('main-menu')?.classList.remove('active');
     });
 
@@ -32,7 +32,7 @@ test.describe('Upgrade Modes @upgrade', () => {
     // Note: Upgrade mode still uses setup-mode class because players spend points to upgrade pieces
 
     const pointsDisplay = page.locator('#points-display');
-    await expect(pointsDisplay).toHaveText('25');
+    await expect(pointsDisplay).toHaveText('15');
 
     // Check for "Fertig" button being visible
     await expect(page.locator('#finish-setup-btn')).toBeVisible();
@@ -46,7 +46,8 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should start 8x8 + Upgrades correctly', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    await domClick(page, '.gamemode-card[data-init-mode="upgrade8x8"]');
+    await domClick(page, '.gamemode-card[data-mode="standard8x8"]');
+    await chooseMenuAction(page, 'Mit 15 Punkten verbessern');
 
     // 2. Verify Initial State
     await expect(page.locator('#board .cell').first()).toBeVisible();
@@ -101,7 +102,8 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should successfully upgrade a Pawn to a Nightrider', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    await page.locator('.gamemode-card[data-init-mode="upgrade8x8"]').click();
+    await page.locator('.gamemode-card[data-mode="standard8x8"]').click({ force: true });
+    await chooseMenuAction(page, 'Mit 15 Punkten verbessern');
 
     // Wait for App to be fully initialized
     await page.waitForSelector('body.game-initialized');
@@ -126,7 +128,8 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should show Angel upgrade option for Queen in upgrade mode', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    await domClick(page, '.gamemode-card[data-init-mode="upgrade8x8"]');
+    await domClick(page, '.gamemode-card[data-mode="standard8x8"]');
+    await chooseMenuAction(page, 'Mit 15 Punkten verbessern');
     await page.waitForSelector('body.game-initialized');
 
     // 2. Check if Queen has upgrade options
@@ -164,7 +167,8 @@ test.describe('Upgrade Modes @upgrade', () => {
 
   test('should complete 8x8 upgrade mode setup', async ({ page }) => {
     // 1. Select "8x8 + Upgrades"
-    await domClick(page, '.gamemode-card[data-init-mode="upgrade8x8"]');
+    await domClick(page, '.gamemode-card[data-mode="standard8x8"]');
+    await chooseMenuAction(page, 'Mit 15 Punkten verbessern');
     await page.waitForSelector('body.game-initialized');
     await expect(page.locator('#board .cell').first()).toBeVisible();
 

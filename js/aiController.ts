@@ -205,10 +205,6 @@ export class AIController {
   }
 
   public aiSetupUpgrades(): void {
-    if (this.game.mode === 'upgrade') {
-      logger.info('[AI] Skipping upgrades in Classic 9x9 Upgrade mode.');
-      return;
-    }
     if (this.game.gameController && this.game.gameController.shopManager) {
       this.game.gameController.shopManager.aiPerformUpgrades();
     }

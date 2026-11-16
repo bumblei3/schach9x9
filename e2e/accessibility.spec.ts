@@ -26,7 +26,11 @@ test.describe('Accessibility Scans @a11y', () => {
     await page.goto('/');
 
     // Start Game (Standard)
-    await page.click('.gamemode-card[data-mode="standard8x8"]');
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Sofort spielen', exact: true })
+      .click();
 
     // Wait for board
     await expect(page.locator('#board-container')).toBeVisible();

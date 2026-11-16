@@ -9,7 +9,7 @@ test.describe('Classic 9x9 Upgrade Mode', () => {
     await helper.goto();
   });
 
-  test('should start with correct pieces and upgrade points', async () => {
+  test('should start with correct pieces and upgrade points', async ({ page }) => {
     await helper.startGame('upgrade');
 
     // Verify Archbishop and Chancellor
@@ -18,9 +18,12 @@ test.describe('Classic 9x9 Upgrade Mode', () => {
 
     // Verify points
     const points = await helper.getPoints();
-    expect(points).toBe(25);
+    expect(points).toBe(15);
 
     // Verify state
     await helper.expectStatus(/Klicke eine Figur für Upgrades/i);
+    await expect(page.locator('#selected-piece-display')).toHaveText(
+      'Dame zum Engel 3, Läufer zum Erzbischof 4, Bauer zum Engel 11. Klicke eine Figur auf dem Brett.'
+    );
   });
 });

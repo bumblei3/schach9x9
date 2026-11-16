@@ -169,7 +169,7 @@ export class GameController {
     }
 
     if (mode === 'upgrade') {
-      initialPoints = 25;
+      initialPoints = 15;
     } else if (mode === 'upgrade8x8') {
       initialPoints = 15;
     }

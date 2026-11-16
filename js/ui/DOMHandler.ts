@@ -748,6 +748,10 @@ export class DOMHandler {
           this.offerClassicStart();
           return;
         }
+        if (mode === 'standard8x8') {
+          this.offerStandard8x8Start();
+          return;
+        }
         const points = parseInt(card.getAttribute('data-init-points') || '0', 10);
         this.startMode(mode, points);
       });
@@ -762,11 +766,11 @@ export class DOMHandler {
       .catch((err: unknown) => console.error('[DOMHandler] App init failed:', err));
   }
 
-  /** One Klassisch card. The old upgrade card was the same position plus 25 points. */
+  /** One Klassisch card. The old upgrade card was the same position plus 15 points. */
   private offerClassicStart(): void {
     UI.showModal(
       'Klassisch 9×9',
-      'Dieselbe Aufstellung. Sofort spielen, oder vorher 25 Punkte zum Verbessern ausgeben.',
+      'Dieselbe Aufstellung. Sofort spielen, oder vorher 15 Punkte zum Verbessern ausgeben.',
       [
         {
           text: 'Sofort spielen',
@@ -774,9 +778,30 @@ export class DOMHandler {
           callback: () => this.startMode('classic', 0),
         },
         {
-          text: 'Mit 25 Punkten verbessern',
+          text: 'Mit 15 Punkten verbessern',
           class: 'btn-secondary',
-          callback: () => this.startMode('upgrade', 25),
+          callback: () => this.startMode('upgrade', 15),
+        },
+        { text: 'Zurück', class: 'btn-secondary' },
+      ]
+    );
+  }
+
+  /** One 8×8 card. The old upgrade card was the same position plus 15 points. */
+  private offerStandard8x8Start(): void {
+    UI.showModal(
+      'Standard 8×8',
+      'Dieselbe Aufstellung. Sofort spielen, oder vorher 15 Punkte zum Verbessern ausgeben.',
+      [
+        {
+          text: 'Sofort spielen',
+          class: 'btn-primary',
+          callback: () => this.startMode('standard8x8', 0),
+        },
+        {
+          text: 'Mit 15 Punkten verbessern',
+          class: 'btn-secondary',
+          callback: () => this.startMode('upgrade8x8', 15),
         },
         { text: 'Zurück', class: 'btn-secondary' },
       ]
