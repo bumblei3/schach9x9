@@ -427,13 +427,17 @@ jobs:
           echo "server did not start"; cat /tmp/http-server.log
           exit 1
 
+      # .github/lighthouse-ci.json ist eine LHCI-Config (ci.assert.assertions),
+      # keine budgets.json. Als budgetPath übergeben, crashte `lhci assert` mit
+      # "Budget file is not defined as an array of budgets" — die Assertions
+      # liefen damals nie, und continue-on-error deckte das als grün zu.
       - name: Lighthouse CI (Performance Budget)
         uses: treosh/lighthouse-ci-action@v12
         continue-on-error: true
         with:
           urls: |
             http://localhost:5050/
-          budgetPath: .github/lighthouse-ci.json
+          configPath: .github/lighthouse-ci.json
           uploadArtifacts: true
 
       - name: Lighthouse summary

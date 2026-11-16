@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-11-16)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `898a750`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `898a750`.
+Release-Tag ist `v2.1.0`. `main` ist `3d85186`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `3d85186`.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
@@ -12,12 +12,14 @@ Release-Tag ist `v2.1.0`. `main` ist `898a750`. Akt IV (Kapitel 19–25) liegt a
 | Tests (CI) | Run 43908688755, `898a750` | grün, inklusive E2E |
 | Typecheck + Lint | `898a750` | grün (`tsc --noEmit`, `eslint . --ext .ts`) |
 | Build | `898a750` | grün |
-| E2E + Lighthouse | Run 43908688755, `898a750` | grün (E2E, Lighthouse, CI-Gate, Pages-Deploy) |
+| E2E + Lighthouse | Run 43914533913, `3d85186` | E2E grün. Lighthouse-Abfrage lief bis zum Fix nie (Budget-Fehler), jetzt echt: Performance 0,68 < 0,90 → rot; Job bleibt `continue-on-error`, siehe Eintrag unten |
 | Security | CodeQL, Run 43908688741 | grün |
 | CI | GitHub Actions | `898a750` grün (Run 43908688755) |
 | Git | `main` `898a750` (2026-11-16) | Tag `v2.1.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung (weiß wie schwarz) und Statuspille sind auf `main`. |
 
 **Abhängigkeiten 2026-11-16:** jsdom 30.1.3 → 31.0.1 (#238), vite 8.3.6 → 8.3.8 und prettier 3.9.10 → 3.10.1 (#239) sind gemergt. jsdom 31 serialisiert `#abc` als `rgb(170, 187, 204)` und `translateY(0)` als `translateY(0px)`; drei Assertions prüften auf die Serialisierung statt auf die Wirkung und blockierten den Bump — Fix #240. #239 lag vor `8c1664a` (Header-Fix) und hatte deshalb falsche visuelle Baselines plus zehn Click-Timeouts in der CI; nach dem Rebase auf `main` war die E2E-Suite lokal grün (106 passed, 1 skipped, 3,4 min). `main` `a4eaad4` ist grün inklusive E2E und Pages-Deploy.
+
+**Lighthouse-Gate lief nie (2026-11-16):** `.github/lighthouse-ci.json` ist eine LHCI-Config (`ci.assert.assertions`), wurde aber als `budgetPath` an `treosh/lighthouse-ci-action` übergeben — `budgetPath` erwartet eine `budgets.json`. `lhci assert` crashte seit dem ersten Lauf mit `Budget file is not defined as an array of budgets`, die Assertions liefen nie, und `continue-on-error: true` (auf Job und Step) zeichnete den Job grün. Die eigentlichen Zahlen standen nur im Artifact. Mit `configPath` statt `budgetPath` läuft die Abfrage jetzt — gegen den Lauf vom 16.11.2026 (Artifact `lhr-1794848942658`, gebautes `dist/`) und den PR-Lauf danach: **Performance 0,68 bzw. 0,75** (Budget ≥ 0,90, error — die Schwankung zwischen den Läufen ist die Runner-CPU, nicht die App), Accessibility 1,00 (≥ 0,95), Best-Practices 0,96 (≥ 0,90), SEO 1,00 (≥ 0,90); FCP 3,8 s (≤ 1,8 s), LCP 5,1 s bzw. 4,7 s (≤ 2,5 s), TTI 5,4 s bzw. 5,0 s (≤ 3,5 s), Byte-Gewicht 576 KiB (≤ 500 kB), CLS 0,008. Der Job bleibt `continue-on-error`, weil Performance ein bekannter, offener Hebel ist: 3D ist bereits lazy geladen, aber ungenutztes JS (175 KiB) und ungenutztes CSS (65 KiB) liegen im initialen Bundle, und das render-blockende Google-Fonts-Stylesheet kostet 0,8 s. Die Abfrage ist jetzt ein Maßstab statt eine Dekoration.
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
