@@ -297,6 +297,7 @@ export function saveGame(game: Game): void {
     capturedPieces: game.capturedPieces,
     drawOffered: game.drawOffered,
     drawOfferedBy: game.drawOfferedBy,
+    winner: game.winner,
   };
   localStorage.setItem('schach9x9_save_autosave', JSON.stringify(gameState));
   game.log('Spiel gespeichert! \u{1F4BE}');
@@ -346,6 +347,7 @@ export function loadGame(game: Game): boolean {
 
     game.drawOffered = state.drawOffered || false;
     game.drawOfferedBy = state.drawOfferedBy || null;
+    game.winner = state.winner ?? null;
     const drawOverlay = document.getElementById('draw-offer-overlay');
     if (drawOverlay) {
       if (game.drawOffered) {

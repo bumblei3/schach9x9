@@ -457,6 +457,7 @@ export class GameController {
     const winningColor = resigningColor === 'white' ? 'black' : 'white';
 
     this.game.phase = PHASES.GAME_OVER;
+    this.game.winner = winningColor;
     UI.renderBoard(this.game);
     UI.updateStatus(this.game);
 
@@ -531,6 +532,7 @@ export class GameController {
     }
 
     this.game.phase = PHASES.GAME_OVER;
+    this.game.winner = 'draw';
     this.game.drawOffered = false;
     this.game.drawOfferedBy = null;
 

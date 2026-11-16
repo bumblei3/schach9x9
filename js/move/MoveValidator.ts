@@ -33,6 +33,7 @@ function recordDraw(game: Game): void {
 export function checkDraw(game: Game): boolean {
   if (game.halfMoveClock >= 100) {
     game.phase = PHASES.GAME_OVER as unknown as (typeof PHASES)[keyof typeof PHASES];
+    game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (50-Züge-Regel)');
@@ -49,6 +50,7 @@ export function checkDraw(game: Game): boolean {
   const occurrences = game.positionHistory.filter(h => h === currentHash).length;
   if (occurrences >= 3) {
     game.phase = PHASES.GAME_OVER as unknown as (typeof PHASES)[keyof typeof PHASES];
+    game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (Stellungswiederholung)');
@@ -63,6 +65,7 @@ export function checkDraw(game: Game): boolean {
 
   if (isInsufficientMaterial(game)) {
     game.phase = PHASES.GAME_OVER as unknown as (typeof PHASES)[keyof typeof PHASES];
+    game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('Unentschieden (Ungenügendes Material)');

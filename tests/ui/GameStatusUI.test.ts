@@ -96,6 +96,20 @@ describe('GameStatusUI Component', () => {
     });
   });
 
+  test('should name the winner, not the side to move, at game over', () => {
+    game.phase = 'game_over';
+    // Weiß hat matt gesetzt, also ist Schwarz am Zug — die alte Logik
+    // verwechselte das und nannte den Verlierer als Sieger.
+    game.turn = 'black';
+    game.winner = 'white';
+    GameStatusUI.updateStatus(game);
+    expect(document.getElementById('status-display')!.textContent).toContain('Weiß hat gewonnen');
+
+    game.winner = 'draw';
+    GameStatusUI.updateStatus(game);
+    expect(document.getElementById('status-display')!.textContent).toContain('Unentschieden');
+  });
+
   test('should update move history ui', () => {
     game.moveHistory = [
       { piece: { type: 'p' }, from: { r: 1, c: 4 }, to: { r: 3, c: 4 } }, // Simple pawn move

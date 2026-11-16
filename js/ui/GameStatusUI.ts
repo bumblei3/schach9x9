@@ -194,9 +194,18 @@ export function updateStatus(game: Game): void {
     case PHASES.ANALYSIS:
       text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
       break;
-    case PHASES.GAME_OVER:
-      text = `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
+    case PHASES.GAME_OVER: {
+      // `game.turn` ist am Ende die *bedrängte* Seite — daraus keinen Sieger
+      // ableiten. `winner` wird an allen GAME_OVER-Stellen gesetzt.
+      const winner = game.winner;
+      text =
+        winner === 'draw'
+          ? 'Spiel vorbei! Unentschieden.'
+          : winner
+            ? `Spiel vorbei! ${winner === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`
+            : `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
       break;
+    }
   }
   statusEl.textContent = text;
   if (game.phase !== PHASES.PLAY) {

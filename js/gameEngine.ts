@@ -151,6 +151,8 @@ export class Game {
   bestMoves: unknown[];
   drawOffered: boolean;
   drawOfferedBy: Player | null;
+  /** Endergebnis: 'white' | 'black' | 'draw' | null (Partie läuft noch). */
+  winner: Player | 'draw' | null;
   analysisMode: boolean;
   analysisBasePosition: unknown;
   analysisVariations: AnalysisVariation[];
@@ -318,6 +320,7 @@ export class Game {
     this.bestMoves = [];
     this.drawOffered = false;
     this.drawOfferedBy = null;
+    this.winner = null;
     this.analysisMode = false;
     this.analysisBasePosition = null;
     this.analysisVariations = [];

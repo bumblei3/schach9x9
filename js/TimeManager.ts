@@ -99,6 +99,8 @@ export class TimeManager {
   private handleTimeout(loserColor: Player): void {
     this.stopClock();
     (this.game as unknown as { phase: string }).phase = PHASES.GAME_OVER;
+    (this.game as unknown as { winner: Player | 'draw' | null }).winner =
+      loserColor === 'white' ? 'black' : 'white';
     const winnerColor = loserColor === 'white' ? 'Schwarz' : 'Weiß';
     const loserName = loserColor === 'white' ? 'Weiß' : 'Schwarz';
 

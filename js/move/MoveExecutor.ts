@@ -404,6 +404,7 @@ async function completeMoveExecution(
   // Check for insufficient material
   if (MoveValidator.isInsufficientMaterial(game)) {
     game.phase = PHASES.GAME_OVER as Phase;
+    game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
 
@@ -451,6 +452,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
   if (!whiteKingExists || !blackKingExists) {
     game.phase = PHASES.GAME_OVER as Phase;
+    game.winner = !whiteKingExists ? 'black' : 'white';
     const winner = !whiteKingExists ? 'Schwarz' : 'Weiß';
     game.log(`KÖNIG GESCHLAGEN! ${winner} gewinnt!`);
 
@@ -529,6 +531,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
   const opponentColor = game.turn;
   if (game.isCheckmate(opponentColor)) {
     game.phase = PHASES.GAME_OVER as Phase;
+    game.winner = opponentColor === 'white' ? 'black' : 'white';
     UI.renderBoard(game);
     UI.updateStatus(game);
     const winner = opponentColor === 'white' ? 'Schwarz' : 'Weiß';
@@ -552,6 +555,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     return;
   } else if (game.isStalemate(opponentColor)) {
     game.phase = PHASES.GAME_OVER as Phase;
+    game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
     game.log('PATT! Unentschieden.');
