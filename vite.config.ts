@@ -27,26 +27,26 @@ function injectServiceWorkerPrecache(): Plugin {
       const distDir = resolve(__dirname, 'dist');
       const swPath = join(distDir, 'service-worker.js');
 
-      const urls: string[] = [];
-      for (const entry of readdirSync(distDir, { withFileTypes: true })) {
-        if (!entry.isFile()) continue;
-        const file = entry.name;
-        if (file === 'service-worker.js') continue; // der Worker cachet sich nicht selbst
-        const relative = `./${file}`;
-        if (/\.(json|png)$/i.test(file)) {
-          urls.push(relative);
-          continue;
+      // Rekursiv: `assets/` wurde früher einzeln behandelt, `fonts/` (die
+      // selbst gehostete Outfit) wäre mit einer flachen Liste außen vor
+      // geblieben — und dann offline ohne Schrift. Alles, was nicht der
+      // Service Worker selbst ist, gehört in den Offline-Shell.
+      const walk = (dir: string, prefix: string): string[] => {
+        const found: string[] = [];
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          if (entry.name === 'service-worker.js') continue;
+          const relative = `${prefix}${entry.name}`;
+          if (entry.isDirectory()) {
+            found.push(...walk(join(dir, entry.name), `${relative}/`));
+            continue;
+          }
+          if (!/\.(js|css|json|png|woff2)$/i.test(entry.name)) continue;
+          if (statSync(join(dir, entry.name)).size > MAX_PRECACHE_BYTES) continue;
+          found.push(`./${relative}`);
         }
-        if (!/\.(js|css)$/i.test(file)) continue;
-        if (statSync(join(distDir, file)).size > MAX_PRECACHE_BYTES) continue;
-        urls.push(relative);
-      }
-      for (const file of readdirSync(join(distDir, 'assets'))) {
-        const relative = `./assets/${file}`;
-        if (!/\.(js|css)$/i.test(file)) continue;
-        if (statSync(join(distDir, 'assets', file)).size > MAX_PRECACHE_BYTES) continue;
-        urls.push(relative);
-      }
+        return found;
+      };
+      const urls = walk(distDir, '');
 
       // Direkt lesen statt existsSync + readFileSync: CodeQL meldet sonst eine
       // Race zwischen "existiert die Datei?" und "schreibe sie".
