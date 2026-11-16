@@ -945,6 +945,10 @@
     margin: 0;
     align-self: center;
     justify-self: center;
+    /* Grid items default to min-size: auto, so the square board inflated the
+       cell and overflowed into the header. */
+    min-width: 0;
+    min-height: 0;
   }
 
   #opening-trainer-container:not(:empty) {

@@ -11,6 +11,13 @@
   align-items: center;
   position: relative;
   padding: 0 0 30px 30px;
+  /* Size comes from the parent, not from the square board. Otherwise a wide
+     short viewport lets the board grow from its width and slide under the
+     header, which then steals clicks on the top rank. */
+  container-type: size;
+  min-width: 0;
+  min-height: 0;
+  --board-eval-slot: 60px; /* .evaluation-bar-wrapper: 44px + 16px margin */
 }
 
 /* Mobile: Clamp board to viewport with safe area insets */
@@ -78,11 +85,15 @@ body.mode-3d #board-wrapper {
 
 #board-wrapper {
   position: relative;
-  width: 100%;
-  /* Shrink-to-fit height: the board itself carries the square aspect ratio.
-     Without this the evaluation bar (a flex sibling of this wrapper) narrows
-     the wrapper and the grid cells become 31x37 rectangles. */
+  /* Square that fits beside the eval bar and inside the container height.
+     A width of 100% plus aspect-ratio made the square as wide as the column,
+     taller than a 1280×720 viewport, and the top rank landed under the header. */
+  width: min(100cqh, 100cqw - var(--board-eval-slot));
+  max-width: 100%;
+  max-height: 100%;
   height: auto;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
 }
 
 /* 8x8 Mode Sizing */
@@ -475,4 +486,20 @@ body.mode-3d #board-wrapper {
   font-weight: bold;
   color: var(--accent-primary);
   margin-left: 8px;
+}
+
+/* After the base width:100% rule. On a wide short screen the grid column is
+   wider than the leftover height; width:100% then ignores the square and the
+   top rank slides under the header. This query is the same breakpoint as
+   layout.css and must stay later in the cascade. */
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 561px) {
+  #board-container {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1;
+    justify-self: center;
+    align-self: center;
+  }
 }

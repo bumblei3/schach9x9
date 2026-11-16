@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { domClick } from './helpers/E2EHelper.js';
+
+// Nicht hardcodieren: die Version steht in package.json und ändert sich mit
+// jedem Release.
+const APP_VERSION = (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
 
 test('settings issue reporter prefills a GitHub issue', async ({ page }) => {
   await page.goto('/?disable-sw');
@@ -43,6 +48,6 @@ test('settings issue reporter prefills a GitHub issue', async ({ page }) => {
   const decoded = decodeURIComponent(url.replace(/\+/g, ' '));
   expect(decoded).toContain('[Fehler] Matt zählt nicht');
   expect(decoded).toContain('Modus: classic');
-  expect(decoded).toContain('Version: 2.0.0');
+  expect(decoded).toContain(`Version: ${APP_VERSION}`);
   await expect(page.locator('#issue-report-overlay')).toBeHidden();
 });
