@@ -13,10 +13,16 @@ vi.mock('../../../js/logger.js', () => ({
 }));
 
 // Mock config
-vi.mock('../../../js/config.js', () => ({
-  BOARD_SIZE: 9,
-  getCurrentBoardSize: () => 9,
-}));
+vi.mock('../../../js/config.js', async () => {
+  const actual = await vi.importActual<typeof import('../../../js/config.js')>(
+    '../../../js/config.js'
+  );
+  return {
+    ...actual,
+    BOARD_SIZE: 9,
+    getCurrentBoardSize: () => 9,
+  };
+});
 
 function squareMeshes(sm: SceneManager3D): THREE.Mesh[] {
   return (sm.boardGroup?.children ?? []).filter(
@@ -149,6 +155,40 @@ describe('SceneManager3D', () => {
     expect(sm.boardToWorld(0, 0)).toEqual({ x: -3.5, z: -3.5 });
     expect(sm.boardToWorld(7, 7)).toEqual({ x: 3.5, z: 3.5 });
     expect(Math.max(...squareMeshes(sm).map(mesh => mesh.userData.row as number))).toBe(7);
+  });
+
+  test('createBoard omits the four Kreuz corners', () => {
+    const sm = new SceneManager3D(container);
+    sm.scene = new THREE.Scene();
+
+    sm.createBoard(9, 'cross');
+    const squares = squareMeshes(sm);
+    expect(squares).toHaveLength(45);
+    const keys = new Set(squares.map(mesh => `${mesh.userData.row},${mesh.userData.col}`));
+    expect(keys.has('0,0')).toBe(false);
+    expect(keys.has('0,8')).toBe(false);
+    expect(keys.has('8,0')).toBe(false);
+    expect(keys.has('8,8')).toBe(false);
+    expect(keys.has('0,4')).toBe(true);
+    expect(keys.has('4,4')).toBe(true);
+
+    sm.createBoard(9);
+    expect(squareMeshes(sm)).toHaveLength(81);
+  });
+
+  test('ensureBoard rebuilds when only the shape changes', () => {
+    const sm = new SceneManager3D(container);
+    sm.scene = new THREE.Scene();
+    sm.ensureBoard(9);
+    const full = sm.boardGroup;
+
+    sm.ensureBoard(9, 'cross');
+    expect(sm.boardGroup).not.toBe(full);
+    expect(squareMeshes(sm)).toHaveLength(45);
+
+    const cross = sm.boardGroup;
+    sm.ensureBoard(9, 'cross');
+    expect(sm.boardGroup).toBe(cross);
   });
 
   test('ensureBoard keeps the group when the edge length matches', () => {

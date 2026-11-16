@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { BOARD_SIZE } from '../../config.js';
+import { BOARD_SIZE, isBlockedCell, type BoardShape } from '../../config.js';
 import { logger } from '../../logger.js';
 
 /**
@@ -27,6 +27,7 @@ export class SceneManager3D {
   public boardGroup: THREE.Group | null;
   /** Squares along one edge of the board currently in the scene. */
   public boardEdge: number | null;
+  public boardShape: BoardShape;
   public squareSize: number;
   public currentTheme: string;
   public boundAnimate: () => void;
@@ -41,6 +42,7 @@ export class SceneManager3D {
     this.controls = null;
     this.boardGroup = null;
     this.boardEdge = null;
+    this.boardShape = 'standard';
     this.squareSize = 1;
 
     // Default settings
@@ -207,18 +209,19 @@ export class SceneManager3D {
     return themes[theme] || themes.classic;
   }
 
-  /** Rebuild the squares when the active game uses a different edge length. */
-  ensureBoard(size: number): void {
+  /** Rebuild when the edge length or the Kreuz corners change. */
+  ensureBoard(size: number, shape: BoardShape = 'standard'): void {
     if (!this.scene) return;
-    if (this.boardGroup && this.boardEdge === size) return;
-    this.createBoard(size);
+    if (this.boardGroup && this.boardEdge === size && this.boardShape === shape) return;
+    this.createBoard(size, shape);
   }
 
-  createBoard(size: number = BOARD_SIZE): void {
+  createBoard(size: number = BOARD_SIZE, shape: BoardShape = 'standard'): void {
     if (!this.scene) return;
 
     this.disposeBoard();
     this.boardEdge = size;
+    this.boardShape = shape;
     this.boardGroup = new THREE.Group();
     this.currentTheme = localStorage.getItem('chess_theme') || 'classic';
 
@@ -227,6 +230,7 @@ export class SceneManager3D {
 
     for (let row = 0; row < size; row++) {
       for (let col = 0; col < size; col++) {
+        if (isBlockedCell(row, col, shape)) continue;
         const isLight = (row + col) % 2 === 0;
         const material = new THREE.MeshStandardMaterial({
           color: isLight ? colors.light : colors.dark,
