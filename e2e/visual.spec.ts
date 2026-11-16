@@ -126,147 +126,53 @@ test.describe('Visual Regression Tests @visual', () => {
     await page.addInitScript(() => {
       localStorage.setItem('disable_animations', 'true');
       localStorage.setItem('settings_3d_mode', 'false');
+      // Der KI-Mentor oeffnet bei einem angeblichen Fehler einen Bestaetigungsdialog
+      // und faengt den Zug ab, bevor die Promotions-UI auftauchen kann.
+      localStorage.setItem('ki_mentor_level', 'OFF');
     });
 
-    // 1. Enter Hire Mode (Standard 9x9)
-    await page.click('.gamemode-card[data-mode="setup"]');
-    const mainMenu = page.locator('#main-menu');
-    await expect(mainMenu).not.toHaveClass(/active/);
+    // 1. Partie starten (klassisch 9x9) und dann eine minimal legale Stellung setzen:
+    //    weisser Bauer ein Feld vor der Unterpromotion. Der alte Weg ueber Shop/Setup
+    //    war instabil (Kaeufe und Phasen wurden vom UI ueberschrieben) und liess den
+    //    Baseline-Vergleich stillschweigend ausfall.
+    await page.click('.gamemode-card[data-mode="classic"]');
+    // Der Modus-Dialog hat die ID #modal-actions (Klasse .modal-buttons).
+    const playNow = page.locator('#modal-actions .btn-primary');
+    if (
+      await playNow
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      await playNow.click();
+    }
+    await expect(page.locator('#board .cell').first()).toBeVisible({ timeout: 15000 });
 
-    // 2. Setup Board for Promotion
-    // Place White King (required)
-    await page.locator('.cell[data-r="8"][data-c="4"]').click(); // e1 (Row 8)
-
-    // Force Opponent to Human to allow manual placement of Black King
     await page.evaluate(() => {
-      // @ts-ignore
-      if (window.app && window.app.game) {
-        // @ts-ignore
-        window.app.game.isAI = false;
-        // @ts-ignore
-        // Ensure 3D is disabled in runtime if possible
-        if (window.app.boardRenderer && window.app.boardRenderer.battleChess3D) {
-          // @ts-ignore
-          window.app.boardRenderer.battleChess3D.enabled = false;
-        }
-      }
+      const g = (window as any).app.game;
+      g.board = Array.from({ length: 9 }, () => Array(9).fill(null));
+      g.board[8][4] = { type: 'k', color: 'white', hasMoved: true };
+      g.board[0][8] = { type: 'k', color: 'black', hasMoved: true };
+      g.board[1][4] = { type: 'p', color: 'white', hasMoved: true };
+      g.turn = 'white';
+      g.phase = 'PLAY';
+      g.isAI = false;
+      g.kiMentorEnabled = false;
+      g.selectedSquare = null;
+      g.validMoves = null;
     });
 
-    // Place Black King (required)
-    // Wait for auto-transition to Black King setup?
-    // Usually happens immediately after White King.
-    // Let's click e9 (Row 0)
+    // 2. Bauer auf die Grundreihe ziehen
+    await page.locator('.cell[data-r="1"][data-c="4"]').click();
     await page.locator('.cell[data-r="0"][data-c="4"]').click();
 
-    // Ensure state is correct and Shop is shown (robustness)
-    await page.evaluate(() => {
-      // @ts-ignore
-      if (window.app.game.phase !== 'SETUP_WHITE_PIECES') {
-        console.warn('Phase mismatch, forcing SETUP_WHITE_PIECES');
-        // @ts-ignore
-        window.app.game.phase = 'SETUP_WHITE_PIECES';
-      }
-      // @ts-ignore
-      window.app.gameController.showShop(true);
-    });
-
-    // Wait for Shop (White Pieces setup)
-    const shop = page.locator('#shop-panel');
-    await expect(shop).toBeVisible();
-
-    // Place White Pawn on Row 1, Col 0 (Close to promotion at Row 0)
-    // Buy a Pawn first
-    const pawnCard = shop.locator('.shop-item[data-piece="p"]');
-    await pawnCard.click();
-
-    // Place it on Row 1, Col 0 (a8?)
-    // Note: White promotes at Row 0.
-    await page.locator('.cell[data-r="1"][data-c="0"]').click();
-
-    // Force points to 0 AND advance phase to skip remaining setup steps
-    await page.evaluate(() => {
-      console.log('%c[Test] Forcing game state skip...', 'color:magenta');
-      // @ts-ignore
-      if (window.app && window.app.game) {
-        // @ts-ignore
-        window.app.game.points = 0;
-        // @ts-ignore
-        window.app.game.phase = 'SETUP_BLACK_UPGRADES';
-        // @ts-ignore
-        window.app.game.isAI = false;
-        // @ts-ignore
-        window.app.game.turn = 'white'; // Force Turn White (String, not int)
-
-        // Manually place White Pawn at (1,0) for promotion test
-        // (1,0) is outside valid setup zone, so we must inject it
-        // game.board is 2D array of objects in the main App
-        // @ts-ignore
-        if (!window.app.game.board[1]) window.app.game.board[1] = [];
-        // @ts-ignore
-        window.app.game.board[1][0] = { type: 'p', color: 'white', hasMoved: true };
-
-        // @ts-ignore
-        window.app.gameController.updateShopUI();
-      }
-    });
-
-    // Finish Setup
-    await page.click('#finish-setup-btn');
-
-    // Fallback: If modal appears despite point hack, click "Fortfahren"
-    const modalBtn = page.locator('.modal-content .btn-primary:has-text("Fortfahren")');
-    try {
-      if (await modalBtn.isVisible({ timeout: 2000 })) {
-        console.log('Modal appeared, clicking confirm...');
-        await modalBtn.click();
-      }
-    } catch (e) {
-      // Ignore
-    }
-
-    // Force clear setup mode if still present
-    const isSetup = await page.evaluate(() => document.body.classList.contains('setup-mode'));
-    if (isSetup) {
-      console.log('Still in setup mode, forcing finish via app...');
-      await page.evaluate(() => {
-        // @ts-ignore - Try multiple paths to finish setup
-        if (window.app?.game?.finishSetupPhase) {
-          // @ts-ignore
-          window.app.game.finishSetupPhase();
-        } else if ((window as any).game?.finishSetupPhase) {
-          (window as any).game.finishSetupPhase();
-        }
-        // Force remove setup-mode class for visual test stability
-        document.body.classList.remove('setup-mode');
-        document.body.classList.add('play-mode');
-      });
-    }
-
-    // Wait for game start with extended timeout for Firefox
-    await expect(page.locator('body')).not.toHaveClass(/setup-mode/, { timeout: 15000 });
-
-    // 3. Move Pawn to Promotion programmatically
-    await page.evaluate(async () => {
-      const game = (window as any).game;
-      if (game.handlePlayClick) {
-        await game.handlePlayClick(1, 0);
-        await game.handlePlayClick(0, 0);
-      }
-    });
-
-    // 4. Wait for Promotion Modal (may not appear if move is illegal)
+    // 3. Das Overlay muss erscheinen. Ein stilles `return` hatte den Vergleich
+    //    uebersprungen und den Test gruen gelassen, ohne etwas zu pruefen.
     const modal = page.locator('#promotion-overlay');
-    try {
-      await expect(modal).toBeVisible({ timeout: 15000 });
-      await expect(modal).not.toHaveClass(/hidden/);
-    } catch {
-      // Promotion may not trigger if setup mode blocks it — skip screenshot
-      console.log('Promotion modal not visible, skipping screenshot');
-      return;
-    }
+    await expect(modal).toBeVisible({ timeout: 15000 });
+    await expect(modal).not.toHaveClass(/hidden/);
 
-    // 5. Screenshot
-    // Wait for any CSS transitions (even if animations disabled, opacity/display might have delays)
+    // 4. Screenshot
     await page.waitForTimeout(500);
     await expect(modal).toHaveScreenshot('promotion-modal.png', {
       maxDiffPixelRatio: 0.1,
