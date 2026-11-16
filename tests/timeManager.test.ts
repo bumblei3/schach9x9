@@ -118,6 +118,30 @@ describe('TimeManager', () => {
     });
   });
 
+  describe('tickClock ohne DOM', () => {
+    // Eine weiterlaufende Uhr darf keinen ReferenceError auslösen, wenn die
+    // Umgebung schon teardown ist — das war ein Flake, der den Unit-Test-Job
+    // in der CI schloss.
+    test('stops itself instead of touching a missing document', () => {
+      const original = globalThis.document;
+      Object.defineProperty(globalThis, 'document', {
+        value: undefined,
+        configurable: true,
+      });
+      const stop = vi.spyOn(timeManager, 'stopClock');
+
+      try {
+        expect(() => timeManager.tickClock()).not.toThrow();
+        expect(stop).toHaveBeenCalled();
+      } finally {
+        Object.defineProperty(globalThis, 'document', {
+          value: original,
+          configurable: true,
+        });
+      }
+    });
+  });
+
   describe('tickClock — countdown + timeout', () => {
     test('subtracts elapsed time from the side to move', () => {
       mockGame.turn = 'white';
