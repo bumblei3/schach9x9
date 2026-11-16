@@ -1,14 +1,46 @@
-// Install event: precache core shell
+// Install event: precache the app shell.
+//
+// The list has to match what the build actually ships. `BUILD_PRECACHE` is
+// empty here and gets filled by a small Vite plugin (see vite.config.ts) that
+// reads the emitted `dist/index.html` and rewrites this file in `dist/` — so
+// the hashed `assets/*` entries can never go stale. The stable files in
+// `SHELL_PRECACHE` live in `public/` and keep their names across builds.
+const SHELL_PRECACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './opening-book.json',
+  './opening-book-8x8.json',
+];
+const BUILD_PRECACHE = [];
+
+const CACHE_NAME = 'schach9x9-v9';
+
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(['/', '/index.html', '/style.css']).catch(() => {});
+    caches.open(CACHE_NAME).then(async cache => {
+      // One entry per `add()`: `addAll` rejects as a whole, so a single missing
+      // file used to leave the cache completely empty (that is what happened
+      // with the old `/style.css` entry — the file is bundled into
+      // `assets/main-*.css` and never shipped under that name).
+      const failures = [];
+      for (const url of [...SHELL_PRECACHE, ...BUILD_PRECACHE]) {
+        try {
+          await cache.add(url);
+        } catch (err) {
+          failures.push(url);
+          console.warn('[SW] precache fehlgeschlagen:', url, err);
+        }
+      }
+      if (failures.length > 0) {
+        console.warn('[SW] precache unvollstaendig, fehlen:', failures.join(', '));
+      }
     })
   );
   self.skipWaiting();
 });
-
-const CACHE_NAME = 'schach9x9-v8';
 
 // Fetch event: Network-First strategy
 self.addEventListener('fetch', event => {
