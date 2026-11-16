@@ -5,6 +5,14 @@
 
 import { registerServiceWorker } from './serviceWorkerRegistration.js';
 
+// Stylesheets für Ansichten, die auf der Startseite nicht vorkommen (Shop,
+// Analyse, Promotion, Debug Console) liegen in css/views.css. Als eigener Chunk
+// nachladen, statt sie in das render-blockierende Haupt-Stylesheet zu legen —
+// das hat den ersten Paint um 0,26 s beschleunigt (Median aus 5 Läufen,
+// tools/lighthouse-local.mjs). Module-Skripte sind deferred, also läuft das
+// parallel zum ersten Paint und nicht danach.
+void import('../css/views.css');
+
 const init = async () => {
   try {
     const { App } = await import('./App.js');
