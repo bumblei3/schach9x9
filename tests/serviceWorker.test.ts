@@ -41,6 +41,7 @@ interface SwEnv {
     delete: ReturnType<typeof vi.fn>;
   };
   store: Map<string, MockResponse>;
+  added: string[];
   load: (event: any) => Promise<MockResponse>;
 }
 
@@ -52,6 +53,7 @@ interface SwEnv {
 async function loadWorker(): Promise<SwEnv> {
   const handlers = new Map<string, Handler>();
   const store = new Map<string, MockResponse>();
+  const added: string[] = [];
 
   const cache = {
     put: vi.fn((request: Request, value: MockResponse) => {
@@ -59,12 +61,23 @@ async function loadWorker(): Promise<SwEnv> {
       return Promise.resolve();
     }),
     match: vi.fn((request: Request) => Promise.resolve(store.get(request.url))),
+    // `cache.add` bekommt im Worker relative URL-Strings, keine Request-Objekte.
+    // Eine Datei wird absichtlich zum Scheitern gebracht, damit der Test prüft,
+    // dass ein einzelner Fehlschlag den Rest der Liste nicht kippt.
+    add: vi.fn((url: string) => {
+      if (url.endsWith('icon-512.png')) {
+        return Promise.reject(new TypeError('Failed to load'));
+      }
+      added.push(url);
+      store.set(new URL(url, 'https://example.test/').href, response('cached'));
+      return Promise.resolve();
+    }),
   };
 
   const caches = {
     open: vi.fn(() => Promise.resolve(cache)),
     match: vi.fn((request: Request) => Promise.resolve(store.get(request.url))),
-    keys: vi.fn(() => Promise.resolve(['schach9x9-v8', 'schach9x9-v7'])),
+    keys: vi.fn(() => Promise.resolve(['schach9x9-v9', 'schach9x9-v8'])),
     delete: vi.fn((_name: string) => Promise.resolve(true)),
   };
 
@@ -75,6 +88,7 @@ async function loadWorker(): Promise<SwEnv> {
     addEventListener: vi.fn((type: string, handler: Handler) => {
       handlers.set(type, handler);
     }),
+    skipWaiting: vi.fn(),
   };
 
   vi.stubGlobal('self', selfMock);
@@ -96,7 +110,7 @@ async function loadWorker(): Promise<SwEnv> {
     return (await resolved) as MockResponse;
   };
 
-  return { handlers, fetchMock, caches, store, load };
+  return { handlers, fetchMock, caches, store, added, load };
 }
 
 describe('shipped service-worker.js', () => {
@@ -169,6 +183,27 @@ describe('shipped service-worker.js', () => {
     expect(env.store.size).toBe(0);
   });
 
+  it('precaches the shell on install and survives a single missing file', async () => {
+    const env = await loadWorker();
+
+    let finished = false;
+    env.handlers.get('install')?.({
+      waitUntil: (promise: Promise<unknown>) => {
+        promise.then(() => {
+          finished = true;
+        });
+      },
+    });
+
+    await vi.waitFor(() => expect(finished).toBe(true));
+
+    // icon-512.png schlägt fehl (siehe Mock), die übrigen Einträge kommen trotzdem an.
+    expect(env.added.some(url => url.endsWith('/index.html'))).toBe(true);
+    expect(env.added.some(url => url.endsWith('icon-192.png'))).toBe(true);
+    expect(env.added.some(url => url.endsWith('icon-512.png'))).toBe(false);
+    expect(env.added.length).toBeGreaterThan(4);
+  });
+
   it('deletes stale caches on activate', async () => {
     const env = await loadWorker();
 
@@ -185,6 +220,6 @@ describe('shipped service-worker.js', () => {
     await vi.waitFor(() => expect(finished).toBe(true));
 
     expect(env.caches.delete).toHaveBeenCalledTimes(1);
-    expect(env.caches.delete).toHaveBeenCalledWith('schach9x9-v7');
+    expect(env.caches.delete).toHaveBeenCalledWith('schach9x9-v8');
   });
 });
