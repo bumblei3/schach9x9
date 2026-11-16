@@ -284,4 +284,32 @@ describe('ShopManager', () => {
       expect(mockGame.log).toHaveBeenCalledWith('Nicht genug Punkte!');
     });
   });
+
+  describe('Festung rook price', () => {
+    beforeEach(() => {
+      mockGame.campaignMode = true;
+      mockGame.currentLevelId = 'boss_1';
+      mockGame.playerColor = 'white';
+      mockGame.phase = PHASES.SETUP_WHITE_PIECES;
+      vi.mocked(campaignManager.getLevel).mockReturnValue({ setupType: 'budget' } as never);
+      vi.mocked(campaignManager.isTalentUnlocked).mockImplementation(
+        (id: string) => id === 'r_festung'
+      );
+    });
+
+    test('buys and refunds a rook for 3 points', () => {
+      mockGame.points = 30;
+      shopManager.selectShopPiece('r');
+      expect(mockGame.selectedShopPiece).toBe('r');
+      expect(document.getElementById('selected-piece-display')?.innerHTML).toContain('(3)');
+
+      shopManager.handleBuyPiece(6, 4);
+      expect(mockGame.board[6][4]).toMatchObject({ type: 'r', color: 'white' });
+      expect(mockGame.points).toBe(27);
+
+      shopManager.handleSellPiece(6, 4);
+      expect(mockGame.board[6][4]).toBeNull();
+      expect(mockGame.points).toBe(30);
+    });
+  });
 });

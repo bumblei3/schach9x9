@@ -89,6 +89,10 @@ export class CampaignModeStrategy implements GameModeStrategy {
           '<p class="sprungfeder-note" style="font-size: 0.95rem; color: #93c5fd; margin-bottom: 1rem;">Sprungfeder stellt einen Extra-Springer aufs Feld.</p>';
       }
     }
+    if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('r_festung')) {
+      plundererNote +=
+        '<p class="festung-note" style="font-size: 0.95rem; color: #fbbf24; margin-bottom: 1rem;">Festung: der Turm kostet 3 Punkte.</p>';
+    }
 
     if (level.setupType === 'fixed') {
       game.phase = PHASES.PLAY;

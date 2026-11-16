@@ -139,7 +139,7 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'r_festung',
         name: 'Festung',
-        description: 'Turm-Schläge geben +5 XP.',
+        description: 'Turm-Schläge geben +5 XP. Im Anwerbe-Shop kostet der Turm 3 Punkte.',
         tier: 1,
         reqLevel: 3,
         cost: 90,

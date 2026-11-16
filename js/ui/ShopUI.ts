@@ -51,12 +51,13 @@ export function updateShopUI(game: GameLike): void {
   const tutorPointsDisplay = document.getElementById('tutor-points-display');
   if (tutorPointsDisplay) tutorPointsDisplay.textContent = (game.tutorPoints || 0).toString();
 
-  const bishopBtn = document.querySelector<HTMLElement>('.shop-item[data-piece="b"]');
-  if (bishopBtn) {
-    const bishopCost = shopPieceCost('b', game);
-    bishopBtn.dataset.cost = String(bishopCost);
-    const bishopLabel = bishopBtn.querySelector('.shop-cost');
-    if (bishopLabel) bishopLabel.textContent = String(bishopCost);
+  for (const piece of ['b', 'r']) {
+    const btn = document.querySelector<HTMLElement>(`.shop-item[data-piece="${piece}"]`);
+    if (!btn) continue;
+    const cost = shopPieceCost(piece, game);
+    btn.dataset.cost = String(cost);
+    const label = btn.querySelector('.shop-cost');
+    if (label) label.textContent = String(cost);
   }
 
   document.querySelectorAll<HTMLElement>('.shop-item').forEach(btn => {

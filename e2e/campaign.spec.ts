@@ -321,6 +321,50 @@ test.describe('Pfeilschnell', () => {
   });
 });
 
+test.describe('Festung', () => {
+  test('prices the hiring rook at 3 before the purchase', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'schach_campaign_state',
+        JSON.stringify({
+          currentLevelId: 'boss_1',
+          unlockedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge', 'boss_1'],
+          completedLevels: ['peasant_revolt', 'bandit_ambush', 'skirmish_bridge'],
+          unlockedRewards: [],
+          gold: 150,
+          unlockedPerks: [],
+          levelStars: {},
+          unlockedTalentIds: ['r_festung'],
+          championType: null,
+        })
+      );
+    });
+
+    const helper = new E2EHelper(page);
+    await helper.goto();
+    await page.click('#campaign-start-btn');
+    await page.locator('.campaign-level-card', { hasText: 'Kapitel 4' }).click();
+    await expect(page.locator('.festung-note')).toHaveText('Festung: der Turm kostet 3 Punkte.');
+    const rook = page.locator('.shop-item[data-piece="r"]');
+    await expect(rook.locator('.shop-cost')).toHaveText('3');
+    await expect(rook).toHaveAttribute('data-cost', '3');
+    await expect(page.locator('.shop-item[data-piece="b"] .shop-cost')).toHaveText('3');
+
+    await page
+      .locator('#modal-actions')
+      .getByRole('button', { name: 'Mission starten', exact: true })
+      .click();
+    await page.locator('.cell[data-r="7"][data-c="4"]').click();
+    await expect(page.locator('#points-display')).toHaveText('30');
+    await rook.click();
+    await page.locator('.cell[data-r="6"][data-c="4"]').click();
+    await expect(page.locator('.cell[data-r="6"][data-c="4"]')).toHaveAttribute('data-piece', 'r');
+    await expect(page.locator('#points-display')).toHaveText('27');
+    await page.locator('.cell[data-r="6"][data-c="4"]').click();
+    await expect(page.locator('#points-display')).toHaveText('30');
+  });
+});
+
 test.describe('Taktik-Genie', () => {
   test('opens one tip when the mission starts', async ({ page }) => {
     test.setTimeout(60000);

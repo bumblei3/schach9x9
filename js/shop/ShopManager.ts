@@ -81,9 +81,7 @@ export class ShopManager {
     }
     if (piece && piece.color === color && piece.type !== 'k') {
       // Look up piece value
-      const pieceEntry = Object.values(SHOP_PIECES).find(p => p.symbol === piece.type);
-      const listed = pieceEntry ? pieceEntry.points : 0;
-      const cost = piece.type === 'b' ? shopPieceCost(piece.type, this.game) : listed;
+      const cost = shopPieceCost(piece.type, this.game);
 
       this.game.points += cost;
       this.game.board[r][c] = null;
