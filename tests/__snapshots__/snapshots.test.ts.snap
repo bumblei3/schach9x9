@@ -38,19 +38,18 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
       To drop 'unsafe-inline' later, self-host Three.js and remove the
       import map.
     -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'">
     <title>Schach 9x9</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link rel="stylesheet" href="css/notifications.css">
     <link rel="stylesheet" href="css/menu.css">
     <link rel="stylesheet" href="css/tutorial.css">
     <link rel="stylesheet" href="css/skins.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&amp;display=swap" rel="stylesheet">
+    <!-- Outfit ist selbst gehostet (css/base.css @font-face). Der Preload holt
+         die Datei mit hoher Priorität, font-display: swap verhindert FOIT. -->
+    <link rel="preload" as="font" type="font/woff2" href="fonts/outfit-latin.woff2" crossorigin="">
 
   
 
