@@ -134,9 +134,25 @@ export function bindIssueReporter(getGame: () => IssueGame | null): void {
   const copyBtn = document.getElementById('issue-report-copy');
   const submitBtn = document.getElementById('issue-report-open');
   const errorEl = document.getElementById('issue-report-error');
-  if (!openBtn || !overlay || !cancelBtn || !copyBtn || !submitBtn || !errorEl) return;
-  if (openBtn.dataset.bound === '1') return;
-  openBtn.dataset.bound = '1';
+  if (!overlay || !cancelBtn || !copyBtn || !submitBtn || !errorEl) return;
+  // Idempotent: DOMHandler kann das mehrfach aufrufen.
+  if (overlay.dataset.reporterBound === '1') return;
+  overlay.dataset.reporterBound = '1';
+
+  const open = (): void => {
+    errorEl.hidden = true;
+    overlay.classList.remove('hidden');
+    document.getElementById('issue-report-detail')?.focus();
+  };
+
+  // Der Einstieg im Menü plus jeder weitere Auslöser (data-report-issue),
+  // etwa im Aktionsmenü — Feedback muss einen Klick entfernt sein, nicht drei.
+  openBtn?.addEventListener('click', open);
+  document.querySelectorAll<HTMLElement>('[data-report-issue]').forEach(el => {
+    if (el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', open);
+  });
 
   const close = (): void => {
     overlay.classList.add('hidden');
@@ -174,12 +190,6 @@ export function bindIssueReporter(getGame: () => IssueGame | null): void {
       env: currentEnvironment(),
     });
   };
-
-  openBtn.addEventListener('click', () => {
-    errorEl.hidden = true;
-    overlay.classList.remove('hidden');
-    document.getElementById('issue-report-detail')?.focus();
-  });
 
   cancelBtn.addEventListener('click', close);
 
