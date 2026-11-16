@@ -1,21 +1,21 @@
 # schach9x9 — Status (Stand: 2026-11-16)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `3d85186`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `3d85186`.
+Release-Tag ist `v2.1.0`. `main` ist `26e7099`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht. Die Testzahlen in der Tabelle sind die Zählung von `26e7099`.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `898a750` | 271 Dateien, 3294/3294 (10,0 s) |
-| Tests (CI) | Run 43908688755, `898a750` | grün, inklusive E2E |
-| Typecheck + Lint | `898a750` | grün (`tsc --noEmit`, `eslint . --ext .ts`) |
-| Build | `898a750` | grün |
-| E2E + Lighthouse | Run 43914533913, `3d85186` | E2E grün. Lighthouse-Abfrage lief bis zum Fix nie (Budget-Fehler), jetzt echt: Performance 0,68 < 0,90 → rot; Job bleibt `continue-on-error`, siehe Eintrag unten |
-| Security | CodeQL, Run 43908688741 | grün |
-| CI | GitHub Actions | `898a750` grün (Run 43908688755) |
-| Git | `main` `898a750` (2026-11-16) | Tag `v2.1.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung (weiß wie schwarz) und Statuspille sind auf `main`. |
+| Tests | `npx vitest run`, Node 26, `26e7099` | 271 Dateien, 3296/3296 |
+| Tests (CI) | Run 43962316078, `26e7099` | grün, inklusive E2E |
+| Typecheck + Lint | `26e7099` | grün (`tsc --noEmit`, `eslint . --ext .ts`) |
+| Build | `26e7099` | grün |
+| E2E + Lighthouse | Run 43962316078, `26e7099` | E2E grün (107 passed). Lighthouse-Abfrage läuft seit dem Budget-Fix echt: Performance 0,68 < 0,90 → rot; Job bleibt `continue-on-error`, siehe Eintrag unten |
+| Security | CodeQL, Run 43962316115 | grün |
+| CI | GitHub Actions | `26e7099` grün (Run 43962316078) |
+| Git | `main` `26e7099` (2026-11-16) | Tag `v2.1.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung (weiß wie schwarz) und Statuspille sind auf `main`. |
 
 **Abhängigkeiten 2026-11-16:** jsdom 30.1.3 → 31.0.1 (#238), vite 8.3.6 → 8.3.8 und prettier 3.9.10 → 3.10.1 (#239) sind gemergt. jsdom 31 serialisiert `#abc` als `rgb(170, 187, 204)` und `translateY(0)` als `translateY(0px)`; drei Assertions prüften auf die Serialisierung statt auf die Wirkung und blockierten den Bump — Fix #240. #239 lag vor `8c1664a` (Header-Fix) und hatte deshalb falsche visuelle Baselines plus zehn Click-Timeouts in der CI; nach dem Rebase auf `main` war die E2E-Suite lokal grün (106 passed, 1 skipped, 3,4 min). `main` `a4eaad4` ist grün inklusive E2E und Pages-Deploy.
 
@@ -203,4 +203,4 @@ Fix: benannte Konstante `SHADOW_MAP_TYPE = THREE.PCFShadowMap` mit Begründung; 
 
 **Erledigt 2026-11-16 (#242, `898a750`):** Der Visual-Test „Pawn Promotion Modal" lief stillschweigend durch. `e2e/visual.spec.ts` hatte im vierten Schritt ein `try { … } catch { return; }` um das Promotion-Overlay — wenn es nicht erschien, endete der Test ohne Fehlermeldung, grün und ohne den Baseline-Vergleich zu erreichen (lokal: „Promotion modal not visible, skipping screenshot", `1 passed`). Ursache für das fehlende Overlay war der KI-Mentor: `showBlunderWarning` fängt den Zug mit einem Bestätigungsdialog ab, bevor die Promotions-UI auftauchen kann. Das Szenario baut jetzt die Stellung sauber auf (klassisch 9×9, Könige e1/i9, weißer Bauer e8, `phase='PLAY'`, `isAI=false`, `kiMentorEnabled=false`, `ki_mentor_level='OFF'` im `addInitScript`) und prüft das Overlay sichtbar. Damit ist `promotion-modal.png` wirklich gedeckt; der Test braucht 3,9 s statt 18 s. E2E: 4 passed, 1 skipped.
 
-**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. `v2.1.0` ist draußen. Die Live-Seite ist durchgespielt (s. o.) — der Playtest mit 3–5 Spielern aus `docs/PLAYTEST_PROTOCOL.md` ist der nächste Datenpunkt, nicht weiterer Code. Das Ziel für das erste Blatt existiert jetzt: [`docs/PLAYTEST_ERGEBNISSE.md`](docs/PLAYTEST_ERGEBNISSE.md) (Sitzungen, Pro-Spieler-Tabelle, Akt-II-gegen-Akt-IV-Vergleich, Kommentare, Konsolen-Auffälligkeiten) — bisher bewusst leer. NNUE bleibt geparkt, M1.2 bleibt zu. Die Abhängigkeiten sind auf dem Stand von `main` (`898a750`): jsdom 31.0.1, vite 8.3.8, prettier 3.10.1.
+**Nächster sinnvoller Schritt:** Die Engine bleibt eingefroren. `v2.1.0` ist draußen. Die Live-Seite ist durchgespielt (s. o.) — der Playtest mit 3–5 Spielern aus `docs/PLAYTEST_PROTOCOL.md` ist der nächste Datenpunkt, nicht weiterer Code. Das Ziel für das erste Blatt existiert jetzt: [`docs/PLAYTEST_ERGEBNISSE.md`](docs/PLAYTEST_ERGEBNISSE.md) (Sitzungen, Pro-Spieler-Tabelle, Akt-II-gegen-Akt-IV-Vergleich, Kommentare, Konsolen-Auffälligkeiten) — bisher bewusst leer. NNUE bleibt geparkt, M1.2 bleibt zu. Die Abhängigkeiten sind auf dem Stand von `main` (`26e7099`): jsdom 31.0.1, vite 8.3.8, prettier 3.10.1.
