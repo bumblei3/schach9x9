@@ -1,0 +1,24 @@
+/* ===========================================
+   VIEWS.CSS — Stylesheets für Ansichten, die auf der Startseite
+   nicht vorkommen: Shop, Analyse, Promotion, Debug Console.
+   ===========================================
+   Diese Datei wird von js/main.ts per Dynamic Import nachgeladen und liegt
+   deshalb nicht im render-blockenden Haupt-Stylesheet. Gemessen mit
+   tools/lighthouse-local.mjs (Median aus 5 Läufe, identischer Build):
+   88,5 KiB render-blockierend → 54,6 KiB, FCP 1,95 s → 1,69 s.
+   Die Startseite selbst wird dadurch nicht gestört: Sie liegt nach dem
+   ersten Paint längst im DOM, und die Menü-CSS (base/themes/layout/board/
+   components/menu) bleibt im blockierenden Bundle.
+   =========================================== */
+
+/* Analyse: Panel, Variantenbaum, Bewertungsbalken */
+@import './analysis.css';
+
+/* Premium: Werte-Modale, Promotion, Talentbaum */
+@import './premium.css';
+
+/* Debug: die schwebende Konsole (Ctrl+D) */
+@import './debug.css';
+
+/* Shop: Truppen anheuern (Setup-/Kreuz-Modus) */
+@import './shop.css';

@@ -18,20 +18,11 @@
 /* Components: Buttons, Modals, Overlays */
 @import './css/components.css';
 
-/* Shop: Shop panel, Tutor, Puzzle */
-@import './css/shop.css';
-
 /* Animations: Keyframes & Transitions */
 @import './css/animations.css';
 
-/* Analysis: Eval Bar, Move Quality */
-@import './css/analysis.css';
-
-/* Debug: Enhanced Debug Console */
-@import './css/debug.css';
-
-/* Premium: Visual Polish & Effects */
-@import './css/premium.css';
+/* Shop, Analyse, Debug und Premium liegen in css/views.css — die wird aus
+   js/main.ts nachgeladen und blockiert den ersten Paint deshalb nicht. */
 
 /* ===========================================
    LEGACY / ADDITIONAL STYLES
