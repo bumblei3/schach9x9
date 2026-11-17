@@ -8,7 +8,7 @@ Release-Tag ist `v2.1.0`. `main` ist `a4cb270` (A11y-Grid + quadratische Zellen,
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `feat/i18n-shell` (Rebase auf `a4cb270`) | 271 Dateien, 3300/3300 |
+| Tests | `npx vitest run`, Node 26, `feat/i18n-shell` (Rebase auf `a4cb270`) | 272 Dateien, 3305/3305 |
 | Tests (CI) | Run 44125184538, `a4cb270` | grün, inklusive E2E |
 | A11y | axe-core über sieben Zustände der Live-Seite, `692680d` (in `a4cb270`) | **0 Verstöße** (vorher sechs Regeln, davon zwei critical) |
 | Typecheck + Lint | `feat/i18n-shell` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |

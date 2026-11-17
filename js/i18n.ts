@@ -22,7 +22,10 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 
 const STORAGE_KEY = 'chess_locale';
 
-const de = {
+// `de`/`en` sind exportiert, weil `tests/i18n.test.ts` das Marker-Audit gegen
+// die Wörterbücher führt (zwei Teilstring-Fehler — `classic` an „Klassisch 30"
+// und an der Standard-8×8-Karte — waren sonst nicht gefangen worden).
+export const de = {
   'menu.open': 'Menü öffnen',
   'analysis.openingLabel': 'Eröffnung:',
   'analysis.variantsTreeLabel': 'Varianten-Baum (Top-Züge & beste Antworten):',
@@ -71,7 +74,6 @@ const de = {
   'settings.aiPersonality': 'KI-Persönlichkeit',
   'settings.feedback': 'Rückmeldung',
   'settings.chooseSkin': 'Figuren-Skin auswählen',
-  'settings.language': 'Sprache',
   'analysis.allCategories': 'Alle Kategorien',
   'analysis.analysis': 'Analyse',
   'analysis.analysisMode': 'Analyse-Modus',
@@ -152,7 +154,7 @@ const de = {
     'Klassisches Schach mit Rochade und En passant. Sofort spielen oder mit 15 Punkten verbessern.',
 } as const;
 
-const en: Record<keyof typeof de, string> = {
+export const en: Record<keyof typeof de, string> = {
   'menu.open': 'Open menu',
   'analysis.openingLabel': 'Opening:',
   'analysis.variantsTreeLabel': 'Variant tree (top moves & best replies):',
@@ -201,7 +203,6 @@ const en: Record<keyof typeof de, string> = {
   'settings.aiPersonality': 'AI personality',
   'settings.feedback': 'Feedback',
   'settings.chooseSkin': 'Choose piece skin',
-  'settings.language': 'Language',
   'analysis.allCategories': 'All categories',
   'analysis.analysis': 'Analysis',
   'analysis.analysisMode': 'Analysis mode',
