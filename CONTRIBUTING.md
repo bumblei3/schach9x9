@@ -49,7 +49,7 @@ vertragen sich nicht, ohne das Flag scheitert `npm ci` an `ERESOLVE`.
 | Fuzz-Tests                  | `npm test tests/fuzz/fuzz.test.ts`                                                    |
 | Typecheck                   | `npm run typecheck`                                                                   |
 | Lint                        | `npm run lint`                                                                        |
-| Formatierung                | `npm run format` bzw. `npm run format:check`                                          |
+| Formatierung (nur eigene Dateien) | `npx prettier --write <datei>` |
 | Abdeckung                   | `npm run test:coverage`                                                               |
 | E2E (komplett, CI-nah)      | `CI=1 npx playwright test --project=chromium --reporter=line --workers=1 --retries=0` |
 | Ein E2E-Spec                | `npx playwright test e2e/<spec>.ts --project=chromium --workers=1 --retries=0`        |
@@ -83,6 +83,15 @@ Dazu:
 - E2E-Suite, wenn du an der UI, am Brett oder an Heuristiken mit
   Schwellwerten gespielt hast (Tutor-Warnungen sind Schwellwerte, keine
   Einheiten — sie können ein Zug an der UI blockieren).
+
+**`npm run format:check` ist kein Gate.** Auf `main` sind 117 Dateien nicht
+prettier-sauber, und `index.html` lässt der Prettier-HTML-Parser mit einem
+Syntaxfehler an `</div>` (Zeile 689) abbrechen — obwohl `parse5`, also der
+HTML5-Parser, die Datei fehlerfrei parst. Es ist also kein Beleg für einen
+Kaputtbaum, sondern eine Parser-Differenz. Formatiere daher gezielt die
+Dateien, die du anfasst, und lasse `npm run format` nicht über den ganzen Baum
+laufen: der Diff würde hundert fremde Dateien mitnehmen und jedes offene PR
+breitmachen.
 
 Zwei Haken laufen automatisch beim Commit:
 
