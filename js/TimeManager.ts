@@ -5,6 +5,7 @@
 import { PHASES, type Game } from './gameEngine.js';
 import * as UI from './ui.js';
 import { soundManager } from './sounds.js';
+import { t } from './i18n.js';
 
 import type { Player } from './types/core.js';
 
@@ -128,7 +129,7 @@ export class TimeManager {
     (this.game as unknown as { phase: string }).phase = PHASES.GAME_OVER;
     (this.game as unknown as { winner: Player | 'draw' | null }).winner =
       loserColor === 'white' ? 'black' : 'white';
-    const winnerColor = loserColor === 'white' ? 'Schwarz' : 'Weiß';
+    const winnerColor = t(loserColor === 'white' ? 'game.sideBlack' : 'game.sideWhite');
     const loserName = loserColor === 'white' ? 'Weiß' : 'Schwarz';
 
     this.game.log(
@@ -139,7 +140,7 @@ export class TimeManager {
       const overlay = document.getElementById('game-over-overlay');
       const winnerText = document.getElementById('winner-text');
       if (overlay && winnerText) {
-        winnerText.textContent = `${winnerColor} gewinnt durch Zeitüberschreitung!`;
+        winnerText.textContent = t('game.endWinsOnTime', { side: winnerColor });
         overlay.classList.remove('hidden');
       }
     }

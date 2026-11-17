@@ -14,6 +14,7 @@ import type { MoveController } from '../moveController.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { UNIT_TALENT_TREES, type TalentNode } from '../campaign/talents.js';
+import { t } from '../i18n.js';
 
 /** +10% XP talents. effectValue is the percent, applied after flat bonuses. */
 const PERCENT_XP_TALENTS = new Set(['n_meister', 'q_omnipraesenz']);
@@ -411,7 +412,7 @@ async function completeMoveExecution(
     game.log('Unentschieden durch unzureichendes Material.');
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Unentschieden (Material)';
+    if (winnerText) winnerText.textContent = t('game.endDrawInsufficient');
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {
@@ -453,7 +454,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
   if (!whiteKingExists || !blackKingExists) {
     game.phase = PHASES.GAME_OVER as Phase;
     game.winner = !whiteKingExists ? 'black' : 'white';
-    const winner = !whiteKingExists ? 'Schwarz' : 'Weiß';
+    const winner = t(!whiteKingExists ? 'game.sideBlack' : 'game.sideWhite');
     game.log(`KÖNIG GESCHLAGEN! ${winner} gewinnt!`);
 
     // Triple Flash Effect on capture (+ screen shake already in animateMove)
@@ -463,7 +464,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
 
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = `${winner} gewinnt!\n(König geschlagen)`;
+    if (winnerText) winnerText.textContent = t('game.endKingCaptured', { side: winner });
     if (overlay) overlay.classList.remove('hidden');
 
     const isPlayerWin = (game.isAI && game.turn === 'black') || !game.isAI;
@@ -534,14 +535,14 @@ export function finishMove(game: Game, lastTo?: Square): void {
     game.winner = opponentColor === 'white' ? 'black' : 'white';
     UI.renderBoard(game);
     UI.updateStatus(game);
-    const winner = opponentColor === 'white' ? 'Schwarz' : 'Weiß';
+    const winner = t(opponentColor === 'white' ? 'game.sideBlack' : 'game.sideWhite');
     game.log(`SCHACHMATT! ${winner} gewinnt!`);
 
     UI.animateCheckmate(game, opponentColor);
 
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = `${winner} gewinnt!`;
+    if (winnerText) winnerText.textContent = t('game.endWinner', { side: winner });
     if (overlay) overlay.classList.remove('hidden');
 
     const isPlayerWin = (game.isAI && opponentColor === 'black') || !game.isAI;
@@ -561,7 +562,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     game.log('PATT! Unentschieden.');
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Unentschieden (Patt)';
+    if (winnerText) winnerText.textContent = t('game.endDrawStalemate');
     if (overlay) overlay.classList.remove('hidden');
 
     if (game.gameController) {

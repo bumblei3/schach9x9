@@ -3,6 +3,7 @@ import * as UI from '../ui.js';
 import type { Game } from '../gameEngine.js';
 import type { Player } from '../types/core.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
+import { t } from '../i18n.js';
 
 /**
  * Rule-draws already painted the overlay. Hand the result to the same
@@ -39,7 +40,7 @@ export function checkDraw(game: Game): boolean {
     game.log('Unentschieden (50-Züge-Regel)');
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Unentschieden (50-Züge-Regel)';
+    if (winnerText) winnerText.textContent = t('game.endDraw50');
     if (overlay) overlay.classList.remove('hidden');
 
     recordDraw(game);
@@ -56,7 +57,7 @@ export function checkDraw(game: Game): boolean {
     game.log('Unentschieden (Stellungswiederholung)');
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Unentschieden (Stellungswiederholung)';
+    if (winnerText) winnerText.textContent = t('game.endDrawRepetition');
     if (overlay) overlay.classList.remove('hidden');
 
     recordDraw(game);
@@ -71,7 +72,7 @@ export function checkDraw(game: Game): boolean {
     game.log('Unentschieden (Ungenügendes Material)');
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Unentschieden (Ungenügendes Material)';
+    if (winnerText) winnerText.textContent = t('game.endDrawMaterial');
     if (overlay) overlay.classList.remove('hidden');
 
     recordDraw(game);

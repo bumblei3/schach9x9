@@ -28,7 +28,7 @@ import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
 import { AI_DIFFICULTIES } from '../config.js';
 import { TIME_CONTROLS } from '../TimeManager.js';
-import { getLocale, isLocale, setLocale } from '../i18n.js';
+import { getLocale, isLocale, setLocale, t } from '../i18n.js';
 
 export class DOMHandler {
   private app: App;
@@ -857,20 +857,20 @@ export class DOMHandler {
   /** One Klassisch card. The old upgrade card was the same position plus 15 points. */
   private offerClassicStart(): void {
     UI.showModal(
-      'Klassisch 9×9',
-      'Dieselbe Aufstellung. Sofort spielen, oder vorher 15 Punkte zum Verbessern ausgeben.',
+      t('modes.classic9x9'),
+      t('game.startMessage'),
       [
         {
-          text: 'Sofort spielen',
+          text: t('game.playNow'),
           class: 'btn-primary',
           callback: () => this.startMode('classic', 0),
         },
         {
-          text: 'Mit 15 Punkten verbessern',
+          text: t('game.upgrade15'),
           class: 'btn-secondary',
           callback: () => this.startMode('upgrade', 15),
         },
-        { text: 'Zurück', class: 'btn-secondary' },
+        { text: t('setup.back'), class: 'btn-secondary' },
       ]
     );
   }
@@ -878,20 +878,20 @@ export class DOMHandler {
   /** One 8×8 card. The old upgrade card was the same position plus 15 points. */
   private offerStandard8x8Start(): void {
     UI.showModal(
-      'Standard 8×8',
-      'Dieselbe Aufstellung. Sofort spielen, oder vorher 15 Punkte zum Verbessern ausgeben.',
+      t('modes.standard8x8'),
+      t('game.startMessage'),
       [
         {
-          text: 'Sofort spielen',
+          text: t('game.playNow'),
           class: 'btn-primary',
           callback: () => this.startMode('standard8x8', 0),
         },
         {
-          text: 'Mit 15 Punkten verbessern',
+          text: t('game.upgrade15'),
           class: 'btn-secondary',
           callback: () => this.startMode('upgrade8x8', 15),
         },
-        { text: 'Zurück', class: 'btn-secondary' },
+        { text: t('setup.back'), class: 'btn-secondary' },
       ]
     );
   }
@@ -1005,16 +1005,16 @@ export class DOMHandler {
         // Kein natives `confirm()`: die App hat ein eigenes Modal
         // (`showModal`), und `#generic-modal` ist E2E-klickbar, ein
         // OS-Dialog nicht.
-        UI.showModal('Wirklich aufgeben?', 'Die Partie wird als verloren gewertet.', [
+        UI.showModal(t('game.resignTitle'), t('game.resignMessage'), [
           {
-            text: 'Ja, aufgeben',
+            text: t('game.resignConfirm'),
             class: 'btn-primary',
             callback: () => {
               this.gameController!.resign(this.game.turn);
               if (mainMenu) mainMenu.classList.remove('active');
             },
           },
-          { text: 'Abbrechen', class: 'btn-secondary' },
+          { text: t('game.drawCancel'), class: 'btn-secondary' },
         ]);
       });
     }
@@ -1033,16 +1033,16 @@ export class DOMHandler {
     if (drawBtn) {
       drawBtn.addEventListener('click', () => {
         if (!this.gameController) return;
-        UI.showModal('Remis anbieten?', 'Dein Gegner kann das Angebot annehmen oder ablehnen.', [
+        UI.showModal(t('game.drawOfferTitle'), t('game.drawOfferMessage'), [
           {
-            text: 'Angebot senden',
+            text: t('game.drawOfferConfirm'),
             class: 'btn-primary',
             callback: () => {
               this.gameController!.offerDraw(this.game.turn);
               if (mainMenu) mainMenu.classList.remove('active');
             },
           },
-          { text: 'Abbrechen', class: 'btn-secondary' },
+          { text: t('game.drawCancel'), class: 'btn-secondary' },
         ]);
       });
     }
@@ -1113,6 +1113,11 @@ export class DOMHandler {
         const target = e.target as HTMLSelectElement;
         if (isLocale(target.value)) {
           setLocale(target.value);
+          // `applyI18n` kennt nur die Marker im Markup. Dynamische Texte
+          // (Statuspille, Sieger-Zeile, Toasts) wurden schon gesetzt und
+          // blieben sonst in der alten Sprache stehen, bis der nächste
+          // Render lief.
+          if (this.game) UI.updateStatus(this.game);
         }
       });
     }

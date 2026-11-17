@@ -57,6 +57,7 @@ import { ClassicModeStrategy } from './modes/strategies/ClassicMode.js';
 import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 import { OpeningTrainerModeStrategy } from './modes/strategies/OpeningTrainerMode.js';
+import { t } from './i18n.js';
 
 export interface ArrowRendererType {
   clearArrows: () => void;
@@ -494,10 +495,10 @@ export class GameController {
     UI.renderBoard(this.game);
     UI.updateStatus(this.game);
 
-    const message =
-      resigningColor === 'white'
-        ? 'Weiß gibt auf! Schwarz gewinnt.'
-        : 'Schwarz gibt auf! Weiß gewinnt.';
+    const message = t('game.resignResult', {
+      side: t(resigningColor === 'white' ? 'game.sideWhite' : 'game.sideBlack'),
+      winner: t(resigningColor === 'white' ? 'game.sideBlack' : 'game.sideWhite'),
+    });
     this.game.log(message);
 
     const overlay = document.getElementById('game-over-overlay');
@@ -581,7 +582,7 @@ export class GameController {
 
     const gameOverOverlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Remis vereinbart';
+    if (winnerText) winnerText.textContent = t('game.endDrawAgreed');
     if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
 
     this.stopClock();

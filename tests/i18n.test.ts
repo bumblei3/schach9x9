@@ -15,11 +15,34 @@
  * `Eröffnung: …` oder `⚙️ Einstellungen` fälschlich melden.
  */
 import { describe, test, expect, beforeEach } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { resolve, join } from 'node:path';
 import { de, en } from '../js/i18n.js';
 
 const html = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
+
+/**
+ * Schlüssel, die zur Laufzeit per `t('…')` genutzt werden. Die Schale markiert
+ * nur `index.html`; dynamische Texte (Statuspille, Game-over-Overlay, Modals)
+ * liegen in `js/` und müssen gleich mit auditiert werden, sonst gelten sie als
+ * „toter Wörterbuch-Eintrag".
+ */
+function keysUsedInJs(): Set<string> {
+  const found = new Set<string>();
+  const walk = (dir: string): void => {
+    for (const entry of readdirSync(dir)) {
+      const p = join(dir, entry);
+      if (statSync(p).isDirectory()) {
+        walk(p);
+      } else if (p.endsWith('.ts')) {
+        const src = readFileSync(p, 'utf8');
+        for (const m of src.matchAll(/\bt\(\s*['"]([a-zA-Z0-9.]+)['"]/g)) found.add(m[1]);
+      }
+    }
+  };
+  walk(resolve(process.cwd(), 'js'));
+  return found;
+}
 
 /** Erster nicht-leere direkte Textknoten — das ist es, was translateElement ersetzt. */
 function firstMeaningfulTextNode(el: Element): string {
@@ -100,7 +123,7 @@ describe('i18n: Marker vs. Wörterbuch', () => {
   });
 
   test('kein toter Wörterbuch-Eintrag ohne Marker', () => {
-    const used = new Set<string>();
+    const used = new Set<string>(keysUsedInJs());
     for (const el of root.querySelectorAll('[data-i18n]')) used.add(el.getAttribute('data-i18n')!);
     for (const attr of ['aria-label', 'title', 'placeholder', 'alt']) {
       for (const el of root.querySelectorAll(`[data-i18n-${attr}]`)) {

@@ -11,6 +11,7 @@ import { computeMaterialSeries } from '../analyze/materialSeries.js';
 import { buildVariantTree } from '../analyze/variantTree.js';
 import type { Piece } from '../types/core.js';
 import { moveToAlgebraic } from '../openingTrainer.js';
+import { t } from '../i18n.js';
 import type { Square } from '../types/core.js';
 
 interface SavedGameState {
@@ -164,35 +165,35 @@ export function updateCapturedUI(game: Game): void {
 export function updateStatus(game: Game): void {
   const statusEl = document.getElementById('status-display');
   if (!statusEl) return;
+  const side = game.turn === 'white' ? t('game.sideWhite') : t('game.sideBlack');
   let text = '';
   switch (game.phase) {
     case PHASES.SETUP_WHITE_KING:
-      text = 'Weiß: Wähle einen Korridor für den König';
+      text = t('game.statusSetupWhiteKing');
       break;
     case PHASES.SETUP_BLACK_KING:
-      text = 'Schwarz: Wähle einen Korridor für den König';
+      text = t('game.statusSetupBlackKing');
       break;
     case PHASES.SETUP_WHITE_PIECES:
-      text = 'Weiß: Kaufe Truppen';
+      text = t('game.statusSetupWhitePieces');
       break;
     case PHASES.SETUP_BLACK_PIECES:
-      text = 'Schwarz: Kaufe Truppen';
+      text = t('game.statusSetupBlackPieces');
       break;
     case PHASES.SETUP_WHITE_UPGRADES:
-      text = 'Weiß: Klicke eine Figur für Upgrades';
+      text = t('game.statusSetupWhiteUpgrades');
       break;
     case PHASES.SETUP_BLACK_UPGRADES:
-      text = 'Schwarz: Klicke eine Figur für Upgrades';
+      text = t('game.statusSetupBlackUpgrades');
       break;
     case PHASES.PLAY: {
-      const side = game.turn === 'white' ? 'Weiß' : 'Schwarz';
       const inCheck = typeof game.isInCheck === 'function' ? game.isInCheck(game.turn) : false;
-      text = inCheck ? `⚠️ SCHACH — ${side} am Zug` : `Spiel läuft - ${side} am Zug`;
+      text = inCheck ? t('game.statusCheck', { side }) : t('game.statusPlay', { side });
       statusEl.classList.toggle('status-check-active', !!inCheck);
       break;
     }
     case PHASES.ANALYSIS:
-      text = `🔍 Analyse-Modus - ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} am Zug`;
+      text = t('game.statusAnalysis', { side });
       break;
     case PHASES.GAME_OVER: {
       // `game.turn` ist am Ende die *bedrängte* Seite — daraus keinen Sieger
@@ -200,10 +201,12 @@ export function updateStatus(game: Game): void {
       const winner = game.winner;
       text =
         winner === 'draw'
-          ? 'Spiel vorbei! Unentschieden.'
+          ? t('game.statusGameOverDraw')
           : winner
-            ? `Spiel vorbei! ${winner === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`
-            : `Spiel vorbei! ${game.turn === 'white' ? 'Weiß' : 'Schwarz'} hat gewonnen!`;
+            ? t('game.statusGameOverWinner', {
+                side: winner === 'white' ? t('game.sideWhite') : t('game.sideBlack'),
+              })
+            : t('game.statusGameOverWinner', { side });
       break;
     }
   }
