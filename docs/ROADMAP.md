@@ -33,7 +33,7 @@ Das Produkt ist **feature-reich**. Billige Eval-Terme sind aufgebraucht (`bench/
 - **Modi:** Classic 9×9, Standard 8×8, Setup/Shop, Upgrade, Cross, Kampagne Akt II und Akt IV (Kapitel 19–25), Fairy-Tactics, Daily Puzzle, Opening-Trainer, Analyse, 3D, Tutor mit Figurennamen.
 - **KI-Infrastruktur:** Alpha-Beta + LMR/NMP/ProbCut/QSearch/TT, inkrementeller Zobrist, 64-bit-Hash auf `main`, 5 Persönlichkeiten, Worker, Track-A (`matchRefs`) und Track-B (`match:stockfish`).
 - **Solo-UX:** Tutorial (inkl. Nachtreiter und Upgrade-Pfad), Replay, Position-teilen, Variant-Tree, Heatmap, Post-Game-Analyse, PWA/Offline, Sound-Settings persistent, Three.js self-hosted.
-- **Qualität:** 272 Testdateien / 3305 Tests (lokal, Node 26, nach dem Rebase auf `a4cb270`; CI-Run steht in [`STATUS.md`](../STATUS.md)). A11y-Regeln `color-contrast`, `label`, `select-name`, `nested-interactive` sind an und werden nicht mehr per `disableRules` weggelegt. TypeScript 7 läuft über den Side-by-Side-Alias (#214).
+- **Qualität:** 272 Testdateien / 3307 Tests (lokal, Node 26, nach dem Rebase auf `a4cb270`; CI-Run steht in [`STATUS.md`](../STATUS.md)). A11y-Regeln `color-contrast`, `label`, `select-name`, `nested-interactive` sind an und werden nicht mehr per `disableRules` weggelegt. TypeScript 7 läuft über den Side-by-Side-Alias (#214).
 
 ### Wo es wirklich hakt
 
