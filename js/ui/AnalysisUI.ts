@@ -31,10 +31,6 @@ interface AppWithGame {
 
 export class AnalysisUI {
   private app: AppWithGame;
-  bar: HTMLElement | null;
-  fill: HTMLElement | null;
-  text: HTMLElement | null;
-  marker: HTMLElement | null;
   panel: HTMLElement | null;
   topMovesContainer: HTMLElement | null;
   panelBarValue: HTMLElement | null;
@@ -50,11 +46,6 @@ export class AnalysisUI {
 
   constructor(app: AppWithGame) {
     this.app = app;
-    this.bar = document.getElementById('evaluation-bar');
-    this.fill = document.getElementById('eval-fill');
-    this.text = document.getElementById('eval-text');
-    this.marker = document.getElementById('eval-marker');
-
     this.panel = document.getElementById('analysis-panel');
     this.topMovesContainer = document.getElementById('top-moves-content');
     this.panelBarValue = document.getElementById('eval-bar');
@@ -76,24 +67,7 @@ export class AnalysisUI {
   update(analysis: AnalysisResult): void {
     const { score = 0, topMoves = [], depth = 0, nodes = 0 } = analysis;
 
-    this.updateBar(score);
     this.updatePanel(score, topMoves, depth, nodes);
-  }
-
-  updateBar(score: number): void {
-    if (!this.bar || !this.fill) return;
-
-    // Convert score (centi-pawns) to percentage
-    const clampedScore = Math.max(-1000, Math.min(1000, score));
-    const percentage = 50 + clampedScore / 20;
-
-    this.fill.style.height = `${percentage}%`;
-
-    const displayScore = (score / 100).toFixed(1);
-    const prefix = score > 0 ? '+' : '';
-    if (this.text) this.text.textContent = prefix + displayScore;
-
-    this.bar.classList.remove('hidden');
   }
 
   updatePanel(

@@ -60,10 +60,6 @@ beforeEach(() => {
 function makeUI() {
   // Pre-create all DOM refs the constructor grabs.
   [
-    'evaluation-bar',
-    'eval-fill',
-    'eval-text',
-    'eval-marker',
     'analysis-panel',
     'analysis-score-value',
     'top-moves-content',
@@ -82,45 +78,6 @@ function makeUI() {
   ui.panel!.classList.remove('hidden');
   return ui;
 }
-
-describe('AnalysisUI.updateBar', () => {
-  test('clamps extreme scores to ±1000 → percentage within [0,100]', () => {
-    const ui = makeUI();
-    ui.updateBar(50000);
-    expect(ui.fill!.style.height).toBe('100%');
-    ui.updateBar(-50000);
-    expect(ui.fill!.style.height).toBe('0%');
-  });
-
-  test('maps score linearly: 50 + score/20', () => {
-    const ui = makeUI();
-    ui.updateBar(0);
-    expect(ui.fill!.style.height).toBe('50%');
-    ui.updateBar(200);
-    expect(ui.fill!.style.height).toBe('60%');
-    expect(ui.text!.textContent).toBe('+2.0');
-  });
-
-  test('negative score has no prefix and one decimal', () => {
-    const ui = makeUI();
-    ui.updateBar(-150);
-    expect(ui.text!.textContent).toBe('-1.5');
-  });
-
-  test('removes the hidden class from the bar', () => {
-    const ui = new AnalysisUI(makeApp());
-    ui.bar = el('evaluation-bar2');
-    ui.bar.classList.add('hidden');
-    ui.fill = el('eval-fill2');
-    ui.updateBar(0);
-    expect(ui.bar.classList.contains('hidden')).toBe(false);
-  });
-
-  test('no-op when bar/fill are missing (no throw)', () => {
-    const ui = new AnalysisUI(makeApp());
-    expect(() => ui.updateBar(10)).not.toThrow();
-  });
-});
 
 describe('AnalysisUI.updatePanel', () => {
   test('writes formatted score, mini-bar width and engine info', () => {
