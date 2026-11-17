@@ -373,10 +373,9 @@ export function loadGame(game: Game): boolean {
     }
 
     if (game.phase === PHASES.PLAY) {
-      const historyPanel = document.getElementById('move-history-panel');
-      const capturedPanel = document.getElementById('captured-pieces-panel');
-      if (historyPanel) historyPanel.classList.remove('hidden');
-      if (capturedPanel) capturedPanel.classList.remove('hidden');
+      // `#move-history-panel`/`#captured-pieces-panel` existierten nie — die
+      // Historie liegt im Info-Overlay, die geschlagenen Figuren in
+      // `#captured-white`/`#captured-black`.
       if (game.updateBestMoves) game.updateBestMoves();
     }
 

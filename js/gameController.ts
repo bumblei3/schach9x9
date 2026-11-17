@@ -677,14 +677,6 @@ export class GameController {
       select.value = this.game.difficulty;
     });
 
-    // Ensure panels are visible in PLAY phase
-    if (this.game.phase === PHASES.PLAY) {
-      const historyPanel = document.getElementById('move-history-panel');
-      const capturedPanel = document.getElementById('captured-pieces-panel');
-      if (historyPanel) historyPanel.classList.remove('hidden');
-      if (capturedPanel) capturedPanel.classList.remove('hidden');
-    }
-
     // Restart clock if needed
     if (this.game.phase === PHASES.PLAY && this.game.clockEnabled) {
       this.startClock();

@@ -452,9 +452,8 @@ describe('GameStateManager', () => {
       game.updateBestMoves = vi.fn();
 
       GameStateManager.loadGame(game as Game);
-      expect(document.getElementById('move-history-panel')!.classList.contains('hidden')).toBe(
-        false
-      );
+      // `#move-history-panel` existierte nie — die Historie liegt im
+      // Info-Overlay. Übrig bleibt die Best-Moves-Aktualisierung.
       expect(game.updateBestMoves).toHaveBeenCalled();
     });
 
