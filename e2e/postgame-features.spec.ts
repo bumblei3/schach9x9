@@ -25,14 +25,12 @@ async function waitGame(page: PWPage) {
 /** End the game (resign), then wait for the game-over overlay. */
 async function endGame(page: PWPage) {
   await page.waitForFunction(
-    () =>
-      (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
+    () => (window as unknown as { app?: { gameController?: unknown } }).app?.gameController != null,
     { timeout: 10000 }
   );
   await page.evaluate(() => {
-    const app = (
-      window as unknown as { app: { gameController: { resign: (c: string) => void } } }
-    ).app;
+    const app = (window as unknown as { app: { gameController: { resign: (c: string) => void } } })
+      .app;
     app.gameController.resign('white');
   });
   await expect(page.locator('#game-over-overlay')).toBeVisible({ timeout: 10000 });
@@ -42,7 +40,9 @@ async function playOneMove(helper: E2EHelper, page: PWPage) {
   await helper.clickCell(7, 4);
   await helper.clickCell(5, 4);
   await page.waitForFunction(
-    () => ((window as unknown as { game?: { moveHistory?: unknown[] } }).game?.moveHistory?.length ?? 0) >= 2,
+    () =>
+      ((window as unknown as { game?: { moveHistory?: unknown[] } }).game?.moveHistory?.length ??
+        0) >= 2,
     { timeout: 30000 }
   );
 }
@@ -71,9 +71,7 @@ test.describe('PGN export', () => {
     await domClick(page, '#export-pgn-btn');
     await page.waitForTimeout(500);
 
-    const pgn = await page.evaluate(
-      () => (window as unknown as { __pgn?: string }).__pgn ?? ''
-    );
+    const pgn = await page.evaluate(() => (window as unknown as { __pgn?: string }).__pgn ?? '');
     expect(pgn).not.toBe('');
     expect(pgn).toContain('[Event "Schach 9x9 Game"]');
     expect(pgn).toMatch(/\[Result/);
@@ -156,11 +154,6 @@ test.describe('Sound settings persistence', () => {
 
 test('resign button ends the game', async ({ page }) => {
   const helper = new E2EHelper(page);
-  const dialogs: string[] = [];
-  page.on('dialog', async (d) => {
-    dialogs.push(d.message());
-    await d.accept(); // accept "Wirklich aufgeben?" so the resign proceeds
-  });
 
   await helper.goto();
   await helper.startGame('classic');
@@ -172,14 +165,18 @@ test('resign button ends the game', async ({ page }) => {
   await page.locator('#action-more-btn').click();
   await expect(page.locator('#resign-btn')).toBeVisible();
   await page.locator('#resign-btn').click();
+
+  // Kein OS-Dialog mehr: die Bestätigung ist das eigene Modal.
+  await expect(page.locator('#modal-title')).toHaveText(/Wirklich aufgeben/);
+  await page.locator('#modal-actions .btn-primary').click();
+
   await expect(page.locator('#game-over-overlay')).toBeVisible({ timeout: 10000 });
-  expect(dialogs.some((m) => /Wirklich aufgeben/.test(m))).toBe(true);
 });
 
 test('draw offer keeps the game running without crashing', async ({ page }) => {
   const helper = new E2EHelper(page);
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('pageerror', e => errors.push(e.message));
 
   await helper.goto();
   await helper.startGame('classic');
@@ -208,7 +205,9 @@ test.describe('Post-game replay overlay', () => {
     await endGame(page);
 
     await page.locator('#postgame-analysis-btn').click();
-    await expect(page.locator('#modal-actions button', { hasText: 'Partie durchsehen' })).toBeVisible();
+    await expect(
+      page.locator('#modal-actions button', { hasText: 'Partie durchsehen' })
+    ).toBeVisible();
     await page.locator('#modal-actions button', { hasText: 'Partie durchsehen' }).click();
 
     const overlay = page.locator('#replay-overlay');

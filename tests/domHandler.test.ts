@@ -55,6 +55,7 @@ vi.mock('../js/ui/AnalysisUI.js', () => ({
 
 // Now import DOMHandler (must be dynamic because of ESM mocks)
 const { DOMHandler } = await import('../js/ui/DOMHandler.js');
+const UI = await import('../js/ui.js');
 
 describe('DOMHandler', () => {
   let app: any;
@@ -119,6 +120,11 @@ describe('DOMHandler', () => {
 
     // Create full required DOM elements
     document.body.innerHTML = `
+            <div id="generic-modal" class="hidden">
+                <div id="modal-title"></div>
+                <div id="modal-message"></div>
+                <div id="modal-actions"></div>
+            </div>
             <select id="time-control-select">
                 <option value="blitz5">Blitz 5+3</option>
                 <option value="rapid10">Rapid 10+0</option>
@@ -287,11 +293,16 @@ describe('DOMHandler', () => {
     document.getElementById('load-btn')!.click();
     expect(app.gameController.loadGame).toHaveBeenCalled();
 
-    (window as any).confirm = vi.fn(() => true);
+    // Kein natives `confirm()` mehr: die App zeigt ihr eigenes Modal.
+    // `ui.js` ist in diesem Test gemockt, also die Callback-Struktur prüfen.
     document.getElementById('draw-offer-btn')!.click();
+    const drawActions = (UI.showModal as ReturnType<typeof vi.fn>).mock.calls[0][2];
+    drawActions[0].callback();
     expect(app.gameController.offerDraw).toHaveBeenCalled();
 
     document.getElementById('resign-btn')!.click();
+    const resignActions = (UI.showModal as ReturnType<typeof vi.fn>).mock.calls[1][2];
+    resignActions[0].callback();
     expect(app.gameController.resign).toHaveBeenCalled();
 
     document.getElementById('puzzle-mode-btn')!.click();

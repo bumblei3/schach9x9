@@ -18,7 +18,6 @@ describe('TutorUI Component', () => {
 
   beforeEach(() => {
     document.body.innerHTML = `
-            <div id="tutor-panel" class="hidden"><div id="tutor-suggestions"></div></div>
             <div id="tutor-recommendations-section" class="hidden">
                 <div id="tutor-recommendations-container"></div>
                 <button id="toggle-tutor-recommendations"></button>
@@ -187,11 +186,14 @@ describe('TutorUI Component', () => {
       expect(hintsBody?.textContent).toContain('a1');
     });
 
-    test('should alert in overlay mode if no tutor available', async () => {
+    test('should toast in overlay mode if no tutor available', async () => {
       document.body.innerHTML = '';
       game.tutorController.getTutorHints = null;
       await TutorUI.showTutorSuggestions(game);
-      expect(window.alert).toHaveBeenCalledWith('Tutor nicht verfügbar!');
+      expect(window.alert).not.toHaveBeenCalled();
+      expect(document.querySelector('#toast-container')?.textContent).toContain(
+        'Tutor nicht verfügbar!'
+      );
     });
 
     test('should log in overlay mode if no hints available', async () => {
@@ -222,116 +224,5 @@ describe('TutorUI Component', () => {
       expect(overlay?.classList.contains('hidden')).toBe(true);
     });
 
-    test('should render setup suggestions in panel during setup phase', async () => {
-      game.phase = 'SETUP_WHITE_PIECES';
-      await TutorUI.showTutorSuggestions(game);
-
-      const container = document.getElementById('tutor-suggestions');
-      expect(container?.textContent).toContain('Empfohlene Aufstellungen');
-      expect(container?.textContent).toContain('Template 1');
-    });
-
-    test('should handle click on setup template in panel', async () => {
-      game.phase = 'SETUP_WHITE_PIECES';
-      await TutorUI.showTutorSuggestions(game);
-
-      const templateEl = document.querySelector('.setup-template') as HTMLElement;
-      templateEl.click();
-
-      expect(window.confirm).toHaveBeenCalled();
-      expect(game.tutorController.applySetupTemplate).toHaveBeenCalledWith('template1');
-    });
-
-    test('should show "No suggestions" if hints empty in panel', async () => {
-      game.getTutorHints = vi.fn(async () => []);
-      await TutorUI.showTutorSuggestions(game);
-
-      const container = document.getElementById('tutor-suggestions');
-      expect(container?.textContent).toContain('Keine Vorschläge verfügbar');
-    });
-
-    test('should render hints in panel with details', async () => {
-      await TutorUI.showTutorSuggestions(game);
-
-      const container = document.getElementById('tutor-suggestions');
-      expect(container?.textContent).toContain('a1');
-      expect(container?.textContent).toContain('Top Move');
-      expect(container?.textContent).toContain('Why?');
-    });
-
-    test('should toggle details in panel', async () => {
-      await TutorUI.showTutorSuggestions(game);
-
-      const showBtn = document.querySelector('.show-details-btn') as HTMLElement;
-      const detailsEl = document.querySelector('.suggestion-details') as HTMLElement;
-
-      expect(detailsEl.classList.contains('hidden')).toBe(true);
-
-      showBtn.click();
-      expect(detailsEl.classList.contains('hidden')).toBe(false);
-      expect(showBtn.textContent).toBe('Erklärung ausblenden');
-
-      showBtn.click();
-      expect(detailsEl.classList.contains('hidden')).toBe(true);
-    });
-
-    test('should execute move from panel "Try" button', async () => {
-      await TutorUI.showTutorSuggestions(game);
-
-      const tryBtn = document.querySelector('.try-move-btn') as HTMLElement;
-      tryBtn.click();
-
-      expect(game.executeMove).toHaveBeenCalled();
-      const panel = document.getElementById('tutor-panel');
-      expect(panel?.classList.contains('hidden')).toBe(true);
-    });
-
-    test('should render hints without questions', async () => {
-      game.getTutorHints = vi.fn(async () => [
-        {
-          move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
-          notation: 'a1',
-          analysis: {
-            category: 'good',
-            qualityLabel: 'Good Move',
-            tacticalExplanations: [],
-            strategicExplanations: ['Some strategy'],
-            warnings: [],
-            questions: [],
-          },
-          score: 50,
-        },
-      ]);
-      await TutorUI.showTutorSuggestions(game);
-      const showBtn = document.querySelector('.show-details-btn');
-      expect(showBtn?.textContent?.trim()).toBe('Warum ist das ein guter Zug?');
-    });
-
-    test('should not crash if arrowRenderer is missing', async () => {
-      game.arrowRenderer = null;
-      await TutorUI.showTutorSuggestions(game);
-      const suggEl = document.querySelector('.tutor-suggestion') as HTMLElement;
-      suggEl.click();
-      // Should not throw
-    });
-
-    test('should highlight move and cells when suggestion clicked in panel', async () => {
-      // Create cells for highlighting
-      document.body.innerHTML += `
-        <div class="cell" data-r="0" data-c="0"></div>
-        <div class="cell" data-r="1" data-c="1"></div>
-      `;
-
-      await TutorUI.showTutorSuggestions(game);
-
-      const suggEl = document.querySelector('.tutor-suggestion') as HTMLElement;
-      suggEl.click();
-
-      expect(game.arrowRenderer.highlightMoves).toHaveBeenCalled();
-      const fromCell = document.querySelector('.cell[data-r="0"][data-c="0"]');
-      const toCell = document.querySelector('.cell[data-r="1"][data-c="1"]');
-      expect(fromCell?.classList.contains('suggestion-highlight')).toBe(true);
-      expect(toCell?.classList.contains('suggestion-highlight')).toBe(true);
-    });
   });
 });

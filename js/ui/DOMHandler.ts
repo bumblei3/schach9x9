@@ -1001,12 +1001,21 @@ export class DOMHandler {
     const resignBtn = document.getElementById('resign-btn');
     if (resignBtn) {
       resignBtn.addEventListener('click', () => {
-        if (this.gameController && confirm('Wirklich aufgeben?')) {
-          this.gameController.resign(this.game.turn);
-          if (mainMenu) {
-            mainMenu.classList.remove('active');
-          }
-        }
+        if (!this.gameController) return;
+        // Kein natives `confirm()`: die App hat ein eigenes Modal
+        // (`showModal`), und `#generic-modal` ist E2E-klickbar, ein
+        // OS-Dialog nicht.
+        UI.showModal('Wirklich aufgeben?', 'Die Partie wird als verloren gewertet.', [
+          {
+            text: 'Ja, aufgeben',
+            class: 'btn-primary',
+            callback: () => {
+              this.gameController!.resign(this.game.turn);
+              if (mainMenu) mainMenu.classList.remove('active');
+            },
+          },
+          { text: 'Abbrechen', class: 'btn-secondary' },
+        ]);
       });
     }
 
@@ -1023,10 +1032,18 @@ export class DOMHandler {
     const drawBtn = document.getElementById('draw-offer-btn');
     if (drawBtn) {
       drawBtn.addEventListener('click', () => {
-        if (this.gameController && confirm('Remis anbieten?')) {
-          this.gameController.offerDraw(this.game.turn);
-          if (mainMenu) mainMenu.classList.remove('active');
-        }
+        if (!this.gameController) return;
+        UI.showModal('Remis anbieten?', 'Dein Gegner kann das Angebot annehmen oder ablehnen.', [
+          {
+            text: 'Angebot senden',
+            class: 'btn-primary',
+            callback: () => {
+              this.gameController!.offerDraw(this.game.turn);
+              if (mainMenu) mainMenu.classList.remove('active');
+            },
+          },
+          { text: 'Abbrechen', class: 'btn-secondary' },
+        ]);
       });
     }
 

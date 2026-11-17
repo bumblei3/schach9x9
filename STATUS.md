@@ -8,7 +8,7 @@ Release-Tag ist `v2.1.0`. `main` ist `a4cb270` (A11y-Grid + quadratische Zellen,
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `chore/legacy-id-cleanup` | 273 Dateien, 3302/3302 |
+| Tests | `npx vitest run`, Node 26, `chore/legacy-id-cleanup` | 273 Dateien, 3278/3278 |
 | Tests (CI) | Run 44125184538, `a4cb270` | grün, inklusive E2E |
 | A11y | axe-core über sieben Zustände der Live-Seite, `692680d` (in `a4cb270`) | **0 Verstöße** (vorher sechs Regeln, davon zwei critical) |
 | Typecheck + Lint | `feat/i18n-shell` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |
@@ -71,6 +71,8 @@ Release-Tag ist `v2.1.0`. `main` ist `a4cb270` (A11y-Grid + quadratische Zellen,
 **`AnalysisUI.updateBar` war toter Doppelcode (2026-11-17, `chore/legacy-id-cleanup`):** Die Methode setzte `this.fill.style.height` auf `#eval-fill`, `#eval-text`, `#eval-marker` und `#evaluation-bar` — keines davon existiert im Markup (die Leiste heißt `#eval-bar` und ist **width**-basiert). Der Guard `if (!this.bar || !this.fill) return;` brach also immer ab; die acht Tests darüber erfanden die Elemente im Mock-DOM und waren grün. Live gemessen: `#eval-bar` width 100 % und `#eval-score` +300.00 nach `#continuous-analysis-btn` — der aktive Pfad ist `updatePanel`. `updateBar` samt den vier Feldern entfernt, die Tests auf `updatePanel` umgebogen (Clamp 0–100, `+`-Präfix, width-Prozente).
 
 **Live-Konsolen-Sweep sauber (2026-11-17):** `STATUS.md` nannte als nächsten Schritt die Durchspielung von Setup/Shop, Kampagnen und Opening-Trainer. Menü, Partie inkl. KI-Antwort, Analyse-Panel, Info-Overlay, Statistik-Overlay, Setup (König platzieren, Figur kaufen 25→24 Punkte, setzen), Opening-Trainer und Puzzle-Menü liefen mit **0 Fehlern und 0 Warnungen**. Damit ist `#points-selection-overlay` auch live widerlegt: die Punkte-Auswahl läuft über `#generic-modal` mit drei Buttons ohne ID.
+
+**Nativ-Dialoge durch die eigene Modal-/Toast-Ebene ersetzt (2026-11-17, `chore/legacy-id-cleanup`):** `confirm()`/`alert()` blockieren den Thread, sehen fremd aus und sind in E2E nur über `page.on('dialog')` erreichbar — die App hat dafür `showModal` (`#generic-modal`) und `showToast`. Umgestellt: Aufgeben und Remis-Angebot in `DOMHandler`, Aufstellung-Vorlage in `TutorUI`. Dadurch waren auch zwei Specs zu rewrite (`postgame-features` assertete `/Wirklich aufgeben/` aus dem OS-Dialog, `draw-offer-hotseat` akzeptierte Dialoge blind). `TutorUI.showTutorSuggestions` hatte außerdem einen ~260 Zeilen langen Block auf Funktionsebene, der `#tutor-panel`/`#tutor-suggestions` nutzte — beides nur in Test-Mocks existent, im Markup nie erzeugt; der Block war unerreichbar (das äußere `if` returned immer) und ist entfernt. `alert('Tutor nicht verfügbar!')` → `showToast`. Verifiziert live: Vorlagen-Overlay → Karte → Modal „Aufstellung … anwenden?" → Anwenden schließt Modal und Overlay.
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 
