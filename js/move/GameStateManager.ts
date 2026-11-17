@@ -332,7 +332,9 @@ export function loadGame(game: Game): boolean {
     game.positionHistory = state.positionHistory;
     game.capturedPieces = state.capturedPieces || { white: [], black: [] };
 
-    const aiToggle = document.getElementById('ai-toggle') as HTMLInputElement;
+    // Wie in `gameController`: der Schalter heißt `#ai-opponent-toggle`, die
+    // alte ID `#ai-toggle` gab es nie.
+    const aiToggle = document.getElementById('ai-opponent-toggle') as HTMLInputElement;
     if (aiToggle) aiToggle.checked = game.isAI;
     const diffSelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
     diffSelects.forEach(select => {

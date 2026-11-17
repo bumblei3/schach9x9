@@ -8,7 +8,7 @@ Release-Tag ist `v2.1.0`. `main` ist `a4cb270` (A11y-Grid + quadratische Zellen,
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `feat/i18n-shell` (Rebase auf `a4cb270`) | 272 Dateien, 3307/3307 |
+| Tests | `npx vitest run`, Node 26, `chore/legacy-id-cleanup` | 273 Dateien, 3310/3310 |
 | Tests (CI) | Run 44125184538, `a4cb270` | grün, inklusive E2E |
 | A11y | axe-core über sieben Zustände der Live-Seite, `692680d` (in `a4cb270`) | **0 Verstöße** (vorher sechs Regeln, davon zwei critical) |
 | Typecheck + Lint | `feat/i18n-shell` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |
@@ -61,6 +61,8 @@ Release-Tag ist `v2.1.0`. `main` ist `a4cb270` (A11y-Grid + quadratische Zellen,
 **Statistik-Overlay war unvollständig (2026-11-17, `feat/i18n-shell`):** `updateStatistics()` lief auf jedem Zug, `showStatisticsOverlay()` war exportiert — aber es gab **keinen Einstieg**, `#stats-close-btn` hatte keinen Listener, und zwei der vom Code erwarteten Karten fehlten im Markup: `#stat-moves` und `#stat-captures` (Phantom-IDs, die der ID-Sweep nur wegen `querySelectorAll<…>()`-Generics übersehen hatte). Dadurch zeigte das Overlay nur 4 von 6 Werten und war ohne Tastaturweg unsichtbar. Neu: `#stats-btn` im Aktionsmenü neben `#info-toggle-btn` (ohne Shortcut-Vorgabe — `S` ist bereits „Speichern"), Listener für Öffnen/Schließen, die zwei Karten nachgerüstet, Labels und Knopfnamen übersetzt (`game.statistics*`, `statistics.*`). `tests/ui.test.ts` pinnte ausdrücklich `expect(…stat-moves).toBeNull(); // Old ID removed` — also den Fehler selbst; angepasst auf Existenz. `e2e/statistics-overlay.spec.ts` prüft Öffnen, alle sechs Karten und Schließen.
 
 **Ein Phantom-Panel-Paar ist übrig (2026-11-17):** `GameStateManager` und `gameController` schalten bei PLAY `#move-history-panel` und `#captured-pieces-panel` sichtbar — beides gibt es im Markup nicht, die null-Guards schlucken es. Die Historie steckt stattdessen im jetzt verdrahteten `#info-overlay`. Produktentscheidung, kein stiller Fix: entweder eigene Panels im Markup oder diese beiden Zweige weg.
+
+**KI-Gegner-Schalter wurde nie synchronisiert (2026-11-17, `chore/legacy-id-cleanup`):** `gameController` und `GameStateManager` setzten den Schalter nach dem Laden auf `game.isAI` — aber suchten dabei `#ai-toggle`, eine ID, die es **nie im Markup gab** (der Schalter heißt `#ai-opponent-toggle`). Die null-Guard schluckte es, der Schalter zeigte nach einem geladenen Partiestand den alten Wert — genau der Fehler, den #250 bei der Schwierigkeit behoben hat, nur dass hier der Test die falsche ID mockte und deshalb grün war. Beide Stellen auf `#ai-opponent-toggle` umgebogen, `tests/gameStateManager.test.ts` liefert den existierenden Schalter und prüft die Übernahme aus `isAI: false`; mit der alten ID schlägt der Test fehl.
 
 Regressionsnotiz 2026-10-20: `bf89c14` („toter Settings-Store entfernt“) löschte `js/settings.ts`, ließ aber `tests/settings.test.ts` stehen → `TS2307` im Lint-Job, `Failed to resolve import` im Unit-Test-Job, CI-Gate zu. Fix `1a3947d` (Test entfernt). Lokal grün (255/3124, `tsc`, `eslint`, `build`), CI nach dem Fix grün inkl. E2E (84 passed) und Pages-Deploy. Lehre: ein gelöschtes Modul muss zusammen mit seinen Importern *und* seinen Tests im selben Commit gehen.
 

@@ -665,7 +665,11 @@ export class GameController {
     UI.updateMoveHistoryUI(this.game);
 
     // Sync UI elements (Difficulty, AI Toggle, Panels)
-    const aiToggle = document.getElementById('ai-toggle') as HTMLInputElement;
+    // `#ai-toggle` existierte nie — der Schalter heißt `#ai-opponent-toggle`.
+    // Die Synchronisation aus dem Spielzustand landete daher in einer null-
+    // Guard und der Schalter zeigte nach einem geladenen Partiestand den
+    // alten Wert (dort steht `isAI` im Save, z. B. Hotseat).
+    const aiToggle = document.getElementById('ai-opponent-toggle') as HTMLInputElement;
     if (aiToggle) aiToggle.checked = this.game.isAI;
 
     const diffSelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
