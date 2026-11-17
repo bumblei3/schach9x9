@@ -295,6 +295,30 @@ export class DOMHandler {
       });
     });
 
+    // Statistik-Overlay: `showStatisticsOverlay()` und `updateStatistics()` waren
+    // vollständig, aber ohne Einstieg — und `stats-close-btn` ohne Listener.
+    const statsBtn = document.getElementById('stats-btn');
+    const statsOverlay = document.getElementById('stats-overlay');
+    if (statsBtn && statsOverlay) {
+      statsBtn.addEventListener('click', () => {
+        const isHidden = statsOverlay.classList.contains('hidden');
+        if (isHidden) {
+          // `showStatisticsOverlay` füllt die Zahlen und entfernt `hidden`.
+          UI.showStatisticsOverlay(this.game);
+        } else {
+          statsOverlay.classList.add('hidden');
+        }
+        statsBtn.classList.toggle('active', isHidden);
+      });
+    }
+    const statsCloseBtn = document.getElementById('stats-close-btn');
+    if (statsCloseBtn && statsOverlay) {
+      statsCloseBtn.addEventListener('click', () => {
+        statsOverlay.classList.add('hidden');
+        statsBtn?.classList.remove('active');
+      });
+    }
+
     const analysisBtn = document.getElementById('toggle-analysis-btn');
     if (analysisBtn) {
       analysisBtn.addEventListener('click', () => {

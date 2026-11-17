@@ -580,6 +580,28 @@
                   <span class="action-label">Info</span>
                 </button>
                 <button
+                  id="stats-btn"
+                  class="action-icon-btn"
+                  role="menuitem"
+                  title="Statistiken anzeigen" data-i18n-title="game.statisticsTitle"
+                  aria-label="Statistiken anzeigen" data-i18n-aria-label="game.statisticsTitle"
+                  data-tooltip="Statistiken"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                  >
+                    <rect x="4" y="12" width="4" height="8"></rect>
+                    <rect x="10" y="7" width="4" height="13"></rect>
+                    <rect x="16" y="3" width="4" height="17"></rect>
+                  </svg>
+                  <span class="action-label" data-i18n="game.statistics">Statistiken</span>
+                </button>
+                <button
                   id="fullscreen-btn"
                   class="action-icon-btn"
                   role="menuitem"
@@ -1022,7 +1044,15 @@
               </div>
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-label">Genauigkeit</div>
+                  <div class="stat-label" data-i18n="statistics.moves">Züge</div>
+                  <div id="stat-moves" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label" data-i18n="statistics.captures">Schläge</div>
+                  <div id="stat-captures" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label" data-i18n="statistics.accuracy">Genauigkeit</div>
                   <div id="stat-accuracy" class="stat-value">--%</div>
                 </div>
                 <div class="stat-card">
@@ -1030,7 +1060,7 @@
                   <div id="stat-best-moves" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">Material</div>
+                  <div class="stat-label" data-i18n="statistics.material">Material</div>
                   <div id="stat-material" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">

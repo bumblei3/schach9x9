@@ -151,7 +151,8 @@ describe('UI Module', () => {
       UI.showStatisticsOverlay(game);
       const overlay = document.getElementById('stats-overlay');
       expect(overlay!.classList.contains('hidden')).toBe(false);
-      expect(document.getElementById('stat-moves')).toBeNull(); // Old ID removed
+      expect(document.getElementById('stat-moves')).not.toBeNull(); // Code erwartet die Karte
+      expect(document.getElementById('stat-captures')).not.toBeNull();
       expect(statusElExists('stat-accuracy')).toBe(true);
       expect(statusElExists('stat-elo')).toBe(true);
     });
