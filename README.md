@@ -30,6 +30,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
 - **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices, Touch-Targets ≥ 44×44px.
+- **Zweisprachige UI**: Deutsch und Englisch umschaltbar (Einstellungen → Sprache), die Wahl wird gespeichert. Pilot: statische UI-Schale; Toasts, Tutor und Kampagnen-/Puzzle-Texte sind noch deutsch.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
 - **TypeScript Strict Mode**: Das Projekt ist vollständig typisiert. Einzige Ausnahme ist ein dokumentiertes, per ESLint-Deaktivierung gekennzeichnetes `any` in `App.ts` (Delegat-Prototyping für 75+ dynamische Game-Methoden).
 
@@ -69,7 +70,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
   Ausgangsstellung** — nicht das absolute Brettmaterial. (Vor v1.6.0 baute
   `playGame` das Brett fälschlich aus der Startstellung, sodass Taktik-FENs
   nie wirklich gespielt wurden — der Gate war damals blind.)
-- `npx vitest run` (3298 Tests), `npx tsc --noEmit`, eslint sauber.
+- `npx vitest run` (3307 Tests), `npx tsc --noEmit`, eslint sauber.
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
@@ -109,7 +110,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.800 automatisierten Tests** (Vitest Unit/Integration + Playwright E2E) in 222 Unit-Testdateien plus 25 E2E-Specs wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **3.300 automatisierten Tests** (Vitest Unit/Integration + Playwright E2E) in 272 Unit-Testdateien plus 42 E2E-Specs (118 Fälle) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -124,7 +125,7 @@ Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiert
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 2818 Tests gesamt (Vitest Unit/Integration in 222 Dateien + 25 E2E-Specs via Playwright), alle grün
+- 3307 Tests gesamt (Vitest Unit/Integration in 272 Dateien + 118 Playwright-E2E-Fälle in 42 Specs), alle grün
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
@@ -190,7 +191,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Aktuell: v2.0.0** (`main` `d1b1e41`, 2026-11-10) — M2 und M3 sind im Release. Auf `main` liegen zusätzlich Akt IV (Kapitel 19–25), der Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren, kein Tag v2.1. Nächster Schritt: Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
+**Aktuell: v2.1.0** (`main` `a4cb270`, 2026-11-17) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Auf `feat/i18n-shell` liegt die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button; danach ist der nächste Schritt der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
 
 **Bereits released (in v1.1.0–v1.3.0):**
 

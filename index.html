@@ -22,7 +22,7 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'"
     />
-    <title>Schach 9x9</title>
+    <title data-i18n="appName">Schach 9x9</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" href="icon-192.png" />
     <link rel="stylesheet" href="style.css" />
@@ -76,7 +76,7 @@
       <div id="spinner-overlay" class="modal-overlay hidden">
         <div class="ai-thinking-panel">
           <div class="spinner"></div>
-          <div style="margin-top: 16px; font-size: 1.2em; font-weight: 600">KI rechnet…</div>
+          <div style="margin-top: 16px; font-size: 1.2em; font-weight: 600" data-i18n="game.aiThinking">KI rechnet…</div>
           <div class="ai-status">
             <div id="ai-depth">Berechne…</div>
             <div id="ai-nodes">0 Positionen</div>
@@ -91,7 +91,7 @@
       <!-- Error Overlay -->
       <div id="error-overlay" class="modal-overlay hidden">
         <div class="critical-error-content">
-          <h2>Ein Fehler ist aufgetreten</h2>
+          <h2 data-i18n="error.generic">Ein Fehler ist aufgetreten</h2>
           <div id="error-message"></div>
           <button class="btn-primary" id="critical-restart-btn">Neustarten</button>
         </div>
@@ -126,7 +126,7 @@
               <path d="M7 17h10" />
               <path d="M12 3v18" />
             </svg>
-            <span class="logo-text">Schach 9x9</span>
+            <span class="logo-text" data-i18n="appName">Schach 9x9</span>
           </div>
           <div class="header-center">
             <div id="status-display" data-testid="status-display" class="status-pill">
@@ -138,7 +138,7 @@
               <span class="header-clock header-clock-self" id="header-clock-white">5:00</span>
             </div>
           </div>
-          <button id="menu-btn" class="icon-btn" aria-label="Menü öffnen">
+          <button id="menu-btn" class="icon-btn" aria-label="Menü öffnen" data-i18n-aria-label="menu.open">
             <svg
               viewBox="0 0 24 24"
               width="24"
@@ -162,7 +162,7 @@
                tree (axe page-has-heading-one) without painting anything. It
                lives inside the main landmark, otherwise axe flags it as
                content outside any landmark. -->
-          <h1 class="sr-only">Schach 9x9</h1>
+          <h1 class="sr-only" data-i18n="appName">Schach 9x9</h1>
           <!-- Opponent Info / Clock -->
           <div class="player-info opponent">
             <div class="player-details">
@@ -188,7 +188,7 @@
                   </svg>
                 </div>
                 <div>
-                  <div class="player-name" id="opponent-name">Gegner</div>
+                  <div class="player-name" id="opponent-name" data-i18n="opponent">Gegner</div>
                   <div class="captured-pieces" id="captured-white"></div>
                 </div>
               </div>
@@ -197,7 +197,7 @@
           </div>
 
           <!-- Opening Name Display -->
-          <div id="opening-name-container" class="hidden">
+          <div id="opening-name-container" class="hidden" data-i18n="analysis.openingLabel">
             Eröffnung: <span id="opening-name">...</span>
           </div>
 
@@ -233,7 +233,7 @@
 
           <!-- Variant Tree (Top candidate moves & best replies) -->
           <div id="variant-tree-container" class="eval-graph-container hidden">
-            <strong>Varianten-Baum (Top-Züge &amp; beste Antworten):</strong>
+            <strong data-i18n="analysis.variantsTreeLabel">Varianten-Baum (Top-Züge &amp; beste Antworten):</strong>
             <div id="variant-tree"></div>
           </div>
 
@@ -272,8 +272,8 @@
               <button
                 id="undo-btn"
                 class="action-icon-btn"
-                title="Rückgängig (U)"
-                aria-label="Rückgängig (U)"
+                title="Rückgängig (U)" data-i18n-title="analysis.undoTitle"
+                aria-label="Rückgängig (U)" data-i18n-aria-label="analysis.undoTitle"
                 data-tooltip="Rückgängig (U)"
                 data-shortcut="U"
               >
@@ -288,8 +288,34 @@
                   <path d="M3 7v6h6"></path>
                   <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
                 </svg>
-                <span class="action-label">Rückgängig</span>
+                <span class="action-label" data-i18n="analysis.undo">Rückgängig</span>
                 <span class="action-shortcut">U</span>
+              </button>
+              <!-- Redo war nur per Tastatur erreichbar (`R` / Strg+Y): die
+                   Funktion selbst (redoStack, `moveController.redoMove`) existiert,
+                   aber keinen Button im Markup gab es nie. Ohne ihn war der
+                   `redo-btn`-Zweig in `updateUndoRedoButtons` toter Code. -->
+              <button
+                id="redo-btn"
+                class="action-icon-btn"
+                title="Wiederholen (R)" data-i18n-title="analysis.redoTitle"
+                aria-label="Wiederholen (R)" data-i18n-aria-label="analysis.redoTitle"
+                data-tooltip="Wiederholen (R)"
+                data-shortcut="R"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                >
+                  <path d="M21 7v6h-6"></path>
+                  <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path>
+                </svg>
+                <span class="action-label" data-i18n="analysis.redo">Wiederholen</span>
+                <span class="action-shortcut">R</span>
               </button>
               <button
                 id="hint-btn"
@@ -332,7 +358,7 @@
                 >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                <span class="action-label">Bester Zug</span>
+                <span class="action-label" data-i18n="board.bestMove">Bester Zug</span>
                 <span class="action-shortcut">B</span>
               </button>
               <button
@@ -353,7 +379,7 @@
                 >
                   <path d="M12 20v-8m-4 8v-4m8 4v-6m-12 6h16"></path>
                 </svg>
-                <span class="action-label">Analyse</span>
+                <span class="action-label" data-i18n="analysis.analysis">Analyse</span>
                 <span class="action-shortcut">A</span>
               </button>
             </div>
@@ -381,7 +407,7 @@
                   <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
                   <circle cx="19" cy="12" r="1.5" fill="currentColor"></circle>
                 </svg>
-                <span class="action-label">Mehr</span>
+                <span class="action-label" data-i18n="more">Mehr</span>
               </button>
               <div
                 id="action-overflow-menu"
@@ -441,8 +467,8 @@
                   id="toggle-opening-book-btn"
                   class="action-icon-btn"
                   role="menuitem"
-                  title="Eröffnungsbuch"
-                  aria-label="Eröffnungsbuch"
+                  title="Eröffnungsbuch" data-i18n-title="analysis.openingBook"
+                  aria-label="Eröffnungsbuch" data-i18n-aria-label="analysis.openingBook"
                   data-tooltip="Eröffnungsbuch"
                 >
                   <svg
@@ -459,7 +485,7 @@
                     <path d="M9 13h7"></path>
                     <path d="M9 17h7"></path>
                   </svg>
-                  <span class="action-label">Eröffnung</span>
+                  <span class="action-label" data-i18n="analysis.opening">Eröffnung</span>
                 </button>
                 <button
                   id="toggle-3d-btn"
@@ -494,8 +520,8 @@
                   id="skin-selector-wrapper"
                   class="action-icon-btn skin-selector-wrapper"
                   role="menuitem"
-                  title="Figuren-Skin auswählen"
-                  aria-label="Figuren-Skin auswählen"
+                  title="Figuren-Skin auswählen" data-i18n-title="settings.chooseSkin"
+                  aria-label="Figuren-Skin auswählen" data-i18n-aria-label="settings.chooseSkin"
                   data-tooltip="Figuren-Skin"
                 >
                   <svg
@@ -514,14 +540,14 @@
                     <circle cx="6.5" cy="12.5" r="2.5"></circle>
                     <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"></path>
                   </svg>
-                  <span class="action-label">Skin</span>
+                  <span class="action-label" data-i18n="skin">Skin</span>
                   <select
                     id="skin-selector"
                     class="skin-selector"
-                    aria-label="Figuren-Skin auswählen"
+                    aria-label="Figuren-Skin auswählen" data-i18n-aria-label="settings.chooseSkin"
                     tabindex="-1"
                   >
-                    <option value="classic">Klassisch</option>
+                    <option value="classic" data-i18n="classic">Klassisch</option>
                     <option value="modern">Modern</option>
                     <option value="pixel">Pixel</option>
                     <option value="infernale">Infernale</option>
@@ -552,6 +578,28 @@
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                   </svg>
                   <span class="action-label">Info</span>
+                </button>
+                <button
+                  id="stats-btn"
+                  class="action-icon-btn"
+                  role="menuitem"
+                  title="Statistiken anzeigen" data-i18n-title="game.statisticsTitle"
+                  aria-label="Statistiken anzeigen" data-i18n-aria-label="game.statisticsTitle"
+                  data-tooltip="Statistiken"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                  >
+                    <rect x="4" y="12" width="4" height="8"></rect>
+                    <rect x="10" y="7" width="4" height="13"></rect>
+                    <rect x="16" y="3" width="4" height="17"></rect>
+                  </svg>
+                  <span class="action-label" data-i18n="game.statistics">Statistiken</span>
                 </button>
                 <button
                   id="fullscreen-btn"
@@ -598,7 +646,7 @@
                     data-tooltip="Remis anbieten"
                   >
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M12 9v4"/><path d="M9 20L15 4"/></svg>
-                    <span class="action-label">Remis anbieten</span>
+                    <span class="action-label" data-i18n="game.offerDraw">Remis anbieten</span>
                   </button>
                   <button
                     id="export-pgn-btn"
@@ -642,7 +690,7 @@
                     data-tooltip="Position speichern"
                   >
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="12" x2="12" y2="21"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="12" y2="6"/></svg>
-                    <span class="action-label">Speichern</span>
+                    <span class="action-label" data-i18n="save">Speichern</span>
                   </button>
                   <button
                     id="load-btn"
@@ -653,7 +701,7 @@
                     data-tooltip="Position laden"
                   >
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M6 12l1.41 1.41"/><path d="M12 6l8.29 13.7"/><path d="M12 22v-4"/><path d="M6 12l1.41-1.41"/><path d="M12 18l8.29-13.7"/></svg>
-                    <span class="action-label">Laden</span>
+                    <span class="action-label" data-i18n="load">Laden</span>
                   </button>
                   <button
                     id="analysis-mode-btn"
@@ -664,7 +712,7 @@
                     data-tooltip="Analyse-Modus"
                   >
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    <span class="action-label">Analyse-Modus</span>
+                    <span class="action-label" data-i18n="analysis.analysisMode">Analyse-Modus</span>
                   </button>
                   <button
                     id="help-btn"
@@ -704,7 +752,7 @@
             aria-label="Tiefenanalyse"
           >
             <div class="analysis-header">
-              <h2>Tiefenanalyse</h2>
+              <h2 data-i18n="analysis.deepAnalysis">Tiefenanalyse</h2>
               <button id="close-analysis-btn" class="close-icon-btn">×</button>
             </div>
             <div class="analysis-body">
@@ -715,7 +763,7 @@
                 <div id="eval-score" class="eval-score">0.00</div>
               </div>
               <div class="top-moves-section">
-                <h3>Top Züge</h3>
+                <h3 data-i18n="analysis.topMoves">Top Züge</h3>
                 <div id="top-moves-content" class="top-moves-list">
                   <!-- Top moves injected by JS -->
                 </div>
@@ -749,7 +797,7 @@
                   <div><strong>Tiefe:</strong> <span id="live-depth">-</span></div>
                   <div><strong>Knoten:</strong> <span id="live-nodes">-</span></div>
                   <div><strong>Bewertung:</strong> <span id="live-score">-</span></div>
-                  <div><strong>Zeit:</strong> <span id="live-time">-</span></div>
+                  <div><strong data-i18n="timeLabel">Zeit:</strong> <span id="live-time">-</span></div>
                 </div>
                 <div style="margin-top: 0.5rem">
                   <strong>Hauptvariante:</strong>
@@ -769,11 +817,11 @@
             aria-label="Feld-Hitze"
           >
             <div class="opening-book-header">
-              <h2>Feld-Hitze (Zug-Aktivität)</h2>
+              <h2 data-i18n="analysis.squareHeat">Feld-Hitze (Zug-Aktivität)</h2>
               <button id="close-heatmap-btn" class="close-icon-btn">×</button>
             </div>
             <div class="heatmap-body">
-              <p class="heatmap-hint">
+              <p class="heatmap-hint" data-i18n="analysis.squareHeatDesc">
                 Wie oft jedes Feld als Zug-Ursprung (von) oder Ziel (nach) genutzt wurde.
               </p>
               <div
@@ -794,13 +842,13 @@
           <!-- Opening Book Panel -->
           <div id="opening-book-panel" class="opening-book-panel hidden">
             <div class="opening-book-header">
-              <h2>Eröffnungsbuch</h2>
+              <h2 data-i18n="analysis.openingBook">Eröffnungsbuch</h2>
               <button id="close-opening-book-btn" class="close-icon-btn">×</button>
             </div>
             <div class="opening-book-body">
               <!-- Current Opening Display -->
               <div id="current-opening-display" class="current-opening-section hidden">
-                <h4>Aktuelle Eröffnung</h4>
+                <h4 data-i18n="analysis.currentOpening">Aktuelle Eröffnung</h4>
                 <div class="current-opening-info">
                   <div class="current-opening-name-row">
                     <span id="current-opening-name" class="current-opening-name"></span>
@@ -826,10 +874,10 @@
                     type="text"
                     id="opening-search"
                     class="opening-search-input"
-                    placeholder="Eröffnung suchen (Name, ECO, Kategorie)..."
+                    placeholder="Eröffnung suchen (Name, ECO, Kategorie)..." data-i18n-placeholder="analysis.searchOpening"
                   />
                   <select id="opening-category-filter" class="opening-category-filter">
-                    <option value="all">Alle Kategorien</option>
+                    <option value="all" data-i18n="analysis.allCategories">Alle Kategorien</option>
                   </select>
                 </div>
                 <div id="opening-search-results" class="opening-search-results"></div>
@@ -847,7 +895,7 @@
           >
             <div class="sheet-handle" aria-hidden="true"></div>
             <div class="shop-header">
-              <h2>Truppen anheuern</h2>
+              <h2 data-i18n="modes.hire">Truppen anheuern</h2>
               <div class="shop-points">
                 <span id="points-display" data-testid="points-display">15</span> Pkt
               </div>
@@ -859,7 +907,7 @@
                 id="toggle-tutor-recommendations"
                 class="btn-secondary full-width"
                 style="padding: 8px; font-size: 0.9rem; margin-bottom: 1rem"
-              >
+               data-i18n="analysis.showAiHints">
                 💡 KI-Vorlagen anzeigen
               </button>
               <div
@@ -908,7 +956,7 @@
                 <div class="shop-cost">12</div>
               </button>
             </div>
-            <div id="selected-piece-display" class="shop-status">Wähle eine Figur</div>
+            <div id="selected-piece-display" class="shop-status" data-i18n="board.choosePiece">Wähle eine Figur</div>
 
             <button id="finish-setup-btn" class="btn-primary full-width" disabled>Fertig</button>
           </div>
@@ -941,7 +989,7 @@
           <!-- Overlays (Game Over, Promotion, etc.) -->
           <div id="game-over-overlay" class="modal-overlay hidden">
             <div class="modal-content">
-              <h2 id="winner-text">Spiel beendet</h2>
+              <h2 id="winner-text" data-i18n="game.gameOver">Spiel beendet</h2>
               <div
                 id="game-over-stats"
                 class="game-over-stats"
@@ -957,17 +1005,17 @@
                 id="postgame-analysis-btn"
                 class="btn-primary"
                 style="margin-top: 0.5rem; display: none"
-              >
+               data-i18n="analysis.postGameAnalysis">
                 📊 Nachspiel-Analyse
               </button>
-              <button id="restart-btn-overlay" class="btn-primary">Neues Spiel</button>
-              <button id="close-game-over-btn" class="btn-secondary">Schließen</button>
+              <button id="restart-btn-overlay" class="btn-primary" data-i18n="menu.newGame">Neues Spiel</button>
+              <button id="close-game-over-btn" class="btn-secondary" data-i18n="board.close">Schließen</button>
             </div>
           </div>
 
           <div id="promotion-overlay" class="modal-overlay hidden">
             <div class="modal-content">
-              <h2>Beförderung</h2>
+              <h2 data-i18n="board.promotion">Beförderung</h2>
               <div id="promotion-options" class="promotion-grid"></div>
             </div>
           </div>
@@ -996,19 +1044,27 @@
               </div>
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-label">Genauigkeit</div>
+                  <div class="stat-label" data-i18n="statistics.moves">Züge</div>
+                  <div id="stat-moves" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label" data-i18n="statistics.captures">Schläge</div>
+                  <div id="stat-captures" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label" data-i18n="statistics.accuracy">Genauigkeit</div>
                   <div id="stat-accuracy" class="stat-value">--%</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">Beste Züge</div>
+                  <div class="stat-label" data-i18n="board.bestMoves">Beste Züge</div>
                   <div id="stat-best-moves" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">Material</div>
+                  <div class="stat-label" data-i18n="statistics.material">Material</div>
                   <div id="stat-material" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">Geschätzte Elo</div>
+                  <div class="stat-label" data-i18n="board.estimatedElo">Geschätzte Elo</div>
                   <div id="stat-elo" class="stat-value">600</div>
                 </div>
               </div>
@@ -1018,14 +1074,14 @@
           <!-- Puzzle Panel -->
           <div id="puzzle-overlay" class="puzzle-panel hidden">
             <div class="puzzle-content">
-              <h2 id="puzzle-title">Puzzle Titel</h2>
+              <h2 id="puzzle-title" data-i18n="modes.puzzleTitle">Puzzle Titel</h2>
               <p id="puzzle-description">Beschreibung...</p>
               <div id="puzzle-difficulty" class="puzzle-difficulty" style="margin: 0.5rem 0;"></div>
-              <div class="puzzle-status" id="puzzle-status">Weiß am Zug</div>
+              <div class="puzzle-status" id="puzzle-status" data-i18n="board.whiteToMove">Weiß am Zug</div>
               <div class="puzzle-buttons">
-                <button id="puzzle-random-btn" class="btn-secondary">🎲 Zufällig</button>
-                <button id="puzzle-hint-btn" class="btn-secondary">💡 Hinweis</button>
-                <button id="puzzle-next-btn" class="btn-primary hidden">Nächstes Puzzle</button>
+                <button id="puzzle-random-btn" class="btn-secondary" data-i18n="board.random">🎲 Zufällig</button>
+                <button id="puzzle-hint-btn" class="btn-secondary" data-i18n="hint">💡 Hinweis</button>
+                <button id="puzzle-next-btn" class="btn-primary hidden" data-i18n="board.nextPuzzle">Nächstes Puzzle</button>
                 <button id="puzzle-exit-btn" class="btn-secondary">Beenden</button>
               </div>
             </div>
@@ -1036,47 +1092,35 @@
         <div id="leaderboard-overlay" class="fullscreen-overlay hidden">
           <div class="menu-content">
             <button id="leaderboard-close-btn" class="close-icon-btn">×</button>
-            <h2>🏆 Bestenliste</h2>
+            <h2 data-i18n="leaderboardEmoji">🏆 Bestenliste</h2>
             <div id="leaderboard-list" style="margin-top: 1rem;"></div>
-            <button id="leaderboard-clear-btn" class="btn-secondary" style="margin-top: 1rem;">Zurücksetzen</button>
+            <button id="leaderboard-clear-btn" class="btn-secondary" style="margin-top: 1rem;" data-i18n="board.reset">Zurücksetzen</button>
           </div>
         </div>
         <div id="help-overlay" class="fullscreen-overlay hidden">
           <div class="info-content">
             <div class="menu-header">
-              <h2>Hilfe & Regeln</h2>
+              <h2 data-i18n="menu.helpAndRules">Hilfe & Regeln</h2>
               <button id="close-help-btn" class="close-icon-btn">×</button>
             </div>
             <div class="help-body" style="padding: 20px; overflow-y: auto; max-height: 70vh">
-              <h3>Spielablauf</h3>
-              <p>Schach 9x9 ist eine Variante auf einem größeren Brett mit neuen Figuren.</p>
+              <h3 data-i18n="settings.gameFlow">Spielablauf</h3>
+              <p data-i18n="setup.introVariant">Schach 9x9 ist eine Variante auf einem größeren Brett mit neuen Figuren.</p>
               <h4>1. Setup-Phase</h4>
               <ul>
-                <li>
-                  <strong>König platzieren:</strong> Wähle einen 3x3 Bereich für deinen König.
+                <li data-i18n="setup.chooseKingArea">
+                  <strong data-i18n="setup.placeKing">König platzieren:</strong> Wähle einen 3x3 Bereich für deinen König.
                 </li>
-                <li><strong>Truppen kaufen:</strong> Nutze deine Punkte, um Figuren zu kaufen.</li>
-                <li>
-                  <strong>Aufstellung:</strong> Platziere deine gekauften Figuren in deinem Bereich.
+                <li data-i18n="modes.shopHint"><strong data-i18n="shop.buyPieces">Truppen kaufen:</strong> Nutze deine Punkte, um Figuren zu kaufen.</li>
+                <li data-i18n="modes.placePiecesHint">
+                  <strong data-i18n="setup.placementLabel">Aufstellung:</strong> Platziere deine gekauften Figuren in deinem Bereich.
                 </li>
               </ul>
-              <h4>2. Neue Figuren</h4>
+              <h4 data-i18n="setup.newPieces">2. Neue Figuren</h4>
               <ul>
                 <li><strong>Kanzler (C):</strong> Zieht wie Turm + Springer.</li>
-                <li><strong>Erzbischof (A):</strong> Zieht wie Läufer + Springer.</li>
+                <li data-i18n="setup.movesLike"><strong data-i18n="setup.archbishopLabel">Erzbischof (A):</strong> Zieht wie Läufer + Springer.</li>
               </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Confirmation Overlay -->
-        <div id="confirmation-overlay" class="modal-overlay hidden">
-          <div class="modal-content">
-            <h2 id="confirmation-title">Bestätigung</h2>
-            <p id="confirmation-message">Bist du sicher?</p>
-            <div class="modal-buttons">
-              <button id="confirm-yes-btn" class="btn-primary">Ja</button>
-              <button id="confirm-no-btn" class="btn-secondary">Nein</button>
             </div>
           </div>
         </div>
@@ -1084,8 +1128,8 @@
         <!-- Draw Offer Overlay -->
         <div id="draw-offer-overlay" class="modal-overlay hidden">
           <div class="modal-content">
-            <h2>Remis angeboten</h2>
-            <p id="draw-offer-message">Dein Gegner bietet ein Unentschieden an.</p>
+            <h2 data-i18n="game.drawOffered">Remis angeboten</h2>
+            <p id="draw-offer-message" data-i18n="game.opponentOffersDraw">Dein Gegner bietet ein Unentschieden an.</p>
             <div class="modal-buttons">
               <button id="accept-draw-btn" class="btn-primary">Annehmen</button>
               <button id="decline-draw-btn" class="btn-secondary">Ablehnen</button>
@@ -1109,8 +1153,8 @@
                 <span id="tutorial-total-steps">8</span>
               </div>
               <div class="tutorial-controls">
-                <button id="tutorial-prev" class="btn-secondary">Zurück</button>
-                <button id="tutorial-next" class="btn-primary">Weiter ▶</button>
+                <button id="tutorial-prev" class="btn-secondary" data-i18n="setup.back">Zurück</button>
+                <button id="tutorial-next" class="btn-primary" data-i18n="setup.nextArrow">Weiter ▶</button>
               </div>
             </div>
           </div>
@@ -1134,7 +1178,7 @@
                     <span class="replay-step-number" id="replay-step-number">0 / 0</span>
                   </div>
                   <div class="replay-move-info">
-                    <div class="replay-move-number-label">Zug</div>
+                    <div class="replay-move-number-label" data-i18n="move">Zug</div>
                     <div class="replay-move-number" id="replay-move-number">—</div>
                   </div>
                   <div class="replay-classification" id="replay-classification">
@@ -1151,10 +1195,10 @@
                   <div class="replay-better-content" id="replay-better-content">—</div>
                 </div>
                 <div class="replay-navigation">
-                  <button id="replay-prev-btn" class="btn-secondary replay-nav-btn">◀ Zurück</button>
-                  <button id="replay-next-btn" class="btn-secondary replay-nav-btn">Weiter ▶</button>
+                  <button id="replay-prev-btn" class="btn-secondary replay-nav-btn" data-i18n="setup.backArrow">◀ Zurück</button>
+                  <button id="replay-next-btn" class="btn-secondary replay-nav-btn" data-i18n="setup.nextArrow">Weiter ▶</button>
                 </div>
-                <div class="replay-keyboard-hint">Tastatur: ← / → oder J / L</div>
+                <div class="replay-keyboard-hint" data-i18n="replay.keyboardHint">Tastatur: ← / → oder J / L</div>
               </div>
             </div>
           </div>
@@ -1175,13 +1219,13 @@
         >
           <div class="modal-content issue-report-content">
             <h2 id="issue-report-title">Problem melden</h2>
-            <p class="issue-report-hint">
+            <p class="issue-report-hint" data-i18n="feedback.hintModal">
               Rückmeldung zu schach9x9 ist ausdrücklich erwünscht. Es öffnet sich ein GitHub-Issue.
               Modus, Stellung und die letzten Fehler hängen an. Kein Name und kein Speicherinhalt.
             </p>
             <label class="issue-report-label" for="issue-report-kind">Art</label>
             <select id="issue-report-kind" class="menu-select">
-              <option value="Fehler">Fehler</option>
+              <option value="Fehler" data-i18n="error.label">Fehler</option>
               <option value="Unklar">Unklar</option>
               <option value="Vorschlag">Vorschlag</option>
             </select>
@@ -1191,7 +1235,7 @@
               class="issue-report-input"
               type="text"
               maxlength="120"
-              placeholder="z. B. Matt in Kapitel 19 zählt nicht"
+              placeholder="z. B. Matt in Kapitel 19 zählt nicht" data-i18n-placeholder="feedback.example"
             />
             <label class="issue-report-label" for="issue-report-detail">Was ist passiert?</label>
             <textarea
@@ -1202,9 +1246,9 @@
             ></textarea>
             <p id="issue-report-error" class="issue-report-error" hidden></p>
             <div class="modal-buttons issue-report-actions">
-              <button type="button" id="issue-report-cancel" class="btn-secondary">Abbrechen</button>
+              <button type="button" id="issue-report-cancel" class="btn-secondary" data-i18n="cancel">Abbrechen</button>
               <button type="button" id="issue-report-copy" class="btn-secondary">Kopieren</button>
-              <button type="button" id="issue-report-open" class="btn-primary">Auf GitHub öffnen</button>
+              <button type="button" id="issue-report-open" class="btn-primary" data-i18n="feedback.openOnGithub">Auf GitHub öffnen</button>
             </div>
           </div>
         </div>
@@ -1214,7 +1258,7 @@
           <div class="menu-container">
             <!-- Sidebar -->
             <nav class="menu-sidebar">
-              <div class="menu-logo">
+              <div class="menu-logo" data-i18n="appName">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="32"
@@ -1241,14 +1285,14 @@
                 <button class="menu-tab-btn" data-tab="learn">
                   <span class="icon">🎓</span> Lernen
                 </button>
-                <button class="menu-tab-btn" data-tab="settings">
+                <button class="menu-tab-btn" data-tab="settings" data-i18n="settings.title">
                   <span class="icon">⚙️</span> Einstellungen
                 </button>
                 <button class="menu-tab-btn" data-tab="credits">
                   <span class="icon">❤️</span> Credits
                 </button>
                 <div style="flex: 1"></div>
-                <button id="resume-game-btn" class="menu-tab-btn hidden" style="color: #4ade80">
+                <button id="resume-game-btn" class="menu-tab-btn hidden" style="color: #4ade80" data-i18n="modes.continue">
                   <span class="icon">▶️</span> Fortsetzen
                 </button>
               </div>
@@ -1258,7 +1302,7 @@
             <div class="menu-content-area" role="region" aria-label="Hauptmenü">
               <!-- Play View -->
               <div id="view-play" class="menu-view active">
-                <h2 class="section-title">Neues Spiel</h2>
+                <h2 class="section-title" data-i18n="menu.newGame">Neues Spiel</h2>
                 <p class="section-subtitle">Starte schnell — oder entdecke weitere Modi.</p>
 
                 <section
@@ -1269,15 +1313,15 @@
                   <div class="gamemode-grid gamemode-grid-featured">
                     <div class="gamemode-card hidden" id="main-menu-continue-btn">
                       <div class="card-icon">📂</div>
-                      <div class="card-title">Fortsetzen</div>
-                      <div class="card-desc">Setze dein zuletzt gespeichertes Spiel fort.</div>
+                      <div class="card-title" data-i18n="modes.continue">Fortsetzen</div>
+                      <div class="card-desc" data-i18n="modes.continueDesc">Setze dein zuletzt gespeichertes Spiel fort.</div>
                     </div>
 
                     <div class="gamemode-card" id="campaign-start-btn">
-                      <span class="card-tag tag-new">Kampagne</span>
+                      <span class="card-tag tag-new" data-i18n="campaign">Kampagne</span>
                       <div class="card-icon">⚔️</div>
-                      <div class="card-title">Kampagne</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="campaign">Kampagne</div>
+                      <div class="card-desc" data-i18n="modes.campaignDesc">
                         Erlebe eine epische Geschichte und kämpfe gegen immer stärkere Gegner.
                       </div>
                     </div>
@@ -1290,8 +1334,8 @@
                       data-mode="classic"
                     >
                       <div class="card-icon">🏰</div>
-                      <div class="card-title">Klassisch 9×9</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.classic9x9">Klassisch 9×9</div>
+                      <div class="card-desc" data-i18n="modes.fixedSetupDesc">
                         Feste Aufstellung mit Erzbischof und Kanzler. Sofort spielen oder mit 15 Punkten verbessern.
                       </div>
                     </button>
@@ -1304,10 +1348,10 @@
                       data-init-points="0"
                       data-mode="daily-puzzle"
                     >
-                      <span class="card-tag tag-pro">Täglich</span>
+                      <span class="card-tag tag-pro" data-i18n="modes.daily">Täglich</span>
                       <div class="card-icon daily-streak-icon" aria-hidden="true">📅</div>
-                      <div class="card-title">Tägliches Puzzle</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.dailyPuzzle">Tägliches Puzzle</div>
+                      <div class="card-desc" data-i18n="modes.dailyPuzzleDesc">
                         Ein neues Puzzle jeden Tag — baue deine Siegesserie auf.
                       </div>
                       <div class="daily-streak-row">
@@ -1317,7 +1361,7 @@
                           style="display: none"
                         ></span>
                         <span class="daily-badge" id="daily-puzzle-badge" style="display: none"
-                          >Heute gelöst ✓</span
+                           data-i18n="modes.solvedToday">Heute gelöst ✓</span
                         >
                       </div>
                     </button>
@@ -1332,7 +1376,7 @@
                     aria-expanded="false"
                     aria-controls="more-modes-grid"
                   >
-                    <span id="more-modes-label">Mehr Modi</span>
+                    <span id="more-modes-label" data-i18n="menu.moreModes">Mehr Modi</span>
                     <span class="menu-more-chevron" aria-hidden="true">▾</span>
                   </button>
                   <div
@@ -1348,8 +1392,8 @@
                       data-mode="setup"
                     >
                       <div class="card-icon">💰</div>
-                      <div class="card-title">Truppen anheuern (9×9)</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.hire9x9">Truppen anheuern (9×9)</div>
+                      <div class="card-desc" data-i18n="modes.armyDesc">
                         Stelle deine eigene 9×9-Armee mit 25 Punkten zusammen.
                       </div>
                     </button>
@@ -1362,8 +1406,8 @@
                       data-mode="cross"
                     >
                       <div class="card-icon">✝️</div>
-                      <div class="card-title">Kreuz-Modus</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.crossMode">Kreuz-Modus</div>
+                      <div class="card-desc" data-i18n="modes.crossDesc">
                         Kämpfe auf einem kreuzförmigen Brett – nur die Mitte zählt!
                       </div>
                     </button>
@@ -1376,8 +1420,8 @@
                       data-mode="standard8x8"
                     >
                       <div class="card-icon">♟️</div>
-                      <div class="card-title">Standard 8×8</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.standard8x8">Standard 8×8</div>
+                      <div class="card-desc" data-i18n="modes.classicChessDesc">
                         Klassisches Schach mit Rochade und En passant. Sofort spielen oder mit 15 Punkten verbessern.
                       </div>
                     </button>
@@ -1391,8 +1435,8 @@
                     >
                       <span class="card-tag tag-pro">Training</span>
                       <div class="card-icon">🧩</div>
-                      <div class="card-title">Puzzle-Modus</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.puzzleMode">Puzzle-Modus</div>
+                      <div class="card-desc" data-i18n="modes.puzzleDesc">
                         Löse taktische Aufgaben und verbessere dein Spiel.
                       </div>
                     </button>
@@ -1405,8 +1449,8 @@
                       data-mode="opening-trainer"
                     >
                       <div class="card-icon">📖</div>
-                      <div class="card-title">Eröffnungs-Trainer</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="modes.openingTrainer">Eröffnungs-Trainer</div>
+                      <div class="card-desc" data-i18n="modes.trainerDesc">
                         Trainiere Eröffnungen aus dem Buch – finde den richtigen Zug.
                       </div>
                     </button>
@@ -1417,8 +1461,8 @@
                       id="leaderboard-btn"
                     >
                       <div class="card-icon">🏆</div>
-                      <div class="card-title">Bestenliste</div>
-                      <div class="card-desc">
+                      <div class="card-title" data-i18n="leaderboard">Bestenliste</div>
+                      <div class="card-desc" data-i18n="leaderboardDesc">
                         Deine besten Partien und Ergebnisse.
                       </div>
                     </button>
@@ -1428,12 +1472,12 @@
 
               <!-- Learn View -->
               <div id="view-learn" class="menu-view">
-                <h2 class="section-title">Lernen & Regeln</h2>
+                <h2 class="section-title" data-i18n="menu.learnAndRules">Lernen & Regeln</h2>
                 <div class="gamemode-grid">
                   <div class="gamemode-card" id="start-tutorial-btn">
                     <div class="card-icon">🎓</div>
                     <div class="card-title">Interaktives Tutorial</div>
-                    <div class="card-desc">
+                    <div class="card-desc" data-i18n="modes.tutorialDesc">
                       Lerne die Regeln, Figuren und Special Moves in einer geführten Tour.
                     </div>
                   </div>
@@ -1442,28 +1486,38 @@
 
               <!-- Settings View -->
               <div id="view-settings" class="menu-view">
-                <h2 class="section-title">Einstellungen</h2>
+                <h2 class="section-title" data-i18n="settings.title">Einstellungen</h2>
                 <div class="settings-grid">
                   <div class="setting-group">
-                    <h3>Darstellung</h3>
+                    <h3 data-i18n="settings.languageLabel">Sprache</h3>
                     <div class="setting-row">
-                      <label>Brett-Design</label>
+                      <label for="language-select" data-i18n="settings.displayLanguage">Anzeigesprache</label>
+                      <select id="language-select" class="menu-select" aria-label="Anzeigesprache">
+                        <option value="de">Deutsch</option>
+                        <option value="en">English</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="setting-group">
+                    <h3 data-i18n="settings.appearance">Darstellung</h3>
+                    <div class="setting-row">
+                      <label data-i18n="settings.boardDesign">Brett-Design</label>
                       <select id="theme-select" class="menu-select" aria-label="Brett-Design">
-                        <option value="classic">Klassisch</option>
-                        <option value="blue">Blau</option>
-                        <option value="green">Grün</option>
+                        <option value="classic" data-i18n="classic">Klassisch</option>
+                        <option value="blue" data-i18n="blue">Blau</option>
+                        <option value="green" data-i18n="settings.green">Grün</option>
                         <option value="dark">Dunkel</option>
                         <option value="wood">Holz</option>
                       </select>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
-                      <label>Figuren-Skin</label>
+                      <label data-i18n="settings.pieceSkin">Figuren-Skin</label>
                       <select
                         id="skin-selector-menu"
-                        aria-label="Figuren-Skin auswählen"
+                        aria-label="Figuren-Skin auswählen" data-i18n-aria-label="settings.chooseSkin"
                         class="menu-select"
                       >
-                        <option value="classic">Klassisch</option>
+                        <option value="classic" data-i18n="classic">Klassisch</option>
                         <option value="modern">Modern</option>
                         <option value="pixel">Pixel</option>
                         <option value="infernale">Infernale</option>
@@ -1476,9 +1530,9 @@
                   </div>
 
                   <div class="setting-group">
-                    <h3>Spiel & Sound</h3>
+                    <h3 data-i18n="settings.gameAndSound">Spiel & Sound</h3>
                     <div class="setting-row">
-                      <label>Sound</label>
+                      <label data-i18n="sound">Sound</label>
                       <div class="volume-control">
                         <label class="toggle-switch">
                           <input type="checkbox" id="sound-toggle" checked aria-label="Sound an/aus" />
@@ -1487,11 +1541,11 @@
                       </div>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
-                      <label>Lautstärke</label>
+                      <label data-i18n="settings.volume">Lautstärke</label>
                       <input
                         type="range"
                         id="volume-slider"
-                        aria-label="Lautstärke"
+                        aria-label="Lautstärke" data-i18n-aria-label="settings.volume"
                         min="0"
                         max="100"
                         value="30"
@@ -1502,11 +1556,11 @@
                   </div>
                       <label>Schwierigkeit</label>
                       <select id="difficulty-select" class="menu-select" aria-label="Schwierigkeit">
-                        <option value="beginner">Anfänger</option>
-                        <option value="easy">Einfach</option>
-                        <option value="medium">Mittel</option>
-                        <option value="hard">Schwer</option>
-                        <option value="expert">Experte</option>
+                        <option value="beginner" data-i18n="settings.beginner">Anfänger</option>
+                        <option value="easy" data-i18n="easy">Einfach</option>
+                        <option value="medium" data-i18n="medium">Mittel</option>
+                        <option value="hard" data-i18n="hard">Schwer</option>
+                        <option value="expert" data-i18n="expert">Experte</option>
                       </select>
                     </div>
                   </div>
@@ -1527,15 +1581,15 @@
                         <option value="blitz5" selected>Blitz 5+3</option>
                         <option value="rapid10">Rapid 10</option>
                         <option value="rapid15">Rapid 15+10</option>
-                        <option value="classical30">Klassisch 30</option>
+                        <option value="classical30" data-i18n="timeControl.classical30">Klassisch 30</option>
                       </select>
                     </div>
                   </div>
 
                   <div class="setting-group">
-                    <h3>KI & Hilfe</h3>
+                    <h3 data-i18n="settings.aiAndHelp">KI & Hilfe</h3>
                     <div class="setting-row">
-                      <label>AI-Gegner</label>
+                      <label data-i18n="settings.aiOpponent">AI-Gegner</label>
                       <div class="volume-control">
                         <label class="toggle-switch">
                           <input type="checkbox" id="ai-opponent-toggle" checked aria-label="AI-Gegner an/aus" />
@@ -1544,8 +1598,8 @@
                       </div>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
-                      <label>KI-Persönlichkeit</label>
-                      <select id="ai-personality-select" class="menu-select" aria-label="KI-Persönlichkeit">
+                      <label data-i18n="settings.aiPersonality">KI-Persönlichkeit</label>
+                      <select id="ai-personality-select" class="menu-select" aria-label="KI-Persönlichkeit" data-i18n-aria-label="settings.aiPersonality">
                         <option value="balanced">⚖️ Ausgeglichen</option>
                         <option value="aggressive">⚔️ Aggressiv</option>
                         <option value="defensive">🛡️ Defensiv</option>
@@ -1557,21 +1611,21 @@
                       <label>KI-Mentor</label>
                       <select id="ki-mentor-level-select" class="menu-select" aria-label="KI-Mentor-Level">
                         <option value="OFF">Aus</option>
-                        <option value="STANDARD" selected>Standard (Nur Patzer)</option>
-                        <option value="STRICT">Streng (Auch Fehler)</option>
+                        <option value="STANDARD" selected data-i18n="mentor.standard">Standard (Nur Patzer)</option>
+                        <option value="STRICT" data-i18n="mentor.strict">Streng (Auch Fehler)</option>
                       </select>
                     </div>
 
                     <div class="setting-row">
-                      <label for="auto-hint-blunder">Auto-Hinweis nach Patzer</label>
+                      <label for="auto-hint-blunder" data-i18n="settings.autoHintBlunder">Auto-Hinweis nach Patzer</label>
                       <input type="checkbox" id="auto-hint-blunder" class="menu-checkbox" />
                     </div>
 
                   </div>
 
                   <div class="setting-group">
-                    <h3>Rückmeldung</h3>
-                    <p class="issue-report-hint">
+                    <h3 data-i18n="settings.feedback">Rückmeldung</h3>
+                    <p class="issue-report-hint" data-i18n="feedback.hintLong">
                       Rückmeldung zu schach9x9 ist ausdrücklich erwünscht. Die Meldung geht als GitHub-Issue raus, mit der aktuellen Partie.
                     </p>
                     <button type="button" id="report-issue-btn" class="btn-secondary">Problem melden</button>

@@ -36,7 +36,6 @@ export class AnalysisUI {
   text: HTMLElement | null;
   marker: HTMLElement | null;
   panel: HTMLElement | null;
-  panelScore: HTMLElement | null;
   topMovesContainer: HTMLElement | null;
   panelBarValue: HTMLElement | null;
   evalScoreValue: HTMLElement | null;
@@ -57,7 +56,6 @@ export class AnalysisUI {
     this.marker = document.getElementById('eval-marker');
 
     this.panel = document.getElementById('analysis-panel');
-    this.panelScore = document.getElementById('analysis-score-value');
     this.topMovesContainer = document.getElementById('top-moves-content');
     this.panelBarValue = document.getElementById('eval-bar');
     this.evalScoreValue = document.getElementById('eval-score');

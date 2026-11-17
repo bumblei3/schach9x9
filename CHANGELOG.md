@@ -3,6 +3,100 @@
 Alle nennenswerten Änderungen an Schach 9x9. Versionierung folgt [SemVer](https://semver.org/lang/de/).
 Generiert aus den Git-Commits via `npm run changelog`.
 
+## [Unreleased]
+
+Changes since `v2.1.0` — liegt auf `feat/i18n-shell`, noch nicht gemergt.
+
+### Features
+
+- **campaign:** Majestät verbilligt die Dame im Anwerbe-Shop (93311eb)
+- **campaign:** Festung verbilligt den Turm im Anwerbe-Shop (90e2d3a)
+- **i18n:** englische UI-Schale — Sprachschalter, 122 Schlüssel, 139 Marker (1527c79)
+- **ui:** Wiederholen-Button in der Aktionsleiste — Redo war nur per Tastatur erreichbar (fb14419)
+- **ui:** Feedback mit einem Klick — Button im Aktionsmenü (9ace284)
+
+### Bug Fixes
+
+- **a11y:** Brett als echtes Grid, Zellen überall quadratisch (#254) (a4cb270)
+- **assets:** Icons waren 1024er-JPEG mit PNG-Endung (#248) (54f2a97)
+- **ci:** Tauri-Build auf dem Tag grün (7c40fbe)
+- **mentor:** 8x8-Zuege waren durch eine erfundene Warnung blockiert (768f934)
+- **pwa:** Precache war leer, Favicon-Pfade absolute (#246) (88e23b7)
+- **tests:** Tutor-Fade-Timer ohne DOM — kein "Errors 1 error" mehr bei 3307 grünen Tests (fc1bf52)
+- **tests:** verwaiste Uhr stoppt sich selbst ohne DOM (#250) (5178d77)
+- **ui:** Obere Reihe nicht mehr vom Header verdeckt (8c1664a)
+
+### Performance
+
+- Outfit selbst hosten statt von Google Fonts (#253) (a0ceff8)
+- View-CSS aus dem render-blockenden Bundle nehmen (#252) (cb893ac)
+
+### Documentation
+
+- STATUS/ROADMAP — Redo-Button, Phantom-ID-Sweep, Timer-Guard (3edcbfe)
+- STATUS.md und ROADMAP auf main 26e7099 (#251) (f40139f)
+- PLAYTEST_ERGEBNISSE.md als Ziel für das erste Blatt (#244) (3d85186)
+- STATUS.md und ROADMAP auf main 898a750 (#243) (3f50881)
+- STATUS.md und ROADMAP auf main a4eaad4 (#241) (0d9d231)
+- Feedback-Einstieg mit einem Klick eintragen (88b202a)
+- ROADMAP auf v2.1.0 (271572a)
+- v2.1.0 in STATUS/ROADMAP eintragen (80578af)
+
+### Tests
+
+- CSS-Erwartungen jsdom-31-tauglich (#240) (1d8349a)
+- **e2e:** 3D-Visual-Test lebt wieder + neun verwaiste Baselines weg (#247) (d5effa3)
+- **e2e:** Promotions-Baseline wird wirklich geprueft (#242) (898a750)
+- **i18n:** Marker-Audit als Gate — 5 Tests gegen die Wörterbücher (4867ab9)
+
+### CI / Automation
+
+- Lighthouse-Abfrage läuft jetzt wirklich (#245) (f57ca2b)
+
+### Chores
+
+- chore(deps-dev)(deps-dev): bump jsdom from 30.1.3 to 31.0.0 (#238) (a4eaad4)
+- chore(deps-dev)(deps-dev): bump the runtime-dependencies group with 2 updates (#239) (3d2b352)
+- **tools:** lokales Lighthouse mit Median statt Einzellauf (#249) (26e7099)
+
+## [2.1.0] – 2026-11-16
+
+Tag „Kreuz & Aufstellung". Changes since `v2.0.0`.
+
+### Neue Modi & Brettformen
+
+- **Kreuz-Modus**: eine Brettform mit 45 Felder, inkl. 3D-Ansicht; das Brett folgt
+  8×8 oder 9×9 und Weiß schaut wieder zu Schwarz (`98d6f6b`, `d925254`, `b8d75d1`).
+- **Standard 8×8 als eigene Karte** mit 15 Upgrade-Punkten — Schwarz rüstet mit
+  (`92f0ded`).
+
+### Kampagne & Inhalte
+
+- Armee und Shop zurück in die Kampagne (`181cef5`), Feenfiguren in die Armee
+  (`d1cb8bb`), gelernte Talente auf der Figur und der Armeekarte (`262dabe`,
+  `b4a89c9`), Erfahrung beim ersten Kapitelsieg (`413104b`), Talentstufen
+  (`4392f7d`).
+- Neue Talente mit Preis- bzw. Werbe-Effekt: Sprungfeder, Pfeil, Taktiker,
+  Plünderer, Majestät, Festung.
+
+### UI & Korrekturen
+
+- Klassisch 9×9 fragt „sofort oder mit 25 Punkten“ (`593e344`), Issue-Reporter
+  unter Einstellungen (`40afb58`), Feedback-Knopf im Aktionsmenü (`9ace284`).
+- **Statuspille nennt den Sieger**, nicht die bedrängte Seite (`24eb9b0`).
+- Brett quadratisch, KI-Aufstellung meidet Grundreihe und blockierte Felder
+  (`d6e49bf`); die schwarze Aufstellung legt keine Bauern mehr auf die
+  Grundreihe (`27021a6`).
+- Obere Reihe nicht mehr vom Header verdeckt (`8c1664a`); Mentor-Warnung blockierte
+  8×8-Züge nicht mehr (`768f343`).
+
+### Qualität
+
+- Snapshots für Menü und Brettansage (`7ea3384`), Tauri-Build auf dem Tag grün
+  (`7c40fbe`).
+- **Testzahlen**: 272 Unit-Testdateien / 3307 Tests, 42 Playwright-Specs / 118
+  Fälle. CI-Gate prüft seit `6a4714a` auch `e2e-test`.
+
 ## [2.0.0] – 2026-08-23
 
 Changes since `v1.9.0`. Der Meilenstein-Release: **M2 9×9-Identität komplett +

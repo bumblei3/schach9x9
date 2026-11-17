@@ -221,7 +221,16 @@ export class MoveController {
         this.redoStack.length > 0 &&
         (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
       redoBtn.disabled = !canRedo;
-      redoBtn.textContent = `⏭ Wiederholen${this.redoStack.length > 0 ? ` (${this.redoStack.length})` : ''}`;
+      // Wie beim Rückgängig-Button den Label-Knoten ersetzen, nicht
+      // `textContent` auf dem Button: das würde das `<span class="action-label">`
+      // samt `data-i18n`-Attribut löschen.
+      const label = redoBtn.querySelector?.('.action-label');
+      if (label) {
+        label.textContent =
+          this.redoStack.length > 0 ? `Wiederholen (${this.redoStack.length})` : 'Wiederholen';
+      } else {
+        redoBtn.textContent = `⏭ Wiederholen${this.redoStack.length > 0 ? ` (${this.redoStack.length})` : ''}`;
+      }
     }
   }
 

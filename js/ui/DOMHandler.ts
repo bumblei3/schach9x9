@@ -28,6 +28,7 @@ import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
 import { AI_DIFFICULTIES } from '../config.js';
 import { TIME_CONTROLS } from '../TimeManager.js';
+import { getLocale, isLocale, setLocale } from '../i18n.js';
 
 export class DOMHandler {
   private app: App;
@@ -249,6 +250,72 @@ export class DOMHandler {
     if (undoBtn) {
       undoBtn.addEventListener('click', () => {
         this.gameController?.undoMove();
+      });
+    }
+
+    // Redo hatte einen Handler in `updateUndoRedoButtons` und einen
+    // Tastaturkürzel-Eintrag, aber nie einen Button — die Klicklage fehlte.
+    const redoBtn = document.getElementById('redo-btn');
+    if (redoBtn) {
+      redoBtn.addEventListener('click', () => {
+        void this.gameController?.redoMove();
+      });
+    }
+
+    // Info-/Zugprotokoll-Panel. Der Button im Aktionsmenü, das Panel samt
+    // Tabs und die Inhalte (`#move-history`, `#log-panel` werden per JS
+    // befüllt) existierten; nur Einstieg, Schließen und Tab-Wechsel fehlten —
+    // ohne sie war der Button wirkungslos und das Panel unsichtbar.
+    const infoToggleBtn = document.getElementById('info-toggle-btn');
+    const infoOverlay = document.getElementById('info-overlay');
+    if (infoToggleBtn && infoOverlay) {
+      infoToggleBtn.addEventListener('click', () => {
+        infoOverlay.classList.toggle('hidden');
+        infoToggleBtn.classList.toggle('active', !infoOverlay.classList.contains('hidden'));
+      });
+    }
+    const infoCloseBtn = document.getElementById('info-close-btn');
+    if (infoCloseBtn && infoOverlay) {
+      infoCloseBtn.addEventListener('click', () => {
+        infoOverlay.classList.add('hidden');
+        infoToggleBtn?.classList.remove('active');
+      });
+    }
+    document.querySelectorAll<HTMLElement>('.info-tabs .tab-btn[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        if (!tab) return;
+        btn.parentElement!.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.info-tabs').forEach(tabs => {
+          const overlay = tabs.closest('#info-overlay');
+          overlay?.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+          overlay?.querySelector(`#tab-${tab}`)?.classList.add('active');
+        });
+      });
+    });
+
+    // Statistik-Overlay: `showStatisticsOverlay()` und `updateStatistics()` waren
+    // vollständig, aber ohne Einstieg — und `stats-close-btn` ohne Listener.
+    const statsBtn = document.getElementById('stats-btn');
+    const statsOverlay = document.getElementById('stats-overlay');
+    if (statsBtn && statsOverlay) {
+      statsBtn.addEventListener('click', () => {
+        const isHidden = statsOverlay.classList.contains('hidden');
+        if (isHidden) {
+          // `showStatisticsOverlay` füllt die Zahlen und entfernt `hidden`.
+          UI.showStatisticsOverlay(this.game);
+        } else {
+          statsOverlay.classList.add('hidden');
+        }
+        statsBtn.classList.toggle('active', isHidden);
+      });
+    }
+    const statsCloseBtn = document.getElementById('stats-close-btn');
+    if (statsCloseBtn && statsOverlay) {
+      statsCloseBtn.addEventListener('click', () => {
+        statsOverlay.classList.add('hidden');
+        statsBtn?.classList.remove('active');
       });
     }
 
@@ -1066,6 +1133,20 @@ export class DOMHandler {
         themeSelect.value = savedTheme;
         document.body.setAttribute('data-theme', savedTheme);
       }
+    }
+
+    // Anzeigesprache. Die Wahl wirkt sofort auf die statische UI-Schale
+    // (Pilot) und wird gespeichert; `initI18n` hat die Sprache beim Boot
+    // bereits aus dem Speicher gelesen.
+    const languageSelect = document.getElementById('language-select') as HTMLSelectElement | null;
+    if (languageSelect) {
+      languageSelect.value = getLocale();
+      languageSelect.addEventListener('change', e => {
+        const target = e.target as HTMLSelectElement;
+        if (isLocale(target.value)) {
+          setLocale(target.value);
+        }
+      });
     }
 
     const exportPgnBtn = document.getElementById('export-pgn-btn');

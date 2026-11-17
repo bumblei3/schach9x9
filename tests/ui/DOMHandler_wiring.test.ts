@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 // Mirrors the mock setup of DOMHandler_coverage.test.ts so DOMHandler imports
 // cleanly under vitest/jsdom. Focus here is REAL wiring invariants, not
@@ -312,6 +314,35 @@ describe('DOMHandler wiring invariants', () => {
       expect(app.gameController.undoMove).toHaveBeenCalledTimes(1);
       expect(btn.querySelector('.undo-icon')).not.toBeNull();
       expect(btn.querySelector('.action-label')!.textContent).toBe('Rückgängig');
+    });
+  });
+
+  // Redo existierte als Funktion (`redoStack`, `moveController.redoMove`,
+  // Tastaturkürzel `R`) aber nie als Button — der Listener fehlte zusammen mit
+  // dem Markup, ohne das `updateUndoRedoButtons` in einen toten Zweig lief.
+  describe('redo button', () => {
+    it('liegt im ausgelieferten Markup neben Rückgängig', () => {
+      const html = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
+      expect(html).toContain('id="redo-btn"');
+      const redo = html.indexOf('id="redo-btn"');
+      const undo = html.indexOf('id="undo-btn"');
+      expect(redo).toBeGreaterThan(undo);
+      expect(redo - undo).toBeLessThan(2000);
+    });
+
+    it('clicking Wiederholen calls redoMove', () => {
+      app.gameController.redoMove = vi.fn();
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `<button id="redo-btn">
+          <svg class="redo-icon"></svg>
+          <span class="action-label">Wiederholen</span>
+        </button>`
+      );
+      handler.init();
+      const btn = document.getElementById('redo-btn')!;
+      btn.click();
+      expect(app.gameController.redoMove).toHaveBeenCalledTimes(1);
     });
   });
 

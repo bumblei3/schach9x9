@@ -4,6 +4,11 @@
  */
 
 import { registerServiceWorker } from './serviceWorkerRegistration.js';
+import { initI18n } from './i18n.js';
+
+// So früh wie möglich, damit die statische UI-Schale in der gespeicherten
+// Sprache rendert. Module-Scripte sind deferred, das Markup ist also da.
+initI18n();
 
 // Stylesheets für Ansichten, die auf der Startseite nicht vorkommen (Shop,
 // Analyse, Promotion, Debug Console) liegen in css/views.css. Als eigener Chunk
