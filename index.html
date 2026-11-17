@@ -291,6 +291,32 @@
                 <span class="action-label" data-i18n="analysis.undo">Rückgängig</span>
                 <span class="action-shortcut">U</span>
               </button>
+              <!-- Redo war nur per Tastatur erreichbar (`R` / Strg+Y): die
+                   Funktion selbst (redoStack, `moveController.redoMove`) existiert,
+                   aber keinen Button im Markup gab es nie. Ohne ihn war der
+                   `redo-btn`-Zweig in `updateUndoRedoButtons` toter Code. -->
+              <button
+                id="redo-btn"
+                class="action-icon-btn"
+                title="Wiederholen (R)" data-i18n-title="analysis.redoTitle"
+                aria-label="Wiederholen (R)" data-i18n-aria-label="analysis.redoTitle"
+                data-tooltip="Wiederholen (R)"
+                data-shortcut="R"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                >
+                  <path d="M21 7v6h-6"></path>
+                  <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path>
+                </svg>
+                <span class="action-label" data-i18n="analysis.redo">Wiederholen</span>
+                <span class="action-shortcut">R</span>
+              </button>
               <button
                 id="hint-btn"
                 class="action-icon-btn"

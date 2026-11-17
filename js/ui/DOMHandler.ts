@@ -253,6 +253,15 @@ export class DOMHandler {
       });
     }
 
+    // Redo hatte einen Handler in `updateUndoRedoButtons` und einen
+    // Tastaturkürzel-Eintrag, aber nie einen Button — die Klicklage fehlte.
+    const redoBtn = document.getElementById('redo-btn');
+    if (redoBtn) {
+      redoBtn.addEventListener('click', () => {
+        void this.gameController?.redoMove();
+      });
+    }
+
     const analysisBtn = document.getElementById('toggle-analysis-btn');
     if (analysisBtn) {
       analysisBtn.addEventListener('click', () => {
