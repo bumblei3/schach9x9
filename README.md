@@ -222,7 +222,7 @@ Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RE
 **UI-B (Mobile & Flow, Unreleased):**
 
 - [✅] **Bottom-Sheets** (Shop + Mehr-Menü mobil + Backdrop)
-- [✅] **Compact Header** mit Header-Uhren
+- [✅] **Compact Header** mit Header-Uhren (erscheinen, wenn die Uhr an ist)
 - [✅] **Landscape-Layout**
 - [✅] **Menü-Cards als Buttons** (`data-init-mode`, kein inline onclick)
 
