@@ -732,18 +732,6 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           </div>
         </div>
 
-        <!-- Confirmation Overlay -->
-        <div id="confirmation-overlay" class="modal-overlay hidden">
-          <div class="modal-content">
-            <h2 id="confirmation-title" data-i18n="setup.confirm">Bestätigung</h2>
-            <p id="confirmation-message">Bist du sicher?</p>
-            <div class="modal-buttons">
-              <button id="confirm-yes-btn" class="btn-primary">Ja</button>
-              <button id="confirm-no-btn" class="btn-secondary">Nein</button>
-            </div>
-          </div>
-        </div>
-
         <!-- Draw Offer Overlay -->
         <div id="draw-offer-overlay" class="modal-overlay hidden">
           <div class="modal-content">

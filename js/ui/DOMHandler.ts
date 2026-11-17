@@ -262,6 +262,39 @@ export class DOMHandler {
       });
     }
 
+    // Info-/Zugprotokoll-Panel. Der Button im Aktionsmenü, das Panel samt
+    // Tabs und die Inhalte (`#move-history`, `#log-panel` werden per JS
+    // befüllt) existierten; nur Einstieg, Schließen und Tab-Wechsel fehlten —
+    // ohne sie war der Button wirkungslos und das Panel unsichtbar.
+    const infoToggleBtn = document.getElementById('info-toggle-btn');
+    const infoOverlay = document.getElementById('info-overlay');
+    if (infoToggleBtn && infoOverlay) {
+      infoToggleBtn.addEventListener('click', () => {
+        infoOverlay.classList.toggle('hidden');
+        infoToggleBtn.classList.toggle('active', !infoOverlay.classList.contains('hidden'));
+      });
+    }
+    const infoCloseBtn = document.getElementById('info-close-btn');
+    if (infoCloseBtn && infoOverlay) {
+      infoCloseBtn.addEventListener('click', () => {
+        infoOverlay.classList.add('hidden');
+        infoToggleBtn?.classList.remove('active');
+      });
+    }
+    document.querySelectorAll<HTMLElement>('.info-tabs .tab-btn[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        if (!tab) return;
+        btn.parentElement!.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.info-tabs').forEach(tabs => {
+          const overlay = tabs.closest('#info-overlay');
+          overlay?.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+          overlay?.querySelector(`#tab-${tab}`)?.classList.add('active');
+        });
+      });
+    });
+
     const analysisBtn = document.getElementById('toggle-analysis-btn');
     if (analysisBtn) {
       analysisBtn.addEventListener('click', () => {
