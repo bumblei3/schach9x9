@@ -81,7 +81,12 @@ describe('AI Trigger Integration', () => {
     controller.moveController = moveController;
     controller.shopManager = { updateShopUI: vi.fn() };
     controller.statisticsManager = { updateStats: vi.fn(), recordGameStart: vi.fn() };
-    controller.timeManager = { startClock: vi.fn(), stopClock: vi.fn(), switchTurn: vi.fn() };
+    controller.timeManager = {
+      startClock: vi.fn(),
+      stopClock: vi.fn(),
+      switchTurn: vi.fn(),
+      updateClockVisibility: vi.fn(),
+    };
 
     controller.initGame(10, 'classic');
   });

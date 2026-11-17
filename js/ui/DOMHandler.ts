@@ -27,6 +27,7 @@ import type { Game } from '../gameEngine.js';
 import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
 import { AI_DIFFICULTIES } from '../config.js';
+import { TIME_CONTROLS } from '../TimeManager.js';
 
 export class DOMHandler {
   private app: App;
@@ -366,15 +367,37 @@ export class DOMHandler {
       });
     });
 
-    // Time Control Selector
+    // Zeitsteuerung. Auch diese lag im Menü, wo das Spiel noch nicht
+    // existiert — ohne Speicherpunkt startete jede Partie mit der
+    // Default-Zeit, egal was gewählt war.
     const timeControlSelect = document.getElementById(
       'time-control-select'
     ) as HTMLSelectElement | null;
     if (timeControlSelect) {
+      const savedTimeControl = localStorage.getItem('chess_time_control');
+      if (savedTimeControl && Object.keys(TIME_CONTROLS).includes(savedTimeControl)) {
+        timeControlSelect.value = savedTimeControl;
+      }
       timeControlSelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
+        localStorage.setItem('chess_time_control', target.value);
         if (this.gameController) {
           this.gameController.setTimeControl(target.value);
+        }
+      });
+    }
+
+    // Spieluhr. Davor gab es keine UI dafür: `clockEnabled` wurde im
+    // Game-Konstruktor auf `false` gesetzt und in Produktivcode nie mehr
+    // gesetzt, also blieben die Uhren dauerhaft auf 5:00 stehen.
+    const clockToggle = document.getElementById('clock-toggle') as HTMLInputElement | null;
+    if (clockToggle) {
+      clockToggle.checked = localStorage.getItem('chess_clock_enabled') === 'true';
+      clockToggle.addEventListener('change', () => {
+        localStorage.setItem('chess_clock_enabled', String(clockToggle.checked));
+        if (this.game) {
+          this.game.clockEnabled = clockToggle.checked;
+          this.gameController?.updateClockVisibility();
         }
       });
     }

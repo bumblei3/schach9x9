@@ -85,7 +85,12 @@ describe('Gameplay Scenarios', () => {
     // Mock necessary controller dependencies if they aren't fully mocked yet
     controller.shopManager = { updateShopUI: vi.fn() };
     controller.statisticsManager = { updateStats: vi.fn(), recordGameStart: vi.fn() };
-    controller.timeManager = { startClock: vi.fn(), stopClock: vi.fn(), switchTurn: vi.fn() };
+    controller.timeManager = {
+      startClock: vi.fn(),
+      stopClock: vi.fn(),
+      switchTurn: vi.fn(),
+      updateClockVisibility: vi.fn(),
+    };
 
     // Disable search time limits for reliable testing
     game.aiMoveTime = 50;

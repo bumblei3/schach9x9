@@ -1059,6 +1059,27 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </div>
 
                   <div class="setting-group">
+                    <h3>Uhr</h3>
+                    <div class="setting-row">
+                      <label for="clock-toggle">Spieluhr</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" id="clock-toggle" aria-label="Spieluhr an/aus">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                    <div class="setting-row" style="margin-top: 10px">
+                      <label>Zeitsteuerung</label>
+                      <select id="time-control-select" class="menu-select" aria-label="Zeitsteuerung">
+                        <option value="blitz3">Blitz 3+2</option>
+                        <option value="blitz5" selected="">Blitz 5+3</option>
+                        <option value="rapid10">Rapid 10</option>
+                        <option value="rapid15">Rapid 15+10</option>
+                        <option value="classical30">Klassisch 30</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="setting-group">
                     <h3>KI &amp; Hilfe</h3>
                     <div class="setting-row">
                       <label>AI-Gegner</label>

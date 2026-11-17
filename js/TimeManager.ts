@@ -18,7 +18,7 @@ export interface GameControllerInterface {
   handleGameEnd?: (_result: 'win' | 'draw', _winnerColor: Player | null) => void;
 }
 
-const TIME_CONTROLS: Record<string, TimeControlMode> = {
+export const TIME_CONTROLS: Record<string, TimeControlMode> = {
   blitz3: { base: 180, increment: 2 },
   blitz5: { base: 300, increment: 3 },
   rapid10: { base: 600, increment: 0 },
@@ -44,13 +44,30 @@ export class TimeManager {
     this.updateClockDisplay();
   }
 
+  /**
+   * Uhren ein-/ausblenden.
+   *
+   * Die Uhr wurde später in vier Elemente aufgeteilt (`.header-clocks` im
+   * Kopf, `#clock-white`/`#clock-black` in den Spieler-Panels), aber diese
+   * Methode suchte weiter nach dem alten einzelnen `#chess-clock` — der
+   * existiert im Markup nicht. Infolgedessen zeigte die Partie dauerhaft
+   * eingefrorene „5:00", obwohl `clockEnabled` `false` ist und kein Timer
+   * läuft. `.hidden` hat `!important` und schlägt damit auch die
+   * Media-Query-Regel, die die Header-Uhren auf engen Viewports zeigt.
+   */
   updateClockVisibility(): void {
-    const clockEl = document.getElementById('chess-clock');
-    if (clockEl) {
-      if (this.game.clockEnabled) {
-        clockEl.classList.remove('hidden');
+    const clockEls = [
+      document.querySelector('.header-clocks'),
+      document.getElementById('clock-white'),
+      document.getElementById('clock-black'),
+    ];
+    const visible = this.game.clockEnabled;
+    for (const el of clockEls) {
+      if (!el) continue;
+      if (visible) {
+        el.classList.remove('hidden');
       } else {
-        clockEl.classList.add('hidden');
+        el.classList.add('hidden');
       }
     }
   }

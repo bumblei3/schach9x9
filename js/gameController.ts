@@ -16,7 +16,7 @@ import { ArrowRenderer } from './arrows.js';
 import { StatisticsManager } from './statisticsManager.js';
 import { puzzleManager } from './puzzleManager.js';
 import { dailyPuzzle } from './dailyPuzzle.js';
-import { TimeManager } from './TimeManager.js';
+import { TimeManager, TIME_CONTROLS } from './TimeManager.js';
 import { ShopManager } from './shop/ShopManager.js';
 import { AnalysisController } from './AnalysisController.js';
 import type { AIController } from './aiController.js';
@@ -199,6 +199,23 @@ export class GameController {
     if (savedDifficulty && Object.values(AI_DIFFICULTIES).includes(savedDifficulty)) {
       this.game.difficulty = savedDifficulty;
     }
+
+    // Uhr aus dem Menü. Ohne diesen Lesepunkt blieb `clockEnabled` auf
+    // `false` und die Uhren standen dauerhaft auf 5:00.
+    const savedClockEnabled = localStorage.getItem('chess_clock_enabled');
+    if (savedClockEnabled !== null) {
+      this.game.clockEnabled = savedClockEnabled === 'true';
+    }
+
+    // Zeitsteuerung aus dem Menü.
+    const savedTimeControl = localStorage.getItem('chess_time_control');
+    if (savedTimeControl && Object.keys(TIME_CONTROLS).includes(savedTimeControl)) {
+      this.timeManager.setTimeControl(savedTimeControl);
+    }
+
+    // Sichtbarkeit an den Zustand anpassen (blendet die eingefrorenen
+    // 5:00 aus, solange die Uhr aus ist).
+    this.timeManager.updateClockVisibility();
 
     // Initialize basic stuff common to all
     UI.initBoardUI(this.game);
