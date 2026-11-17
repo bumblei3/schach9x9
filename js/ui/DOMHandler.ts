@@ -115,46 +115,6 @@ export class DOMHandler {
       });
     });
 
-    // Standard 8x8 Mode
-    const standard8x8Btn = document.getElementById('standard-8x8-btn');
-    if (standard8x8Btn) {
-      standard8x8Btn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(0, 'standard8x8');
-      });
-    }
-
-    // Standard 8x8 Mode with Upgrades
-    const upgrade8x8Btn = document.getElementById('upgrade-8x8-btn');
-    if (upgrade8x8Btn) {
-      upgrade8x8Btn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(5, 'standard8x8');
-      });
-    }
-
-    // Classic Mode (9x9)
-    const classicBtn = document.getElementById('classic-mode-btn');
-    if (classicBtn) {
-      classicBtn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(0, 'classic');
-      });
-    }
-
-    // Puzzle Mode
-    const puzzleStartBtn = document.getElementById('puzzle-start-btn');
-    if (puzzleStartBtn) {
-      puzzleStartBtn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(0, 'puzzle');
-      });
-    }
-
     // Campaign Mode
     const campaignStartBtn = document.getElementById('campaign-start-btn');
     if (campaignStartBtn) {
@@ -1025,15 +985,6 @@ export class DOMHandler {
         }
       }
     });
-
-    const restartBtn = document.getElementById('restart-btn');
-    if (restartBtn) {
-      restartBtn.addEventListener('click', () => {
-        if (confirm('Spiel wirklich neu starten?')) {
-          location.reload();
-        }
-      });
-    }
 
     const saveBtn = document.getElementById('save-btn');
     if (saveBtn) {

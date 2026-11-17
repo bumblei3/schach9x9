@@ -246,13 +246,6 @@ describe('DOMHandler Comprehensive Coverage', () => {
     expect(document.body.textContent).toContain('Keine Züge');
   });
 
-  it('Edge Case: should reload page on restart button confirm', () => {
-    domHandler.init();
-    window.confirm = vi.fn().mockReturnValue(true);
-    document.getElementById('restart-btn')!.click();
-    expect(location.reload).toHaveBeenCalled();
-  });
-
   it('Edge Case: should handle tutor level change', () => {
     domHandler.init();
     const select = document.getElementById('ki-mentor-level-select') as HTMLInputElement;
@@ -350,30 +343,6 @@ describe('DOMHandler Comprehensive Coverage', () => {
       const btns = document.querySelectorAll<HTMLElement>('.points-btn');
       btns[1].click();
       expect(app.init).not.toHaveBeenCalled();
-    });
-
-    it('standard 8x8 button inits with 0 points', () => {
-      domHandler.init();
-      document.getElementById('standard-8x8-btn')!.click();
-      expect(app.init).toHaveBeenCalledWith(0, 'standard8x8');
-    });
-
-    it('upgrade 8x8 button inits with 5 points', () => {
-      domHandler.init();
-      document.getElementById('upgrade-8x8-btn')!.click();
-      expect(app.init).toHaveBeenCalledWith(5, 'standard8x8');
-    });
-
-    it('classic button inits classic mode', () => {
-      domHandler.init();
-      document.getElementById('classic-mode-btn')!.click();
-      expect(app.init).toHaveBeenCalledWith(0, 'classic');
-    });
-
-    it('puzzle button inits puzzle mode', () => {
-      domHandler.init();
-      document.getElementById('puzzle-start-btn')!.click();
-      expect(app.init).toHaveBeenCalledWith(0, 'puzzle');
     });
 
     it('campaign button hides main menu and shows campaign UI', () => {

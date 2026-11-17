@@ -362,14 +362,6 @@ describe('DOMHandler', () => {
     expect((document as any).exitFullscreen).toHaveBeenCalled();
   });
 
-  test('should handle classic and puzzle start', () => {
-    document.getElementById('classic-mode-btn')!.click();
-    expect(app.init).toHaveBeenCalledWith(0, 'classic');
-
-    document.getElementById('puzzle-start-btn')!.click();
-    expect(app.init).toHaveBeenCalledWith(0, 'puzzle');
-  });
-
   test('should handle mentor level selection', () => {
     const select = document.getElementById('ki-mentor-level-select') as HTMLSelectElement;
     select.value = 'STRICT';
@@ -412,14 +404,6 @@ describe('DOMHandler', () => {
     expect(app.game.aiController.toggleAnalysisMode).toHaveBeenCalled();
   });
 
-  test('should handle restart action', () => {
-    const restartBtn = document.getElementById('restart-btn')!;
-    (window as any).confirm = vi.fn(() => false); // User cancels
-
-    restartBtn.click();
-    expect((window as any).confirm).toHaveBeenCalled();
-  });
-
   test('should handle theme selection from localStorage', () => {
     localStorage.setItem('chess_theme', 'blue');
     // We need a fresh init to pick up localStorage
@@ -448,11 +432,6 @@ describe('DOMHandler', () => {
     exportBtn.click();
     expect((window as any).alert).not.toHaveBeenCalled();
     expect(document.body.textContent).toContain('Keine Züge zum Exportieren!');
-  });
-
-  test('should handle standard 8x8 mode start', () => {
-    document.getElementById('standard-8x8-btn')!.click();
-    expect(app.init).toHaveBeenCalledWith(0, 'standard8x8');
   });
 
   test('should handle threats and opportunities buttons', () => {
