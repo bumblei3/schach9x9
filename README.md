@@ -185,6 +185,9 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Formatting (Prettier):** `npm run format`
 - **CI-Check:** `npm run format:check && npm run lint && npm test`
 
+Details zu Branches, Commit-Regeln, dem Verifikationsgate und den
+Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## 🗺️ Roadmap / In Arbeit
 
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
