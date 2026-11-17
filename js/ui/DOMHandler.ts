@@ -414,8 +414,18 @@ export class DOMHandler {
         // then). The previous guard `if (this.app.battleChess3D)` skipped the
         // entire toggle on the first click, leaving `enabled` at its
         // constructor default (false) and never flipping to 3D on click #1.
+        //
+        // `init3D()` lädt den 595-KiB-Chunk per Dynamic Import — offline kann
+        // das scheitern. Ohne Abfangen würde das als ungehandelte Rejection
+        // des Click-Handlers auftauchen.
         if (!this.app.battleChess3D) {
-          await this.app.init3D();
+          try {
+            await this.app.init3D();
+          } catch (e) {
+            console.warn('[DOMHandler] 3D-Initialisierung fehlgeschlagen:', e);
+            showToast('3D-Ansicht konnte nicht geladen werden.', 'warning');
+            return;
+          }
         }
         if (!this.app.battleChess3D) return; // init failed; bail out
 

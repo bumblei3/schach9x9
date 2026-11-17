@@ -4,7 +4,7 @@ import { chooseMenuAction, domClick } from './helpers/E2EHelper.js';
 test.describe('3D Mode Toggle @3d', () => {
   test.beforeEach(async ({ page }) => {
     // Enable console log proxying
-    page.on('console', (msg) => console.log(`PAGE LOG: ${msg.text()}`));
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
     await page.goto('/?disable-sw');
     await page.waitForFunction(() => document.body.classList.contains('app-ready'));
   });
@@ -37,9 +37,7 @@ test.describe('3D Mode Toggle @3d', () => {
     // value. Detect the state before/after to prove the toggle actually flips.
     const getEnabled = () =>
       page.evaluate(
-        () =>
-          (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D
-            ?.enabled
+        () => (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D?.enabled
       );
 
     // Initial state: 3D hidden, 2D visible
@@ -56,8 +54,8 @@ test.describe('3D Mode Toggle @3d', () => {
     await clickToggle();
     await page.waitForFunction(
       () =>
-        (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D
-          ?.enabled === true,
+        (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D?.enabled ===
+        true,
       undefined,
       { timeout: 30000 }
     );
@@ -66,19 +64,60 @@ test.describe('3D Mode Toggle @3d', () => {
     // Best-effort: the 3D canvas should attach. Don't hard-fail on its
     // geometry in headless CI (no GPU) — the enabled flag above is the
     // authoritative toggle signal.
-    await expect(container3d.locator('canvas')).toBeAttached({ timeout: 10000 }).catch(() => {});
+    await expect(container3d.locator('canvas'))
+      .toBeAttached({ timeout: 10000 })
+      .catch(() => {});
 
     // Second toggle: flips back to the opposite state, 2D board visible again.
     // Assert on the toggle *direction* (XOR) instead of an absolute start
     // value — robust against lazy engine init timing.
     await clickToggle();
     await page.waitForFunction(
-      (prev) =>
-        (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D
-          ?.enabled === !prev,
+      prev =>
+        (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D?.enabled ===
+        !prev,
       enabledAfterFirst,
       { timeout: 30000 }
     );
     await expect(boardWrapper).toBeVisible();
+  });
+
+  // App.init() rief init3D() selbst auf — das lädt den 595-KiB-Chunk per
+  // Dynamic Import und baute eine Three.js-Szene, auch wenn der Spieler 3D
+  // nie anklickt (gemessen: +582 KiB Transfer pro Partiestart). Damit die
+  // Lazy-Absicht aus dem Kommentar in App.init3D() auch gilt, sperrt dieser
+  // Test beide Richtungen.
+  test('lädt den 3D-Chunk erst beim ersten Toggle', async ({ page }) => {
+    await page.goto('/?disable-sw');
+    await page.waitForFunction(() => document.body.classList.contains('app-ready'));
+    await page.click('.gamemode-card[data-mode="standard8x8"]', { force: true });
+    await chooseMenuAction(page, 'Sofort spielen');
+    await expect(page.locator('body')).toHaveClass(/game-initialized/);
+
+    const chunkLoaded = () =>
+      page.evaluate(() =>
+        performance.getEntriesByType('resource').some(r => /battleChess3D/.test(r.name))
+      );
+    const engineExists = () =>
+      page.evaluate(
+        () => (window as unknown as { battleChess3D?: unknown }).battleChess3D !== undefined
+      );
+
+    expect(await chunkLoaded()).toBe(false);
+    expect(await engineExists()).toBe(false);
+
+    await domClick(page, '#toggle-3d-btn');
+    await page.waitForFunction(
+      () =>
+        (window as unknown as { battleChess3D?: { enabled: boolean } }).battleChess3D?.enabled ===
+        true,
+      undefined,
+      { timeout: 30000 }
+    );
+    await page.waitForFunction(
+      () => performance.getEntriesByType('resource').some(r => /battleChess3D/.test(r.name)),
+      undefined,
+      { timeout: 30000 }
+    );
   });
 });
