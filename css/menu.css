@@ -13,12 +13,18 @@
   backdrop-filter: blur(20px);
   display: flex;
   opacity: 0;
+  /* visibility entfernt das Menü aus dem Accessibility-Tree, solange es
+     inaktiv ist — sonst zählt axe ein zweites <main> (landmark-no-duplicate-main). */
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s ease;
 }
 
 #main-menu.active {
   opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
 

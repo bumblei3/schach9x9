@@ -44,8 +44,6 @@
 
   <body>
     <a href="#board-wrapper" class="skip-link">Zum Schachbrett springen</a>
-    <!-- Hidden H1 for Accessibility -->
-    <h1 class="hidden">Schach 9x9</h1>
 
     <!-- Global SVG Assets (Hidden) -->
     <svg style="position: absolute; width: 0; height: 0; overflow: hidden" aria-hidden="true">
@@ -159,7 +157,12 @@
         </header>
 
         <!-- Main Game Area -->
-        <div class="game-area" role="main">
+        <div class="game-area" role="main" aria-label="Spielfeld">
+          <!-- Visually hidden H1: keeps a level-one heading in the accessibility
+               tree (axe page-has-heading-one) without painting anything. It
+               lives inside the main landmark, otherwise axe flags it as
+               content outside any landmark. -->
+          <h1 class="sr-only">Schach 9x9</h1>
           <!-- Opponent Info / Clock -->
           <div class="player-info opponent">
             <div class="player-details">
@@ -694,9 +697,14 @@
         <!-- PANEL LAYER: Contextual side/top panels -->
         <div id="panel-layer">
           <!-- Analysis Panel (Deep Analysis) -->
-          <div id="analysis-panel" class="analysis-panel hidden">
+          <div
+            id="analysis-panel"
+            class="analysis-panel hidden"
+            role="region"
+            aria-label="Tiefenanalyse"
+          >
             <div class="analysis-header">
-              <h3>Tiefenanalyse</h3>
+              <h2>Tiefenanalyse</h2>
               <button id="close-analysis-btn" class="close-icon-btn">×</button>
             </div>
             <div class="analysis-body">
@@ -707,7 +715,7 @@
                 <div id="eval-score" class="eval-score">0.00</div>
               </div>
               <div class="top-moves-section">
-                <h4>Top Züge</h4>
+                <h3>Top Züge</h3>
                 <div id="top-moves-content" class="top-moves-list">
                   <!-- Top moves injected by JS -->
                 </div>
@@ -754,9 +762,14 @@
           </div>
 
           <!-- Opening Book Panel -->
-          <div id="move-heatmap-panel" class="analysis-panel hidden">
+          <div
+            id="move-heatmap-panel"
+            class="analysis-panel hidden"
+            role="region"
+            aria-label="Feld-Hitze"
+          >
             <div class="opening-book-header">
-              <h3>Feld-Hitze (Zug-Aktivität)</h3>
+              <h2>Feld-Hitze (Zug-Aktivität)</h2>
               <button id="close-heatmap-btn" class="close-icon-btn">×</button>
             </div>
             <div class="heatmap-body">
@@ -781,7 +794,7 @@
           <!-- Opening Book Panel -->
           <div id="opening-book-panel" class="opening-book-panel hidden">
             <div class="opening-book-header">
-              <h3>Eröffnungsbuch</h3>
+              <h2>Eröffnungsbuch</h2>
               <button id="close-opening-book-btn" class="close-icon-btn">×</button>
             </div>
             <div class="opening-book-body">
@@ -1242,7 +1255,7 @@
             </nav>
 
             <!-- Content Area -->
-            <main class="menu-content-area">
+            <div class="menu-content-area" role="region" aria-label="Hauptmenü">
               <!-- Play View -->
               <div id="view-play" class="menu-view active">
                 <h2 class="section-title">Neues Spiel</h2>
@@ -1549,8 +1562,9 @@
                 <h2 class="section-title">Credits</h2>
                 <p>Entwickelt mit ❤️ vom Google Deepmind Team</p>
               </div>
-            </main>
+            </div>
           </div>
+
         </div>
 
         <!-- Hidden elements for compatibility if needed -->
