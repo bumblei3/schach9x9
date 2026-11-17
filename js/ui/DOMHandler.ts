@@ -26,6 +26,7 @@ import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
 import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
+import { AI_DIFFICULTIES } from '../config.js';
 
 export class DOMHandler {
   private app: App;
@@ -338,9 +339,22 @@ export class DOMHandler {
     // AI Difficulty Selector (handles both in-game menu and main menu)
     const difficultySelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
     difficultySelects.forEach(select => {
+      // Die Schwierigkeit steht im Menü, das Spiel existiert dort noch
+      // nicht — ohne Speicherpunkt landete die Wahl in einem `this.game ===
+      // null` und jedes Spiel startete mit `beginner`. Gleiches Muster wie
+      // KI-Mentor und KI-Persönlichkeit.
+      const savedDifficulty = localStorage.getItem('chess_ai_difficulty') as AIDifficulty | null;
+      if (savedDifficulty && Object.values(AI_DIFFICULTIES).includes(savedDifficulty)) {
+        select.value = savedDifficulty;
+      }
+      if (this.game && Object.values(AI_DIFFICULTIES).includes(select.value as AIDifficulty)) {
+        this.game.difficulty = select.value as AIDifficulty;
+      }
+
       select.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
         const value = target.value;
+        localStorage.setItem('chess_ai_difficulty', value);
         if (this.game) {
           this.game.difficulty = value as AIDifficulty;
           console.log('[DOMHandler] AI Difficulty changed to:', value);

@@ -34,7 +34,7 @@ import { notificationUI } from './ui/NotificationUI.js';
 import { confettiSystem } from './effects.js';
 import type { Player } from './types/core.js';
 import type { GameMode } from './config.js';
-import { isBlockedCell } from './config.js';
+import { isBlockedCell, AI_DIFFICULTIES, type AIDifficulty } from './config.js';
 import type { Level } from './campaign/types.js';
 import { achievementsManager } from './achievements.js';
 import { leaderboardManager } from './leaderboard.js';
@@ -190,6 +190,14 @@ export class GameController {
     const savedPersonality = localStorage.getItem('chess_ai_personality');
     if (savedPersonality && AI_PERSONALITIES[savedPersonality]) {
       this.game.aiPersonality = savedPersonality;
+    }
+
+    // Schwierigkeit aus dem Menü (gespeichert in `chess_ai_difficulty`).
+    // Ohne diesen Lesepunkt startete jedes Spiel mit `beginner`, egal was im
+    // Menü gewählt war.
+    const savedDifficulty = localStorage.getItem('chess_ai_difficulty') as AIDifficulty | null;
+    if (savedDifficulty && Object.values(AI_DIFFICULTIES).includes(savedDifficulty)) {
+      this.game.difficulty = savedDifficulty;
     }
 
     // Initialize basic stuff common to all
