@@ -253,15 +253,20 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Require lint + test + build success
+      - name: Require lint + test + build + e2e success
         run: |
           echo "lint=${{ needs.lint.result }}"
           echo "test=${{ needs.test.result }}"
           echo "build=${{ needs.build.result }}"
+          echo "e2e-test=${{ needs.e2e-test.result }}"
           fail=0
           [ "${{ needs.lint.result }}" = "success" ] || fail=1
           [ "${{ needs.test.result }}" = "success" ] || fail=1
           [ "${{ needs.build.result }}" = "success" ] || fail=1
+          # e2e-test fehlte in dieser Liste, obwohl der Job in `needs` stand und
+          # die Branch-Protection "E2E Tests (Playwright)" als required check
+          # verlangt — der Gate meldete also grün, während E2E rot war.
+          [ "${{ needs.e2e-test.result }}" = "success" ] || fail=1
           if [ "$fail" -ne 0 ]; then
             echo "❌ Required jobs failed — CI gate closed"
             exit 1
