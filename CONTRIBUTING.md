@@ -40,22 +40,22 @@ vertragen sich nicht, ohne das Flag scheitert `npm ci` an `ERESOLVE`.
 
 ## Befehle
 
-| Zweck                       | Befehl                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| Dev-Server                  | `npm run dev`                                                                         |
-| Produktions-Build           | `npm run build`                                                                       |
-| Unit-Tests (komplett)       | `npm test`                                                                            |
-| Eine Testdatei              | `npx vitest run tests/<datei>.test.ts`                                                |
-| Fuzz-Tests                  | `npm test tests/fuzz/fuzz.test.ts`                                                    |
-| Typecheck                   | `npm run typecheck`                                                                   |
-| Lint                        | `npm run lint`                                                                        |
-| Formatierung (nur eigene Dateien) | `npx prettier --write <datei>` |
-| Abdeckung                   | `npm run test:coverage`                                                               |
-| E2E (komplett, CI-nah)      | `CI=1 npx playwright test --project=chromium --reporter=line --workers=1 --retries=0` |
-| Ein E2E-Spec                | `npx playwright test e2e/<spec>.ts --project=chromium --workers=1 --retries=0`        |
-| E2E-Baselines neu aufnehmen | `npm run test:visual:update`                                                          |
-| Engine gegen Stockfish      | `npm run match:stockfish`                                                             |
-| Changelog aus den Commits   | `npm run changelog`                                                                   |
+| Zweck                             | Befehl                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| Dev-Server                        | `npm run dev`                                                                         |
+| Produktions-Build                 | `npm run build`                                                                       |
+| Unit-Tests (komplett)             | `npm test`                                                                            |
+| Eine Testdatei                    | `npx vitest run tests/<datei>.test.ts`                                                |
+| Fuzz-Tests                        | `npm test tests/fuzz/fuzz.test.ts`                                                    |
+| Typecheck                         | `npm run typecheck`                                                                   |
+| Lint                              | `npm run lint`                                                                        |
+| Formatierung (nur eigene Dateien) | `npx prettier --write <datei>`                                                        |
+| Abdeckung                         | `npm run test:coverage`                                                               |
+| E2E (komplett, CI-nah)            | `CI=1 npx playwright test --project=chromium --reporter=line --workers=1 --retries=0` |
+| Ein E2E-Spec                      | `npx playwright test e2e/<spec>.ts --project=chromium --workers=1 --retries=0`        |
+| E2E-Baselines neu aufnehmen       | `npm run test:visual:update`                                                          |
+| Engine gegen Stockfish            | `npm run match:stockfish`                                                             |
+| Changelog aus den Commits         | `npm run changelog`                                                                   |
 
 Nur **Chromium** ist als Playwright-Projekt aktiv (Firefox/WebKit stehen in
 `playwright.config.ts` auskommentiert). E2E läuft gegen ein statisch
