@@ -324,6 +324,11 @@ function showBetterMoveArrow(
 }
 
 function clearBetterMoveHighlights(): void {
+  // Der Fade-Timer aus `renderTutorFeedbackPanel` überlebt den Test-Aufbau: ist
+  // jsdom bereits abgerissen, ist `document` weg und der Aufruf würde als
+  // Uncaught Exception den vitest-Lauf rot machen — alle Tests grün, aber
+  // `Errors 1 error`. Gleiches Muster wie in `TooltipManager.ts`.
+  if (typeof document === 'undefined') return;
   document
     .querySelectorAll('.cell.better-move-from, .cell.better-move-to')
     .forEach(el => el.classList.remove('better-move-from', 'better-move-to'));
