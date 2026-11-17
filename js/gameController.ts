@@ -214,6 +214,14 @@ export class GameController {
       this.timeManager.setTimeControl(savedTimeControl);
     }
 
+    // Tutor-Modus aus dem Menü. Additiv: nur wenn gespeichert, sonst greift der
+    // Konstruktor-Default (Modus aus). Ohne diesen Punkt landet die Wahl im
+    // Menü in einem `this.game === null` und der Modus bliebe unerreichbar.
+    const savedTutorMode = localStorage.getItem('chess_tutor_mode');
+    if (savedTutorMode) {
+      this.game.tutorMode = savedTutorMode;
+    }
+
     // Sichtbarkeit an den Zustand anpassen (blendet die eingefrorenen
     // 5:00 aus, solange die Uhr aus ist).
     this.timeManager.updateClockVisibility();
