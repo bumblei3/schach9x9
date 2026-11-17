@@ -12,6 +12,8 @@
  */
 
 import { describe, test, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { AI_PERSONALITIES, type AIPersonality } from '../js/ai/personalities.js';
 
 const ALL = Object.values(AI_PERSONALITIES);
@@ -124,5 +126,20 @@ describe('AI_PERSONALITIES semantic consistency (labels match numbers)', () => {
         expect(p.wasmPersonality).toBe('AGGRESSIVE');
       }
     }
+  });
+});
+
+// `trapper` war in AI_PERSONALITIES definiert und im README beworben, aber im
+// Select fehlte die Option — die Persönlichkeit war nicht wählbar. Der Test
+// vergleicht die Config direkt mit dem ausgelieferten Markup.
+describe('AI_PERSONALITIES ist im UI wählbar', () => {
+  const html = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
+  const selectBlock = html.match(/<select id="ai-personality-select"[\s\S]*?<\/select>/)?.[0] ?? '';
+  const options = [...selectBlock.matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
+
+  test('jede Persönlichkeit aus dem Config hat genau eine Option', () => {
+    const keys = Object.keys(AI_PERSONALITIES);
+    expect(options.length).toBe(keys.length);
+    for (const key of keys) expect(options).toContain(key);
   });
 });

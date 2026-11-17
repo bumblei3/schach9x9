@@ -23,6 +23,7 @@ import type { AIController } from './aiController.js';
 import { campaignManager } from './campaign/CampaignManager.js';
 import { relocateGiftedPiece } from './campaign/plunderer.js';
 import { VICTORY_XP, victoryUnitTypes, victoryXpLine } from './campaign/victoryXp.js';
+import { AI_PERSONALITIES } from './ai/personalities.js';
 import { AnalysisManager } from './ai/AnalysisManager.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 import { getHeatmapUI, HeatmapUI } from './ui/HeatmapUI.js';
@@ -182,6 +183,13 @@ export class GameController {
     const aiOpponent = localStorage.getItem('chess_ai_opponent');
     if (aiOpponent !== null) {
       this.game.isAI = aiOpponent === 'true';
+    }
+
+    // KI-Persönlichkeit aus dem Menü. Nur gesetzt, wenn explizit gespeichert —
+    // die Kampagne überschreibt das später mit der Level-Vorgabe.
+    const savedPersonality = localStorage.getItem('chess_ai_personality');
+    if (savedPersonality && AI_PERSONALITIES[savedPersonality]) {
+      this.game.aiPersonality = savedPersonality;
     }
 
     // Initialize basic stuff common to all

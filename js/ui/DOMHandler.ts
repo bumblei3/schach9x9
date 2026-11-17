@@ -20,6 +20,7 @@ import { OpeningBookUI } from './OpeningBookUI.js';
 import { hidePostGameStats } from './PostGameAnalysisUI.js';
 import { syncDailyPuzzleMenu } from './dailyPuzzleMenu.js';
 import { bindIssueReporter } from './issueReporter.js';
+import { AI_PERSONALITIES } from '../ai/personalities.js';
 import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
@@ -298,8 +299,21 @@ export class DOMHandler {
       'ai-personality-select'
     ) as HTMLSelectElement | null;
     if (personalitySelect) {
+      // Gleiches Muster wie der KI-Mentor: die Wahl gilt auch, wenn sie
+      // getroffen wird, bevor das erste Spiel existiert — ohne diesen
+      // Speicherpunkt landete sie in einem `this.game === null` und ging
+      // verloren.
+      const savedPersonality = localStorage.getItem('chess_ai_personality');
+      if (savedPersonality && AI_PERSONALITIES[savedPersonality]) {
+        personalitySelect.value = savedPersonality;
+      }
+      if (this.game && AI_PERSONALITIES[personalitySelect.value]) {
+        this.game.aiPersonality = personalitySelect.value;
+      }
+
       personalitySelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
+        localStorage.setItem('chess_ai_personality', target.value);
         if (this.game) {
           this.game.aiPersonality = target.value;
         }

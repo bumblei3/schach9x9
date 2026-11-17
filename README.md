@@ -31,13 +31,13 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
 - **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices, Touch-Targets ≥ 44×44px.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
-- **TypeScript Strict Mode**: Das gesamte Projekt ist vollständig typisiert (0 `any`-Typen in Produktionscode).
+- **TypeScript Strict Mode**: Das Projekt ist vollständig typisiert. Einzige Ausnahme ist ein dokumentiertes, per ESLint-Deaktivierung gekennzeichnetes `any` in `App.ts` (Delegat-Prototyping für 75+ dynamische Game-Methoden).
 
 ## 🧠 Technische Highlights
 
 ### KI-Engine (`js/aiEngine.ts`)
 
-- **Alpha-Beta Pruning** mit **LMR** (Late Move Reductions, log-Formel), **Null-Move Pruning** (R=2), **ProbCut** (depth≥5, β-150cp), **Singular Extensions** (depth≥6, margin=100cp)
+- **Alpha-Beta Pruning** mit **LMR** (Late Move Reductions, log-Formel), **Null-Move Pruning** (R=1), **ProbCut** (depth≥5, β-150cp), **Singular Extensions** (depth≥6, margin=100cp)
 - **Iterative Deepening** mit **Aspiration Windows** + **IIR** (Internal Iterative Reduction, adaptive 0.5×–2.0× Fenster)
 - **Transposition Table** (Zobrist Hashing, 262k Einträge)
 - **Move Ordering**: MVV-LVA + SEE, Killer Moves, History Heuristic, Counter Moves, **Threat-Bonus** (Checks, Angriffe, entdeckte Angriffe, X-Ray, Pin-Breaks, Königssicherheit)
@@ -69,7 +69,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
   Ausgangsstellung** — nicht das absolute Brettmaterial. (Vor v1.6.0 baute
   `playGame` das Brett fälschlich aus der Startstellung, sodass Taktik-FENs
   nie wirklich gespielt wurden — der Gate war damals blind.)
-- `npx vitest run` (2819 Tests), `npx tsc --noEmit`, eslint sauber.
+- `npx vitest run` (3298 Tests), `npx tsc --noEmit`, eslint sauber.
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
@@ -105,13 +105,13 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
   - **MoveController** (`moveController.ts`): Zug-Ausführung, Validierung, Undo/Redo
   - **AIController** (`aiController.ts`): KI-Steuerung, Analyse-Modus, Worker-Pool
   - **DOMHandler** (`ui/DOMHandler.ts`): DOM-Zugriff und Event-Listener
-- **Vollständig typisiert**: 0 `any`-Typen im Produktionscode
+- **Vollständig typisiert**: ein dokumentiertes `any` im Produktionscode (`App.ts`, Delegat-Prototyping)
 
 ## 🧪 Qualitätssicherung & Testing
 
 Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **2.800 automatisierten Tests** (Vitest Unit/Integration + Playwright E2E) in 222 Unit-Testdateien plus 25 E2E-Specs wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
-Das Projekt ist vollständig **TypeScript Strict Mode compliant** (0 Errors, 0 `any`-Typen).
+Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
 | Modul             | Coverage (Lines) | Beschreibung                                                |
 | ----------------- | ---------------- | ----------------------------------------------------------- |
