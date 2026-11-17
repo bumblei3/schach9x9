@@ -30,6 +30,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
 - **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices, Touch-Targets ≥ 44×44px.
+- **Zweisprachige UI**: Deutsch und Englisch umschaltbar (Einstellungen → Sprache), die Wahl wird gespeichert. Pilot: statische UI-Schale; Toasts, Tutor und Kampagnen-/Puzzle-Texte sind noch deutsch.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
 - **TypeScript Strict Mode**: Das Projekt ist vollständig typisiert. Einzige Ausnahme ist ein dokumentiertes, per ESLint-Deaktivierung gekennzeichnetes `any` in `App.ts` (Delegat-Prototyping für 75+ dynamische Game-Methoden).
 

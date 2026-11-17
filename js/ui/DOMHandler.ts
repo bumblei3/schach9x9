@@ -28,6 +28,7 @@ import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
 import { AI_DIFFICULTIES } from '../config.js';
 import { TIME_CONTROLS } from '../TimeManager.js';
+import { getLocale, isLocale, setLocale } from '../i18n.js';
 
 export class DOMHandler {
   private app: App;
@@ -1066,6 +1067,20 @@ export class DOMHandler {
         themeSelect.value = savedTheme;
         document.body.setAttribute('data-theme', savedTheme);
       }
+    }
+
+    // Anzeigesprache. Die Wahl wirkt sofort auf die statische UI-Schale
+    // (Pilot) und wird gespeichert; `initI18n` hat die Sprache beim Boot
+    // bereits aus dem Speicher gelesen.
+    const languageSelect = document.getElementById('language-select') as HTMLSelectElement | null;
+    if (languageSelect) {
+      languageSelect.value = getLocale();
+      languageSelect.addEventListener('change', e => {
+        const target = e.target as HTMLSelectElement;
+        if (isLocale(target.value)) {
+          setLocale(target.value);
+        }
+      });
     }
 
     const exportPgnBtn = document.getElementById('export-pgn-btn');
