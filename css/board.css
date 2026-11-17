@@ -98,14 +98,16 @@ body.mode-3d #board-wrapper {
 
 /* 8x8 Mode Sizing */
 #board.board-8x8 {
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
 }
 
 #board {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(9, 1fr);
+  /* minmax(0, 1fr) damit der Min-Inhalt der Figuren die Zeilenhöhe nicht
+     anhebt — die Zellen bleiben auf jedem Viewport quadratisch. */
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-rows: repeat(9, minmax(0, 1fr));
   width: 100%;
   /* The board stays square no matter how wide the wrapper gets. */
   height: auto;
@@ -151,16 +153,23 @@ body.mode-3d #board-wrapper {
 }
 
 /* --- 3x3 Grid Overlay (Thick Borders) --- */
-/* Vertical dividers after Col 3 and Col 6 (9x9 mode only) */
-#board:not(.board-8x8) .cell:nth-child(9n + 3),
-#board:not(.board-8x8) .cell:nth-child(9n + 6) {
+/* Vertical dividers after Col 3 and Col 6 (9x9 mode only). Selected by
+   data-c, not :nth-child: the cells sit inside role="row" wrappers, so
+   nth-child counts within a row. */
+#board:not(.board-8x8) .cell[data-c='2'],
+#board:not(.board-8x8) .cell[data-c='5'] {
   border-right: 4px solid #000;
 }
 
-/* Horizontal dividers after Row 3 (cells 19-27) and Row 6 (cells 46-54) (9x9 mode only) */
-#board:not(.board-8x8) .cell:nth-child(n + 19):nth-child(-n + 27),
-#board:not(.board-8x8) .cell:nth-child(n + 46):nth-child(-n + 54) {
+/* Horizontal dividers after Row 3 and Row 6 (9x9 mode only) */
+#board:not(.board-8x8) .cell[data-r='2'],
+#board:not(.board-8x8) .cell[data-r='5'] {
   border-bottom: 4px solid #000;
+}
+
+/* Reihen-Wrapper: keine eigene Box, das Grid des Bretts bleibt unverändert. */
+.board-row {
+  display: contents;
 }
 
 /* --- Cells --- */

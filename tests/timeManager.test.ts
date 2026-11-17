@@ -207,35 +207,58 @@ describe('TimeManager', () => {
   });
 
   describe('updateClockVisibility', () => {
-    test('hides the clock element when clock is disabled', () => {
-      mockGame.clockEnabled = false;
-      const clockEl = {
-        classList: { add: vi.fn(), remove: vi.fn() },
+    const installClockDom = (present: boolean) => {
+      const els = {
+        header: { classList: { add: vi.fn(), remove: vi.fn() } },
+        white: { classList: { add: vi.fn(), remove: vi.fn() } },
+        black: { classList: { add: vi.fn(), remove: vi.fn() } },
       };
       Object.defineProperty(global, 'document', {
-        value: { getElementById: vi.fn(() => clockEl) },
+        value: {
+          querySelector: vi.fn(() => (present ? els.header : null)),
+          getElementById: vi.fn((id: string) => {
+            if (!present) return null;
+            if (id === 'clock-white') return els.white;
+            if (id === 'clock-black') return els.black;
+            return null;
+          }),
+        },
         configurable: true,
       });
+      return els;
+    };
+
+    test('blendet alle Uhren aus, wenn die Uhr aus ist', () => {
+      mockGame.clockEnabled = false;
+      const els = installClockDom(true);
 
       timeManager.updateClockVisibility();
 
-      expect((global as any).document.getElementById).toHaveBeenCalledWith('chess-clock');
-      expect(clockEl.classList.add).toHaveBeenCalledWith('hidden');
+      for (const el of [els.header, els.white, els.black]) {
+        expect(el.classList.add).toHaveBeenCalledWith('hidden');
+        expect(el.classList.remove).not.toHaveBeenCalled();
+      }
     });
 
-    test('shows the clock element when clock is enabled', () => {
+    test('zeigt alle Uhren, wenn die Uhr an ist', () => {
       mockGame.clockEnabled = true;
-      const clockEl = {
-        classList: { add: vi.fn(), remove: vi.fn() },
-      };
-      Object.defineProperty(global, 'document', {
-        value: { getElementById: vi.fn(() => clockEl) },
-        configurable: true,
-      });
+      const els = installClockDom(true);
 
       timeManager.updateClockVisibility();
 
-      expect(clockEl.classList.remove).toHaveBeenCalledWith('hidden');
+      for (const el of [els.header, els.white, els.black]) {
+        expect(el.classList.remove).toHaveBeenCalledWith('hidden');
+        expect(el.classList.add).not.toHaveBeenCalled();
+      }
+    });
+
+    // Regression: früher suchte die Methode nach `#chess-clock`, einem ID,
+    // die im Markup nicht existiert. Fehlende Elemente dürfen nicht werfen.
+    test('erträgt fehlende Uhren-Elemente', () => {
+      mockGame.clockEnabled = false;
+      installClockDom(false);
+
+      expect(() => timeManager.updateClockVisibility()).not.toThrow();
     });
   });
 });

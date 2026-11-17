@@ -20,11 +20,14 @@ import { OpeningBookUI } from './OpeningBookUI.js';
 import { hidePostGameStats } from './PostGameAnalysisUI.js';
 import { syncDailyPuzzleMenu } from './dailyPuzzleMenu.js';
 import { bindIssueReporter } from './issueReporter.js';
+import { AI_PERSONALITIES } from '../ai/personalities.js';
 import { Tutorial } from '../tutorial.js';
 import type { App } from '../App.js';
 import type { Game } from '../gameEngine.js';
 import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
+import { AI_DIFFICULTIES } from '../config.js';
+import { TIME_CONTROLS } from '../TimeManager.js';
 
 export class DOMHandler {
   private app: App;
@@ -298,8 +301,21 @@ export class DOMHandler {
       'ai-personality-select'
     ) as HTMLSelectElement | null;
     if (personalitySelect) {
+      // Gleiches Muster wie der KI-Mentor: die Wahl gilt auch, wenn sie
+      // getroffen wird, bevor das erste Spiel existiert — ohne diesen
+      // Speicherpunkt landete sie in einem `this.game === null` und ging
+      // verloren.
+      const savedPersonality = localStorage.getItem('chess_ai_personality');
+      if (savedPersonality && AI_PERSONALITIES[savedPersonality]) {
+        personalitySelect.value = savedPersonality;
+      }
+      if (this.game && AI_PERSONALITIES[personalitySelect.value]) {
+        this.game.aiPersonality = personalitySelect.value;
+      }
+
       personalitySelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
+        localStorage.setItem('chess_ai_personality', target.value);
         if (this.game) {
           this.game.aiPersonality = target.value;
         }
@@ -324,9 +340,22 @@ export class DOMHandler {
     // AI Difficulty Selector (handles both in-game menu and main menu)
     const difficultySelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
     difficultySelects.forEach(select => {
+      // Die Schwierigkeit steht im Menü, das Spiel existiert dort noch
+      // nicht — ohne Speicherpunkt landete die Wahl in einem `this.game ===
+      // null` und jedes Spiel startete mit `beginner`. Gleiches Muster wie
+      // KI-Mentor und KI-Persönlichkeit.
+      const savedDifficulty = localStorage.getItem('chess_ai_difficulty') as AIDifficulty | null;
+      if (savedDifficulty && Object.values(AI_DIFFICULTIES).includes(savedDifficulty)) {
+        select.value = savedDifficulty;
+      }
+      if (this.game && Object.values(AI_DIFFICULTIES).includes(select.value as AIDifficulty)) {
+        this.game.difficulty = select.value as AIDifficulty;
+      }
+
       select.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
         const value = target.value;
+        localStorage.setItem('chess_ai_difficulty', value);
         if (this.game) {
           this.game.difficulty = value as AIDifficulty;
           console.log('[DOMHandler] AI Difficulty changed to:', value);
@@ -338,15 +367,37 @@ export class DOMHandler {
       });
     });
 
-    // Time Control Selector
+    // Zeitsteuerung. Auch diese lag im Menü, wo das Spiel noch nicht
+    // existiert — ohne Speicherpunkt startete jede Partie mit der
+    // Default-Zeit, egal was gewählt war.
     const timeControlSelect = document.getElementById(
       'time-control-select'
     ) as HTMLSelectElement | null;
     if (timeControlSelect) {
+      const savedTimeControl = localStorage.getItem('chess_time_control');
+      if (savedTimeControl && Object.keys(TIME_CONTROLS).includes(savedTimeControl)) {
+        timeControlSelect.value = savedTimeControl;
+      }
       timeControlSelect.addEventListener('change', e => {
         const target = e.target as HTMLSelectElement;
+        localStorage.setItem('chess_time_control', target.value);
         if (this.gameController) {
           this.gameController.setTimeControl(target.value);
+        }
+      });
+    }
+
+    // Spieluhr. Davor gab es keine UI dafür: `clockEnabled` wurde im
+    // Game-Konstruktor auf `false` gesetzt und in Produktivcode nie mehr
+    // gesetzt, also blieben die Uhren dauerhaft auf 5:00 stehen.
+    const clockToggle = document.getElementById('clock-toggle') as HTMLInputElement | null;
+    if (clockToggle) {
+      clockToggle.checked = localStorage.getItem('chess_clock_enabled') === 'true';
+      clockToggle.addEventListener('change', () => {
+        localStorage.setItem('chess_clock_enabled', String(clockToggle.checked));
+        if (this.game) {
+          this.game.clockEnabled = clockToggle.checked;
+          this.gameController?.updateClockVisibility();
         }
       });
     }
@@ -414,8 +465,18 @@ export class DOMHandler {
         // then). The previous guard `if (this.app.battleChess3D)` skipped the
         // entire toggle on the first click, leaving `enabled` at its
         // constructor default (false) and never flipping to 3D on click #1.
+        //
+        // `init3D()` lädt den 595-KiB-Chunk per Dynamic Import — offline kann
+        // das scheitern. Ohne Abfangen würde das als ungehandelte Rejection
+        // des Click-Handlers auftauchen.
         if (!this.app.battleChess3D) {
-          await this.app.init3D();
+          try {
+            await this.app.init3D();
+          } catch (e) {
+            console.warn('[DOMHandler] 3D-Initialisierung fehlgeschlagen:', e);
+            showToast('3D-Ansicht konnte nicht geladen werden.', 'warning');
+            return;
+          }
         }
         if (!this.app.battleChess3D) return; // init failed; bail out
 

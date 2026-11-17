@@ -517,7 +517,7 @@
   align-items: center;
 }
 
-.analysis-header h3 {
+.analysis-header h2 {
   margin: 0;
   font-size: 0.9rem;
   font-weight: 700;
@@ -562,7 +562,7 @@
   text-align: right;
 }
 
-.top-moves-section h4 {
+.top-moves-section h3 {
   margin: 0 0 10px 0;
   font-size: 0.8rem;
   color: var(--text-muted);

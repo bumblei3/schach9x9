@@ -1,6 +1,18 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+/**
+ * Axe-Scans der Hauptzustände.
+ *
+ * Früher stand hier ein `disableRules`-Block für `landmark-unique`,
+ * `page-has-heading-one`, `landmark-no-duplicate-main` und
+ * `scrollable-region-focusable` — der überdeckte die Verstöße, statt sie zu
+ * beheben. Alle vier sind seitdem im Code gefixt (Menü `visibility:hidden`
+ * statt nur `opacity:0`, `.sr-only`-H1 innerhalb der main-Region, h2/h3 statt
+ * h1→h3). Die Liste ist bewusst weg: ein Rückfall muss auch hier rot werden,
+ * nicht nur in `e2e/a11y.spec.ts`.
+ */
+
 test.describe('Accessibility Scans @a11y', () => {
   test('Main Menu should be accessible', async ({ page }) => {
     await page.goto('/');
@@ -9,15 +21,7 @@ test.describe('Accessibility Scans @a11y', () => {
     await expect(page.locator('#main-menu')).toBeVisible();
 
     // Scan
-    const accessibilityScanResults = await new AxeBuilder({ page })
-      .include('#main-menu')
-      .disableRules([
-        'landmark-unique',
-        'page-has-heading-one',
-        'scrollable-region-focusable',
-        'landmark-no-duplicate-main',
-      ])
-      .analyze();
+    const accessibilityScanResults = await new AxeBuilder({ page }).include('#main-menu').analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
   });
@@ -37,12 +41,6 @@ test.describe('Accessibility Scans @a11y', () => {
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude('#battle-chess-3d-container') // Exclude WebGL canvas
-      .disableRules([
-        'landmark-unique',
-        'page-has-heading-one',
-        'scrollable-region-focusable',
-        'landmark-no-duplicate-main',
-      ])
       .analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -59,12 +57,6 @@ test.describe('Accessibility Scans @a11y', () => {
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .include('#shop-panel')
-      .disableRules([
-        'landmark-unique',
-        'page-has-heading-one',
-        'scrollable-region-focusable',
-        'landmark-no-duplicate-main',
-      ])
       .analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -81,15 +73,7 @@ test.describe('Accessibility Scans @a11y', () => {
     // Wait for settings content to become visible
     await expect(page.locator('#view-settings')).toBeVisible({ timeout: 5000 });
 
-    const accessibilityScanResults = await new AxeBuilder({ page })
-      .include('#main-menu')
-      .disableRules([
-        'landmark-unique',
-        'page-has-heading-one',
-        'scrollable-region-focusable',
-        'landmark-no-duplicate-main',
-      ])
-      .analyze();
+    const accessibilityScanResults = await new AxeBuilder({ page }).include('#main-menu').analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
   });

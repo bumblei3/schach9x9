@@ -173,10 +173,21 @@ export function initBoardUI(game: GameLike): void {
   boardEl.classList.add(size === 8 ? 'board-8x8' : 'board-9x9');
 
   // Set CSS grid template
-  boardEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-  boardEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+  // minmax(0, 1fr) statt 1fr: die Zeilen bekommen sonst einen Min-Inhalt aus
+  // den Figuren-SVGs und werden auf kleinen Viewports höher als breit — die
+  // Zellen wären 24x26 statt 24x24. Die Obergrenze 0 hält alle Zeilen gleich.
+  boardEl.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+  boardEl.style.gridTemplateRows = `repeat(${size}, minmax(0, 1fr))`;
 
   for (let r = 0; r < size; r++) {
+    // Reihen-Wrapper tragen role="row", damit die gridcells einer Reihe
+    // zugeordnet sind (axe: aria-required-parent / aria-required-children).
+    // display:contents lässt das CSS-Grid des Bretts unverändert — die Zellen
+    // bleiben auf denselben Grid-Achsen.
+    const rowEl = document.createElement('div');
+    rowEl.className = 'board-row';
+    rowEl.setAttribute('role', 'row');
+    boardEl.appendChild(rowEl);
     for (let c = 0; c < size; c++) {
       const cell = document.createElement('div');
       cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
@@ -432,7 +443,7 @@ export function initBoardUI(game: GameLike): void {
           .forEach(c => c.classList.remove('hover-piece'));
       });
 
-      boardEl.appendChild(cell);
+      rowEl.appendChild(cell);
     }
   }
 

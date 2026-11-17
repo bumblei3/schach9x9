@@ -69,6 +69,38 @@ describe('BoardRenderer Component', () => {
     expect(boardEl?.innerHTML).toContain('cell');
   });
 
+  // Axe meldete aria-required-children/parent auf #board: 81 gridcells ohne
+  // row-Eltern. Die Reihen-Wrapper tragen role="row" und display:contents.
+  test('board exposes a grid/row/gridcell hierarchy', () => {
+    BoardRenderer.initBoardUI(game);
+    BoardRenderer.renderBoard(game);
+
+    const boardEl = document.getElementById('board');
+    const rows = boardEl?.querySelectorAll(':scope > .board-row') ?? [];
+    expect(rows.length).toBe(9);
+    for (const row of Array.from(rows)) {
+      expect(row.getAttribute('role')).toBe('row');
+      expect(row.querySelectorAll(':scope > .cell').length).toBe(9);
+      for (const cell of Array.from(row.querySelectorAll(':scope > .cell'))) {
+        expect(cell.getAttribute('role')).toBe('gridcell');
+      }
+    }
+    // Keine Zelle darf direkter Kind des Grids sein.
+    expect(boardEl?.querySelectorAll(':scope > .cell').length).toBe(0);
+  });
+
+  // 1fr (= minmax(auto, 1fr)) lässt den Min-Inhalt der Figuren-SVGs die
+  // Zeilenhöhe anheben — auf kleinen Viewports wurden die Zellen 24x26.
+  test('board grid tracks are minmax(0, 1fr) so cells stay square', () => {
+    BoardRenderer.initBoardUI(game);
+    BoardRenderer.renderBoard(game);
+
+    const boardEl = document.getElementById('board');
+    // jsdom serialisiert 0 als 0px (derselbe Effekt, andere Serialisierung).
+    expect(boardEl?.style.gridTemplateRows).toMatch(/^repeat\(9, minmax\(0(px)?, 1fr\)\)$/);
+    expect(boardEl?.style.gridTemplateColumns).toMatch(/^repeat\(9, minmax\(0(px)?, 1fr\)\)$/);
+  });
+
   test('should handle piece symbol retrieval', () => {
     const symbol = BoardRenderer.getPieceSymbol({ type: 'p', color: 'white' } as any);
     expect(symbol).toContain('piece-svg');

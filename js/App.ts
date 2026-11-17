@@ -165,12 +165,14 @@ export class App {
       }
     }
 
-    // Initialize 3D Battle Chess mode
-    try {
-      this.init3D();
-    } catch (e) {
-      console.warn('[App] 3D initialization failed (continuing):', e);
-    }
+    // 3D NICHT hier initialisieren. `init3D()` lädt per Dynamic Import den
+    // 595-KiB-battleChess3D-Chunk und baut eine komplette Three.js-Szene —
+    // gemessen: +582 KiB Transfer bei jedem Partiestart, auch wenn der Spieler
+    // 3D nie anklickt (511 → 1234 KiB). Der Toggle in DOMHandler ruft
+    // `init3D()` beim ersten Klick auf, das ist der vorgesehene Lazy-Pfad;
+    // außerdem war das `try { this.init3D(); }` ohne `await` wertlos, weil die
+    // Async-Funktion die Exception als ungehandelten Rejection ausgab — offline
+    // erschien genau das als `Failed to fetch dynamically imported module`.
 
     // Initialize Service Worker
     this.registerServiceWorker();
