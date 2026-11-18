@@ -18,6 +18,13 @@ initI18n();
 // parallel zum ersten Paint und nicht danach.
 void import('../css/views.css');
 
+// Der Erfolge-Button soll schon im ersten Menü sein. Das Modul wird sonst
+// erst in `App.init()` geladen (also beim ersten Partiestart) und der Button
+// käme einem neuen Nutzer zu spät. Der Import ist idempotent
+// (`addAchievementsButton` prüft die ID), der späte Aufruf in App.init bleibt
+// als Absicherung.
+import('./ui/AchievementUI').catch(e => console.error('[Main] AchievementUI failed:', e));
+
 const init = async () => {
   try {
     const { App } = await import('./App.js');
