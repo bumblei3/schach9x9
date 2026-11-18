@@ -16,6 +16,10 @@ export class TooltipManager {
 
     this.tooltipEl = document.createElement('div');
     this.tooltipEl.className = 'global-tooltip hidden';
+    // Rein visuelles Duplikat von title/aria-label: nicht nochmal ins
+    // Accessibility-Tree, sonst liegt es als body-Direktkind ausserhalb jeder
+    // Landmarke (Axe `region`).
+    this.tooltipEl.setAttribute('aria-hidden', 'true');
     document.body.appendChild(this.tooltipEl);
 
     document.addEventListener('mouseover', e => this.handleMouseOver(e));
