@@ -80,8 +80,8 @@ describe('dynamische Texte (Game-over-Durchlauf)', () => {
   });
 
   test('Erfolgs-Schlüssel sind tatsächlich übersetzt', () => {
-    const keys = Object.keys(de).filter(k => k.startsWith('achievement.'));
-    expect(keys.length).toBe(12); // 6 Erfolge × name/description
+    const keys = Object.keys(de).filter(k => k.startsWith('achievement'));
+    expect(keys.length).toBe(13); // 6 Erfolge × name/description + Button-Titel
     for (const k of keys) {
       expect(en[k as keyof typeof en], k).not.toBe(de[k as keyof typeof de]);
     }

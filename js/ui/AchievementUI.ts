@@ -4,6 +4,7 @@
  */
 
 import { achievementsManager, AchievementsManager, type Achievement } from '../achievements.js';
+import { t } from '../i18n.js';
 import { logger } from '../logger.js';
 
 let isInitialized = false;
@@ -180,7 +181,18 @@ export function addAchievementsButton(): void {
   const btn = document.createElement('button');
   btn.id = 'achievements-menu-btn';
   btn.className = 'menu-btn';
-  btn.textContent = '🏆 Erfolge';
+  // Emoji im eigenen Span, Text als Textknoten: `applyI18n` ersetzt bei
+  // Elementen mit Kind-Elementen gezielt den Textknoten, ein `textContent`
+  // über dem Button würde das Emoji mit fortnehmen.
+  const icon = document.createElement('span');
+  icon.textContent = '🏆';
+  btn.appendChild(icon);
+  // Das Leerzeichen als eigenen Knoten: `translateElement` ersetzt den ersten
+  // nicht-leeren Textknoten (`trim()`-Prüfung) und würde einem Knoten
+  // `" Achievements"` das Leerzeichen mit wegnehmen.
+  btn.appendChild(document.createTextNode(' '));
+  btn.appendChild(document.createTextNode(t('achievements.title')));
+  btn.setAttribute('data-i18n', 'achievements.title');
   btn.addEventListener('click', showAchievementsPanel);
 
   // Insert before the last button (usually Settings/Info)
