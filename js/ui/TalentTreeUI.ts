@@ -1,6 +1,7 @@
 import { UNIT_TALENT_TREES } from '../campaign/talents.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { showModal, showToast } from './OverlayManager.js';
+import { t } from '../i18n.js';
 
 export class TalentTreeUI {
   private currentUnitType: string = 'p';
@@ -226,11 +227,11 @@ export class TalentTreeUI {
     if (buyBtn && !buyBtn.hasAttribute('disabled')) {
       buyBtn.addEventListener('click', () => {
         if (campaignManager.unlockTalent(this.currentUnitType, talent.id, talent.cost)) {
-          showToast(`${talent.name} erlernt!`, 'success');
+          showToast(t('toast.talentLearned', { name: talent.name }), 'success');
           this.renderTree(); // refresh status
           this.selectTalent(talent.id); // refresh logic
         } else {
-          showToast('Nicht genug Gold!', 'error');
+          showToast(t('toast.notEnoughGold'), 'error');
         }
       });
     }

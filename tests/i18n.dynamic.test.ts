@@ -9,7 +9,7 @@
  * dynamisch gesetzter Text bliebe sonst deutsch, egal welche Sprache gilt.
  */
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { setLocale, getLocale } from '../js/i18n.js';
+import { setLocale, getLocale, de, en } from '../js/i18n.js';
 
 const { updateStatus } = await import('../js/ui/GameStatusUI.js');
 
@@ -64,6 +64,19 @@ describe('dynamische Texte (Game-over-Durchlauf)', () => {
     expect(document.getElementById('status-display')!.textContent).toBe(
       'Spiel läuft - Schwarz am Zug'
     );
+  });
+
+  test('toast-Schlüssel sind tatsächlich übersetzt', () => {
+    const toastKeys = Object.keys(de).filter(k => k.startsWith('toast.'));
+    expect(toastKeys.length).toBeGreaterThan(20);
+    // `undo`/`redo` sind in beiden Sprachen gleich, der Emergency-Text ist
+    // bewusst englisch — der Rest muss sich unterscheiden, sonst hätte das
+    // Kopieren des Deutschen nach Englisch kein Effekt.
+    const identical = new Set(['toast.undo', 'toast.redo', 'toast.emergencyRecovery']);
+    for (const k of toastKeys) {
+      if (identical.has(k)) continue;
+      expect(en[k as keyof typeof en], k).not.toBe(de[k as keyof typeof de]);
+    }
   });
 
   test('die Wahl bleibt persistent und wird sofort angewendet', () => {

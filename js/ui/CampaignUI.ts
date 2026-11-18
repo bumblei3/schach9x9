@@ -4,6 +4,7 @@ import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
 import { hiringBudget } from '../campaign/hiringBudget.js';
 import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { showToast } from './OverlayManager.js';
+import { t } from '../i18n.js';
 
 interface CampaignUIHost {
   startCampaignLevel?: (_levelId: string) => void;
@@ -294,9 +295,9 @@ export class CampaignUI {
       campaignManager.unlockPerk(perk.id);
       this.updateGoldDisplay();
       this.renderPerks();
-      showToast(`${perk.name} erfolgreich gekauft!`, 'success');
+      showToast(t('toast.perkBought', { name: perk.name }), 'success');
     } else {
-      showToast('Nicht genug Gold!', 'error');
+      showToast(t('toast.notEnoughGold'), 'error');
     }
   }
 
@@ -386,7 +387,7 @@ export class CampaignUI {
         btn?.addEventListener('click', () => {
           campaignManager.setChampion(type);
           this.renderArmy();
-          showToast(`${names[type]} ist jetzt dein Champion!`, 'success');
+          showToast(t('toast.championSet', { name: names[type] }), 'success');
         });
       }
 

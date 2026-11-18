@@ -4,6 +4,7 @@
  * @module KeyboardManager
  */
 import { showToast, closeModal, renderBoard, updateStatus } from '../ui.js';
+import { t } from '../i18n.js';
 import type { App } from '../App.js';
 import type { Game, Piece } from '../gameEngine.js';
 
@@ -52,7 +53,7 @@ export class KeyboardManager {
         this.pendingFile = null;
         this.pendingFileTimer = null;
       }, 2000);
-      showToast(`Feld: ${key.toUpperCase()}…`, 'info');
+      showToast(t('toast.field', { key: key.toUpperCase() }), 'info');
       return;
     }
     if (this.pendingFile && /^[1-9]$/.test(key)) {
@@ -66,7 +67,12 @@ export class KeyboardManager {
       const game = this.app.game;
       if (game) renderBoard(game);
       if (g.selectedSquare) {
-        showToast(`${this.pendingFile.toUpperCase()}${key} ausgewählt`, 'info');
+        showToast(
+          t('toast.fieldSelected', {
+            square: `${this.pendingFile.toUpperCase()}${key}`,
+          }),
+          'info'
+        );
       }
       if (this.pendingFileTimer) clearTimeout(this.pendingFileTimer);
       this.pendingFile = null;
@@ -84,7 +90,7 @@ export class KeyboardManager {
     if ((ctrl && key === 'z' && !shift) || key === 'u') {
       event.preventDefault();
       this.app.gameController.undoMove();
-      showToast('Undo', 'info');
+      showToast(t('toast.undo'), 'info');
       return;
     }
 
@@ -92,7 +98,7 @@ export class KeyboardManager {
     if ((ctrl && key === 'y') || (ctrl && shift && key === 'z') || key === 'r') {
       event.preventDefault();
       this.app.gameController.redoMove();
-      showToast('Redo', 'info');
+      showToast(t('toast.redo'), 'info');
       return;
     }
 
@@ -110,7 +116,7 @@ export class KeyboardManager {
       event.preventDefault();
       if (g.analysisManager) {
         const active = g.analysisManager.toggleThreats();
-        showToast(active ? 'Drohungen AN' : 'Drohungen AUS', 'info');
+        showToast(active ? t('toast.threatsOn') : t('toast.threatsOff'), 'info');
         const btn = document.getElementById('threats-btn');
         if (btn) btn.classList.toggle('active', active);
       }
@@ -122,7 +128,7 @@ export class KeyboardManager {
       event.preventDefault();
       if (g.analysisManager) {
         const active = g.analysisManager.toggleOpportunities();
-        showToast(active ? 'Chancen AN' : 'Chancen AUS', 'info');
+        showToast(active ? t('toast.opportunitiesOn') : t('toast.opportunitiesOff'), 'info');
         const btn = document.getElementById('opportunities-btn');
         if (btn) btn.classList.toggle('active', active);
       }
@@ -134,7 +140,7 @@ export class KeyboardManager {
       event.preventDefault();
       if (g.analysisManager) {
         const active = g.analysisManager.toggleBestMove();
-        showToast(active ? 'Bester Zug AN' : 'Bester Zug AUS', 'info');
+        showToast(active ? t('toast.bestMoveOn') : t('toast.bestMoveOff'), 'info');
         const btn = document.getElementById('best-move-btn');
         if (btn) btn.classList.toggle('active', active);
       }
@@ -196,7 +202,7 @@ export class KeyboardManager {
     if (ctrl && shift && key === 'f12') {
       event.preventDefault();
       this.performEmergencyRecovery();
-      showToast('🔧 Emergency Recovery - Game unstuck!', 'warning');
+      showToast(t('toast.emergencyRecovery'), 'warning');
       return;
     }
 

@@ -585,7 +585,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     try {
       if (game.gameController && game.gameController.saveGame) {
         game.gameController.saveGame();
-        UI.showToast('Spiel automatisch gespeichert', 'success');
+        UI.showToast(t('toast.gameAutosaved'), 'success');
       }
     } catch (e) {
       console.warn('Auto-save failed:', e);

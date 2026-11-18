@@ -507,7 +507,7 @@ export class DOMHandler {
             await this.app.init3D();
           } catch (e) {
             console.warn('[DOMHandler] 3D-Initialisierung fehlgeschlagen:', e);
-            showToast('3D-Ansicht konnte nicht geladen werden.', 'warning');
+            showToast(t('toast.3dUnavailable'), 'warning');
             return;
           }
         }
@@ -664,7 +664,7 @@ export class DOMHandler {
         const piece = game.board?.[move.from.r]?.[move.from.c];
         game.validMoves = piece ? (game.getValidMoves(move.from.r, move.from.c, piece) ?? []) : [];
         UI.renderBoard(game);
-        showToast('Hinweis: diese Figur ziehen', 'info');
+        showToast(t('toast.hintMovePiece'), 'info');
       });
     }
 
@@ -1132,13 +1132,13 @@ export class DOMHandler {
     if (exportPgnBtn) {
       exportPgnBtn.addEventListener('click', async () => {
         if (!this.game || !this.game.moveHistory || this.game.moveHistory.length === 0) {
-          showToast('Keine Züge zum Exportieren!', 'warning');
+          showToast(t('toast.noMovesToExport'), 'warning');
           return;
         }
         const pgn = generatePGN(this.game);
         const copied = await copyPGNToClipboard(pgn);
         if (copied) {
-          showToast('PGN in die Zwischenablage kopiert!', 'success');
+          showToast(t('toast.pgnCopied'), 'success');
         } else {
           downloadPGN(pgn);
         }
@@ -1152,14 +1152,14 @@ export class DOMHandler {
     if (exportGifBtn) {
       exportGifBtn.addEventListener('click', async () => {
         if (!this.game || !this.game.moveHistory || this.game.moveHistory.length === 0) {
-          showToast('Keine Züge zum Exportieren!', 'warning');
+          showToast(t('toast.noMovesToExport'), 'warning');
           return;
         }
         try {
           await exportReplayGIF(this.game);
         } catch (e) {
           console.error('GIF export failed:', e);
-          showToast('GIF-Export fehlgeschlagen.', 'error');
+          showToast(t('toast.gifFailed'), 'error');
         }
         if (mainMenu) {
           mainMenu.classList.remove('active');
@@ -1171,7 +1171,7 @@ export class DOMHandler {
     if (sharePosBtn) {
       sharePosBtn.addEventListener('click', async () => {
         if (!this.gameController) {
-          showToast('Starte zuerst ein Spiel.', 'warning');
+          showToast(t('toast.startGameFirst'), 'warning');
           return;
         }
         await this.gameController.shareCurrentPosition();
@@ -1275,9 +1275,9 @@ export class DOMHandler {
         }
         localStorage.setItem('ki_mentor_level', level);
 
-        let msg = 'KI-Mentor deaktiviert';
-        if (level === 'STANDARD') msg = 'KI-Mentor: Standard (Patzer)';
-        else if (level === 'STRICT') msg = 'KI-Mentor: Streng (Fehler & Patzer)';
+        let msg = t('toast.mentorDisabled');
+        if (level === 'STANDARD') msg = t('toast.mentorStandard');
+        else if (level === 'STRICT') msg = t('toast.mentorStrict');
 
         showToast(msg, level !== 'OFF' ? 'success' : 'neutral');
       });
@@ -1301,9 +1301,7 @@ export class DOMHandler {
           localStorage.setItem('auto_hint_blunder', String(enabled));
           syncBoxes(enabled);
           showToast(
-            enabled
-              ? 'Auto-Hinweis nach Patzer aktiviert'
-              : 'Auto-Hinweis nach Patzer deaktiviert',
+            enabled ? t('toast.autoHintEnabled') : t('toast.autoHintDisabled'),
             enabled ? 'success' : 'neutral'
           );
         });
