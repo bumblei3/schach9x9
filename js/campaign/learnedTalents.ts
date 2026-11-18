@@ -1,5 +1,5 @@
 import { campaignManager } from './CampaignManager.js';
-import { UNIT_TALENT_TREES } from './talents.js';
+import { UNIT_TALENT_TREES, talentName } from './talents.js';
 
 /** Names of talents this piece type has already learned, in tree order. */
 export function learnedTalentNames(unitType: string): string[] {
@@ -7,5 +7,5 @@ export function learnedTalentNames(unitType: string): string[] {
   if (!tree) return [];
   return tree.talents
     .filter(talent => campaignManager.isTalentUnlocked(talent.id))
-    .map(talent => talent.name);
+    .map(talent => talentName(talent));
 }

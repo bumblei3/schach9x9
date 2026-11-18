@@ -1,6 +1,11 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { Level, Perk, UnitXp } from '../campaign/types.js';
-import { CAMPAIGN_PERKS, campaignLevelTitle } from '../campaign/campaignData.js';
+import {
+  CAMPAIGN_PERKS,
+  campaignLevelTitle,
+  campaignPerkName,
+  campaignPerkDescription,
+} from '../campaign/campaignData.js';
 import { hiringBudget } from '../campaign/hiringBudget.js';
 import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { showToast } from './OverlayManager.js';
@@ -28,14 +33,14 @@ export class CampaignUI {
         <div class="campaign-content" style="background: var(--bg-panel); padding: 2rem; border-radius: 1rem; max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
           <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
             <div>
-              <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Kampagne</h2>
+              <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-i18n="campaign.title">Kampagne</h2>
               <div id="campaign-gold-display" style="color: #ffd700; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; margin-top: 5px;">
-                <span>💰</span> <span id="campaign-gold-value">0</span> Gold
+                <span>💰</span> <span id="campaign-gold-value">0</span> ${t('campaign.gold')}
               </div>
             </div>
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-              <button id="campaign-army-toggle" type="button" class="btn-secondary" style="background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.2);">⚔️ Deine Armee</button>
-              <button id="campaign-shop-toggle" type="button" class="btn-secondary" style="background: rgba(255,215,0,0.1); color: #ffd700; border-color: rgba(255,215,0,0.2);">🛒 Shop</button>
+              <button id="campaign-army-toggle" type="button" class="btn-secondary" style="background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.2);"><span>⚔️</span> <span data-i18n="campaign.yourArmy">${t('campaign.yourArmy')}</span></button>
+              <button id="campaign-shop-toggle" type="button" class="btn-secondary" style="background: rgba(255,215,0,0.1); color: #ffd700; border-color: rgba(255,215,0,0.2);"><span>🛒</span> <span data-i18n="campaign.shop">${t('campaign.shop')}</span></button>
               <button id="campaign-close-btn" type="button" class="close-icon-btn">×</button>
             </div>
           </div>
@@ -49,7 +54,7 @@ export class CampaignUI {
           <div id="campaign-shop-view" class="hidden">
              <div class="shop-header" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
                 <button id="campaign-shop-back" class="btn-icon">←</button>
-                <h3 style="margin: 0; color: #ffd700;">Söldner-Shop</h3>
+                <h3 style="margin: 0; color: #ffd700;">${t('campaign.mercenaryShop')}</h3>
                 <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;">Erwirb Vorteile für deine Truppen.</p>
              </div>
              <div id="campaign-perks-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem;">
@@ -60,8 +65,8 @@ export class CampaignUI {
           <div id="campaign-army-view" class="hidden">
              <div class="army-header" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
                 <button id="campaign-army-back" class="btn-icon">←</button>
-                <h3 style="margin: 0; color: #818cf8;">Deine Armee</h3>
-                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;">Verbessere deine Einheiten durch Erfahrung.</p>
+                <h3 style="margin: 0; color: #818cf8;" data-i18n="campaign.yourArmy">${t('campaign.yourArmy')}</h3>
+                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;" data-i18n="campaign.armyHint">Verbessere deine Einheiten durch Erfahrung.</p>
              </div>
              <div id="campaign-army-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem;">
                 <!-- Units injected here -->
@@ -107,6 +112,13 @@ export class CampaignUI {
       }
     }
     this.container = document.getElementById('campaign-overlay');
+    // Dynamische Inhalte (Level-Karten, Perks, Armee) stehen nicht in
+    // `data-i18n`-Markern — sie werden beim Sprachwechsel neu gerendert.
+    window.addEventListener('i18n:locale-changed', () => {
+      if (this.container && !this.container.classList.contains('hidden')) {
+        this.switchView(this.currentView);
+      }
+    });
   }
 
   show(): void {
@@ -120,7 +132,10 @@ export class CampaignUI {
     if (this.container) this.container.classList.add('hidden');
   }
 
+  private currentView: 'levels' | 'shop' | 'army' = 'levels';
+
   switchView(view: 'levels' | 'shop' | 'army'): void {
+    this.currentView = view;
     const mainView = document.getElementById('campaign-main-view');
     const shopView = document.getElementById('campaign-shop-view');
     const armyView = document.getElementById('campaign-army-view');
@@ -217,11 +232,11 @@ export class CampaignUI {
             font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
         ">${statusIcon}</div>
         <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-primary); opacity: 0.8; margin-bottom: -0.2rem;">
-            Mission ${levels.indexOf(level) + 1}
+            ${t('campaign.mission', { n: levels.indexOf(level) + 1 })}
         </div>
         <div style="font-weight: 800; font-size: 1.25rem; color: var(--text-main); line-height: 1.2;">${campaignLevelTitle(level)}</div>
         <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
-            <span style="opacity: 0.6;">Schwierigkeit:</span>
+            <span style="opacity: 0.6;">${t('campaign.difficulty')}</span>
             <span style="color: ${this.getDifficultyColor(level.difficulty)}; font-weight: bold;">${level.difficulty.toUpperCase()}</span>
         </div>
         ${starRating}
@@ -260,8 +275,8 @@ export class CampaignUI {
 
       card.innerHTML = `
         <div style="font-size: 2rem; margin-bottom: 0.5rem;">${perk.icon}</div>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-main); line-height: 1.2;">${perk.name}</div>
-        <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">${perk.description}</div>
+        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-main); line-height: 1.2;">${campaignPerkName(perk)}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">${campaignPerkDescription(perk)}</div>
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
           ${
             isUnlocked
@@ -270,7 +285,7 @@ export class CampaignUI {
           }
           ${
             !isUnlocked
-              ? `<button class="buy-perk-btn btn-primary" data-id="${perk.id}" ${canAfford ? '' : 'disabled'} style="padding: 5px 15px; font-size: 0.8rem;">Kaufen</button>`
+              ? `<button class="buy-perk-btn btn-primary" data-id="${perk.id}" ${canAfford ? '' : 'disabled'} style="padding: 5px 15px; font-size: 0.8rem;">${t('campaign.buy')}</button>`
               : ''
           }
         </div>
@@ -295,7 +310,7 @@ export class CampaignUI {
       campaignManager.unlockPerk(perk.id);
       this.updateGoldDisplay();
       this.renderPerks();
-      showToast(t('toast.perkBought', { name: perk.name }), 'success');
+      showToast(t('toast.perkBought', { name: campaignPerkName(perk) }), 'success');
     } else {
       showToast(t('toast.notEnoughGold'), 'error');
     }
@@ -367,17 +382,17 @@ export class CampaignUI {
         </div>
         <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 2px;">
            <span>${xp.xp} XP</span>
-           <span>nächstes Level: ${nextLevelXp}</span>
+           <span>${t('campaign.nextLevel', { xp: nextLevelXp })}</span>
         </div>
 
         <div style="margin-top: auto; padding-top: 1rem; display: flex; flex-direction: column; gap: 8px;">
            <button class="champion-btn btn-secondary" 
                    style="width: 100%; font-size: 0.8rem; border-color: ${isChampion ? '#f59e0b' : 'rgba(255,255,255,0.1)'}; color: ${isChampion ? '#f59e0b' : 'inherit'};"
                    ${isChampion ? 'disabled' : ''}>
-             ${isChampion ? 'DEIN CHAMPION' : 'ALS CHAMPION WÄHLEN'}
+             ${isChampion ? t('campaign.yourChampion') : t('campaign.chooseChampion')}
            </button>
            <button class="talents-btn btn-secondary" style="width: 100%; font-size: 0.8rem; border-color: rgba(78, 205, 196, 0.3); color: #4ecdc4;">
-             🔮 TALENTBAUM
+             <span>🔮</span> <span data-i18n="campaign.talentTree">${t('campaign.talentTree')}</span>
            </button>
         </div>
       `;

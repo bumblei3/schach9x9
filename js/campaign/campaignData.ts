@@ -132,6 +132,37 @@ const LEVEL_I18N_KEYS: Record<string, { title: I18nKey; description: I18nKey }> 
   },
 };
 
+/**
+ * Zuordnung Perk-ID → i18n-Schlüssel. Übersetzt wird erst beim Rendern; die
+ * Perk-Daten selbst bleiben unangetastet.
+ */
+const PERK_I18N_KEYS: Record<string, { name: I18nKey; description: I18nKey }> = {
+  stabile_bauern: {
+    name: 'campaign.perk.stabile_bauern.name',
+    description: 'campaign.perk.stabile_bauern.description',
+  },
+  elite_garde: {
+    name: 'campaign.perk.elite_garde.name',
+    description: 'campaign.perk.elite_garde.description',
+  },
+  taktik_genie: {
+    name: 'campaign.perk.taktik_genie.name',
+    description: 'campaign.perk.taktik_genie.description',
+  },
+};
+
+/** Übersetzter Perk-Name (Fallback: deutscher Quelltext). */
+export function campaignPerkName(perk: Perk): string {
+  const e = PERK_I18N_KEYS[perk.id];
+  return e ? t(e.name) : perk.name;
+}
+
+/** Übersetzte Perk-Beschreibung (Fallback: deutscher Quelltext). */
+export function campaignPerkDescription(perk: Perk): string {
+  const e = PERK_I18N_KEYS[perk.id];
+  return e ? t(e.description) : perk.description;
+}
+
 /** Übersetzter Kampagnen-Titel (Fallback: der deutsche Quelltext). */
 export function campaignLevelTitle(level: Level): string {
   const entry = LEVEL_I18N_KEYS[level.id];

@@ -45,7 +45,7 @@ function keysUsedInJs(): Set<string> {
         // `campaignData.ts`) stehen nicht in einem `t()`-Aufruf. Gezählt wird
         // nur, was tatsächlich ein Wörterbuch-Key ist — ein toter Eintrag
         // fiele damit weiterhin auf.
-        for (const m of src.matchAll(/['"]([a-z][a-z0-9]*(?:\.[a-z0-9_-]+)+)['"]/g)) {
+        for (const m of src.matchAll(/['"]([a-z][a-z0-9]*(?:\.[a-zA-Z0-9_-]+)+)['"]/g)) {
           if (m[1] in de) found.add(m[1]);
         }
       }
