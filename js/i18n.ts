@@ -179,6 +179,97 @@ export const de = {
   'achievement.win_with_king_only.name': 'König allein',
   'achievement.win_with_king_only.description': 'Gewinne ein Spiel mit nur deinem König übrig',
   'achievements.title': 'Erfolge',
+  'campaign.level.peasant_revolt.title': 'Kapitel 1: Der Aufstand',
+  'campaign.level.peasant_revolt.description':
+    'Eine Armee von Bauern marschiert auf. Dein König muss sich verteidigen. Lerne die Macht der Bauernstruktur.',
+  'campaign.level.bandit_ambush.title': 'Kapitel 2: Die Kavallerie',
+  'campaign.level.bandit_ambush.description':
+    'Vier Springer bedrohen das Land. Ihre Unberechenbarkeit ist gefährlich. Nutze deine Läufer weise.',
+  'campaign.level.skirmish_bridge.title': 'Kapitel 3: Der General',
+  'campaign.level.skirmish_bridge.description':
+    'Ein echter militärischer Test. Eine ausgeglichene Armee erwartet dich. Zeige, dass du bereit für die 9x9 Welt bist.',
+  'campaign.level.boss_1.title': 'Kapitel 4: Die Belagerung des dunklen Turms',
+  'campaign.level.boss_1.description':
+    'Der Turm des Tyrannen steht vor dir. Durchbrich die Verteidigung und stürze den Lord.',
+  'campaign.level.knight_mission.title': 'Kapitel 5: Der Ritt der Gerechten',
+  'campaign.level.knight_mission.description':
+    'Deine Springer sind der Schlüssel zum Sieg. Nutze ihre Wendigkeit, um die feindliche Kavallerie zu umgehen.',
+  'campaign.level.final_battle.title': 'Kapitel 6: Der Kampf um den Eisernen Thron',
+  'campaign.level.final_battle.description':
+    'Der Imperator stellt sich dir im Thronsaal entgegen. Das Schicksal des Reiches liegt in deinen Händen!',
+  'campaign.level.endgame_rook.title': 'Endspiel 1: Turm-Matt',
+  'campaign.level.endgame_rook.description':
+    'Lerne das grundlegende Mattmuster: König und Turm gegen König. Dränge den König an den Rand!',
+  'campaign.level.endgame_queen.title': 'Endspiel 2: Damen-Matt',
+  'campaign.level.endgame_queen.description':
+    'Die Dame ist mächtig. Nutze sie, um den gegnerischen König schnell mattzusetzen.',
+  'campaign.level.endgame_pawn.title': 'Endspiel 3: Bauernumwandlung',
+  'campaign.level.endgame_pawn.description':
+    'Ein einzelner Bauer kann das Spiel entscheiden. Führe ihn zur Umwandlung und gewinne!',
+  'campaign.level.endgame_bishops.title': 'Endspiel 4: Zwei Läufer',
+  'campaign.level.endgame_bishops.description':
+    'Zwei Läufer können den König mattsetzen. Koordiniere sie geschickt!',
+  'campaign.level.endgame_exchange.title': 'Endspiel 5: Turm gegen Läufer',
+  'campaign.level.endgame_exchange.description':
+    'Du hast einen Turm, der Gegner einen Läufer. Nutze deinen Materialvorteil zum Sieg!',
+  'campaign.level.archbishop_gabel.title': 'Kapitel 7: Die Gabel des Erzbischofs',
+  'campaign.level.archbishop_gabel.description':
+    'Der Erzbischof vereint Läufer und Springer in einer Figur. Nutze seine Reichweite, um zwei Ziele gleichzeitig anzugreifen!',
+  'campaign.level.chancellor_xray.title': 'Kapitel 8: Der Stachel der Kanzlerin',
+  'campaign.level.chancellor_xray.description':
+    'Die Kanzlerin kombiniert Turm und Springer. Ihre Linien sehen durch — Spieße und X-Ray-Angriffe sind ihre Waffe.',
+  'campaign.level.angel_vs_queen.title': 'Kapitel 9: Der Engel und die Königin',
+  'campaign.level.angel_vs_queen.description':
+    'Dein Engel ist der Königin ebenbürtig — mit einem extra Springersprung. Zeige, dass die Feenfigur die klassische Dame schlägt!',
+  'campaign.level.nightrider_lines.title': 'Kapitel 10: Der Nachtreiter-Sturm',
+  'campaign.level.nightrider_lines.description':
+    'Nachtreiter reiten in Springer-Sprüngen über das ganze Brett. Kontrolliere die Linien, bevor sie dich erreichen!',
+  'campaign.level.fairy_battle.title': 'Kapitel 11: Der Rat der Feen',
+  'campaign.level.fairy_battle.description':
+    'Alle vier Feenfiguren auf einmal! Koordiniere Erzbischof, Kanzlerin, Engel und Nachtreiter gegen die Elite des Imperators.',
+  'campaign.level.boss_emperor_return.title': 'Kapitel 12: Die Rückkehr des Imperators',
+  'campaign.level.boss_emperor_return.description':
+    'Der Imperator ist zurück — mit einer Feenarmee. Der finale Kampf um das Schicksal des 9x9-Reiches!',
+  'campaign.level.archbishop_solo.title': 'Kapitel 13: Der Erzbischof-Solitär',
+  'campaign.level.archbishop_solo.description':
+    'Ein einzelner Erzbischof gegen eine ganze Armee. Seine Gabelkraft aus Läufer und Springer reicht aus — wenn du ihn richtig führst.',
+  'campaign.level.chancellor_lines.title': 'Kapitel 14: Die Linien der Kanzlerin',
+  'campaign.level.chancellor_lines.description':
+    'Die Kanzlerin beherrscht Linien und Reihen. Nutze ihre Turm-Schärfe, um den Gegner in die Enge zu treiben.',
+  'campaign.level.angel_storm.title': 'Kapitel 15: Der Engel-Sturm',
+  'campaign.level.angel_storm.description':
+    'Der Engel ist die stärkste Feenfigur. Führe ihn an die Front und zerreiße die feindlichen Linien!',
+  'campaign.level.nightrider_speed.title': 'Kapitel 16: Der Nachtreiter-Sprint',
+  'campaign.level.nightrider_speed.description':
+    'Der Nachtreiter überrascht durch seine Geschwindigkeit. Nutze seine Springer-Sprünge, um den Gegner zu überrumpeln.',
+  'campaign.level.fairy_synergy.title': 'Kapitel 17: Feen-Synergie',
+  'campaign.level.fairy_synergy.description':
+    'Erzbischof und Kanzlerin arbeiten zusammen. Läufer + Springer + Turm = unaufhaltbare Gabeln!',
+  'campaign.level.fairy_master.title': 'Kapitel 18: Der Feen-Meister',
+  'campaign.level.fairy_master.description':
+    'Alle vier Feenfiguren auf einmal gegen eine Elite-Armee. Der ultimative Test deiner 9x9-Kunst!',
+  'campaign.level.archbishop_fork.title': 'Kapitel 19: Der Doppelangriff des Erzbischofs',
+  'campaign.level.archbishop_fork.description':
+    'Der Erzbischof auf e6 springt nach c7. Von dort gabelt er den König auf a9 und die Dame auf d9 — das ist Matt.',
+  'campaign.level.chancellor_xray_2.title': 'Kapitel 20: Der Kanzler-Spieß',
+  'campaign.level.chancellor_xray_2.description':
+    'Die Kanzlerin zieht von h9 nach e9. Der König auf e8 steht im Spieß, dahinter der Springer. Die Dame hält die Fluchtfelder.',
+  'campaign.level.angel_battery.title': 'Kapitel 21: Engelsbatterie',
+  'campaign.level.angel_battery.description':
+    'Der Engel springt von b5 nach c7, in die Linie des Turmes auf c3. Die Bauern schließen die Ecke. Nur dieser Sprung setzt matt.',
+  'campaign.level.nightrider_fork.title': 'Kapitel 22: Nachtreiter-Gabel',
+  'campaign.level.nightrider_fork.description':
+    'Der Nachtreiter springt von a5 nach b7 und gabelt den König auf a9 und die Dame auf c5. Die Dame auf c8 hält die Fluchtfelder.',
+  'campaign.level.archbishop_chancellor_duo.title':
+    'Kapitel 23: Erzbischof + Kanzler: Doppelwirkung',
+  'campaign.level.archbishop_chancellor_duo.description':
+    'Der Erzbischof springt von c9 nach b7 und öffnet die Reihe der Kanzlerin. Beide geben Schach. Ohne eine der beiden Figuren gibt es kein Matt.',
+  'campaign.level.angel_endgame.title': 'Kapitel 24: Der Engel im Endspiel',
+  'campaign.level.angel_endgame.description':
+    'Schwarz hat nur König und Springer. Der Engel auf b5 springt nach a7: Schach auf der a-Linie und Gabel auf den Springer auf f7.',
+  'campaign.level.fairy_sacrifice.title': 'Kapitel 25: Sprung und Dame',
+  'campaign.level.fairy_sacrifice.description':
+    'Noch kein Matt. Der Erzbischof springt von d6 nach c8 und gibt Schach. Im nächsten Zug setzt die Dame matt.',
   hard: 'Schwer',
   load: 'Laden',
   medium: 'Mittel',
@@ -401,6 +492,97 @@ export const en: Record<keyof typeof de, string> = {
   'achievement.win_with_king_only.name': 'King alone',
   'achievement.win_with_king_only.description': 'Win a game with only your king left',
   'achievements.title': 'Achievements',
+  'campaign.level.peasant_revolt.title': 'Chapter 1: The Uprising',
+  'campaign.level.peasant_revolt.description':
+    'An army of peasants is marching on. Your king must defend himself. Learn the power of the pawn structure.',
+  'campaign.level.bandit_ambush.title': 'Chapter 2: The Cavalry',
+  'campaign.level.bandit_ambush.description':
+    'Four knights threaten the land. Their unpredictability is dangerous. Use your bishops wisely.',
+  'campaign.level.skirmish_bridge.title': 'Chapter 3: The General',
+  'campaign.level.skirmish_bridge.description':
+    'A true military test. A balanced army awaits you. Show that you are ready for the 9x9 world.',
+  'campaign.level.boss_1.title': 'Chapter 4: The Siege of the Dark Tower',
+  'campaign.level.boss_1.description':
+    "The tyrant's tower stands before you. Break through the defence and topple the lord.",
+  'campaign.level.knight_mission.title': 'Chapter 5: The Ride of the Righteous',
+  'campaign.level.knight_mission.description':
+    'Your knights are the key to victory. Use their agility to outflank the enemy cavalry.',
+  'campaign.level.final_battle.title': 'Chapter 6: The Battle for the Iron Throne',
+  'campaign.level.final_battle.description':
+    'The emperor faces you in the throne room. The fate of the realm is in your hands!',
+  'campaign.level.endgame_rook.title': 'Endgame 1: Rook Mate',
+  'campaign.level.endgame_rook.description':
+    'Learn the basic mate pattern: king and rook against king. Drive the king to the edge!',
+  'campaign.level.endgame_queen.title': 'Endgame 2: Queen Mate',
+  'campaign.level.endgame_queen.description':
+    'The queen is powerful. Use her to mate the enemy king quickly.',
+  'campaign.level.endgame_pawn.title': 'Endgame 3: Pawn Promotion',
+  'campaign.level.endgame_pawn.description':
+    'A single pawn can decide the game. Lead him to promotion and win!',
+  'campaign.level.endgame_bishops.title': 'Endgame 4: Two Bishops',
+  'campaign.level.endgame_bishops.description':
+    'Two bishops can mate the king. Coordinate them skilfully!',
+  'campaign.level.endgame_exchange.title': 'Endgame 5: Rook vs Bishop',
+  'campaign.level.endgame_exchange.description':
+    'You have a rook, the opponent a bishop. Use your material advantage to win!',
+  'campaign.level.archbishop_gabel.title': "Chapter 7: The Archbishop's Fork",
+  'campaign.level.archbishop_gabel.description':
+    'The archbishop combines bishop and knight in one piece. Use his reach to attack two targets at once!',
+  'campaign.level.chancellor_xray.title': "Chapter 8: The Chancellor's Sting",
+  'campaign.level.chancellor_xray.description':
+    'The chancellor combines rook and knight. Her lines see through — skewers and x-ray attacks are her weapon.',
+  'campaign.level.angel_vs_queen.title': 'Chapter 9: The Angel and the Queen',
+  'campaign.level.angel_vs_queen.description':
+    "Your angel is the queen's equal — with an extra knight jump. Show that the fairy piece beats the classical queen!",
+  'campaign.level.nightrider_lines.title': 'Chapter 10: The Nightrider Storm',
+  'campaign.level.nightrider_lines.description':
+    'Nightriders ride in knight jumps across the whole board. Control the lines before they reach you!',
+  'campaign.level.fairy_battle.title': 'Chapter 11: The Council of Fairies',
+  'campaign.level.fairy_battle.description':
+    "All four fairy pieces at once! Coordinate archbishop, chancellor, angel and nightrider against the emperor's elite.",
+  'campaign.level.boss_emperor_return.title': 'Chapter 12: The Return of the Emperor',
+  'campaign.level.boss_emperor_return.description':
+    'The emperor is back — with a fairy army. The final battle for the fate of the 9x9 realm!',
+  'campaign.level.archbishop_solo.title': 'Chapter 13: The Lonely Archbishop',
+  'campaign.level.archbishop_solo.description':
+    'A single archbishop against a whole army. His fork power from bishop and knight is enough — if you lead him well.',
+  'campaign.level.chancellor_lines.title': "Chapter 14: The Chancellor's Lines",
+  'campaign.level.chancellor_lines.description':
+    'The chancellor masters lines and ranks. Use her rook sharpness to corner the opponent.',
+  'campaign.level.angel_storm.title': 'Chapter 15: The Angel Storm',
+  'campaign.level.angel_storm.description':
+    'The angel is the strongest fairy piece. Lead him to the front and tear apart the enemy lines!',
+  'campaign.level.nightrider_speed.title': 'Chapter 16: The Nightrider Sprint',
+  'campaign.level.nightrider_speed.description':
+    'The nightrider surprises with his speed. Use his knight jumps to overwhelm the opponent.',
+  'campaign.level.fairy_synergy.title': 'Chapter 17: Fairy Synergy',
+  'campaign.level.fairy_synergy.description':
+    'Archbishop and chancellor work together. Bishop + knight + rook = unstoppable forks!',
+  'campaign.level.fairy_master.title': 'Chapter 18: The Fairy Master',
+  'campaign.level.fairy_master.description':
+    'All four fairy pieces at once against an elite army. The ultimate test of your 9x9 skill!',
+  'campaign.level.archbishop_fork.title': "Chapter 19: The Archbishop's Double Attack",
+  'campaign.level.archbishop_fork.description':
+    'The archbishop on e6 jumps to c7. From there he forks the king on a9 and the queen on d9 — that is mate.',
+  'campaign.level.chancellor_xray_2.title': "Chapter 20: The Chancellor's Skewer",
+  'campaign.level.chancellor_xray_2.description':
+    'The chancellor moves from h9 to e9. The king on e8 is skewered, with the knight behind it. The queen covers the escape squares.',
+  'campaign.level.angel_battery.title': 'Chapter 21: Angel Battery',
+  'campaign.level.angel_battery.description':
+    'The angel jumps from b5 to c7, into the line of the rook on c3. The pawns close the corner. Only this jump mates.',
+  'campaign.level.nightrider_fork.title': 'Chapter 22: Nightrider Fork',
+  'campaign.level.nightrider_fork.description':
+    'The nightrider jumps from a5 to b7 and forks the king on a9 and the queen on c5. The queen on c8 covers the escape squares.',
+  'campaign.level.archbishop_chancellor_duo.title':
+    'Chapter 23: Archbishop + Chancellor: Double Effect',
+  'campaign.level.archbishop_chancellor_duo.description':
+    "The archbishop jumps from c9 to b7 and opens the chancellor's rank. Both give check. Without one of the two pieces there is no mate.",
+  'campaign.level.angel_endgame.title': 'Chapter 24: The Angel in the Endgame',
+  'campaign.level.angel_endgame.description':
+    'Black has only a king and a knight. The angel on b5 jumps to a7: check along the a-file and a fork on the knight at f7.',
+  'campaign.level.fairy_sacrifice.title': 'Chapter 25: Leap and Queen',
+  'campaign.level.fairy_sacrifice.description':
+    'Not yet mate. The archbishop jumps from d6 to c8 and gives check. On the next move the queen mates.',
   hard: 'Hard',
   load: 'Load',
   medium: 'Medium',

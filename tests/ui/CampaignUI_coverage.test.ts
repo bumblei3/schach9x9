@@ -39,12 +39,16 @@ vi.mock('../../js/ui/TalentTreeUI', () => ({
   },
 }));
 
-vi.mock('../../js/campaign/campaignData', () => ({
-  CAMPAIGN_PERKS: [
-    { id: 'double_gold', name: 'Double Gold', cost: 100, description: 'Earn 2x gold' },
-    { id: 'extra_hp', name: 'Extra HP', cost: 200, description: '+10 HP' },
-  ],
-}));
+vi.mock('../../js/campaign/campaignData', async importOriginal => {
+  const actual = await importOriginal<typeof import('../../js/campaign/campaignData.js')>();
+  return {
+    ...actual,
+    CAMPAIGN_PERKS: [
+      { id: 'double_gold', name: 'Double Gold', cost: 100, description: 'Earn 2x gold' },
+      { id: 'extra_hp', name: 'Extra HP', cost: 200, description: '+10 HP' },
+    ],
+  };
+});
 
 describe('CampaignUI', () => {
   let app: any;
@@ -209,7 +213,13 @@ describe('CampaignUI', () => {
 
   it('prints the hiring budget only on budget chapters', () => {
     (campaignManager.getAllLevels as any).mockReturnValue([
-      { id: 'boss_1', title: 'Belagerung', difficulty: 'hard', setupType: 'budget', playerBudget: 30 },
+      {
+        id: 'boss_1',
+        title: 'Belagerung',
+        difficulty: 'hard',
+        setupType: 'budget',
+        playerBudget: 30,
+      },
       { id: 'archbishop_fork', title: 'Gabel', difficulty: 'easy', setupType: 'fixed' },
     ]);
     (campaignManager.isLevelUnlocked as any).mockReturnValue(true);
@@ -225,11 +235,19 @@ describe('CampaignUI', () => {
 
   it('adds Elite-Garde to the budget line when the perk is owned', () => {
     (campaignManager.getAllLevels as any).mockReturnValue([
-      { id: 'boss_1', title: 'Belagerung', difficulty: 'hard', setupType: 'budget', playerBudget: 30 },
+      {
+        id: 'boss_1',
+        title: 'Belagerung',
+        difficulty: 'hard',
+        setupType: 'budget',
+        playerBudget: 30,
+      },
     ]);
     (campaignManager.isLevelUnlocked as any).mockReturnValue(true);
     (campaignManager.isLevelCompleted as any).mockReturnValue(false);
-    (campaignManager.isPerkUnlocked as any).mockImplementation((id: string) => id === 'elite_garde');
+    (campaignManager.isPerkUnlocked as any).mockImplementation(
+      (id: string) => id === 'elite_garde'
+    );
 
     campaignUI.show();
     const card = document.getElementById('campaign-levels-grid')!.children[0];
@@ -238,12 +256,20 @@ describe('CampaignUI', () => {
 
   it('adds Taktiker to the budget line on Kapitel 4', () => {
     (campaignManager.getAllLevels as any).mockReturnValue([
-      { id: 'boss_1', title: 'Belagerung', difficulty: 'hard', setupType: 'budget', playerBudget: 30 },
+      {
+        id: 'boss_1',
+        title: 'Belagerung',
+        difficulty: 'hard',
+        setupType: 'budget',
+        playerBudget: 30,
+      },
     ]);
     (campaignManager.isLevelUnlocked as any).mockReturnValue(true);
     (campaignManager.isLevelCompleted as any).mockReturnValue(false);
     (campaignManager.isPerkUnlocked as any).mockReturnValue(false);
-    (campaignManager.isTalentUnlocked as any).mockImplementation((id: string) => id === 'n_taktiker');
+    (campaignManager.isTalentUnlocked as any).mockImplementation(
+      (id: string) => id === 'n_taktiker'
+    );
 
     campaignUI.show();
     const card = document.getElementById('campaign-levels-grid')!.children[0];

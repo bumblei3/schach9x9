@@ -1,4 +1,148 @@
 import { Level, Perk } from './types.js';
+import { t, type I18nKey } from '../i18n.js';
+
+/**
+ * Zuordnung Level-ID → i18n-Schlüssel für Titel und Beschreibung.
+ *
+ * Die Kampagnen-Daten selbst bleiben unangetastet (sie liegen serialisiert im
+ * `localStorage` und werden über `CampaignManager` verglichen); übersetzt
+ * wird erst beim Rendern. Die Schlüssel stehen als Literale in dieser Tabelle,
+ * damit der i18n-Audit (`tests/i18n.test.ts`) sie als genutzt erkennt.
+ */
+const LEVEL_I18N_KEYS: Record<string, { title: I18nKey; description: I18nKey }> = {
+  peasant_revolt: {
+    title: 'campaign.level.peasant_revolt.title',
+    description: 'campaign.level.peasant_revolt.description',
+  },
+  bandit_ambush: {
+    title: 'campaign.level.bandit_ambush.title',
+    description: 'campaign.level.bandit_ambush.description',
+  },
+  skirmish_bridge: {
+    title: 'campaign.level.skirmish_bridge.title',
+    description: 'campaign.level.skirmish_bridge.description',
+  },
+  boss_1: {
+    title: 'campaign.level.boss_1.title',
+    description: 'campaign.level.boss_1.description',
+  },
+  knight_mission: {
+    title: 'campaign.level.knight_mission.title',
+    description: 'campaign.level.knight_mission.description',
+  },
+  final_battle: {
+    title: 'campaign.level.final_battle.title',
+    description: 'campaign.level.final_battle.description',
+  },
+  endgame_rook: {
+    title: 'campaign.level.endgame_rook.title',
+    description: 'campaign.level.endgame_rook.description',
+  },
+  endgame_queen: {
+    title: 'campaign.level.endgame_queen.title',
+    description: 'campaign.level.endgame_queen.description',
+  },
+  endgame_pawn: {
+    title: 'campaign.level.endgame_pawn.title',
+    description: 'campaign.level.endgame_pawn.description',
+  },
+  endgame_bishops: {
+    title: 'campaign.level.endgame_bishops.title',
+    description: 'campaign.level.endgame_bishops.description',
+  },
+  endgame_exchange: {
+    title: 'campaign.level.endgame_exchange.title',
+    description: 'campaign.level.endgame_exchange.description',
+  },
+  archbishop_gabel: {
+    title: 'campaign.level.archbishop_gabel.title',
+    description: 'campaign.level.archbishop_gabel.description',
+  },
+  chancellor_xray: {
+    title: 'campaign.level.chancellor_xray.title',
+    description: 'campaign.level.chancellor_xray.description',
+  },
+  angel_vs_queen: {
+    title: 'campaign.level.angel_vs_queen.title',
+    description: 'campaign.level.angel_vs_queen.description',
+  },
+  nightrider_lines: {
+    title: 'campaign.level.nightrider_lines.title',
+    description: 'campaign.level.nightrider_lines.description',
+  },
+  fairy_battle: {
+    title: 'campaign.level.fairy_battle.title',
+    description: 'campaign.level.fairy_battle.description',
+  },
+  boss_emperor_return: {
+    title: 'campaign.level.boss_emperor_return.title',
+    description: 'campaign.level.boss_emperor_return.description',
+  },
+  archbishop_solo: {
+    title: 'campaign.level.archbishop_solo.title',
+    description: 'campaign.level.archbishop_solo.description',
+  },
+  chancellor_lines: {
+    title: 'campaign.level.chancellor_lines.title',
+    description: 'campaign.level.chancellor_lines.description',
+  },
+  angel_storm: {
+    title: 'campaign.level.angel_storm.title',
+    description: 'campaign.level.angel_storm.description',
+  },
+  nightrider_speed: {
+    title: 'campaign.level.nightrider_speed.title',
+    description: 'campaign.level.nightrider_speed.description',
+  },
+  fairy_synergy: {
+    title: 'campaign.level.fairy_synergy.title',
+    description: 'campaign.level.fairy_synergy.description',
+  },
+  fairy_master: {
+    title: 'campaign.level.fairy_master.title',
+    description: 'campaign.level.fairy_master.description',
+  },
+  archbishop_fork: {
+    title: 'campaign.level.archbishop_fork.title',
+    description: 'campaign.level.archbishop_fork.description',
+  },
+  chancellor_xray_2: {
+    title: 'campaign.level.chancellor_xray_2.title',
+    description: 'campaign.level.chancellor_xray_2.description',
+  },
+  angel_battery: {
+    title: 'campaign.level.angel_battery.title',
+    description: 'campaign.level.angel_battery.description',
+  },
+  nightrider_fork: {
+    title: 'campaign.level.nightrider_fork.title',
+    description: 'campaign.level.nightrider_fork.description',
+  },
+  archbishop_chancellor_duo: {
+    title: 'campaign.level.archbishop_chancellor_duo.title',
+    description: 'campaign.level.archbishop_chancellor_duo.description',
+  },
+  angel_endgame: {
+    title: 'campaign.level.angel_endgame.title',
+    description: 'campaign.level.angel_endgame.description',
+  },
+  fairy_sacrifice: {
+    title: 'campaign.level.fairy_sacrifice.title',
+    description: 'campaign.level.fairy_sacrifice.description',
+  },
+};
+
+/** Übersetzter Kampagnen-Titel (Fallback: der deutsche Quelltext). */
+export function campaignLevelTitle(level: Level): string {
+  const entry = LEVEL_I18N_KEYS[level.id];
+  return entry ? t(entry.title) : level.title;
+}
+
+/** Übersetzte Kampagnen-Beschreibung (Fallback: der deutsche Quelltext). */
+export function campaignLevelDescription(level: Level): string {
+  const entry = LEVEL_I18N_KEYS[level.id];
+  return entry ? t(entry.description) : level.description;
+}
 
 const CAMPAIGN_LEVELS_BASE: Level[] = [
   {

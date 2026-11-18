@@ -103,9 +103,10 @@ const localStorageMock = (() => {
 })();
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
-vi.mock('../js/campaign/campaignData.js', () => ({
-  CAMPAIGN_LEVELS: MOCK_CAMPAIGN_LEVELS,
-}));
+vi.mock('../js/campaign/campaignData.js', async importOriginal => {
+  const actual = await importOriginal<typeof import('../js/campaign/campaignData.js')>();
+  return { ...actual, CAMPAIGN_LEVELS: MOCK_CAMPAIGN_LEVELS };
+});
 
 // Import system under test
 import { GameController } from '../js/gameController.js';

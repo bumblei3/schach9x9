@@ -41,6 +41,13 @@ function keysUsedInJs(): Set<string> {
         // still nicht als genutzt gelten — der Audit hätte sie als „tot"
         // gemeldet und die Übersetzung faktisch unsichtbar abgeschaltet.
         for (const m of src.matchAll(/\bt\(\s*['"]([a-zA-Z0-9._-]+)['"]/g)) found.add(m[1]);
+        // Schlüssel in Zuordnungstabellen (z. B. `LEVEL_I18N_KEYS` in
+        // `campaignData.ts`) stehen nicht in einem `t()`-Aufruf. Gezählt wird
+        // nur, was tatsächlich ein Wörterbuch-Key ist — ein toter Eintrag
+        // fiele damit weiterhin auf.
+        for (const m of src.matchAll(/['"]([a-z][a-z0-9]*(?:\.[a-z0-9_-]+)+)['"]/g)) {
+          if (m[1] in de) found.add(m[1]);
+        }
       }
     }
   };
