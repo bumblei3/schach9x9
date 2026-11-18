@@ -474,6 +474,20 @@ export class AnalysisUI {
     this.replayPosition = 0;
     this.replayTotal = history.length;
 
+    // `reconstructBoardAtMove` baut auf `savedGameState` auf: es stellt die
+    // Endstellung wieder her und zieht von dort aus die Züge zurück. Ohne
+    // Snapshot bleibt das Brett auf der Endstellung stehen und nur die
+    // Hervorhebung wechselt — die Navigation wirkte dann, tat aber nichts.
+    // Der GIF-Export setzt denselben Snapshot in `replayShell()` selbst.
+    const board = JSON.parse(JSON.stringify(this.game.board));
+    this.game.savedGameState = {
+      board,
+      turn: this.game.turn,
+      selectedSquare: this.game.selectedSquare,
+      validMoves: this.game.validMoves,
+      lastMoveHighlight: this.game.lastMoveHighlight,
+    };
+
     this.replayBoardEl = document.getElementById('replay-board');
     this.replayStepNumberEl = document.getElementById('replay-step-number');
     this.replayMoveNumberEl = document.getElementById('replay-move-number');
@@ -685,6 +699,16 @@ export class AnalysisUI {
     const game = this.game;
     game.replayPosition = -1;
     game.lastMove = null;
+    // Aus dem Snapshot des Replay-Startpunkts zurück auf die Endstellung.
+    const saved = game.savedGameState;
+    if (saved) {
+      game.board = saved.board;
+      game.turn = saved.turn;
+      game.selectedSquare = saved.selectedSquare;
+      game.validMoves = saved.validMoves;
+      game.lastMoveHighlight = saved.lastMoveHighlight;
+      game.savedGameState = null;
+    }
     renderBoard(game);
     updateStatus(game);
   }
