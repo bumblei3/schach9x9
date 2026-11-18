@@ -37,7 +37,7 @@ export function checkDraw(game: Game): boolean {
     game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
-    game.log('Unentschieden (50-Züge-Regel)');
+    game.log(t('log.draw50'));
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
     if (winnerText) winnerText.textContent = t('game.endDraw50');
@@ -69,7 +69,7 @@ export function checkDraw(game: Game): boolean {
     game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
-    game.log('Unentschieden (Ungenügendes Material)');
+    game.log(t('log.drawMaterial'));
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
     if (winnerText) winnerText.textContent = t('game.endDrawMaterial');

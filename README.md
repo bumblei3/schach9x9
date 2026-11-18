@@ -184,7 +184,10 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Tests ausführen:** `npm test`
 - **Linting (ESLint):** `npm run lint`
 - **Formatting (Prettier):** `npm run format`
-- **CI-Check:** `npm run format:check && npm run lint && npm test`
+- **CI-Check:** `npm run lint && npm test` — `npm run format:check` ist auf `main` nicht grün (117 Dateien, inklusive `index.html`; Details in [`CONTRIBUTING.md`](CONTRIBUTING.md))
+
+Details zu Branches, Commit-Regeln, dem Verifikationsgate und den
+Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## 🗺️ Roadmap / In Arbeit
 
