@@ -49,7 +49,11 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
   const turnColor = game.turn;
 
   // Detect test/e2e environment to use faster/shallower search
+  // `typeof navigator` allein reicht nicht: Node 26 legt einen globalen
+  // `navigator` ab, während `window` nach dem jsdom-Abriss fehlt — die
+  // Referenz wirft dann in einem Timer und bricht den vitest-Lauf ab.
   const isTestEnv =
+    typeof window !== 'undefined' &&
     typeof navigator !== 'undefined' &&
     (navigator.webdriver === true ||
       (window as Window & { __PLAYWRIGHT__?: boolean }).__PLAYWRIGHT__ === true ||

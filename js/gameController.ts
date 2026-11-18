@@ -321,7 +321,7 @@ export class GameController {
     const validRowStart = color === 'white' ? size - 3 : 0;
 
     if (r < validRowStart || r >= validRowStart + 3) {
-      this.game.log('Ungültiger Bereich für König!');
+      this.game.log(t('log.invalidKingSquare'));
       return;
     }
 
@@ -364,13 +364,13 @@ export class GameController {
     const occupant = this.game.board[kingR]?.[kingC];
     if (occupant?.gifted && occupant.color === color) {
       if (!relocateGiftedPiece(this.game.board, kingR, kingC)) {
-        this.game.log('Der Plünderer-Bauer bleibt auf dem Feld.');
+        this.game.log(t('log.plundererPawnStays'));
         return;
       }
       this.game.log(
         occupant.type === 'n'
-          ? 'Der Sprungfeder-Springer rückt auf das nächste freie Feld.'
-          : 'Der Plünderer-Bauer rückt auf das nächste freie Feld.'
+          ? t('log.sprungfederMoves')
+          : t('log.plundererMoves')
       );
     }
 
@@ -384,11 +384,11 @@ export class GameController {
         // Skip AI King placement and go straight to player piece buying.
         this.game.phase = PHASES.SETUP_WHITE_PIECES;
         this.game.points = this.game.initialPoints;
-        this.game.log('König platziert. Bitte stell deine Truppen auf.');
+        this.game.log(t('log.kingPlaced'));
         this.showShop(true);
       } else {
         this.game.phase = PHASES.SETUP_BLACK_KING;
-        this.game.log('Weißer König platziert. Schwarz ist dran.');
+        this.game.log(t('log.whiteKingPlaced'));
         UI.updateStatus(this.game);
 
         if (this.game.isAI) {
@@ -426,7 +426,7 @@ export class GameController {
     const color = isWhiteTurn ? 'white' : 'black';
 
     if (piece.color !== color) {
-      this.game.log('Nur eigene Figuren können verbessert werden!');
+      this.game.log(t('log.ownPiecesOnly'));
       return;
     }
 
@@ -540,8 +540,10 @@ export class GameController {
     this.game.drawOffered = true;
     this.game.drawOfferedBy = color || this.game.turn;
 
-    const offeringColor = this.game.drawOfferedBy === 'white' ? 'Weiß' : 'Schwarz';
-    this.game.log(`${offeringColor} bietet Remis an.`);
+    const offeringColor = this.game.drawOfferedBy === 'white'
+      ? t('piece.colorWhite')
+      : t('piece.colorBlack');
+    this.game.log(t('draw.offerLog', { color: offeringColor }));
 
     // If AI is the opponent, let AI evaluate and respond
     if (this.game.isAI) {
@@ -562,8 +564,10 @@ export class GameController {
     const overlay = document.getElementById('draw-offer-overlay');
     const message = document.getElementById('draw-offer-message');
 
-    const offeringColor = this.game.drawOfferedBy === 'white' ? 'Weiß' : 'Schwarz';
-    if (message) message.textContent = `${offeringColor} bietet Remis an. Möchtest du annehmen?`;
+    const offeringColor = this.game.drawOfferedBy === 'white'
+      ? t('piece.colorWhite')
+      : t('piece.colorBlack');
+    if (message) message.textContent = t('draw.offerMessage', { color: offeringColor });
 
     if (overlay) overlay.classList.remove('hidden');
   }
@@ -772,7 +776,7 @@ export class GameController {
         window.battleChess3D.updateFromGameState(this.game);
       }
     } else {
-      UI.updatePuzzleStatus('success', 'Alle Puzzles gelöst!');
+      UI.updatePuzzleStatus('success', t('game.allPuzzlesSolved'));
     }
   }
 
@@ -848,7 +852,7 @@ export class GameController {
     }
     const pos = manager.getNextPosition();
     if (!pos) {
-      notificationUI.show('Keine Eröffnungs-Stellungen im Buch gefunden.', 'info');
+      notificationUI.show(t('openingTrainer.noPositions'), 'info');
       this.currentTrainerPosition = null;
       return;
     }
@@ -967,7 +971,9 @@ export class GameController {
     const btn = document.getElementById('restart-btn-overlay');
     if (!btn) return;
     btn.textContent =
-      this.game.campaignMode || this.game.mode === 'campaign' ? 'Zum Menü' : 'Neues Spiel';
+      this.game.campaignMode || this.game.mode === 'campaign'
+        ? t('game.toMenu')
+        : t('game.newGame');
   }
 
   reloadPage(): void {

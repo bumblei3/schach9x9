@@ -1,4 +1,5 @@
-import { puzzleManager } from '../puzzleManager.js';
+import { puzzleManager, puzzleTitle, puzzleDescription, puzzleDifficultyText } from '../puzzleManager.js';
+import { t } from '../i18n.js';
 import type { GameControllerInterface } from '../types/core.js';
 
 export class PuzzleMenu {
@@ -69,17 +70,18 @@ export class PuzzleMenu {
   private buildFilterChips(bar: HTMLElement): HTMLButtonElement[] {
     const created: HTMLButtonElement[] = [];
     // Difficulty chips
-    const difficulties = ['Alle', ...puzzleManager.getDifficulties()];
+    const all = 'Alle';
+    const difficulties = [all, ...puzzleManager.getDifficulties()];
     difficulties.forEach((d) => {
-      const active = this.filterDifficulty === null ? d === 'Alle' : d === this.filterDifficulty;
+      const active = this.filterDifficulty === null ? d === all : d === this.filterDifficulty;
       const chip = document.createElement('button');
       chip.className = `puzzle-filter-chip ${active ? 'active' : ''}`;
-      chip.textContent = d;
+      chip.textContent = d === all ? t('puzzle.filterAll') : puzzleDifficultyText(d);
       if (typeof chip.setAttribute === 'function') {
         chip.setAttribute('aria-pressed', String(active));
       }
       chip.onclick = () => {
-        this.filterDifficulty = d === 'Alle' ? null : d;
+        this.filterDifficulty = d === all ? null : d;
         this.renderFilterBar();
         this.renderPuzzleList();
       };
@@ -94,13 +96,14 @@ export class PuzzleMenu {
     const cat = document.createElement('select');
     cat.className = 'puzzle-filter-cat';
     if (typeof cat.setAttribute === 'function') {
-      cat.setAttribute('aria-label', 'Kategorie filtern');
+      cat.setAttribute('aria-label', t('puzzle.filterCategoryLabel'));
     }
-    [
-      ['', 'Alle Kategorien'],
-      ['classic', 'Klassisch'],
-      ['fairy', 'Feenfiguren'],
-    ].forEach(([value, label]) => {
+    const labels: Array<[string, string]> = [
+      ['', t('puzzle.filterAllCategories')],
+      ['classic', t('puzzle.filterClassic')],
+      ['fairy', t('puzzle.filterFairy')],
+    ];
+    labels.forEach(([value, label]) => {
       const opt = document.createElement('option');
       opt.value = value;
       opt.textContent = label;
@@ -130,7 +133,7 @@ export class PuzzleMenu {
     const solvedCount = allPuzzles.filter(p => puzzleManager.isSolved(p.id)).length;
     const progressEl = document.getElementById('puzzle-progress');
     if (progressEl) {
-      progressEl.textContent = `Fortschritt: ${solvedCount}/${allPuzzles.length} gelöst`;
+      progressEl.textContent = t('puzzle.progress', { solved: solvedCount, total: allPuzzles.length });
     }
 
     container.innerHTML = '';
@@ -142,7 +145,7 @@ export class PuzzleMenu {
     if (filtered.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'puzzle-empty';
-      empty.textContent = 'Keine Puzzles für diesen Filter.';
+      empty.textContent = t('puzzle.emptyFilter');
       container.appendChild(empty);
       return;
     }
@@ -153,16 +156,17 @@ export class PuzzleMenu {
       const card = document.createElement('div');
       card.className = `puzzle-card ${isSolved ? 'solved' : ''}`;
 
+      // CSS-Klasse bleibt am Datenwert (einfach/mittel/schwer), der Text wird übersetzt.
       const difficultyClass = puzzle.difficulty.toLowerCase();
 
       card.innerHTML = `
         <div class="puzzle-card-header">
-          <span class="puzzle-title">${puzzle.title}</span>
+          <span class="puzzle-title">${puzzleTitle(puzzle)}</span>
           ${isSolved ? '<span class="puzzle-check">✅</span>' : ''}
         </div>
         <div class="puzzle-card-body">
-          <span class="puzzle-difficulty ${difficultyClass}">${puzzle.difficulty}</span>
-          <p class="puzzle-desc">${puzzle.description}</p>
+          <span class="puzzle-difficulty ${difficultyClass}">${puzzleDifficultyText(puzzle.difficulty)}</span>
+          <p class="puzzle-desc">${puzzleDescription(puzzle)}</p>
         </div>
       `;
 

@@ -269,7 +269,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <span class="action-label" data-i18n="board.bestMove">Bester Zug</span>
                 <span class="action-shortcut">B</span>
               </button>
-              <button id="toggle-analysis-btn" class="action-icon-btn" title="Engine-Analyse (A)" data-i18n-title="action.analysisHint" aria-label="Engine-Analyse (A)" data-i18n-aria-label="action.analysisHint" data-tooltip="Engine-Analyse (A)" data-shortcut="A">
+              <button id="toggle-analysis-btn" class="action-icon-btn" title="Engine-Analyse (A)" data-i18n-title="action.analysisHint" aria-label="Analyse A" data-i18n-aria-label="action.analysisLabel" data-tooltip="Engine-Analyse (A)" data-shortcut="A">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--accent-primary)" stroke-width="2" fill="none">
                   <path d="M12 20v-8m-4 8v-4m8 4v-6m-12 6h16"></path>
                 </svg>
@@ -303,7 +303,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </svg>
                   <span class="action-label">Chancen</span>
                 </button>
-                <button id="toggle-opening-book-btn" class="action-icon-btn" role="menuitem" title="Eröffnungsbuch" data-i18n-title="action.openingBook" aria-label="Eröffnungsbuch" data-i18n-aria-label="action.openingBook" data-tooltip="Eröffnungsbuch">
+                <button id="toggle-opening-book-btn" class="action-icon-btn" role="menuitem" title="Eröffnungsbuch" data-i18n-title="action.openingBook" aria-label="Eröffnung" data-i18n-aria-label="analysis.opening" data-tooltip="Eröffnungsbuch">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="#9f5fef" stroke-width="2" fill="none">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                     <path d="M6.5 17H20"></path>

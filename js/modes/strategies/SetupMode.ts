@@ -4,6 +4,7 @@ import { PHASES, AI_DELAY_MS } from '../../config.js';
 import * as UI from '../../ui.js';
 import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
+import { t } from '../../i18n.js';
 import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
 
 export class SetupModeStrategy implements GameModeStrategy {
@@ -73,7 +74,7 @@ export class SetupModeStrategy implements GameModeStrategy {
         game.phase = PHASES.SETUP_WHITE_UPGRADES;
         game.selectedShopPiece = null;
         controller.updateShopUI();
-        game.log('Weiß: Truppen-Upgrades möglich.');
+        game.log(t('log.setupWhiteUpgrades'));
       } else if (game.phase === PHASES.SETUP_WHITE_UPGRADES) {
         // Setup Mode Transition
         if (game.campaignMode) {
@@ -95,7 +96,7 @@ export class SetupModeStrategy implements GameModeStrategy {
               controller.finishSetupPhase();
             }, 1000);
           }
-          game.log('Weiß fertig. Schwarz rüstet auf.');
+          game.log(t('log.whiteDoneBlackSetup'));
         } else {
           game.phase = PHASES.SETUP_BLACK_PIECES;
           game.points = game.initialPoints;
@@ -115,7 +116,7 @@ export class SetupModeStrategy implements GameModeStrategy {
         game.phase = PHASES.SETUP_BLACK_UPGRADES;
         game.selectedShopPiece = null;
         controller.updateShopUI();
-        game.log('Schwarz: Truppen-Upgrades möglich.');
+        game.log(t('log.blackUpgrades'));
 
         if (game.isAI) {
           // AI Upgrades

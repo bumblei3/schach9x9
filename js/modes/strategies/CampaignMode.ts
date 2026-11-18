@@ -6,7 +6,8 @@ import { PHASES } from '../../config.js';
 import * as UI from '../../ui.js';
 import { logger } from '../../logger.js';
 import { campaignManager } from '../../campaign/CampaignManager.js';
-import { campaignLevelDescription } from '../../campaign/campaignData.js';
+import { campaignLevelDescription, campaignLevelTitle } from '../../campaign/campaignData.js';
+import { t } from '../../i18n.js';
 import { BoardFactory } from '../../campaign/BoardFactory.js';
 import { SetupModeStrategy } from './SetupMode.js'; // Re-use setup logic if possible or composition
 import { hiringBudget } from '../../campaign/hiringBudget.js';
@@ -81,22 +82,22 @@ export class CampaignModeStrategy implements GameModeStrategy {
     if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('p_scavenger')) {
       if (placePlundererPawn(game.board)) {
         plundererNote +=
-          '<p class="plunderer-note" style="font-size: 0.95rem; color: #4ecdc4; margin-bottom: 1rem;">Plünderer stellt einen Extra-Bauern aufs Feld.</p>';
+          `<p class="plunderer-note" style="font-size: 0.95rem; color: #4ecdc4; margin-bottom: 1rem;">${t('campaign.intro.plunderer')}</p>`;
       }
     }
     if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('n_sprungfeder')) {
       if (placeSprungfederKnight(game.board)) {
         plundererNote +=
-          '<p class="sprungfeder-note" style="font-size: 0.95rem; color: #93c5fd; margin-bottom: 1rem;">Sprungfeder stellt einen Extra-Springer aufs Feld.</p>';
+          `<p class="sprungfeder-note" style="font-size: 0.95rem; color: #93c5fd; margin-bottom: 1rem;">${t('campaign.intro.sprungfeder')}</p>`;
       }
     }
     if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('r_festung')) {
       plundererNote +=
-        '<p class="festung-note" style="font-size: 0.95rem; color: #fbbf24; margin-bottom: 1rem;">Festung: der Turm kostet 3 Punkte.</p>';
+        `<p class="festung-note" style="font-size: 0.95rem; color: #fbbf24; margin-bottom: 1rem;">${t('campaign.intro.festung')}</p>`;
     }
     if (level.setupType === 'budget' && campaignManager.isTalentUnlocked('q_majestaet')) {
       plundererNote +=
-        '<p class="majestaet-note" style="font-size: 0.95rem; color: #f0abfc; margin-bottom: 1rem;">Majestät: die Dame kostet 7 Punkte.</p>';
+        `<p class="majestaet-note" style="font-size: 0.95rem; color: #f0abfc; margin-bottom: 1rem;">${t('campaign.intro.majestaet')}</p>`;
     }
 
     if (level.setupType === 'fixed') {
@@ -162,7 +163,7 @@ export class CampaignModeStrategy implements GameModeStrategy {
       ? `<p class="campaign-budget" style="font-size: 1.05rem; color: #ffd700; font-weight: bold; margin-bottom: 1rem;">${budgetText}</p>`
       : '';
     const tipNote = campaignManager.isPerkUnlocked('taktik_genie')
-      ? '<p class="taktik-genie-note" style="font-size: 0.95rem; color: #c4b5fd; margin-bottom: 1rem;">Taktik-Genie zeigt einmal den besten Zug, sobald die Mission läuft.</p>'
+      ? `<p class="taktik-genie-note" style="font-size: 0.95rem; color: #c4b5fd; margin-bottom: 1rem;">${t('campaign.intro.taktikGenie')}</p>`
       : '';
     const desc = `
       <div class="campaign-intro">
@@ -172,20 +173,20 @@ export class CampaignModeStrategy implements GameModeStrategy {
         ${tipNote}
         <div class="campaign-goals-box" style="background: rgba(49, 196, 141, 0.1); border: 1px solid rgba(49, 196, 141, 0.3); border-radius: 8px; padding: 1rem;">
           <h4 style="margin-top: 0; color: var(--accent-success); display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 1.2rem;">🎯</span> Missionsziele
+            <span style="font-size: 1.2rem;">🎯</span> ${t('campaign.intro.goals')}
           </h4>
           <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
             <li style="display: flex; align-items: center; gap: 10px;">
-              <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>${level.winCondition.type === 'checkmate' ? 'Setze den Gegner Matt' : 'Besiege den Gegner'}</span>
+              <span style="color: gold; font-size: 1.2rem;">⭐</span> <span>${t(level.winCondition.type === 'checkmate' ? 'campaign.intro.checkmate' : 'campaign.intro.defeat')}</span>
             </li>
           </ul>
         </div>
       </div>
     `;
 
-    UI.showModal(level.title, desc, [
+    UI.showModal(campaignLevelTitle(level), desc, [
       {
-        text: 'Mission starten',
+        text: t('campaign.intro.start'),
         class: 'btn-primary',
         callback: () => {
           if (level.setupType === 'fixed') offerTaktikGenieTip(controller);

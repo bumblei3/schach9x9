@@ -8,6 +8,7 @@ import {
 } from './gameEngine.js';
 import type { GameController, GameExtended } from './gameController.js';
 import * as UI from './ui.js';
+import { t } from './i18n.js';
 
 interface AnalysisBasePosition {
   board: (PieceWithMoved | null)[][];
@@ -86,7 +87,7 @@ export class AnalysisController {
     UI.renderBoard(this.game);
     UI.renderEvalGraph(this.game);
 
-    this.game.log('🔍 Analyse-Modus aktiviert. Züge lösen keine KI-Reaktion aus.');
+    this.game.log(t('log.analysisOn'));
 
     // Start continuous analysis if enabled
     if (this.game.continuousAnalysis && this.game.aiController) {

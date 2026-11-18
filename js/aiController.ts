@@ -26,6 +26,7 @@ import { AI_PERSONALITIES } from './ai/personalities.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 
 import AIWorker from './ai/aiWorker.ts?worker';
+import { t } from './i18n.js';
 
 // Piece values for shop
 const PIECES: Record<string, ShopPieceConfig> = SHOP_PIECES;
@@ -824,13 +825,13 @@ export class AIController {
     // Accept if insufficient material
     if (this.game.isInsufficientMaterial && this.game.isInsufficientMaterial()) {
       shouldAccept = true;
-      this.game.log('KI akzeptiert: Ungenügendes Material.');
+      this.game.log(t('log.aiAcceptMaterial'));
     }
 
     // Accept if 50-move rule is close
     if (this.game.halfMoveClock >= HALF_MOVE_CLOCK_NEAR_50) {
       shouldAccept = true;
-      this.game.log('KI akzeptiert: 50-Züge-Regel nahe.');
+      this.game.log(t('log.aiAccept50'));
     }
 
     // Accept if position is roughly equal and many moves have been played
@@ -839,7 +840,7 @@ export class AIController {
       this.game.moveHistory.length > DRAW_ACCEPT_MOVES_MIN
     ) {
       shouldAccept = true;
-      this.game.log('KI akzeptiert: Ausgeglichene Position nach vielen Zügen.');
+      this.game.log(t('log.aiAcceptBalanced'));
     }
 
     if (shouldAccept) {

@@ -7,6 +7,8 @@ import { soundManager } from '../sounds.js';
 import { notificationUI } from './NotificationUI.js';
 import type { Player, Piece } from '../types/core.js';
 import type { GameLike, MoveRecord, Puzzle, ModalAction } from '../types/core.js';
+import { t } from '../i18n.js';
+import { puzzleTitle, puzzleDescription, puzzleDifficultyText } from '../puzzleManager.js';
 
 /**
  * Zeigt ein modales Dialogfenster an.
@@ -97,14 +99,15 @@ export function showPromotionUI(
   optionsContainer.className = 'promotion-grid';
 
   // Sort by value descending, mark top 2 as recommended
+  // Figurenname ueber die zentrale piece.*-Map, nicht lokal hart kodiert.
   const options = [
-    { type: 'q', name: 'Dame', cost: 9 },
-    { type: 'e', name: 'Engel', cost: 12 },
-    { type: 'c', name: 'Kanzler', cost: 8 },
-    { type: 'a', name: 'Erzbischof', cost: 7 },
-    { type: 'r', name: 'Turm', cost: 5 },
-    { type: 'b', name: 'Läufer', cost: 3 },
-    { type: 'n', name: 'Springer', cost: 3 },
+    { type: 'q', key: 'piece.q' as const, cost: 9 },
+    { type: 'e', key: 'piece.e' as const, cost: 12 },
+    { type: 'c', key: 'piece.c' as const, cost: 8 },
+    { type: 'a', key: 'piece.a' as const, cost: 7 },
+    { type: 'r', key: 'piece.r' as const, cost: 5 },
+    { type: 'b', key: 'piece.b' as const, cost: 3 },
+    { type: 'n', key: 'piece.n' as const, cost: 3 },
   ].sort((a, b) => b.cost - a.cost);
 
   const recommended = new Set([options[0].type, options[1].type]);
@@ -114,8 +117,14 @@ export function showPromotionUI(
     if (piece) {
       piece.type = opt.type as Piece['type'];
       if (moveRecord) moveRecord.specialMove = { type: 'promotion', promotedTo: opt.type };
-      if (game.log)
-        game.log(`${color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zu ${opt.name} befördert!`);
+      if (game.log) {
+        game.log(
+          t('promotion.log', {
+            color: t(color === 'white' ? 'piece.colorWhite' : 'piece.colorBlack'),
+            name: t(opt.key),
+          })
+        );
+      }
       soundManager.playPromotion();
       overlay.classList.add('hidden');
       renderBoard(game);
@@ -130,7 +139,7 @@ export function showPromotionUI(
       btn.dataset.piece = opt.type;
       btn.tabIndex = 0;
       btn.setAttribute('role', 'button');
-      btn.setAttribute('aria-label', `${opt.name} befördern`);
+      btn.setAttribute('aria-label', t('promotion.to', { name: t(opt.key) }));
 
       if (recommended.has(opt.type)) {
         btn.classList.add('recommended');
@@ -144,8 +153,8 @@ export function showPromotionUI(
       btn.innerHTML = `
         ${recommended.has(opt.type) ? '<div class="promo-badge">★</div>' : ''}
         <div class="piece-svg">${svgs ? svgs[color][opt.type] : '?'}</div>
-        <div class="piece-name">${opt.name}</div>
-        <div class="piece-cost">${opt.cost} Pkt</div>
+        <div class="piece-name">${t(opt.key)}</div>
+        <div class="piece-cost">${opt.cost} ${t('promotion.points')}</div>
       `;
 
       btn.onclick = () => selectPiece(opt);
@@ -177,15 +186,17 @@ export function showPuzzleOverlay(puzzle: Puzzle): void {
   if (!overlay) return;
   const titleEl = document.getElementById('puzzle-title');
   const descEl = document.getElementById('puzzle-description');
-  if (titleEl) titleEl.textContent = puzzle.title;
-  if (descEl) descEl.textContent = puzzle.description;
+  if (titleEl) titleEl.textContent = puzzleTitle(puzzle);
+  if (descEl) descEl.textContent = puzzleDescription(puzzle);
 
   const diffEl = document.getElementById('puzzle-difficulty');
-  if (diffEl) diffEl.textContent = `Schwierigkeit: ${puzzle.difficulty}`;
+  if (diffEl) {
+    diffEl.textContent = t('puzzle.difficultyLabel', { difficulty: puzzleDifficultyText(puzzle.difficulty) });
+  }
 
   const statusEl = document.getElementById('puzzle-status');
   if (statusEl) {
-    statusEl.textContent = 'Weiß am Zug';
+    statusEl.textContent = t('board.whiteToMove');
     statusEl.className = 'puzzle-status';
   }
 

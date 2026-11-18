@@ -5,6 +5,7 @@
 import { shopPieceCost } from '../campaign/pfeilschnell.js';
 import { PIECE_VALUES } from '../config.js';
 import { getPieceText } from './BoardRenderer.js';
+import { t } from '../i18n.js';
 import { updateTutorRecommendations } from './TutorUI.js';
 import type { GameLike, PieceType } from '../types/core.js';
 import type { Game } from '../gameEngine.js';
@@ -105,16 +106,19 @@ export function updateShopUI(game: GameLike): void {
         `Bauer zum Engel ${diff('p', 'e')}. Klicke eine Figur auf dem Brett.`;
     }
   } else {
-    if (shopHeader) shopHeader.textContent = 'Truppen anheuern';
+    if (shopHeader) shopHeader.textContent = t('modes.hire');
     if (shopGrid) shopGrid.classList.remove('hidden');
     if (tutorSection) tutorSection.classList.remove('hidden');
 
     if (statusDisplay) {
       if (game.selectedShopPiece) {
         const pieceType = game.selectedShopPiece as Exclude<PieceType, null>;
-        statusDisplay.textContent = `Platziere: ${getPieceText({ type: pieceType, color: game.turn })} (${shopPieceCost(pieceType, game)} Pkt)`;
+        statusDisplay.textContent = t('shop.placePiece', {
+          piece: getPieceText({ type: pieceType, color: game.turn }),
+          cost: shopPieceCost(pieceType, game),
+        });
       } else {
-        statusDisplay.textContent = 'Wähle eine Figur zum Kaufen';
+        statusDisplay.textContent = t('shop.pickPiece');
       }
     }
   }
