@@ -36,7 +36,11 @@ function keysUsedInJs(): Set<string> {
         walk(p);
       } else if (p.endsWith('.ts')) {
         const src = readFileSync(p, 'utf8');
-        for (const m of src.matchAll(/\bt\(\s*['"]([a-zA-Z0-9.]+)['"]/g)) found.add(m[1]);
+        // `[a-zA-Z0-9._-]` statt `[a-zA-Z0-9.]`: Schlüssel wie
+        // `achievement.first_win.name` enthalten Unterstriche und wären sonst
+        // still nicht als genutzt gelten — der Audit hätte sie als „tot"
+        // gemeldet und die Übersetzung faktisch unsichtbar abgeschaltet.
+        for (const m of src.matchAll(/\bt\(\s*['"]([a-zA-Z0-9._-]+)['"]/g)) found.add(m[1]);
       }
     }
   };

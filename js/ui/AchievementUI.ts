@@ -3,7 +3,7 @@
  * UI component for displaying and managing achievements
  */
 
-import { achievementsManager, type Achievement } from '../achievements.js';
+import { achievementsManager, AchievementsManager, type Achievement } from '../achievements.js';
 import { logger } from '../logger.js';
 
 let isInitialized = false;
@@ -28,8 +28,8 @@ function createAchievementCard(ach: Achievement): HTMLElement {
   card.innerHTML = `
     <div class="achievement-icon">${getAchievementIcon(ach.id)}</div>
     <div class="achievement-info">
-      <div class="achievement-name">${ach.name}</div>
-      <div class="achievement-description">${ach.description}</div>
+      <div class="achievement-name">${AchievementsManager.nameOf(ach)}</div>
+      <div class="achievement-description">${AchievementsManager.descriptionOf(ach)}</div>
       ${progressBar}
     </div>
     <div class="achievement-status">
