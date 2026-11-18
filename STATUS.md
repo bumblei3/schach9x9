@@ -1,16 +1,24 @@
-# schach9x9 — Status (Stand: 2026-11-17)
+# schach9x9 — Status (Stand: 2026-11-18)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `a4cb270` (A11y-Grid + quadratische Zellen, #254). Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
+Release-Tag ist `v2.1.0`. `main` ist `e644567` (#272, über #271/#256). Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
+
+**Die i18n-Grenze ist geschlossen (2026-11-18, #271):** Nach Puzzletexten und dem Kampagnen-Intro-Dialog lief ein Sweep über `js/` (Umlaute in Setzstellen) die übrigen hartkodierten Texte hinter `t()`: Undo/Redo samt Zähler, Eröffnungs-Trainer (Titel, Hinweis, Fortschritt, Knopf), Shop-Header/-Status, Heatmap, Beförderungs-Overlay (Figurname jetzt zentral über `piece.*`), Remis-Nachricht, „Alle Puzzles gelöst!", „Zum Menü"/„Neues Spiel" und die Spiel-Logs als Gruppe `log.*`. Deutsch bleibt bytegleich, Englisch deckt alle Stellen ab; `tests/puzzle/puzzleI18n.test.ts` und die erweiterte `tests/campaign/hiringBudget.test.ts` prüfen die Differenz je Sprache. Damit sind statische Schale, Status/Game-over, Toasts, Tutor, Tutorial, Kampagnen, Puzzle, Skins und Rest-UI gleichzeitig übersetzt.
+
+**Eine Layout-Fix machte Axe-Befunde sichtbar (2026-11-18, #271+#272):** `#action-overflow-menu` wuchs ohne Obergrenze (bei 720 px Viewport 982 px, sechs von siebzehn Einträgen außerhalb des Viewports) und der Debug-Knopf lag auf der mobilen Action-Bar (#272: max-height + Scrollen, Knopf bei 84 px). Die begrenzte Höhe machte zwei Einträge erst erreichbar — und damit sichtbar, dass `#toggle-opening-book-btn` (Name „Eröffnungsbuch", sichtbar „Eröffnung") und `#toggle-analysis-btn` (Name „Engine-Analyse (A)", sichtbar „Analyse A") Accessible-Name-Mismatches hatten (#271: Namen am sichtbaren Text). Axe verlangt hier wortlich „Analyse A", Klammern helfen nicht. Der globale Tooltip lag als body-Direktkind außerhalb jeder Landmarke (`region`) und bekommt `aria-hidden`, da er ein visuelles Duplikat von `title`/`aria-label` ist. Auffahrt über sieben Zustände: 0 Befunde.
+
+**Vitest-Volllauf war flaky, jetzt deterministisch (2026-11-18, #271):** „Errors 1" nach 3277 grünen Tests hatte zwei Ursachen: `HintGenerator`/`MoveAnalyzer` prüften nur `typeof navigator` — Node 26 legt einen globalen `navigator` ab, während `window` nach dem jsdom-Abriss fehlt, die Referenz warf dann in einem Timer; und `tests/tutorController.test.ts` mokte `../js/ui.js` teilweise ohne `showTutorSuggestions`, das der 300-ms-Debounce dynamisch importiert. Guard jetzt `typeof window` zuerst, Mock mit `importOriginal`. Vier Vollläufe: 0 Errors.
+
+**E2E-Volllauf braucht `--workers=8` (2026-11-18):** mit den Default-32-Workern wird der Playwright-Prozess auf dieser Maschine mit SIGKILL beendet (Log bricht mitten in der Suite ab, `test-results/` bleibt halb stehen); mit acht Workern läuft dieselbe Suite in ~30 s komplett durch (121 passed).
 
 ## Gesundheit
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `chore/dead-replay` | 275 Dateien, 3266/3266 |
-| Tests (CI) | Run 44125184538, `a4cb270` | grün, inklusive E2E |
-| A11y | axe-core über sieben Zustände der Live-Seite, `692680d` (in `a4cb270`) | **0 Verstöße** (vorher sechs Regeln, davon zwei critical) |
+| Tests | `npx vitest run`, Node 26, `e644567` | 278 Dateien, **3277/3277**, 0 Errors (vier Vollläufe hintereinander) |
+| Tests (CI) | PR-Runs #271/#272, `c6e72e5`/`12f6895` | grün, inklusive E2E |
+| A11y | axe-core über sieben Zustände der Live-Seite, `e644567` | **0 Befunde** (vorher sechs Regeln, davon zwei critical; 2026-11-18 erneut sauber) |
 | Typecheck + Lint | `feat/i18n-shell` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |
 | Build | `feat/i18n-shell` | grün |
 | E2E | lokal, `feat/tutor-mode-select` | **121 passed** (3,3 min), `e2e/visual.spec.ts` 5/5 ohne Baseline-Bewegung. `e2e/a11y.spec.ts` (7 Zustände, axe), `e2e/undo-redo.spec.ts` (Undo→Redo) und `e2e/info-panel.spec.ts` (Info-Panel), `e2e/statistics-overlay.spec.ts` (Statistiken) und `e2e/tutor-mode.spec.ts` (Tutor-Modus) sind mittendrin — der e2e-test-Job ist in der Branch-Protection required. Lighthouse-Abfrage läuft seit dem Budget-Fix echt: Performance 0,68 < 0,90 → rot; Job bleibt `continue-on-error`, siehe Eintrag unten |
