@@ -1134,6 +1134,17 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                         <option value="STRICT" data-i18n="mentor.strict">Streng (Auch Fehler)</option>
                       </select>
                     </div>
+                    <!-- Tutor-Modus: \`MoveAnalyzer\` wertet \`game.tutorMode ===
+                         'guess_the_move'\` aus (+10 Punkte für den besten Zug), aber
+                         das Select fehlte im Markup — der Modus war ohne UI
+                         unerreichbar, nur Tests setzten ihn. -->
+                    <div class="setting-row" style="margin-top: 10px">
+                      <label for="tutor-mode-select" data-i18n="settings.tutorMode">Tutor-Modus</label>
+                      <select id="tutor-mode-select" class="menu-select" aria-label="Tutor-Modus" data-i18n-aria-label="settings.tutorMode">
+                        <option value="" selected="" data-i18n="tutorMode.off">Aus</option>
+                        <option value="guess_the_move" data-i18n="tutorMode.guessTheMove">Rate den Zug!</option>
+                      </select>
+                    </div>
 
                     <div class="setting-row">
                       <label for="auto-hint-blunder" data-i18n="settings.autoHintBlunder">Auto-Hinweis nach Patzer</label>

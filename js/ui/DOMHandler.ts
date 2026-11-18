@@ -429,16 +429,22 @@ export class DOMHandler {
       });
     }
 
-    // Tutor Mode Selector
+    // Tutor-Modus („Rate den Zug!"). `MoveAnalyzer` wertet
+    // `game.tutorMode === 'guess_the_move'` aus, aber das Select fehlte im
+    // Markup — der Modus war nur über Tests erreichbar. Gleiches Drei-Punkte-
+    // Muster wie KI-Mentor/Schwierigkeit: Init aus dem Speicher, Change
+    // speichern und anwenden.
     const tutorModeSelect = document.getElementById(
       'tutor-mode-select'
     ) as HTMLSelectElement | null;
     if (tutorModeSelect) {
+      const savedTutorMode = localStorage.getItem('chess_tutor_mode') || '';
+      tutorModeSelect.value = savedTutorMode;
+      if (this.game) this.game.tutorMode = savedTutorMode;
       tutorModeSelect.addEventListener('change', e => {
-        const target = e.target as HTMLSelectElement;
-        if (this.game) {
-          this.game.tutorMode = target.value;
-        }
+        const mode = (e.target as HTMLSelectElement).value;
+        if (this.game) this.game.tutorMode = mode;
+        localStorage.setItem('chess_tutor_mode', mode);
       });
     }
 
