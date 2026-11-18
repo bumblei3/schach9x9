@@ -798,6 +798,7 @@ export async function findBetterAlternative(
 
   try {
     const isTestEnv =
+      typeof window !== 'undefined' &&
       typeof navigator !== 'undefined' &&
       (navigator.webdriver === true ||
         (window as Window & { __PLAYWRIGHT__?: boolean }).__PLAYWRIGHT__ === true);

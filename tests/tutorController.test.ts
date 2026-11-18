@@ -3,30 +3,37 @@ import { Game } from '../js/gameEngine.js';
 import { PHASES } from '../js/config.js';
 import * as aiEngine from '../js/aiEngine.js';
 
-// Mock UI module
-vi.mock('../js/ui.js', () => ({
-  renderBoard: vi.fn(),
-  showModal: vi.fn(),
-  updateStatus: vi.fn(),
-  updateShopUI: vi.fn(),
-  getPieceText: vi.fn((piece: any) => {
-    if (!piece) return '';
-    const symbols: Record<string, string> = {
-      p: '♟',
-      n: '♞',
-      b: '♝',
-      r: '♜',
-      q: '♛',
-      k: '♚',
-      a: '♗',
-      c: '♖',
-      e: '♕',
-    };
-    return symbols[piece.type] || '?';
-  }),
-  renderEvalGraph: vi.fn(),
-  setTutorLoading: vi.fn(),
-}));
+// Mock UI module — teilweise, mit importOriginal: `HintGenerator` importiert
+// '../js/ui.js' dynamisch (`showTutorSuggestions`). Ein Mock ohne diesen
+// Export wirft "No export defined", sobald der 300-ms-Debounce-Timer nach dem
+// Test laeuft — und das bricht den gesamten vitest-Lauf ab (Errors 1).
+vi.mock('../js/ui.js', async importOriginal => {
+  const actual = await importOriginal<typeof import('../js/ui.js')>();
+  return {
+    ...actual,
+    renderBoard: vi.fn(),
+    showModal: vi.fn(),
+    updateStatus: vi.fn(),
+    updateShopUI: vi.fn(),
+    getPieceText: vi.fn((piece: any) => {
+      if (!piece) return '';
+      const symbols: Record<string, string> = {
+        p: '♟',
+        n: '♞',
+        b: '♝',
+        r: '♜',
+        q: '♛',
+        k: '♚',
+        a: '♗',
+        c: '♖',
+        e: '♕',
+      };
+      return symbols[piece.type] || '?';
+    }),
+    renderEvalGraph: vi.fn(),
+    setTutorLoading: vi.fn(),
+  };
+});
 
 // Mock sounds module
 vi.mock('../js/sounds.js', () => ({
