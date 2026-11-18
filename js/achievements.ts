@@ -6,6 +6,7 @@
 import { logger } from './logger.js';
 import { statisticsManager } from './statisticsManager.js';
 import { showToast } from './ui/OverlayManager.js';
+import { t } from './i18n.js';
 
 export interface Achievement {
   id: string;
@@ -117,7 +118,7 @@ export class AchievementsManager {
       ach.unlocked = true;
       this.save();
       logger.info(`[AchievementsManager] Achievement unlocked: ${ach.name}`);
-      showToast(`Erfolg freigeschaltet: ${ach.name}`, 'success');
+      showToast(t('toast.achievementUnlocked', { name: ach.name }), 'success');
       return true;
     }
     return false;

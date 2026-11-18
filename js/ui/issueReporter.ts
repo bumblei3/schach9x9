@@ -9,6 +9,7 @@
 
 import pkg from '../../package.json';
 import { showToast } from './OverlayManager.js';
+import { t } from '../i18n.js';
 import { errorManager } from '../utils/ErrorManager.js';
 
 export const APP_VERSION: string = pkg.version;
@@ -212,10 +213,7 @@ export function bindIssueReporter(getGame: () => IssueGame | null): void {
     if (!form) return;
     const { body } = compose(form);
     const copied = await copyText(body);
-    showToast(
-      copied ? 'Bericht kopiert.' : 'Kopieren fehlgeschlagen.',
-      copied ? 'success' : 'error'
-    );
+    showToast(copied ? t('toast.reportCopied') : t('toast.copyFailed'), copied ? 'success' : 'error');
   });
 
   submitBtn.addEventListener('click', async () => {
@@ -227,9 +225,7 @@ export function bindIssueReporter(getGame: () => IssueGame | null): void {
     if (!popup) {
       const copied = await copyText(body);
       showToast(
-        copied
-          ? 'Popup blockiert. Bericht ist kopiert — auf GitHub einfügen.'
-          : 'Popup blockiert. Bericht konnte nicht kopiert werden.',
+        copied ? t('toast.popupBlockedCopied') : t('toast.popupBlockedFailed'),
         copied ? 'warning' : 'error'
       );
       return;

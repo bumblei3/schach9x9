@@ -5,6 +5,7 @@
 import { PHASES } from '../config.js';
 import { updateShopUI } from './ShopUI.js';
 import { showToast, showModal } from '../ui.js';
+import { t } from '../i18n.js';
 import type { Game } from '../gameEngine.js';
 import type { MoveExplanation } from '../tutor/MoveAnalyzer.js';
 import type { MoveResult } from '../aiEngine.js';
@@ -174,7 +175,7 @@ export async function showTutorSuggestions(
       !g.tutorController ||
       (inSetup ? !g.tutorController.getSetupTemplates : !g.tutorController.getTutorHints)
     ) {
-      showToast('Tutor nicht verfügbar!', 'error');
+      showToast(t('toast.tutorUnavailable'), 'error');
       return;
     }
 
@@ -256,10 +257,7 @@ export async function showTutorSuggestions(
         // Instead of an alert, we could show a toast or just a log
         console.log('[TutorUI] No hints available yet.');
         // Show user-friendly toast
-        showToast(
-          'Keine Vorschläge verfügbar. Möglicherweise ist die KI noch am Denken oder es gibt keine legalen Züge.',
-          'info'
-        );
+        showToast(t('toast.tutorNoHints'), 'info');
         return;
       }
 

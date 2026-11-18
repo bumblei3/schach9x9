@@ -1,6 +1,7 @@
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import type { GameLike, Piece, Player } from '../types/core.js';
 import { showToast, showModal, getPieceText, showMoveQuality } from '../ui.js';
+import { t } from '../i18n.js';
 import {
   detectThreatsAfterMove,
   isTactical,
@@ -764,9 +765,9 @@ export function handlePlayerMove(
 
       if (isBest) {
         if (game.tutorPoints !== undefined) game.tutorPoints += 10;
-        showToast('Richtig geraten! +10 Tutor-Punkte', 'success');
+        showToast(t('toast.guessCorrect'), 'success');
       } else {
-        showToast('Nicht der beste Zug, aber das Spiel geht weiter.', 'neutral');
+        showToast(t('toast.guessNotBest'), 'neutral');
       }
     }
   }
