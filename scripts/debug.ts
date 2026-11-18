@@ -282,7 +282,10 @@ export class DebugConsole {
     toggleBtn.textContent = '🛠️';
     toggleBtn.title = 'Open Debug Console';
     toggleBtn.style.position = 'fixed';
-    toggleBtn.style.bottom = '10px';
+    // Auf schmalen Viewports steht die Action-Bar als fixed-Leiste unten und
+    // der 🛠️-Knopf davor (gemessen bei 390 px: beide bei y≈786, der Knopf
+    // fängt die Klicks auf „Mehr" ab). Dort oberhalb der Leiste platzieren.
+    toggleBtn.style.bottom = window.matchMedia('(max-width: 768px)').matches ? '84px' : '10px';
     toggleBtn.style.right = '10px';
     toggleBtn.style.zIndex = '10000';
     toggleBtn.style.fontSize = '24px';

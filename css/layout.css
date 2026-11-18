@@ -295,6 +295,12 @@
   border-radius: 18px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
   z-index: calc(var(--z-overlay) + 5);
+  /* Das Menü wächst von der Action-Bar nach oben. Ohne Obergrenze über den
+     Viewport-Rand hinaus (gemessen: 982 px bei 720 px Viewport, sechs von
+     siebzehn Einträgen unerreichbar), darum Höhe begrenzen und scrollen. */
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .action-overflow-menu.hidden {
@@ -792,7 +798,7 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.45rem;
-    z-index: var(--z-overlay);
+    z-index: calc(var(--z-overlay) + 5);
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.55);
   }
 
