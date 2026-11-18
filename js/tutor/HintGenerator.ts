@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import { logger } from '../logger.js';
 import { PHASES, BOARD_SIZE, type Game, type Square } from '../gameEngine.js';
 import type { MoveInfo } from './MoveAnalyzer.js';
@@ -431,8 +432,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'fortress_12',
-          name: '🏰 Die Festung',
-          description: 'Defensiv mit Turm und Läufern.',
+          name: t('setup.fortress_12.name'),
+          description: t('setup.fortress_12.description'),
           pieces: ['r', 'b', 'b', 'p'],
         },
         12
@@ -440,8 +441,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'rush_12',
-          name: '⚡ Der Ansturm',
-          description: 'Aggressiv mit Dame und Bauern.',
+          name: t('setup.rush_12.name'),
+          description: t('setup.rush_12.description'),
           pieces: ['q', 'p', 'p', 'p'],
         },
         12
@@ -449,8 +450,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'flexible_12',
-          name: '🔄 Flexibel',
-          description: 'Ausgewogen mit Springer und Läufer.',
+          name: t('setup.flexible_12.name'),
+          description: t('setup.flexible_12.description'),
           pieces: ['n', 'n', 'b', 'p', 'p', 'p'],
           isRecommended: true,
         },
@@ -460,8 +461,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'gambit_12',
-          name: '⚔️ Gambit',
-          description: 'Schnelle Entwicklung mit Springern und Läufern. Wenig Bauern.',
+          name: t('setup.gambit_12.name'),
+          description: t('setup.gambit_12.description'),
           pieces: ['n', 'n', 'b', 'b'],
         },
         12
@@ -469,8 +470,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'swarm_12',
-          name: '🐝 Der Schwarm',
-          description: 'Viele leichte Figuren für maximale Feldpräsenz.',
+          name: t('setup.swarm_12.name'),
+          description: t('setup.swarm_12.description'),
           pieces: ['n', 'b', 'p', 'p', 'p', 'p', 'p', 'p'],
         },
         12
@@ -484,8 +485,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'fortress_18',
-          name: '🏰 Die Festung',
-          description: 'Maximale Defensive mit 2 Türmen und Erzbischof.',
+          name: t('setup.fortress_18.name'),
+          description: t('setup.fortress_18.description'),
           pieces: ['r', 'r', 'a', 'p'],
         },
         18
@@ -493,8 +494,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'siege_18',
-          name: '🔨 Belagerung',
-          description: 'Schwere Artillerie: Kanzler und Turm.',
+          name: t('setup.siege_18.name'),
+          description: t('setup.siege_18.description'),
           pieces: ['c', 'r', 'r'],
         },
         18
@@ -502,8 +503,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'royal_guard_18',
-          name: '🛡️ Königsgarde',
-          description: 'Maximaler Schutz mit Engel und Bauern.',
+          name: t('setup.royal_guard_18.name'),
+          description: t('setup.royal_guard_18.description'),
           pieces: ['e', 'n', 'p', 'p', 'p'],
         },
         18
@@ -511,8 +512,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'flexible_18',
-          name: '🔄 Flexibel',
-          description: 'Kanzler, Dame und Bauer für Vielseitigkeit.',
+          name: t('setup.flexible_18.name'),
+          description: t('setup.flexible_18.description'),
           pieces: ['c', 'q', 'p'],
           isRecommended: true,
         },
@@ -521,8 +522,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'swarm_18',
-          name: '🐝 Der Schwarm',
-          description: 'Maximale Anzahl an Figuren (8 Stk) für totale Dominanz.',
+          name: t('setup.swarm_18.name'),
+          description: t('setup.swarm_18.description'),
           pieces: ['n', 'n', 'b', 'r', 'p', 'p', 'p', 'p'],
         },
         18
@@ -536,8 +537,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'balanced_20',
-          name: '⚖️ Ausgewogen',
-          description: 'Solid structure with heavy and light pieces.',
+          name: t('setup.balanced_20.name'),
+          description: t('setup.balanced_20.description'),
           pieces: ['r', 'r', 'b', 'n', 'p', 'p', 'p', 'p'],
         },
         20
@@ -545,8 +546,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'royal_20',
-          name: '👑 Royal',
-          description: 'Focused on high value pieces.',
+          name: t('setup.royal_20.name'),
+          description: t('setup.royal_20.description'),
           pieces: ['q', 'a', 'p', 'p', 'p', 'p'],
         },
         20
@@ -554,8 +555,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'swarm_20',
-          name: '🐝 Swarm',
-          description: 'Control the board with many pieces.',
+          name: t('setup.swarm_20.name'),
+          description: t('setup.swarm_20.description'),
           pieces: ['n', 'n', 'b', 'b', 'r', 'p', 'p', 'p'],
           isRecommended: true,
         },
@@ -570,8 +571,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'power_25',
-          name: '⚡ Powerhouse',
-          description: 'Dame, Kanzler und Erzbischof - maximale Feuerkraft.',
+          name: t('setup.power_25.name'),
+          description: t('setup.power_25.description'),
           pieces: ['q', 'c', 'a', 'p'],
         },
         25
@@ -579,8 +580,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'wall_25',
-          name: '🧱 Die Mauer',
-          description: 'Defensivwerk mit Kanzler und Türmen.',
+          name: t('setup.wall_25.name'),
+          description: t('setup.wall_25.description'),
           pieces: ['c', 'r', 'r', 'b', 'p', 'p', 'p', 'p'],
         },
         25
@@ -588,8 +589,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'balanced_25',
-          name: '⚖️ Großmeister',
-          description: 'Klassische, flexible Aufstellung für jede Situation.',
+          name: t('setup.balanced_25.name'),
+          description: t('setup.balanced_25.description'),
           pieces: ['q', 'r', 'r', 'n', 'n'],
           isRecommended: true,
         },
@@ -598,8 +599,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'legendary_25',
-          name: '🌟 Legenden',
-          description: 'Engel und Kanzler führen die Armee an.',
+          name: t('setup.legendary_25.name'),
+          description: t('setup.legendary_25.description'),
           pieces: ['e', 'c', 'n', 'p', 'p'],
         },
         25
@@ -614,8 +615,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'dark_tower_30',
-          name: '🏰 Dunkler Turm',
-          description: 'Massive Verteidigung mit Engel und Türmen.',
+          name: t('setup.dark_tower_30.name'),
+          description: t('setup.dark_tower_30.description'),
           pieces: ['e', 'r', 'r', 'c'], // 12+5+5+8 = 30
         },
         30
@@ -623,8 +624,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'royal_court_30',
-          name: '👑 Hofstaat',
-          description: 'Dame, Kanzler und Erzbischof vereint.',
+          name: t('setup.royal_court_30.name'),
+          description: t('setup.royal_court_30.description'),
           pieces: ['q', 'c', 'a', 'n', 'n'], // 9+8+7+3+3 = 30
         },
         30
@@ -632,8 +633,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'divine_30',
-          name: '✨ Die Auserwählten',
-          description: 'Zwei Engel führen die Schlacht an.',
+          name: t('setup.divine_30.name'),
+          description: t('setup.divine_30.description'),
           pieces: ['e', 'e', 'n', 'n'], // 12+12+3+3 = 30
           isRecommended: true,
         },
@@ -649,8 +650,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'imperator_50',
-          name: '⚔️ Imperiale Legion',
-          description: 'Eine Armee aus Engeln und Kanzlern.',
+          name: t('setup.imperator_50.name'),
+          description: t('setup.imperator_50.description'),
           pieces: ['e', 'e', 'c', 'c', 'r', 'r'], // 12+12+8+8+5+5 = 50
         },
         50
@@ -658,8 +659,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'queens_wrath_50',
-          name: '👸 Rache der Königin',
-          description: 'Vier Damen dominieren das Brett.',
+          name: t('setup.queens_wrath_50.name'),
+          description: t('setup.queens_wrath_50.description'),
           pieces: ['q', 'q', 'q', 'q', 'e', 'p', 'p'], // 9*4=36 + 12 + 1 + 1 = 50
         },
         50
@@ -667,8 +668,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: 'ultimate_50',
-          name: '🌟 Ultimative Macht',
-          description: 'Eine ausgewogene, vernichtende Streitmacht.',
+          name: t('setup.ultimate_50.name'),
+          description: t('setup.ultimate_50.description'),
           pieces: ['e', 'q', 'c', 'a', 'r', 'r', 'n', 'p'], // 12+9+8+7+5+5+3+1 = 50
           isRecommended: true,
         },
@@ -716,8 +717,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
       createTemplate(
         {
           id: `custom_${points}`,
-          name: `🛠️ Maßgeschneidert (${points} Pkt)`,
-          description: 'Automatisch generierte Aufstellung für dein Budget.',
+          name: t('setup.custom.name', { points }),
+          description: t('setup.custom.description'),
           pieces: dynamicPieces,
           isRecommended: true,
         },
@@ -731,8 +732,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
     createTemplate(
       {
         id: 'fortress_15',
-        name: '🏰 Die Festung',
-        description: 'Defensive Strategie: 2 Türme. Ideal gegen aggressive Gegner.',
+        name: t('setup.fortress_15.name'),
+        description: t('setup.fortress_15.description'),
         pieces: ['r', 'r', 'b', 'p', 'p'],
       },
       15
@@ -740,8 +741,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
     createTemplate(
       {
         id: 'rush_15',
-        name: '⚡ Der Ansturm',
-        description: 'Offensive: Dame + 2 Springer.',
+        name: t('setup.rush_15.name'),
+        description: t('setup.rush_15.description'),
         pieces: ['q', 'n', 'n'],
       },
       15
@@ -749,8 +750,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
     createTemplate(
       {
         id: 'flexible_15',
-        name: '🔄 Flexibel',
-        description: 'Erzbischof bietet Vielseitigkeit.',
+        name: t('setup.flexible_15.name'),
+        description: t('setup.flexible_15.description'),
         pieces: ['a', 'r', 'b'],
         isRecommended: true,
       },
@@ -759,8 +760,8 @@ export function getSetupTemplates(game: Game): SetupTemplate[] {
     createTemplate(
       {
         id: 'gambit_15',
-        name: '⚔️ Das Gambit',
-        description: 'Opfere Material für Position? Viele leichte Figuren.',
+        name: t('setup.gambit_15.name'),
+        description: t('setup.gambit_15.description'),
         pieces: ['n', 'n', 'b', 'b', 'p', 'p', 'p'],
       },
       15
@@ -895,7 +896,7 @@ function createMockHints(game: Game, turnColor: 'white' | 'black'): TutorHint[] 
       score: 100 - index * 20,
       category: index === 0 ? 'best' : 'good',
       qualityLabel: index === 0 ? '⭐ Bester Zug!' : '✅ Guter Zug',
-      summary: index === 0 ? 'Stärkster Zug nach Engine-Bewertung.' : 'Solider Zug.',
+      summary: index === 0 ? t('tutor.quality.bestMove') : t('tutor.quality.normal'),
       betterMove: null,
       tacticalExplanations: [],
       strategicExplanations: ['Mock hint for e2e testing'],

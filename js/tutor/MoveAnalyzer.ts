@@ -222,21 +222,21 @@ export function buildTutorSummary(
   // Fallback by quality category
   switch (analysis.category) {
     case 'brilliant':
-      return 'Taktische Idee mit klarem Vorteil.';
+      return t('tutor.quality.tacticalIdee');
     case 'best':
-      return 'Stärkster Zug nach Engine-Bewertung.';
+      return t('tutor.quality.bestMove');
     case 'excellent':
-      return 'Sehr starke Fortsetzung, nur minimal unter dem Bestzug.';
+      return t('tutor.quality.excellent');
     case 'good':
-      return 'Solider Zug ohne klares taktisches Motiv.';
+      return t('tutor.quality.good');
     case 'inaccuracy':
-      return 'Es gibt spürbar bessere Alternativen.';
+      return t('tutor.quality.inaccuracy');
     case 'mistake':
-      return 'Die Stellung wird spürbar schlechter.';
+      return t('tutor.quality.mistake');
     case 'blunder':
-      return 'Grober Stellungs- oder Materialverlust.';
+      return t('tutor.quality.blunder');
     default:
-      return 'Solider Zug.';
+      return t('tutor.quality.normal');
   }
 }
 
@@ -256,14 +256,14 @@ export function showTutorMoveFeedback(analysis: MoveExplanation): void {
     normal: '♟️',
   };
   const shortLabel: Record<string, string> = {
-    brilliant: 'Brilliant',
-    best: 'Bester Zug',
-    excellent: 'Exzellent',
-    good: 'Gut',
-    inaccuracy: 'Ungenau',
-    mistake: 'Fehler',
-    blunder: 'Patzer',
-    normal: 'Zug',
+    brilliant: t('tutor.shortLabel.brilliant'),
+    best: t('tutor.shortLabel.best'),
+    excellent: t('tutor.shortLabel.excellent'),
+    good: t('tutor.shortLabel.good'),
+    inaccuracy: t('tutor.shortLabel.inaccuracy'),
+    mistake: t('tutor.shortLabel.mistake'),
+    blunder: t('tutor.shortLabel.blunder'),
+    normal: t('tutor.shortLabel.normal'),
   };
   const cat = analysis.category || 'normal';
   const toastType =
@@ -275,10 +275,10 @@ export function showTutorMoveFeedback(analysis: MoveExplanation): void {
           ? 'success'
           : 'neutral';
 
-  const head = `${emoji[cat] || '♟️'} ${shortLabel[cat] || 'Zug'}`;
+  const head = `${emoji[cat] || '♟️'} ${shortLabel[cat] || t('tutor.shortLabel.normal')}`;
   const better = analysis.betterMove;
   const toastBody = better
-    ? `${head}: ${summary} · Besser: ${better.notation}`
+    ? `${head}: ${summary} · ${t('tutor.better', { move: better.notation })}`
     : `${head}: ${summary}`;
   showToast(toastBody, toastType);
   renderTutorFeedbackPanel(analysis, summary);
@@ -364,9 +364,9 @@ function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): 
     : '';
   const betterHtml = analysis.betterMove
     ? `<div class="tutor-feedback-better">
-         <span class="tutor-feedback-better-label">Besser war:</span>
+         <span class="tutor-feedback-better-label">${t('tutor.betterWas')}</span>
          <span class="tutor-feedback-better-move">${escapeHtml(analysis.betterMove.notation)}</span>
-         <span class="tutor-feedback-better-hint">(grüner Pfeil)</span>
+         <span class="tutor-feedback-better-hint">${t('tutor.greenArrow')}</span>
        </div>`
     : '';
 
@@ -444,16 +444,16 @@ export function analyzeMoveWithExplanation(
     qualityLabel = '✅ Guter Zug.';
   } else if (diffP >= -2.5) {
     category = 'inaccuracy';
-    qualityLabel = `!? Ungenauigkeit (${Math.abs(diffP)} Bauern schwächer)`;
+    qualityLabel = t('tutor.inaccuracyLabel', { pawns: Math.abs(diffP) });
     warnings.push('Es gibt strategisch wertvollere Alternativen.');
   } else if (diffP >= -4.0) {
     category = 'mistake';
     qualityLabel = `? Fehler (${Math.abs(diffP)} Bauern schlechter)`;
-    warnings.push('Dieser Zug verschlechtert deine Stellung spürbar.');
+    warnings.push(t('tutor.warnWorse'));
   } else {
     category = 'blunder';
     qualityLabel = `?? Grober Fehler (${Math.abs(diffP)} Bauern Verlust)`;
-    warnings.push('⚠️ Dieser Zug gefährdet deine Position massiv!');
+    warnings.push(t('tutor.warnCritical'));
   }
 
   // Detect tactical patterns
@@ -469,7 +469,7 @@ export function analyzeMoveWithExplanation(
   const fairyPatterns = detectFairyPatterns(game, analyzer, move);
   fairyPatterns.forEach(fp => {
     tacticalExplanations.unshift(fp.explanation); // fairy names first — they are the headline
-    questions.push(`Nutzt du die Stärke des ${fp.pieceName} voll aus?`);
+    questions.push(t('tutor.questionUsePiece', { piece: fp.pieceName }));
   });
 
   // Analyze strategic value (piece may already sit on `to` after the move)
@@ -540,7 +540,7 @@ function appendPostMoveReasons(
   // Own king in check after own move = illegal in real chess; still warn if engine allows
   try {
     if (typeof game.isInCheck === 'function' && game.isInCheck(mover.color as 'white' | 'black')) {
-      warnings.push('Dein König steht (noch) im Schach — decken oder fliehen!');
+      warnings.push(t('tutor.warnKingInCheck'));
     }
   } catch {
     /* ignore */
@@ -592,7 +592,7 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
     if (Math.abs(from.c - to.c) > 1) {
       patterns.push({
         type: 'safety',
-        explanation: '🛡️ Bringt den König in Sicherheit (Rochade)',
+        explanation: t('tutor.castlingSafe'),
       });
     }
   }
@@ -668,7 +668,7 @@ export function getScoreDescription(score: number): ScoreDescription {
   if (score >= 900) {
     return { label: '🏆 Gewinnstellung', color: '#10b981', emoji: '🏆' };
   } else if (score >= 500) {
-    return { label: '⭐ Großer Vorteil', color: '#22c55e', emoji: '⭐' };
+    return { label: t('tutor.labelBigAdvantage'), color: '#22c55e', emoji: '⭐' };
   } else if (score >= 200) {
     return { label: '✨ Klarer Vorteil', color: '#4ade80', emoji: '✨' };
   } else if (score >= 50) {
@@ -680,7 +680,7 @@ export function getScoreDescription(score: number): ScoreDescription {
   } else if (score >= -500) {
     return { label: '⚠️ Schwieriger', color: '#f87171', emoji: '⚠️' };
   } else if (score >= -900) {
-    return { label: '🔴 Großer Nachteil', color: '#ef4444', emoji: '🔴' };
+    return { label: t('tutor.labelBigDisadvantage'), color: '#ef4444', emoji: '🔴' };
   } else {
     return { label: '💀 Verloren', color: '#dc2626', emoji: '💀' };
   }
@@ -707,7 +707,7 @@ export function getMoveNotation(game: GameLike, move: MoveInfo): string {
 
   if (targetPiece && targetPiece !== piece) {
     const targetName = getPieceName(targetPiece.type);
-    return `${pieceSymbol} ${pieceName} schlägt ${targetName} (${toNotation})`;
+    return `${pieceSymbol} ${t('tutor.captureDesc', { piece: pieceName, target: targetName, move: toNotation })}`;
   }
   return `${pieceSymbol} ${pieceName} ${fromNotation}→${toNotation}`;
 }
@@ -717,16 +717,16 @@ export function getMoveNotation(game: GameLike, move: MoveInfo): string {
  */
 export function getPieceName(type: string): string {
   const names: Record<string, string> = {
-    p: 'Bauer',
-    r: 'Turm',
-    n: 'Springer',
-    b: 'Läufer',
-    q: 'Dame',
-    k: 'König',
-    a: 'Erzbischof',
-    c: 'Kanzler',
-    e: 'Engel',
-    j: 'Nachtreiter',
+    p: t('piece.p'),
+    r: t('piece.r'),
+    n: t('piece.n'),
+    b: t('piece.b'),
+    q: t('piece.q'),
+    k: t('piece.k'),
+    a: t('piece.a'),
+    c: t('piece.c'),
+    e: t('piece.e'),
+    j: t('piece.j'),
   };
   return names[type] || type;
 }
@@ -929,7 +929,7 @@ export async function checkBlunder(
     localStorage.getItem('auto_hint_blunder') === 'true'
   ) {
     const betterText = analysis.betterMove
-      ? `Besser wäre ${getMoveNotation(game, analysis.betterMove)}.`
+      ? t('tutor.betterWouldBe', { move: getMoveNotation(game, analysis.betterMove) })
       : 'Schau dir die Stellung noch einmal an.';
     showToast(`💡 Auto-Hinweis: ${analysis.qualityLabel} — ${betterText}`, 'warning');
   }
@@ -965,15 +965,11 @@ export function showBlunderWarning(
 
   const message = (
     isPreMove
-      ? [
-          `Dieser Zug würde deine Stellung um ${diff} Bauern verschlechtern.`,
-          explanation,
-          'Möchtest du diesen Zug wirklich ausführen?',
-        ]
+      ? [t('tutor.worsenByPawns', { pawns: diff }), explanation, t('tutor.confirmMove')]
       : [
           `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.`,
           explanation,
-          'Möchtest du den Zug zurücknehmen?',
+          t('tutor.confirmUndo'),
         ]
   )
     .filter(part => part && part.trim().length > 0)
@@ -987,7 +983,7 @@ export function showBlunderWarning(
     : [
         { text: 'Nein, weiterspielen', class: 'btn-secondary' },
         {
-          text: 'Ja, Zug rückgängig machen',
+          text: t('tutor.confirmUndoYes'),
           class: 'btn-primary',
           callback: () => {
             if (game.moveController && game.moveController.undoMove) {
