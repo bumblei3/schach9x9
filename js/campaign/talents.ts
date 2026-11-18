@@ -1,3 +1,5 @@
+import { t, type I18nKey } from '../i18n.js';
+
 export interface TalentNode {
   id: string;
   name: string;
@@ -13,6 +15,71 @@ export interface TalentNode {
 export interface UnitTalentTree {
   unitType: string; // 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'j'
   talents: TalentNode[];
+}
+
+/**
+ * Zuordnung Talent-ID → i18n-Schlüssel. Übersetzt wird erst beim Rendern; die
+ * Talent-Daten selbst bleiben unangetastet.
+ */
+const TALENT_I18N_KEYS: Record<string, { name: I18nKey; description: I18nKey }> = {
+  p_scavenger: { name: 'talent.p_scavenger.name', description: 'talent.p_scavenger.description' },
+  p_marsch: { name: 'talent.p_marsch.name', description: 'talent.p_marsch.description' },
+  p_veteran: { name: 'talent.p_veteran.name', description: 'talent.p_veteran.description' },
+  n_sprungfeder: {
+    name: 'talent.n_sprungfeder.name',
+    description: 'talent.n_sprungfeder.description',
+  },
+  n_taktiker: { name: 'talent.n_taktiker.name', description: 'talent.n_taktiker.description' },
+  n_meister: { name: 'talent.n_meister.name', description: 'talent.n_meister.description' },
+  b_pfeilschnell: {
+    name: 'talent.b_pfeilschnell.name',
+    description: 'talent.b_pfeilschnell.description',
+  },
+  b_diagonal: { name: 'talent.b_diagonal.name', description: 'talent.b_diagonal.description' },
+  b_lichtbringer: {
+    name: 'talent.b_lichtbringer.name',
+    description: 'talent.b_lichtbringer.description',
+  },
+  r_festung: { name: 'talent.r_festung.name', description: 'talent.r_festung.description' },
+  r_belagerer: { name: 'talent.r_belagerer.name', description: 'talent.r_belagerer.description' },
+  r_zitadelle: { name: 'talent.r_zitadelle.name', description: 'talent.r_zitadelle.description' },
+  q_majestaet: { name: 'talent.q_majestaet.name', description: 'talent.q_majestaet.description' },
+  q_inspiration: {
+    name: 'talent.q_inspiration.name',
+    description: 'talent.q_inspiration.description',
+  },
+  q_omnipraesenz: {
+    name: 'talent.q_omnipraesenz.name',
+    description: 'talent.q_omnipraesenz.description',
+  },
+  k_fuehrung: { name: 'talent.k_fuehrung.name', description: 'talent.k_fuehrung.description' },
+  k_aura: { name: 'talent.k_aura.name', description: 'talent.k_aura.description' },
+  k_koenig: { name: 'talent.k_koenig.name', description: 'talent.k_koenig.description' },
+  a_gabelmeister: {
+    name: 'talent.a_gabelmeister.name',
+    description: 'talent.a_gabelmeister.description',
+  },
+  c_xrayauge: { name: 'talent.c_xrayauge.name', description: 'talent.c_xrayauge.description' },
+  e_engelsfluegel: {
+    name: 'talent.e_engelsfluegel.name',
+    description: 'talent.e_engelsfluegel.description',
+  },
+  j_spurwechsel: {
+    name: 'talent.j_spurwechsel.name',
+    description: 'talent.j_spurwechsel.description',
+  },
+};
+
+/** Übersetzter Talent-Name (Fallback: deutscher Quelltext). */
+export function talentName(node: TalentNode): string {
+  const e = TALENT_I18N_KEYS[node.id];
+  return e ? t(e.name) : node.name;
+}
+
+/** Übersetzte Talent-Beschreibung (Fallback: deutscher Quelltext). */
+export function talentDescription(node: TalentNode): string {
+  const e = TALENT_I18N_KEYS[node.id];
+  return e ? t(e.description) : node.description;
 }
 
 export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
@@ -100,8 +167,7 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'b_pfeilschnell',
         name: 'Pfeilschnell',
-        description:
-          'Läufer-Schläge bringen +2 Gold. Im Anwerbe-Shop kostet der Läufer 2 Punkte.',
+        description: 'Läufer-Schläge bringen +2 Gold. Im Anwerbe-Shop kostet der Läufer 2 Punkte.',
         tier: 1,
         reqLevel: 3,
         cost: 80,
@@ -254,8 +320,7 @@ export const UNIT_TALENT_TREES: Record<string, UnitTalentTree> = {
       {
         id: 'a_gabelmeister',
         name: 'Gabelmeister',
-        description:
-          'Erzbischof-Schläge bringen Bonus-Gold beim Schlagen (+2 Gold pro Schlag).',
+        description: 'Erzbischof-Schläge bringen Bonus-Gold beim Schlagen (+2 Gold pro Schlag).',
         tier: 1,
         reqLevel: 3,
         cost: 100,

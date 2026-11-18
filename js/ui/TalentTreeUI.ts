@@ -1,4 +1,5 @@
 import { UNIT_TALENT_TREES } from '../campaign/talents.js';
+import { talentName, talentDescription } from '../campaign/talents.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { showModal, showToast } from './OverlayManager.js';
 import { t } from '../i18n.js';
@@ -136,16 +137,17 @@ export class TalentTreeUI {
       const talents = tree.talents.filter(t => t.tier === tier);
       if (talents.length > 0) {
         if (renderedTiers > 0) {
-          html += '<div style="display:flex;justify-content:center;margin:-20px 0 10px;"><div style="width:2px;height:24px;background:#555;"></div></div>';
+          html +=
+            '<div style="display:flex;justify-content:center;margin:-20px 0 10px;"><div style="width:2px;height:24px;background:#555;"></div></div>';
         }
-        html += `<div class="talent-tier" data-label="Tier ${tier}" style="margin-bottom: 40px; display: flex; gap: 40px; justify-content: center;">`;
-        talents.forEach(t => {
-          const isUnlocked = campaignManager.isTalentUnlocked(t.id);
+        html += `<div class="talent-tier" data-label="${t('talent.tierLabel', { tier })}" style="margin-bottom: 40px; display: flex; gap: 40px; justify-content: center;">`;
+        talents.forEach(node => {
+          const isUnlocked = campaignManager.isTalentUnlocked(node.id);
           // Available if not unlocked, previous tier reqs met (simplified: just level req)
           // And we could check specific parent dependency if we wanted a real tree connected structure.
           // For now: Level Requirement is the main gate.
-          const isLevelMet = unitXp.level >= t.reqLevel;
-          const prereq = tree.talents.find(pt => pt.tier === t.tier - 1);
+          const isLevelMet = unitXp.level >= node.reqLevel;
+          const prereq = tree.talents.find(pt => pt.tier === node.tier - 1);
           const prereqMet = !prereq || campaignManager.isTalentUnlocked(prereq.id);
           const isAvailable = !isUnlocked && isLevelMet && prereqMet;
           let statusClass = 'locked';
@@ -153,8 +155,8 @@ export class TalentTreeUI {
           else if (isAvailable) statusClass = 'available';
 
           html += `
-                    <div class="talent-node ${statusClass}" data-id="${t.id}" role="button" tabindex="0" aria-label="${t.name} (Tier ${t.tier}, Level ${t.reqLevel})">
-                        <div class="talent-icon">${t.icon}</div>
+                    <div class="talent-node ${statusClass}" data-id="${node.id}" role="button" tabindex="0" aria-label="${t('talent.nodeLabel', { name: talentName(node), tier: node.tier, level: node.reqLevel })}">
+                        <div class="talent-icon">${node.icon}</div>
                         ${isUnlocked ? '<div style="position: absolute; bottom: -5px; right: -5px; font-size: 10px;">✅</div>' : ''}
                     </div>
                 `;
@@ -199,22 +201,22 @@ export class TalentTreeUI {
 
     let actionButton = '';
     if (isUnlocked) {
-      actionButton = '<span style="color: #ffd700; font-weight: bold;">Bereits erlernt</span>';
+      actionButton = `<span style="color: #ffd700; font-weight: bold;">${t('talent.alreadyLearned')}</span>`;
     } else if (!levelMet) {
-      actionButton = `<span style="color: #666;">Benötigt Level ${talent.reqLevel}</span>`;
+      actionButton = `<span style="color: #666;">${t('talent.requiresLevel', { level: talent.reqLevel })}</span>`;
     } else if (prereqLocked && prereqNode) {
-      actionButton = `<span style="color: #666;">Benötigt Talent: ${prereqNode.name}</span>`;
+      actionButton = `<span style="color: #666;">${t('talent.requiresTalent', { name: talentName(prereqNode) })}</span>`;
     } else {
       const btnClass = canAfford ? 'btn-primary' : 'btn-secondary disabled';
-      actionButton = `<button class="${btnClass} buy-talent-btn" ${!canAfford ? 'disabled' : ''}>Lernen (${talent.cost} Gold)</button>`;
+      actionButton = `<button class="${btnClass} buy-talent-btn" ${!canAfford ? 'disabled' : ''}>${t('talent.learnFor', { cost: talent.cost })}</button>`;
     }
 
     infoPanel.innerHTML = `
         <div style="display: flex; gap: 15px; align-items: start;">
             <div style="font-size: 2rem; background: #222; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">${talent.icon}</div>
             <div style="flex: 1;">
-                <div class="talent-name">${talent.name}</div>
-                <div class="talent-desc">${talent.description}</div>
+                <div class="talent-name">${talentName(talent)}</div>
+                <div class="talent-desc">${talentDescription(talent)}</div>
                 <div class="talent-cost">Tier ${talent.tier} • Level ${talent.reqLevel}</div>
             </div>
             <div class="talent-action">
@@ -227,7 +229,7 @@ export class TalentTreeUI {
     if (buyBtn && !buyBtn.hasAttribute('disabled')) {
       buyBtn.addEventListener('click', () => {
         if (campaignManager.unlockTalent(this.currentUnitType, talent.id, talent.cost)) {
-          showToast(t('toast.talentLearned', { name: talent.name }), 'success');
+          showToast(t('toast.talentLearned', { name: talentName(talent) }), 'success');
           this.renderTree(); // refresh status
           this.selectTalent(talent.id); // refresh logic
         } else {
