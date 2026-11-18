@@ -32,13 +32,17 @@ const { mockLevels } = vi.hoisted(() => ({
   ],
 }));
 
-vi.mock('../js/campaign/campaignData.js', () => ({
-  CAMPAIGN_LEVELS: mockLevels,
-  CAMPAIGN_PERKS: [
-    { id: 'stabile_bauern', name: 'Stabile Bauern', cost: 150, icon: '🛡️' },
-    { id: 'elite_garde', name: 'Elite-Garde', cost: 250, icon: '⚔️' },
-  ],
-}));
+vi.mock('../js/campaign/campaignData.js', async importOriginal => {
+  const actual = await importOriginal<typeof import('../js/campaign/campaignData.js')>();
+  return {
+    ...actual,
+    CAMPAIGN_LEVELS: mockLevels,
+    CAMPAIGN_PERKS: [
+      { id: 'stabile_bauern', name: 'Stabile Bauern', cost: 150, icon: '🛡️' },
+      { id: 'elite_garde', name: 'Elite-Garde', cost: 250, icon: '⚔️' },
+    ],
+  };
+});
 
 vi.mock('../js/storage.js', () => ({
   storageManager: {},

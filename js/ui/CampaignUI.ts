@@ -1,6 +1,6 @@
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { Level, Perk, UnitXp } from '../campaign/types.js';
-import { CAMPAIGN_PERKS } from '../campaign/campaignData.js';
+import { CAMPAIGN_PERKS, campaignLevelTitle } from '../campaign/campaignData.js';
 import { hiringBudget } from '../campaign/hiringBudget.js';
 import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { showToast } from './OverlayManager.js';
@@ -219,7 +219,7 @@ export class CampaignUI {
         <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-primary); opacity: 0.8; margin-bottom: -0.2rem;">
             Mission ${levels.indexOf(level) + 1}
         </div>
-        <div style="font-weight: 800; font-size: 1.25rem; color: var(--text-main); line-height: 1.2;">${level.title}</div>
+        <div style="font-weight: 800; font-size: 1.25rem; color: var(--text-main); line-height: 1.2;">${campaignLevelTitle(level)}</div>
         <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
             <span style="opacity: 0.6;">Schwierigkeit:</span>
             <span style="color: ${this.getDifficultyColor(level.difficulty)}; font-weight: bold;">${level.difficulty.toUpperCase()}</span>
