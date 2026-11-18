@@ -7,6 +7,8 @@ import { soundManager } from '../sounds.js';
 import { notificationUI } from './NotificationUI.js';
 import type { Player, Piece } from '../types/core.js';
 import type { GameLike, MoveRecord, Puzzle, ModalAction } from '../types/core.js';
+import { t } from '../i18n.js';
+import { puzzleTitle, puzzleDescription, puzzleDifficultyText } from '../puzzleManager.js';
 
 /**
  * Zeigt ein modales Dialogfenster an.
@@ -177,15 +179,17 @@ export function showPuzzleOverlay(puzzle: Puzzle): void {
   if (!overlay) return;
   const titleEl = document.getElementById('puzzle-title');
   const descEl = document.getElementById('puzzle-description');
-  if (titleEl) titleEl.textContent = puzzle.title;
-  if (descEl) descEl.textContent = puzzle.description;
+  if (titleEl) titleEl.textContent = puzzleTitle(puzzle);
+  if (descEl) descEl.textContent = puzzleDescription(puzzle);
 
   const diffEl = document.getElementById('puzzle-difficulty');
-  if (diffEl) diffEl.textContent = `Schwierigkeit: ${puzzle.difficulty}`;
+  if (diffEl) {
+    diffEl.textContent = t('puzzle.difficultyLabel', { difficulty: puzzleDifficultyText(puzzle.difficulty) });
+  }
 
   const statusEl = document.getElementById('puzzle-status');
   if (statusEl) {
-    statusEl.textContent = 'Weiß am Zug';
+    statusEl.textContent = t('board.whiteToMove');
     statusEl.className = 'puzzle-status';
   }
 

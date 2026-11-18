@@ -323,6 +323,9 @@ export interface Puzzle {
         piece: PieceType;
       }
   >;
+  /** Prozedurale Puzzles: Texte werden aus `mateIn` übersetzt. */
+  generated?: boolean;
+  mateIn?: number;
 }
 
 // ============================================================================

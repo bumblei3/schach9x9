@@ -11,6 +11,7 @@
  */
 
 import { puzzleManager, type Puzzle } from './puzzleManager.js';
+import { t } from './i18n.js';
 
 const DAY_MS = 86_400_000;
 const STREAK_CAP = 365;
@@ -142,9 +143,9 @@ export class DailyPuzzleManager {
     const current = this.getStreak(date);
     const best = Math.max(this.getBestStreak(), current);
     if (current <= 0 && best <= 0) return '';
-    if (current <= 0) return `Best ${best}`;
-    const dayWord = current === 1 ? 'Tag' : 'Tage';
-    return `🔥 ${current} ${dayWord} · Best ${best}`;
+    if (current <= 0) return t('puzzle.streakBest', { best });
+    const unit = t(current === 1 ? 'puzzle.streakUnit.one' : 'puzzle.streakUnit.many');
+    return t('puzzle.streak', { count: current, unit, best });
   }
 }
 

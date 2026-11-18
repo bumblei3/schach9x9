@@ -2,6 +2,7 @@ import { PuzzleGenerator } from './puzzleGenerator.js';
 import { ProceduralGenerator } from './puzzle/ProceduralGenerator.js';
 import type { MoveResult } from './aiEngine.js';
 import type { GameLike, PieceType } from './types/core.js';
+import { t, type I18nKey } from './i18n.js';
 
 export interface Puzzle {
   id: string;
@@ -12,6 +13,60 @@ export interface Puzzle {
   setupStr?: string;
   setup?: (_game: GameLike) => void;
   solution: MoveResult[];
+  /**
+   * Vom `ProceduralGenerator` erzeugte Puzzles tragen keine feste ID: Titel und
+   * Beschreibung werden aus `mateIn` übersetzt, die Datenfelder sind nur noch
+   * Fallback für den deutschen Default.
+   */
+  generated?: boolean;
+  mateIn?: number;
+}
+
+const PUZZLE_I18N: Record<string, { title: I18nKey; description: I18nKey }> = {
+  'mate-in-1-001': { title: 'puzzle.mate-in-1-001.title', description: 'puzzle.mate-in-1-001.description' },
+  'mate-in-1-rook': { title: 'puzzle.mate-in-1-rook.title', description: 'puzzle.mate-in-1-rook.description' },
+  'mate-in-1-arch': { title: 'puzzle.mate-in-1-arch.title', description: 'puzzle.mate-in-1-arch.description' },
+  'mate-in-1-queen-001': { title: 'puzzle.mate-in-1-queen-001.title', description: 'puzzle.mate-in-1-queen-001.description' },
+  'double-rook-mate': { title: 'puzzle.double-rook-mate.title', description: 'puzzle.double-rook-mate.description' },
+  'fairy-archbishop-corner': { title: 'puzzle.fairy-archbishop-corner.title', description: 'puzzle.fairy-archbishop-corner.description' },
+  'fairy-archbishop-center': { title: 'puzzle.fairy-archbishop-center.title', description: 'puzzle.fairy-archbishop-center.description' },
+  'fairy-archbishop-end': { title: 'puzzle.fairy-archbishop-end.title', description: 'puzzle.fairy-archbishop-end.description' },
+  'fairy-angel-basic': { title: 'puzzle.fairy-angel-basic.title', description: 'puzzle.fairy-angel-basic.description' },
+  'fairy-angel-mirror': { title: 'puzzle.fairy-angel-mirror.title', description: 'puzzle.fairy-angel-mirror.description' },
+  'fairy-angel-shield': { title: 'puzzle.fairy-angel-shield.title', description: 'puzzle.fairy-angel-shield.description' },
+  'fairy-chancellor-rookline': { title: 'puzzle.fairy-chancellor-rookline.title', description: 'puzzle.fairy-chancellor-rookline.description' },
+  'fairy-chancellor-mirror': { title: 'puzzle.fairy-chancellor-mirror.title', description: 'puzzle.fairy-chancellor-mirror.description' },
+  'mate-in-1-backrank': { title: 'puzzle.mate-in-1-backrank.title', description: 'puzzle.mate-in-1-backrank.description' },
+  'mate-in-1-backrank2': { title: 'puzzle.mate-in-1-backrank2.title', description: 'puzzle.mate-in-1-backrank2.description' },
+};
+
+const MATE_KEY: Record<number, I18nKey> = { 1: 'puzzle.mateIn1', 2: 'puzzle.mateIn2' };
+
+/** Übersetzter Puzzletitel — an der Setzstelle, nicht in den Daten. */
+export function puzzleTitle(p: Puzzle): string {
+  if (p.generated) return t('puzzle.generatedTitle', { mode: t(MATE_KEY[p.mateIn ?? 1]) });
+  const entry = PUZZLE_I18N[p.id];
+  return entry ? t(entry.title) : p.title;
+}
+
+/** Übersetzte Puzzlebeschreibung — an der Setzstelle, nicht in den Daten. */
+export function puzzleDescription(p: Puzzle): string {
+  if (p.generated) {
+    const depth = p.mateIn ?? 1;
+    return t('puzzle.procDesc', { depth, unit: t(depth > 1 ? 'puzzle.movesMany' : 'puzzle.moveOne') });
+  }
+  const entry = PUZZLE_I18N[p.id];
+  return entry ? t(entry.description) : p.description;
+}
+
+/** Schwierigkeitslabel; der Datenwert bleibt die deutsche Quellsprache. */
+export function puzzleDifficultyText(difficulty: string): string {
+  const key: I18nKey | null =
+    difficulty === 'Einfach' ? 'puzzle.diff.easy'
+      : difficulty === 'Mittel' ? 'puzzle.diff.medium'
+        : difficulty === 'Schwer' ? 'puzzle.diff.hard'
+          : null;
+  return key ? t(key) : difficulty;
 }
 
 export class PuzzleManager {

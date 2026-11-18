@@ -3,34 +3,40 @@ import { PuzzleMenu } from '../../js/ui/PuzzleMenu.js';
 import { puzzleManager } from '../../js/puzzleManager.js';
 import type { GameController } from '../../js/gameController.js';
 
-// Mock puzzleManager
-vi.mock('../../js/puzzleManager.js', () => ({
-  puzzleManager: {
-    getPuzzles: vi.fn().mockReturnValue([
-      { id: 'p1', title: 'Puzzle 1', difficulty: 'Einfach', description: 'Test 1' },
-      { id: 'p2', title: 'Puzzle 2', difficulty: 'Mittel', description: 'Test 2' },
-    ]),
-    isSolved: vi.fn().mockReturnValue(false),
-    getDifficulties: vi.fn().mockReturnValue(['Einfach', 'Mittel']),
-    getFilteredPuzzles: vi.fn().mockImplementation(function (
-      this: unknown,
-      difficulty?: string,
-      fairy?: boolean
-    ) {
-      const all = [
+// Mock puzzleManager — teilweise, mit importOriginal: das Modul exportiert
+// neben `puzzleManager` auch die i18n-Helfer (`puzzleTitle`, …), und ein Mock
+// ohne sie wirft "No export defined", sobald PuzzleMenu sie importiert.
+vi.mock('../../js/puzzleManager.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../js/puzzleManager.js')>();
+  return {
+    ...actual,
+    puzzleManager: {
+      getPuzzles: vi.fn().mockReturnValue([
         { id: 'p1', title: 'Puzzle 1', difficulty: 'Einfach', description: 'Test 1' },
         { id: 'p2', title: 'Puzzle 2', difficulty: 'Mittel', description: 'Test 2' },
-      ];
-      return all
-        .map((puzzle, index) => ({ index, puzzle }))
-        .filter(
-          ({ puzzle }) =>
-            (difficulty === undefined || puzzle.difficulty === difficulty) &&
-            (fairy === undefined || puzzle.id.startsWith('fairy-') === fairy)
-        );
-    }),
-  },
-}));
+      ]),
+      isSolved: vi.fn().mockReturnValue(false),
+      getDifficulties: vi.fn().mockReturnValue(['Einfach', 'Mittel']),
+      getFilteredPuzzles: vi.fn().mockImplementation(function (
+        this: unknown,
+        difficulty?: string,
+        fairy?: boolean
+      ) {
+        const all = [
+          { id: 'p1', title: 'Puzzle 1', difficulty: 'Einfach', description: 'Test 1' },
+          { id: 'p2', title: 'Puzzle 2', difficulty: 'Mittel', description: 'Test 2' },
+        ];
+        return all
+          .map((puzzle, index) => ({ index, puzzle }))
+          .filter(
+            ({ puzzle }) =>
+              (difficulty === undefined || puzzle.difficulty === difficulty) &&
+              (fairy === undefined || puzzle.id.startsWith('fairy-') === fairy)
+          );
+      }),
+    },
+  };
+});
 
 describe('PuzzleMenu', () => {
   let puzzleMenu: PuzzleMenu;

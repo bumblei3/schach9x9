@@ -16,6 +16,8 @@ interface GeneratedPuzzle {
   difficulty: string;
   setupStr: string;
   solution: MoveResult[];
+  generated?: boolean;
+  mateIn?: number;
 }
 
 /**
@@ -40,6 +42,8 @@ export class ProceduralGenerator {
           title: `Generiert: ${difficulty === 'easy' ? 'Matt in 1' : 'Matt in 2'}`,
           description: `Weiß am Zug. Finde das Matt in ${depth} ${depth > 1 ? 'Zügen' : 'Zug'}.`,
           difficulty: difficulty === 'easy' ? 'Einfach' : 'Mittel',
+          generated: true,
+          mateIn: depth,
           setupStr: PuzzleGenerator.boardToString(board, 'white'),
           solution: solution,
         };
