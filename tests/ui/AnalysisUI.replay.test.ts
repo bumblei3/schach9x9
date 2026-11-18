@@ -60,6 +60,7 @@ function makeGame() {
     validMoves: null,
     lastMoveHighlight: null,
     savedGameState: null,
+    replayMode: false,
     moveController: { reconstructBoardAtMove: vi.fn() },
   };
 }
@@ -103,5 +104,19 @@ describe('AnalysisUI-Replay: Ausgangszustand', () => {
     ui.enterReplayMode();
 
     expect(game.moveController.reconstructBoardAtMove).toHaveBeenCalled();
+  });
+
+  test('replayMode schottet das Brett ab und wird beim Verlassen gelöst', () => {
+    const game = makeGame();
+    const ui = new AnalysisUI({ game } as never);
+    expect(game.replayMode).toBeFalsy();
+
+    ui.enterReplayMode();
+    // BoardRenderer (Drag/Hover) und GameController.handleCellClick lesen
+    // genau diesen Schalter — ohne ihn ist das Brett im Replay klickbar.
+    expect(game.replayMode).toBe(true);
+
+    ui.exitReplayMode();
+    expect(game.replayMode).toBe(false);
   });
 });

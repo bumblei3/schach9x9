@@ -3,24 +3,14 @@
  * @module GameStatusUI
  */
 import { BOARD_SIZE, PHASES, PIECE_VALUES } from '../config.js';
-import { renderBoard } from './BoardRenderer.js';
 import { getOpeningName } from '../ai/OpeningDatabase.js';
 import { openingBookUI } from './OpeningBookUI.js';
-import type { Game, PieceWithMoved, MoveHistoryEntry } from '../gameEngine.js';
+import type { Game, MoveHistoryEntry } from '../gameEngine.js';
 import { computeMaterialSeries } from '../analyze/materialSeries.js';
 import { buildVariantTree } from '../analyze/variantTree.js';
 import type { Piece } from '../types/core.js';
 import { moveToAlgebraic } from '../openingTrainer.js';
 import { t } from '../i18n.js';
-import type { Square } from '../types/core.js';
-
-interface SavedGameState {
-  board: (PieceWithMoved | null)[][];
-  turn: 'white' | 'black';
-  selectedSquare: Square | null;
-  validMoves: Square[];
-  lastMoveHighlight: { from: Square; to: Square } | null;
-}
 
 /** Helper: access dynamic properties not in Game interface */
 const g = <T>(game: Game, key: string): T | undefined =>
@@ -544,77 +534,4 @@ export function showStatisticsOverlay(game: Game): void {
     updateStatistics(game);
     overlay.classList.remove('hidden');
   }
-}
-
-/**
- * Replay-Modus Funktionen.
- */
-export function updateReplayUI(game: Game): void {
-  const moveNumEl = document.getElementById('replay-move-num');
-  if (moveNumEl) moveNumEl.textContent = String(game.replayPosition + 1);
-  const first = document.getElementById('replay-first') as HTMLButtonElement,
-    prev = document.getElementById('replay-prev') as HTMLButtonElement,
-    next = document.getElementById('replay-next') as HTMLButtonElement,
-    last = document.getElementById('replay-last') as HTMLButtonElement;
-  if (first) first.disabled = game.replayPosition === -1;
-  if (prev) prev.disabled = game.replayPosition === -1;
-  if (next) next.disabled = game.replayPosition === game.moveHistory.length - 1;
-  if (last) last.disabled = game.replayPosition === game.moveHistory.length - 1;
-  renderBoard(game);
-}
-
-export function enterReplayMode(game: Game): void {
-  if (game.replayMode || game.moveHistory.length === 0) return;
-  const gk = game as unknown as Record<string, unknown>;
-  gk.savedGameState = {
-    board: JSON.parse(JSON.stringify(game.board)),
-    turn: game.turn,
-    selectedSquare: game.selectedSquare,
-    validMoves: game.validMoves,
-    lastMoveHighlight: game.lastMoveHighlight,
-  };
-  game.replayMode = true;
-  game.replayPosition = game.moveHistory.length - 1;
-  if (gk.stopClock) (gk.stopClock as () => void)();
-
-  const statusEl = document.getElementById('replay-status');
-  const exitEl = document.getElementById('replay-exit');
-  const controlEl = document.getElementById('replay-control');
-  if (statusEl) statusEl.classList.remove('hidden');
-  if (exitEl) exitEl.classList.remove('hidden');
-  if (controlEl) controlEl.classList.remove('hidden');
-
-  const undo = document.getElementById('undo-btn') as HTMLButtonElement;
-  if (undo) undo.disabled = true;
-  updateReplayUI(game);
-}
-
-export function exitReplayMode(game: Game): void {
-  if (!game.replayMode) return;
-  const gk = game as unknown as Record<string, unknown>;
-  const saved = gk.savedGameState as SavedGameState | null;
-  if (saved) {
-    game.board = saved.board;
-    game.turn = saved.turn;
-    game.selectedSquare = saved.selectedSquare;
-    game.validMoves = saved.validMoves;
-    game.lastMoveHighlight = saved.lastMoveHighlight;
-  }
-  game.replayMode = false;
-  game.replayPosition = -1;
-  gk.savedGameState = null;
-
-  const statusEl = document.getElementById('replay-status');
-  const exitEl = document.getElementById('replay-exit');
-  const controlEl = document.getElementById('replay-control');
-  if (statusEl) statusEl.classList.add('hidden');
-  if (exitEl) exitEl.classList.add('hidden');
-  if (controlEl) controlEl.classList.add('hidden');
-
-  const undo = document.getElementById('undo-btn') as HTMLButtonElement;
-  if (undo) undo.disabled = game.moveHistory.length === 0 || game.phase !== PHASES.PLAY;
-  renderBoard(game);
-  const gk2 = game as unknown as Record<string, unknown>;
-  if (game.clockEnabled && game.phase === PHASES.PLAY && gk2.startClock)
-    (gk2.startClock as () => void)();
 }

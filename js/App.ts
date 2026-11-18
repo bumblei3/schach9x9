@@ -387,28 +387,6 @@ export class App {
       UI_MODULE!.updateStatistics(this);
     };
 
-    // Replay methods
-    GP.enterReplayMode = function () {
-      return app.moveController!.enterReplayMode();
-    };
-    GP.exitReplayMode = function () {
-      return app.moveController!.exitReplayMode();
-    };
-    GP.replayFirst = function () {
-      return app.moveController!.replayFirst();
-    };
-    GP.replayPrevious = function () {
-      return app.moveController!.replayPrevious();
-    };
-    GP.replayNext = function () {
-      return app.moveController!.replayNext();
-    };
-    GP.replayLast = function () {
-      return app.moveController!.replayLast();
-    };
-    GP.updateReplayUI = function () {
-      return app.moveController!.updateReplayUI();
-    };
     GP.reconstructBoardAtMove = function (idx: number) {
       return app.moveController!.reconstructBoardAtMove(idx);
     };
