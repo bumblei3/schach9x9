@@ -107,6 +107,50 @@ export class AchievementsManager {
     return [...this.achievements];
   }
 
+  /**
+   * Übersetzte Anzeige von Name/Beschreibung. Die Daten selbst bleiben
+   * unangetastet (sie liegen serialisiert im `localStorage`), die Übersetzung
+   * greift beim Rendern und im Toast. Statisch statt per Template-String,
+   * damit der i18n-Audit (`tests/i18n.test.ts`) die Schlüssel findet.
+   */
+  public static nameOf(ach: Achievement): string {
+    switch (ach.id) {
+      case 'first_win':
+        return t('achievement.first_win.name');
+      case 'win_streak_5':
+        return t('achievement.win_streak_5.name');
+      case 'ten_wins':
+        return t('achievement.ten_wins.name');
+      case 'checkmate_in_5':
+        return t('achievement.checkmate_in_5.name');
+      case 'promote_pawn':
+        return t('achievement.promote_pawn.name');
+      case 'win_with_king_only':
+        return t('achievement.win_with_king_only.name');
+      default:
+        return ach.name;
+    }
+  }
+
+  public static descriptionOf(ach: Achievement): string {
+    switch (ach.id) {
+      case 'first_win':
+        return t('achievement.first_win.description');
+      case 'win_streak_5':
+        return t('achievement.win_streak_5.description');
+      case 'ten_wins':
+        return t('achievement.ten_wins.description');
+      case 'checkmate_in_5':
+        return t('achievement.checkmate_in_5.description');
+      case 'promote_pawn':
+        return t('achievement.promote_pawn.description');
+      case 'win_with_king_only':
+        return t('achievement.win_with_king_only.description');
+      default:
+        return ach.description;
+    }
+  }
+
   public isUnlocked(id: string): boolean {
     const ach = this.achievements.find(a => a.id === id);
     return ach ? ach.unlocked : false;
@@ -118,7 +162,10 @@ export class AchievementsManager {
       ach.unlocked = true;
       this.save();
       logger.info(`[AchievementsManager] Achievement unlocked: ${ach.name}`);
-      showToast(t('toast.achievementUnlocked', { name: ach.name }), 'success');
+      showToast(
+        t('toast.achievementUnlocked', { name: AchievementsManager.nameOf(ach) }),
+        'success'
+      );
       return true;
     }
     return false;
