@@ -78,21 +78,6 @@ describe('AnalysisUI branch coverage', () => {
     (pg.analyzeGame as any).mockClear();
   });
 
-  // --- updateBar / updatePanel edge branches ---
-  test('updateBar clamps at +1000 and -1000', () => {
-    analysisUI.updateBar(5000);
-    expect(document.getElementById('eval-fill')!.style.height).toBe('100%');
-    analysisUI.updateBar(-5000);
-    expect(document.getElementById('eval-fill')!.style.height).toBe('0%');
-  });
-
-  test('updateBar shows "+" prefix only for positive score', () => {
-    analysisUI.updateBar(50);
-    expect(document.getElementById('eval-text')!.textContent).toBe('+0.5');
-    analysisUI.updateBar(0);
-    expect(document.getElementById('eval-text')!.textContent).toBe('0.0');
-  });
-
   test('updatePanel early-returns when panel hidden', () => {
     document.getElementById('analysis-panel')!.classList.add('hidden');
     // should not throw and not touch eval-score

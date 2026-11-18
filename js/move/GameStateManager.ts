@@ -332,7 +332,9 @@ export function loadGame(game: Game): boolean {
     game.positionHistory = state.positionHistory;
     game.capturedPieces = state.capturedPieces || { white: [], black: [] };
 
-    const aiToggle = document.getElementById('ai-toggle') as HTMLInputElement;
+    // Wie in `gameController`: der Schalter heißt `#ai-opponent-toggle`, die
+    // alte ID `#ai-toggle` gab es nie.
+    const aiToggle = document.getElementById('ai-opponent-toggle') as HTMLInputElement;
     if (aiToggle) aiToggle.checked = game.isAI;
     const diffSelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
     diffSelects.forEach(select => {
@@ -371,10 +373,9 @@ export function loadGame(game: Game): boolean {
     }
 
     if (game.phase === PHASES.PLAY) {
-      const historyPanel = document.getElementById('move-history-panel');
-      const capturedPanel = document.getElementById('captured-pieces-panel');
-      if (historyPanel) historyPanel.classList.remove('hidden');
-      if (capturedPanel) capturedPanel.classList.remove('hidden');
+      // `#move-history-panel`/`#captured-pieces-panel` existierten nie — die
+      // Historie liegt im Info-Overlay, die geschlagenen Figuren in
+      // `#captured-white`/`#captured-black`.
       if (game.updateBestMoves) game.updateBestMoves();
     }
 

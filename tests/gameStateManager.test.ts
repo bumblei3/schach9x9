@@ -79,8 +79,8 @@ describe('GameStateManager', () => {
             <div id="undo-btn"></div>
             <div id="replay-status" class="hidden"></div>
             <div id="replay-exit" class="hidden"></div>
-            <div id="ai-toggle"></div>
-             <div id="difficulty-select"></div>
+            <input type="checkbox" id="ai-opponent-toggle" checked />
+            <div id="difficulty-select"></div>
         `;
 
     game = {
@@ -383,6 +383,26 @@ describe('GameStateManager', () => {
       expect(newGame.points).toBe(20);
     });
 
+    test('synchronisiert den KI-Gegner-Schalter aus dem geladenen Zustand', () => {
+      // `#ai-toggle` existierte nie im Markup — die Synchronisation lief in
+      // eine null-Guard, der Schalter zeigte nach dem Laden den alten Wert.
+      const state = {
+        phase: 'PLAY',
+        isAI: false,
+        board: Array(9)
+          .fill(null)
+          .map(() => Array(9).fill(null)),
+      };
+      localStorage.setItem('schach9x9_save_autosave', JSON.stringify(state));
+
+      GameStateManager.loadGame(game as Game);
+
+      expect(game.isAI).toBe(false);
+      expect((document.getElementById('ai-opponent-toggle') as HTMLInputElement).checked).toBe(
+        false
+      );
+    });
+
     test('should load with draw offer', () => {
       const state = {
         phase: 'PLAY',
@@ -432,9 +452,8 @@ describe('GameStateManager', () => {
       game.updateBestMoves = vi.fn();
 
       GameStateManager.loadGame(game as Game);
-      expect(document.getElementById('move-history-panel')!.classList.contains('hidden')).toBe(
-        false
-      );
+      // `#move-history-panel` existierte nie — die Historie liegt im
+      // Info-Overlay. Übrig bleibt die Best-Moves-Aktualisierung.
       expect(game.updateBestMoves).toHaveBeenCalled();
     });
 

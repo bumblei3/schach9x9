@@ -347,7 +347,6 @@ function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): 
     panel.setAttribute('aria-live', 'polite');
     // Prefer next to board / action area
     const host =
-      document.getElementById('game-panel') ||
       document.getElementById('board-container') ||
       document.querySelector('.game-area') ||
       document.body;

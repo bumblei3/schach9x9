@@ -41,7 +41,12 @@ class Logger {
 
     // Load settings from localStorage or use defaults
     const savedLevel = this.hasLocalStorage ? localStorage.getItem('logLevel') : null;
-    this.level = savedLevel !== null ? (parseInt(savedLevel, 10) as LogLevel) : LOG_LEVELS.DEBUG;
+    // Produktion: nur WARN und ERROR. DEBUG ist opt-in — die Debug-Konsole
+    // (Ctrl+D) schaltet es bei Öffnen selbst auf DEBUG, damit der
+    // Abhör-Pfad dort voll Aussagekraft behält. Ohne den Schalter bekäme
+    // jeder User pro KI-Worker mehrere console.log-Ausgaben.
+    this.level =
+      savedLevel !== null ? (parseInt(savedLevel, 10) as LogLevel) : LOG_LEVELS.WARN;
 
     const savedEnabled = this.hasLocalStorage ? localStorage.getItem('loggingEnabled') : null;
     this.enabled = savedEnabled !== null ? savedEnabled === 'true' : true;

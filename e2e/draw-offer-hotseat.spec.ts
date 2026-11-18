@@ -11,9 +11,10 @@ async function waitGame(page: PWPage) {
 }
 
 test.describe('Draw offer vs human (hotseat)', () => {
-  test('offering a draw shows the overlay and accepting ends the game as a draw', async ({ page }) => {
+  test('offering a draw shows the overlay and accepting ends the game as a draw', async ({
+    page,
+  }) => {
     const helper = new E2EHelper(page);
-    page.on('dialog', async (d) => { await d.accept(); });
     await helper.goto();
     await helper.startGame('classic');
     await waitGame(page);
@@ -24,10 +25,12 @@ test.describe('Draw offer vs human (hotseat)', () => {
       if (game) game.isAI = false;
     });
 
-    // White offers a draw
+    // White offers a draw — Bestätigung über das eigene Modal, nicht OS-Dialog.
     await page.locator('#action-more-btn').click();
     await expect(page.locator('#draw-offer-btn')).toBeVisible();
     await page.locator('#draw-offer-btn').click();
+    await expect(page.locator('#modal-title')).toHaveText(/Remis anbieten/);
+    await page.locator('#modal-actions .btn-primary').click();
 
     // The opponent (black) sees the draw-offer overlay
     await expect(page.locator('#draw-offer-overlay')).toBeVisible({ timeout: 5000 });
@@ -41,7 +44,6 @@ test.describe('Draw offer vs human (hotseat)', () => {
 
   test('declining a draw keeps the game running', async ({ page }) => {
     const helper = new E2EHelper(page);
-    page.on('dialog', async (d) => { await d.accept(); });
     await helper.goto();
     await helper.startGame('classic');
     await waitGame(page);
@@ -54,6 +56,8 @@ test.describe('Draw offer vs human (hotseat)', () => {
     await page.locator('#action-more-btn').click();
     await expect(page.locator('#draw-offer-btn')).toBeVisible();
     await page.locator('#draw-offer-btn').click();
+    await expect(page.locator('#modal-title')).toHaveText(/Remis anbieten/);
+    await page.locator('#modal-actions .btn-primary').click();
 
     await expect(page.locator('#draw-offer-overlay')).toBeVisible({ timeout: 5000 });
     await page.locator('#decline-draw-btn').click();

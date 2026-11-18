@@ -1,11 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 // Mock DOM
 document.body.innerHTML = `
-  <div id="evaluation-bar">
-    <div id="eval-fill"></div>
-    <div id="eval-text"></div>
-    <div id="eval-marker"></div>
-  </div>
   <div id="analysis-panel" class="hidden">
     <div id="eval-score"></div>
     <div id="eval-bar"></div>
@@ -32,19 +27,21 @@ describe('AnalysisUI', () => {
   });
 
   test('update should update evaluation bar', () => {
+    document.getElementById('analysis-panel')!.classList.remove('hidden');
     const data = { score: 120, depth: 10, nodes: 1000, topMoves: [] };
     analysisUI.update(data);
 
-    const evalText = document.getElementById('eval-text')!;
-    expect(evalText.textContent).toBe('+1.2');
+    expect(document.getElementById('eval-score')!.textContent).toBe('+1.20');
+    expect(document.getElementById('eval-bar')!.style.width).toBe('56%');
   });
 
   test('update should handle large positive scores', () => {
+    document.getElementById('analysis-panel')!.classList.remove('hidden');
     const data = { score: 500, depth: 10, nodes: 1000, topMoves: [] };
     analysisUI.update(data);
 
-    const evalText = document.getElementById('eval-text')!;
-    expect(evalText.textContent).toBe('+5.0');
+    expect(document.getElementById('eval-score')!.textContent).toBe('+5.00');
+    expect(document.getElementById('eval-bar')!.style.width).toBe('75%');
   });
 
   test('togglePanel should toggle visibility', () => {
@@ -76,22 +73,21 @@ describe('AnalysisUI', () => {
     expect(list.innerHTML).toContain('d4');
   });
 
-  test('updateBar should handle negative scores', () => {
-    analysisUI.updateBar(-350);
-    const evalText = document.getElementById('eval-text')!;
-    expect(evalText.textContent).toBe('-3.5');
-    const fill = document.getElementById('eval-fill')!;
-    // Percentage = 50 + (-350)/20 = 50 - 17.5 = 32.5%
-    expect(fill.style.height).toBe('32.5%');
+  test('update should handle negative scores', () => {
+    document.getElementById('analysis-panel')!.classList.remove('hidden');
+    analysisUI.updatePanel(-350, [], 10, 1000);
+    expect(document.getElementById('eval-score')!.textContent).toBe('-3.50');
+    // 50 + (-350)/20 = 32.5%
+    expect(document.getElementById('eval-bar')!.style.width).toBe('32.5%');
   });
 
-  test('updateBar should clamp extreme scores', () => {
-    analysisUI.updateBar(2000); // Greater than 1000, should clamp to 1000
-    const fill = document.getElementById('eval-fill')!;
-    expect(fill.style.height).toBe('100%'); // 50 + 1000/20 = 100
+  test('update should clamp extreme scores', () => {
+    document.getElementById('analysis-panel')!.classList.remove('hidden');
+    analysisUI.updatePanel(2000, [], 10, 1000);
+    expect(document.getElementById('eval-bar')!.style.width).toBe('100%');
 
-    analysisUI.updateBar(-2000); // Less than -1000, should clamp to -1000
-    expect(fill.style.height).toBe('0%'); // 50 + (-1000)/20 = 0
+    analysisUI.updatePanel(-2000, [], 10, 1000);
+    expect(document.getElementById('eval-bar')!.style.width).toBe('0%');
   });
 
   test('updatePanel should update engine info', () => {
@@ -108,12 +104,6 @@ describe('AnalysisUI', () => {
     const engineInfo = document.getElementById('analysis-engine-info')!;
     expect(engineInfo.textContent).toContain('Tiefe: -');
     expect(engineInfo.textContent).toContain('Knoten: -');
-  });
-
-  test('updateBar should not crash when bar elements are null', () => {
-    analysisUI.bar = null;
-    analysisUI.fill = null;
-    expect(() => analysisUI.updateBar(100)).not.toThrow();
   });
 
   test('togglePanel should return false when panel is null', () => {

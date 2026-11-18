@@ -28,7 +28,7 @@ import type { GameController } from '../gameController.js';
 import type { AIDifficulty } from '../config.js';
 import { AI_DIFFICULTIES } from '../config.js';
 import { TIME_CONTROLS } from '../TimeManager.js';
-import { getLocale, isLocale, setLocale } from '../i18n.js';
+import { getLocale, isLocale, setLocale, t } from '../i18n.js';
 
 export class DOMHandler {
   private app: App;
@@ -114,46 +114,6 @@ export class DOMHandler {
         }
       });
     });
-
-    // Standard 8x8 Mode
-    const standard8x8Btn = document.getElementById('standard-8x8-btn');
-    if (standard8x8Btn) {
-      standard8x8Btn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(0, 'standard8x8');
-      });
-    }
-
-    // Standard 8x8 Mode with Upgrades
-    const upgrade8x8Btn = document.getElementById('upgrade-8x8-btn');
-    if (upgrade8x8Btn) {
-      upgrade8x8Btn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(5, 'standard8x8');
-      });
-    }
-
-    // Classic Mode (9x9)
-    const classicBtn = document.getElementById('classic-mode-btn');
-    if (classicBtn) {
-      classicBtn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(0, 'classic');
-      });
-    }
-
-    // Puzzle Mode
-    const puzzleStartBtn = document.getElementById('puzzle-start-btn');
-    if (puzzleStartBtn) {
-      puzzleStartBtn.addEventListener('click', () => {
-        const overlay = document.getElementById('points-selection-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        this.app.init(0, 'puzzle');
-      });
-    }
 
     // Campaign Mode
     const campaignStartBtn = document.getElementById('campaign-start-btn');
@@ -897,20 +857,20 @@ export class DOMHandler {
   /** One Klassisch card. The old upgrade card was the same position plus 15 points. */
   private offerClassicStart(): void {
     UI.showModal(
-      'Klassisch 9×9',
-      'Dieselbe Aufstellung. Sofort spielen, oder vorher 15 Punkte zum Verbessern ausgeben.',
+      t('modes.classic9x9'),
+      t('game.startMessage'),
       [
         {
-          text: 'Sofort spielen',
+          text: t('game.playNow'),
           class: 'btn-primary',
           callback: () => this.startMode('classic', 0),
         },
         {
-          text: 'Mit 15 Punkten verbessern',
+          text: t('game.upgrade15'),
           class: 'btn-secondary',
           callback: () => this.startMode('upgrade', 15),
         },
-        { text: 'Zurück', class: 'btn-secondary' },
+        { text: t('setup.back'), class: 'btn-secondary' },
       ]
     );
   }
@@ -918,20 +878,20 @@ export class DOMHandler {
   /** One 8×8 card. The old upgrade card was the same position plus 15 points. */
   private offerStandard8x8Start(): void {
     UI.showModal(
-      'Standard 8×8',
-      'Dieselbe Aufstellung. Sofort spielen, oder vorher 15 Punkte zum Verbessern ausgeben.',
+      t('modes.standard8x8'),
+      t('game.startMessage'),
       [
         {
-          text: 'Sofort spielen',
+          text: t('game.playNow'),
           class: 'btn-primary',
           callback: () => this.startMode('standard8x8', 0),
         },
         {
-          text: 'Mit 15 Punkten verbessern',
+          text: t('game.upgrade15'),
           class: 'btn-secondary',
           callback: () => this.startMode('upgrade8x8', 15),
         },
-        { text: 'Zurück', class: 'btn-secondary' },
+        { text: t('setup.back'), class: 'btn-secondary' },
       ]
     );
   }
@@ -1026,15 +986,6 @@ export class DOMHandler {
       }
     });
 
-    const restartBtn = document.getElementById('restart-btn');
-    if (restartBtn) {
-      restartBtn.addEventListener('click', () => {
-        if (confirm('Spiel wirklich neu starten?')) {
-          location.reload();
-        }
-      });
-    }
-
     const saveBtn = document.getElementById('save-btn');
     if (saveBtn) {
       saveBtn.addEventListener('click', () => {
@@ -1050,12 +1001,21 @@ export class DOMHandler {
     const resignBtn = document.getElementById('resign-btn');
     if (resignBtn) {
       resignBtn.addEventListener('click', () => {
-        if (this.gameController && confirm('Wirklich aufgeben?')) {
-          this.gameController.resign(this.game.turn);
-          if (mainMenu) {
-            mainMenu.classList.remove('active');
-          }
-        }
+        if (!this.gameController) return;
+        // Kein natives `confirm()`: die App hat ein eigenes Modal
+        // (`showModal`), und `#generic-modal` ist E2E-klickbar, ein
+        // OS-Dialog nicht.
+        UI.showModal(t('game.resignTitle'), t('game.resignMessage'), [
+          {
+            text: t('game.resignConfirm'),
+            class: 'btn-primary',
+            callback: () => {
+              this.gameController!.resign(this.game.turn);
+              if (mainMenu) mainMenu.classList.remove('active');
+            },
+          },
+          { text: t('game.drawCancel'), class: 'btn-secondary' },
+        ]);
       });
     }
 
@@ -1072,10 +1032,18 @@ export class DOMHandler {
     const drawBtn = document.getElementById('draw-offer-btn');
     if (drawBtn) {
       drawBtn.addEventListener('click', () => {
-        if (this.gameController && confirm('Remis anbieten?')) {
-          this.gameController.offerDraw(this.game.turn);
-          if (mainMenu) mainMenu.classList.remove('active');
-        }
+        if (!this.gameController) return;
+        UI.showModal(t('game.drawOfferTitle'), t('game.drawOfferMessage'), [
+          {
+            text: t('game.drawOfferConfirm'),
+            class: 'btn-primary',
+            callback: () => {
+              this.gameController!.offerDraw(this.game.turn);
+              if (mainMenu) mainMenu.classList.remove('active');
+            },
+          },
+          { text: t('game.drawCancel'), class: 'btn-secondary' },
+        ]);
       });
     }
 
@@ -1145,6 +1113,11 @@ export class DOMHandler {
         const target = e.target as HTMLSelectElement;
         if (isLocale(target.value)) {
           setLocale(target.value);
+          // `applyI18n` kennt nur die Marker im Markup. Dynamische Texte
+          // (Statuspille, Sieger-Zeile, Toasts) wurden schon gesetzt und
+          // blieben sonst in der alten Sprache stehen, bis der nächste
+          // Render lief.
+          if (this.game) UI.updateStatus(this.game);
         }
       });
     }

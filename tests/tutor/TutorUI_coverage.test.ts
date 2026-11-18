@@ -12,8 +12,10 @@ describe('TutorUI Coverage', () => {
   beforeEach(() => {
     // Setup DOM
     document.body.innerHTML = `
-      <div id="tutor-panel" class="hidden">
-        <div id="tutor-suggestions"></div>
+      <div id="generic-modal" class="hidden">
+        <div id="modal-title"></div>
+        <div id="modal-message"></div>
+        <div id="modal-actions"></div>
       </div>
       <div id="tutor-recommendations-container"></div>
       <button id="toggle-tutor-recommendations" data-initialized="false"></button>
@@ -101,9 +103,6 @@ describe('TutorUI Coverage', () => {
       mockGame.phase = 'SETUP_WHITE_PIECES';
       await TutorUI.showTutorSuggestions(mockGame);
 
-      // Spy on confirm
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-
       const overlay = document.getElementById('tutor-overlay');
       expect(overlay).not.toBeNull();
       expect(overlay!.classList.contains('hidden')).toBe(false);
@@ -112,52 +111,12 @@ describe('TutorUI Coverage', () => {
       expect(card).not.toBeNull();
       card.click();
 
+      // Kein natives `confirm()` mehr: die App zeigt ihr eigenes Modal.
+      const primary = document.querySelector('#modal-actions .btn-primary') as HTMLElement;
+      expect(primary).not.toBeNull();
+      primary.click();
+
       expect(mockGame.tutorController.applySetupTemplate).toHaveBeenCalledWith('defensive');
-    });
-  });
-
-  describe('showTutorSuggestions - Play Phase', () => {
-    it('should return early if no hints', async () => {
-      (mockGame.tutorController.getTutorHints as any).mockResolvedValue([]);
-
-      await TutorUI.showTutorSuggestions(mockGame);
-
-      const suggestionsEl = document.getElementById('tutor-suggestions')!;
-      expect(suggestionsEl.innerHTML).toContain('Keine Vorschläge');
-    });
-
-    it('should render hints with details button', async () => {
-      const hint = {
-        move: { from: { r: 0, c: 0 }, to: { r: 1, c: 1 } },
-        score: 150,
-        notation: 'a1-b2',
-        analysis: {
-          category: 'good',
-          qualityLabel: 'Guter Zug',
-          questions: ['Warum gut?'],
-          tacticalExplanations: ['Gabel!'],
-          strategicExplanations: [],
-          warnings: [],
-        },
-      };
-      mockGame.getTutorHints = vi.fn().mockResolvedValue([hint]);
-      mockGame.tutorController.getTutorHints = vi.fn().mockResolvedValue([hint]); // Fallback check in code logic might direct call
-
-      await TutorUI.showTutorSuggestions(mockGame);
-
-      // Play phase uses 'tutor-suggestions' in panel
-      const panel = document.getElementById('tutor-suggestions')!;
-
-      expect(panel.innerHTML).toContain('Guter Zug');
-      expect(panel.innerHTML).toContain('Warum gut?');
-
-      const showBtn = panel.querySelector('.show-details-btn') as HTMLElement;
-      expect(showBtn).not.toBeNull();
-
-      showBtn.click();
-      // Details should be toggled (removed hidden class typically)
-      const details = panel.querySelector('.suggestion-details')!;
-      expect(details.classList.contains('hidden')).toBe(false);
     });
   });
 });

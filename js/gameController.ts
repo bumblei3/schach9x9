@@ -57,6 +57,7 @@ import { ClassicModeStrategy } from './modes/strategies/ClassicMode.js';
 import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 import { OpeningTrainerModeStrategy } from './modes/strategies/OpeningTrainerMode.js';
+import { t } from './i18n.js';
 
 export interface ArrowRendererType {
   clearArrows: () => void;
@@ -494,10 +495,10 @@ export class GameController {
     UI.renderBoard(this.game);
     UI.updateStatus(this.game);
 
-    const message =
-      resigningColor === 'white'
-        ? 'Weiß gibt auf! Schwarz gewinnt.'
-        : 'Schwarz gibt auf! Weiß gewinnt.';
+    const message = t('game.resignResult', {
+      side: t(resigningColor === 'white' ? 'game.sideWhite' : 'game.sideBlack'),
+      winner: t(resigningColor === 'white' ? 'game.sideBlack' : 'game.sideWhite'),
+    });
     this.game.log(message);
 
     const overlay = document.getElementById('game-over-overlay');
@@ -581,7 +582,7 @@ export class GameController {
 
     const gameOverOverlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
-    if (winnerText) winnerText.textContent = 'Remis vereinbart';
+    if (winnerText) winnerText.textContent = t('game.endDrawAgreed');
     if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
 
     this.stopClock();
@@ -665,21 +666,17 @@ export class GameController {
     UI.updateMoveHistoryUI(this.game);
 
     // Sync UI elements (Difficulty, AI Toggle, Panels)
-    const aiToggle = document.getElementById('ai-toggle') as HTMLInputElement;
+    // `#ai-toggle` existierte nie — der Schalter heißt `#ai-opponent-toggle`.
+    // Die Synchronisation aus dem Spielzustand landete daher in einer null-
+    // Guard und der Schalter zeigte nach einem geladenen Partiestand den
+    // alten Wert (dort steht `isAI` im Save, z. B. Hotseat).
+    const aiToggle = document.getElementById('ai-opponent-toggle') as HTMLInputElement;
     if (aiToggle) aiToggle.checked = this.game.isAI;
 
     const diffSelects = document.querySelectorAll<HTMLSelectElement>('#difficulty-select');
     diffSelects.forEach(select => {
       select.value = this.game.difficulty;
     });
-
-    // Ensure panels are visible in PLAY phase
-    if (this.game.phase === PHASES.PLAY) {
-      const historyPanel = document.getElementById('move-history-panel');
-      const capturedPanel = document.getElementById('captured-pieces-panel');
-      if (historyPanel) historyPanel.classList.remove('hidden');
-      if (capturedPanel) capturedPanel.classList.remove('hidden');
-    }
 
     // Restart clock if needed
     if (this.game.phase === PHASES.PLAY && this.game.clockEnabled) {

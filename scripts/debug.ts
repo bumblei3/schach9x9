@@ -3,7 +3,7 @@
  * Features: Log filtering, search, export, AI debug, board state
  */
 
-import { logger } from '../js/logger.js';
+import { logger, LOG_LEVELS } from '../js/logger.js';
 import { campaignManager } from '../js/campaign/CampaignManager.js';
 import { Game } from '../js/gameEngine.js';
 
@@ -328,6 +328,9 @@ export class DebugConsole {
     if (panel) {
       panel.classList.toggle('hidden', !this.isVisible);
       if (this.isVisible) {
+        // Die Konsole ist der Debug-Zugang: volle Stufe, damit der
+        // Abhör-Pfad (und die Log-Liste hier) nichts verbirgt.
+        logger.setLevel(LOG_LEVELS.DEBUG);
         this.updateStateTab();
       }
     }
