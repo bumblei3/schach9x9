@@ -706,6 +706,19 @@ export const de = {
   'puzzle.mate-in-1-backrank.description': 'Weiß zieht und setzt in 1 Zug matt (Grundlinienmatt).',
   'puzzle.mate-in-1-backrank2.title': 'Puzzle 13: Grundlinienmatt (Turm + Läufer)',
   'puzzle.mate-in-1-backrank2.description': 'Weiß zieht und setzt in 1 Zug matt (Grundlinienmatt mit Läufer-Deckung).',
+  'campaign.intro.goals': 'Missionsziele',
+  'campaign.intro.checkmate': 'Setze den Gegner Matt',
+  'campaign.intro.defeat': 'Besiege den Gegner',
+  'campaign.intro.start': 'Mission starten',
+  'campaign.intro.taktikGenie': 'Taktik-Genie zeigt einmal den besten Zug, sobald die Mission läuft.',
+  'campaign.intro.plunderer': 'Plünderer stellt einen Extra-Bauern aufs Feld.',
+  'campaign.intro.sprungfeder': 'Sprungfeder stellt einen Extra-Springer aufs Feld.',
+  'campaign.intro.festung': 'Festung: der Turm kostet 3 Punkte.',
+  'campaign.intro.majestaet': 'Majestät: die Dame kostet 7 Punkte.',
+  'campaign.budget.label': 'Budget {total}',
+  'campaign.budget.breakdown': 'Budget {total} ({base} + {parts})',
+  'campaign.budget.eliteGarde': 'Elite-Garde',
+  'campaign.budget.taktiker': 'Taktiker',
 } as const;
 
 export const en: Record<keyof typeof de, string> = {
@@ -1384,6 +1397,19 @@ export const en: Record<keyof typeof de, string> = {
   'puzzle.mate-in-1-backrank.description': 'White to move and mate in 1 (back-rank mate).',
   'puzzle.mate-in-1-backrank2.title': 'Puzzle 13: Back-Rank Mate (Rook + Bishop)',
   'puzzle.mate-in-1-backrank2.description': 'White to move and mate in 1 (back-rank mate with bishop cover).',
+  'campaign.intro.goals': 'Mission objectives',
+  'campaign.intro.checkmate': 'Checkmate the opponent',
+  'campaign.intro.defeat': 'Defeat the opponent',
+  'campaign.intro.start': 'Start mission',
+  'campaign.intro.taktikGenie': 'Tactic Genius reveals the best move once the mission is underway.',
+  'campaign.intro.plunderer': 'Plunderer puts an extra pawn on the board.',
+  'campaign.intro.sprungfeder': 'Springbok puts an extra knight on the board.',
+  'campaign.intro.festung': 'Fortress: the rook costs 3 points.',
+  'campaign.intro.majestaet': 'Majesty: the queen costs 7 points.',
+  'campaign.budget.label': 'Purse {total}',
+  'campaign.budget.breakdown': 'Purse {total} ({base} + {parts})',
+  'campaign.budget.eliteGarde': 'Elite Guard',
+  'campaign.budget.taktiker': 'Tactician',
 };
 
 export type I18nKey = keyof typeof de;
