@@ -473,7 +473,10 @@ export class AnalysisUI {
     this.replayActive = true;
     this.replayPosition = 0;
     this.replayTotal = history.length;
-
+    // `game.replayMode` ist der Abschottungs-Schalter: BoardRenderer (Drag &
+    // Hover) und `GameController.handleCellClick` werten ihn. Ohne ihn
+    // ließe sich im Replay auf dem Brett auswählen und ziehen.
+    this.game.replayMode = true;
     // `reconstructBoardAtMove` baut auf `savedGameState` auf: es stellt die
     // Endstellung wieder her und zieht von dort aus die Züge zurück. Ohne
     // Snapshot bleibt das Brett auf der Endstellung stehen und nur die
@@ -697,6 +700,7 @@ export class AnalysisUI {
     if (overlay) overlay.classList.add('hidden');
 
     const game = this.game;
+    game.replayMode = false;
     game.replayPosition = -1;
     game.lastMove = null;
     // Aus dem Snapshot des Replay-Startpunkts zurück auf die Endstellung.

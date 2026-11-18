@@ -23,8 +23,6 @@ import {
   undoMove as undoMoveFromManager,
   saveGame as saveGameFromManager,
   loadGame as loadGameFromManager,
-  enterReplayMode as enterReplayModeFromManager,
-  exitReplayMode as exitReplayModeFromManager,
   reconstructBoardAtMove as reconstructBoardAtMoveFromManager,
   undoMoveForReplay as undoMoveForReplayFromManager,
 } from './move/GameStateManager.js';
@@ -205,8 +203,7 @@ export class MoveController {
     if (undoBtn) {
       const count = this.game.moveHistory.length;
       const canUndo =
-        count > 0 &&
-        (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
+        count > 0 && (this.game.phase === PHASES.PLAY || this.game.phase === PHASES.ANALYSIS);
       undoBtn.disabled = !canUndo;
       const label = undoBtn.querySelector?.('.action-label');
       if (label) {
@@ -299,66 +296,6 @@ export class MoveController {
     }
 
     return baseValue;
-  }
-
-  /**
-   * Enters replay mode
-   */
-  public enterReplayMode(): void {
-    return enterReplayModeFromManager(this.game, this);
-  }
-
-  /**
-   * Exits replay mode
-   */
-  public exitReplayMode(): void {
-    return exitReplayModeFromManager(this.game);
-  }
-
-  public replayFirst(): void {
-    if (!this.game.replayMode) this.enterReplayMode();
-    this.game.replayPosition = -1;
-    this.updateReplayUI();
-  }
-
-  public replayPrevious(): void {
-    if (!this.game.replayMode) this.enterReplayMode();
-    if (this.game.replayPosition > -1) {
-      this.game.replayPosition--;
-      this.updateReplayUI();
-    }
-  }
-
-  public replayNext(): void {
-    if (!this.game.replayMode) this.enterReplayMode();
-    if (this.game.replayPosition < this.game.moveHistory.length - 1) {
-      this.game.replayPosition++;
-      this.updateReplayUI();
-    }
-  }
-
-  public replayLast(): void {
-    if (!this.game.replayMode) this.enterReplayMode();
-    this.game.replayPosition = this.game.moveHistory.length - 1;
-    this.updateReplayUI();
-  }
-
-  public updateReplayUI(): void {
-    reconstructBoardAtMoveFromManager(this.game, this.game.replayPosition);
-    const replayMoveNum = document.getElementById('replay-move-num');
-    if (replayMoveNum) replayMoveNum.textContent = String(this.game.replayPosition + 1);
-
-    const first = document.getElementById('replay-first') as HTMLButtonElement;
-    const prev = document.getElementById('replay-prev') as HTMLButtonElement;
-    const next = document.getElementById('replay-next') as HTMLButtonElement;
-    const last = document.getElementById('replay-last') as HTMLButtonElement;
-
-    if (first) first.disabled = this.game.replayPosition === -1;
-    if (prev) prev.disabled = this.game.replayPosition === -1;
-    if (next) next.disabled = this.game.replayPosition === this.game.moveHistory.length - 1;
-    if (last) last.disabled = this.game.replayPosition === this.game.moveHistory.length - 1;
-
-    UI.renderBoard(this.game);
   }
 
   public reconstructBoardAtMove(moveIndex: number): void {

@@ -184,18 +184,6 @@ describe('GameStatusUI Component', () => {
     expect(document.getElementById('clock-black')!.classList.contains('active')).toBe(false);
   });
 
-  test('should handle replay mode transitions', () => {
-    game.moveHistory = [{}];
-    GameStatusUI.enterReplayMode(game);
-    expect(game.replayMode).toBe(true);
-    expect(document.getElementById('replay-control')!.classList.contains('hidden')).toBe(false);
-    expect(game.stopClock).toHaveBeenCalled();
-
-    GameStatusUI.exitReplayMode(game);
-    expect(game.replayMode).toBe(false);
-    expect(document.getElementById('replay-control')!.classList.contains('hidden')).toBe(true);
-    expect(game.startClock).toHaveBeenCalled();
-  });
 
   test('should render eval graph and handle clicks', () => {
     game.moveHistory = [{ evalScore: 100 }, { evalScore: 200 }, { evalScore: -50 }];

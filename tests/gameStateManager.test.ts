@@ -293,17 +293,6 @@ describe('GameStateManager', () => {
   });
 
   describe('Replay Mode', () => {
-    test('should manage replay mode lifecycle', () => {
-      game.moveHistory = [
-        { from: { r: 0, c: 0 }, to: { r: 1, c: 1 }, piece: { type: 'p' } } as any,
-      ];
-      GameStateManager.enterReplayMode(game as Game, moveController);
-      expect(game.replayMode).toBe(true);
-
-      GameStateManager.exitReplayMode(game as Game);
-      expect(game.replayMode).toBe(false);
-      expect(game.startClock).toHaveBeenCalled();
-    });
 
     test('should undo moves for replay', () => {
       const move = {
