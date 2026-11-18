@@ -129,7 +129,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           </div>
           <div class="header-center">
             <div id="status-display" data-testid="status-display" class="status-pill">Weiß: Wähle einen Korridor für den König</div>
-            <div class="header-clocks" aria-label="Uhren">
+            <div class="header-clocks" aria-label="Uhren" data-i18n-aria-label="a11y.clocks">
               <span class="header-clock header-clock-opp" id="header-clock-black">5:00</span>
               <span class="header-clock-sep" aria-hidden="true">·</span>
               <span class="header-clock header-clock-self" id="header-clock-white">5:00</span>
@@ -145,7 +145,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
         </header>
 
         <!-- Main Game Area -->
-        <div class="game-area" role="main" aria-label="Spielfeld">
+        <div class="game-area" role="main" aria-label="Spielfeld" data-i18n-aria-label="a11y.board">
           <!-- Visually hidden H1: keeps a level-one heading in the accessibility
                tree (axe page-has-heading-one) without painting anything. It
                lives inside the main landmark, otherwise axe flags it as
@@ -184,8 +184,8 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             <!-- 3D Battle Chess Container -->
             <div id="battle-chess-3d-container"></div>
 
-            <div id="board-wrapper" aria-label="Schachbrett" role="region">
-              <div id="board" data-testid="board" role="grid" aria-label="Schachbrett" class="board-9x9" style="grid-template-columns: repeat(9, minmax(0px, 1fr)); grid-template-rows: repeat(9, minmax(0px, 1fr));"><div class="board-row" role="row"><div class="cell light" data-r="0" data-c="0" role="gridcell" tabindex="-1" aria-label="a9" draggable="true"></div><div class="cell dark" data-r="0" data-c="1" role="gridcell" tabindex="-1" aria-label="b9" draggable="true"></div><div class="cell light border-right" data-r="0" data-c="2" role="gridcell" tabindex="-1" aria-label="c9" draggable="true"></div><div class="cell dark" data-r="0" data-c="3" role="gridcell" tabindex="-1" aria-label="d9" draggable="true"></div><div class="cell light" data-r="0" data-c="4" role="gridcell" tabindex="-1" aria-label="e9" draggable="true"></div><div class="cell dark border-right" data-r="0" data-c="5" role="gridcell" tabindex="-1" aria-label="f9" draggable="true"></div><div class="cell light" data-r="0" data-c="6" role="gridcell" tabindex="-1" aria-label="g9" draggable="true"></div><div class="cell dark" data-r="0" data-c="7" role="gridcell" tabindex="-1" aria-label="h9" draggable="true"></div><div class="cell light" data-r="0" data-c="8" role="gridcell" tabindex="-1" aria-label="i9" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark" data-r="1" data-c="0" role="gridcell" tabindex="-1" aria-label="a8" draggable="true"></div><div class="cell light" data-r="1" data-c="1" role="gridcell" tabindex="-1" aria-label="b8" draggable="true"></div><div class="cell dark border-right" data-r="1" data-c="2" role="gridcell" tabindex="-1" aria-label="c8" draggable="true"></div><div class="cell light" data-r="1" data-c="3" role="gridcell" tabindex="-1" aria-label="d8" draggable="true"></div><div class="cell dark" data-r="1" data-c="4" role="gridcell" tabindex="-1" aria-label="e8" draggable="true"></div><div class="cell light border-right" data-r="1" data-c="5" role="gridcell" tabindex="-1" aria-label="f8" draggable="true"></div><div class="cell dark" data-r="1" data-c="6" role="gridcell" tabindex="-1" aria-label="g8" draggable="true"></div><div class="cell light" data-r="1" data-c="7" role="gridcell" tabindex="-1" aria-label="h8" draggable="true"></div><div class="cell dark" data-r="1" data-c="8" role="gridcell" tabindex="-1" aria-label="i8" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light border-bottom" data-r="2" data-c="0" role="gridcell" tabindex="-1" aria-label="a7" draggable="true"></div><div class="cell dark border-bottom" data-r="2" data-c="1" role="gridcell" tabindex="-1" aria-label="b7" draggable="true"></div><div class="cell light border-right border-bottom" data-r="2" data-c="2" role="gridcell" tabindex="-1" aria-label="c7" draggable="true"></div><div class="cell dark border-bottom" data-r="2" data-c="3" role="gridcell" tabindex="-1" aria-label="d7" draggable="true"></div><div class="cell light border-bottom" data-r="2" data-c="4" role="gridcell" tabindex="-1" aria-label="e7" draggable="true"></div><div class="cell dark border-right border-bottom" data-r="2" data-c="5" role="gridcell" tabindex="-1" aria-label="f7" draggable="true"></div><div class="cell light border-bottom" data-r="2" data-c="6" role="gridcell" tabindex="-1" aria-label="g7" draggable="true"></div><div class="cell dark border-bottom" data-r="2" data-c="7" role="gridcell" tabindex="-1" aria-label="h7" draggable="true"></div><div class="cell light border-bottom" data-r="2" data-c="8" role="gridcell" tabindex="-1" aria-label="i7" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark" data-r="3" data-c="0" role="gridcell" tabindex="-1" aria-label="a6" draggable="true"></div><div class="cell light" data-r="3" data-c="1" role="gridcell" tabindex="-1" aria-label="b6" draggable="true"></div><div class="cell dark border-right" data-r="3" data-c="2" role="gridcell" tabindex="-1" aria-label="c6" draggable="true"></div><div class="cell light" data-r="3" data-c="3" role="gridcell" tabindex="-1" aria-label="d6" draggable="true"></div><div class="cell dark" data-r="3" data-c="4" role="gridcell" tabindex="-1" aria-label="e6" draggable="true"></div><div class="cell light border-right" data-r="3" data-c="5" role="gridcell" tabindex="-1" aria-label="f6" draggable="true"></div><div class="cell dark" data-r="3" data-c="6" role="gridcell" tabindex="-1" aria-label="g6" draggable="true"></div><div class="cell light" data-r="3" data-c="7" role="gridcell" tabindex="-1" aria-label="h6" draggable="true"></div><div class="cell dark" data-r="3" data-c="8" role="gridcell" tabindex="-1" aria-label="i6" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light" data-r="4" data-c="0" role="gridcell" tabindex="-1" aria-label="a5" draggable="true"></div><div class="cell dark" data-r="4" data-c="1" role="gridcell" tabindex="-1" aria-label="b5" draggable="true"></div><div class="cell light border-right" data-r="4" data-c="2" role="gridcell" tabindex="-1" aria-label="c5" draggable="true"></div><div class="cell dark" data-r="4" data-c="3" role="gridcell" tabindex="-1" aria-label="d5" draggable="true"></div><div class="cell light" data-r="4" data-c="4" role="gridcell" tabindex="-1" aria-label="e5" draggable="true"></div><div class="cell dark border-right" data-r="4" data-c="5" role="gridcell" tabindex="-1" aria-label="f5" draggable="true"></div><div class="cell light" data-r="4" data-c="6" role="gridcell" tabindex="-1" aria-label="g5" draggable="true"></div><div class="cell dark" data-r="4" data-c="7" role="gridcell" tabindex="-1" aria-label="h5" draggable="true"></div><div class="cell light" data-r="4" data-c="8" role="gridcell" tabindex="-1" aria-label="i5" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark border-bottom" data-r="5" data-c="0" role="gridcell" tabindex="-1" aria-label="a4" draggable="true"></div><div class="cell light border-bottom" data-r="5" data-c="1" role="gridcell" tabindex="-1" aria-label="b4" draggable="true"></div><div class="cell dark border-right border-bottom" data-r="5" data-c="2" role="gridcell" tabindex="-1" aria-label="c4" draggable="true"></div><div class="cell light border-bottom" data-r="5" data-c="3" role="gridcell" tabindex="-1" aria-label="d4" draggable="true"></div><div class="cell dark border-bottom" data-r="5" data-c="4" role="gridcell" tabindex="-1" aria-label="e4" draggable="true"></div><div class="cell light border-right border-bottom" data-r="5" data-c="5" role="gridcell" tabindex="-1" aria-label="f4" draggable="true"></div><div class="cell dark border-bottom" data-r="5" data-c="6" role="gridcell" tabindex="-1" aria-label="g4" draggable="true"></div><div class="cell light border-bottom" data-r="5" data-c="7" role="gridcell" tabindex="-1" aria-label="h4" draggable="true"></div><div class="cell dark border-bottom" data-r="5" data-c="8" role="gridcell" tabindex="-1" aria-label="i4" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light" data-r="6" data-c="0" role="gridcell" tabindex="-1" aria-label="a3" draggable="true"></div><div class="cell dark" data-r="6" data-c="1" role="gridcell" tabindex="-1" aria-label="b3" draggable="true"></div><div class="cell light border-right" data-r="6" data-c="2" role="gridcell" tabindex="-1" aria-label="c3" draggable="true"></div><div class="cell dark" data-r="6" data-c="3" role="gridcell" tabindex="-1" aria-label="d3" draggable="true"></div><div class="cell light" data-r="6" data-c="4" role="gridcell" tabindex="-1" aria-label="e3" draggable="true"></div><div class="cell dark border-right" data-r="6" data-c="5" role="gridcell" tabindex="-1" aria-label="f3" draggable="true"></div><div class="cell light" data-r="6" data-c="6" role="gridcell" tabindex="-1" aria-label="g3" draggable="true"></div><div class="cell dark" data-r="6" data-c="7" role="gridcell" tabindex="-1" aria-label="h3" draggable="true"></div><div class="cell light" data-r="6" data-c="8" role="gridcell" tabindex="-1" aria-label="i3" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark" data-r="7" data-c="0" role="gridcell" tabindex="-1" aria-label="a2" draggable="true"></div><div class="cell light" data-r="7" data-c="1" role="gridcell" tabindex="-1" aria-label="b2" draggable="true"></div><div class="cell dark border-right" data-r="7" data-c="2" role="gridcell" tabindex="-1" aria-label="c2" draggable="true"></div><div class="cell light" data-r="7" data-c="3" role="gridcell" tabindex="-1" aria-label="d2" draggable="true"></div><div class="cell dark" data-r="7" data-c="4" role="gridcell" tabindex="-1" aria-label="e2" draggable="true"></div><div class="cell light border-right" data-r="7" data-c="5" role="gridcell" tabindex="-1" aria-label="f2" draggable="true"></div><div class="cell dark" data-r="7" data-c="6" role="gridcell" tabindex="-1" aria-label="g2" draggable="true"></div><div class="cell light" data-r="7" data-c="7" role="gridcell" tabindex="-1" aria-label="h2" draggable="true"></div><div class="cell dark" data-r="7" data-c="8" role="gridcell" tabindex="-1" aria-label="i2" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light" data-r="8" data-c="0" role="gridcell" tabindex="-1" aria-label="a1" draggable="true"></div><div class="cell dark" data-r="8" data-c="1" role="gridcell" tabindex="-1" aria-label="b1" draggable="true"></div><div class="cell light border-right" data-r="8" data-c="2" role="gridcell" tabindex="-1" aria-label="c1" draggable="true"></div><div class="cell dark" data-r="8" data-c="3" role="gridcell" tabindex="-1" aria-label="d1" draggable="true"></div><div class="cell light" data-r="8" data-c="4" role="gridcell" tabindex="-1" aria-label="e1" draggable="true"></div><div class="cell dark border-right" data-r="8" data-c="5" role="gridcell" tabindex="-1" aria-label="f1" draggable="true"></div><div class="cell light" data-r="8" data-c="6" role="gridcell" tabindex="-1" aria-label="g1" draggable="true"></div><div class="cell dark" data-r="8" data-c="7" role="gridcell" tabindex="-1" aria-label="h1" draggable="true"></div><div class="cell light" data-r="8" data-c="8" role="gridcell" tabindex="-1" aria-label="i1" draggable="true"></div></div></div>
+            <div id="board-wrapper" aria-label="Schachbrett" data-i18n-aria-label="a11y.chessboard" role="region">
+              <div id="board" data-testid="board" role="grid" aria-label="Schachbrett" data-i18n-aria-label="a11y.chessboard" class="board-9x9" style="grid-template-columns: repeat(9, minmax(0px, 1fr)); grid-template-rows: repeat(9, minmax(0px, 1fr));"><div class="board-row" role="row"><div class="cell light" data-r="0" data-c="0" role="gridcell" tabindex="-1" aria-label="a9" draggable="true"></div><div class="cell dark" data-r="0" data-c="1" role="gridcell" tabindex="-1" aria-label="b9" draggable="true"></div><div class="cell light border-right" data-r="0" data-c="2" role="gridcell" tabindex="-1" aria-label="c9" draggable="true"></div><div class="cell dark" data-r="0" data-c="3" role="gridcell" tabindex="-1" aria-label="d9" draggable="true"></div><div class="cell light" data-r="0" data-c="4" role="gridcell" tabindex="-1" aria-label="e9" draggable="true"></div><div class="cell dark border-right" data-r="0" data-c="5" role="gridcell" tabindex="-1" aria-label="f9" draggable="true"></div><div class="cell light" data-r="0" data-c="6" role="gridcell" tabindex="-1" aria-label="g9" draggable="true"></div><div class="cell dark" data-r="0" data-c="7" role="gridcell" tabindex="-1" aria-label="h9" draggable="true"></div><div class="cell light" data-r="0" data-c="8" role="gridcell" tabindex="-1" aria-label="i9" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark" data-r="1" data-c="0" role="gridcell" tabindex="-1" aria-label="a8" draggable="true"></div><div class="cell light" data-r="1" data-c="1" role="gridcell" tabindex="-1" aria-label="b8" draggable="true"></div><div class="cell dark border-right" data-r="1" data-c="2" role="gridcell" tabindex="-1" aria-label="c8" draggable="true"></div><div class="cell light" data-r="1" data-c="3" role="gridcell" tabindex="-1" aria-label="d8" draggable="true"></div><div class="cell dark" data-r="1" data-c="4" role="gridcell" tabindex="-1" aria-label="e8" draggable="true"></div><div class="cell light border-right" data-r="1" data-c="5" role="gridcell" tabindex="-1" aria-label="f8" draggable="true"></div><div class="cell dark" data-r="1" data-c="6" role="gridcell" tabindex="-1" aria-label="g8" draggable="true"></div><div class="cell light" data-r="1" data-c="7" role="gridcell" tabindex="-1" aria-label="h8" draggable="true"></div><div class="cell dark" data-r="1" data-c="8" role="gridcell" tabindex="-1" aria-label="i8" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light border-bottom" data-r="2" data-c="0" role="gridcell" tabindex="-1" aria-label="a7" draggable="true"></div><div class="cell dark border-bottom" data-r="2" data-c="1" role="gridcell" tabindex="-1" aria-label="b7" draggable="true"></div><div class="cell light border-right border-bottom" data-r="2" data-c="2" role="gridcell" tabindex="-1" aria-label="c7" draggable="true"></div><div class="cell dark border-bottom" data-r="2" data-c="3" role="gridcell" tabindex="-1" aria-label="d7" draggable="true"></div><div class="cell light border-bottom" data-r="2" data-c="4" role="gridcell" tabindex="-1" aria-label="e7" draggable="true"></div><div class="cell dark border-right border-bottom" data-r="2" data-c="5" role="gridcell" tabindex="-1" aria-label="f7" draggable="true"></div><div class="cell light border-bottom" data-r="2" data-c="6" role="gridcell" tabindex="-1" aria-label="g7" draggable="true"></div><div class="cell dark border-bottom" data-r="2" data-c="7" role="gridcell" tabindex="-1" aria-label="h7" draggable="true"></div><div class="cell light border-bottom" data-r="2" data-c="8" role="gridcell" tabindex="-1" aria-label="i7" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark" data-r="3" data-c="0" role="gridcell" tabindex="-1" aria-label="a6" draggable="true"></div><div class="cell light" data-r="3" data-c="1" role="gridcell" tabindex="-1" aria-label="b6" draggable="true"></div><div class="cell dark border-right" data-r="3" data-c="2" role="gridcell" tabindex="-1" aria-label="c6" draggable="true"></div><div class="cell light" data-r="3" data-c="3" role="gridcell" tabindex="-1" aria-label="d6" draggable="true"></div><div class="cell dark" data-r="3" data-c="4" role="gridcell" tabindex="-1" aria-label="e6" draggable="true"></div><div class="cell light border-right" data-r="3" data-c="5" role="gridcell" tabindex="-1" aria-label="f6" draggable="true"></div><div class="cell dark" data-r="3" data-c="6" role="gridcell" tabindex="-1" aria-label="g6" draggable="true"></div><div class="cell light" data-r="3" data-c="7" role="gridcell" tabindex="-1" aria-label="h6" draggable="true"></div><div class="cell dark" data-r="3" data-c="8" role="gridcell" tabindex="-1" aria-label="i6" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light" data-r="4" data-c="0" role="gridcell" tabindex="-1" aria-label="a5" draggable="true"></div><div class="cell dark" data-r="4" data-c="1" role="gridcell" tabindex="-1" aria-label="b5" draggable="true"></div><div class="cell light border-right" data-r="4" data-c="2" role="gridcell" tabindex="-1" aria-label="c5" draggable="true"></div><div class="cell dark" data-r="4" data-c="3" role="gridcell" tabindex="-1" aria-label="d5" draggable="true"></div><div class="cell light" data-r="4" data-c="4" role="gridcell" tabindex="-1" aria-label="e5" draggable="true"></div><div class="cell dark border-right" data-r="4" data-c="5" role="gridcell" tabindex="-1" aria-label="f5" draggable="true"></div><div class="cell light" data-r="4" data-c="6" role="gridcell" tabindex="-1" aria-label="g5" draggable="true"></div><div class="cell dark" data-r="4" data-c="7" role="gridcell" tabindex="-1" aria-label="h5" draggable="true"></div><div class="cell light" data-r="4" data-c="8" role="gridcell" tabindex="-1" aria-label="i5" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark border-bottom" data-r="5" data-c="0" role="gridcell" tabindex="-1" aria-label="a4" draggable="true"></div><div class="cell light border-bottom" data-r="5" data-c="1" role="gridcell" tabindex="-1" aria-label="b4" draggable="true"></div><div class="cell dark border-right border-bottom" data-r="5" data-c="2" role="gridcell" tabindex="-1" aria-label="c4" draggable="true"></div><div class="cell light border-bottom" data-r="5" data-c="3" role="gridcell" tabindex="-1" aria-label="d4" draggable="true"></div><div class="cell dark border-bottom" data-r="5" data-c="4" role="gridcell" tabindex="-1" aria-label="e4" draggable="true"></div><div class="cell light border-right border-bottom" data-r="5" data-c="5" role="gridcell" tabindex="-1" aria-label="f4" draggable="true"></div><div class="cell dark border-bottom" data-r="5" data-c="6" role="gridcell" tabindex="-1" aria-label="g4" draggable="true"></div><div class="cell light border-bottom" data-r="5" data-c="7" role="gridcell" tabindex="-1" aria-label="h4" draggable="true"></div><div class="cell dark border-bottom" data-r="5" data-c="8" role="gridcell" tabindex="-1" aria-label="i4" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light" data-r="6" data-c="0" role="gridcell" tabindex="-1" aria-label="a3" draggable="true"></div><div class="cell dark" data-r="6" data-c="1" role="gridcell" tabindex="-1" aria-label="b3" draggable="true"></div><div class="cell light border-right" data-r="6" data-c="2" role="gridcell" tabindex="-1" aria-label="c3" draggable="true"></div><div class="cell dark" data-r="6" data-c="3" role="gridcell" tabindex="-1" aria-label="d3" draggable="true"></div><div class="cell light" data-r="6" data-c="4" role="gridcell" tabindex="-1" aria-label="e3" draggable="true"></div><div class="cell dark border-right" data-r="6" data-c="5" role="gridcell" tabindex="-1" aria-label="f3" draggable="true"></div><div class="cell light" data-r="6" data-c="6" role="gridcell" tabindex="-1" aria-label="g3" draggable="true"></div><div class="cell dark" data-r="6" data-c="7" role="gridcell" tabindex="-1" aria-label="h3" draggable="true"></div><div class="cell light" data-r="6" data-c="8" role="gridcell" tabindex="-1" aria-label="i3" draggable="true"></div></div><div class="board-row" role="row"><div class="cell dark" data-r="7" data-c="0" role="gridcell" tabindex="-1" aria-label="a2" draggable="true"></div><div class="cell light" data-r="7" data-c="1" role="gridcell" tabindex="-1" aria-label="b2" draggable="true"></div><div class="cell dark border-right" data-r="7" data-c="2" role="gridcell" tabindex="-1" aria-label="c2" draggable="true"></div><div class="cell light" data-r="7" data-c="3" role="gridcell" tabindex="-1" aria-label="d2" draggable="true"></div><div class="cell dark" data-r="7" data-c="4" role="gridcell" tabindex="-1" aria-label="e2" draggable="true"></div><div class="cell light border-right" data-r="7" data-c="5" role="gridcell" tabindex="-1" aria-label="f2" draggable="true"></div><div class="cell dark" data-r="7" data-c="6" role="gridcell" tabindex="-1" aria-label="g2" draggable="true"></div><div class="cell light" data-r="7" data-c="7" role="gridcell" tabindex="-1" aria-label="h2" draggable="true"></div><div class="cell dark" data-r="7" data-c="8" role="gridcell" tabindex="-1" aria-label="i2" draggable="true"></div></div><div class="board-row" role="row"><div class="cell light" data-r="8" data-c="0" role="gridcell" tabindex="-1" aria-label="a1" draggable="true"></div><div class="cell dark" data-r="8" data-c="1" role="gridcell" tabindex="-1" aria-label="b1" draggable="true"></div><div class="cell light border-right" data-r="8" data-c="2" role="gridcell" tabindex="-1" aria-label="c1" draggable="true"></div><div class="cell dark" data-r="8" data-c="3" role="gridcell" tabindex="-1" aria-label="d1" draggable="true"></div><div class="cell light" data-r="8" data-c="4" role="gridcell" tabindex="-1" aria-label="e1" draggable="true"></div><div class="cell dark border-right" data-r="8" data-c="5" role="gridcell" tabindex="-1" aria-label="f1" draggable="true"></div><div class="cell light" data-r="8" data-c="6" role="gridcell" tabindex="-1" aria-label="g1" draggable="true"></div><div class="cell dark" data-r="8" data-c="7" role="gridcell" tabindex="-1" aria-label="h1" draggable="true"></div><div class="cell light" data-r="8" data-c="8" role="gridcell" tabindex="-1" aria-label="i1" draggable="true"></div></div></div>
             <div class="col-labels" style="grid-template-columns: repeat(9, 1fr);"><span class="coord-label">a</span><span class="coord-label">b</span><span class="coord-label">c</span><span class="coord-label">d</span><span class="coord-label">e</span><span class="coord-label">f</span><span class="coord-label">g</span><span class="coord-label">h</span><span class="coord-label">i</span></div><div class="row-labels" style="grid-template-rows: repeat(9, 1fr);"><span class="coord-label">9</span><span class="coord-label">8</span><span class="coord-label">7</span><span class="coord-label">6</span><span class="coord-label">5</span><span class="coord-label">4</span><span class="coord-label">3</span><span class="coord-label">2</span><span class="coord-label">1</span></div></div>
           </div>
 
@@ -233,9 +233,9 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           </div>
 
           <!-- Action Bar (UI-A: primary + overflow) -->
-          <div class="action-bar" role="toolbar" aria-label="Spiel-Aktionen">
+          <div class="action-bar" role="toolbar" aria-label="Spiel-Aktionen" data-i18n-aria-label="a11y.gameActions">
             <div class="action-bar-primary">
-              <button id="undo-btn" class="action-icon-btn" title="Rückgängig (U)" data-i18n-title="analysis.undoTitle" aria-label="Rückgängig (U)" data-i18n-aria-label="analysis.undoTitle" data-tooltip="Rückgängig (U)" data-shortcut="U">
+              <button id="undo-btn" class="action-icon-btn" title="Rückgängig (U)" data-i18n-title="action.undoHint" aria-label="Rückgängig (U)" data-i18n-aria-label="action.undoHint" data-tooltip="Rückgängig (U)" data-shortcut="U">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                   <path d="M3 7v6h6"></path>
                   <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
@@ -247,7 +247,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                    Funktion selbst (redoStack, \`moveController.redoMove\`) existiert,
                    aber keinen Button im Markup gab es nie. Ohne ihn war der
                    \`redo-btn\`-Zweig in \`updateUndoRedoButtons\` toter Code. -->
-              <button id="redo-btn" class="action-icon-btn" title="Wiederholen (R)" data-i18n-title="analysis.redoTitle" aria-label="Wiederholen (R)" data-i18n-aria-label="analysis.redoTitle" data-tooltip="Wiederholen (R)" data-shortcut="R">
+              <button id="redo-btn" class="action-icon-btn" title="Wiederholen (R)" data-i18n-title="action.redoHint" aria-label="Wiederholen (R)" data-i18n-aria-label="action.redoHint" data-tooltip="Wiederholen (R)" data-shortcut="R">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                   <path d="M21 7v6h-6"></path>
                   <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path>
@@ -255,21 +255,21 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <span class="action-label" data-i18n="analysis.redo">Wiederholen</span>
                 <span class="action-shortcut">R</span>
               </button>
-              <button id="hint-btn" class="action-icon-btn" title="Tipps anzeigen (H)" aria-label="Tipps anzeigen (H)" data-tooltip="Tipps anzeigen (H)" data-shortcut="H">
+              <button id="hint-btn" class="action-icon-btn" title="Tipps anzeigen (H)" data-i18n-title="action.hintsHint" aria-label="Tipps anzeigen (H)" data-i18n-aria-label="action.hintsHint" data-tooltip="Tipps anzeigen (H)" data-shortcut="H">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                   <path d="M9.663 17h4.673M12 3v1M6.343 4.343l-.707-.707M17.657 4.343l.707-.707M4 12h1M19 12h1M12 21a9 9 0 0 0 9-9c0-4.97-4.03-9-9-9s-9 4.03-9 9a9 9 0 0 0 9 9z"></path>
                 </svg>
                 <span class="action-label">Tipps</span>
                 <span class="action-shortcut">H</span>
               </button>
-              <button id="best-move-btn" class="action-icon-btn" title="Bester Zug (B)" aria-label="Bester Zug (B)" data-tooltip="Bester Zug (B)" data-shortcut="B">
+              <button id="best-move-btn" class="action-icon-btn" title="Bester Zug (B)" data-i18n-title="action.bestMoveHint" aria-label="Bester Zug (B)" data-i18n-aria-label="action.bestMoveHint" data-tooltip="Bester Zug (B)" data-shortcut="B">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="#22c55e" stroke-width="2" fill="none">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 <span class="action-label" data-i18n="board.bestMove">Bester Zug</span>
                 <span class="action-shortcut">B</span>
               </button>
-              <button id="toggle-analysis-btn" class="action-icon-btn" title="Engine-Analyse (A)" aria-label="Engine-Analyse (A)" data-tooltip="Engine-Analyse (A)" data-shortcut="A">
+              <button id="toggle-analysis-btn" class="action-icon-btn" title="Engine-Analyse (A)" data-i18n-title="action.analysisHint" aria-label="Engine-Analyse (A)" data-i18n-aria-label="action.analysisHint" data-tooltip="Engine-Analyse (A)" data-shortcut="A">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--accent-primary)" stroke-width="2" fill="none">
                   <path d="M12 20v-8m-4 8v-4m8 4v-6m-12 6h16"></path>
                 </svg>
@@ -279,7 +279,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             </div>
 
             <div class="action-bar-more">
-              <button id="action-more-btn" class="action-icon-btn" title="Mehr" aria-label="Mehr" aria-haspopup="menu" aria-expanded="false" aria-controls="action-overflow-menu" data-tooltip="Mehr">
+              <button id="action-more-btn" class="action-icon-btn" title="Mehr" data-i18n-title="a11y.more" aria-label="Mehr" data-i18n-aria-label="a11y.more" aria-haspopup="menu" aria-expanded="false" aria-controls="action-overflow-menu" data-tooltip="Mehr">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                   <circle cx="5" cy="12" r="1.5" fill="currentColor"></circle>
                   <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
@@ -287,8 +287,8 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 </svg>
                 <span class="action-label" data-i18n="more">Mehr</span>
               </button>
-              <div id="action-overflow-menu" class="action-overflow-menu hidden" role="menu" aria-label="Weitere Aktionen">
-                <button id="threats-btn" class="action-icon-btn" role="menuitem" title="Drohungen visualisieren (T)" aria-label="Drohungen visualisieren (T)" data-tooltip="Drohungen (T)" data-shortcut="T">
+              <div id="action-overflow-menu" class="action-overflow-menu hidden" role="menu" aria-label="Weitere Aktionen" data-i18n-aria-label="a11y.moreActions">
+                <button id="threats-btn" class="action-icon-btn" role="menuitem" title="Drohungen visualisieren (T)" data-i18n-title="action.threatsHint" aria-label="Drohungen visualisieren (T)" data-i18n-aria-label="action.threatsHint" data-tooltip="Drohungen (T)" data-shortcut="T">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ef4444" stroke-width="2" fill="none">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                     <line x1="12" y1="9" x2="12" y2="13"></line>
@@ -297,13 +297,13 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   <span class="action-label">Drohungen</span>
                   <span class="action-shortcut">T</span>
                 </button>
-                <button id="opportunities-btn" class="action-icon-btn" role="menuitem" title="Chancen anzeigen" aria-label="Chancen anzeigen" data-tooltip="Chancen">
+                <button id="opportunities-btn" class="action-icon-btn" role="menuitem" title="Chancen anzeigen" data-i18n-title="action.opportunities" aria-label="Chancen anzeigen" data-i18n-aria-label="action.opportunities" data-tooltip="Chancen">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="#f59e0b" stroke-width="2" fill="none">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                   </svg>
                   <span class="action-label">Chancen</span>
                 </button>
-                <button id="toggle-opening-book-btn" class="action-icon-btn" role="menuitem" title="Eröffnungsbuch" data-i18n-title="analysis.openingBook" aria-label="Eröffnungsbuch" data-i18n-aria-label="analysis.openingBook" data-tooltip="Eröffnungsbuch">
+                <button id="toggle-opening-book-btn" class="action-icon-btn" role="menuitem" title="Eröffnungsbuch" data-i18n-title="action.openingBook" aria-label="Eröffnungsbuch" data-i18n-aria-label="action.openingBook" data-tooltip="Eröffnungsbuch">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="#9f5fef" stroke-width="2" fill="none">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                     <path d="M6.5 17H20"></path>
@@ -313,7 +313,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </svg>
                   <span class="action-label" data-i18n="analysis.opening">Eröffnung</span>
                 </button>
-                <button id="toggle-3d-btn" class="action-icon-btn" role="menuitem" title="3D-Schlachtmodus (3)" aria-label="3D-Schlachtmodus (3)" data-tooltip="3D (3)" data-shortcut="3">
+                <button id="toggle-3d-btn" class="action-icon-btn" role="menuitem" title="3D-Schlachtmodus (3)" data-i18n-title="action.battle3dHint" aria-label="3D-Schlachtmodus (3)" data-i18n-aria-label="action.battle3dHint" data-tooltip="3D (3)" data-shortcut="3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                     <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
@@ -342,7 +342,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <option value="frost">Frost</option>
                   </select>
                 </div>
-                <button id="info-toggle-btn" class="action-icon-btn" role="menuitem" title="Info / Zugprotokoll" aria-label="Info / Zugprotokoll" data-tooltip="Info">
+                <button id="info-toggle-btn" class="action-icon-btn" role="menuitem" title="Info / Zugprotokoll" data-i18n-title="action.moveLog" aria-label="Info / Zugprotokoll" data-i18n-aria-label="action.moveLog" data-tooltip="Info">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -350,7 +350,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </svg>
                   <span class="action-label">Info</span>
                 </button>
-                <button id="stats-btn" class="action-icon-btn" role="menuitem" title="Statistiken anzeigen" data-i18n-title="game.statisticsTitle" aria-label="Statistiken anzeigen" data-i18n-aria-label="game.statisticsTitle" data-tooltip="Statistiken">
+                <button id="stats-btn" class="action-icon-btn" role="menuitem" title="Statistiken anzeigen" data-i18n-title="action.statistics" aria-label="Statistiken anzeigen" data-i18n-aria-label="action.statistics" data-tooltip="Statistiken">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                     <rect x="4" y="12" width="4" height="8"></rect>
                     <rect x="10" y="7" width="4" height="13"></rect>
@@ -358,7 +358,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </svg>
                   <span class="action-label" data-i18n="game.statistics">Statistiken</span>
                 </button>
-                <button id="fullscreen-btn" class="action-icon-btn" role="menuitem" title="Vollbild (F)" aria-label="Vollbild (F)" data-tooltip="Vollbild (F)" data-shortcut="F">
+                <button id="fullscreen-btn" class="action-icon-btn" role="menuitem" title="Vollbild (F)" data-i18n-title="action.fullscreenHint" aria-label="Vollbild (F)" data-i18n-aria-label="action.fullscreenHint" data-tooltip="Vollbild (F)" data-shortcut="F">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                     <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
                     <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
@@ -367,43 +367,43 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </svg>
                   <span class="action-label">Vollbild</span>
 
-                  </button><button id="resign-btn" class="action-icon-btn" role="menuitem" title="Aufgeben (Esc)" aria-label="Aufgeben" data-tooltip="Aufgeben" data-shortcut="Esc">
+                  </button><button id="resign-btn" class="action-icon-btn" role="menuitem" title="Aufgeben (Esc)" data-i18n-title="action.resignHint" aria-label="Aufgeben" data-i18n-aria-label="action.resign" data-tooltip="Aufgeben" data-shortcut="Esc">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17L5 12l5-5"></path><path d="M15 12l-5-5 5-5"></path></svg>
                     <span class="action-label">Aufgeben</span>
                   </button>
-                  <button id="draw-offer-btn" class="action-icon-btn" role="menuitem" title="Remis anbieten" aria-label="Remis anbieten" data-tooltip="Remis anbieten">
+                  <button id="draw-offer-btn" class="action-icon-btn" role="menuitem" title="Remis anbieten" data-i18n-title="game.offerDraw" aria-label="Remis anbieten" data-i18n-aria-label="game.offerDraw" data-tooltip="Remis anbieten">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"></path><path d="M12 9v4"></path><path d="M9 20L15 4"></path></svg>
                     <span class="action-label" data-i18n="game.offerDraw">Remis anbieten</span>
                   </button>
-                  <button id="export-pgn-btn" class="action-icon-btn" role="menuitem" title="PGN exportieren" aria-label="PGN exportieren" data-tooltip="PGN exportieren">
+                  <button id="export-pgn-btn" class="action-icon-btn" role="menuitem" title="PGN exportieren" data-i18n-title="action.exportPgn" aria-label="PGN exportieren" data-i18n-aria-label="action.exportPgn" data-tooltip="PGN exportieren">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                     <span class="action-label">PGN exportieren</span>
                   </button>
-                  <button id="export-gif-btn" class="action-icon-btn" role="menuitem" title="Replay als GIF exportieren" aria-label="Replay als GIF exportieren" data-tooltip="Replay als GIF exportieren">
+                  <button id="export-gif-btn" class="action-icon-btn" role="menuitem" title="Replay als GIF exportieren" data-i18n-title="action.exportGif" aria-label="Replay als GIF exportieren" data-i18n-aria-label="action.exportGif" data-tooltip="Replay als GIF exportieren">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                     <span class="action-label">GIF exportieren</span>
                   </button>
-                  <button id="share-position-btn" class="action-icon-btn" role="menuitem" title="Position teilen (Link)" aria-label="Position teilen" data-tooltip="Position mit Link teilen">
+                  <button id="share-position-btn" class="action-icon-btn" role="menuitem" title="Position teilen (Link)" data-i18n-title="action.sharePositionLink" aria-label="Position teilen" data-i18n-aria-label="action.sharePosition" data-tooltip="Position mit Link teilen">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><line x1="8.59" y1="13.41" x2="15.42" y2="18.42"></line><line x1="15.41" y1="6.59" x2="8.59" y2="11.41"></line></svg>
                     <span class="action-label">Position teilen</span>
                   </button>
-                  <button id="save-btn" class="action-icon-btn" role="menuitem" title="Position speichern" aria-label="Position speichern" data-tooltip="Position speichern">
+                  <button id="save-btn" class="action-icon-btn" role="menuitem" title="Position speichern" data-i18n-title="action.savePosition" aria-label="Position speichern" data-i18n-aria-label="action.savePosition" data-tooltip="Position speichern">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="12" x2="12" y2="21"></line><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="12" y2="6"></line></svg>
                     <span class="action-label" data-i18n="save">Speichern</span>
                   </button>
-                  <button id="load-btn" class="action-icon-btn" role="menuitem" title="Position laden" aria-label="Position laden" data-tooltip="Position laden">
+                  <button id="load-btn" class="action-icon-btn" role="menuitem" title="Position laden" data-i18n-title="action.loadPosition" aria-label="Position laden" data-i18n-aria-label="action.loadPosition" data-tooltip="Position laden">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="M6 12l1.41 1.41"></path><path d="M12 6l8.29 13.7"></path><path d="M12 22v-4"></path><path d="M6 12l1.41-1.41"></path><path d="M12 18l8.29-13.7"></path></svg>
                     <span class="action-label" data-i18n="load">Laden</span>
                   </button>
-                  <button id="analysis-mode-btn" class="action-icon-btn" role="menuitem" title="Analyse-Modus" aria-label="Analyse-Modus" data-tooltip="Analyse-Modus">
+                  <button id="analysis-mode-btn" class="action-icon-btn" role="menuitem" title="Analyse-Modus" data-i18n-title="action.analysisMode" aria-label="Analyse-Modus" data-i18n-aria-label="action.analysisMode" data-tooltip="Analyse-Modus">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                     <span class="action-label" data-i18n="analysis.analysisMode">Analyse-Modus</span>
                   </button>
-                  <button id="help-btn" class="action-icon-btn" role="menuitem" title="Hilfe / Tutorial" aria-label="Hilfe / Tutorial" data-tooltip="Hilfe / Tutorial">
+                  <button id="help-btn" class="action-icon-btn" role="menuitem" title="Hilfe / Tutorial" data-i18n-title="action.help" aria-label="Hilfe / Tutorial" data-i18n-aria-label="action.help" data-tooltip="Hilfe / Tutorial">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     <span class="action-label">Hilfe / Tutorial</span>
                   </button>
-                  <button id="feedback-btn" class="action-icon-btn" role="menuitem" title="Feedback / Problem melden" aria-label="Feedback / Problem melden" data-tooltip="Feedback" data-report-issue="">
+                  <button id="feedback-btn" class="action-icon-btn" role="menuitem" title="Feedback / Problem melden" data-i18n-title="action.feedback" aria-label="Feedback / Problem melden" data-i18n-aria-label="action.feedback" data-tooltip="Feedback" data-report-issue="">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     <span class="action-label">Feedback</span>
                   </button>
@@ -415,7 +415,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
         <!-- PANEL LAYER: Contextual side/top panels -->
         <div id="panel-layer">
           <!-- Analysis Panel (Deep Analysis) -->
-          <div id="analysis-panel" class="analysis-panel hidden" role="region" aria-label="Tiefenanalyse">
+          <div id="analysis-panel" class="analysis-panel hidden" role="region" aria-label="Tiefenanalyse" data-i18n-aria-label="action.deepAnalysis">
             <div class="analysis-header">
               <h2 data-i18n="analysis.deepAnalysis">Tiefenanalyse</h2>
               <button id="close-analysis-btn" class="close-icon-btn">×</button>
@@ -468,7 +468,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           </div>
 
           <!-- Opening Book Panel -->
-          <div id="move-heatmap-panel" class="analysis-panel hidden" role="region" aria-label="Feld-Hitze">
+          <div id="move-heatmap-panel" class="analysis-panel hidden" role="region" aria-label="Feld-Hitze" data-i18n-aria-label="action.squareHeat">
             <div class="opening-book-header">
               <h2 data-i18n="analysis.squareHeat">Feld-Hitze (Zug-Aktivität)</h2>
               <button id="close-heatmap-btn" class="close-icon-btn">×</button>
@@ -477,7 +477,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
               <p class="heatmap-hint" data-i18n="analysis.squareHeatDesc">
                 Wie oft jedes Feld als Zug-Ursprung (von) oder Ziel (nach) genutzt wurde.
               </p>
-              <div id="heatmap-grid" class="heatmap-grid" role="grid" aria-label="Zug-Hitze Karte"></div>
+              <div id="heatmap-grid" class="heatmap-grid" role="grid" aria-label="Zug-Hitze Karte" data-i18n-aria-label="action.moveHeatmap"></div>
               <div class="heatmap-legend">
                 <span>wenig</span>
                 <span class="heatmap-legend-bar"></span>
@@ -530,7 +530,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           </div>
 
           <!-- Shop Panel (Contextual) -->
-          <div id="shop-panel" class="shop-panel bottom-sheet hidden" role="dialog" aria-label="Shop">
+          <div id="shop-panel" class="shop-panel bottom-sheet hidden" role="dialog" aria-label="Shop" data-i18n-aria-label="a11y.shop">
             <div class="sheet-handle" aria-hidden="true"></div>
             <div class="shop-header">
               <h2 data-i18n="modes.hire">Truppen anheuern</h2>
@@ -895,7 +895,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             </nav>
 
             <!-- Content Area -->
-            <div class="menu-content-area" role="region" aria-label="Hauptmenü">
+            <div class="menu-content-area" role="region" aria-label="Hauptmenü" data-i18n-aria-label="a11y.mainMenu">
               <!-- Play View -->
               <div id="view-play" class="menu-view active">
                 <h2 class="section-title" data-i18n="menu.newGame">Neues Spiel</h2>
@@ -1023,7 +1023,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <h3 data-i18n="settings.languageLabel">Sprache</h3>
                     <div class="setting-row">
                       <label for="language-select" data-i18n="settings.displayLanguage">Anzeigesprache</label>
-                      <select id="language-select" class="menu-select" aria-label="Anzeigesprache">
+                      <select id="language-select" class="menu-select" aria-label="Anzeigesprache" data-i18n-aria-label="a11y.displayLanguage">
                         <option value="de">Deutsch</option>
                         <option value="en">English</option>
                       </select>
@@ -1033,7 +1033,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <h3 data-i18n="settings.appearance">Darstellung</h3>
                     <div class="setting-row">
                       <label data-i18n="settings.boardDesign">Brett-Design</label>
-                      <select id="theme-select" class="menu-select" aria-label="Brett-Design">
+                      <select id="theme-select" class="menu-select" aria-label="Brett-Design" data-i18n-aria-label="a11y.boardDesign">
                         <option value="classic" data-i18n="classic">Klassisch</option>
                         <option value="blue" data-i18n="blue">Blau</option>
                         <option value="green" data-i18n="settings.green">Grün</option>
@@ -1062,7 +1062,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                       <label data-i18n="sound">Sound</label>
                       <div class="volume-control">
                         <label class="toggle-switch">
-                          <input type="checkbox" id="sound-toggle" checked="" aria-label="Sound an/aus">
+                          <input type="checkbox" id="sound-toggle" checked="" aria-label="Sound an/aus" data-i18n-aria-label="a11y.soundToggle">
                           <span class="toggle-slider"></span>
                         </label>
                       </div>
@@ -1074,7 +1074,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <span id="volume-value" class="volume-value" aria-live="polite">30%</span>
                   </div>
                       <label>Schwierigkeit</label>
-                      <select id="difficulty-select" class="menu-select" aria-label="Schwierigkeit">
+                      <select id="difficulty-select" class="menu-select" aria-label="Schwierigkeit" data-i18n-aria-label="settings.difficulty">
                         <option value="beginner" data-i18n="settings.beginner">Anfänger</option>
                         <option value="easy" data-i18n="easy">Einfach</option>
                         <option value="medium" data-i18n="medium">Mittel</option>
@@ -1089,13 +1089,13 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <div class="setting-row">
                       <label for="clock-toggle">Spieluhr</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" id="clock-toggle" aria-label="Spieluhr an/aus">
+                        <input type="checkbox" id="clock-toggle" aria-label="Spieluhr an/aus" data-i18n-aria-label="a11y.clockToggle">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>Zeitsteuerung</label>
-                      <select id="time-control-select" class="menu-select" aria-label="Zeitsteuerung">
+                      <select id="time-control-select" class="menu-select" aria-label="Zeitsteuerung" data-i18n-aria-label="a11y.timeControl">
                         <option value="blitz3">Blitz 3+2</option>
                         <option value="blitz5" selected="">Blitz 5+3</option>
                         <option value="rapid10">Rapid 10</option>
@@ -1111,7 +1111,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                       <label data-i18n="settings.aiOpponent">AI-Gegner</label>
                       <div class="volume-control">
                         <label class="toggle-switch">
-                          <input type="checkbox" id="ai-opponent-toggle" checked="" aria-label="AI-Gegner an/aus">
+                          <input type="checkbox" id="ai-opponent-toggle" checked="" aria-label="AI-Gegner an/aus" data-i18n-aria-label="a11y.aiOpponentToggle">
                           <span class="toggle-slider"></span>
                         </label>
                       </div>
@@ -1128,7 +1128,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
                       <label>KI-Mentor</label>
-                      <select id="ki-mentor-level-select" class="menu-select" aria-label="KI-Mentor-Level">
+                      <select id="ki-mentor-level-select" class="menu-select" aria-label="KI-Mentor-Level" data-i18n-aria-label="settings.mentorLevel">
                         <option value="OFF">Aus</option>
                         <option value="STANDARD" selected="" data-i18n="mentor.standard">Standard (Nur Patzer)</option>
                         <option value="STRICT" data-i18n="mentor.strict">Streng (Auch Fehler)</option>
