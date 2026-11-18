@@ -4,6 +4,7 @@ import { PHASES, type Game, type PieceWithMoved } from '../gameEngine.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { shopPieceCost } from '../campaign/pfeilschnell.js';
 import { logger } from '../logger.js';
+import { t } from '../i18n.js';
 import * as UI from '../ui.js';
 
 /**
@@ -94,7 +95,7 @@ export class ShopManager {
         window.battleChess3D.removePiece(r, c);
       }
     } else {
-      if (this.game.log) this.game.log('Bitte zuerst eine Figur im Shop auswählen!');
+      if (this.game.log) this.game.log(t('log.selectShopPieceFirst'));
     }
   }
 
@@ -161,7 +162,7 @@ export class ShopManager {
 
     const upgrades = this.getAvailableUpgrades(piece.type);
     if (upgrades.length === 0) {
-      if (this.game.log) this.game.log('Keine Upgrades für diese Figur verfügbar.');
+      if (this.game.log) this.game.log(t('log.noUpgradesAvailable'));
       return;
     }
 

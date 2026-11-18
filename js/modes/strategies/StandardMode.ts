@@ -4,6 +4,7 @@ import { PHASES, type Phase } from '../../config.js';
 import * as UI from '../../ui.js';
 import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
+import { t } from '../../i18n.js';
 
 export class StandardModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
@@ -52,7 +53,7 @@ export class StandardModeStrategy implements GameModeStrategy {
       if (game.phase === PHASES.SETUP_WHITE_UPGRADES) {
         game.phase = PHASES.SETUP_BLACK_UPGRADES;
         game.points = game.initialPoints;
-        game.log('Weiß fertig. Schwarz: Truppen-Upgrades möglich.');
+        game.log(t('log.whiteDoneBlackUpgrades'));
 
         if (game.isAI) {
           setTimeout(() => controller.finishSetupPhase(), 500);

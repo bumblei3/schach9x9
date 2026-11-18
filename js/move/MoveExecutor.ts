@@ -455,7 +455,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     game.phase = PHASES.GAME_OVER as Phase;
     game.winner = !whiteKingExists ? 'black' : 'white';
     const winner = t(!whiteKingExists ? 'game.sideBlack' : 'game.sideWhite');
-    game.log(`KÖNIG GESCHLAGEN! ${winner} gewinnt!`);
+    game.log(t('log.kingCaptured', { winner }));
 
     // Triple Flash Effect on capture (+ screen shake already in animateMove)
     if (UI.flashSquare && lastTo) {

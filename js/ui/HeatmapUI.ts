@@ -7,6 +7,7 @@
  */
 import { computeHeatmap, cellIntensity, BOARD_SIZE } from '../analyze/heatmap.js';
 import type { MoveHistoryEntry } from '../gameEngine.js';
+import { t } from '../i18n.js';
 
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
 
@@ -57,18 +58,24 @@ export class HeatmapUI {
           'aria-label',
           `${FILES[c]}${displayR + 1}: ${cell.from} von, ${cell.to} nach`
         );
-        el.title = `${FILES[c]}${displayR + 1}: ${cell.from}× von, ${cell.to}× nach`;
+        el.title = t('heatmap.cellTitle', {
+          file: FILES[c],
+          rank: displayR + 1,
+          from: cell.from,
+          to: cell.to,
+        });
         this.grid.appendChild(el);
       }
     }
 
     if (this.hottestLabel) {
       if (hottest && hottest.count > 0) {
-        this.hottestLabel.textContent = `Aktivstes Feld: ${FILES[hottest.c]}${
-          hottest.r + 1
-        } (${hottest.count}× genutzt)`;
+        this.hottestLabel.textContent = t('heatmap.hottest', {
+          square: `${FILES[hottest.c]}${hottest.r + 1}`,
+          count: hottest.count,
+        });
       } else {
-        this.hottestLabel.textContent = 'Noch keine Züge gespielt.';
+        this.hottestLabel.textContent = t('heatmap.empty');
       }
     }
   }

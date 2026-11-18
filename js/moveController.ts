@@ -28,6 +28,7 @@ import {
 } from './move/GameStateManager.js';
 import * as UI from './ui.js';
 import { animateMove as animateMoveFromBoardRenderer } from './ui/BoardRenderer.js';
+import { t } from './i18n.js';
 
 /**
  * Orchestrator for move-related logic, delegating to specialized sub-modules.
@@ -207,9 +208,10 @@ export class MoveController {
       undoBtn.disabled = !canUndo;
       const label = undoBtn.querySelector?.('.action-label');
       if (label) {
-        label.textContent = count > 0 ? `Rückgängig (${count})` : 'Rückgängig';
+        label.textContent = count > 0 ? t('action.undoCount', { count }) : t('action.undoPlain');
       } else {
-        undoBtn.textContent = `⏮ Rückgängig${count > 0 ? ` (${count})` : ''}`;
+        undoBtn.textContent =
+          count > 0 ? `⏮ ${t('action.undoCount', { count })}` : `⏮ ${t('action.undoPlain')}`;
       }
     }
 
@@ -224,9 +226,14 @@ export class MoveController {
       const label = redoBtn.querySelector?.('.action-label');
       if (label) {
         label.textContent =
-          this.redoStack.length > 0 ? `Wiederholen (${this.redoStack.length})` : 'Wiederholen';
+          this.redoStack.length > 0
+            ? t('action.redoCount', { count: this.redoStack.length })
+            : t('action.redoPlain');
       } else {
-        redoBtn.textContent = `⏭ Wiederholen${this.redoStack.length > 0 ? ` (${this.redoStack.length})` : ''}`;
+        redoBtn.textContent =
+          this.redoStack.length > 0
+            ? `⏭ ${t('action.redoCount', { count: this.redoStack.length })}`
+            : `⏭ ${t('action.redoPlain')}`;
       }
     }
   }

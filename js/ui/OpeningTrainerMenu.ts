@@ -8,6 +8,7 @@
  */
 
 import type { OpeningTrainerManager } from '../openingTrainer.js';
+import { t } from '../i18n.js';
 
 export class OpeningTrainerMenu {
   private container: HTMLElement;
@@ -39,13 +40,12 @@ export class OpeningTrainerMenu {
     root.className = 'opening-trainer-menu';
 
     const heading = document.createElement('h2');
-    heading.textContent = 'Eröffnungs-Trainer';
+    heading.textContent = t('openingTrainer.title');
     root.appendChild(heading);
 
     const hint = document.createElement('p');
     hint.className = 'opening-trainer-hint';
-    hint.textContent =
-      'Finde den Buch-Zug (höchste Engine-Gewichtung). Falsche Züge setzen die Serie zurück.';
+    hint.textContent = t('openingTrainer.hint');
     root.appendChild(hint);
 
     root.appendChild(this.buildProgressReadout());
@@ -59,7 +59,7 @@ export class OpeningTrainerMenu {
     const startButton = document.createElement('button');
     startButton.type = 'button';
     startButton.className = 'opening-trainer-start';
-    startButton.textContent = 'Nächste Stellung';
+    startButton.textContent = t('openingTrainer.nextPosition');
     startButton.addEventListener('click', this.handleStart);
     root.appendChild(startButton);
 
@@ -76,22 +76,22 @@ export class OpeningTrainerMenu {
 
     const streak = document.createElement('span');
     streak.className = 'opening-trainer-streak';
-    streak.textContent = `Serie: ${progress.streak}`;
+    streak.textContent = t('openingTrainer.streak', { streak: progress.streak });
     readout.appendChild(streak);
 
     const solved = document.createElement('span');
     solved.className = 'opening-trainer-solved';
-    solved.textContent = `Gelöst: ${progress.solvedHashes.length}`;
+    solved.textContent = t('openingTrainer.solved', { count: progress.solvedHashes.length });
     readout.appendChild(solved);
 
     const acc = document.createElement('span');
     acc.className = 'opening-trainer-accuracy';
-    acc.textContent = `Treffer: ${Math.round(accuracy * 100)}%`;
+    acc.textContent = t('openingTrainer.accuracy', { pct: Math.round(accuracy * 100) });
     readout.appendChild(acc);
 
     const attempts = document.createElement('span');
     attempts.className = 'opening-trainer-attempts';
-    attempts.textContent = `Versuche: ${progress.attempts}`;
+    attempts.textContent = t('openingTrainer.attempts', { count: progress.attempts });
     readout.appendChild(attempts);
 
     return readout;
