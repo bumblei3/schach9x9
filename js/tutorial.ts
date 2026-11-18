@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // Tutorial system for Schach 9x9
 import { PIECE_SVGS } from './chess-pieces.js';
 
@@ -74,44 +75,44 @@ export class Tutorial {
   public createQuickStartSteps(): Step[] {
     return [
       {
-        title: '⬡ Willkommen — 9×9 & Feenfiguren',
+        title: t('tutorial.quick1.title'),
         content: `
-          <p>Schach 9×9 spielt auf einem größeren Brett mit zusätzlichen Figuren:</p>
+          <p>${t('tutorial.quick1.intro')}</p>
           <ul style="text-align:left; line-height:1.6;">
-            <li><strong>Erzbischof</strong> — Läufer + Springer</li>
-            <li><strong>Kanzler</strong> — Turm + Springer</li>
-            <li><strong>Nachtreiter</strong> — gleitender Springer (mehrere Sprünge in Linie)</li>
-            <li><strong>Engel</strong> — Dame + Springer (Premium)</li>
+            <li><strong>${t('piece.a')}</strong> — ${t('tutorial.quick1.pieceA')}</li>
+            <li><strong>${t('piece.c')}</strong> — ${t('tutorial.quick1.pieceC')}</li>
+            <li><strong>${t('piece.j')}</strong> — ${t('tutorial.quick1.pieceJ')}</li>
+            <li><strong>${t('piece.e')}</strong> — ${t('tutorial.quick1.pieceE')}</li>
           </ul>
-          <p style="margin-top:0.75rem;color:#4ecca3;">Tipp: Die ausführliche Tour mit Zugdiagrammen findest du unter <em>Lernen → Interaktives Tutorial</em>.</p>
+          <p style="margin-top:0.75rem;color:#4ecca3;">${t('tutorial.quick1.tip')} <em>Learn → Interactive Tutorial</em>.</p>
         `,
       },
       {
-        title: '👑 Setup — König platzieren',
+        title: t('tutorial.fullSetup.title'),
         content: this.createSetupDemo(),
       },
       {
-        title: '💰 Shop & Upgrades',
+        title: t('tutorial.quick3.title'),
         content: `
-          <p>Vor dem Spiel startest du oft mit <strong>Punkten</strong> im Shop:</p>
+          <p>${t('tutorial.quick3.intro')} <strong>Punkte</strong> ${t('tutorial.quick3.intro2')}</p>
           <ul style="text-align:left; line-height:1.6;">
-            <li>Kaufe zusätzliche Figuren für deine Startaufstellung</li>
+            <li>${t('tutorial.quick3.buyPieces')}</li>
             <li>Im <strong>Upgrade-Modus</strong> verbesserst du Figuren (z. B. Springer → Nachtreiter)</li>
-            <li>Kosten = Differenz der Figurenwerte</li>
+            <li>${t('tutorial.quick3.costRule')}</li>
           </ul>
         `,
       },
       {
-        title: '🎮 Spielbedienung',
+        title: t('tutorial.quick4.title'),
         content: `
-          <p>So spielst du:</p>
+          <p>${t('tutorial.quick4.intro')}</p>
           <ul style="text-align:left; line-height:1.6;">
-            <li><strong>Ziehen:</strong> Figur antippen → Ziel antippen</li>
-            <li><strong>Tastatur:</strong> <code>B</code> = bester Zug, <code>H</code> = Tipp, <code>U</code> = Rückgängig, <code>A</code> = Analyse</li>
-            <li><strong>3D-Ansicht:</button> im Spiel umschalten</li>
-            <li><strong>Timers:</strong> oben links / rechts</li>
+            <li><strong>Move:</strong> ${t('tutorial.quick4.move')}</li>
+            <li><strong>Keyboard:</strong> <code>B</code> ${t('tutorial.quick4.keyboard')} <code>H</code> ${t('tutorial.quick4.keyboardH')} <code>U</code> ${t('tutorial.quick4.keyboardU')} <code>A</code> ${t('tutorial.quick4.keyboardA')}</li>
+            <li><strong>3D-Ansicht:</strong> ${t('tutorial.quick4.view3d')}</li>
+            <li><strong>Timers:</strong> ${t('tutorial.quick4.timers')}</li>
           </ul>
-          <p style="margin-top:1rem;text-align:center;font-size:1.1em;color:#4ecca3;"><strong>Viel Erfolg am Brett! ♟️</strong></p>
+          <p style="margin-top:1rem;text-align:center;font-size:1.1em;color:#4ecca3;"><strong>${t('tutorial.quick4.goodLuck')}</strong></p>
         `,
       },
     ];
@@ -120,49 +121,49 @@ export class Tutorial {
   public createSteps(): Step[] {
     return [
       {
-        title: '🎮 Willkommen zu Schach 9x9!',
+        title: t('tutorial.full1.title'),
         content: `
-          <p>Schach 9x9 ist eine erweiterte Variante des klassischen Schachs mit einzigartigen Regeln und besonderen Figuren.</p>
-          <p>In diesem Tutorial lernst du:</p>
+          <p>${t('tutorial.full1.p1')}</p>
+          <p>${t('tutorial.full1.p2')}</p>
           <ul>
-            <li>🏰 Das 9x9 Brett und Korridor-System</li>
-            <li>⚔️ Die speziellen Figuren: Erzbischof, Kanzler, Nachtreiter und Engel</li>
-            <li>👑 Die Setup-Phase (König platzieren)</li>
-            <li>💰 Das Punkte-Shop-System</li>
-            <li>♟️ Grundlegende Spielregeln</li>
+            <li>${t('tutorial.full1.li1')}</li>
+            <li>${t('tutorial.full1.li2')}</li>
+            <li>${t('tutorial.full1.li3')}</li>
+            <li>${t('tutorial.full1.li4')}</li>
+            <li>${t('tutorial.full1.li5')}</li>
           </ul>
         `,
       },
       {
-        title: '⚔️ Der Erzbischof',
+        title: t('tutorial.fullArchbishop.title'),
         content: this.createArchbishopDemo(),
       },
       {
-        title: '🏰 Der Kanzler',
+        title: t('tutorial.fullChancellor.title'),
         content: this.createChancellorDemo(),
       },
       {
-        title: '🐎 Der Nachtreiter',
+        title: t('tutorial.fullNightrider.title'),
         content: this.createNightriderDemo(),
       },
       {
-        title: '😇 Der Engel',
+        title: t('tutorial.fullAngel.title'),
         content: this.createAngelDemo(),
       },
       {
-        title: '🗺️ Das Korridor-System',
+        title: t('tutorial.fullCorridor.title'),
         content: this.createCorridorDemo(),
       },
       {
-        title: '👑 Setup — König platzieren',
+        title: t('tutorial.fullSetup.title'),
         content: this.createSetupDemo(),
       },
       {
-        title: '💰 Der Shop',
+        title: t('tutorial.fullShop.title'),
         content: this.createShopDemo(),
       },
       {
-        title: '⭐ Truppen Upgrades',
+        title: t('tutorial.fullUpgrade.title'),
         content: this.createUpgradeDemo(),
       },
     ];
@@ -170,25 +171,25 @@ export class Tutorial {
 
   public createSetupDemo(): string {
     return `
-      <p>In vielen Modi wählst du zu Beginn, <strong>wo dein König steht</strong>.</p>
+      <p>${t('tutorial.setupDemo.intro')} <strong>${t('tutorial.setupDemo.whereKing')}</strong>${t('tutorial.setupDemo.intro2')}</p>
       <ul style="text-align:left; line-height:1.55; margin: 0.75rem 0;">
-        <li>Klicke auf ein erlaubtes Startfeld im eigenen <strong>Korridor</strong></li>
-        <li>Danach platzierst du (je nach Modus) weitere Figuren oder gehst in den Shop</li>
-        <li>Die KI platziert ihren König auf der gegenüberliegenden Seite</li>
+        <li>${t('tutorial.setupDemo.click')} <strong>Korridor</strong></li>
+        <li>${t('tutorial.setupDemo.then')}</li>
+        <li>${t('tutorial.setupDemo.ai')}</li>
       </ul>
-      <p style="font-size:0.95em;color:#4ecca3;">Strategietipp: Der Königskorridor bestimmt, welche Flügel du früh kontrollierst.</p>
+      <p style="font-size:0.95em;color:#4ecca3;">${t('tutorial.setupDemo.tip')}</p>
     `;
   }
 
   public createNightriderDemo(): string {
     return `
-      <p>Der <strong>Nachtreiter</strong> ist ein "gleitender" Springer. Er kann mehrere Springer-Sprünge in einer Linie ausführen.</p>
+      <p>${t('tutorial.nightriderDemo.intro', { piece: t('piece.j') })}</p>
       <div class="piece-demo">
         <div class="piece-svg" style="width: 80px; height: 80px;">${PIECE_SVGS.white.j}</div>
-        <p style="margin: 10px 0; font-size: 1.1em;"><strong>Nachtreiter (6 Punkte)</strong></p>
+        <p style="margin: 10px 0; font-size: 1.1em;"><strong>${t('tutorial.nightriderDemo.label')}</strong></p>
         ${this.createMoveGrid('nightrider', 7)}
         <p style="margin-top: 15px; font-size: 0.9em; color: #4ecca3;">
-          🔵 = Mehrfache Springer-Sprünge in einer Linie
+          ${t('tutorial.nightriderDemo.legend')}
         </p>
       </div>
     `;
@@ -196,14 +197,14 @@ export class Tutorial {
 
   public createAngelDemo(): string {
     return `
-      <p>Der <strong>Engel</strong> ist die mächtigste Figur. Er kombiniert die Bewegungen von <strong>Dame</strong> und <strong>Springer</strong>.</p>
+      <p>${t('tutorial.angelDemo.intro', { piece: t('piece.e'), queen: t('piece.q'), knight: t('piece.n') })}</p>
       <div class="piece-demo">
         <div class="piece-svg" style="width: 80px; height: 80px;">${PIECE_SVGS.white.e}</div>
-        <p style="margin: 10px 0; font-size: 1.1em;"><strong>Engel (12 Punkte)</strong></p>
+        <p style="margin: 10px 0; font-size: 1.1em;"><strong>${t('tutorial.angelDemo.label')}</strong></p>
         ${this.createMoveGrid('angel')}
         <p style="margin-top: 15px; font-size: 0.9em; color: #4ecca3;">
-          🟢 = Dame (Gerade & Diagonal)<br>
-          🔵 = Springer-Bewegung (L-förmig)
+          ${t('tutorial.angelDemo.legendQ')}<br>
+          ${t('tutorial.legendKnight')}
         </p>
       </div>
     `;
@@ -211,14 +212,14 @@ export class Tutorial {
 
   public createArchbishopDemo(): string {
     return `
-      <p>Der <strong>Erzbischof</strong> kombiniert die Bewegungen von <strong>Läufer</strong> und <strong>Springer</strong>.</p>
+      <p>${t('tutorial.archbishopDemo.intro', { piece: t('piece.a'), bishop: t('piece.b'), knight: t('piece.n') })}</p>
       <div class="piece-demo">
         <div class="piece-svg" style="width: 80px; height: 80px;">${PIECE_SVGS.white.a}</div>
-        <p style="margin: 10px 0; font-size: 1.1em;"><strong>Erzbischof (7 Punkte)</strong></p>
+        <p style="margin: 10px 0; font-size: 1.1em;"><strong>${t('tutorial.archbishopDemo.label')}</strong></p>
         ${this.createMoveGrid('archbishop')}
         <p style="margin-top: 15px; font-size: 0.9em; color: #4ecca3;">
-          🟢 = Diagonale Bewegung (wie Läufer)<br>
-          🔵 = Springer-Bewegung (L-förmig)
+          ${t('tutorial.archbishopDemo.legendB')}<br>
+          ${t('tutorial.legendKnight')}
         </p>
       </div>
     `;
@@ -226,14 +227,14 @@ export class Tutorial {
 
   public createChancellorDemo(): string {
     return `
-      <p>Der <strong>Kanzler</strong> kombiniert die Bewegungen von <strong>Turm</strong> und <strong>Springer</strong>.</p>
+      <p>${t('tutorial.chancellorDemo.intro', { piece: t('piece.c'), rook: t('piece.r'), knight: t('piece.n') })}</p>
       <div class="piece-demo">
         <div class="piece-svg" style="width: 80px; height: 80px;">${PIECE_SVGS.white.c}</div>
-        <p style="margin: 10px 0; font-size: 1.1em;"><strong>Kanzler (9 Punkte)</strong></p>
+        <p style="margin: 10px 0; font-size: 1.1em;"><strong>${t('tutorial.chancellorDemo.label')}</strong></p>
         ${this.createMoveGrid('chancellor')}
         <p style="margin-top: 15px; font-size: 0.9em; color: #4ecca3;">
-          🟢 = Gerade Bewegung (wie Turm)<br>
-          🔵 = Springer-Bewegung (L-förmig)
+          ${t('tutorial.chancellorDemo.legendR')}<br>
+          ${t('tutorial.legendKnight')}
         </p>
       </div>
     `;
@@ -241,7 +242,7 @@ export class Tutorial {
 
   public createUpgradeDemo(): string {
     return `
-      <p>Im <strong>Upgrade-Modus</strong> kannst du deine Figuren verbessern, indem du Punkte investierst.</p>
+      <p>${t('tutorial.upgradeDemo.intro')} <strong>Upgrade-Modus</strong> ${t('tutorial.upgradeDemo.intro2')}</p>
       <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin: 15px 0;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px;">
           <div style="text-align: center;">
@@ -270,9 +271,9 @@ export class Tutorial {
       <ol style="text-align: left; margin-top: 5px; font-size: 0.95em;">
         <li>Starte ein Spiel im <strong>Upgrade-Modus</strong></li>
         <li>Klicke eine leuchtende Figur in der Setup-Phase an</li>
-        <li>Wähle dein Upgrade (z.B. Springer zu Nachtreiter für 3 Pkt)</li>
+        <li>${t('tutorial.upgradeDemo.chooseUpgrade')}</li>
       </ol>
-      <p style="font-size: 0.9em; margin-top: 5px;"><em>Tipp: Der Engel ist das ultimative Upgrade für die Dame!</em></p>
+      <p style="font-size: 0.9em; margin-top: 5px;"><em>${t('tutorial.upgradeDemo.tip')}</em></p>
     `;
   }
 
@@ -416,13 +417,13 @@ export class Tutorial {
 
   public createCorridorDemo(): string {
     return `
-      <p>Am Anfang des Spiels platzierst du deinen <strong>König</strong> in einem von drei <strong>3x3 Korridoren</strong>.</p>
-      <p>Alle deine Figuren müssen im selben Korridor wie dein König platziert werden.</p>
+      <p>${t('tutorial.corridorDemo.p1')} <strong>${t('piece.k')}</strong> ${t('tutorial.corridorDemo.p2')} <strong>${t('tutorial.corridorDemo.corridors')}</strong>${t('tutorial.corridorDemo.p3')}</p>
+      <p>${t('tutorial.corridorDemo.allSame')}</p>
       <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin: 20px 0;">
-        <p style="text-align: center; color: #4ecca3; margin-bottom: 10px; font-weight: bold;">Die drei Korridore (Beispiel: Weiß unten):</p>
+        <p style="text-align: center; color: #4ecca3; margin-bottom: 10px; font-weight: bold;">${t('tutorial.corridorDemo.caption')}</p>
         <div style="font-family: monospace; font-size: 0.75em; line-height: 1.8; color: #e0e0e0;">
           <div style="text-align: center; margin-bottom: 10px;">
-            <span style="color: #888;">Schwarz (oben)</span>
+            <span style="color: #888;">${t('tutorial.corridorDemo.blackTop')}</span>
           </div>
           ┌───────┬───────┬───────┐<br>
           │ Kor 1 │ Kor 2 │ Kor 3 │<br>
@@ -438,11 +439,11 @@ export class Tutorial {
           │ 3x3   │ 3x3   │ 3x3   │<br>
           └───────┴───────┴───────┘<br>
           <div style="text-align: center; margin-top: 10px;">
-            <span style="color: #888;">Weiß (unten)</span>
+            <span style="color: #888;">${t('tutorial.corridorDemo.whiteBottom')}</span>
           </div>
         </div>
       </div>
-      <p><strong>Wichtig:</strong> Wähle deinen Korridor strategisch! Er bestimmt die Startposition deiner Armee.</p>
+      <p><strong>${t('tutorial.corridorDemo.important')}</strong> ${t('tutorial.corridorDemo.tip')}</p>
     `;
   }
 
@@ -452,51 +453,51 @@ export class Tutorial {
       <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin: 15px 0;">
         <table style="width: 100%; color: #e0e0e0; border-collapse: collapse; font-size: 0.9em;">
           <tr style="border-bottom: 1px solid #333;">
-            <th style="text-align: left; padding: 5px; color: #4ecca3;">Figur</th>
-            <th style="text-align: right; padding: 5px; color: #4ecca3;">Kosten</th>
+            <th style="text-align: left; padding: 5px; color: #4ecca3;">${t('tutorial.shopDemo.piece')}</th>
+            <th style="text-align: right; padding: 5px; color: #4ecca3;">${t('tutorial.shopDemo.cost')}</th>
           </tr>
           <tr>
-            <td style="padding: 4px;">♟ Bauer</td>
+            <td style="padding: 4px;">♟ ${t('piece.p')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>1</strong></td>
           </tr>
           <tr style="background: rgba(255,255,255,0.03);">
-            <td style="padding: 4px;">♞ Springer / ♝ Läufer</td>
+            <td style="padding: 4px;">♞ ${t('piece.n')} / ♝ ${t('piece.b')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>3</strong></td>
           </tr>
           <tr>
-            <td style="padding: 4px;">♜ Turm</td>
+            <td style="padding: 4px;">♜ ${t('piece.r')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>5</strong></td>
           </tr>
           <tr style="background: rgba(255,255,255,0.03);">
-            <td style="padding: 4px;">🐎 Nachtreiter</td>
+            <td style="padding: 4px;">🐎 ${t('piece.j')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>6</strong></td>
           </tr>
           <tr>
-            <td style="padding: 4px;">🏰 Erzbischof</td>
+            <td style="padding: 4px;">🏰 ${t('piece.a')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>7</strong></td>
           </tr>
           <tr style="background: rgba(255,255,255,0.03);">
-            <td style="padding: 4px;">⚖️ Kanzler</td>
+            <td style="padding: 4px;">⚖️ ${t('piece.c')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>8</strong></td>
           </tr>
           <tr>
-            <td style="padding: 4px;">♛ Dame</td>
+            <td style="padding: 4px;">♛ ${t('piece.q')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>9</strong></td>
           </tr>
           <tr style="background: rgba(255,255,255,0.03);">
-            <td style="padding: 4px;">🕊️ Engel</td>
+            <td style="padding: 4px;">🕊️ ${t('piece.e')}</td>
             <td style="text-align: right; padding: 4px; color: #4ecca3;"><strong>12</strong></td>
           </tr>
         </table>
       </div>
-      <p style="font-size: 0.9em;"><strong>Beispiel-Setups (15 Pkt):</strong></p>
+      <p style="font-size: 0.9em;"><strong>${t('tutorial.shopDemo.examples')}</strong></p>
       <ul style="margin-top: 5px; font-size: 0.85em;">
-        <li>1 Erzbischof (7) + 1 Nachtreiter (6) + 2 Bauern (2)</li>
-        <li>1 Kanzler (8) + 1 Turm (5) + 1 Läufer (3) ... warte, das sind 16!</li>
-        <li>1 Engel (12) + 1 Springer (3) = Maximale Power</li>
+        <li>${t('tutorial.shopDemo.ex1')}</li>
+        <li>${t('tutorial.shopDemo.ex2')}</li>
+        <li>${t('tutorial.shopDemo.ex3')}</li>
       </ul>
       <p style="text-align: center; margin-top: 15px; font-size: 1.1em; color: #4ecca3;">
-        <strong>Viel Erfolg! ♟️</strong>
+        <strong>${t('tutorial.shopDemo.goodLuck')}</strong>
       </p>
     `;
   }
