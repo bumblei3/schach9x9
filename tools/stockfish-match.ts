@@ -28,10 +28,10 @@
 
 import { createRequire } from 'node:module';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { setBoardVariant, BOARD_VARIANTS, getCurrentBoardSize } from '../js/config.js';
-import { createJsSearch } from '../js/search.js';
 import {
   getAllLegalMoves,
   makeMove,
@@ -351,13 +351,19 @@ async function configureStockfish(
   await sf.waitFor(l => l === 'readyok', 15000);
 }
 
+const SF_MOVETIME_MS = 5000;
+
 async function stockfishBestMove(
   sf: StockfishHandle,
   fen: string,
   depth: number
 ): Promise<string> {
   sf.send(`position fen ${fen}`);
-  sf.send(`go depth ${depth}`);
+  // Zeitobergrenze neben der Tiefe: reines `go depth` haengt in Stockfish 19
+  // (WASM) — der Aufrufer bekommt kein `bestmove` und bricht nach 120 s ab.
+  // `movetime` zwingt Stockfish zu einer Antwort, die Tiefe bleibt das
+  // Suchziel.
+  sf.send(`go depth ${depth} movetime ${SF_MOVETIME_MS}`);
   const line = await sf.waitFor(l => l.startsWith('bestmove '), 120000);
   // bestmove e2e4 ponder e7e5
   const parts = line.trim().split(/\s+/);
@@ -367,18 +373,58 @@ async function stockfishBestMove(
 }
 
 // ---------------------------------------------------------------------------
-// Our engine move
+// Our engine move — laeuft in einem Kindprozess, siehe tools/search-server.ts
 // ---------------------------------------------------------------------------
+
+let searchProc: ChildProcessWithoutNullStreams | null = null;
+let searchBuf = '';
+let searchLineResolve: ((_line: string) => void) | null = null;
+
+function getSearchServer(): ChildProcessWithoutNullStreams {
+  if (!searchProc) {
+    searchProc = spawn(
+      process.execPath,
+      ['--import', fileURLToPath(import.meta.resolve('tsx')), 'tools/search-server.ts'],
+      { stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+    searchProc.stdout.setEncoding('utf8');
+    searchProc.stdout.on('data', (chunk: string) => {
+      searchBuf += chunk;
+      let nl: number;
+      while ((nl = searchBuf.indexOf('\n')) >= 0) {
+        const line = searchBuf.slice(0, nl);
+        searchBuf = searchBuf.slice(nl + 1);
+        if (line.trim() && searchLineResolve) searchLineResolve(line);
+      }
+    });
+    searchProc.stderr.setEncoding('utf8');
+    searchProc.stderr.on('data', (chunk: string) => {
+      if (/error|fail|exception/i.test(chunk)) process.stderr.write(`[search-err] ${chunk}`);
+    });
+  }
+  return searchProc;
+}
 
 async function ourBestMove(
   board: IntBoard,
   turn: 'white' | 'black',
   depth: number
 ): Promise<Move | null> {
-  const search = createJsSearch({ personality: 'NORMAL' });
-  // Pass current castling/EP so search can castle and capture EP.
-  const result = await search.run(board, turn, depth, { ...getRules() });
-  return result.move;
+  // Die Suche laeuft in einem Kindprozess, weil sie synchron ist und den
+  // Event-Loop blockieren wuerde — das laesst den Stockfish-Kindprozess
+  // ueberlaufen und verstummen.
+  const proc = getSearchServer();
+  const reply = await new Promise<string>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('search-server timeout')), 20000);
+    searchLineResolve = (line: string) => {
+      clearTimeout(timer);
+      resolve(line);
+    };
+    proc.stdin.write(JSON.stringify({ board, turn, depth, rules: { ...getRules() } }) + '\n');
+  });
+  const data = JSON.parse(reply) as { ok: boolean; move?: Move | null; error?: string };
+  if (!data.ok) throw new Error(data.error ?? 'search-server error');
+  return data.move ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -632,17 +678,18 @@ async function main(): Promise<void> {
   );
   console.log('rules: full standard (castling + EP + auto-queen promo)');
 
-  const sf = await startStockfish(args.sfEngine);
-  await configureStockfish(sf, { elo: args.sfElo });
-
   const results: GameResult[] = [];
   for (let i = 0; i < args.games; i++) {
     const ourColor: 'white' | 'black' = i % 2 === 0 ? 'white' : 'black';
     process.stdout.write(`Game ${i + 1}/${args.games} — we play ${ourColor}...\n`);
-    // Fresh game state for SF hash tables
-    sf.send('ucinewgame');
-    sf.send('isready');
-    await sf.waitFor(l => l === 'readyok', 15000);
+
+    // Frische Engine je Partie. Stockfish 19 (WASM) gerät nach einer Partie
+    // in einen Zustand, aus dem es auf `go depth` nicht mehr antwortet —
+    // `match:stockfish` bricht sonst ab Partie 2 mit
+    // `Stockfish wait timeout (120000ms)`. Ein Neustart kostet ~200 ms und
+    // hält das Protokoll zuverlässig; `ucinewgame` allein reicht nicht.
+    const sf = await startStockfish(args.sfEngine);
+    await configureStockfish(sf, { elo: args.sfElo });
 
     const r = await playGame(i + 1, ourColor, sf, args.depth, args.sfDepth, args.maxPlies, args.quiet);
     results.push(r);
@@ -650,9 +697,12 @@ async function main(): Promise<void> {
       `  → ${r.winner.toUpperCase()} (${r.termination}) plies=${r.plies} ${r.durationMs}ms` +
         (r.moves.length ? ` pv0=${r.moves[0]}` : '')
     );
+    sf.quit();
   }
 
-  sf.quit();
+  // Den Such-Server mit beenden: er lauscht auf stdin und haelt den
+  // Prozess sonst offen — der Lauf sieht aus wie ein Haenger.
+  if (searchProc) searchProc.kill();
 
   const wins = results.filter(r => r.winner === 'ours').length;
   const losses = results.filter(r => r.winner === 'sf').length;
