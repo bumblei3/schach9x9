@@ -65,19 +65,18 @@ seit v1.8.0 eingefroren; Messstaende und verworfene Hebel stehen in
 **Regression-Gates** (müssen grün sein, bevor ein Hebel gemergt wird). Kanonische
 Doku mit den exakten Aufrufen: [`bench/ABSOLUTE_STRENGTH_BASELINE.md`](bench/ABSOLUTE_STRENGTH_BASELINE.md).
 
-- **Track A (relativ, 9×9):** `js/matchRefs.ts` gegen einen eingefrorenen
-  git-Ref über zwei Worktrees (`NEW_REF` vs `OLD_REF`; Self-Play wäre wertlos,
-  weil beide Seiten dasselbe replayen). Mit `MATCH_FENS=1` spielen echte
-  9×9-Taktik-FENs (Forks, Skewers, Back-Rank), bei Zeitablauf zählt das
-  Material-Delta zur Ausgangsstellung.
+- **Track A (relativ, 9×9):** `js/matchRefs.ts` (Worktrees `NEW_REF`/`OLD_REF`,
+  Engine-Line-Server `js/engineNode.ts`) gegen einen eingefrorenen git-Ref;
+  Self-Play wäre wertlos, weil beide Seiten dasselbe replayen. Mit
+  `MATCH_FENS=1` spielen echte 9×9-Taktik-FENs (Forks, Skewers, Back-Rank),
+  bei Zeitablauf zählt das Material-Delta zur Ausgangsstellung.
 - **Track B (absolut, 8×8):** `npm run match:stockfish -- --games=8 --depth=4
   --sf-depth=8 --sf-elo=1400` (Stockfish 18 als Child-Prozess).
 - **Statik:** `npx vitest run` (3277 Tests in 278 Dateien), `npx tsc --noEmit`,
   eslint sauber.
 
-Die Farbbalance-Probe `js/asymmetryProbe.ts` und `js/engineNode.ts` sind
-eigenstaendige Skripte ohne Import im Produktionspfad (knip: ungenutzte
-Dateien) — kein Teil der CI.
+Die Farbbalance-Probe `js/asymmetryProbe.ts` ist ein eigenes Skript ohne
+Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
