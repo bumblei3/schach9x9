@@ -54,7 +54,7 @@ export function checkDraw(game: Game): boolean {
     game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
-    game.log('Unentschieden (Stellungswiederholung)');
+    game.log(t('log.drawRepetition'));
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
     if (winnerText) winnerText.textContent = t('game.endDrawRepetition');

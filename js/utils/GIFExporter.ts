@@ -4,6 +4,7 @@ import { getPieceText } from '../ui/BoardRenderer.js';
 import { notificationUI } from '../ui/NotificationUI.js';
 import type { GameLike, Board } from '../types/core.js';
 import type { Game } from '../gameEngine.js';
+import { t } from '../i18n.js';
 
 const CELL = 60;
 
@@ -37,7 +38,7 @@ function replayShell(game: GameLike): Game {
 /** Encode the replay. Does not read or write the live board after the copy. */
 export async function renderReplayGifBytes(game: GameLike): Promise<Uint8Array> {
   if (!game?.moveHistory?.length) {
-    throw new Error('Keine Züge zum Exportieren');
+    throw new Error(t('toast.noMovesToExport'));
   }
 
   const shell = replayShell(game);
@@ -102,7 +103,7 @@ export async function renderReplayGifBytes(game: GameLike): Promise<Uint8Array> 
 
 export async function exportReplayGIF(game: GameLike): Promise<void> {
   if (!game?.moveHistory?.length) {
-    notificationUI.show('Keine Züge zum Exportieren!', 'warning');
+    notificationUI.show(t('toast.noMovesToExport'), 'warning');
     return;
   }
 

@@ -1,6 +1,7 @@
 import { logger } from '../logger.js';
 import { drawArrow } from '../ui/ArrowRenderer.js';
 import type { Square } from '../types/core.js';
+import { t } from '../i18n.js';
 
 export interface RatedMove {
   moveNumber: number;
@@ -85,15 +86,15 @@ export class AnalysisManager {
     const accuracy = summary.whiteAccuracy;
 
     if (accuracy > 90) {
-      return 'Hervorragendes Spiel! Deine taktische Übersicht war makellos. Du hast fast jeden Vorteil direkt genutzt.';
+      return t('analysis.coachExcellent');
     } else if (accuracy > 80) {
-      return 'Starke Leistung. Du hast die Kontrolle behalten, auch wenn es kleine Ungenauigkeiten gab.';
+      return t('analysis.coachStrong');
     } else if (accuracy > 65) {
-      return 'Ein solider Sieg. Achte in Zukunft darauf, deine Figuren noch besser zu koordinieren, um schneller zum Ziel zu kommen.';
+      return t('analysis.coachSolid');
     } else if (accuracy > 50) {
-      return 'Du hast gewonnen, aber es gab viele brenzlige Momente. Versuche, mehr auf die Drohungen des Gegners zu achten.';
+      return t('analysis.coachWonMessy');
     } else {
-      return 'Ein harter Kampf. Du solltest an deiner Taktik arbeiten und weniger voreilige Züge machen.';
+      return t('analysis.coachHardFight');
     }
   }
 

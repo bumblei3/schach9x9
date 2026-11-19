@@ -431,28 +431,28 @@ export function analyzeMoveWithExplanation(
     if (diffP > 0.5 && isTactical(game, move)) {
       category = 'brilliant';
       qualityLabel =
-        '!! Brillanter Zug! Du hast eine taktische Tiefe gefunden, die die KI beeindruckt.';
+        t('tutor.brilliantLabel');
     } else {
       category = 'best';
-      qualityLabel = '⭐ Bester Zug! Exakt die Empfehlung der KI.';
+      qualityLabel = t('tutor.bestLabel');
     }
   } else if (diffP >= -0.3) {
     category = 'excellent';
-    qualityLabel = '✨ Exzellenter Zug! Beinahe perfekt.';
+    qualityLabel = t('tutor.excellentLabel');
   } else if (diffP >= -1.5) {
     category = 'good';
-    qualityLabel = '✅ Guter Zug.';
+    qualityLabel = t('tutor.goodLabel');
   } else if (diffP >= -2.5) {
     category = 'inaccuracy';
     qualityLabel = t('tutor.inaccuracyLabel', { pawns: Math.abs(diffP) });
-    warnings.push('Es gibt strategisch wertvollere Alternativen.');
+    warnings.push(t('tutor.strategicAlternatives'));
   } else if (diffP >= -4.0) {
     category = 'mistake';
-    qualityLabel = `? Fehler (${Math.abs(diffP)} Bauern schlechter)`;
+    qualityLabel = t('tutor.mistakeLabel', { pawns: Math.abs(diffP) });
     warnings.push(t('tutor.warnWorse'));
   } else {
     category = 'blunder';
-    qualityLabel = `?? Grober Fehler (${Math.abs(diffP)} Bauern Verlust)`;
+    qualityLabel = t('tutor.blunderLabel', { pawns: Math.abs(diffP) });
     warnings.push(t('tutor.warnCritical'));
   }
 

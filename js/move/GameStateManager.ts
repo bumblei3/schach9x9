@@ -4,6 +4,7 @@ import type { Phase } from '../config.js';
 import * as UI from '../ui.js';
 import type { Game, PieceWithMoved, MoveHistoryEntry, Piece } from '../gameEngine.js';
 import type { MoveController } from '../moveController.js';
+import { t } from '../i18n.js';
 
 /**
  * Undoes the last move
@@ -288,7 +289,7 @@ export function loadGame(game: Game): boolean {
         const message = document.getElementById('draw-offer-message');
         const offeringColor = game.drawOfferedBy === 'white' ? 'Wei\u00DF' : 'Schwarz';
         if (message)
-          message.textContent = `${offeringColor} bietet Remis an. M\u00F6chtest du annehmen?`;
+          message.textContent = t('draw.offerMessage', { color: offeringColor });
         drawOverlay.classList.remove('hidden');
       } else {
         drawOverlay.classList.add('hidden');
@@ -311,11 +312,11 @@ export function loadGame(game: Game): boolean {
       if (game.updateBestMoves) game.updateBestMoves();
     }
 
-    game.log('Spiel geladen! \u{1F4C2}');
+    game.log(t('log.gameLoaded'));
     return true;
   } catch (e) {
     logger.context('GameStateManager').error('Fehler beim Laden:', e);
-    game.log('Fehler beim Laden des Spielstands.');
+    game.log(t('log.loadFailed'));
     return false;
   }
 }

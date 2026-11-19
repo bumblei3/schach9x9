@@ -376,7 +376,7 @@ export class AIController {
           }
         } else {
           logger.warn('[AI] No valid move found in worker results!');
-          this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
+          this.game.log(t('log.aiCannotMove'));
         }
         logger.context('AIController').debug('[DEBUG] AI processResults calling resolve');
         resolve();
@@ -400,7 +400,7 @@ export class AIController {
             const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
             this.game.executeMove(randomMove.from, randomMove.to);
           } else {
-            this.game.log('KI kann nicht ziehen (Patt oder Matt?)');
+            this.game.log(t('log.aiCannotMove'));
           }
           resolve();
         }
@@ -848,7 +848,7 @@ export class AIController {
         this.game.gameController.acceptDraw();
       }
     } else {
-      this.game.log('KI lehnt das Remis-Angebot ab.');
+      this.game.log(t('log.aiDeclinesDraw'));
       if (this.game.gameController) {
         this.game.gameController.declineDraw();
       }
@@ -869,7 +869,7 @@ export class AIController {
       score <= DRAW_OFFER_THRESHOLD_HIGH &&
       this.game.moveHistory.length > DRAW_OFFER_MIN_MOVES
     ) {
-      this.game.log('KI bietet Remis an (schlechte Position).');
+      this.game.log(t('log.aiOffersDrawBad'));
       return true;
     }
 
@@ -877,13 +877,13 @@ export class AIController {
     const currentHash = this.game.getBoardHash();
     const occurrences = this.game.positionHistory.filter((h: string) => h === currentHash).length;
     if (occurrences >= 2) {
-      this.game.log('KI bietet Remis an (drohende Stellungswiederholung).');
+      this.game.log(t('log.aiOffersDrawRepetition'));
       return true;
     }
 
     // Offer draw if position is roughly equal and game is long
     if (Math.abs(score) < 30 && this.game.moveHistory.length > 50) {
-      this.game.log('KI bietet Remis an (ausgeglichene Position, langes Spiel).');
+      this.game.log(t('log.aiOffersDrawLong'));
       return true;
     }
 

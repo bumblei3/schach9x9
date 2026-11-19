@@ -16,6 +16,7 @@ import { getBoardHash } from '../move/MoveValidator.js';
 import type { Game } from '../gameEngine.js';
 import { PHASES } from '../config.js';
 import { openingBook } from '../ai/OpeningBook.js';
+import { t } from '../i18n.js';
 
 interface OpeningBookUIElements {
   container: HTMLElement | null;
@@ -161,11 +162,11 @@ export class OpeningBookUI {
     if (this.elements.currentStats) {
       clearChildren(this.elements.currentStats);
       const stats: Array<{ className: string; text: string }> = [
-        { className: 'stat-pill', text: `Beliebtheit: ${entry.popularity}%` },
-        { className: 'stat-pill white', text: `Weiß: ${entry.whiteWinRate}%` },
-        { className: 'stat-pill black', text: `Schwarz: ${entry.blackWinRate}%` },
-        { className: 'stat-pill draw', text: `Remis: ${entry.drawRate}%` },
-        { className: 'stat-pill', text: `Ø Elo: ${entry.avgElo}` },
+        { className: 'stat-pill', text: t('book.popularity', { value: entry.popularity }) },
+        { className: 'stat-pill white', text: t('book.whiteWinRate', { value: entry.whiteWinRate }) },
+        { className: 'stat-pill black', text: t('book.blackWinRate', { value: entry.blackWinRate }) },
+        { className: 'stat-pill draw', text: t('book.drawRate', { value: entry.drawRate }) },
+        { className: 'stat-pill', text: t('book.avgElo', { value: entry.avgElo }) },
       ];
       for (const s of stats) {
         this.elements.currentStats.appendChild(el('span', { className: s.className, text: s.text }));
@@ -222,7 +223,7 @@ export class OpeningBookUI {
       );
     } else {
       this.elements.bookMovesList.appendChild(
-        el('div', { className: 'no-book-moves', text: 'Kein Buchzug für diese Stellung' })
+        el('div', { className: 'no-book-moves', text: t('book.noMoveForPosition') })
       );
     }
   }
@@ -258,7 +259,7 @@ export class OpeningBookUI {
 
     if (entries.length === 0) {
       this.elements.searchResults.appendChild(
-        el('div', { className: 'no-results', text: 'Keine Eröffnungen gefunden' })
+        el('div', { className: 'no-results', text: t('book.noResults') })
       );
       return;
     }
