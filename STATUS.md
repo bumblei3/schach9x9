@@ -12,6 +12,8 @@ Release-Tag ist `v2.1.0`. `main` ist `528942d` (#274, darunter #273/#272/#271/#2
 
 **Die dokumentierten Git-Haken liefen nie (#274, 2026-11-18):** `CONTRIBUTING.md` behauptete `pre-commit` (lint + test) und `commit-msg` (commitlint), aber husky v9 ohne `prepare`-Skript installierte nichts, `.husky/` hatte nur `pre-commit`, und commitlint war gar nicht als Paket abgelegt (`npx commitlint` griff auf Adhoc-Installationen). Neu: `prepare=husky`, `.husky/commit-msg`, `@commitlint/cli` + `config-conventional` als DevDependencies. Dabei zwei Config-Funde: `commitlint.config.js` war ein ESM-Duplikat, das mit installierter CLI still die aktive Config würde (Header-Limit 100 weg); `.huskyrc` ist tote Husky-v4. In `.cjs` bleibt `header-max-length: 100`, `subject-case` aus — die Historie wechselt bewusst zwischen Groß-/Kleinschreibung.
 
+**Planung aktuell (2026-11-19):** `docs/ROADMAP.md` traegt die i18n-Runde, den Median-Messbetrieb in der CI (#278), den Hook-Stand (#274) und die README-Korrekturen; Kopf dort auf `main` `9f2fe1b`. Der naeschte Datenpunkt bleibt der Playtest.
+
 **E2E-Volllauf braucht `--workers=8` (2026-11-18):** mit den Default-32-Workern wird der Playwright-Prozess auf dieser Maschine mit SIGKILL beendet (Log bricht mitten in der Suite ab, `test-results/` bleibt halb stehen); mit acht Workern läuft dieselbe Suite in ~30 s komplett durch (121 passed).
 
 ## Gesundheit
