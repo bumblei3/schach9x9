@@ -40,7 +40,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 
 - **Alpha-Beta Pruning** mit **LMR** (Late Move Reductions, log-Formel), **Null-Move Pruning** (R=1), **ProbCut** (depth≥5, β-150cp), **Singular Extensions** (depth≥6, margin=100cp)
 - **Iterative Deepening** mit **Aspiration Windows** + **IIR** (Internal Iterative Reduction, adaptive 0.5×–2.0× Fenster)
-- **Transposition Table** (Zobrist Hashing, 262k Einträge)
+- **Transposition Table** (Zobrist Hashing, 1.048.576 Einträge, `TT_SIZE = 1 << 20`)
 - **Move Ordering**: MVV-LVA + SEE, Killer Moves, History Heuristic, Counter Moves, **Threat-Bonus** (Checks, Angriffe, entdeckte Angriffe, X-Ray, Pin-Breaks, Königssicherheit)
 - **Quiescence Search** mit SEE-basiertem Capture-Sorting
 - **Opening Book** (PGN-Import, Merge-Strategien, Eröffnungsnamen-Anzeige)
