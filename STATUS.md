@@ -12,6 +12,8 @@ Release-Tag ist `v2.1.0`. `main` ist `528942d` (#274, darunter #273/#272/#271/#2
 
 **Die dokumentierten Git-Haken liefen nie (#274, 2026-11-18):** `CONTRIBUTING.md` behauptete `pre-commit` (lint + test) und `commit-msg` (commitlint), aber husky v9 ohne `prepare`-Skript installierte nichts, `.husky/` hatte nur `pre-commit`, und commitlint war gar nicht als Paket abgelegt (`npx commitlint` griff auf Adhoc-Installationen). Neu: `prepare=husky`, `.husky/commit-msg`, `@commitlint/cli` + `config-conventional` als DevDependencies. Dabei zwei Config-Funde: `commitlint.config.js` war ein ESM-Duplikat, das mit installierter CLI still die aktive Config würde (Header-Limit 100 weg); `.huskyrc` ist tote Husky-v4. In `.cjs` bleibt `header-max-length: 100`, `subject-case` aus — die Historie wechselt bewusst zwischen Groß-/Kleinschreibung.
 
+**Safe-Area-Insets wirkten nie (#284):** Die README wirbt mit "Safe-Area-Inset für Notched Devices", `css/layout.css`/`board.css`/`tutorial.css` verwenden `env(safe-area-inset-*)` an Aktionsleiste, Panels und Tutorial — aber das Viewport-Meta hatte **kein `viewport-fit=cover`**, sodass der Browser die Insets immer mit 0 rechnete. Behoben; neu `tests/platform/safe-area.test.ts` sperrt die Kombination (Meta + `env()`-Verwendung + Manifest/Theme-Farbe) und faellt ohne `viewport-fit=cover` rot (gegenproebelt).
+
 **Touch-Zielgroessen waren ungetestet (2026-11-19, #283):** Die README wirbt mit "Touch-Targets >= 44x44px", `css/base.css` erzwingt das unter `@media (pointer: coarse)` — nie geprueft. Neu `e2e/touch-targets.spec.ts`: emuliert coarse-Pointer (iPhone-13-Felder ohne `defaultBrowserType`, sonst launch er WebKit; ohne `isMobile` meldet Chrome `pointer: fine` und die Regel gaebe nicht) und verlangt in Menue und Partie 0 Unterschreitungen. Brettfelder bewusst ausgenommen (keine Steuerelemente, Groesse folgt der Brettgeometrie).
 
 **Touch-Drag war ungetestet (2026-11-19, #282):** Die README wirbt mit "Touch-Drag-Support", `BoardRenderer` implementiert touchstart/-move/-end — aber kein einziger Spec hat je eine Beruehrungsgeste ausgeloest. Neu `e2e/touch-drag.spec.ts` (CDP `Input.dispatchTouchEvent`, eine Geste pro CDP-Sitzung, sonst vergißt der Browser den Touch-Zustand): Drag e2–e4 setzt den Bauern, Drag auf ein illegales Feld und reines Tippen tun nichts. Volle Suite dadurch 121 → 124.
@@ -24,7 +26,7 @@ Release-Tag ist `v2.1.0`. `main` ist `528942d` (#274, darunter #273/#272/#271/#2
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `e644567` | 278 Dateien, **3277/3277**, 0 Errors (vier Vollläufe hintereinander) |
+| Tests | `npx vitest run`, Node 26, `f100798` | 279 Dateien, **3281/3281**, 0 Errors |
 | Tests (CI) | PR-Runs #271/#272, `c6e72e5`/`12f6895` | grün, inklusive E2E |
 | A11y | axe-core über sieben Zustände der Live-Seite, `e644567` | **0 Befunde** (vorher sechs Regeln, davon zwei critical; 2026-11-18 erneut sauber) |
 | Typecheck + Lint | `feat/i18n-shell` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |
