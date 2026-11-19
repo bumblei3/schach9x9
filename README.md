@@ -116,7 +116,7 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3277 Vitest-Tests in 278 Dateien** plus 46 Playwright-E2E-Specs (zuletzt 124 Faelle gruen, inklusive Touch-Drag) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3277 Vitest-Tests in 278 Dateien** plus 47 Playwright-E2E-Specs (zuletzt 126 Faelle gruen, inklusive Touch-Drag und Touch-Zielgroessen) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -131,7 +131,7 @@ Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiert
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3277 Vitest-Tests in 278 Dateien plus 46 Playwright-Specs, zuletzt 124 Faelle gruen
+- 3277 Vitest-Tests in 278 Dateien plus 47 Playwright-Specs, zuletzt 126 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
