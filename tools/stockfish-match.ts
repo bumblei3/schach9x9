@@ -172,8 +172,40 @@ function castlingFen(cr: number): string {
   return s || '-';
 }
 
-function epFen(ep: number): string {
+function epFen(ep: number, board: IntBoard, turn: 'white' | 'black'): string {
   if (ep < 0) return '-';
+  const r = Math.floor(ep / SIZE);
+  const c = ep % SIZE;
+  if (c < 0 || c >= SIZE) return '-';
+
+  // En passant steht in der FEN nur, wenn tatsaechlich ein Bauer des am Zug
+  // befindlichen Spielers neben dem Zielfeld steht, der den Durchmarsch
+  // schlagen koennte. Ohne diese Pruefung lieferte `boardToFen` Felder wie
+  // `c5` — fuer die Stockfish das `position`-Kommando verweigert
+  // (`Invalid en-passant square`) und dann nie ein `bestmove` sendet. Der
+  // Aufrufer sieht das 120 s spaeter als Timeout, die eigentliche Ursache
+  // stand aber schon im Backlog.
+  const attackerRank = turn === 'white' ? 3 : 4; // von oben gezaehlt
+  const capturedRank = turn === 'white' ? 1 : 6;
+  if (r !== (turn === 'white' ? 2 : 5)) return '-';
+
+  const captured = board[capturedRank * SIZE + c]!;
+  const capturedIsPawnOfOpponent =
+    captured !== PIECE_NONE &&
+    (captured & TYPE_MASK) === PIECE_PAWN &&
+    (captured & COLOR_MASK) === (turn === 'white' ? COLOR_BLACK : COLOR_WHITE);
+  if (!capturedIsPawnOfOpponent) return '-';
+
+  const attackerColor = turn === 'white' ? COLOR_WHITE : COLOR_BLACK;
+  const links = c > 0 ? board[attackerRank * SIZE + (c - 1)] : PIECE_NONE;
+  const rechts = c < SIZE - 1 ? board[attackerRank * SIZE + (c + 1)] : PIECE_NONE;
+  const hatAngreifer =
+    (links !== PIECE_NONE && (links & TYPE_MASK) === PIECE_PAWN && (links & COLOR_MASK) === attackerColor) ||
+    (rechts !== PIECE_NONE &&
+      (rechts & TYPE_MASK) === PIECE_PAWN &&
+      (rechts & COLOR_MASK) === attackerColor);
+  if (!hatAngreifer) return '-';
+
   return squareToUci(ep);
 }
 
@@ -202,7 +234,7 @@ function boardToFen(board: IntBoard, turn: 'white' | 'black', halfmove = 0, full
   }
   const stm = turn === 'white' ? 'w' : 'b';
   const r = getRules();
-  return `${ranks.join('/')} ${stm} ${castlingFen(r.castling)} ${epFen(r.ep)} ${halfmove} ${fullmove}`;
+  return `${ranks.join('/')} ${stm} ${castlingFen(r.castling)} ${epFen(r.ep, board, turn)} ${halfmove} ${fullmove}`;
 }
 
 function materialCount(board: IntBoard): number {
@@ -263,6 +295,20 @@ async function startStockfish(engineName: string): Promise<StockfishHandle> {
   const waiters: Waiter[] = [];
 
   const dispatch = (line: string) => {
+    // Stockfish meldet eine verweigerte Anfrage als `info string CRITICAL
+    // ERROR: Command ... failed`. Ohne eigene Behandlung landet das im
+    // Backlog, der Waiter holt sie nicht ab und bricht erst nach 120 s als
+    // Timeout ab — die Ursache steht dann nur im Log. Hier bekommt jeder
+    // wartende Aufrufer die Meldung direkt.
+    if (/CRITICAL ERROR/.test(line)) {
+      const fehler = new Error(`Stockfish: ${line.replace(/^info string /, '')}`);
+      while (waiters.length) {
+        const w = waiters.shift()!;
+        clearTimeout(w.timer);
+        w.reject(fehler);
+      }
+      return;
+    }
     for (let i = 0; i < waiters.length; i++) {
       const w = waiters[i]!;
       if (w.pred(line)) {
