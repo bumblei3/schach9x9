@@ -149,6 +149,23 @@ export const SKIN_PRESETS: Record<string, SkinPreset> = {
       accent: { color: 0x6366f1, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.7 },
     },
   },
+  // `frost` fehlte in den 3D-Presets, obwohl der Skin im 2D-Set
+  // (`js/assets/pieces/frost.ts`), in `getAvailableSkins()` und im
+  // Auswahl-Markup existierte. `createPiece3D` fiel damit für die Wahl
+  // „Frost" still auf `SKIN_PRESETS.classic` zurück — der Spieler sah
+  // keinen Unterschied. Farben aus den 2D-SVGs (`#e0f7fa`/`#00bcd4` und
+  // `#0d47a1`/`#2196f3`).
+  frost: {
+    name: 'Frost',
+    white: {
+      base: { color: 0xe0f7fa, roughness: 0.35, metalness: 0.15 },
+      accent: { color: 0x00bcd4, roughness: 0.3, metalness: 0.25 },
+    },
+    black: {
+      base: { color: 0x0d47a1, roughness: 0.35, metalness: 0.15 },
+      accent: { color: 0x2196f3, roughness: 0.3, metalness: 0.25 },
+    },
+  },
 };
 
 
