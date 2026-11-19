@@ -1,7 +1,7 @@
-# schach9x9 — Status (Stand: 2026-11-18)
+# schach9x9 — Status (Stand: 2026-11-19)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `528942d` (#274, darunter #273/#272/#271/#256). Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
+Release-Tag ist `v2.1.0`. `main` ist `15fb97a` (#284). Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 **Die i18n-Grenze ist geschlossen (2026-11-18, #271):** Nach Puzzletexten und dem Kampagnen-Intro-Dialog lief ein Sweep über `js/` (Umlaute in Setzstellen) die übrigen hartkodierten Texte hinter `t()`: Undo/Redo samt Zähler, Eröffnungs-Trainer (Titel, Hinweis, Fortschritt, Knopf), Shop-Header/-Status, Heatmap, Beförderungs-Overlay (Figurname jetzt zentral über `piece.*`), Remis-Nachricht, „Alle Puzzles gelöst!", „Zum Menü"/„Neues Spiel" und die Spiel-Logs als Gruppe `log.*`. Deutsch bleibt bytegleich, Englisch deckt alle Stellen ab; `tests/puzzle/puzzleI18n.test.ts` und die erweiterte `tests/campaign/hiringBudget.test.ts` prüfen die Differenz je Sprache. Damit sind statische Schale, Status/Game-over, Toasts, Tutor, Tutorial, Kampagnen, Puzzle, Skins und Rest-UI gleichzeitig übersetzt.
@@ -32,15 +32,15 @@ Release-Tag ist `v2.1.0`. `main` ist `528942d` (#274, darunter #273/#272/#271/#2
 
 | Gate | Befehl | Ergebnis |
 |------|--------|----------|
-| Tests | `npx vitest run`, Node 26, `f100798` | 279 Dateien, **3281/3281**, 0 Errors |
+| Tests | `npx vitest run`, Node 26, `15fb97a` | 279 Dateien, **3281/3281**, 0 Errors |
 | Tests (CI) | PR-Runs #271/#272, `c6e72e5`/`12f6895` | grün, inklusive E2E |
 | A11y | axe-core über sieben Zustände der Live-Seite, `e644567` | **0 Befunde** (vorher sechs Regeln, davon zwei critical; 2026-11-18 erneut sauber) |
-| Typecheck + Lint | `feat/i18n-shell` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |
-| Build | `feat/i18n-shell` | grün |
-| E2E | lokal, `e2e/touch-drag.spec.ts`-Stand | **126 passed** (30 s mit `--workers=8`), `e2e/visual.spec.ts` 5/5 ohne Baseline-Bewegung. `e2e/a11y.spec.ts` (7 Zustände, axe), `e2e/undo-redo.spec.ts` (Undo→Redo) und `e2e/info-panel.spec.ts` (Info-Panel), `e2e/statistics-overlay.spec.ts` (Statistiken) und `e2e/tutor-mode.spec.ts` (Tutor-Modus) sind mittendrin — der e2e-test-Job ist in der Branch-Protection required. Lighthouse-Abfrage läuft seit dem Budget-Fix echt: Performance 0,68 < 0,90 → rot; Job bleibt `continue-on-error`, siehe Eintrag unten |
+| Typecheck + Lint | `15fb97a` | grün (`tsc --noEmit --incremental false`, `eslint . --ext .ts --max-warnings=0`) |
+| Build | `15fb97a` | grün |
+| E2E | lokal, `15fb97a` | **127 passed** (33 s mit `--workers=8`), darin die neue `e2e/offline-pwa.spec.ts` (SW-Precache + Offline-Partie mit KI-Antwort). `e2e/visual.spec.ts` 5/5 ohne Baseline-Bewegung. `e2e/a11y.spec.ts` (7 Zustände, axe), `e2e/undo-redo.spec.ts` (Undo→Redo), `e2e/info-panel.spec.ts`, `e2e/statistics-overlay.spec.ts` und `e2e/tutor-mode.spec.ts` sind mittendrin — der e2e-test-Job ist in der Branch-Protection required. Lighthouse-Abfrage läuft seit dem Budget-Fix echt: Performance 0,68 < 0,90 → rot; Job bleibt `continue-on-error`, siehe Eintrag unten |
 | Security | CodeQL, Run 44125184376 (`a4cb270`) | grün |
-| CI | GitHub Actions | `main` `a4cb270` grün (Run 44125184538, inkl. Pages-Deploy). Seit `6a4714a` prüft der CI Gate auch `e2e-test` — vorher meldete er grün, während E2E rot war. |
-| Git | `main` `a4cb270` (2026-11-17) | Tag `v2.1.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung (weiß wie schwarz), Statuspille, A11y-Grid und quadratische Zellen (`692680d`/`a4cb270`) sind auf `main`. Der Axe-Gate liegt auf `6a4714a`, der 3D-Lazy-Fix auf `8606db0`, die Reaktivierung der überdeckten Axe-Regeln auf `0e3b27a`, die KI-Persönlichkeits-Fixes auf `f514323`, die Schwierigkeits-Fixes auf `4ef6014`. |
+| CI | GitHub Actions | `main` `15fb97a` grün (#284, inkl. Pages-Deploy). Seit `6a4714a` prüft der CI Gate auch `e2e-test` — vorher meldete er grün, während E2E rot war. |
+| Git | `main` `15fb97a` (2026-11-19) | Tag `v2.1.0`. Brett-Quadrat, Kreuz-Korridore, KI-Aufstellung (weiß wie schwarz), Statuspille, A11y-Grid und quadratische Zellen (`692680d`/`a4cb270`) sind auf `main`. Der Axe-Gate liegt auf `6a4714a`, der 3D-Lazy-Fix auf `8606db0`, die Reaktivierung der überdeckten Axe-Regeln auf `0e3b27a`, die KI-Persönlichkeits-Fixes auf `f514323`, die Schwierigkeits-Fixes auf `4ef6014`. |
 
 **Abhängigkeiten 2026-11-16:** jsdom 30.1.3 → 31.0.1 (#238), vite 8.3.6 → 8.3.8 und prettier 3.9.10 → 3.10.1 (#239) sind gemergt. jsdom 31 serialisiert `#abc` als `rgb(170, 187, 204)` und `translateY(0)` als `translateY(0px)`; drei Assertions prüften auf die Serialisierung statt auf die Wirkung und blockierten den Bump — Fix #240. #239 lag vor `8c1664a` (Header-Fix) und hatte deshalb falsche visuelle Baselines plus zehn Click-Timeouts in der CI; nach dem Rebase auf `main` war die E2E-Suite lokal grün (106 passed, 1 skipped, 3,4 min). `main` `a4eaad4` ist grün inklusive E2E und Pages-Deploy.
 
