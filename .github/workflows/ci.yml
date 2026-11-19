@@ -436,12 +436,18 @@ jobs:
       # keine budgets.json. Als budgetPath übergeben, crashte `lhci assert` mit
       # "Budget file is not defined as an array of budgets" — die Assertions
       # liefen damals nie, und continue-on-error deckte das als grün zu.
-      - name: Lighthouse CI (Performance Budget)
+      # Drei Läufe pro URL, Abfrage gegen den Median: der Performance-Score ist
+      # auf den Runners bimodal (lokal gemessen 0,82 und 1,00 auf demselben
+      # Build), ein Einzellauf traegt keine Aussage. Ohne aggregationMethod
+      # wuerde LHCI beim Mehrfachlauf optimistisch aggregieren (der beste Lauf
+      # zaehlt) — die Config stellt deshalb je Assertion auf "median".
+      - name: Lighthouse CI (Performance Budget, Median aus 3 Läufen)
         uses: treosh/lighthouse-ci-action@v12
         continue-on-error: true
         with:
           urls: |
             http://localhost:5050/
+          runs: 3
           configPath: .github/lighthouse-ci.json
           uploadArtifacts: true
 

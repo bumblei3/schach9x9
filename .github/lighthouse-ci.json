@@ -2,15 +2,69 @@
   "ci": {
     "assert": {
       "assertions": {
-        "categories:performance": ["error", { "minScore": 0.9 }],
-        "categories:accessibility": ["error", { "minScore": 0.95 }],
-        "categories:best-practices": ["error", { "minScore": 0.9 }],
-        "categories:seo": ["error", { "minScore": 0.9 }],
-        "first-contentful-paint": ["warn", { "maxNumericValue": 1800 }],
-        "largest-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
-        "interactive": ["warn", { "maxNumericValue": 3500 }],
-        "cumulative-layout-shift": ["warn", { "maxNumericValue": 0.1 }],
-        "total-byte-weight": ["warn", { "maxNumericValue": 500000 }]
+        "categories:performance": [
+          "error",
+          {
+            "aggregationMethod": "median",
+            "minScore": 0.9
+          }
+        ],
+        "categories:accessibility": [
+          "error",
+          {
+            "aggregationMethod": "median",
+            "minScore": 0.95
+          }
+        ],
+        "categories:best-practices": [
+          "error",
+          {
+            "aggregationMethod": "median",
+            "minScore": 0.9
+          }
+        ],
+        "categories:seo": [
+          "error",
+          {
+            "aggregationMethod": "median",
+            "minScore": 0.9
+          }
+        ],
+        "first-contentful-paint": [
+          "warn",
+          {
+            "aggregationMethod": "median",
+            "maxNumericValue": 1800
+          }
+        ],
+        "largest-contentful-paint": [
+          "warn",
+          {
+            "aggregationMethod": "median",
+            "maxNumericValue": 2500
+          }
+        ],
+        "interactive": [
+          "warn",
+          {
+            "aggregationMethod": "median",
+            "maxNumericValue": 3500
+          }
+        ],
+        "cumulative-layout-shift": [
+          "warn",
+          {
+            "aggregationMethod": "median",
+            "maxNumericValue": 0.1
+          }
+        ],
+        "total-byte-weight": [
+          "warn",
+          {
+            "aggregationMethod": "median",
+            "maxNumericValue": 500000
+          }
+        ]
       }
     }
   }
