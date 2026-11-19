@@ -30,7 +30,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
 - **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices, Touch-Targets ≥ 44×44px.
-- **Zweisprachige UI**: Deutsch und Englisch umschaltbar (Einstellungen → Sprache), die Wahl wird gespeichert. Pilot: statische UI-Schale; Toasts, Tutor und Kampagnen-/Puzzle-Texte sind noch deutsch.
+- **Zweisprachige UI**: Deutsch und Englisch umschaltbar (Einstellungen → Sprache), die Wahl wird gespeichert. Deckt die komplette Schale ab — Menüs, Toasts, Tutor, Kampagnen-, Puzzle- und Analyse-Texte. Ein Audit-Test verlangt fuer jeden Schluessel eine Setzstelle, damit keine Ausgabe in der falschen Sprache stehen bleibt.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
 - **TypeScript Strict Mode**: Das Projekt ist vollständig typisiert. Einzige Ausnahme ist ein dokumentiertes, per ESLint-Deaktivierung gekennzeichnetes `any` in `App.ts` (Delegat-Prototyping für 75+ dynamische Game-Methoden).
 
@@ -58,19 +58,26 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 | **H-Q2** – Quiescence Check-Extension | reverted: bei fester Zeit messbar schwächer (8:5 im Baseline-Match) | ↩️ revertiert |
 | **H-P1** – PSQT für 9x9 zentrieren    | Center-(4,4)-PST — **schwächer** auf Taktik-FENs (5:10 vs v1.5.0) | ↩️ revertiert 2026-07-31 |
 
-**Regression-Gates** (müssen alle grün sein, bevor ein Hebel gemergt wird):
+Aktueller Stand: `MAX_SEARCH_TIME` 8 s (10 s gemessen: −44 cp), die Engine ist
+seit v1.8.0 eingefroren; Messstaende und verworfene Hebel stehen in
+[`docs/STATUS.md`](docs/STATUS.md) und [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-- `js/asymmetryProbe.ts` – balanced-vs-balanced Self-Play mit alternierenden
-  Farben; erkennt Color-Bias in TT/Eval/QSearch (eine Farbe >60% = Bug).
-- `js/engineNode.ts` + `js/matchRefs.ts` – echter Stärke-Gate für die
-  deterministische Engine: `NEW_REF` vs `OLD_REF` über zwei git-Worktrees
-  (Self-Play ist wertlos, da beide Seiten identische Spiele replayen).
-  `matchRefs` spielt mit `MATCH_FENS=1` echte 9×9-Taktik-FENs (Forks,
-  Skewers, Back-Rank) und wertet bei Zeitablauf das **Material-Delta zur
-  Ausgangsstellung** — nicht das absolute Brettmaterial. (Vor v1.6.0 baute
-  `playGame` das Brett fälschlich aus der Startstellung, sodass Taktik-FENs
-  nie wirklich gespielt wurden — der Gate war damals blind.)
-- `npx vitest run` (3307 Tests), `npx tsc --noEmit`, eslint sauber.
+**Regression-Gates** (müssen grün sein, bevor ein Hebel gemergt wird). Kanonische
+Doku mit den exakten Aufrufen: [`bench/ABSOLUTE_STRENGTH_BASELINE.md`](bench/ABSOLUTE_STRENGTH_BASELINE.md).
+
+- **Track A (relativ, 9×9):** `js/matchRefs.ts` gegen einen eingefrorenen
+  git-Ref über zwei Worktrees (`NEW_REF` vs `OLD_REF`; Self-Play wäre wertlos,
+  weil beide Seiten dasselbe replayen). Mit `MATCH_FENS=1` spielen echte
+  9×9-Taktik-FENs (Forks, Skewers, Back-Rank), bei Zeitablauf zählt das
+  Material-Delta zur Ausgangsstellung.
+- **Track B (absolut, 8×8):** `npm run match:stockfish -- --games=8 --depth=4
+  --sf-depth=8 --sf-elo=1400` (Stockfish 18 als Child-Prozess).
+- **Statik:** `npx vitest run` (3277 Tests in 278 Dateien), `npx tsc --noEmit`,
+  eslint sauber.
+
+Die Farbbalance-Probe `js/asymmetryProbe.ts` und `js/engineNode.ts` sind
+eigenstaendige Skripte ohne Import im Produktionspfad (knip: ungenutzte
+Dateien) — kein Teil der CI.
 
 ### Persönlichkeiten (`js/ai/personalities.ts`)
 
@@ -94,7 +101,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 
 - **Transparent Overlay**: Nahtlose Integration der 3D-Ansicht
 - **Procedural Models**: Alle Schachfiguren werden prozedural generiert (`js/pieces3D.js`)
-- **Skin-System**: Classic, Infernale, Frost, Neon
+- **Skin-System**: Classic, Modern, Pixel, Infernale, Wood, Neon, Minimalist (`js/pieces3D.ts`)
 - **Animationen**: Weiche Übergänge, Capture-Effekte, Partikel-System
 
 ### Architektur (`js/App.ts`)
@@ -110,7 +117,7 @@ Die Solo-KI wird kontinuierlich über isolierte, messbare Hebel gestärkt
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit über **3.300 automatisierten Tests** (Vitest Unit/Integration + Playwright E2E) in 272 Unit-Testdateien plus 42 E2E-Specs (118 Fälle) wird eine extrem hohe Stabilität gewährleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3277 Vitest-Tests in 278 Dateien** plus 45 Playwright-E2E-Specs (zuletzt 121 Faelle gruen) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -125,7 +132,7 @@ Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiert
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3307 Tests gesamt (Vitest Unit/Integration in 272 Dateien + 118 Playwright-E2E-Fälle in 42 Specs), alle grün
+- 3277 Vitest-Tests in 278 Dateien plus 45 Playwright-Specs, zuletzt alle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
