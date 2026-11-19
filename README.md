@@ -72,7 +72,7 @@ Doku mit den exakten Aufrufen: [`bench/ABSOLUTE_STRENGTH_BASELINE.md`](bench/ABS
   bei Zeitablauf zählt das Material-Delta zur Ausgangsstellung.
 - **Track B (absolut, 8×8):** `npm run match:stockfish -- --games=8 --depth=4
   --sf-depth=8 --sf-elo=1400` (Stockfish 18 als Child-Prozess).
-- **Statik:** `npx vitest run` (3277 Tests in 278 Dateien), `npx tsc --noEmit`,
+- **Statik:** `npx vitest run` (3286 Tests in 280 Dateien), `npx tsc --noEmit`,
   eslint sauber.
 
 Die Farbbalance-Probe `js/asymmetryProbe.ts` ist ein eigenes Skript ohne
@@ -116,22 +116,24 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3281 Vitest-Tests in 279 Dateien** plus 48 Playwright-E2E-Specs (zuletzt 127 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen und Offline-Runde) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3286 Vitest-Tests in 280 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
-| Modul             | Coverage (Lines) | Beschreibung                                                |
-| ----------------- | ---------------- | ----------------------------------------------------------- |
-| **Global**        | **> 92%**        | Gesamtheitliche Codeabdeckung (Branches > 82%)              |
-| **AI Engine**     | > 90%            | Validierung von Suchalgorithmen, Bewertung, Time Management |
-| **3D Engine**     | > 95%            | PieceManager3D und SceneManager3D                           |
-| **Logic & Rules** | > 99%            | Spielregeln, Move-Validation, Game-State                    |
-| **UI Components** | > 95%            | AnalysisUI, ShopManager, PuzzleMenu                         |
+| Kennzahl         | Wert                        | Quelle                                        |
+| ---------------- | --------------------------- | --------------------------------------------- |
+| **Zeilen**       | **91,3 %** (11560/12665)    | `npx vitest run --coverage`, `main`           |
+| **Branches**     | **80,4 %** (7471/9295)      | dito                                          |
+| **Funktionen**   | 89,4 %                      | dito                                          |
+
+Die Modulaufschlüsselung (Engine, 3D, Regeln, UI) steht im CI-Step-Summary
+des `test`-Jobs, nicht hier: eine Tabelle mit fünf harten Prozentzahlen
+veraltet bei jeder Änderung und sagt nichts aus, was nachprüfbar ist.
 
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3281 Vitest-Tests in 279 Dateien plus 48 Playwright-Specs, zuletzt 127 Faelle gruen
+- 3286 Vitest-Tests in 280 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
