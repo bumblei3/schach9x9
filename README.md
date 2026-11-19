@@ -116,7 +116,7 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3281 Vitest-Tests in 279 Dateien** plus 47 Playwright-E2E-Specs (zuletzt 126 Faelle gruen, inklusive Touch-Drag und Touch-Zielgroessen) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3281 Vitest-Tests in 279 Dateien** plus 48 Playwright-E2E-Specs (zuletzt 127 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen und Offline-Runde) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -131,7 +131,7 @@ Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiert
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3281 Vitest-Tests in 279 Dateien plus 47 Playwright-Specs, zuletzt 126 Faelle gruen
+- 3281 Vitest-Tests in 279 Dateien plus 48 Playwright-Specs, zuletzt 127 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
@@ -200,7 +200,7 @@ Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Aktuell: v2.1.0** (`main` `a4cb270`, 2026-11-17) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Auf `feat/i18n-shell` liegt die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button; danach ist der nächste Schritt der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
+**Aktuell: v2.1.0** (`main` `15fb97a`, 2026-11-19) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. Die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button liegt auf `main`; Safe-Area-Insets wirken seit `viewport-fit=cover` (#284), Touch-Drag und Touch-Zielgrößen sind e2e-geprüft (#282/#283), die Offline-Runde gegen die ausgelieferte `dist/` ebendso (`e2e/offline-pwa.spec.ts`). NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Nächster Schritt ist der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
 
 **Bereits released (in v1.1.0–v1.3.0):**
 
@@ -271,9 +271,7 @@ Fehler, Unklarheiten und Ideen kannst du als [GitHub-Issue](https://github.com/b
 
 ## 📌 Bekannte Einschränkungen / Offen
 
-- **TypeScript 7:** aktuell auf `^6.0.3` fixiert — `typescript-eslint` v8
-  (latest) unterstützt nur `typescript <6.1.0`. TS 7 erst nach Release von
-  `typescript-eslint` v9 einsetzen.
+- **TypeScript 7:** läuft als Side-by-Side-Alias (`@typescript/native`, #214) — `tsc` nutzt TS 7, der Linter bleibt auf der TS-6-API (`typescript-eslint` v8). Nicht wieder als Blocker führen.
 - **Multiplayer:** bewusst nicht geplant (Solo-Fokus).
 
 ## 📄 Lizenz

@@ -366,8 +366,9 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
                   </svg>
                   <span class="action-label">Vollbild</span>
+                </button>
 
-                  </button><button id="resign-btn" class="action-icon-btn" role="menuitem" title="Aufgeben (Esc)" data-i18n-title="action.resignHint" aria-label="Aufgeben" data-i18n-aria-label="action.resign" data-tooltip="Aufgeben" data-shortcut="Esc">
+                  <button id="resign-btn" class="action-icon-btn" role="menuitem" title="Aufgeben (Esc)" data-i18n-title="action.resignHint" aria-label="Aufgeben" data-i18n-aria-label="action.resign" data-tooltip="Aufgeben" data-shortcut="Esc">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17L5 12l5-5"></path><path d="M15 12l-5-5 5-5"></path></svg>
                     <span class="action-label">Aufgeben</span>
                   </button>
