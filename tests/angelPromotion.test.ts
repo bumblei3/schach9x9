@@ -399,12 +399,20 @@ describe('Angel Piece and Promotion', () => {
     test('Angel move generation should be fast', () => {
       game.board[4][4] = { type: 'e', color: 'white', hasMoved: false };
 
-      const startTime = performance.now();
-      const moves = game.getValidMoves(4, 4, game.board[4][4]);
-      const endTime = performance.now();
+      // Best-of-N statt Einzelmessung: ein einzelner Sample im Volllauf wird
+      // von einem anderen Worker verschluckt und meldet 50+ ms für Code, der
+      // lokal 0,1 ms braucht. Das Minimum über fünf Läufe bleibt ein
+      // Regressionssignal (echte Verlangsamung hebt auch das Minimum), ist aber
+      // gegen Lastrauschen immun.
+      let elapsed = Infinity;
+      let moves: ReturnType<typeof game.getValidMoves> = [];
+      for (let i = 0; i < 5; i++) {
+        const startTime = performance.now();
+        moves = game.getValidMoves(4, 4, game.board[4][4]);
+        elapsed = Math.min(elapsed, performance.now() - startTime);
+      }
 
-      // CI runners can be slower; use generous threshold (10ms baseline + CI variance)
-      expect(endTime - startTime).toBeLessThan(50);
+      expect(elapsed).toBeLessThan(50);
       expect(moves.length).toBeGreaterThan(20); // Angel has many moves
     });
 
