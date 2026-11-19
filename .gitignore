@@ -49,3 +49,6 @@ build/
 **/*.spec.js.map
 **/*.spec.d.ts
 src-tauri/target/
+
+# husky install erzeugt Laufzeitdateien
+.husky/_
