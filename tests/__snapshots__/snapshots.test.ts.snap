@@ -25,7 +25,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
 
   
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Ein Schachspiel auf einem 9x9 Brett mit neuen Figuren und Regeln.">
     <meta name="theme-color" content="#0a0e27">
     <!--

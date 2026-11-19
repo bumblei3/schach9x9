@@ -29,7 +29,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
 - **Zug-Qualitäts-Indikatoren**: Sofortiges Feedback auf Züge (Brilliant, Best, Blunder) mit visuellen Badges.
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
 - **3D-Schlachtmodus**: Flüssige 3D-Grafik mit Three.js, inklusive Kampfanimationen und anpassbaren Skins.
-- **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices, Touch-Targets ≥ 44×44px.
+- **PWA & Mobile Ready**: Installierbar, offline spielbar, **Touch-Drag-Support**, Safe-Area-Inset für Notched Devices (incl. `viewport-fit=cover`, sonst wären alle `env()`-Werte 0), Touch-Targets ≥ 44×44px.
 - **Zweisprachige UI**: Deutsch und Englisch umschaltbar (Einstellungen → Sprache), die Wahl wird gespeichert. Deckt die komplette Schale ab — Menüs, Toasts, Tutor, Kampagnen-, Puzzle- und Analyse-Texte. Ein Audit-Test verlangt fuer jeden Schluessel eine Setzstelle, damit keine Ausgabe in der falschen Sprache stehen bleibt.
 - **Detaillierte Statistiken**: Analyse von Gewinnraten, Zügen und Spieler-Genauigkeit.
 - **TypeScript Strict Mode**: Das Projekt ist vollständig typisiert. Einzige Ausnahme ist ein dokumentiertes, per ESLint-Deaktivierung gekennzeichnetes `any` in `App.ts` (Delegat-Prototyping für 75+ dynamische Game-Methoden).
@@ -116,7 +116,7 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3277 Vitest-Tests in 278 Dateien** plus 47 Playwright-E2E-Specs (zuletzt 126 Faelle gruen, inklusive Touch-Drag und Touch-Zielgroessen) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3281 Vitest-Tests in 279 Dateien** plus 47 Playwright-E2E-Specs (zuletzt 126 Faelle gruen, inklusive Touch-Drag und Touch-Zielgroessen) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Formatting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -131,7 +131,7 @@ Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiert
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3277 Vitest-Tests in 278 Dateien plus 47 Playwright-Specs, zuletzt 126 Faelle gruen
+- 3281 Vitest-Tests in 279 Dateien plus 47 Playwright-Specs, zuletzt 126 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
