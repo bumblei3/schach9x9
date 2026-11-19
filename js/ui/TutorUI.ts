@@ -226,7 +226,7 @@ export async function showTutorSuggestions(
             .join('');
 
           div.innerHTML = `
-              ${template.isRecommended ? '<div class="recommended-badge">KI-Tipp</div>' : ''}
+              ${template.isRecommended ? `<div class="recommended-badge">${t('tutor.aiTipBadge')}</div>` : ''}
               <div class="template-name">${template.name}</div>
               <div class="template-description" style="font-size: 0.85rem; color: #cbd5e1;">${template.description}</div>
               <div style="margin-top: 10px; display: flex; gap: 4px;">${piecesPreview}</div>

@@ -130,11 +130,9 @@ export class TimeManager {
     (this.game as unknown as { winner: Player | 'draw' | null }).winner =
       loserColor === 'white' ? 'black' : 'white';
     const winnerColor = t(loserColor === 'white' ? 'game.sideBlack' : 'game.sideWhite');
-    const loserName = loserColor === 'white' ? 'Weiß' : 'Schwarz';
+    const loserName = t(loserColor === 'white' ? 'piece.colorWhite' : 'piece.colorBlack');
 
-    this.game.log(
-      `${loserName} hat keine Zeit mehr! ${winnerColor} gewinnt durch Zeitüberschreitung.`
-    );
+    this.game.log(t('game.timeoutLog', { loser: loserName, winner: winnerColor }));
 
     if (typeof document !== 'undefined') {
       const overlay = document.getElementById('game-over-overlay');

@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 /**
  /**
   * UI-Orchestrator für Schach9x9.
@@ -41,9 +42,9 @@ export function animateCheck(game: GameLike, color: Player): void {
   const statusEl = document.getElementById('status-display');
   if (statusEl) {
     statusEl.classList.add('status-check');
-    const side = color === 'white' ? 'Weiß' : 'Schwarz';
+    const side = t(color === 'white' ? 'piece.colorWhite' : 'piece.colorBlack');
     const prev = statusEl.textContent || '';
-    statusEl.textContent = `⚠️ SCHACH! ${side} steht im Schach`;
+    statusEl.textContent = t('game.checkStatus', { side });
     statusEl.setAttribute('data-prev-status', prev);
     setTimeout(() => {
       statusEl.classList.remove('status-check');

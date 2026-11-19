@@ -11,8 +11,8 @@ export class TalentTreeUI {
     if (unitType) this.currentUnitType = unitType;
     const content = this.renderContent();
 
-    showModal('Einheiten & Talente', content, [
-      { text: 'Schließen', class: 'btn-secondary', callback: () => {} },
+    showModal(t('campaign.unitsTalents'), content, [
+      { text: t('analysis.close'), class: 'btn-secondary', callback: () => {} },
     ]);
 
     setTimeout(() => {

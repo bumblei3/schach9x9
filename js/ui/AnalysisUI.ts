@@ -8,6 +8,7 @@ import type { AIProgressData } from '../aiEngine';
 import type { MoveHistoryEntry } from '../gameEngine.js';
 import { renderBoard } from './BoardRenderer.js';
 import { updateStatus } from './GameStatusUI.js';
+import { t } from '../i18n.js';
 
 interface AnalysisResult {
   score?: number;
@@ -389,10 +390,10 @@ export class AnalysisUI {
         </div>
       `;
 
-    showModal('Analyse abgeschlossen', content, [
-      { text: 'Schließen', class: 'btn-secondary' },
+    showModal(t('analysis.modalTitle'), content, [
+      { text: t('analysis.close'), class: 'btn-secondary' },
       {
-        text: 'Partie durchsehen',
+        text: t('analysis.reviewGame'),
         class: 'btn-primary',
         callback: () => {
           this.enterReplayMode();
@@ -637,7 +638,7 @@ export class AnalysisUI {
         this.replayBetterContentEl.textContent = cached.notation;
         this.replayBetterContentEl.classList.remove('empty');
       } else {
-        this.replayBetterContentEl.textContent = 'Keine bessere Alternative bekannt';
+        this.replayBetterContentEl.textContent = t('analysis.noBetterAlternative');
         this.replayBetterContentEl.classList.add('empty');
       }
     }

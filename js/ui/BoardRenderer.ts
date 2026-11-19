@@ -11,6 +11,7 @@ import { campaignManager } from '../campaign/CampaignManager.js';
 import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
 import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
+import { t } from '../i18n.js';
 
 const SPOKEN_PIECE: Record<string, string> = {
   p: 'Bauer',
@@ -904,13 +905,13 @@ export function showMoveQuality(
     const y = rect.top;
 
     const labels: Record<string, string> = {
-      brilliant: 'Brilliant!!',
-      best: 'Bester Zug ⭐',
-      excellent: 'Exzellent ✨',
-      good: 'Gut ✅',
-      inaccuracy: 'Ungenau ?!',
-      mistake: 'Fehler ?',
-      blunder: 'Patzer ??',
+      brilliant: t('review.label.brilliant'),
+      best: t('review.label.best'),
+      excellent: t('review.label.excellent'),
+      good: t('review.label.good'),
+      inaccuracy: t('review.label.inaccuracy'),
+      mistake: t('review.label.mistake'),
+      blunder: t('review.label.blunder'),
     };
 
     if (labels[category]) {

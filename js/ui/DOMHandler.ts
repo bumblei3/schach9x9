@@ -598,14 +598,14 @@ export class DOMHandler {
       if (!listEl) return;
       const entries = leaderboardManager.getAll();
       if (entries.length === 0) {
-        listEl.innerHTML = '<p style="opacity:0.7">Noch keine Partien gespielt.</p>';
+        listEl.innerHTML = `<p style="opacity:0.7">${t('leaderboard.empty')}</p>`;
         return;
       }
       listEl.innerHTML = entries
         .map(
           (e, i) =>
             `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-              <strong>${i + 1}.</strong> ${e.result === 'win' ? '🏆 Sieg' : e.result === 'draw' ? '🤝 Remis' : '❌ Niederlage'}
+              <strong>${i + 1}.</strong> ${e.result === 'win' ? t('statistics.result.win') : e.result === 'draw' ? t('statistics.result.draw') : t('statistics.result.loss')}
               — ${e.moveCount} Züge — ${e.difficulty} — ${e.date}
             </div>`
         )

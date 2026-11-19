@@ -1033,16 +1033,16 @@ export class GameController {
 
       const ok = this.enterAnalysisMode();
       if (ok) {
-        notificationUI.show('Geteilte Stellung geladen — Analyse-Modus.', 'success');
+        notificationUI.show(t('toast.positionSharedLoaded'), 'success');
         this.requestPositionAnalysis();
       } else {
-        notificationUI.show('Stellung geladen.', 'info');
+        notificationUI.show(t('toast.positionLoaded'), 'info');
       }
       logger.info('[Share] Loaded FEN into analysis:', fen.slice(0, 40));
       return true;
     } catch (e) {
       logger.error('[Share] Failed to load FEN:', e);
-      notificationUI.show('FEN konnte nicht geladen werden.', 'error');
+      notificationUI.show(t('toast.fenLoadFailed'), 'error');
       return false;
     }
   }
@@ -1052,7 +1052,7 @@ export class GameController {
    */
   async shareCurrentPosition(): Promise<boolean> {
     if (!this.game?.board) {
-      notificationUI.show('Kein Brett zum Teilen.', 'warning');
+      notificationUI.show(t('toast.noBoardToShare'), 'warning');
       return false;
     }
     const fen = this.getCurrentFEN();
@@ -1061,14 +1061,14 @@ export class GameController {
     try {
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(payload);
-        notificationUI.show('Link + FEN in die Zwischenablage kopiert.', 'success');
+        notificationUI.show(t('toast.shareLinkCopied'), 'success');
         return true;
       }
     } catch {
       /* fall through */
     }
     // Fallback: show so the user can copy manually
-    notificationUI.show('Zwischenablage blockiert — FEN unten im Log.', 'warning');
+    notificationUI.show(t('toast.clipboardBlockedFenInLog'), 'warning');
     this.game.log?.(`🔗 Teilen: ${url}`);
     this.game.log?.(`FEN: ${fen}`);
     return false;
@@ -1100,18 +1100,18 @@ export class GameController {
     // 3. Debug/Analysis mode (implied if logic reaches here for AI turn)
 
     if (this.game.phase !== PHASES.PLAY) {
-      notificationUI.show('Tipps sind nur während des Spiels verfügbar.', 'warning');
+      notificationUI.show(t('toast.tipsOnlyDuringGame'), 'warning');
       return;
     }
 
     if (this.game.isAI && !isPlayerTurn) {
-      notificationUI.show('Tipps sind nur verfügbar, wenn du am Zug bist.', 'info');
+      notificationUI.show(t('toast.tipsOnlyOnYourTurn'), 'info');
       return;
     }
 
     // 1. Prioritize TutorController (New System with Overlay)
     if (this.game.tutorController) {
-      notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
+      notificationUI.show(t('toast.tutorThinking'), 'info');
       // Use the showHint method which forces calculation if needed
       await this.game.tutorController?.showHint?.();
       return;
@@ -1119,11 +1119,11 @@ export class GameController {
 
     // 2. Fallback to active AI Controller (Legacy/Hotseat)
     if (!this.game.isAI && !this.game.aiController) {
-      notificationUI.show('Tipps sind in diesem Modus nicht verfügbar.', 'warning');
+      notificationUI.show(t('toast.tipsUnavailableMode'), 'warning');
       return;
     }
 
-    notificationUI.show('Der Tutor analysiert die Stellung...', 'info');
+    notificationUI.show(t('toast.tutorThinking'), 'info');
 
     // We assume game.aiController is available as fallback
     if (this.game.aiController) {
@@ -1148,7 +1148,7 @@ export class GameController {
 
           notificationUI.show(`Tipp: ${explanation}`, 'success', 'Tutor', 5000);
         } else {
-          notificationUI.show('Der Tutor konnte keinen klaren Rat finden.', 'info');
+          notificationUI.show(t('toast.tutorNoClearAdvice'), 'info');
         }
       }
     }

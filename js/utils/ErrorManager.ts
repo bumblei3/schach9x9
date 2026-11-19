@@ -4,6 +4,7 @@
  */
 import { logger } from '../logger.js';
 import { notificationUI } from '../ui/NotificationUI.js';
+import { t } from '../i18n.js';
 
 const RECENT_ERROR_LIMIT = 8;
 
@@ -69,7 +70,7 @@ class ErrorManager {
     } else {
       // Show toast for non-critical errors
       const msg = error instanceof Error ? error.message : String(error);
-      notificationUI.show(msg, 'error', `Fehler (${context})`);
+      notificationUI.show(msg, 'error', t('error.title', { context }));
     }
   }
 
@@ -78,7 +79,7 @@ class ErrorManager {
    */
   warning(message: string, context: string = 'App'): void {
     logger.warn(`[${context}]`, message);
-    notificationUI.show(message, 'warning', `Warnung (${context})`);
+    notificationUI.show(message, 'warning', t('error.warningTitle', { context }));
   }
 
   /**
@@ -89,12 +90,12 @@ class ErrorManager {
 
     // Fallback if overlay doesn't exist
     if (!errorOverlay) {
-      alert(`KRITISCHER FEHLER:\n${error instanceof Error ? error.message : String(error)}`);
+      alert(t('error.criticalAlert', { message: error instanceof Error ? error.message : String(error) }));
       return;
     }
 
     // Enhance error message
-    const displayMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+    const displayMsg = error instanceof Error ? error.message : t('error.unknown');
     if (error instanceof Error && error.stack) {
       logger.context('ErrorManager').error('Full Stack:', error.stack);
     }
