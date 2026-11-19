@@ -84,10 +84,12 @@ Dazu:
   Schwellwerten gespielt hast (Tutor-Warnungen sind Schwellwerte, keine
   Einheiten — sie können ein Zug an der UI blockieren).
 
-**`npm run format:check` ist kein Gate.** Auf `main` sind 117 Dateien nicht
-prettier-sauber, und `index.html` lässt der Prettier-HTML-Parser mit einem
-Syntaxfehler an `</div>` (Zeile 689) abbrechen — obwohl `parse5`, also der
-HTML5-Parser, die Datei fehlerfrei parst. Es ist also kein Beleg für einen
+**`npm run format:check` ist kein Gate.** Auf `main` sind 129 Dateien nicht
+prettier-sauber (49 unter `tests/`, 33 unter `js/`, 12 unter `e2e/`, 12 unter
+`tools/`, dazu `README.md`, `STATUS.md`, `docs/`, `css/`), und `index.html`
+lässt der Prettier-HTML-Parser mit einem Syntaxfehler an `</div>` (Zeile 1662)
+abbrechen — obwohl der Browser die Datei fehlerfrei baut und alle
+E2E-Visual-Baselines unverändert sind. Es ist also kein Beleg für einen
 Kaputtbaum, sondern eine Parser-Differenz. Formatiere daher gezielt die
 Dateien, die du anfasst, und lasse `npm run format` nicht über den ganzen Baum
 laufen: der Diff würde hundert fremde Dateien mitnehmen und jedes offene PR
