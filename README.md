@@ -192,7 +192,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Tests ausführen:** `npm test`
 - **Linting (ESLint):** `npm run lint`
 - **Formatting (Prettier):** `npm run format`
-- **CI-Check:** `npm run lint && npm test` — `npm run format:check` ist auf `main` nicht grün (117 Dateien, inklusive `index.html`; Details in [`CONTRIBUTING.md`](CONTRIBUTING.md))
+- **CI-Check:** `npm run lint && npm test` — `npm run format:check` ist auf `main` nicht grün: 129 Dateien (49 unter `tests/`, 33 unter `js/`, 12 unter `e2e/`, 12 unter `tools/`), dazu `index.html`, die der Prettier-HTML-Parser mit einem `SyntaxError` an einem `</div>` (Zeile 1662) abbricht. Der Browser parst dieselbe Stelle fehlerfrei und alle E2E-Baselines sind unverändert — es ist eine Parser-Differenz, kein Kaputtbaum. Formatiere daher gezielt die Dateien, die du anfasst, und lasse `npm run format` nicht über den ganzen Baum laufen (Details in [`CONTRIBUTING.md`](CONTRIBUTING.md))
 
 Details zu Branches, Commit-Regeln, dem Verifikationsgate und den
 Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
