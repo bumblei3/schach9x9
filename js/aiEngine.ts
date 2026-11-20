@@ -187,9 +187,10 @@ export async function getBestMove(
   turnColor: Player,
   maxDepth: number = 4,
   _difficulty: string = 'expert',
-  timeParams: TimeParams = {}
+  timeParams: TimeParams = {},
+  rules?: RuleState
 ): Promise<MoveResult | null> {
-  const result = await getBestMoveDetailed(uiBoard, turnColor, maxDepth, timeParams);
+  const result = await getBestMoveDetailed(uiBoard, turnColor, maxDepth, timeParams, undefined, rules);
   if (!result || !result.move) return null;
   const move = result.move;
   move.score = result.score;
@@ -299,7 +300,7 @@ export async function getBestMoveDetailed(
     if (elo && elo < 1400) {
       const blunderChance = (1400 - elo) / 1400; // ~0.43 at 800, ~0.29 at 1000
       if (Math.random() < blunderChance) {
-        const top = await getTopMoves(uiBoard, turnColor, 3, 1);
+        const top = await getTopMoves(uiBoard, turnColor, 3, 1, undefined, undefined, rules);
         // Pick from candidates other than the best move (guaranteed suboptimal)
         const alternatives = top.filter(
           t =>
@@ -451,9 +452,10 @@ export async function getTopMoves(
 
 export async function analyzePosition(
   uiBoard: UiBoard,
-  turnColor: Player
+  turnColor: Player,
+  rules?: RuleState
 ): Promise<SearchResult | null> {
-  return getBestMoveDetailed(uiBoard, turnColor, 4, {});
+  return getBestMoveDetailed(uiBoard, turnColor, 4, {}, undefined, rules);
 }
 
 export async function evaluatePosition(uiBoard: UiBoard, forColor: Player): Promise<number> {

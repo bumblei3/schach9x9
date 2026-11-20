@@ -270,7 +270,14 @@ self.onmessage = async function (e: MessageEvent) {
             personality: payload.personality as string | undefined,
             maxDepth: depth,
           };
-          const bestMove = await getBestMoveDetailed(board, turnColor, depth, timeParams);
+          const bestMove = await getBestMoveDetailed(
+            board,
+            turnColor,
+            depth,
+            timeParams,
+            undefined,
+            payload.rules as RuleState | undefined
+          );
           workerSelf.postMessage({
             type: 'SEARCH_RESULT',
             id,
