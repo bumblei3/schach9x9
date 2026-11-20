@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-11-20)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `93ce81b`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
+Release-Tag ist `v2.1.0`. `main` ist `21f85e2`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 **Die i18n-Grenze ist geschlossen (2026-11-18, #271):** Nach Puzzletexten und dem Kampagnen-Intro-Dialog lief ein Sweep über `js/` (Umlaute in Setzstellen) die übrigen hartkodierten Texte hinter `t()`: Undo/Redo samt Zähler, Eröffnungs-Trainer (Titel, Hinweis, Fortschritt, Knopf), Shop-Header/-Status, Heatmap, Beförderungs-Overlay (Figurname jetzt zentral über `piece.*`), Remis-Nachricht, „Alle Puzzles gelöst!", „Zum Menü"/„Neues Spiel" und die Spiel-Logs als Gruppe `log.*`. Deutsch bleibt bytegleich, Englisch deckt alle Stellen ab; `tests/puzzle/puzzleI18n.test.ts` und die erweiterte `tests/campaign/hiringBudget.test.ts` prüfen die Differenz je Sprache. Damit sind statische Schale, Status/Game-over, Toasts, Tutor, Tutorial, Kampagnen, Puzzle, Skins und Rest-UI gleichzeitig übersetzt.
