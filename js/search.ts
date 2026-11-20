@@ -31,6 +31,10 @@ import {
   isInCheck as checkInt,
   getRules,
   setRules,
+  CR_WK,
+  CR_WQ,
+  CR_BK,
+  CR_BQ,
   type RuleState,
 } from './ai/MoveGenerator';
 import { evaluate, type EvalConfig } from './evaluate';
@@ -818,7 +822,23 @@ export function createJsSearch(evalConfig: EvalConfig = { personality: 'NORMAL' 
       let iirUnstableCount = 0;
 
       // M1.1: incremental hash — initialize once via full recompute at the root.
-      const rootHash = computeZobristHash(board, color);
+      // The root hash MUST include castling rights and the EP target: the TT is
+      // process-global and never cleared, so a rights-less root hash lets two
+      // positions that differ only in rights collide. The stored best move can
+      // then be illegal in the current position (castle/EP) — the `illegal-ours`
+      // mechanism. `makeMoveHash` already maintains both incrementally, so the
+      // root has to carry them too or the tree is keyed inconsistently.
+      const rootHash = computeZobristHash(
+        board,
+        color,
+        {
+          wk: (rulesAtEntry.castling & CR_WK) !== 0,
+          wq: (rulesAtEntry.castling & CR_WQ) !== 0,
+          bk: (rulesAtEntry.castling & CR_BK) !== 0,
+          bq: (rulesAtEntry.castling & CR_BQ) !== 0,
+        },
+        rulesAtEntry.ep >= 0 ? rulesAtEntry.ep : null
+      );
 
       for (let d = 1; d <= maxDepth; d++) {
         if (performance.now() - start > timeCap * 0.8) break;
