@@ -26,7 +26,9 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { parseFEN } from './utils.js';
-import { pieceToCode } from './pieceCodes.js';
+import { pieceToCode, codeToPiece } from './pieceCodes.js';
+import { rulesFromPosition } from './ai/ruleState.js';
+import type { Piece } from './types/core.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -82,13 +84,15 @@ export function askMove(
   turn: 'white' | 'black',
   elo: number,
   moveNumber: number,
-  fen?: string
+  fen?: string,
+  rules?: { castling: number; ep: number }
 ): Promise<NodeResponse> {
   const gameNumber = ++h.seq;
   return new Promise((resolveCb) => {
     h.pending.set(gameNumber, resolveCb);
     const payload: Record<string, unknown> = { gameNumber, board, turn, elo, moveNumber };
     if (fen) payload.fen = fen;
+    if (rules) payload.rules = rules;
     h.proc.stdin!.write(JSON.stringify(payload) + '\n');
   });
 }
@@ -226,12 +230,29 @@ export async function playGame(
   const startDiff = startFen ? materialDiff(board, newIsWhite) : 0;
   let turn: 'white' | 'black' = startFen ? fenToBoardTurn(startFen) : 'white';
   let moveNumber = 1;
+  // Regelzustand der Integer-Engine: EP-Ziel aus dem letzten Zug. Ohne ihn
+  // sucht die Engine in 9x9 ohne en passant (die App macht es mit).
+  let lastMove: { piece: Piece; to: { r: number; c: number }; isDoublePawnPush?: boolean } | null =
+    null;
   for (let i = 0; i < maxMoves; i++) {
     const newToMove = (turn === 'white') === newIsWhite;
     const h = newToMove ? newH : oldH;
-    const res = await askMove(h, board, turn, elo, moveNumber);
+    const rules = rulesFromPosition(
+      board.map(row => row.map(codeToPiece)),
+      lastMove
+    );
+    const res = await askMove(h, board, turn, elo, moveNumber, undefined, rules);
     if (res.error || !res.move) return 'draw'; // crash/illegal -> draw, flagged
+    const mover = codeToPiece(board[res.move.from.r][res.move.from.c]);
     applyMove(board, res.move);
+    lastMove = mover
+      ? {
+          piece: mover,
+          to: { ...res.move.to },
+          isDoublePawnPush:
+            mover.type === 'p' && Math.abs(res.move.to.r - res.move.from.r) === 2,
+        }
+      : null;
     if (moveNumber >= 100) break; // no mate -> decide by material
     turn = turn === 'white' ? 'black' : 'white';
     if (turn === 'white') moveNumber++;

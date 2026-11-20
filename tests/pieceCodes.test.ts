@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { PIECE_TYPE_CODE, pieceToCode } from '../js/pieceCodes.js';
+import { PIECE_TYPE_CODE, pieceToCode, codeToPiece } from '../js/pieceCodes.js';
 
 const LETTERS = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'j'] as const;
 
@@ -47,5 +47,25 @@ describe('pieceToCode', () => {
 
   test('returns 0 for an unknown piece type', () => {
     expect(pieceToCode({ type: 'x' as never, color: 'white', hasMoved: false })).toBe(0);
+  });
+});
+
+describe('codeToPiece', () => {
+  test('returns null for an empty square', () => {
+    expect(codeToPiece(0)).toBeNull();
+  });
+
+  test('round-trips every piece for both colors', () => {
+    for (const letter of LETTERS) {
+      for (const color of ['white', 'black'] as const) {
+        const piece = { type: letter, color, hasMoved: false };
+        expect(codeToPiece(pieceToCode(piece))).toEqual(piece);
+      }
+    }
+  });
+
+  test('returns null for an unknown code', () => {
+    expect(codeToPiece(99)).toBeNull();
+    expect(codeToPiece(-99)).toBeNull();
   });
 });

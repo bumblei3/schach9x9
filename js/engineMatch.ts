@@ -12,6 +12,7 @@ import {
   type SearchResult,
 } from './aiEngine.js';
 import { isInCheck, COLOR_WHITE, COLOR_BLACK } from './ai/MoveGenerator.js';
+import { rulesFromPosition } from './ai/ruleState.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
 import type { Piece } from './types/core.js';
 
@@ -244,6 +245,10 @@ export class EngineMatchRunner {
     }> = [];
     let moveNumber = 1;
     let currentTurn: 'white' | 'black' = 'white';
+    // Regelzustand der Integer-Engine: EP-Ziel aus dem letzten Zug. Ohne ihn
+    // sucht die Engine in 9x9 ohne en passant (die App macht es mit).
+    let lastMove: { piece: Piece; to: { r: number; c: number }; isDoublePawnPush?: boolean } | null =
+      null;
 
     try {
       while (moveNumber <= (this.config.maxMoves || 300)) {
@@ -284,6 +289,7 @@ export class EngineMatchRunner {
         const color = currentTurn === 'white' ? 'white' : 'black';
         const personality = AI_PERSONALITIES[engineConfig.personality]?.wasmPersonality || 'NORMAL';
         const elo = engineConfig.elo || 2500;
+        const rules = rulesFromPosition(uiBoard, lastMove);
 
         let engineResult: SearchResult | null = null;
         let move: MoveResult | null = null;
@@ -295,7 +301,8 @@ export class EngineMatchRunner {
             color as 'white' | 'black',
             engineConfig.depth || 6,
             { elo, personality, maxTimeMs: timeAlloc.allocatedTimeMs, maxDepth: engineConfig.depth },
-            moveNumber
+            moveNumber,
+            rules
           );
           engineResult = result;
           move = result?.move || null;
@@ -354,7 +361,16 @@ export class EngineMatchRunner {
         }
 
         // Apply move
+        const mover = pieceCodeToPiece(gameState[move.from.r][move.from.c]);
         this.applyMove(gameState, move, currentTurn);
+        lastMove = mover
+          ? {
+              piece: mover,
+              to: { ...move.to },
+              isDoublePawnPush:
+                mover.type === 'p' && Math.abs(move.to.r - move.from.r) === 2,
+            }
+          : null;
 
         // Record move
         moveHistory.push(

@@ -16,35 +16,8 @@
  */
 
 import { getBestMoveDetailed, type MoveResult } from './aiEngine.js';
-import type { Piece } from './types/core.js';
-import { pieceToCode } from './pieceCodes.js';
+import { pieceToCode, codeToPiece } from './pieceCodes.js';
 import { parseFEN } from './utils.js';
-
-function pieceCodeToPiece(code: number): Piece | null {
-  switch (code) {
-    case 1: return { type: 'p', color: 'white', hasMoved: false };
-    case 2: return { type: 'n', color: 'white', hasMoved: false };
-    case 3: return { type: 'b', color: 'white', hasMoved: false };
-    case 4: return { type: 'r', color: 'white', hasMoved: false };
-    case 5: return { type: 'q', color: 'white', hasMoved: false };
-    case 6: return { type: 'k', color: 'white', hasMoved: false };
-    case 7: return { type: 'a', color: 'white', hasMoved: false };
-    case 8: return { type: 'c', color: 'white', hasMoved: false };
-    case 9: return { type: 'e', color: 'white', hasMoved: false };
-    case 10: return { type: 'j', color: 'white', hasMoved: false };
-    case -1: return { type: 'p', color: 'black', hasMoved: false };
-    case -2: return { type: 'n', color: 'black', hasMoved: false };
-    case -3: return { type: 'b', color: 'black', hasMoved: false };
-    case -4: return { type: 'r', color: 'black', hasMoved: false };
-    case -5: return { type: 'q', color: 'black', hasMoved: false };
-    case -6: return { type: 'k', color: 'black', hasMoved: false };
-    case -7: return { type: 'a', color: 'black', hasMoved: false };
-    case -8: return { type: 'c', color: 'black', hasMoved: false };
-    case -9: return { type: 'e', color: 'black', hasMoved: false };
-    case -10: return { type: 'j', color: 'black', hasMoved: false };
-    default: return null;
-  }
-}
 
 /** Parse a 9x9 FEN into the number[][] board + turn used by evaluatePosition. */
 export function fenToBoard(fen: string): { board: number[][]; turn: 'white' | 'black' } {
@@ -60,6 +33,9 @@ export interface NodeRequest {
   elo: number;
   moveNumber: number;
   fen?: string; // optional: override board/turn from a FEN string
+  // Optional castling/EP state for the integer engine. Without it the engine
+  // searches 9x9 without en-passant (the app installs it per position).
+  rules?: { castling: number; ep: number };
 }
 
 export interface NodeResponse {
@@ -79,14 +55,15 @@ export async function evaluatePosition(req: NodeRequest): Promise<NodeResponse> 
       board = parsed.board;
       turn = parsed.turn;
     }
-    const uiBoard = board.map(row => row.map(pieceCodeToPiece));
+    const uiBoard = board.map(row => row.map(codeToPiece));
     const turnColor = turn;
     const result = await getBestMoveDetailed(
       uiBoard,
       turnColor,
       4, // base; adaptive allocation may raise it (elo 1600 -> depth 5)
       { elo: req.elo, personality: 'NORMAL', maxTimeMs: 60000 },
-      req.moveNumber
+      req.moveNumber,
+      req.rules
     );
     return {
       gameNumber: req.gameNumber,

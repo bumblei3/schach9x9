@@ -29,6 +29,7 @@ import {
   PIECE_NIGHTRIDER,
 } from '../ai/MoveGenerator.js';
 import { TYPE_MASK, COLOR_MASK } from '../ai/BoardDefinitions.js';
+import { rulesFromPosition, type RuleState } from '../ai/ruleState.js';
 import { OpeningBook } from '../ai/OpeningBook.js';
 import type { Square, Piece } from '../gameEngine.js';
 import * as fs from 'fs';
@@ -304,7 +305,8 @@ async function getEngineMove(
   timeMs: number,
   elo: number,
   personality: string,
-  moveNumber: number
+  moveNumber: number,
+  rules?: RuleState
 ): Promise<{ move: MoveResult | null; result: SearchResult | null }> {
   const uiBoard = boardToUi(board);
   const color = turn === 'white' ? 'white' : 'black';
@@ -318,7 +320,7 @@ async function getEngineMove(
   };
 
   try {
-    const result = await getBestMoveDetailed(uiBoard, color, depth, timeParams, moveNumber);
+    const result = await getBestMoveDetailed(uiBoard, color, depth, timeParams, moveNumber, rules);
     return { move: result?.move || null, result };
   } catch (err) {
     logger.error('[Trainer] Engine error:', err);
@@ -419,9 +421,13 @@ export class OpeningBookTrainer {
       moveNumber: 1,
       currentTurn: 'white',
     };
+    // Regelzustand der Integer-Engine: EP-Ziel aus dem letzten Zug.
+    let lastMove: { piece: Piece; to: { r: number; c: number }; isDoublePawnPush?: boolean } | null =
+      null;
 
     try {
       while (state.moveNumber <= this.config.drawMoveLimit) {
+        const rules = rulesFromPosition(boardToUi(state.board), lastMove);
         const { move, result } = await getEngineMove(
           state.board,
           state.currentTurn,
@@ -429,7 +435,8 @@ export class OpeningBookTrainer {
           this.config.timePerMoveMs,
           this.config.elo,
           this.config.personality,
-          state.moveNumber
+          state.moveNumber,
+          rules
         );
 
         if (!move) {
@@ -448,7 +455,16 @@ export class OpeningBookTrainer {
           nodes: result?.nodes,
         });
 
+        const mover = boardToUi(state.board)[move.from.r][move.from.c];
         applyMoveInt(state.board, move);
+        lastMove = mover
+          ? {
+              piece: mover,
+              to: { ...move.to },
+              isDoublePawnPush:
+                mover.type === 'p' && Math.abs(move.to.r - move.from.r) === 2,
+            }
+          : null;
 
         if (state.moveHistory.length <= this.config.openingMovesTracked) {
           this.recordOpeningPosition(state, state.moveHistory.length - 1);

@@ -34,3 +34,28 @@ export function pieceToCode(p: Piece | null): number {
   const base = PIECE_TYPE_CODE[p.type] ?? 0;
   return p.color === 'white' ? base : -base;
 }
+
+/** Signed code -> unsigned piece type. */
+const CODE_TO_TYPE: Record<number, Piece['type']> = {
+  1: 'p',
+  2: 'n',
+  3: 'b',
+  4: 'r',
+  5: 'q',
+  6: 'k',
+  7: 'a',
+  8: 'c',
+  9: 'e',
+  10: 'j',
+};
+
+/**
+ * Inverse of `pieceToCode`. `0`/unknown -> null. Used by the match harnesses to
+ * rebuild a UI board (for `rulesFromPosition`) from the signed number board.
+ */
+export function codeToPiece(code: number): Piece | null {
+  if (code === 0) return null;
+  const type = CODE_TO_TYPE[Math.abs(code)];
+  if (!type) return null;
+  return { type, color: code > 0 ? 'white' : 'black', hasMoved: false };
+}

@@ -75,6 +75,7 @@ interface FakeRequest {
   gameNumber: number;
   board: number[][];
   turn: 'white' | 'black';
+  rules?: { castling: number; ep: number };
 }
 
 function replyLine(req: FakeRequest, move: unknown): string {
@@ -238,6 +239,16 @@ describe('startEngine / askMove — the engine line protocol', () => {
     await askMove(h, startingBoard(), 'white', 1600, 4, fen);
 
     expect(JSON.parse(sw.procs[0].written[0]).fen).toBe(fen);
+  });
+
+  it('includes the castling/EP rules when supplied', async () => {
+    const h = startEngine('/tmp/w');
+    sw.respond.fn = echoReply();
+    const rules = { castling: 0, ep: 30 };
+
+    await askMove(h, startingBoard(), 'white', 1600, 4, undefined, rules);
+
+    expect(JSON.parse(sw.procs[0].written[0]).rules).toEqual(rules);
   });
 
   it('buffers a line split across two stdout chunks', async () => {
@@ -425,6 +436,29 @@ describe('playGame — verdict', () => {
     await playGame(newH, oldH, 1600, true, 2, '8k/9/9/9/9/9/r8/R3r4/4R3K b - - 0 1');
 
     expect(sw.order[0]).toBe(1);
+  });
+
+  it('sends the en-passant target after a double pawn push', async () => {
+    const newH = startEngine('/tmp/n');
+    const oldH = startEngine('/tmp/o');
+    const seen: Array<{ turn: string; rules?: { castling: number; ep: number } }> = [];
+    let first = true;
+    sw.respond.fn = (line: string) => {
+      const req = JSON.parse(line) as FakeRequest;
+      seen.push({ turn: req.turn, rules: req.rules });
+      if (first) {
+        first = false;
+        // White double push e2-e4 on the 9x9 board: (7,4) -> (5,4).
+        return [replyLine(req, { from: { r: 7, c: 4 }, to: { r: 5, c: 4 } })];
+      }
+      return [replyLine(req, null)];
+    };
+
+    await playGame(newH, oldH, 1600, true, 2);
+
+    expect(seen[0].rules).toEqual({ castling: 0, ep: -1 });
+    expect(seen[1].turn).toBe('black');
+    expect(seen[1].rules?.ep).toBe(6 * 9 + 4); // e3 (skipped square)
   });
 
   it('judges a start FEN by material GAINED, not absolute material', async () => {
