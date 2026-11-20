@@ -17,6 +17,7 @@
 
 import { getBestMoveDetailed, type MoveResult } from './aiEngine.js';
 import { pieceToCode, codeToPiece } from './pieceCodes.js';
+import { clearTranspositionTable } from './ai/transpositionTable.js';
 import { parseFEN } from './utils.js';
 
 /** Parse a 9x9 FEN into the number[][] board + turn used by evaluatePosition. */
@@ -36,6 +37,8 @@ export interface NodeRequest {
   // Optional castling/EP state for the integer engine. Without it the engine
   // searches 9x9 without en-passant (the app installs it per position).
   rules?: { castling: number; ep: number };
+  // Partie-Start: leert die prozessglobale TT, damit die Partien unabhängig sind.
+  newGame?: boolean;
 }
 
 export interface NodeResponse {
@@ -55,6 +58,7 @@ export async function evaluatePosition(req: NodeRequest): Promise<NodeResponse> 
       board = parsed.board;
       turn = parsed.turn;
     }
+    if (req.newGame) clearTranspositionTable();
     const uiBoard = board.map(row => row.map(codeToPiece));
     const turnColor = turn;
     const result = await getBestMoveDetailed(

@@ -468,7 +468,8 @@ function getSearchServer(): ChildProcessWithoutNullStreams {
 async function ourBestMove(
   board: IntBoard,
   turn: 'white' | 'black',
-  depth: number
+  depth: number,
+  newGame = false
 ): Promise<Move | null> {
   // Die Suche laeuft in einem Kindprozess, weil sie synchron ist und den
   // Event-Loop blockieren wuerde — das laesst den Stockfish-Kindprozess
@@ -498,7 +499,14 @@ async function ourBestMove(
     // Die Suche kommt mit beiden Formen zurecht, darum ist das hier eine
     // defensieve Normalisierung — keine bewiesene Fehlerursache.
     proc.stdin.write(
-      JSON.stringify({ id, board: Array.from(board), turn, depth, rules: { ...getRules() } }) + '\n'
+      JSON.stringify({
+        id,
+        board: Array.from(board),
+        turn,
+        depth,
+        rules: { ...getRules() },
+        newGame,
+      }) + '\n'
     );
   });
   const data = JSON.parse(reply) as { ok: boolean; move?: Move | null; error?: string };
@@ -580,7 +588,7 @@ async function playGame(
       let move: Move;
 
       if (isOurs) {
-        const best = await ourBestMove(board, turn, depth);
+        const best = await ourBestMove(board, turn, depth, plies === 0);
         if (!best) {
           // `illegal-ours` heisst nicht automatisch "die Engine hat einen
           // illegalen Zug gemacht": kein Zug heisst auch Matt/Patt oder ein

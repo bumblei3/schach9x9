@@ -12,6 +12,7 @@ import {
   type SearchResult,
 } from './aiEngine.js';
 import { isInCheck, COLOR_WHITE, COLOR_BLACK } from './ai/MoveGenerator.js';
+import { clearTranspositionTable } from './ai/transpositionTable.js';
 import { rulesFromPosition } from './ai/ruleState.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
 import type { Piece } from './types/core.js';
@@ -227,6 +228,9 @@ export class EngineMatchRunner {
     gameNumber: number
   ): Promise<GameResult> {
     const startTime = Date.now();
+    // TT ist ein Modul-Global: jede Partie muss sauber starten, sonst sind die
+    // Partien ueber die TT abhaengig.
+    clearTranspositionTable();
     const gameState = this.createInitialGameState();
 
     const baseTime = this.config.timeControl.baseTimeMs || 10000;

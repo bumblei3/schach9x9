@@ -17,6 +17,7 @@ import {
   CR_ALL,
 } from '../js/ai/MoveGenerator.js';
 import { createJsSearch } from '../js/search.js';
+import { clearTranspositionTable } from '../js/ai/transpositionTable.js';
 import {
   COLOR_WHITE,
   COLOR_BLACK,
@@ -68,6 +69,18 @@ describe('TT root hash', () => {
     expect(
       legal.some(m => m.from === zweite.move?.from && m.to === zweite.move?.to)
     ).toBe(true);
+  });
+
+  test('clearTranspositionTable() setzt die TT zurueck (kein Treffer nach dem Leeren)', async () => {
+    const board = endgameBoard();
+    setRules({ castling: CR_ALL, ep: -1 });
+    const erste = await createJsSearch({ personality: 'NORMAL' }).run(board, 'white', 4);
+    expect(erste.nodes).toBeGreaterThan(50);
+
+    // Ohne Clear waere die naechste Suche derselben Stellung ein TT-Treffer.
+    clearTranspositionTable();
+    const nachClear = await createJsSearch({ personality: 'NORMAL' }).run(board, 'white', 4);
+    expect(nachClear.nodes).toBeGreaterThan(erste.nodes * 0.5);
   });
 
   test('EP-Ziel steht im Root-Hash (gleiches Brett, anderes EP-Ziel)', async () => {

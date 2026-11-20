@@ -209,15 +209,27 @@ function uint8ToFlag(f: number): 'exact' | 'lower' | 'upper' {
   return f === 1 ? 'exact' : f === 2 ? 'lower' : 'upper';
 }
 
+/**
+ * Leert die prozessglobale TT — am Partie-Start. Die Arrays liegen in
+ * Modul-Globals, darum teilt jede Instanz sie sich; ein Clear auf einer Instanz
+ * leert alle. Ohne das bleiben die Partien eines Prozesses ueber die TT
+ * verknuepft (statistisch abhaengig, Intervalle zu schmal).
+ */
+export function clearTranspositionTable(): void {
+  ttEntryCount = 0;
+  ttHashLow.fill(0);
+  ttHashHigh.fill(0);
+  ttDepths.fill(0);
+  ttScores.fill(0);
+  ttFlags.fill(0);
+  ttBestFrom.fill(0);
+  ttBestTo.fill(0);
+  ttBestMoveValid.fill(0);
+}
+
 export class TranspositionTable {
   clear(): void {
-    ttHashLow.fill(0);
-    ttHashHigh.fill(0);
-    ttDepths.fill(0);
-    ttScores.fill(0);
-    ttFlags.fill(0);
-    ttBestMoveValid.fill(0);
-    ttEntryCount = 0;
+    clearTranspositionTable();
   }
 
   probe(hashLow: number, hashHigh: number, depth: number): TTEntry | null {

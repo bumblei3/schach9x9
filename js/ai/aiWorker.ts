@@ -21,6 +21,7 @@ import {
   type SearchResult,
 } from '../aiEngine.js';
 import { setRules, resetRules, CR_ALL, type RuleState } from './MoveGenerator.js';
+import { clearTranspositionTable } from './transpositionTable.js';
 
 const workerSelf: Worker = self as unknown as Worker;
 
@@ -115,6 +116,11 @@ self.onmessage = async function (e: MessageEvent) {
         };
 
         touchHeartbeat(id);
+
+        // Partie-Start: die TT ist ein Modul-Global und wurde sonst von der
+        // vorherigen Partie geerbt — die KI haengte dann von der Historie ab.
+        // moveNumber 0 ist der erste eigene Antrag einer Partie.
+        if (moveNumber === 0) clearTranspositionTable();
 
         // Setup progress callback + heartbeat
         const heartbeatInterval = setInterval(() => {

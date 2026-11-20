@@ -85,7 +85,8 @@ export function askMove(
   elo: number,
   moveNumber: number,
   fen?: string,
-  rules?: { castling: number; ep: number }
+  rules?: { castling: number; ep: number },
+  newGame?: boolean
 ): Promise<NodeResponse> {
   const gameNumber = ++h.seq;
   return new Promise((resolveCb) => {
@@ -93,6 +94,7 @@ export function askMove(
     const payload: Record<string, unknown> = { gameNumber, board, turn, elo, moveNumber };
     if (fen) payload.fen = fen;
     if (rules) payload.rules = rules;
+    if (newGame) payload.newGame = true;
     h.proc.stdin!.write(JSON.stringify(payload) + '\n');
   });
 }
@@ -241,7 +243,7 @@ export async function playGame(
       board.map(row => row.map(codeToPiece)),
       lastMove
     );
-    const res = await askMove(h, board, turn, elo, moveNumber, undefined, rules);
+    const res = await askMove(h, board, turn, elo, moveNumber, undefined, rules, i === 0);
     if (res.error || !res.move) return 'draw'; // crash/illegal -> draw, flagged
     const mover = codeToPiece(board[res.move.from.r][res.move.from.c]);
     applyMove(board, res.move);

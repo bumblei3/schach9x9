@@ -19,6 +19,7 @@ import { createInterface } from 'node:readline';
 import { setBoardVariant, BOARD_VARIANTS } from '../js/config.js';
 import { createJsSearch } from '../js/search.js';
 import { setRules, type RuleState } from '../js/ai/MoveGenerator.js';
+import { clearTranspositionTable } from '../js/ai/transpositionTable.js';
 import type { IntBoard } from '../js/evaluate.js';
 
 setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
@@ -33,6 +34,8 @@ interface SearchRequest {
   turn: 'white' | 'black';
   depth: number;
   rules?: RuleState;
+  /** Partie-Start: leert die prozessglobale TT (sonst sind Partien abhaengig). */
+  newGame?: boolean;
 }
 
 const rl = createInterface({ input: process.stdin });
@@ -52,6 +55,7 @@ rl.on('line', async (line: string) => {
       Array.isArray(msg.board) ? msg.board : Object.values(msg.board ?? {})
     );
     if (msg.rules) setRules(msg.rules);
+    if (msg.newGame) clearTranspositionTable();
     const result = await search.run(board, msg.turn, msg.depth, {
       ...(msg.rules as object),
     } as RuleState);
