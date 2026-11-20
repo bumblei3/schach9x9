@@ -681,7 +681,9 @@ export class AIController {
         w.onmessage = workerHandler;
 
         const p = personalities[i % personalities.length] || 'NORMAL';
-        const color = this.game.turn === 'white' ? 0 : 1;
+        // Die Engine erwartet 'white'/'black' (Player); 0/1 wuerde als Schwarz
+        // interpretiert — der Tipp wuerde fuer die falsche Farbe suchen.
+        const color = this.game.turn;
 
         w.postMessage({
           type: 'search',

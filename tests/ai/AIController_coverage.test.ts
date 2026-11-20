@@ -480,6 +480,23 @@ describe('AIController Coverage Boost', () => {
       expect(await promise).toBeNull();
     });
 
+    test('posts the side-to-move as a color string, not 0/1', async () => {
+      mockGame.turn = 'white';
+      controller.initWorkerPool();
+      const workers = controller.aiWorkers as any[];
+      const promise = controller.getHint(4);
+      const searchPost = workers[0].postMessage.mock.calls.find(
+        (c: any[]) => c[0] && c[0].type === 'search'
+      );
+      expect(searchPost).toBeDefined();
+      // 0/1 wurde von der Engine als Schwarz gelesen — der Tipp war falsch.
+      expect(searchPost[0].data.color).toBe('white');
+      workers.forEach((w, i) =>
+        w.emit('message', { type: 'bestMove', id: i, bestMove: null, score: 0 })
+      );
+      await promise;
+    });
+
     test('resolves a hint with explanation for a strong capture move', async () => {
       controller.initWorkerPool();
       const workers = controller.aiWorkers as any[];
