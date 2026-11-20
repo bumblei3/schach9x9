@@ -433,6 +433,8 @@ async function stockfishBestMove(
 let searchProc: ChildProcessWithoutNullStreams | null = null;
 let searchBuf = '';
 let searchLineResolve: ((_line: string) => void) | null = null;
+/** Laufende Nummer der Such-Anfragen, damit Antworten zugeordnet werden. */
+let searchAnfrageId = 0;
 
 function getSearchServer(): ChildProcessWithoutNullStreams {
   if (!searchProc) {
@@ -472,9 +474,22 @@ async function ourBestMove(
   // Event-Loop blockieren wuerde — das laesst den Stockfish-Kindprozess
   // ueberlaufen und verstummen.
   const proc = getSearchServer();
+  // Jede Anfrage bekommt eine Id. Ohne sie kann eine verspaetete Antwort
+  // einer abgebrochenen Partie beim naechsten Aufruf landen: `searchLineResolve`
+  // ist eine einzige globale Variable, die der naechste Aufruf ueberschreibt.
+  // Genau das erzeugte die sporadischen `illegal-ours`-Faelle — die Antwort
+  // `6->21` (g8f6) gehoerte zu Partie 28, wurde aber in Partie 29 abgerufen.
+  const id = ++searchAnfrageId;
   const reply = await new Promise<string>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('search-server timeout')), 20000);
     searchLineResolve = (line: string) => {
+      // Antworten zu einer anderen (vera') Anfrage verwerfen.
+      try {
+        const roh = JSON.parse(line) as { id?: number };
+        if (roh.id !== undefined && roh.id !== id) return;
+      } catch {
+        /* kein JSON — nicht unsere Antwort */
+      }
       clearTimeout(timer);
       resolve(line);
     };
@@ -483,7 +498,7 @@ async function ourBestMove(
     // Die Suche kommt mit beiden Formen zurecht, darum ist das hier eine
     // defensieve Normalisierung — keine bewiesene Fehlerursache.
     proc.stdin.write(
-      JSON.stringify({ board: Array.from(board), turn, depth, rules: { ...getRules() } }) + '\n'
+      JSON.stringify({ id, board: Array.from(board), turn, depth, rules: { ...getRules() } }) + '\n'
     );
   });
   const data = JSON.parse(reply) as { ok: boolean; move?: Move | null; error?: string };
@@ -597,6 +612,7 @@ async function playGame(
           if (!loose) {
             if (process.env.DBG_SEARCH) process.stderr.write(
               `[dbg-illegal] partie=${game} zug=${moveToUci(best)} turn=${turn} uns=${ourColor} ` +
+                `board=${JSON.stringify(Array.from(board))} ` +
                 `fen=${boardToFen(board, turn, 0, fullmove)} ` +
                 `legal=${legal.map(moveToUci).join(',')}\n`
             );
