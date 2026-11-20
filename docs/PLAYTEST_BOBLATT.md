@@ -1,6 +1,6 @@
 # Playtest-Blatt — Feedback in Daten, nicht in Gefühle
 
-Stand: 2026-11-16 · Ergänzt [`PLAYTEST_PROTOCOL.md`](PLAYTEST_PROTOCOL.md). Das
+Stand: 2026-11-20 · Ergänzt [`PLAYTEST_PROTOCOL.md`](PLAYTEST_PROTOCOL.md). Das
 Protokoll beschreibt *warum* und *was*; dieses Blatt ist das Arbeitsblatt, das
 ein Spieler ausfüllt und das die Zahlen in genau das Format bringt, das das
 Protokoll verlangt.
@@ -49,7 +49,14 @@ ____   (Erwartung: < 25)
 „Was fehlt dir?" ___________________________________________________
 
 ## 8. Konsolen-Auffälligkeiten (nur falls aufgefallen)
-____________________________________________________________
+_____________________________________________________________
+
+## 9. KI-Regeln (neu seit 2026-11-20 — gezielt prüfen)
+Die KI sucht mit den Rochaden-/en-passant-Regeln der Stellung. Bitte einmal
+gezielt prüfen:
+- [ ] 8×8: König hin- und zurückgezogen — hat die KI danach noch rochiert? (sollte **nein**)
+- [ ] 9×9: Bauer zweizogen, gegnerischer Bauer daneben — hat die KI en passant geschlagen? (sollte **ja**)
+Beobachtung: _____________________________________________________________
 ```
 
 ## Übertragen nach `docs/PLAYTEST_ERGEBNISSE.md`
