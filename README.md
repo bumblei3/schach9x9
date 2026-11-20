@@ -72,7 +72,7 @@ Doku mit den exakten Aufrufen: [`bench/ABSOLUTE_STRENGTH_BASELINE.md`](bench/ABS
   bei Zeitablauf zählt das Material-Delta zur Ausgangsstellung.
 - **Track B (absolut, 8×8):** `npm run match:stockfish -- --games=8 --depth=4
   --sf-depth=8 --sf-elo=1400` (Stockfish 18 als Child-Prozess).
-- **Statik:** `npx vitest run` (3286 Tests in 280 Dateien), `npx tsc --noEmit`,
+- **Statik:** `npx vitest run` (3311 Tests in 283 Dateien), `npx tsc --noEmit`,
   eslint sauber.
 
 Die Farbbalance-Probe `js/asymmetryProbe.ts` ist ein eigenes Skript ohne
@@ -116,7 +116,7 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3286 Vitest-Tests in 280 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3311 Vitest-Tests in 283 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -133,7 +133,7 @@ veraltet bei jeder Änderung und sagt nichts aus, was nachprüfbar ist.
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3286 Vitest-Tests in 280 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
+- 3311 Vitest-Tests in 283 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
@@ -202,7 +202,7 @@ Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Aktuell: v2.1.0** (`main` `15fb97a`, 2026-11-19) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. Die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button liegt auf `main`; Safe-Area-Insets wirken seit `viewport-fit=cover` (#284), Touch-Drag und Touch-Zielgrößen sind e2e-geprüft (#282/#283), die Offline-Runde gegen die ausgelieferte `dist/` ebendso (`e2e/offline-pwa.spec.ts`). NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Nächster Schritt ist der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
+**Aktuell: v2.1.0** (`main` `574f9a1`, 2026-11-20) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. Die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button liegt auf `main`; Safe-Area-Insets wirken seit `viewport-fit=cover` (#284), Touch-Drag und Touch-Zielgrößen sind e2e-geprüft (#282/#283), die Offline-Runde gegen die ausgelieferte `dist/` ebendso (`e2e/offline-pwa.spec.ts`). NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Nächster Schritt ist der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
 
 **Bereits released (in v1.1.0–v1.3.0):**
 
