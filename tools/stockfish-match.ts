@@ -29,6 +29,7 @@
 import { createRequire } from 'node:module';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { pathToFileURL } from 'node:url';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { setBoardVariant, BOARD_VARIANTS, getCurrentBoardSize } from '../js/config.js';
@@ -172,7 +173,7 @@ function castlingFen(cr: number): string {
   return s || '-';
 }
 
-function epFen(ep: number, board: IntBoard, turn: 'white' | 'black'): string {
+export function epFen(ep: number, board: IntBoard, turn: 'white' | 'black'): string {
   if (ep < 0) return '-';
   const r = Math.floor(ep / SIZE);
   const c = ep % SIZE;
@@ -185,11 +186,18 @@ function epFen(ep: number, board: IntBoard, turn: 'white' | 'black'): string {
   // (`Invalid en-passant square`) und dann nie ein `bestmove` sendet. Der
   // Aufrufer sieht das 120 s spaeter als Timeout, die eigentliche Ursache
   // stand aber schon im Backlog.
-  const attackerRank = turn === 'white' ? 3 : 4; // von oben gezaehlt
-  const capturedRank = turn === 'white' ? 1 : 6;
-  if (r !== (turn === 'white' ? 2 : 5)) return '-';
+  // Reihen (von oben gezaehlt): Das EP-Ziel liegt eine Reihe hinter dem
+  // Durchmarsch; der geschlagene Bauer und der schlagende Bauer stehen
+  // beide auf der Reihe dazwischen. Frueher stand hier `1`/`6` — das ist
+  // nicht die Reihe des geschlagenen Bauern, sondern die Startreihe einer
+  // Seite. Folge: legitimes En passant wurde im Match *immer* zu `-`
+  // verdreht, weil die Bauer-Pruefung auf einer leeren Reihe gescheitert
+  // ist. Der Fehler war still, weil `-` eine gueltige FEN ist.
+  const epReihe = turn === 'white' ? 2 : 5;
+  const bauerReihe = turn === 'white' ? epReihe + 1 : epReihe - 1;
+  if (r !== epReihe) return '-';
 
-  const captured = board[capturedRank * SIZE + c]!;
+  const captured = board[bauerReihe * SIZE + c]!;
   const capturedIsPawnOfOpponent =
     captured !== PIECE_NONE &&
     (captured & TYPE_MASK) === PIECE_PAWN &&
@@ -197,8 +205,8 @@ function epFen(ep: number, board: IntBoard, turn: 'white' | 'black'): string {
   if (!capturedIsPawnOfOpponent) return '-';
 
   const attackerColor = turn === 'white' ? COLOR_WHITE : COLOR_BLACK;
-  const links = c > 0 ? board[attackerRank * SIZE + (c - 1)] : PIECE_NONE;
-  const rechts = c < SIZE - 1 ? board[attackerRank * SIZE + (c + 1)] : PIECE_NONE;
+  const links = c > 0 ? board[bauerReihe * SIZE + (c - 1)] : PIECE_NONE;
+  const rechts = c < SIZE - 1 ? board[bauerReihe * SIZE + (c + 1)] : PIECE_NONE;
   const hatAngreifer =
     (links !== PIECE_NONE && (links & TYPE_MASK) === PIECE_PAWN && (links & COLOR_MASK) === attackerColor) ||
     (rechts !== PIECE_NONE &&
@@ -783,7 +791,15 @@ async function main(): Promise<void> {
   );
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+// Main-Guard: ohne ihn wuerde ein Import (z. B. aus einem Test) den Match
+// starten. Das Skript bleibt so importierbar, ohne Seiteffekte.
+const istMain =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (istMain) {
+  main().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}
