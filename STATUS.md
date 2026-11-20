@@ -1,4 +1,4 @@
-# schach9x9 — Status (Stand: 2026-11-19)
+# schach9x9 — Status (Stand: 2026-11-20)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
 Release-Tag ist `v2.1.0`. `main` ist `15fb97a` (#284). Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
@@ -25,6 +25,8 @@ Release-Tag ist `v2.1.0`. `main` ist `15fb97a` (#284). Akt IV (Kapitel 19–25) 
 **Touch-Drag war ungetestet (2026-11-19, #282):** Die README wirbt mit "Touch-Drag-Support", `BoardRenderer` implementiert touchstart/-move/-end — aber kein einziger Spec hat je eine Beruehrungsgeste ausgeloest. Neu `e2e/touch-drag.spec.ts` (CDP `Input.dispatchTouchEvent`, eine Geste pro CDP-Sitzung, sonst vergißt der Browser den Touch-Zustand): Drag e2–e4 setzt den Bauern, Drag auf ein illegales Feld und reines Tippen tun nichts. Volle Suite dadurch 121 → 124.
 
 **Planung aktuell (2026-11-19):** `docs/ROADMAP.md` traegt die i18n-Runde, den Median-Messbetrieb in der CI (#278), den Hook-Stand (#274) und die README-Korrekturen; Kopf dort auf `main` `9f2fe1b`. Der naeschte Datenpunkt bleibt der Playtest.
+
+**Die KI suchte ohne Rochaden-/EP-Regeln (2026-11-20):** `MoveGenerator` haelt `castling`/`ep` in Modul-Globalzustand; die Worker-Anfragen und die Tutor-/Analyse-Pfade setzten ihn nie. Folge: 9x9 suchte ohne en passant, 8x8 mit vollen Rochadenrechten, auch nachdem der Koenig gelaufen war — die KI verpasste EP taktisch und konnte eine illegale Rochade zurueckgeben (`executeMove` validiert nicht). Neu `js/ai/ruleState.ts` (`rulesFromPosition`), `rules`-Parameter in `getBestMoveDetailed`/`getTopMoves`/`runJsSearch`, Weiterleitung im Worker (`getBestMove`/`getTopMoves`/`search`/`analyze`) und in `aiController`/`HintGenerator`/`MoveAnalyzer`/`variantTree`/`GameStatusUI`. `tests/aiEngine.rules.test.ts` deckt EP (9x9), Rochadenrechte (8x8) und die Worker-Weiterleitung ab; die Gegenprobe (Regeln nicht installieren) ist rot. Offen: Die CLI-Harnesses (`engineMatch`, `engineNode`, `OpeningBookTrainer`) suchen weiter ohne Regeln — relative Match-Aussagen bleiben gueltig, die absolute Track-A-Elo gilt eine EP-lose Variante.
 
 **E2E-Volllauf braucht `--workers=8` (2026-11-18):** mit den Default-32-Workern wird der Playwright-Prozess auf dieser Maschine mit SIGKILL beendet (Log bricht mitten in der Suite ab, `test-results/` bleibt halb stehen); mit acht Workern läuft dieselbe Suite in ~30 s komplett durch (121 passed).
 
