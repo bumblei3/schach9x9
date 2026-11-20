@@ -11,7 +11,7 @@
     <!--
       Content-Security-Policy (defense-in-depth, per trischach hardening).
       script-src:
-        'self'        -> app modules (js/main.ts, scripts/debug.ts)
+        'self'        -> app modules (js/main.ts)
       This blocks eval(), data:/blob: script injection and all third-party
       script CDNs. Three.js r185 is bundled by Vite (self-hosted). frame-ancestors is intentionally omitted: it
       is ignored when delivered via a <meta> element (HTTP-header only).
@@ -1661,7 +1661,10 @@
         <div id="info-tabs-container" class="hidden"></div>
       </div>
 
-      <script type="module" src="scripts/debug.ts"></script>
+      <!-- Kein `scripts/debug.ts` mehr: das 680-Zeilen-Skript war ein Relikt
+           ohne HTML-Anker, ohne Import und ohne `data-dbg`-Element, wurde aber
+           als Modul geladen — der Browser bekam dafür einen 404 aus `dist/`,
+           weil Vite es nicht bündelt. Ausgeliefert wird nur `js/main.ts`. -->
       <script type="module" src="js/main.ts"></script>
     </div>
   </body>
