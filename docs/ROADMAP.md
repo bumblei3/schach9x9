@@ -125,7 +125,7 @@ MAX_SEARCH_TIME 10s gemessen: −44 → 8s bleibt. M1.3 gemessen: 0.550 / +35, n
 | # | Arbeit | Warum | Akzeptanz |
 | - | ------ | ----- | --------- |
 | ~~1.1~~ | ✅ Inkrementeller Zobrist-Hash gemergt (Quiesce-Fix, Log +52 Elo) | — | — |
-| 1.2 | Hash-Keys für Rochade/EP (8×8) | TT-Kollisionen bei RuleState | Zu. Symfix und M1.3: je 0 `illegal-ours` |
+| 1.2 | Hash-Keys für Rochade/EP (8×8) | TT-Kollisionen bei RuleState | **jetzt wirklich zu** (`38455b8`) — `makeMoveHash` pflegte die Rechte, der Root-Hash nicht; das war der `illegal-ours`/0-ms-Mechanismus |
 | ~~1.3~~ | ✅ 64-bit Zobrist gemergt und gemessen: 0.550 / +35, neutral | — | — |
 | 1.4 | Optional: Killer/History/Counter Move bleiben; **kein** neues Pruning | Pruning ist kalibriert | — |
 | 1.5 | Track B nach 1.1: **n=40, d5, gleiche Knobs** | Messung, kein Glauben | Zwei Läufe: 0.575 und 0.550. Gate 0.30 erreicht. Intervalle enthalten die 0 |
