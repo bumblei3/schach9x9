@@ -30,7 +30,9 @@ Release-Tag ist `v2.1.0`. `main` ist `15fb97a` (#284). Akt IV (Kapitel 19–25) 
 
 **Live-Sweep ohne Konsolenfehler (2026-11-20):** frischer `dist`-Build auf `http://localhost:3000`, Konsolen-Sammler per `Page.addScriptToEvaluateOnNewDocument` (log/warn/error/info + `pageerror`), dann Initial-Load plus Classic 9×9, Standard 8×8, Opening-Trainer, Puzzle, Cross, Daily-Puzzle, Kampagne (`peasant_revolt`) und Setup/Shop durchgespielt: 0 `error`/`pageerror` in jedem Modus, Zugaustausch mit der KI funktioniert. Der Playtest mit 3–5 Menschen (#225) bleibt der nächste Datenpunkt.
 
-**E2E-Volllauf braucht `--workers=8` (2026-11-18):** mit den Default-32-Workern wird der Playwright-Prozess auf dieser Maschine mit SIGKILL beendet (Log bricht mitten in der Suite ab, `test-results/` bleibt halb stehen); mit acht Workern läuft dieselbe Suite in ~30 s komplett durch (121 passed).
+**Tipp-Farbe korrigiert (2026-11-20, `efcf1f1`):** `aiController.getHint` schickte `color = turn === 'white' ? 0 : 1`. Die Engine liest den Wert als `Player` und wertet `0` als Schwarz — ein Tipp fuer den weissen Spieler haette fuer Schwarz gesucht. Jetzt wird `this.game.turn` (`'white'`/`'black'`) durchgereicht. Der Test `posts the side-to-move as a color string, not 0/1` faellt mit 0/1 rot (Gegenprobe).
+
+**E2E-Volllauf braucht `--workers=8` (2026-11-18):** mit den Default-32-Workern wird der Playwright-Prozess auf dieser Maschine mit SIGKILL beendet (Log bricht mitten in der Suite ab, `test-results/` bleibt halb stehen); mit acht Workern läuft dieselbe Suite in ~33 s komplett durch (**159 passed**, 2026-11-20).
 
 ## Gesundheit
 
