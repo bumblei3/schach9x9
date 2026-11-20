@@ -28,6 +28,7 @@ setBoardVariant(BOARD_VARIANTS.STANDARD_8X8);
 const search = createJsSearch({ personality: 'NORMAL' });
 
 interface SearchRequest {
+  id?: number;
   board: IntBoard;
   turn: 'white' | 'black';
   depth: number;
@@ -38,8 +39,9 @@ const rl = createInterface({ input: process.stdin });
 
 rl.on('line', async (line: string) => {
   if (!line.trim()) return;
+  let msg: SearchRequest | null = null;
   try {
-    const msg = JSON.parse(line) as SearchRequest;
+    msg = JSON.parse(line) as SearchRequest;
     // Robust gegen beide Formen: ein Array (so schickt `stockfish-match.ts`
     // es seit dem Serialisierungs-Fix) und ein Objekt mit numerischen
     // Schluesseln (so lieferte `JSON.stringify` ein Int8Array frueher). Ohne
@@ -59,13 +61,18 @@ rl.on('line', async (line: string) => {
     if (process.env.DBG_SEARCH) {
       process.stderr.write(
         `[dbg-server] turn=${msg.turn} zug=${result.move ? `${result.move.from}->${result.move.to}` : 'null'} ` +
+          `board=${JSON.stringify(Array.from(board))} ` +
           `regeln=${JSON.stringify(msg.rules ?? null)}\n`
       );
     }
-    process.stdout.write(JSON.stringify({ ok: true, move: result.move }) + '\n');
+    process.stdout.write(JSON.stringify({ ok: true, id: msg.id, move: result.move }) + '\n');
   } catch (err) {
     process.stdout.write(
-      JSON.stringify({ ok: false, error: err instanceof Error ? err.message : String(err) }) + '\n'
+      JSON.stringify({
+        ok: false,
+        id: msg?.id,
+        error: err instanceof Error ? err.message : String(err),
+      }) + '\n'
     );
   }
 });

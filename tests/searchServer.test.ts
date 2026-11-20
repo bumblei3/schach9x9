@@ -85,6 +85,25 @@ describe('search-server', () => {
     expect(data.move!.to).toBeGreaterThanOrEqual(0);
   });
 
+  test('trägt die Anfrage-Id in der Antwort zurück (Verbindungsgrundlage gegen Verspätung)', async () => {
+    // Die Id ist die Korrelation zwischen Anfrage und Antwort. Ohne sie kann
+    // eine verspaetete Antwort einer abgebrochenen Partie beim naechsten
+    // Aufruf landen — das war die Ursache der sporadischen `illegal-ours`.
+    const reply = await new Promise<string>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('kein Antwort')), 20000);
+      resolveLine = (line: string) => {
+        clearTimeout(timer);
+        resolve(line);
+      };
+      proc.stdin.write(
+        JSON.stringify({ id: 4242, board: Array.from(startBoard()), turn: 'white', depth: 2 }) + '\n'
+      );
+    });
+    const data = JSON.parse(reply) as { ok: boolean; id?: number };
+    expect(data.ok).toBe(true);
+    expect(data.id).toBe(4242);
+  });
+
   test('beantwortet zwei Anfragen nacheinander (Zustand bleibt brauchbar)', async () => {
     for (let i = 0; i < 2; i++) {
       const reply = await new Promise<string>((resolve, reject) => {
