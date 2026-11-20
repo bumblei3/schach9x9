@@ -47,7 +47,7 @@ for (let i = 0; i < size; i++) {
   const id = i + 1;
   const reply = await new Promise<string>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Anfrage ${i}: timeout`)), 20000);
-    resolveLine = (line: string) => {
+    resolveLine = (_line: string) => {
       clearTimeout(timer);
       resolve(line);
     };
