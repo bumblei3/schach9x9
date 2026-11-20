@@ -252,7 +252,17 @@ Kein `CRITICAL ERROR` von Stockfish, keine FEN-Ungültigkeit. Der Such-Server an
 
 Die Latenz selbst ist jetzt gemessen (40 Läufe, 1706 Anfragen): **Median 399 ms**, 16 Anfragen zwischen 8 und 17,7 s, **keine über 20 s**. Der `search-server timeout` entsteht also nicht durch eine einzelne Anfrage.
 
-**Neuer Befund: 19 Antworten kamen in `ms=0`.** Eine echte Suche dauert ~400 ms; `ms=0` bedeutet, `search.run` war instant zurück. Der eine `illegal-ours`-Fall des Laufs war genau so eine Antwort (`zug=33->51 ms=0`). Auffällig ist zudem, dass in diesem Abschnitt mehrere `turn=white`-Antworten hintereinander standen, obwohl die Farbe wechseln müsste, und dass Züge sich pendelten (`4->25`, `25->4`, `4->25`). Das sieht nach Antworten aus, die nicht aus einer frischen Suche stammen. Ursache ungeklärt; das Instrument (Anfragendauer je Antwort) steht im Server-Log hinter `DBG_SEARCH`. Der Such-Server (`tools/search-server.ts`) bleibt als zweite, unabhängige Maßnahme erhalten: die Suche ist synchron und hätte den Event-Loop blockieren können; er macht den Lauf darüber hinaus robust. **Protokollwarnung:** `movetime 5000` ist neu — die Zahlen sind mit den alten `go depth`-Läufen (1400er) nicht direkt vergleichbar. `tsx` ist jetzt eine deklarierte DevDependency.
+**Neuer Befund: 19 Antworten kamen in `ms=0`, und sie hängen mit einem Endlos-Zustand zusammen.** Eine echte Suche dauert ~400 ms; `ms=0` bedeutet, `search.run` war instant zurück. Der eine `illegal-ours`-Fall des Laufs war genau so eine Antwort (`zug=33->51 ms=0`). Die 0-ms-Fälle stehen nicht isoliert da, sondern in Abschnitten, die so aussehen:
+
+```
+[dbg-server] turn=white zug=4->25 ms=20  board=…
+[dbg-server] turn=white zug=25->4 ms=33  board=…
+[dbg-server] turn=white zug=4->25 ms=0   board=…   ← ab hier ms=0, Züge pendeln
+[dbg-server] turn=white zug=25->4 ms=0   board=…
+       g21 ply 170 pieces=8 last=d1c1
+```
+
+Ab diesem Punkt kommen **ausschließlich** `turn=white`-Antworten, und es kreisen genau zwei Boards (`4->25` und `25->4`). Geprüft: `makeMove(A, {from: 4, to: 25})` ergibt **nicht** `B`, und bei `B` hat Weiß 40 Züge, Schwarz nur 2. Die beiden Boards sind also **nicht** durch den gemeldeten Zug verbunden, obwohl die Id-Korrelation greift (jede Antwort trägt ihre Anfrage-Id). Es bleibt also eine Inkonsistenz zwischen dem Board, das das Tool sendet, und der Antwort, die es bekommt — ein anderer Mechanismus als der behobene Race. `ply 170` und `pieces=8` deuten auf ein spätes Endspiel. Ursache ungeklärt; das Instrument (Anfragendauer und Board je Antwort) steht im Server-Log hinter `DBG_SEARCH`. Der Such-Server (`tools/search-server.ts`) bleibt als zweite, unabhängige Maßnahme erhalten: die Suche ist synchron und hätte den Event-Loop blockieren können; er macht den Lauf darüber hinaus robust. **Protokollwarnung:** `movetime 5000` ist neu — die Zahlen sind mit den alten `go depth`-Läufen (1400er) nicht direkt vergleichbar. `tsx` ist jetzt eine deklarierte DevDependency.
 - **M1.2 (Hash-Keys für Rochade/EP auf 8×8):** zu. Der M1.3-Lauf hatte 0 `illegal-ours`, der Symfix-Lauf ebenfalls.
 - **TypeScript 7:** erledigt in #214 (tsc 7, Linter bleibt auf der TS-6-API). Nicht wieder als Blocker führen.
 - **MAX_SEARCH_TIME 10s:** gemessen 2026-08-22 (−44) → 8s eingefroren.
