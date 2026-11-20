@@ -108,6 +108,25 @@ describe('aiWorker protocol', () => {
     expect(best.data.bestMove).toEqual({ from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
   });
 
+  test('getBestMove forwards the position rules (castling/EP) to the engine', async () => {
+    const rules = { castling: 0, ep: 30 };
+    await send('getBestMove', { board: [], color: 'white', depth: 3, rules });
+    expect(aiEngine.getBestMoveDetailed).toHaveBeenCalledWith(
+      [],
+      'white',
+      3,
+      expect.any(Object),
+      undefined,
+      rules
+    );
+  });
+
+  test('getTopMoves forwards the position rules (castling/EP) to the engine', async () => {
+    const rules = { castling: 0, ep: 30 };
+    await send('getTopMoves', { board: [], color: 'white', count: 1, depth: 2, rules });
+    expect(aiEngine.getTopMoves).toHaveBeenCalledWith([], 'white', 1, 2, undefined, undefined, rules);
+  });
+
   test('getBestMove posts null on engine failure', async () => {
     (aiEngine as any).getBestMoveDetailed.mockRejectedValueOnce(new Error('boom'));
     const logger = (await import('../../js/logger.js')).logger;

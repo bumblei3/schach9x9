@@ -8,6 +8,7 @@ import { openingBookUI } from './OpeningBookUI.js';
 import type { Game, MoveHistoryEntry } from '../gameEngine.js';
 import { computeMaterialSeries } from '../analyze/materialSeries.js';
 import { buildVariantTree } from '../analyze/variantTree.js';
+import { rulesFromPosition } from '../ai/ruleState.js';
 import type { Piece } from '../types/core.js';
 import { moveToAlgebraic } from '../openingTrainer.js';
 import { t } from '../i18n.js';
@@ -464,7 +465,7 @@ export async function renderVariantTree(game: Game): Promise<void> {
   const board = game.board as (Piece | null)[][];
   const turn: 'white' | 'black' = game.turn === 'white' ? 'white' : 'black';
   // Awaiting the async KI search before rendering — no isAnimating guard.
-  const nodes = await buildVariantTree(board, turn, 3, 2);
+  const nodes = await buildVariantTree(board, turn, 3, 2, rulesFromPosition(board, game.lastMove));
   if (nodes.length === 0) return; // nothing to show; keep panel hidden
 
   container.classList.remove('hidden');

@@ -202,6 +202,12 @@ export interface GameLike {
   mode: string;
   // Last move
   lastMoveHighlight: { from: Square; to: Square; piece?: Piece } | null;
+  // Last move state for the integer engine (en-passant / castling rights)
+  lastMove?: {
+    piece: Piece;
+    to: Square;
+    isDoublePawnPush?: boolean;
+  } | null;
   // Check detection
   isInCheck?: (_color: Player) => boolean;
   isSquareUnderAttack?: (_r: number, _c: number, _color: Player) => boolean;

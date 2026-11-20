@@ -21,8 +21,9 @@ import {
 import { logger } from './logger.js';
 import * as UI from './ui.js';
 import * as aiEngine from './aiEngine.js';
-import type { MoveResult, SearchResult } from './aiEngine.js';
+import type { MoveResult, SearchResult, RuleState } from './aiEngine.js';
 import { AI_PERSONALITIES } from './ai/personalities.js';
+import { rulesFromPosition } from './ai/ruleState.js';
 import { AnalysisUI } from './ui/AnalysisUI.js';
 
 import AIWorker from './ai/aiWorker.ts?worker';
@@ -43,6 +44,16 @@ export class AIController {
   public evaluatePosition?: (_color: Player) => number;
   public requestPositionAnalysis?: () => void;
   private _aiMoveStartTime: number;
+
+  /**
+   * Castling/EP state for the integer engine, derived from the live position.
+   * The engine keeps this in module-global state, so every worker request has
+   * to carry it — otherwise 9×9 searches without en-passant and 8×8 searches
+   * with stale castling rights.
+   */
+  private positionRules(): RuleState {
+    return rulesFromPosition(this.game.board, this.game.lastMove);
+  }
 
   constructor(game: Game) {
     this.game = game;
@@ -471,6 +482,7 @@ export class AIController {
             config: personalityConfig,
             lastMove: lastMove,
             timeLimit: timeLimit,
+            rules: this.positionRules(),
           },
         });
       });
@@ -589,6 +601,7 @@ export class AIController {
           depth,
           maxTimeMs,
           moveNumber,
+          rules: this.positionRules(),
         },
       });
     });
@@ -681,6 +694,7 @@ export class AIController {
             lastMove,
             personality: p,
             id: i,
+            rules: this.positionRules(),
           },
         });
       });
@@ -964,6 +978,7 @@ export class AIController {
         color: this.game.turn,
         depth: analysisDepth,
         topMovesCount: 3,
+        rules: this.positionRules(),
       },
     });
   }

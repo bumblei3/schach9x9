@@ -20,7 +20,7 @@ import {
   type AIProgressData,
   type SearchResult,
 } from '../aiEngine.js';
-import { setRules, resetRules, CR_ALL } from './MoveGenerator.js';
+import { setRules, resetRules, CR_ALL, type RuleState } from './MoveGenerator.js';
 
 const workerSelf: Worker = self as unknown as Worker;
 
@@ -104,13 +104,14 @@ self.onmessage = async function (e: MessageEvent) {
       }
 
       case 'getBestMove': {
-        const { board, color, depth, config, personality, moveNumber } = (data ?? {}) as {
+        const { board, color, depth, config, personality, moveNumber, rules } = (data ?? {}) as {
           board: Parameters<typeof getBestMoveDetailed>[0];
           color: Parameters<typeof getBestMoveDetailed>[1];
           depth: number;
           config?: { elo?: number; personality?: string };
           personality?: string;
           moveNumber?: number;
+          rules?: RuleState;
         };
 
         touchHeartbeat(id);
@@ -131,7 +132,7 @@ self.onmessage = async function (e: MessageEvent) {
             personality: personality || config?.personality,
             maxDepth: depth,
           };
-          const result = await getBestMoveDetailed(board, color, depth, timeParams, moveNumber);
+          const result = await getBestMoveDetailed(board, color, depth, timeParams, moveNumber, rules);
           workerSelf.postMessage({ type: 'bestMove', id, data: result });
         } catch (error) {
           logger.error('[AI Worker] getBestMove failed:', error);
@@ -160,7 +161,8 @@ self.onmessage = async function (e: MessageEvent) {
             data.count as number | undefined,
             data.depth as number | undefined,
             data.maxTimeMs as number | undefined,
-            data.moveNumber as number | undefined
+            data.moveNumber as number | undefined,
+            data.rules as RuleState | undefined
           );
           workerSelf.postMessage({ type: 'topMoves', id, data: topMoves });
         } catch (error) {
@@ -189,7 +191,7 @@ self.onmessage = async function (e: MessageEvent) {
         // posts a result back (live analysis never populates).
         let topMoves: Awaited<ReturnType<typeof getTopMoves>>;
         try {
-          topMoves = await getTopMoves(board, color, topMovesCount, depth, 8000, 0);
+          topMoves = await getTopMoves(board, color, topMovesCount, depth, 8000, 0, data.rules as RuleState | undefined);
         } catch (e) {
           console.error('[AI Worker] analyze getTopMoves threw:', e);
           workerSelf.postMessage({ type: 'analysis', id, data: { score: 0, depth, nodes: 0, topMoves: [] } });
@@ -234,7 +236,14 @@ self.onmessage = async function (e: MessageEvent) {
             personality,
             maxDepth: depth,
           };
-          const result = await getBestMoveDetailed(board, color, depth, timeParams);
+          const result = await getBestMoveDetailed(
+            board,
+            color,
+            depth,
+            timeParams,
+            undefined,
+            data.rules as RuleState | undefined
+          );
           // Send back as 'bestMove' to match what AIController.getHint expects
           // result contains { bestMove, score, pv, ... }
           workerSelf.postMessage({ type: 'bestMove', id, ...result });

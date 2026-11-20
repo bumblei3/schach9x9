@@ -14,6 +14,7 @@ import type { TutorHint } from '../ui.js';
 import { analyzeMoveWithExplanation, getMoveNotation } from './MoveAnalyzer.js';
 import type { Piece } from '../types/core.js';
 import * as aiEngine from '../aiEngine.js';
+import { rulesFromPosition } from '../ai/ruleState.js';
 
 interface TacticalPattern {
   type: string;
@@ -93,7 +94,8 @@ export async function getTutorHints(game: Game, _tutorController: unknown): Prom
         3,
         isTestEnv ? 2 : Math.min(tutorDepth, 3),
         isTestEnv ? 1000 : Math.min(maxTimeMs, 1500),
-        moveNumber
+        moveNumber,
+        rulesFromPosition(game.board, game.lastMove)
       );
     }
 

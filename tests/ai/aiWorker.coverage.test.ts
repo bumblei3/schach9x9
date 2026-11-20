@@ -434,7 +434,7 @@ describe('AI Worker - Branch Coverage for Untested Paths', () => {
 
       // depth defaults to 4, topMovesCount to 3 when not provided.
       // (getBestMoveDetailed is not used in the analyze case.)
-      expect(getTopMoves).toHaveBeenCalledWith(mockBoard, 'white', 3, 4, 8000, 0);
+      expect(getTopMoves).toHaveBeenCalledWith(mockBoard, 'white', 3, 4, 8000, 0, undefined);
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'analysis',

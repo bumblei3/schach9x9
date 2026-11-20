@@ -17,6 +17,7 @@ import {
   COLOR_BLACK,
   COLOR_WHITE,
 } from '../aiEngine.js';
+import { rulesFromPosition } from '../ai/ruleState.js';
 import { MENTOR_LEVELS } from '../config.js';
 
 // --- Type definitions ---
@@ -803,7 +804,15 @@ export async function findBetterAlternative(
       (navigator.webdriver === true ||
         (window as Window & { __PLAYWRIGHT__?: boolean }).__PLAYWRIGHT__ === true);
 
-    const top = await getTopMoves(board, turn, 2, isTestEnv ? 1 : 2, isTestEnv ? 400 : 1200);
+    const top = await getTopMoves(
+      board,
+      turn,
+      2,
+      isTestEnv ? 1 : 2,
+      isTestEnv ? 400 : 1200,
+      undefined,
+      rulesFromPosition(board, game.lastMove)
+    );
     if (!top?.length || !top[0]?.move) return null;
 
     const best = top[0].move as MoveInfo & { from: Square; to: Square };

@@ -18,6 +18,7 @@
 
 import type { Move, Piece, PieceType } from '../types/core.js';
 import { getTopMoves } from '../aiEngine.js';
+import { rulesFromPosition, type RuleState } from '../ai/ruleState.js';
 
 export interface VariantNode {
   /** The candidate move for the side to move. */
@@ -70,9 +71,10 @@ export async function buildVariantTree(
   uiBoard: (Piece | null)[][],
   turnColor: 'white' | 'black',
   count = 3,
-  depth = 2
+  depth = 2,
+  rules?: RuleState
 ): Promise<VariantNode[]> {
-  const rootResults = await getTopMoves(uiBoard, turnColor, count, depth);
+  const rootResults = await getTopMoves(uiBoard, turnColor, count, depth, 5000, undefined, rules);
 
   const opponent: 'white' | 'black' = turnColor === 'white' ? 'black' : 'white';
   const replyDepth = Math.max(1, depth - 1);
@@ -91,7 +93,15 @@ export async function buildVariantTree(
     let boardAfter = applyMove(uiBoard, rootFull);
     let side = opponent;
     for (let i = 0; i < maxReplies; i++) {
-      const replies = await getTopMoves(boardAfter, side, 1, replyDepth);
+      const replies = await getTopMoves(
+        boardAfter,
+        side,
+        1,
+        replyDepth,
+        5000,
+        undefined,
+        rulesFromPosition(boardAfter)
+      );
       const reply = replies[0]?.move;
       if (!reply) break;
 

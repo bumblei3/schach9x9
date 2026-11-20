@@ -13,7 +13,6 @@ import {
   type TimeAllocationParams,
 } from './ai/timeManagement';
 import { setOpeningBook, queryOpeningBook } from './ai/OpeningBook';
-import type { Move } from './ai/MoveGenerator';
 import {
   getAllLegalMoves as genLegalInt,
   makeMove as makeMoveInt,
@@ -23,6 +22,9 @@ import {
   findKing as findKingInt,
   see as seeInt,
   getAllThreats,
+  setRules,
+  type RuleState,
+  type Move,
   // Note: Piece constants (PIECE_*, COLOR_*) are re-exported from BoardDefinitions below
 } from './ai/MoveGenerator';
 import {
@@ -54,6 +56,9 @@ import { evaluate, EVAL_VALUES, type EvalConfig } from './evaluate';
 import { createJsSearch } from './search';
 
 export { computeZobristHash };
+
+export { rulesFromPosition } from './ai/ruleState.js';
+export type { RuleState } from './ai/ruleState.js';
 
 // --- Types ---
 
@@ -106,7 +111,7 @@ export interface UndoInfo {
   oldHasMoved: boolean;
 }
 
-type UiBoard = (Piece | null)[][];
+export type UiBoard = (Piece | null)[][];
 type IntBoard = Int8Array;
 
 // --- Board conversion ---
@@ -196,9 +201,12 @@ export async function getBestMoveDetailed(
   turnColor: Player,
   maxDepth: number = 4,
   timeParams: TimeParams = {},
-  moveNumber?: number
+  moveNumber?: number,
+  rules?: RuleState
 ): Promise<SearchResult | null> {
   const board = convertBoardToInt(uiBoard);
+  // Install this position's castling/EP state before any move generation.
+  if (rules) setRules(rules);
 
   if (moveNumber !== undefined && moveNumber < 25) {
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
@@ -283,7 +291,7 @@ export async function getBestMoveDetailed(
   const elo = config.elo || 2500;
 
   logger.debug('[AiEngine] Using JS Search');
-  const jsResult = await runJsSearch(board, turnColor, maxDepth, elo, personalityId);
+  const jsResult = await runJsSearch(board, turnColor, maxDepth, elo, personalityId, undefined, rules);
   if (jsResult) {
     let move = convertMoveToResult(jsResult.move);
     // Elo-based blunder: at low Elo, occasionally pick a suboptimal move
@@ -331,10 +339,11 @@ async function runJsSearch(
   maxDepth: number,
   _elo: number,
   personality: string,
-  timeLimitMs?: number
+  timeLimitMs?: number,
+  rules?: RuleState
 ): Promise<JsSearchResult> {
   const jsSearch = createJsSearch({ personality: personality as EvalConfig['personality'] });
-  const result = await jsSearch.run(board, turnColor, maxDepth, undefined, timeLimitMs);
+  const result = await jsSearch.run(board, turnColor, maxDepth, rules, timeLimitMs);
   jsNodesEvaluated = result.nodes;
   return result;
 }
@@ -347,9 +356,12 @@ export async function getTopMoves(
   count: number = 3,
   searchDepth: number = 2,
   maxTimeMs: number = 5000,
-  moveNumber?: number
+  moveNumber?: number,
+  rules?: RuleState
 ): Promise<SearchResult[]> {
   const board = convertBoardToInt(uiBoard);
+  // Install this position's castling/EP state before any move generation.
+  if (rules) setRules(rules);
   const bookMoves: SearchResult[] = [];
   if (moveNumber !== undefined && moveNumber < 25) {
     const bookMove = queryOpeningBook(uiBoard, moveNumber);
@@ -403,7 +415,7 @@ export async function getTopMoves(
     if (remaining < 200) break;
     const budget = Math.min(sliceMs, remaining);
     try {
-      const jsResult = await runJsSearch(board, turnColor, loopDepth, 0, 'NORMAL', budget);
+      const jsResult = await runJsSearch(board, turnColor, loopDepth, 0, 'NORMAL', budget, rules);
       if (jsResult) moveScores.push({ move: candidate.move, score: jsResult.score });
       else moveScores.push({ move: candidate.move, score: candidate.score });
     } catch {
