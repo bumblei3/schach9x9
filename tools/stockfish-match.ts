@@ -453,7 +453,11 @@ function getSearchServer(): ChildProcessWithoutNullStreams {
     });
     searchProc.stderr.setEncoding('utf8');
     searchProc.stderr.on('data', (chunk: string) => {
+      // Fehler immer melden; das Diagnose-Log nur auf Verlangen — sonst waere
+      // der Lauf bei aktivem `DBG_SEARCH` unsichtbar, weil das Kind-stderr
+      // sonst nirgends landet.
       if (/error|fail|exception/i.test(chunk)) process.stderr.write(`[search-err] ${chunk}`);
+      else if (process.env.DBG_SEARCH) process.stderr.write(chunk);
     });
   }
   return searchProc;
@@ -557,6 +561,13 @@ async function playGame(
       if (isOurs) {
         const best = await ourBestMove(board, turn, depth);
         if (!best) {
+          // `illegal-ours` heisst nicht automatisch "die Engine hat einen
+          // illegalen Zug gemacht": kein Zug heisst auch Matt/Patt oder ein
+          // leerer Such-Baum. Ohne diese Zeile bleibt der Fall unklarbar.
+          if (process.env.DBG_SEARCH) process.stderr.write(
+            `[dbg-illegal] partie=${game} kein zug fen=${boardToFen(board, turn, 0, fullmove)} ` +
+              `legal=${legal.length} schach=${isInCheck(board, turn === 'white' ? COLOR_WHITE : COLOR_BLACK)} regeln-ep=${getRules().ep}\n`
+          );
           return {
             game,
             ourColor,
@@ -578,6 +589,11 @@ async function playGame(
           // Accept best without promo match if only from/to — search may omit promo on non-promo
           const loose = legal.find(m => m.from === best.from && m.to === best.to);
           if (!loose) {
+            if (process.env.DBG_SEARCH) process.stderr.write(
+              `[dbg-illegal] partie=${game} zug=${moveToUci(best)} turn=${turn} uns=${ourColor} ` +
+                `fen=${boardToFen(board, turn, 0, fullmove)} ` +
+                `legal=${legal.map(moveToUci).join(',')}\n`
+            );
             return {
               game,
               ourColor,

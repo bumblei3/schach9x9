@@ -44,6 +44,16 @@ rl.on('line', async (line: string) => {
     const result = await search.run(msg.board, msg.turn, msg.depth, {
       ...(msg.rules as object),
     } as RuleState);
+    // Diagnose: der Server hat ueber alle Anfragen eine Such-Instanz. Wenn er
+    // internen Zustand haelt, kann eine Antwort zu einer anderen Farbe gehoeren
+    // als die Anfrage — genau das zeigten zwei `illegal-ours`-Faelle (d7d5 bei
+    // Weiß am Zug, f3f4 bei Schwarz am Zug).
+    if (process.env.DBG_SEARCH) {
+      process.stderr.write(
+        `[dbg-server] turn=${msg.turn} zug=${result.move ? `${result.move.from}->${result.move.to}` : 'null'} ` +
+          `regeln=${JSON.stringify(msg.rules ?? null)}\n`
+      );
+    }
     process.stdout.write(JSON.stringify({ ok: true, move: result.move }) + '\n');
   } catch (err) {
     process.stdout.write(
