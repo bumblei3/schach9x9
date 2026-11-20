@@ -40,6 +40,7 @@ const rl = createInterface({ input: process.stdin });
 rl.on('line', async (line: string) => {
   if (!line.trim()) return;
   let msg: SearchRequest | null = null;
+  const angefangen = Date.now();
   try {
     msg = JSON.parse(line) as SearchRequest;
     // Robust gegen beide Formen: ein Array (so schickt `stockfish-match.ts`
@@ -61,7 +62,7 @@ rl.on('line', async (line: string) => {
     if (process.env.DBG_SEARCH) {
       process.stderr.write(
         `[dbg-server] turn=${msg.turn} zug=${result.move ? `${result.move.from}->${result.move.to}` : 'null'} ` +
-          `board=${JSON.stringify(Array.from(board))} ` +
+          `ms=${Date.now() - angefangen} board=${JSON.stringify(Array.from(board))} ` +
           `regeln=${JSON.stringify(msg.rules ?? null)}\n`
       );
     }
