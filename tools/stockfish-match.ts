@@ -478,7 +478,13 @@ async function ourBestMove(
       clearTimeout(timer);
       resolve(line);
     };
-    proc.stdin.write(JSON.stringify({ board, turn, depth, rules: { ...getRules() } }) + '\n');
+    // `JSON.stringify` auf ein Int8Array liefert KEIN Array, sondern ein
+    // Objekt mit numerischen Schluesseln (`length` ist dann `undefined`).
+    // Die Suche kommt mit beiden Formen zurecht, darum ist das hier eine
+    // defensieve Normalisierung — keine bewiesene Fehlerursache.
+    proc.stdin.write(
+      JSON.stringify({ board: Array.from(board), turn, depth, rules: { ...getRules() } }) + '\n'
+    );
   });
   const data = JSON.parse(reply) as { ok: boolean; move?: Move | null; error?: string };
   if (!data.ok) throw new Error(data.error ?? 'search-server error');

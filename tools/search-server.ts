@@ -40,8 +40,16 @@ rl.on('line', async (line: string) => {
   if (!line.trim()) return;
   try {
     const msg = JSON.parse(line) as SearchRequest;
+    // Robust gegen beide Formen: ein Array (so schickt `stockfish-match.ts`
+    // es seit dem Serialisierungs-Fix) und ein Objekt mit numerischen
+    // Schluesseln (so lieferte `JSON.stringify` ein Int8Array frueher). Ohne
+    // diese Normalisierung ist `board.length` undefined und die Suche
+    // antwortet aus einer anderen Position.
+    const board = Int8Array.from(
+      Array.isArray(msg.board) ? msg.board : Object.values(msg.board ?? {})
+    );
     if (msg.rules) setRules(msg.rules);
-    const result = await search.run(msg.board, msg.turn, msg.depth, {
+    const result = await search.run(board, msg.turn, msg.depth, {
       ...(msg.rules as object),
     } as RuleState);
     // Diagnose: der Server hat ueber alle Anfragen eine Such-Instanz. Wenn er

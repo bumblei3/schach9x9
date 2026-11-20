@@ -101,4 +101,40 @@ describe('search-server', () => {
       expect(data.ok, `Anfrage ${i + 1} schlug fehl`).toBe(true);
     }
   });
+
+  test('akzeptiert die Objekt-Form, die JSON.stringify(Int8Array) liefert', async () => {
+    // `JSON.stringify(new Int8Array([...]))` ist KEIN Array, sondern
+    // `{"0":1,...}` mit `length === undefined`. Der Server normalisiert das
+    // auf `Int8Array`. **Gegenprobe:** der Test ist auch ohne Normalisierung
+    // gruen — die Suche kommt mit der Objekt-Form zurecht, weil sie
+    // ausschliesslich per Index liest. Der Test haelt also eine
+    // Robustheitsgarantie fest (und dokumentiert die Serialisierung), aber er
+    // ist NICHT die Ursache der sporadischen `illegal-ours`-Faelle; die ist
+    // weiter offen.
+    const board = startBoard();
+    const alsObjekt = JSON.parse(JSON.stringify(board)) as Record<string, number>;
+    expect(Array.isArray(alsObjekt)).toBe(false);
+    expect((alsObjekt as unknown as { length?: number }).length).toBeUndefined();
+
+    const reply = await new Promise<string>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('kein Antwort bei Objekt-Board')), 20000);
+      resolveLine = (line: string) => {
+        clearTimeout(timer);
+        resolve(line);
+      };
+      proc.stdin.write(JSON.stringify({ board: alsObjekt, turn: 'white', depth: 2 }) + '\n');
+    });
+
+    const data = JSON.parse(reply) as { ok: boolean; move?: { from: number; to: number } | null };
+    expect(data.ok).toBe(true);
+    // Ein Zug aus der Startstellung: von einem weissen Bauer oder Springer.
+    expect(data.move).not.toBeNull();
+    const legal = new Set([
+      // weisse Bauern auf der 7. Reihe (r=6): Indizes 48-55
+      48, 49, 50, 51, 52, 53, 54, 55,
+      // weisse Springer b1/g1 (r=7): 57 und 62
+      57, 62,
+    ]);
+    expect(legal.has(data.move!.from)).toBe(true);
+  });
 });
