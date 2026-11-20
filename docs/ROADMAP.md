@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-11-19 · `main` `15fb97a` · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-11-20 · `main` `93ce81b` · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 

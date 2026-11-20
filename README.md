@@ -24,7 +24,7 @@ Das Spiel ist live unter folgender Adresse verfügbar:
   - **Transposition Table** mit depth-preferred Replacement
   - **Move Ordering** mit MVV-LVA, Killer Moves, History Heuristic, **Threat Detection** (hängende Figuren, entdeckte Angriffe, X-Ray, Fesselungen, Königssicherheit)
   - **5 KI-Persönlichkeiten** (Ausgewogen, Aggressiv, Defensiv, Positionell, Der Fallensteller) mit individuellen Eval-Gewichten und Suchverhalten
-  - **Adaptives Zeitmanagement**: dynamische Zeitallokation basierend auf Positions-Komplexität, Spielphase, Uhrzeit und Persönlichkeit
+  - **Adaptives Zeitmanagement**: dynamische Zeitallokation basierend auf Positions-Komplexität, Spielphase, Restzeit, Inkrement und Persönlichkeit
 - **Engine Analyse Modus**: Echtzeit-Evaluation mit vertikaler Bar, Top-Züge inkl. PV-Varianten und Engine-Statistiken.
 - **Zug-Qualitäts-Indikatoren**: Sofortiges Feedback auf Züge (Brilliant, Best, Blunder) mit visuellen Badges.
 - **Tutor-System**: Echtzeit-Analyse und Verbesserungsvorschläge während des Spiels.
@@ -72,7 +72,7 @@ Doku mit den exakten Aufrufen: [`bench/ABSOLUTE_STRENGTH_BASELINE.md`](bench/ABS
   bei Zeitablauf zählt das Material-Delta zur Ausgangsstellung.
 - **Track B (absolut, 8×8):** `npm run match:stockfish -- --games=8 --depth=4
   --sf-depth=8 --sf-elo=1400` (Stockfish 18 als Child-Prozess).
-- **Statik:** `npx vitest run` (3311 Tests in 283 Dateien), `npx tsc --noEmit`,
+- **Statik:** `npx vitest run` (3314 Tests in 284 Dateien), `npx tsc --noEmit`,
   eslint sauber.
 
 Die Farbbalance-Probe `js/asymmetryProbe.ts` ist ein eigenes Skript ohne
@@ -116,7 +116,7 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3311 Vitest-Tests in 283 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3314 Vitest-Tests in 284 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -133,7 +133,7 @@ veraltet bei jeder Änderung und sagt nichts aus, was nachprüfbar ist.
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3311 Vitest-Tests in 283 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
+- 3314 Vitest-Tests in 284 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur
@@ -148,8 +148,9 @@ schach9x9/
 │   │   ├── OpeningBook.ts      # Eröffnungsbuch
 │   │   ├── transpositionTable.ts
 │   │   ├── MoveOrdering.ts     # Move-Ordering mit Threat-Detection
-│   │   ├── search.ts           # JS Alpha-Beta mit LMR, NMP, ProbCut…
-│   │   └── aiEngine.ts         # JS-Such-Engine (primär, kein WASM)
+│   │   └── ruleState.ts        # Regeln (Rochade/EP) je Stellung
+│   ├── search.ts               # JS Alpha-Beta mit LMR, NMP, ProbCut…
+│   ├── aiEngine.ts             # JS-Such-Engine (primär, kein WASM)
 │   ├── assets/             # Statische Assets (Figuren SVGs)
 │   ├── campaign/           # Kampagnen-System
 │   ├── input/              # Eingabe-Handler
@@ -192,7 +193,7 @@ Das Projekt nutzt einen modernen Entwicklungs-Workflow:
 - **Tests ausführen:** `npm test`
 - **Linting (ESLint):** `npm run lint`
 - **Formatting (Prettier):** `npm run format`
-- **CI-Check:** `npm run lint && npm test` — `npm run format:check` ist auf `main` nicht grün: 129 Dateien (49 unter `tests/`, 33 unter `js/`, 12 unter `e2e/`, 12 unter `tools/`), dazu `index.html`, die der Prettier-HTML-Parser mit einem `SyntaxError` an einem `</div>` (Zeile 1662) abbricht. Der Browser parst dieselbe Stelle fehlerfrei und alle E2E-Baselines sind unverändert — es ist eine Parser-Differenz, kein Kaputtbaum. Formatiere daher gezielt die Dateien, die du anfasst, und lasse `npm run format` nicht über den ganzen Baum laufen (Details in [`CONTRIBUTING.md`](CONTRIBUTING.md))
+- **CI-Check:** `npm run lint && npm test` — `npm run format:check` ist auf `main` nicht grün: 135 Dateien (53 unter `tests/`, 34 unter `js/`, 13 unter `tools/`, 12 unter `e2e/`, 7 unter `docs/`, 16 weitere), dazu `index.html`, dessen `</div>` (Zeile 1662) der Prettier-HTML-Parser als „Unexpected closing tag“ abbucht. Der Browser parst dieselbe Stelle fehlerfrei und alle E2E-Baselines sind unverändert — es ist eine Parser-Differenz, kein Kaputtbaum. Formatiere daher gezielt die Dateien, die du anfasst, und lasse `npm run format` nicht über den ganzen Baum laufen (Details in [`CONTRIBUTING.md`](CONTRIBUTING.md))
 
 Details zu Branches, Commit-Regeln, dem Verifikationsgate und den
 Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
@@ -202,7 +203,7 @@ Projektkonventionen: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 Aktuelle Planung mit Milestones M0–M5: **[`docs/ROADMAP.md`](docs/ROADMAP.md)**.
 Mess-Ist-Stand: [`STATUS.md`](STATUS.md). Nicht wiederholen: [`bench/NEGATIVE_RESULTS.md`](bench/NEGATIVE_RESULTS.md).
 
-**Aktuell: v2.1.0** (`main` `574f9a1`, 2026-11-20) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. Die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button liegt auf `main`; Safe-Area-Insets wirken seit `viewport-fit=cover` (#284), Touch-Drag und Touch-Zielgrößen sind e2e-geprüft (#282/#283), die Offline-Runde gegen die ausgelieferte `dist/` ebendso (`e2e/offline-pwa.spec.ts`). NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Nächster Schritt ist der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
+**Aktuell: v2.1.0** (`main` `93ce81b`, 2026-11-20) — M2 und M3 sind im Release, dazu Kreuz-Modus, 8×8-Upgrade-Karte, Akt IV (Kapitel 19–25), Tagespuzzle-Zugmarker und ein gemeinsamer Partieende-Weg für Matt, Zeitüberschreitung und Remis nach Regel. Die zweisprachige UI (Deutsch/Englisch) samt Wiederholen-Button liegt auf `main`; Safe-Area-Insets wirken seit `viewport-fit=cover` (#284), Touch-Drag und Touch-Zielgrößen sind e2e-geprüft (#282/#283), die Offline-Runde gegen die ausgelieferte `dist/` ebendso (`e2e/offline-pwa.spec.ts`). NNUE bleibt geparkt (−132 Elo, n=80). Die Engine ist eingefroren. Nächster Schritt ist der Playtest aus [`docs/PLAYTEST_PROTOCOL.md`](docs/PLAYTEST_PROTOCOL.md) — Live-Seite durchspielen (Setup/Shop, Kapitel 19, Eröffnungs-Trainer).
 
 **Bereits released (in v1.1.0–v1.3.0):**
 
