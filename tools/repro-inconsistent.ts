@@ -26,7 +26,7 @@ const proc = spawn(process.execPath, ['--import', tsxPfad, 'tools/search-server.
 });
 
 let buf = '';
-let resolveLine: ((l: string) => void) | null = null;
+let resolveLine: ((_line: string) => void) | null = null;
 proc.stdout.setEncoding('utf8');
 proc.stdout.on('data', (chunk: string) => {
   buf += chunk;
@@ -49,7 +49,7 @@ for (let i = 0; i < size; i++) {
     const timer = setTimeout(() => reject(new Error(`Anfrage ${i}: timeout`)), 20000);
     resolveLine = (_line: string) => {
       clearTimeout(timer);
-      resolve(line);
+      resolve(_line);
     };
     proc.stdin.write(
       JSON.stringify({ id, board: schritt.board, turn: schritt.turn, depth: 5 }) + '\n'
