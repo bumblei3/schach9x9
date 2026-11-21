@@ -72,7 +72,7 @@ Doku mit den exakten Aufrufen: [`bench/ABSOLUTE_STRENGTH_BASELINE.md`](bench/ABS
   bei Zeitablauf zählt das Material-Delta zur Ausgangsstellung.
 - **Track B (absolut, 8×8):** `npm run match:stockfish -- --games=8 --depth=4
   --sf-depth=8 --sf-elo=1400` (Stockfish 18 als Child-Prozess).
-- **Statik:** `npx vitest run` (3314 Tests in 284 Dateien), `npx tsc --noEmit`,
+- **Statik:** `npx vitest run` (3320 Tests in 287 Dateien), `npx tsc --noEmit`,
   eslint sauber.
 
 Die Farbbalance-Probe `js/asymmetryProbe.ts` ist ein eigenes Skript ohne
@@ -116,7 +116,7 @@ Import im Produktionspfad (knip: ungenutzte Datei) — kein Teil der CI.
 
 ## 🧪 Qualitätssicherung & Testing
 
-Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3314 Vitest-Tests in 284 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
+Das Projekt legt großen Wert auf Robustheit und Korrektheit. Mit **3320 Vitest-Tests in 287 Dateien** plus 49 Playwright-E2E-Specs (zuletzt 159 Faelle gruen, inklusive Touch-Drag, Touch-Zielgroessen, Offline-Runde und dem Kampagnen-Smoke über alle 25 Kapitel) wird eine extrem hohe Stabilitaet gewaehrleistet. Jede Änderung wird durch eine CI-Pipeline (Linting, Testing, Strict Type Checking) verifiziert.
 
 Das Projekt ist **TypeScript Strict Mode compliant** (0 Errors, ein dokumentiertes `any`).
 
@@ -133,7 +133,7 @@ veraltet bei jeder Änderung und sagt nichts aus, was nachprüfbar ist.
 Test-Suite Highlights:
 
 - 17 MoveOrdering-Tests (inkl. 5 Threat-Detection-Tests)
-- 3314 Vitest-Tests in 284 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
+- 3320 Vitest-Tests in 287 Dateien plus 49 Playwright-Specs, zuletzt 159 Faelle gruen
 - Unit-, Integrations- und E2E-Tests (Playwright, Chromium)
 
 ## 📁 Projektstruktur

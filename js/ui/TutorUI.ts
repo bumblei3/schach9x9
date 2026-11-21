@@ -165,6 +165,11 @@ export async function showTutorSuggestions(
   game: Game,
   providedHints: TutorHint[] | null = null
 ): Promise<void> {
+  // Der Debounce-Timer aus `TutorController` ueberlebt den Test-Aufbau: ist
+  // jsdom bereits abgerissen, ist `document` weg und der Aufruf wuerde als
+  // Unhandled Rejection den vitest-Lauf rot machen — alle Tests grün, aber
+  // `Errors 1 error`. Gleiches Muster wie in `MoveAnalyzer`.
+  if (typeof document === 'undefined') return;
   const g = game as GameWithExtensions;
   const tutorPanel = document.getElementById('tutor-panel');
   const suggestionsEl = document.getElementById('tutor-suggestions');

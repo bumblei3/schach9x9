@@ -400,7 +400,7 @@ export async function getTopMoves(
   }
   quickScores.sort((a, b) => b.score - a.score);
   const topCandidates = quickScores.slice(0, Math.min(8, quickScores.length));
-  const moveScores: { move: Move; score: number }[] = [];
+  const moveScores: { move: Move; score: number; nodes: number }[] = [];
   // Search each candidate at (almost) the full requested tutor depth. Previously
   // this used `searchDepth - 3`, which silently made the tutor SHALLOWER than
   // the opponent AI (e.g. expert opponent depth 6 vs tutor 5). We keep only a
@@ -417,10 +417,13 @@ export async function getTopMoves(
     const budget = Math.min(sliceMs, remaining);
     try {
       const jsResult = await runJsSearch(board, turnColor, loopDepth, 0, 'NORMAL', budget, rules);
-      if (jsResult) moveScores.push({ move: candidate.move, score: jsResult.score });
-      else moveScores.push({ move: candidate.move, score: candidate.score });
+      if (jsResult) {
+        moveScores.push({ move: candidate.move, score: jsResult.score, nodes: jsResult.nodes });
+      } else {
+        moveScores.push({ move: candidate.move, score: candidate.score, nodes: 0 });
+      }
     } catch {
-      moveScores.push({ move: candidate.move, score: candidate.score });
+      moveScores.push({ move: candidate.move, score: candidate.score, nodes: 0 });
     }
   }
   moveScores.sort((a, b) => b.score - a.score);
@@ -432,7 +435,7 @@ export async function getTopMoves(
       const undo = makeMoveInt(board, move);
       const score = quickEval(board);
       undoMoveInt(board, undo);
-      moveScores.push({ move, score });
+      moveScores.push({ move, score, nodes: 0 });
     }
     moveScores.sort((a, b) => b.score - a.score);
   }
@@ -443,7 +446,7 @@ export async function getTopMoves(
       move: convertMoveToResult(ms.move as unknown as { from: number; to: number }),
       score: ms.score,
       depth: loopDepth,
-      nodes: 0,
+      nodes: ms.nodes,
     })),
   ];
 }
