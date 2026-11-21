@@ -54,8 +54,8 @@ export function setTutorLoading(loading: boolean): void {
     suggestionsEl.innerHTML = `
       <div class="tutor-thinking-container" style="padding: 2rem; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
         <div class="tutor-thinking-icon" style="font-size: 2.5rem; animation: pulse 1.5s infinite;">🤖</div>
-        <div style="font-weight: bold; color: var(--accent-primary);">KI-Tutor denkt nach...</div>
-        <div style="font-size: 0.8rem; opacity: 0.7;">Analysiere hunderte Spielverläufe für den optimalen Tipp.</div>
+        <div style="font-weight: bold; color: var(--accent-primary);">${t('tutor.thinking')}</div>
+        <div style="font-size: 0.8rem; opacity: 0.7;">${t('tutor.analyzing')}</div>
       </div>
     `;
     const panel = document.getElementById('tutor-panel');
@@ -136,11 +136,13 @@ export function updateTutorRecommendations(game: Game): void {
         .join('');
 
       card.innerHTML = `
-        ${template.isRecommended ? '<div class="recommended-badge">Empfohlen</div>' : ''}
+        ${template.isRecommended
+          ? `<div class="recommended-badge">${t('tutor.recommendedBadge')}</div>`
+          : ''}
         <div class="template-name">${template.name}</div>
         <div class="template-description">${template.description}</div>
         <div class="template-pieces">
-          <span>Enthält:</span>
+          <span>${t('tutor.contains')}</span>
           ${piecesPreview}
         </div>
       `;
@@ -269,7 +271,7 @@ export async function showTutorSuggestions(
         overlay.innerHTML = `
         <div class="modal-content" style="max-width: 500px; text-align: left;">
           <div class="menu-header">
-            <h2>💡 KI-Tipps</h2>
+            <h2>${t('tutor.hintsTitle')}</h2>
             <button id="close-tutor-btn" class="close-icon-btn">×</button>
           </div>
           <div id="tutor-hints-body" style="max-height: 60vh; overflow-y: auto;"></div>

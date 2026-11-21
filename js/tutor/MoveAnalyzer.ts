@@ -532,7 +532,7 @@ function appendPostMoveReasons(
   // Did we give check?
   try {
     if (typeof game.isInCheck === 'function' && game.isInCheck(opponent as 'white' | 'black')) {
-      tactical.push('♔ Schach dem Gegner!');
+      tactical.push(t('tutor.checkToOpponent'));
     }
   } catch {
     /* ignore */
@@ -569,7 +569,7 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
   if (to.r >= 3 && to.r <= 5 && to.c >= 3 && to.c <= 5) {
     patterns.push({
       type: 'center_control',
-      explanation: '🏰 Besetzt das Zentrum',
+      explanation: t('tutor.centerControl'),
     });
   }
 
@@ -582,7 +582,7 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
   ) {
     patterns.push({
       type: 'development',
-      explanation: '🚀 Entwickelt eine Figur',
+      explanation: t('tutor.developPiece'),
     });
   }
 
@@ -604,7 +604,7 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
     if (piece.color === 'white' && to.r < 4) {
       patterns.push({
         type: 'space',
-        explanation: 'Territoriumsgewinn',
+        explanation: t('tutor.spaceGain'),
       });
     }
   }
@@ -625,7 +625,7 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
     if (!hasPawn) {
       patterns.push({
         type: 'open_file',
-        explanation: '🛣️ Besetzt eine offene Linie',
+        explanation: t('tutor.openFile'),
       });
     }
   }
@@ -652,7 +652,7 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
       if (protectedByPawn) {
         patterns.push({
           type: 'outpost',
-          explanation: '🐴 Starker Springer-Vorposten',
+          explanation: t('tutor.knightOutpost'),
         });
       }
     }
@@ -667,23 +667,23 @@ export function analyzeStrategicValue(game: GameLike, move: MoveInfo): Strategic
 export function getScoreDescription(score: number): ScoreDescription {
   // Score is in centipawns (100 = 1 pawn advantage)
   if (score >= 900) {
-    return { label: '🏆 Gewinnstellung', color: '#10b981', emoji: '🏆' };
+    return { label: t('tutor.scoreWinning'), color: '#10b981', emoji: '🏆' };
   } else if (score >= 500) {
     return { label: t('tutor.labelBigAdvantage'), color: '#22c55e', emoji: '⭐' };
   } else if (score >= 200) {
-    return { label: '✨ Klarer Vorteil', color: '#4ade80', emoji: '✨' };
+    return { label: t('tutor.scoreBigPlus'), color: '#4ade80', emoji: '✨' };
   } else if (score >= 50) {
-    return { label: '➕ Leichter Vorteil', color: '#86efac', emoji: '➕' };
+    return { label: t('tutor.scoreSlightPlus'), color: '#86efac', emoji: '➕' };
   } else if (score >= -50) {
-    return { label: '⚖️ Ausgeglichen', color: '#94a3b8', emoji: '⚖️' };
+    return { label: t('tutor.scoreEqual'), color: '#94a3b8', emoji: '⚖️' };
   } else if (score >= -200) {
-    return { label: '➖ Leichter Nachteil', color: '#fca5a5', emoji: '➖' };
+    return { label: t('tutor.scoreSlightMinus'), color: '#fca5a5', emoji: '➖' };
   } else if (score >= -500) {
-    return { label: '⚠️ Schwieriger', color: '#f87171', emoji: '⚠️' };
+    return { label: t('tutor.scoreHard'), color: '#f87171', emoji: '⚠️' };
   } else if (score >= -900) {
     return { label: t('tutor.labelBigDisadvantage'), color: '#ef4444', emoji: '🔴' };
   } else {
-    return { label: '💀 Verloren', color: '#dc2626', emoji: '💀' };
+    return { label: t('tutor.scoreLost'), color: '#dc2626', emoji: '💀' };
   }
 }
 
@@ -697,7 +697,7 @@ export function getMoveNotation(game: GameLike, move: MoveInfo): string {
   const toNotation = String.fromCharCode(97 + move.to.c) + (BOARD_SIZE - move.to.r);
 
   if (!piece) {
-    return `Zug ${fromNotation}→${toNotation}`;
+    return t('tutor.moveNotation', { from: fromNotation, to: toNotation });
   }
 
   // If piece already on destination, we cannot see the captured piece on `to`.
@@ -940,7 +940,7 @@ export async function checkBlunder(
   ) {
     const betterText = analysis.betterMove
       ? t('tutor.betterWouldBe', { move: getMoveNotation(game, analysis.betterMove) })
-      : 'Schau dir die Stellung noch einmal an.';
+      : t('tutor.lookAgain');
     showToast(`💡 Auto-Hinweis: ${analysis.qualityLabel} — ${betterText}`, 'warning');
   }
 
@@ -967,17 +967,17 @@ export function showBlunderWarning(
   // itself carry tactical motifs (hanging piece, discovered attack).
   const explanation =
     detail ||
-    'Kein konkretes taktisches Motiv erkannt, aber die Stellung verschlechtert sich deutlich.';
+    t('tutor.noTacticalMotif');
 
   const isPreMove = !!proceedCallback;
-  const title = isPreMove ? '⚠️ Warnung: Grober Fehler?' : '⚠️ Schwerer Fehler (Blunder)';
+  const title = isPreMove ? t('tutor.warnBlunderTitle') : t('tutor.blunderTitle');
   const diff = (analysis.scoreDiff / -100).toFixed(1);
 
   const message = (
     isPreMove
       ? [t('tutor.worsenByPawns', { pawns: diff }), explanation, t('tutor.confirmMove')]
       : [
-          `Dieser Zug verschlechtert deine Stellung um ${diff} Bauern.`,
+          t('tutor.worsenByPawns', { pawns: diff }),
           explanation,
           t('tutor.confirmUndo'),
         ]
@@ -987,11 +987,11 @@ export function showBlunderWarning(
 
   const buttons = isPreMove
     ? [
-        { text: 'Abbrechen', class: 'btn-secondary' },
-        { text: 'Trotzdem ziehen', class: 'btn-primary', callback: proceedCallback },
+        { text: t('tutor.cancel'), class: 'btn-secondary' },
+        { text: t('tutor.playAnyway'), class: 'btn-primary', callback: proceedCallback },
       ]
     : [
-        { text: 'Nein, weiterspielen', class: 'btn-secondary' },
+        { text: t('tutor.noContinue'), class: 'btn-secondary' },
         {
           text: t('tutor.confirmUndoYes'),
           class: 'btn-primary',

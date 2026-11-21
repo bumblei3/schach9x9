@@ -33,14 +33,14 @@ export class CampaignUI {
         <div class="campaign-content" style="background: var(--bg-panel); padding: 2rem; border-radius: 1rem; max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
           <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
             <div>
-              <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-i18n="campaign.title">Kampagne</h2>
+              <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="campaign-title">${t('campaign.title')}</h2>
               <div id="campaign-gold-display" style="color: #ffd700; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; margin-top: 5px;">
-                <span>💰</span> <span id="campaign-gold-value">0</span> ${t('campaign.gold')}
+                <span>💰</span> <span id="campaign-gold-value">0</span> <span id="campaign-gold-label">${t('campaign.gold')}</span>
               </div>
             </div>
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-              <button id="campaign-army-toggle" type="button" class="btn-secondary" style="background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.2);"><span>⚔️</span> <span data-i18n="campaign.yourArmy">${t('campaign.yourArmy')}</span></button>
-              <button id="campaign-shop-toggle" type="button" class="btn-secondary" style="background: rgba(255,215,0,0.1); color: #ffd700; border-color: rgba(255,215,0,0.2);"><span>🛒</span> <span data-i18n="campaign.shop">${t('campaign.shop')}</span></button>
+              <button id="campaign-army-toggle" type="button" class="btn-secondary" style="background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.2);"><span>⚔️</span> <span>${t('campaign.yourArmy')}</span></button>
+              <button id="campaign-shop-toggle" type="button" class="btn-secondary" style="background: rgba(255,215,0,0.1); color: #ffd700; border-color: rgba(255,215,0,0.2);"><span>🛒</span> <span>${t('campaign.shop')}</span></button>
               <button id="campaign-close-btn" type="button" class="close-icon-btn">×</button>
             </div>
           </div>
@@ -54,8 +54,8 @@ export class CampaignUI {
           <div id="campaign-shop-view" class="hidden">
              <div class="shop-header" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
                 <button id="campaign-shop-back" class="btn-icon">←</button>
-                <h3 style="margin: 0; color: #ffd700;">${t('campaign.mercenaryShop')}</h3>
-                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;">Erwirb Vorteile für deine Truppen.</p>
+                <h3 style="margin: 0; color: #ffd700;" id="campaign-shop-title">${t('campaign.mercenaryShop')}</h3>
+                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;" id="campaign-shop-hint">${t('campaign.recruitPerks')}</p>
              </div>
              <div id="campaign-perks-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem;">
                 <!-- Perks injected here -->
@@ -65,8 +65,8 @@ export class CampaignUI {
           <div id="campaign-army-view" class="hidden">
              <div class="army-header" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
                 <button id="campaign-army-back" class="btn-icon">←</button>
-                <h3 style="margin: 0; color: #818cf8;" data-i18n="campaign.yourArmy">${t('campaign.yourArmy')}</h3>
-                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;" data-i18n="campaign.armyHint">Verbessere deine Einheiten durch Erfahrung.</p>
+                <h3 style="margin: 0; color: #818cf8;" id="campaign-army-title">${t('campaign.yourArmy')}</h3>
+                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;" id="campaign-army-hint">${t('campaign.armyHint')}</p>
              </div>
              <div id="campaign-army-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem;">
                 <!-- Units injected here -->
@@ -115,13 +115,33 @@ export class CampaignUI {
     // Dynamische Inhalte (Level-Karten, Perks, Armee) stehen nicht in
     // `data-i18n`-Markern — sie werden beim Sprachwechsel neu gerendert.
     window.addEventListener('i18n:locale-changed', () => {
+      // Die Overlay-Markup-Texte stehen in einem einmal gebauten Template —
+      // sie werden von `applyI18n` nie erreicht. Ohne dieses Neu-Set bleiben
+      // sie in der Sprache der Overlay-Erstellung haengen, auch wenn das
+      // Overlay erst nach dem Sprachwechsel geoeffnet wird.
+      this.renderStaticLabels();
       if (this.container && !this.container.classList.contains('hidden')) {
         this.switchView(this.currentView);
       }
     });
   }
 
+  /** Statische Ueberschriften/Hinweise des Overlay-Templates. */
+  renderStaticLabels(): void {
+    const set = (id: string, key: Parameters<typeof t>[0]): void => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = t(key);
+    };
+    set('campaign-title', 'campaign.title');
+    set('campaign-gold-label', 'campaign.gold');
+    set('campaign-shop-title', 'campaign.mercenaryShop');
+    set('campaign-shop-hint', 'campaign.recruitPerks');
+    set('campaign-army-title', 'campaign.yourArmy');
+    set('campaign-army-hint', 'campaign.armyHint');
+  }
+
   show(): void {
+    this.renderStaticLabels();
     this.switchView('levels'); // Default to levels
     this.updateGoldDisplay();
     this.renderLevels();
@@ -323,16 +343,16 @@ export class CampaignUI {
 
     const unitTypes = ['p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'j'];
     const names: Record<string, string> = {
-      p: 'Infanterie (Bauer)',
-      n: 'Kavallerie (Springer)',
-      b: 'Priester (Läufer)',
-      r: 'Burgwache (Turm)',
-      q: 'General (Dame)',
-      k: 'König (Anführer)',
-      a: 'Erzbischof',
-      c: 'Kanzler',
-      e: 'Engel',
-      j: 'Nachtreiter',
+      p: t('campaign.unitInfantry'),
+      n: t('campaign.unitCavalry'),
+      b: t('campaign.unitPriest'),
+      r: t('campaign.unitCastleGuard'),
+      q: t('campaign.unitGeneral'),
+      k: t('campaign.unitKingLeader'),
+      a: t('piece.a'),
+      c: t('piece.c'),
+      e: t('piece.e'),
+      j: t('piece.j'),
     };
     const icons: Record<string, string> = {
       p: '🛡️',
@@ -392,7 +412,7 @@ export class CampaignUI {
              ${isChampion ? t('campaign.yourChampion') : t('campaign.chooseChampion')}
            </button>
            <button class="talents-btn btn-secondary" style="width: 100%; font-size: 0.8rem; border-color: rgba(78, 205, 196, 0.3); color: #4ecdc4;">
-             <span>🔮</span> <span data-i18n="campaign.talentTree">${t('campaign.talentTree')}</span>
+             <span>🔮</span> <span>${t('campaign.talentTree')}</span>
            </button>
         </div>
       `;

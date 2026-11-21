@@ -25,33 +25,44 @@ function unlockedTalents(unitType: string) {
   return tree.talents.filter(t => campaignManager.isTalentUnlocked(t.id));
 }
 
-const PIECE_NAMES: Record<string, { nom: string; acc: string; fem?: boolean }> = {
-  p: { nom: 'Bauer', acc: 'Bauern' },
-  n: { nom: 'Springer', acc: 'Springer' },
-  b: { nom: 'Läufer', acc: 'Läufer' },
-  r: { nom: 'Turm', acc: 'Turm' },
-  q: { nom: 'Dame', acc: 'Dame', fem: true },
-  k: { nom: 'König', acc: 'König' },
-  a: { nom: 'Erzbischof', acc: 'Erzbischof' },
-  c: { nom: 'Kanzler', acc: 'Kanzler' },
-  e: { nom: 'Engel', acc: 'Engel' },
-  j: { nom: 'Nachtreiter', acc: 'Nachtreiter' },
+const PIECE_NAMES: Record<string, { fem?: boolean }> = {
+  p: {},
+  n: {},
+  b: {},
+  r: {},
+  q: { fem: true },
+  k: {},
+  a: {},
+  c: {},
+  e: {},
+  j: {},
 };
+
+/**
+ * Akkusativformen, die sich von der Nominativform unterscheiden. Nur der Bauer
+ * ist unregelmaessig (Bauer -> Bauern); alle anderen Figuren sind identisch.
+ * Die regelmaessigen kommen weiterhin zentral aus `piece.*`.
+ */
+const PIECE_ACC: Record<string, string> = { p: 'Bauern' };
 
 function pieceAccusative(type: string): string {
   const name = PIECE_NAMES[type];
-  if (!name) return `deinen ${type}`;
-  return `${name.fem ? 'deine' : 'deinen'} ${name.acc}`;
+  const piece = PIECE_ACC[type] ?? t(`piece.${type}` as Parameters<typeof t>[0]);
+  if (!name) return t('xp.accMasc', { piece: type });
+  return t(name.fem ? 'xp.accFem' : 'xp.accMasc', { piece });
 }
 
 function pieceNominative(type: string): string {
   const name = PIECE_NAMES[type];
-  if (!name) return `Dein ${type}`;
-  return `${name.fem ? 'Deine' : 'Dein'} ${name.nom}`;
+  const piece = t(`piece.${type}` as Parameters<typeof t>[0]);
+  if (!name) return t('xp.nomMasc', { piece: type });
+  return t(name.fem ? 'xp.nomFem' : 'xp.nomMasc', { piece });
 }
 
 function goldNotice(talents: TalentNode[]): string {
-  return talents.map(t => `${t.name}: +${t.effectValue} Gold`).join(', ');
+  return talents
+    .map(x => t('xp.goldGain', { talent: x.name, value: x.effectValue ?? 0 }))
+    .join(', ');
 }
 
 function xpNotice(type: string, xpAmount: number, talents: TalentNode[]): string {
@@ -67,7 +78,7 @@ function xpNotice(type: string, xpAmount: number, talents: TalentNode[]): string
     }
   }
   const bonus = parts.length > 0 ? ` (${parts.join(', ')})` : '';
-  return `+${xpAmount} XP für ${pieceAccusative(type)}${bonus}`;
+  return t('xp.forPiece', { amount: xpAmount, piece: pieceAccusative(type), bonus });
 }
 
 /**
@@ -138,7 +149,11 @@ export async function executeMove(
     game.board[from.r][rookTargetCol] = rook;
     game.board[from.r][rookCol] = null;
     rook.hasMoved = true;
-    game.log(`${piece.color === 'white' ? 'Weiß' : 'Schwarz'} rochiert!`);
+    game.log(
+      t('log.castling', {
+        color: piece.color === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+      })
+    );
   }
 
   // Handle En Passant
@@ -265,7 +280,10 @@ export async function executeMove(
         moveRecord.specialMove = { type: 'promotion', promotedTo: promotionType };
         moveRecord.promotion = promotionType;
         game.log(
-          `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${promotionType} befördert!`
+          t('log.promotion', {
+            color: piece.color === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+            piece: t(`piece.${promotionType}` as Parameters<typeof t>[0]),
+          })
         );
         soundManager.playMove(from.c, to.c);
       } else {
@@ -282,16 +300,15 @@ export async function executeMove(
               moveRecord.promotion = actualType;
               game.stats.promotions++;
               game.log(
-                `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum ${actualType} befördert!`
+                t('log.promotion', {
+                  color: piece.color === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+                  piece: t(`piece.${actualType}` as Parameters<typeof t>[0]),
+                })
               );
               // Award XP for promotion in Campaign
               if (game.campaignMode && piece.color === game.playerColor) {
                 campaignManager.addUnitXp('p', 50);
-                notificationUI.show(
-                  'Beförderungs-Bonus: +50 XP für die Infanterie!',
-                  'success',
-                  'Held'
-                );
+                notificationUI.show(t('xp.promotionBonus'), 'success', t('xp.promotionBonusTitle'));
               }
             }
             completeMoveExecution(game, moveController, moveRecord);
@@ -304,7 +321,9 @@ export async function executeMove(
           moveRecord.specialMove = { type: 'promotion', promotedTo: 'e' };
           moveRecord.promotion = 'e';
           game.log(
-            `${piece.color === 'white' ? 'Weißer' : 'Schwarzer'} Bauer zum Engel befördert!`
+            t('log.promotionAngel', {
+              color: piece.color === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+            })
           );
           soundManager.playMove(from.c, to.c);
         }
@@ -366,7 +385,7 @@ async function completeMoveExecution(
     if (result === 'wrong') {
       setTimeout(() => {
         moveController.undoMove();
-        UI.updatePuzzleStatus('error', 'Falscher Zug!');
+        UI.updatePuzzleStatus('error', t('puzzle.wrongMove'));
         soundManager.playError();
       }, 500);
     } else if (result === 'solved') {
@@ -377,14 +396,16 @@ async function completeMoveExecution(
         const streakLabel = dailyPuzzle.formatStreakLabel();
         UI.updatePuzzleStatus(
           'success',
-          streakLabel ? `Richtig! Puzzle gelöst — ${streakLabel}` : 'Richtig! Puzzle gelöst!',
+          streakLabel
+            ? t('puzzle.solvedStreak', { streak: streakLabel })
+            : t('puzzle.solved'),
           false
         );
       } else {
-        UI.updatePuzzleStatus('success', 'Richtig! Puzzle gelöst!');
+        UI.updatePuzzleStatus('success', t('puzzle.solved'));
       }
     } else {
-      UI.updatePuzzleStatus('neutral', 'Richtig... weiter!');
+      UI.updatePuzzleStatus('neutral', t('puzzle.correctContinue'));
 
       // Auto-play opponent move if available
       const nextIndex = game.puzzleState ? game.puzzleState.currentMoveIndex : 0;
@@ -559,7 +580,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
     game.winner = 'draw';
     UI.renderBoard(game);
     UI.updateStatus(game);
-    game.log('PATT! Unentschieden.');
+    game.log(t('log.stalemate'));
     const overlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
     if (winnerText) winnerText.textContent = t('game.endDrawStalemate');
@@ -572,7 +593,11 @@ export function finishMove(game: Game, lastTo?: Square): void {
   } else if (MoveValidator.checkDraw(game)) {
     return;
   } else if (game.isInCheck(opponentColor)) {
-    game.log(`SCHACH! ${opponentColor === 'white' ? 'Weiß' : 'Schwarz'} steht im Schach.`);
+    game.log(
+      t('log.check', {
+        color: opponentColor === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+      })
+    );
     soundManager.playCheck();
     UI.animateCheck(game, opponentColor);
   }
@@ -592,7 +617,11 @@ export function finishMove(game: Game, lastTo?: Square): void {
     }
   }
 
-  game.log(`${game.turn === 'white' ? 'Weiß' : 'Schwarz'} ist am Zug.`);
+  game.log(
+    t('log.toMove', {
+      color: game.turn === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+    })
+  );
 
   if (game.isAI && game.turn === 'black' && game.phase === PHASES.PLAY) {
     setTimeout(() => {

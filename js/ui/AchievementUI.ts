@@ -86,7 +86,10 @@ function renderAchievements(): void {
   const totalCount = achievements.length;
   const statsEl = document.getElementById('achievements-stats');
   if (statsEl) {
-    statsEl.textContent = `${unlockedCount} / ${totalCount} freigeschaltet`;
+    statsEl.textContent = t('achievement.unlockedCount', {
+      unlocked: unlockedCount,
+      total: totalCount,
+    });
   }
 }
 
@@ -130,11 +133,11 @@ function initializeAchievementsUI(): void {
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
-          <h2>🏆 Erfolge</h2>
-          <button class="modal-close" id="achievements-close-btn" aria-label="Schließen">&times;</button>
+          <h2>🏆 ${t('achievements.title')}</h2>
+          <button class="modal-close" id="achievements-close-btn" aria-label="${t('board.close')}">&times;</button>
         </div>
         <div class="modal-body">
-          <div id="achievements-stats" class="achievements-stats">0 / 0 freigeschaltet</div>
+          <div id="achievements-stats" class="achievements-stats"></div>
           <div id="achievements-container" class="achievements-grid"></div>
         </div>
       </div>

@@ -405,7 +405,7 @@ export class GameController {
       this.game.points = this.game.initialPoints;
       UI.updateStatus(this.game);
       this.showShop(true);
-      this.game.log('Weiß kauft ein.');
+      this.game.log(t('log.whiteBuys'));
     }
     UI.updateStatus(this.game);
   }
@@ -533,7 +533,7 @@ export class GameController {
 
     // Don't allow multiple pending offers
     if (this.game.drawOffered) {
-      this.game.log('Es gibt bereits ein offenes Remis-Angebot.');
+      this.game.log(t('log.drawAlreadyOffered'));
       return;
     }
 
@@ -590,7 +590,7 @@ export class GameController {
 
     UI.renderBoard(this.game);
     UI.updateStatus(this.game);
-    this.game.log('Remis vereinbart!');
+    this.game.log(t('log.drawAgreed'));
 
     const gameOverOverlay = document.getElementById('game-over-overlay');
     const winnerText = document.getElementById('winner-text');
@@ -613,7 +613,11 @@ export class GameController {
           ? 'black'
           : 'white'
         : this.game.turn;
-    this.game.log(`${decliningColor === 'white' ? 'Weiß' : 'Schwarz'} lehnt das Remis-Angebot ab.`);
+    this.game.log(
+      t('log.drawDeclined', {
+        color: decliningColor === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+      })
+    );
 
     this.game.drawOffered = false;
     this.game.drawOfferedBy = null;
@@ -627,10 +631,10 @@ export class GameController {
 
   saveGame(_fromAutoSave?: boolean): void {
     if (storageManager.saveGame(this.game as unknown as import('./storage.js').GameLike)) {
-      this.game.log('💾 Spiel erfolgreich gespeichert!');
+      this.game.log(t('log.gameSavedOk'));
       soundManager.playMove(); // Feedback sound
     } else {
-      this.game.log('❌ Fehler beim Speichern.');
+      this.game.log(t('log.saveFailed'));
     }
   }
 
@@ -639,11 +643,13 @@ export class GameController {
     try {
       state = storageManager.loadGame();
       if (!state) {
-        this.game.log('⚠️ Kein gespeichertes Spiel gefunden.');
+        this.game.log(t('log.noSaveFound'));
         return;
       }
     } catch (e: unknown) {
-      this.game.log('❌ Fehler beim Laden: ' + (e instanceof Error ? e.message : String(e)));
+      this.game.log(
+        t('log.loadFailedMsg', { error: e instanceof Error ? e.message : String(e) })
+      );
       return;
     }
 
@@ -657,9 +663,9 @@ export class GameController {
         state
       )
     ) {
-      this.game.log('📂 Spielstand geladen.');
+      this.game.log(t('log.loadedFromFile'));
     } else {
-      this.game.log('❌ Fehler beim Laden des Spielstands.');
+      this.game.log(t('log.loadFailed'));
       return;
     }
 
@@ -710,7 +716,7 @@ export class GameController {
       }
     }
 
-    this.game.log('📂 Spiel erfolgreich geladen!');
+    this.game.log(t('log.loadedOk'));
     soundManager.playGameStart(); // Feedback sound
   }
 
@@ -1200,11 +1206,11 @@ export class GameController {
     let opponent = 'Human';
     if (this.game.isAI) {
       const difficultyMap: Record<string, string> = {
-        beginner: 'AI-Anfänger',
-        easy: 'AI-Einfach',
-        medium: 'AI-Mittel',
-        hard: 'AI-Schwer',
-        expert: 'AI-Experte',
+        beginner: t('difficulty.aiBeginner'),
+        easy: t('difficulty.aiEasy'),
+        medium: t('difficulty.aiMedium'),
+        hard: t('difficulty.aiHard'),
+        expert: t('difficulty.aiExpert'),
       };
       opponent = difficultyMap[this.game.difficulty] || 'AI';
     }
@@ -1396,14 +1402,14 @@ export class GameController {
             starsEarned,
             [
               {
-                text: 'Nächste Mission',
+                text: t('game.nextMission'),
                 class: 'btn-primary',
                 callback: () => {
                   window.location.reload();
                 },
               },
               {
-                text: 'Hauptmenü',
+                text: t('game.mainMenu'),
                 class: 'btn-secondary',
                 callback: () => {
                   window.location.reload();

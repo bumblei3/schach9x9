@@ -73,16 +73,16 @@ export class TalentTreeUI {
     if (!container) return;
 
     const units = [
-      { id: 'p', icon: '♟️', name: 'Bauer' },
-      { id: 'n', icon: '♞', name: 'Springer' },
-      { id: 'b', icon: '♝', name: 'Läufer' },
-      { id: 'r', icon: '♜', name: 'Turm' },
-      { id: 'q', icon: '♛', name: 'Dame' },
-      { id: 'k', icon: '♚', name: 'König' },
-      { id: 'a', icon: '♝', name: 'Erzbischof' },
-      { id: 'c', icon: '♜', name: 'Kanzler' },
-      { id: 'e', icon: '♝', name: 'Engel' },
-      { id: 'j', icon: '♞', name: 'Nachtreiter' },
+      { id: 'p', icon: '♟️', name: t('piece.p') },
+      { id: 'n', icon: '♞', name: t('piece.n') },
+      { id: 'b', icon: '♝', name: t('piece.b') },
+      { id: 'r', icon: '♜', name: t('piece.r') },
+      { id: 'q', icon: '♛', name: t('piece.q') },
+      { id: 'k', icon: '♚', name: t('piece.k') },
+      { id: 'a', icon: '♝', name: t('piece.a') },
+      { id: 'c', icon: '♜', name: t('piece.c') },
+      { id: 'e', icon: '♝', name: t('piece.e') },
+      { id: 'j', icon: '♞', name: t('piece.j') },
       // Special units can be added later
     ];
 
@@ -120,11 +120,10 @@ export class TalentTreeUI {
     const tree = UNIT_TALENT_TREES[this.currentUnitType];
     const unitXp = campaignManager.getUnitXp(this.currentUnitType);
 
-    if (unitTitle) unitTitle.textContent = `Talente: Level ${unitXp.level}`;
+    if (unitTitle) unitTitle.textContent = t('talent.title', { level: unitXp.level });
 
     if (!tree || tree.talents.length === 0) {
-      container.innerHTML =
-        '<div style="margin: auto; color: #888;">Keine Talente verfügbar für diese Einheit.</div>';
+      container.innerHTML = `<div style="margin: auto; color: #888;">${t('talent.noneAvailable')}</div>`;
       return;
     }
 

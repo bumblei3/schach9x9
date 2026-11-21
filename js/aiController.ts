@@ -638,14 +638,14 @@ export class AIController {
           // Generate simple explanation based on score/action
           const explanation =
             bestResult.score > 300
-              ? 'Gewinnt deutlich Material.'
+              ? t('ai.explWinning')
               : bestResult.score > 100
-                ? 'Verschafft einen Vorteil.'
+                ? t('ai.explAdvantage')
                 : bestResult.move.capture
-                  ? 'Schlägt eine gegnerische Figur.'
+                  ? t('ai.explCapture')
                   : bestResult.move.promotion
-                    ? 'Holt eine neue Figur.'
-                    : 'Verbessert die Position.';
+                    ? t('ai.explPromotion')
+                    : t('ai.explImproves');
 
           resolve({ move: bestResult.move, explanation });
         } else {
@@ -797,14 +797,14 @@ export class AIController {
 
     if (nodesEl && data.nodes !== undefined) {
       const nodesFormatted = data.nodes.toLocaleString('de-DE');
-      nodesEl.textContent = `${nodesFormatted} Positionen`;
+      nodesEl.textContent = `${nodesFormatted} ${t('board.nodes')}`;
     }
 
     if (bestMoveEl && data.bestMove) {
       const size = this.game.boardSize;
       const from = String.fromCharCode(97 + data.bestMove.from.c) + (size - data.bestMove.from.r);
       const to = String.fromCharCode(97 + data.bestMove.to.c) + (size - data.bestMove.to.r);
-      bestMoveEl.textContent = `Bester Zug: ${from}-${to}`;
+      bestMoveEl.textContent = t('board.bestMoveLabel', { from, to });
 
       // Show engine arrow
       if (UI.drawEngineArrow) {

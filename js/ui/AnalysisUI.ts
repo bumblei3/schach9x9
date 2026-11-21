@@ -206,12 +206,12 @@ export class AnalysisUI {
 
   showAnalysisPrompt(): void {
     showModal(
-      'Partie analysieren?',
-      'Möchtest du die gesamte Partie von der KI analysieren lassen? Dies zeigt dir deine Genauigkeit und Fehler an.',
+      t('analysis.fullAnalysisPrompt'),
+      t('analysis.fullAnalysisBody'),
       [
-        { text: 'Abbrechen', class: 'btn-secondary' },
+        { text: t('tutor.cancel'), class: 'btn-secondary' },
         {
-          text: 'Analysieren',
+          text: t('analysis.analyse'),
           class: 'btn-primary',
           callback: () => this.startFullAnalysis(),
         },
@@ -228,7 +228,7 @@ export class AnalysisUI {
     const { analyzeGame, classifyMove } = PostGameAnalyzer;
 
     this.isAnalyzing = true;
-    showModal('Ganganalyse', 'Die KI analysiert die Stellungen...', []);
+    showModal(t('analysis.gameAnalysis'), t('analysis.analysing'), []);
 
     const states = this.collectBoardStates();
     const results: AnalysisResult[] = [];
@@ -240,7 +240,11 @@ export class AnalysisUI {
       const turn = i % 2 === 0 ? 'white' : 'black';
 
       // Update progress modal
-      showModal('Ganganalyse', `Analysiere Stellung ${i + 1} von ${states.length}...`, []);
+      showModal(
+        t('analysis.gameAnalysis'),
+        t('analysis.analysingPosition', { n: i + 1, total: states.length }),
+        []
+      );
 
       const analysis: AnalysisResult = await new Promise(resolve => {
         const handler = (e: MessageEvent) => {
@@ -408,7 +412,7 @@ export class AnalysisUI {
       .map(
         ([quality, count]) => `
         <div class="stat-row">
-          <span class="stat-label" style="color: ${PostGameAnalyzer.QUALITY_METADATA[quality as PostGameAnalyzer.MoveQuality].color}">${PostGameAnalyzer.QUALITY_METADATA[quality as PostGameAnalyzer.MoveQuality].label}</span>
+          <span class="stat-label" style="color: ${PostGameAnalyzer.QUALITY_METADATA[quality as PostGameAnalyzer.MoveQuality].color}">${PostGameAnalyzer.qualityLabel(quality as PostGameAnalyzer.MoveQuality)}</span>
           <span class="stat-count">${count}</span>
         </div>
       `
@@ -453,7 +457,10 @@ export class AnalysisUI {
       if (classification !== undefined) {
         const meta = PostGameAnalyzer.QUALITY_METADATA[classification];
         if (meta) {
-          this.bestMoveCache.set(i, { notation: meta.symbol + ' ' + meta.label, score: evalScore ?? 0 });
+          this.bestMoveCache.set(i, {
+            notation: meta.symbol + ' ' + PostGameAnalyzer.qualityLabel(classification),
+            score: evalScore ?? 0,
+          });
         }
       }
     }
@@ -600,7 +607,7 @@ export class AnalysisUI {
 
     if (this.replayMoveNumberEl) {
       const moveNumber = this.replayPosition + 1;
-      this.replayMoveNumberEl.textContent = `Zug ${moveNumber}`;
+      this.replayMoveNumberEl.textContent = t('analysis.moveNumber', { n: moveNumber });
     }
 
     const classification = (move as { classification?: PostGameAnalyzer.MoveQuality }).classification;
@@ -610,7 +617,9 @@ export class AnalysisUI {
       const meta = PostGameAnalyzer.QUALITY_METADATA[classification];
       this.replayClassBadgeEl.style.backgroundColor = this.classifyBadgeColor(classification);
       this.replayClassBadgeEl.textContent = meta?.symbol ?? '—';
-      this.replayClassLabelEl.textContent = meta?.label ?? '—';
+      this.replayClassLabelEl.textContent =
+        (classification !== undefined ? PostGameAnalyzer.qualityLabel(classification) : null) ??
+        '—';
     } else {
       if (this.replayClassBadgeEl) {
         this.replayClassBadgeEl.style.backgroundColor = '#374151';

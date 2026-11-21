@@ -4,6 +4,7 @@
  */
 
 import type { ToastOptions } from '../types/core.js';
+import { t } from '../i18n.js';
 
 export class NotificationUI {
   private container: HTMLElement | null = null;
@@ -95,7 +96,7 @@ export class NotificationUI {
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'toast-close';
-    closeBtn.setAttribute('aria-label', 'Schließen');
+    closeBtn.setAttribute('aria-label', t('board.close'));
     closeBtn.textContent = '×';
     closeBtn.onclick = () => this.hide(toast);
 
