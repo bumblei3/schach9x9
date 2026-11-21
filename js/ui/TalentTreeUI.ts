@@ -3,6 +3,7 @@ import { talentName, talentDescription } from '../campaign/talents.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { showModal, showToast } from './OverlayManager.js';
 import { t } from '../i18n.js';
+import { afterDom } from '../domTimer.js';
 
 export class TalentTreeUI {
   private currentUnitType: string = 'p';
@@ -15,7 +16,7 @@ export class TalentTreeUI {
       { text: t('analysis.close'), class: 'btn-secondary', callback: () => {} },
     ]);
 
-    setTimeout(() => {
+    afterDom(() => {
       this.renderTabs();
       this.renderTree();
     }, 0);

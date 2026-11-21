@@ -16,6 +16,7 @@ import type { Player, GameLike } from './types/core.js';
 import * as AIEngine from './aiEngine.js';
 import { confettiSystem } from './effects.js';
 import { updateStatus } from './ui/GameStatusUI.js';
+import { afterDom } from './domTimer.js';
 
 /**
  * Animation für den Schach-Zustand.
@@ -31,9 +32,9 @@ export function animateCheck(game: GameLike, color: Player): void {
       const pieceEl = cell.querySelector('.piece, .piece-svg');
       if (pieceEl) {
         pieceEl.classList.add('king-in-check');
-        setTimeout(() => pieceEl.classList.remove('king-in-check'), 1600);
+        afterDom(() => pieceEl.classList.remove('king-in-check'), 1600);
       }
-      setTimeout(() => {
+      afterDom(() => {
         cell.classList.remove('king-check-flash');
       }, 1500);
     }
@@ -46,7 +47,7 @@ export function animateCheck(game: GameLike, color: Player): void {
     const prev = statusEl.textContent || '';
     statusEl.textContent = t('game.checkStatus', { side });
     statusEl.setAttribute('data-prev-status', prev);
-    setTimeout(() => {
+    afterDom(() => {
       statusEl.classList.remove('status-check');
       if (statusEl.textContent?.includes('SCHACH!')) {
         try {

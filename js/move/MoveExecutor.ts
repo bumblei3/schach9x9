@@ -15,6 +15,7 @@ import { notificationUI } from '../ui/NotificationUI.js';
 import { campaignManager } from '../campaign/CampaignManager.js';
 import { UNIT_TALENT_TREES, type TalentNode } from '../campaign/talents.js';
 import { t } from '../i18n.js';
+import { afterDom } from '../domTimer.js';
 
 /** +10% XP talents. effectValue is the percent, applied after flat bonuses. */
 const PERCENT_XP_TALENTS = new Set(['n_meister', 'q_omnipraesenz']);
@@ -383,7 +384,7 @@ async function completeMoveExecution(
     };
     const result = puzzleManager.checkMove(game, moveRecordForPuzzle);
     if (result === 'wrong') {
-      setTimeout(() => {
+      afterDom(() => {
         moveController.undoMove();
         UI.updatePuzzleStatus('error', t('puzzle.wrongMove'));
         soundManager.playError();
@@ -413,7 +414,7 @@ async function completeMoveExecution(
 
       if (puzzle && nextIndex < puzzle.solution.length) {
         const nextMove = puzzle.solution[nextIndex];
-        setTimeout(() => {
+        afterDom(() => {
           // Ensure we are in a state to move
           if (game.phase === PHASES.PLAY) {
             moveController.executeMove(nextMove.from, nextMove.to);
@@ -624,7 +625,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
   );
 
   if (game.isAI && game.turn === 'black' && game.phase === PHASES.PLAY) {
-    setTimeout(() => {
+    afterDom(() => {
       // Use prototype method directly to bypass any own property override
       const proto = Object.getPrototypeOf(game);
       if (typeof proto.aiMove === 'function') {
@@ -632,7 +633,7 @@ export function finishMove(game: Game, lastTo?: Square): void {
       }
     }, 1000);
   } else {
-    setTimeout(() => {
+    afterDom(() => {
       // Use prototype method directly to bypass any own property override
       const proto2 = Object.getPrototypeOf(game);
       if (typeof proto2.updateBestMoves === 'function') {

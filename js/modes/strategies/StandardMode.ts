@@ -5,6 +5,7 @@ import * as UI from '../../ui.js';
 import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
 import { t } from '../../i18n.js';
+import { afterDom } from '../../domTimer.js';
 
 export class StandardModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
@@ -56,7 +57,7 @@ export class StandardModeStrategy implements GameModeStrategy {
         game.log(t('log.whiteDoneBlackUpgrades'));
 
         if (game.isAI) {
-          setTimeout(() => controller.finishSetupPhase(), 500);
+          afterDom(() => controller.finishSetupPhase(), 500);
         }
         controller.autoSave();
       } else if (game.phase === PHASES.SETUP_BLACK_UPGRADES) {

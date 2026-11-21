@@ -12,6 +12,7 @@ import { learnedTalentNames } from '../campaign/learnedTalents.js';
 import { PIECE_SVGS } from '../assets/pieces/index.js';
 import { DRAG_IMAGE_HIDDEN_OFFSET } from '../constants.js';
 import { t } from '../i18n.js';
+import { afterDom, everyDom } from '../domTimer.js';
 
 const SPOKEN_PIECE: Record<string, string> = {
   p: 'Bauer',
@@ -61,14 +62,14 @@ function showInvalidDropFeedback(toR: number, toC: number, fromR: number, fromC:
     toCell.classList.remove('invalid-move');
     void (toCell as HTMLElement).offsetWidth;
     toCell.classList.add('invalid-move');
-    setTimeout(() => toCell.classList.remove('invalid-move'), 550);
+    afterDom(() => toCell.classList.remove('invalid-move'), 550);
   }
   const fromCell = document.querySelector(`.cell[data-r="${fromR}"][data-c="${fromC}"]`);
   if (fromCell) {
     fromCell.classList.remove('piece-shake');
     void (fromCell as HTMLElement).offsetWidth;
     fromCell.classList.add('piece-shake');
-    setTimeout(() => fromCell.classList.remove('piece-shake'), 450);
+    afterDom(() => fromCell.classList.remove('piece-shake'), 450);
   }
   if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
     try {
@@ -241,7 +242,7 @@ export function initBoardUI(game: GameLike): void {
           dragImage.style.position = 'absolute';
           dragImage.style.top = `${DRAG_IMAGE_HIDDEN_OFFSET}px`;
           e.dataTransfer.setDragImage(dragImage, cell.offsetWidth / 2, cell.offsetHeight / 2);
-          setTimeout(() => {
+          afterDom(() => {
             if (document.body.contains(dragImage)) {
               document.body.removeChild(dragImage);
             }
@@ -777,7 +778,7 @@ export async function animateMove(
 
     // Animation Loop for Move Trail
     let frames = 0;
-    const trailInterval = setInterval(() => {
+    const trailInterval = everyDom(() => {
       const rect = clone.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
@@ -817,7 +818,7 @@ export async function animateMove(
       }
     }, 20); // Faster interval for smoother trails
 
-    setTimeout(() => {
+    afterDom(() => {
       clearInterval(trailInterval);
       if (document.body.contains(clone)) document.body.removeChild(clone);
       if (pieceElement) pieceElement.style.opacity = originalOpacity;
@@ -942,9 +943,9 @@ export function drawGhostTrail(rect: DOMRect, pieceSymbol: string): void {
   document.body.appendChild(ghost);
 
   // Animate removal
-  setTimeout(() => {
+  afterDom(() => {
     ghost.classList.add('fade-out');
-    setTimeout(() => {
+    afterDom(() => {
       if (document.body.contains(ghost)) {
         document.body.removeChild(ghost);
       }
@@ -966,7 +967,7 @@ export function flashSquare(r: number, c: number, type: 'check' | 'mate' | 'capt
   cell.classList.add(className);
 
   if (type !== 'mate') {
-    setTimeout(() => {
+    afterDom(() => {
       cell.classList.remove(className);
     }, 1000);
   }
@@ -1004,8 +1005,8 @@ export function drawEngineArrow(from: Square, to: Square): void {
 
   document.body.appendChild(arrow);
 
-  setTimeout(() => {
+  afterDom(() => {
     arrow.style.opacity = '0';
-    setTimeout(() => arrow.remove(), 500);
+    afterDom(() => arrow.remove(), 500);
   }, 2000);
 }

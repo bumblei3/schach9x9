@@ -58,6 +58,7 @@ import { StandardModeStrategy } from './modes/strategies/StandardMode.js';
 import { CampaignModeStrategy } from './modes/strategies/CampaignMode.js';
 import { OpeningTrainerModeStrategy } from './modes/strategies/OpeningTrainerMode.js';
 import { t } from './i18n.js';
+import { afterDom } from './domTimer.js';
 
 export interface ArrowRendererType {
   clearArrows: () => void;
@@ -392,7 +393,7 @@ export class GameController {
         UI.updateStatus(this.game);
 
         if (this.game.isAI) {
-          setTimeout(() => {
+          afterDom(() => {
             if (this.game.aiSetupKing) {
               this.game.aiSetupKing();
             }
@@ -550,7 +551,7 @@ export class GameController {
       const aiColor = this.game.turn === 'white' ? 'black' : 'white';
       if (this.game.turn !== aiColor) {
         // Player offered draw to AI
-        setTimeout(() => {
+        afterDom(() => {
           if (this.game.aiEvaluateDrawOffer) this.game.aiEvaluateDrawOffer();
         }, AI_DELAY_MS);
       }
@@ -705,12 +706,12 @@ export class GameController {
     if (this.game.isAI) {
       if (this.game.phase === PHASES.SETUP_BLACK_KING) {
         // AI needs to place black king
-        setTimeout(() => {
+        afterDom(() => {
           if (this.game.aiSetupKing) this.game.aiSetupKing();
         }, AI_DELAY_MS);
       } else if (this.game.phase === PHASES.SETUP_BLACK_PIECES) {
         // AI needs to place black pieces
-        setTimeout(() => {
+        afterDom(() => {
           if (this.game.aiSetupPieces) this.game.aiSetupPieces();
         }, AI_DELAY_MS);
       }
@@ -903,7 +904,7 @@ export class GameController {
     if (result.correct) {
       this.loadTrainerPosition();
     } else {
-      setTimeout(() => this.loadTrainerPosition(), 900);
+      afterDom(() => this.loadTrainerPosition(), 900);
     }
   }
 
@@ -1326,7 +1327,7 @@ export class GameController {
 
     // Show analysis prompt after a short delay (only if not campaign win)
     /* 
-    setTimeout(() => {
+    afterDom(() => {
       // Only show analysis if NOT in campaign mode (or at least not winning campaign step)
       // Actually, disable for campaign entirely for now to avoid modal conflict
       if (this.analysisUI && !this.game.campaignMode) {
@@ -1391,7 +1392,7 @@ export class GameController {
           );
         });
 
-        setTimeout(async () => {
+        afterDom(async () => {
           // Perform Analysis
           const analysisManager = new AnalysisManager(this.game);
           const summary = await analysisManager.runPostGameAnalysis();

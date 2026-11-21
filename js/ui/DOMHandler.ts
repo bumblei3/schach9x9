@@ -29,6 +29,7 @@ import type { AIDifficulty } from '../config.js';
 import { AI_DIFFICULTIES } from '../config.js';
 import { TIME_CONTROLS } from '../TimeManager.js';
 import { getLocale, isLocale, setLocale, t } from '../i18n.js';
+import { afterDom } from '../domTimer.js';
 
 export class DOMHandler {
   private app: App;
@@ -537,7 +538,7 @@ export class DOMHandler {
           container3D.classList.remove('active');
           document.body.classList.remove('mode-3d');
           toggle3D.classList.remove('active-3d');
-          setTimeout(() => {
+          afterDom(() => {
             if (!this.app.battleChess3D!.enabled) {
               container3D.classList.add('hidden');
             }

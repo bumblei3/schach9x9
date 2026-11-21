@@ -4,6 +4,20 @@ Laufender Zustand des Repos `bumblei3/schach9x9`.
 Release-Tag ist `v2.1.0`. `main` ist `21f85e2`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
+**Timer-Klasse jetzt zentral geschuetzt (2026-11-21):** Nach dem
+`TutorUI`-Fix tauchte der Fehler sofort wieder, diesmal aus `StandardModeStrategy.startGame`
+(`StandardMode.ts:98`, `document.querySelector` in einem `setTimeout`, gestartet
+ueber `handleTransition`/`finishSetupPhase`). Ein Guard pro Callback ist
+Whack-a-Mole — die Klasse hat ~48 Aufrufstellen in 19 Dateien. Neu
+`js/domTimer.ts` mit `afterDom`/`everyDom`/`frameDom`: Argumentreihenfolge wie
+`setTimeout`/`setInterval`/`requestAnimationFrame`, aber der Callback ist ohne
+DOM ein No-Op. Rein textuell ausgetauscht, im Browser identisches Verhalten.
+Ausgenommen: `js/utils.ts` (Debounce-Mechanismus selbst), `js/ai/aiWorker.ts`
+und `js/matchRefs.ts` (kein DOM) sowie das `setTimeout` in
+`SceneManager3D` (`new Promise(r => setTimeout(r, 100))` — ein Wrap laesst die
+Promise ohne DOM nie aufloesen). Gegenprobe: vor dem Fix 1 von 6 Laeufen mit
+`Errors 1 error`, danach 6 von 6 sauber.
+
 **`Errors 1 error` bei sonst grüner Suite (2026-11-21):** Der intermittierende vitest-Fund aus der CI-Umgebung hatte eine konkrete Quelle: `ReferenceError: document is not defined` in `TutorUI.showTutorSuggestions`, ausgelöst über den 300-ms-Debounce in `TutorController`. Node 26 legt einen globalen `navigator` ab, `document` ist nach dem jsdom-Abriss weg — der Timer feuert noch, die Promise-Rejection blieb ungefangen, und vitest zählte sie als Unhandled Error, ohne dass ein einziger Test rot wurde (drei von sechs Läufen in einer Serie betroffen; der pre-commit-Haken hat deshalb einmal einen sauberen Commit abgelehnt). Guard in `showTutorSuggestions` und im Debounce, gleiches Muster wie `MoveAnalyzer.clearBetterMoveHighlights`. Neu `tests/tutor/tutorUi.domGuard.test.ts`; Gegenprobe (Guard entfernt) fällt rot.
 
 **Die Knotenzahl im Analyse-Panel war tot (2026-11-21):** Die Zeile `Tiefe: 5 | Knoten: -` zeigte seit dem Feature existiert dauerhaft den Bindestrich — `getTopMoves` setzte fuer jeden Kandidaten `nodes: 0` in die Rueckgabe, `updatePanel` schrieb daher immer `-`. `runJsSearch` hat die Zahl lokal berechnet, sie ging nur in der Uebergabe verloren. Behoben: `moveScores` traegt `nodes` je Kandidat (Buchzug und Quick-Eval-Fallback bleiben 0), der Worker `analyze` reicht `best.nodes` durch. Neu `tests/aiEngine.topMovesNodes.test.ts` (Invariante: mindestens ein Kandidat mit `nodes > 0`; gegenprochen durch den Codezustand vor dem Fix). Live im `dist`-Build: **Tiefe: 5 | Knoten: 5629**. Damit ist das im README beworbene „Engine-Statistiken"-Feld erstmals echt. (Der `isAnalyzing`-Gate von `updateLiveProgress` bleibt bewusst stehen — zwei Specs pinnen ihn als Absicht.)

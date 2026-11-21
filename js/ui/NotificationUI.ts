@@ -5,6 +5,7 @@
 
 import type { ToastOptions } from '../types/core.js';
 import { t } from '../i18n.js';
+import { afterDom } from '../domTimer.js';
 
 export class NotificationUI {
   private container: HTMLElement | null = null;
@@ -116,7 +117,7 @@ export class NotificationUI {
 
     // Auto close
     if (effectiveDuration > 0) {
-      setTimeout(() => {
+      afterDom(() => {
         if (toast.parentElement) this.hide(toast);
       }, effectiveDuration);
     }

@@ -28,6 +28,7 @@ import { AnalysisUI } from './ui/AnalysisUI.js';
 
 import AIWorker from './ai/aiWorker.ts?worker';
 import { t } from './i18n.js';
+import { afterDom } from './domTimer.js';
 
 // Piece values for shop
 const PIECES: Record<string, ShopPieceConfig> = SHOP_PIECES;
@@ -395,7 +396,7 @@ export class AIController {
 
       // Add timeout to prevent game from freezing if workers hang
       let hasProcessed = false;
-      const timeoutId = setTimeout(() => {
+      const timeoutId = afterDom(() => {
         if (!hasProcessed) {
           hasProcessed = true;
           logger.error('[AI] Worker timeout after 30 seconds! Making fallback move.');
@@ -570,7 +571,7 @@ export class AIController {
     const prevHandler = worker.onmessage;
 
     return new Promise<SearchResult[]>(resolve => {
-      const timeoutId = setTimeout(() => {
+      const timeoutId = afterDom(() => {
         worker.onmessage = prevHandler;
         logger.warn('[AI] requestTopMoves timed out');
         resolve([]);
@@ -654,7 +655,7 @@ export class AIController {
       };
 
       // Set timeout
-      const timeoutId = setTimeout(() => {
+      const timeoutId = afterDom(() => {
         logger.warn('[AI] Hint generation timed out');
         processResults();
       }, 5000);

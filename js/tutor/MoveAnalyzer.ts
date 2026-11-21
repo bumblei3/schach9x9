@@ -19,6 +19,7 @@ import {
 } from '../aiEngine.js';
 import { rulesFromPosition } from '../ai/ruleState.js';
 import { MENTOR_LEVELS } from '../config.js';
+import { afterDom } from '../domTimer.js';
 
 // --- Type definitions ---
 
@@ -383,10 +384,12 @@ function renderTutorFeedbackPanel(analysis: MoveExplanation, summary?: string): 
   // Auto-fade after longer reads for good moves; keep mistakes longer
   const keepMs =
     cat === 'blunder' || cat === 'mistake' ? 14000 : analysis.betterMove ? 12000 : 7000;
-  window.clearTimeout((panel as HTMLElement & { _hideTimer?: number })._hideTimer);
-  (panel as HTMLElement & { _hideTimer?: number })._hideTimer = window.setTimeout(() => {
+  window.clearTimeout(
+    (panel as HTMLElement & { _hideTimer?: ReturnType<typeof setTimeout> })._hideTimer
+  );
+  (panel as HTMLElement & { _hideTimer?: ReturnType<typeof setTimeout> })._hideTimer = afterDom(() => {
     panel?.classList.add('tutor-feedback--fade');
-    setTimeout(() => {
+    afterDom(() => {
       if (panel) panel.hidden = true;
       clearBetterMoveHighlights();
     }, 400);

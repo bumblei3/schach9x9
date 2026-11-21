@@ -12,6 +12,7 @@ import { logger } from '../../logger.js';
 import type { SceneManager3D } from './SceneManager3D.js';
 import type { Game } from '../../gameEngine.js';
 import type { Square, Piece } from '../../types/core.js';
+import { frameDom } from '../../domTimer.js';
 
 /** Meshes face +z, toward white and the camera. These types have a front. */
 const FACING_PIECES = new Set(['n', 'b', 'a', 'c', 'e', 'j']);
@@ -263,7 +264,7 @@ export class PieceManager3D {
         piece.position.y = Math.sin(progress * Math.PI) * 0.5;
 
         if (progress < 1) {
-          requestAnimationFrame(moveAnimation);
+          frameDom(moveAnimation);
         } else {
           piece.position.y = 0;
           piece.userData.row = toRow;
@@ -333,7 +334,7 @@ export class PieceManager3D {
       });
 
       if (progress < 1) {
-        requestAnimationFrame(animateParticles);
+        frameDom(animateParticles);
       } else {
         particles.forEach(p => {
           if (this.sceneManager.scene) this.sceneManager.scene.remove(p);
