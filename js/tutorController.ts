@@ -67,6 +67,8 @@ export class TutorController implements TutorControllerLike {
     this.game = game;
     // Debounce the heavy calculation part
     this.debouncedGetTutorHints = debounce(async () => {
+      // Siehe TutorUI.showTutorSuggestions: ohne DOM ist der Aufruf ein No-op.
+      if (typeof document === 'undefined') return;
       this.game.bestMoves = (await getTutorHints(this.game, this)) as Game['bestMoves'];
       await showTutorSuggestions(this.game);
     }, 300);

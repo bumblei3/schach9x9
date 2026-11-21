@@ -6,6 +6,7 @@ import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
 import { t } from '../../i18n.js';
 import { offerTaktikGenieTip } from '../../campaign/taktikGenie.js';
+import { afterDom } from '../../domTimer.js';
 
 export class SetupModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
@@ -82,7 +83,7 @@ export class SetupModeStrategy implements GameModeStrategy {
           // Finish White and start the game!
           this.startGame(game, controller);
           offerTaktikGenieTip(controller);
-          game.log('Weiß fertig. Die Schlacht beginnt!');
+          game.log(t('log.whiteDone'));
           return;
         }
 
@@ -91,7 +92,7 @@ export class SetupModeStrategy implements GameModeStrategy {
           game.points = game.initialPoints;
           // AI trigger
           if (game.isAI) {
-            setTimeout(() => {
+            afterDom(() => {
               if (game.aiSetupUpgrades) game.aiSetupUpgrades();
               controller.finishSetupPhase();
             }, 1000);
@@ -102,12 +103,12 @@ export class SetupModeStrategy implements GameModeStrategy {
           game.points = game.initialPoints;
           game.selectedShopPiece = null;
           controller.updateShopUI();
-          game.log('Weiß fertig. Schwarz kauft ein.');
+          game.log(t('log.whiteDoneBlackBuys'));
 
           controller.autoSave();
 
           if (game.isAI) {
-            setTimeout(() => {
+            afterDom(() => {
               if (game.aiSetupPieces) game.aiSetupPieces();
             }, AI_DELAY_MS);
           }
@@ -120,7 +121,7 @@ export class SetupModeStrategy implements GameModeStrategy {
 
         if (game.isAI) {
           // AI Upgrades
-          setTimeout(() => {
+          afterDom(() => {
             if (game.aiSetupUpgrades) game.aiSetupUpgrades();
             controller.finishSetupPhase();
           }, 1000); // Give it a moment
@@ -145,11 +146,11 @@ export class SetupModeStrategy implements GameModeStrategy {
       }
 
       UI.showModal(
-        'Ungenutzte Punkte',
-        `Du hast noch ${game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
+        t('setup.unusedPoints'),
+        t('setup.unusedPointsMsg', { points: game.points }),
         [
-          { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
-          { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition },
+          { text: t('tutor.cancel'), class: 'btn-secondary', callback: () => {} },
+          { text: t('setup.continue'), class: 'btn-primary', callback: handleTransition },
         ]
       );
       return;
@@ -175,7 +176,7 @@ export class SetupModeStrategy implements GameModeStrategy {
     const actionBar = document.querySelector('.action-bar');
     if (actionBar) actionBar.classList.remove('hidden');
 
-    game.log('Spiel beginnt! Weiß ist am Zug.');
+    game.log(t('log.gameStarts'));
     if (game.updateBestMoves) game.updateBestMoves();
     controller.startClock();
     UI.updateStatistics(game);

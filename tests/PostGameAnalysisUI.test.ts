@@ -34,6 +34,18 @@ vi.mock('../js/tutor/PostGameAnalyzer.js', () => ({
     blunder: { label: 'Blunder', symbol: '💀', color: '#ef4444' },
     book: { label: 'Book', symbol: '📖', color: '#64748b' },
   },
+  qualityLabel: (q: string) =>
+    ({
+      brilliant: 'Brilliant',
+      great: 'Great',
+      best: 'Best',
+      excellent: 'Excellent',
+      good: 'Good',
+      inaccuracy: 'Inaccuracy',
+      mistake: 'Mistake',
+      blunder: 'Blunder',
+      book: 'Book',
+    })[q] ?? q,
 }));
 
 const { showSummaryModalSpy } = vi.hoisted(() => ({ showSummaryModalSpy: vi.fn() }));

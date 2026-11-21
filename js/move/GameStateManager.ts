@@ -103,7 +103,12 @@ export function undoMove(game: Game, moveController: MoveController): void {
   UI.updateMoveHistoryUI(game);
   UI.updateStatus(game);
   game.log(
-    `Zug ${move.piece && move.piece?.color === 'white' ? 'Weiß' : 'Schwarz'} zurückgenommen`
+    t('log.undoMove', {
+      color:
+        move.piece && move.piece?.color === 'white'
+          ? t('piece.colorWhite')
+          : t('piece.colorBlack'),
+    })
   );
 
   // If we undid a move that caused game over, reset phase to PLAY
@@ -233,7 +238,7 @@ export function saveGame(game: Game): void {
     winner: game.winner,
   };
   localStorage.setItem('schach9x9_save_autosave', JSON.stringify(gameState));
-  game.log('Spiel gespeichert! \u{1F4BE}');
+  game.log(t('log.gameSaved'));
 }
 
 /**
@@ -244,7 +249,7 @@ export function saveGame(game: Game): void {
 export function loadGame(game: Game): boolean {
   const savedData = localStorage.getItem('schach9x9_save_autosave');
   if (!savedData) {
-    game.log('Kein gespeichertes Spiel gefunden.');
+    game.log(t('log.noSavedGame'));
     return false;
   }
 

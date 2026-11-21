@@ -2,10 +2,12 @@
  * Manage global tooltips for UI elements
  * Looks for elements with 'data-tooltip' attribute
  */
+import { afterDom } from '../domTimer.js';
+
 export class TooltipManager {
   tooltipEl: HTMLElement | null = null;
   activeElement: HTMLElement | null = null;
-  private touchHideTimer = 0;
+  private touchHideTimer: ReturnType<typeof setTimeout> | undefined = undefined;
 
   constructor() {
     this.init();
@@ -35,8 +37,8 @@ export class TooltipManager {
         if (!text) return;
         // Skip if this is an <a>/<button> with its own primary action handled elsewhere
         this.show(text, target);
-        window.clearTimeout(this.touchHideTimer);
-        this.touchHideTimer = window.setTimeout(() => this.hide(), 1600);
+        if (this.touchHideTimer !== undefined) window.clearTimeout(this.touchHideTimer);
+        this.touchHideTimer = afterDom(() => this.hide(), 1600);
       },
       { passive: true }
     );

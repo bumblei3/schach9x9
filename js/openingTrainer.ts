@@ -6,6 +6,7 @@
 import { OpeningBook } from './ai/OpeningBook.js';
 import { TEXTBOOK_LINES } from './ai/textbook.js';
 import type { Square, Piece } from './gameEngine.js';
+import { t } from './i18n.js';
 
 export interface TrainerProgress {
   streak: number;
@@ -151,8 +152,8 @@ export class OpeningTrainerManager {
     const expectedAlgebraic = moveToAlgebraic(pos.expectedMove.from, pos.expectedMove.to);
     const accPct = Math.round(this.accuracy * 100);
     const feedback = correct
-      ? `Richtig! 🔥 Serie ${this.progress.streak} · Treffer ${accPct}%`
-      : `Falsch — erwartet ${expectedAlgebraic}. Serie zurückgesetzt.`;
+      ? t('trainer.correct', { streak: this.progress.streak, accuracy: accPct })
+      : t('trainer.wrong', { expected: expectedAlgebraic });
     return {
       correct,
       expected: pos.expectedMove,

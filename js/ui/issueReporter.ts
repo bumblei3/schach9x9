@@ -78,7 +78,7 @@ export function currentEnvironment(): IssueEnvironment {
     href: clip(href, 300),
     userAgent: clip(ua, 180),
     viewport: `${width}×${height}`,
-    language: lang || 'unbekannt',
+    language: lang || t('report.unknown'),
     online,
     now: new Date().toISOString(),
   };
@@ -87,28 +87,28 @@ export function currentEnvironment(): IssueEnvironment {
 export function buildIssueReport(input: IssueReportInput): { title: string; body: string } {
   const detail = clip(clean(input.detail), MAX_DETAIL_LENGTH);
   const summary = clip(clean(input.summary), 120) || clip(detail.replace(/\s+/g, ' '), 80);
-  const title = `[${input.kind}] ${summary || 'Meldung'}`;
+  const title = `[${input.kind}] ${summary || t('report.fallbackSummary')}`;
   const lines = [
-    '### Meldung',
-    `Art: ${input.kind}`,
-    `Kurz: ${summary || '—'}`,
+    t('report.sectionReport'),
+    t('report.kind', { kind: input.kind }),
+    t('report.short', { summary: summary || '—' }),
     '',
-    '### Was ist passiert?',
+    t('report.whatHappened'),
     detail || '—',
     '',
-    '### Spiel',
-    `- Version: ${input.env.version}`,
-    `- Seite: ${input.env.href || '—'}`,
+    t('report.game'),
+    t('report.version', { version: input.env.version }),
+    t('report.page', { href: input.env.href || '—' }),
     ...gameLines(input.game),
     '',
-    '### Umgebung',
-    `- Browser: ${input.env.userAgent || '—'}`,
-    `- Fenster: ${input.env.viewport}`,
-    `- Sprache: ${input.env.language}`,
-    `- Online: ${input.env.online ? 'ja' : 'nein'}`,
-    `- Zeitpunkt: ${input.env.now}`,
+    t('report.environment'),
+    t('report.browser', { ua: input.env.userAgent || '—' }),
+    t('report.window', { viewport: input.env.viewport }),
+    t('report.language', { language: input.env.language }),
+    t('report.online', { value: input.env.online ? t('report.aiYes', { difficulty: '' }).trim() : t('report.aiNo') }),
+    t('report.time', { now: input.env.now }),
     '',
-    '### Letzte Fehler',
+    t('report.errors'),
     ...errorLines(input.errors),
     '',
   ];
@@ -122,7 +122,10 @@ export function githubIssueUrl(title: string, body: string): string {
   let report = body;
   let url = issueUrl(title, report);
   while (url.length > MAX_ISSUE_URL_LENGTH && report.length > 200) {
-    report = report.slice(0, Math.floor(report.length * 0.75)).trimEnd() + '\n\n[gekürzt]';
+    report =
+      report.slice(0, Math.floor(report.length * 0.75)).trimEnd() +
+      '\n\n' +
+      t('report.truncated');
     url = issueUrl(title, report);
   }
   return url;
@@ -170,7 +173,7 @@ export function bindIssueReporter(getGame: () => IssueGame | null): void {
     const detailEl = document.getElementById('issue-report-detail') as HTMLTextAreaElement | null;
     const detail = detailEl?.value.trim() ?? '';
     if (detail.length < MIN_DETAIL_LENGTH) {
-      showError('Beschreibe kurz, was passiert ist.');
+      showError(t('report.describeShort'));
       detailEl?.focus();
       return null;
     }
@@ -245,32 +248,36 @@ function issueUrl(title: string, body: string): string {
 
 function gameLines(game: IssueGame | null): string[] {
   if (!game) {
-    return ['- Partie: noch keine'];
+    return [t('report.noGame')];
   }
   const lines = [
-    `- Modus: ${game.mode || '—'}`,
-    `- Phase: ${game.phase || '—'}`,
-    `- Am Zug: ${game.turn || '—'}`,
-    `- KI: ${game.isAI ? `ja (${game.difficulty || '—'})` : 'nein'}`,
+    t('report.mode', { mode: game.mode || '—' }),
+    t('report.phase', { phase: game.phase || '—' }),
+    t('report.turn', { turn: game.turn || '—' }),
+    t('report.ai', {
+      value: game.isAI
+        ? t('report.aiYes', { difficulty: game.difficulty || '—' })
+        : t('report.aiNo'),
+    }),
   ];
-  if (game.currentLevelId) lines.push(`- Kapitel: ${game.currentLevelId}`);
+  if (game.currentLevelId) lines.push(t('report.chapter', { id: game.currentLevelId }));
   const puzzle = game.puzzleState;
   if (puzzle && (puzzle.id || puzzle.puzzleId)) {
-    const id = puzzle.puzzleId || puzzle.id;
+    const id = puzzle.puzzleId || puzzle.id || '';
     const state = puzzle.solved
-      ? 'gelöst'
+      ? t('report.solved')
       : puzzle.failed
-        ? 'fehlgeschlagen'
+        ? t('report.failed')
         : puzzle.active
-          ? 'offen'
+          ? t('report.open')
           : '—';
-    lines.push(`- Puzzle: ${id} (${state})`);
+    lines.push(t('report.puzzle', { id, state }));
   }
   const moves = game.moveHistory ?? [];
-  lines.push(`- Züge: ${moves.length}`);
+  lines.push(t('report.moves', { n: moves.length }));
   const recent = formatMoves(moves, game.boardSize || 9);
-  if (recent) lines.push(`- Letzte Züge: ${recent}`);
-  lines.push(`- Stellung: ${formatPosition(game)}`);
+  if (recent) lines.push(t('report.recentMoves', { moves: recent }));
+  lines.push(t('report.position', { fen: formatPosition(game) }));
   return lines;
 }
 
@@ -290,7 +297,7 @@ function formatMoves(moves: { from?: IssueSquare; to?: IssueSquare }[], boardSiz
 function formatPosition(game: IssueGame): string {
   const board = game.board;
   const size = game.boardSize || board?.length || 0;
-  if (!board || size === 0) return 'nicht verfügbar';
+  if (!board || size === 0) return t('report.unavailable');
   let pieces = 0;
   let encoded = '';
   for (let r = 0; r < size; r++) {
@@ -305,7 +312,7 @@ function formatPosition(game: IssueGame): string {
       encoded += `${piece.color[0]}${piece.type}`;
     }
   }
-  if (pieces === 0 && (game.moveHistory?.length ?? 0) === 0) return 'leer';
+  if (pieces === 0 && (game.moveHistory?.length ?? 0) === 0) return t('report.empty');
   const turn = game.turn ? game.turn[0] : '?';
   return `\`${encoded}${turn}\``;
 }
@@ -317,7 +324,7 @@ function algebraic(square: IssueSquare, boardSize: number): string {
 }
 
 function errorLines(errors: string[]): string[] {
-  if (errors.length === 0) return ['- keine'];
+  if (errors.length === 0) return [t('report.noErrors')];
   return errors.slice(-8).map(line => `- ${clip(clean(line), 400)}`);
 }
 

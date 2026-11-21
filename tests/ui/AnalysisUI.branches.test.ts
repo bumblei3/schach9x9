@@ -35,6 +35,7 @@ vi.mock('../../js/tutor/PostGameAnalyzer.js', () => {
   return {
     MOVE_QUALITY,
     QUALITY_METADATA,
+    qualityLabel: (q: string) => QUALITY_METADATA[q]?.label ?? q,
     analyzeGame: vi.fn(() => ({ accuracy: 90, counts: { best: 3 } })),
     classifyMove: vi.fn(() => 'best'),
   };

@@ -14,6 +14,7 @@ import type { Square } from './types/core.js';
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { BattleAnimator } from './battleAnimations.js';
+import { afterDom } from './domTimer.js';
 
 /**
  * Main 3D Battle Chess Engine
@@ -147,7 +148,7 @@ export class BattleChess3D {
       }
       document.body.classList.add('mode-3d');
       // Force resize after enabling to ensure canvas fits
-      setTimeout(() => this.onWindowResize(), 50);
+      afterDom(() => this.onWindowResize(), 50);
       logger.info('3D mode enabled');
     } else {
       this.inputHandler.disable();

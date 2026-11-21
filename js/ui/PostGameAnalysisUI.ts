@@ -5,6 +5,7 @@ import * as PostGameAnalyzerModule from '../tutor/PostGameAnalyzer.js';
 import { analyzeGame } from '../tutor/PostGameAnalyzer.js';
 import type { MoveHistoryEntry } from '../gameEngine.js';
 import { AnalysisUI } from './AnalysisUI.js';
+import { t } from '../i18n.js';
 
 /**
  * Displays game stats and shows the "Nachspiel-Analyse" button
@@ -45,7 +46,7 @@ export function showPostGameStats(
           ];
         if (!meta) return '';
         return `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 6px;padding:2px 8px;border-radius:4px;background:${meta.color}22;border:1px solid ${meta.color}44;color:${meta.color};font-size:0.75rem;font-weight:600;">
-          ${meta.symbol} ${meta.label}: ${counts[q]}
+          ${meta.symbol} ${PostGameAnalyzerModule.qualityLabel(q as keyof typeof PostGameAnalyzerModule.QUALITY_METADATA)}: ${counts[q]}
         </span>`;
       })
       .join('');
@@ -54,23 +55,31 @@ export function showPostGameStats(
   statsEl.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:0.5rem;">
       <div style="flex:1;min-width:140px;text-align:center;">
-        <div style="font-weight:bold;color:#4ade80;margin-bottom:4px;">Weiß</div>
+        <div style="font-weight:bold;color:#4ade80;margin-bottom:4px;">${t('analysis.white')}</div>
         <div style="font-size:1.5rem;font-weight:bold;color:#4ade80;">${whiteAnalysis.accuracy}%</div>
-        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">${whiteAnalysis.totalMoves} Züge</div>
+        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">
+          ${whiteAnalysis.totalMoves} ${t('statistics.movesShort')}
+        </div>
       </div>
       <div style="flex:1;min-width:140px;text-align:center;">
-        <div style="font-weight:bold;color:#f87171;margin-bottom:4px;">Schwarz</div>
+        <div style="font-weight:bold;color:#f87171;margin-bottom:4px;">${t('analysis.black')}</div>
         <div style="font-size:1.5rem;font-weight:bold;color:#f87171;">${blackAnalysis.accuracy}%</div>
-        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">${blackAnalysis.totalMoves} Züge</div>
+        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">
+          ${blackAnalysis.totalMoves} ${t('statistics.movesShort')}
+        </div>
       </div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-height:120px;overflow-y:auto;">
       <div style="flex:1;min-width:160px;">
-        <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:4px;text-align:center;">Weiß</div>
+        <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:4px;text-align:center;">
+          ${t('analysis.white')}
+        </div>
         <div style="text-align:center;">${renderCounts(whiteAnalysis.counts)}</div>
       </div>
       <div style="flex:1;min-width:160px;">
-        <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:4px;text-align:center;">Schwarz</div>
+        <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:4px;text-align:center;">
+          ${t('analysis.black')}
+        </div>
         <div style="text-align:center;">${renderCounts(blackAnalysis.counts)}</div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { BOARD_SIZE, isBlockedCell, type BoardShape } from '../../config.js';
 import { logger } from '../../logger.js';
+import { frameDom } from '../../domTimer.js';
 
 /**
  * Shadow map type for the WebGL renderer.
@@ -339,7 +340,7 @@ export class SceneManager3D {
   animate(): void {
     if (!this.enabled) return;
 
-    requestAnimationFrame(this.boundAnimate);
+    frameDom(this.boundAnimate);
 
     if (this.controls) this.controls.update();
     if (this.renderer && this.scene && this.camera) {

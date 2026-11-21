@@ -27,7 +27,7 @@ export class ShopManager {
 
     // Check if player has enough points
     if (cost > this.game.points) {
-      if (this.game.log) this.game.log('Nicht genug Punkte!');
+      if (this.game.log) this.game.log(t('shop.notEnoughPoints'));
       return;
     }
 
@@ -46,7 +46,7 @@ export class ShopManager {
       // Get SVG for display
       const svg = PIECE_SVGS['white'][pieceType];
 
-      displayEl.innerHTML = `Ausgewählt: <div style="display:inline-block;width:30px;height:30px;vertical-align:middle;">${svg}</div> ${pieceInfo ? pieceInfo.name : pieceType} (${cost})`;
+      displayEl.innerHTML = `${t('shop.selected')} <div style="display:inline-block;width:30px;height:30px;vertical-align:middle;">${svg}</div> ${pieceInfo ? pieceInfo.name : pieceType} (${cost})`;
     }
   }
 
@@ -74,9 +74,7 @@ export class ShopManager {
     // Can only remove own non-king pieces
     if (piece && piece.gifted) {
       const kept =
-        piece.type === 'n'
-          ? 'Der Sprungfeder-Springer bleibt auf dem Feld.'
-          : 'Der Plünderer-Bauer bleibt auf dem Feld.';
+        piece.type === 'n' ? t('shop.springSpringerStays') : t('shop.plundererStays');
       if (this.game.log) this.game.log(kept);
       return;
     }
@@ -88,7 +86,7 @@ export class ShopManager {
       this.game.board[r][c] = null;
 
       UI.updateShopUI(this.game);
-      if (this.game.log) this.game.log('Figur entfernt, Punkte erstattet.');
+      if (this.game.log) this.game.log(t('shop.pieceRemoved'));
 
       // Update 3D board if active
       if (window.battleChess3D && window.battleChess3D.enabled) {
@@ -166,7 +164,10 @@ export class ShopManager {
       return;
     }
 
-    const modalTitle = `Upgrade für ${Object.values(SHOP_PIECES).find(p => p.symbol === piece.type)?.name || piece.type}`;
+    const modalTitle = t('shop.upgradeFor', {
+      piece:
+        Object.values(SHOP_PIECES).find(p => p.symbol === piece.type)?.name || piece.type,
+    });
 
     let content =
       '<div class="upgrade-options" style="display: flex; flex-direction: column; gap: 1rem;">';
@@ -340,7 +341,10 @@ export class ShopManager {
 
       if (this.game.log)
         this.game.log(
-          `${piece.color === 'white' ? 'Weiß' : 'Schwarz'} hat eine Figur zu ${targetType} verbessert.`
+          t('shop.pieceUpgraded', {
+            color: piece.color === 'white' ? t('piece.colorWhite') : t('piece.colorBlack'),
+            target: targetType,
+          })
         );
 
       UI.updateShopUI(this.game);
