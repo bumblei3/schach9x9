@@ -5,12 +5,13 @@ Release-Tag ist `v2.1.0`. `main` ist `3fef48c`. Akt IV (Kapitel 19–25) liegt a
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 **PR #294 ist gemerged (2026-11-22):** die i18n-Restgruppen und der zentrale
-DOM-Timer-Guard liegen jetzt auf `main` (Merge-Commit `6d238d0`, 53 Dateien).
-Alle Required Checks waren vor dem Merge grün (CI Gate, Lint/Type, Unit 24,
-E2E, Lighthouse, CodeQL, Security Audit); der Push auf `main` läuft separat
-nach. Damit ist der englische UI-Text auch auf der Live-Seite nicht mehr
-teilweise deutsch, und die `Errors 1`-Funde aus dem Node-26-/jsdom-Abriss
-haben ihren zentralen Guard im ausgelieferten Build.
+DOM-Timer-Guard liegen jetzt auf `main` (Merge-Commit `6d238d0`, 53 Dateien). Alle Required Checks waren vor dem Merge grün (CI Gate, Lint/Type, Unit 24,
+E2E, Lighthouse, CodeQL, Security Audit); Push und Pages-Deployment liefen
+anschließend durch. Das Live-Bundle ist Byte-gleich mit dem `production-build`-
+Artefakt des main-Runs (der abweichende Hash gegenüber einem lokalen Build
+kommt von Node 24 in CI gegen Node 26 lokal). Damit ist der englische UI-Text
+auch auf der Live-Seite nicht mehr teilweise deutsch, und die `Errors 1`-Funde
+aus dem Node-26-/jsdom-Abriss haben ihren zentralen Guard im ausgelieferten Build.
 
 **PR #295 ist gemerged (2026-11-22):** `js-yaml`-Override 5.3.0 → 5.4.1
 schließt GHSA-r3ph-w7gj-g6xm (CPU-DoS in Merge-Keys) zusätzlich zu dem
