@@ -1,7 +1,7 @@
 # schach9x9 — Status (Stand: 2026-11-22)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `6d238d0`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
+Release-Tag ist `v2.1.0`. `main` ist `3fef48c`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
 
 **PR #294 ist gemerged (2026-11-22):** die i18n-Restgruppen und der zentrale
@@ -11,6 +11,14 @@ E2E, Lighthouse, CodeQL, Security Audit); der Push auf `main` läuft separat
 nach. Damit ist der englische UI-Text auch auf der Live-Seite nicht mehr
 teilweise deutsch, und die `Errors 1`-Funde aus dem Node-26-/jsdom-Abriss
 haben ihren zentralen Guard im ausgelieferten Build.
+
+**PR #295 ist gemerged (2026-11-22):** `js-yaml`-Override 5.3.0 → 5.4.1
+schließt GHSA-r3ph-w7gj-g6xm (CPU-DoS in Merge-Keys) zusätzlich zu dem
+bereits über 5.3.0 gefixten CVE-2026-59870. Der Pfad war Dev-only
+(`commitlint → cosmiconfig → js-yaml`) und damit für die CI-Audit-Stufe
+(`--omit=dev`) unsichtbar; der Job zeigt jetzt zusätzlich einen Full-Audit
+im Step-Summary und lädt das zweite JSON als Artefakt hoch, ohne den Gate
+zu verschärfen. `npm audit` und `npm audit --omit=dev`: je 0 Findings.
 
 **Track B bei SF 1600 gemessen, Gate bleibt zu (2026-11-22):**
 `bench/sf_match_m5_elo1600_n40.log` (n=40, d5 vs SF d8/1600, `lite-single`):

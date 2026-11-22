@@ -1,6 +1,6 @@
 # schach9x9 — Roadmap
 
-Stand: 2026-11-22 · `main` `6d238d0` · Live: https://bumblei3.github.io/schach9x9/
+Stand: 2026-11-22 · `main` `3fef48c` · Live: https://bumblei3.github.io/schach9x9/
 
 Dieses Dokument ist die kanonische Planung. `STATUS.md` hält den Mess-Ist-Stand, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel. Ältere Vorschläge in `docs/verbesserungsvorschlaege.md` sind historisch (TS-Migration, Multiplayer, Opening Book, PGN … sind erledigt oder bewusst abgelehnt).
 
@@ -229,7 +229,7 @@ M0 Freeze v1.8 ──┬── M1 Suche (Zobrist) ── M5-Gates
                               └── M3 Coach (braucht 2.2)
 ```
 
-**Nächster konkreter Schritt:** `main` ist `6d238d0` (2026-11-22). PR #294
+**Nächster konkreter Schritt:** `main` ist `3fef48c` (2026-11-22). PR #294
 (i18n-Restgruppen, DOM-Timer zentral) ist gemerged und damit auf der Live-Seite
 wirksam; der Playtest aus [`PLAYTEST_PROTOCOL.md`](PLAYTEST_PROTOCOL.md) samt
 [`PLAYTEST_BOBLATT.md`](PLAYTEST_BOBLATT.md) bleibt der nächste Datenpunkt.
@@ -253,6 +253,6 @@ Diese drei Punkte sind keine Technik, sondern Richtung. Default, falls niemand e
 
 ## Release-Linie
 
-Die Tabelle steht in [`STATUS.md`](../STATUS.md). Kurz: Tag `v2.1.0`, `main` ist `6d238d0`.
+Die Tabelle steht in [`STATUS.md`](../STATUS.md). Kurz: Tag `v2.1.0`, `main` ist `3fef48c`.
 
 v2.0 ist die erste Version, die man jemandem zeigen kann mit „das ist Feenschach, nicht Schach mit einem Extra-Feld“.
