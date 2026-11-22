@@ -54,7 +54,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
   
 
   
-    <a href="#board-wrapper" class="skip-link">Zum Schachbrett springen</a>
+    <a href="#board-wrapper" class="skip-link" data-i18n="a11y.skipToBoard">Zum Schachbrett springen</a>
 
     <!-- Global SVG Assets (Hidden) -->
     <svg style="position: absolute; width: 0; height: 0; overflow: hidden" aria-hidden="true">
@@ -259,7 +259,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
                   <path d="M9.663 17h4.673M12 3v1M6.343 4.343l-.707-.707M17.657 4.343l.707-.707M4 12h1M19 12h1M12 21a9 9 0 0 0 9-9c0-4.97-4.03-9-9-9s-9 4.03-9 9a9 9 0 0 0 9 9z"></path>
                 </svg>
-                <span class="action-label">Tipps</span>
+                <span class="action-label" data-i18n="action.tips">Tipps</span>
                 <span class="action-shortcut">H</span>
               </button>
               <button id="best-move-btn" class="action-icon-btn" title="Bester Zug (B)" data-i18n-title="action.bestMoveHint" aria-label="Bester Zug (B)" data-i18n-aria-label="action.bestMoveHint" data-tooltip="Bester Zug (B)" data-shortcut="B">
@@ -294,14 +294,14 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <line x1="12" y1="9" x2="12" y2="13"></line>
                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                   </svg>
-                  <span class="action-label">Drohungen</span>
+                  <span class="action-label" data-i18n="action.threats">Drohungen</span>
                   <span class="action-shortcut">T</span>
                 </button>
                 <button id="opportunities-btn" class="action-icon-btn" role="menuitem" title="Chancen anzeigen" data-i18n-title="action.opportunities" aria-label="Chancen anzeigen" data-i18n-aria-label="action.opportunities" data-tooltip="Chancen">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="#f59e0b" stroke-width="2" fill="none">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                   </svg>
-                  <span class="action-label">Chancen</span>
+                  <span class="action-label" data-i18n="action.chances">Chancen</span>
                 </button>
                 <button id="toggle-opening-book-btn" class="action-icon-btn" role="menuitem" title="Eröffnungsbuch" data-i18n-title="action.openingBook" aria-label="Eröffnung" data-i18n-aria-label="analysis.opening" data-tooltip="Eröffnungsbuch">
                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="#9f5fef" stroke-width="2" fill="none">
@@ -365,12 +365,12 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
                     <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
                   </svg>
-                  <span class="action-label">Vollbild</span>
+                  <span class="action-label" data-i18n="action.fullscreen">Vollbild</span>
                 </button>
 
                   <button id="resign-btn" class="action-icon-btn" role="menuitem" title="Aufgeben (Esc)" data-i18n-title="action.resignHint" aria-label="Aufgeben" data-i18n-aria-label="action.resign" data-tooltip="Aufgeben" data-shortcut="Esc">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17L5 12l5-5"></path><path d="M15 12l-5-5 5-5"></path></svg>
-                    <span class="action-label">Aufgeben</span>
+                    <span class="action-label" data-i18n="action.resign">Aufgeben</span>
                   </button>
                   <button id="draw-offer-btn" class="action-icon-btn" role="menuitem" title="Remis anbieten" data-i18n-title="game.offerDraw" aria-label="Remis anbieten" data-i18n-aria-label="game.offerDraw" data-tooltip="Remis anbieten">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"></path><path d="M12 9v4"></path><path d="M9 20L15 4"></path></svg>
@@ -378,15 +378,15 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                   </button>
                   <button id="export-pgn-btn" class="action-icon-btn" role="menuitem" title="PGN exportieren" data-i18n-title="action.exportPgn" aria-label="PGN exportieren" data-i18n-aria-label="action.exportPgn" data-tooltip="PGN exportieren">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                    <span class="action-label">PGN exportieren</span>
+                    <span class="action-label" data-i18n="action.exportPgn">PGN exportieren</span>
                   </button>
                   <button id="export-gif-btn" class="action-icon-btn" role="menuitem" title="Replay als GIF exportieren" data-i18n-title="action.exportGif" aria-label="Replay als GIF exportieren" data-i18n-aria-label="action.exportGif" data-tooltip="Replay als GIF exportieren">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    <span class="action-label">GIF exportieren</span>
+                    <span class="action-label" data-i18n="action.exportGifLabel">GIF exportieren</span>
                   </button>
                   <button id="share-position-btn" class="action-icon-btn" role="menuitem" title="Position teilen (Link)" data-i18n-title="action.sharePositionLink" aria-label="Position teilen" data-i18n-aria-label="action.sharePosition" data-tooltip="Position mit Link teilen">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><line x1="8.59" y1="13.41" x2="15.42" y2="18.42"></line><line x1="15.41" y1="6.59" x2="8.59" y2="11.41"></line></svg>
-                    <span class="action-label">Position teilen</span>
+                    <span class="action-label" data-i18n="action.sharePosition">Position teilen</span>
                   </button>
                   <button id="save-btn" class="action-icon-btn" role="menuitem" title="Position speichern" data-i18n-title="action.savePosition" aria-label="Position speichern" data-i18n-aria-label="action.savePosition" data-tooltip="Position speichern">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="12" x2="12" y2="21"></line><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="12" y2="6"></line></svg>
@@ -455,13 +455,13 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     gap: 0.5rem;
                     margin-bottom: 0.5rem;
                   ">
-                  <div><strong>Tiefe:</strong> <span id="live-depth">-</span></div>
-                  <div><strong>Knoten:</strong> <span id="live-nodes">-</span></div>
-                  <div><strong>Bewertung:</strong> <span id="live-score">-</span></div>
+                  <div><strong data-i18n="analysis.depthLabel">Tiefe:</strong> <span id="live-depth">-</span></div>
+                  <div><strong data-i18n="analysis.nodesLabel">Knoten:</strong> <span id="live-nodes">-</span></div>
+                  <div><strong data-i18n="analysis.evaluationLabel">Bewertung:</strong> <span id="live-score">-</span></div>
                   <div><strong data-i18n="timeLabel">Zeit:</strong> <span id="live-time">-</span></div>
                 </div>
                 <div style="margin-top: 0.5rem">
-                  <strong>Hauptvariante:</strong>
+                  <strong data-i18n="analysis.mainLineLabel">Hauptvariante:</strong>
                   <span id="live-pv" style="color: var(--accent-primary); font-family: monospace">-</span>
                 </div>
               </div>
@@ -480,9 +480,9 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
               </p>
               <div id="heatmap-grid" class="heatmap-grid" role="grid" aria-label="Zug-Hitze Karte" data-i18n-aria-label="action.moveHeatmap"></div>
               <div class="heatmap-legend">
-                <span>wenig</span>
+                <span data-i18n="heatmap.low">wenig</span>
                 <span class="heatmap-legend-bar"></span>
-                <span>viel</span>
+                <span data-i18n="heatmap.high">viel</span>
               </div>
               <p id="heatmap-hottest" class="heatmap-hottest"></p>
             </div>
@@ -663,7 +663,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
           <div id="stats-overlay" class="fullscreen-overlay hidden">
             <div class="stats-content">
               <div class="stats-header">
-                <h2>Statistiken</h2>
+                <h2 data-i18n="game.statistics">Statistiken</h2>
                 <button id="stats-close-btn" class="close-icon-btn">×</button>
               </div>
               <div class="stats-grid">
@@ -706,7 +706,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <button id="puzzle-random-btn" class="btn-secondary" data-i18n="board.random">🎲 Zufällig</button>
                 <button id="puzzle-hint-btn" class="btn-secondary" data-i18n="hint">💡 Hinweis</button>
                 <button id="puzzle-next-btn" class="btn-primary hidden" data-i18n="board.nextPuzzle">Nächstes Puzzle</button>
-                <button id="puzzle-exit-btn" class="btn-secondary">Beenden</button>
+                <button id="puzzle-exit-btn" class="btn-secondary" data-i18n="puzzle.exit">Beenden</button>
               </div>
             </div>
           </div>
@@ -730,7 +730,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             <div class="help-body" style="padding: 20px; overflow-y: auto; max-height: 70vh">
               <h3 data-i18n="settings.gameFlow">Spielablauf</h3>
               <p data-i18n="setup.introVariant">Schach 9x9 ist eine Variante auf einem größeren Brett mit neuen Figuren.</p>
-              <h4>1. Setup-Phase</h4>
+              <h4 data-i18n="tutorial.setupPhase">1. Setup-Phase</h4>
               <ul>
                 <li data-i18n="setup.chooseKingArea">
                   <strong data-i18n="setup.placeKing">König platzieren:</strong> Wähle einen 3x3 Bereich für deinen König.
@@ -773,7 +773,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
             </div>
             <div class="tutorial-footer">
               <div class="step-indicator">
-                Schritt <span id="tutorial-current-step">1</span> von
+                <span data-i18n="tutorial.stepLabel">Schritt</span> <span id="tutorial-current-step">1</span> <span data-i18n="tutorial.of">von</span>
                 <span id="tutorial-total-steps">8</span>
               </div>
               <div class="tutorial-controls">
@@ -788,7 +788,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
         <div id="replay-overlay" class="fullscreen-overlay hidden">
           <div class="replay-content">
             <div class="replay-header">
-              <h2>Partie durchgehen</h2>
+              <h2 data-i18n="replay.title">Partie durchgehen</h2>
               <button id="replay-close-btn" class="close-icon-btn">×</button>
             </div>
             <div class="replay-body">
@@ -798,7 +798,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
               <div class="replay-side-panel">
                 <div class="replay-step-info">
                   <div class="replay-step-header">
-                    <span class="replay-step-label">Schritt</span>
+                    <span class="replay-step-label" data-i18n="replay.stepLabel">Schritt</span>
                     <span class="replay-step-number" id="replay-step-number">0 / 0</span>
                   </div>
                   <div class="replay-move-info">
@@ -810,12 +810,12 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <span class="replay-class-label" id="replay-class-label">—</span>
                   </div>
                   <div class="replay-eval-row">
-                    <span class="replay-eval-label">Bewertung</span>
+                    <span class="replay-eval-label" data-i18n="replay.evaluation">Bewertung</span>
                     <span class="replay-eval-value" id="replay-eval-value">—</span>
                   </div>
                 </div>
                 <div class="replay-better-move" id="replay-better-move">
-                  <div class="replay-better-header">Besser alternativ</div>
+                  <div class="replay-better-header" data-i18n="replay.betterAlternative">Besser alternativ</div>
                   <div class="replay-better-content" id="replay-better-content">—</div>
                 </div>
                 <div class="replay-navigation">
@@ -1008,7 +1008,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                 <div class="gamemode-grid">
                   <div class="gamemode-card" id="start-tutorial-btn">
                     <div class="card-icon">🎓</div>
-                    <div class="card-title">Interaktives Tutorial</div>
+                    <div class="card-title" data-i18n="menu.interactiveTutorial">Interaktives Tutorial</div>
                     <div class="card-desc" data-i18n="modes.tutorialDesc">
                       Lerne die Regeln, Figuren und Special Moves in einer geführten Tour.
                     </div>
@@ -1038,7 +1038,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                         <option value="classic" data-i18n="skin.classic">Klassisch</option>
                         <option value="blue" data-i18n="blue">Blau</option>
                         <option value="green" data-i18n="settings.green">Grün</option>
-                        <option value="dark">Dunkel</option>
+                        <option value="dark" data-i18n="settings.themeDark">Dunkel</option>
                         <option value="wood" data-i18n="skin.wood">Holz</option>
                       </select>
                     </div>
@@ -1074,7 +1074,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     </div>
                     <span id="volume-value" class="volume-value" aria-live="polite">30%</span>
                   </div>
-                      <label>Schwierigkeit</label>
+                      <label data-i18n="settings.difficulty">Schwierigkeit</label>
                       <select id="difficulty-select" class="menu-select" aria-label="Schwierigkeit" data-i18n-aria-label="settings.difficulty">
                         <option value="beginner" data-i18n="settings.beginner">Anfänger</option>
                         <option value="easy" data-i18n="easy">Einfach</option>
@@ -1095,7 +1095,7 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                       </label>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
-                      <label>Zeitsteuerung</label>
+                      <label data-i18n="a11y.timeControl">Zeitsteuerung</label>
                       <select id="time-control-select" class="menu-select" aria-label="Zeitsteuerung" data-i18n-aria-label="a11y.timeControl">
                         <option value="blitz3">Blitz 3+2</option>
                         <option value="blitz5" selected="">Blitz 5+3</option>
@@ -1120,17 +1120,17 @@ exports[`Visual DOM Snapshot Tests > Initial setup phase snapshot 1`] = `
                     <div class="setting-row" style="margin-top: 10px">
                       <label data-i18n="settings.aiPersonality">KI-Persönlichkeit</label>
                       <select id="ai-personality-select" class="menu-select" aria-label="KI-Persönlichkeit" data-i18n-aria-label="settings.aiPersonality">
-                        <option value="balanced">⚖️ Ausgeglichen</option>
-                        <option value="aggressive">⚔️ Aggressiv</option>
-                        <option value="defensive">🛡️ Defensiv</option>
-                        <option value="positional">♟️ Positionell</option>
-                        <option value="trapper">🪤 Der Fallensteller</option>
+                        <option value="balanced" data-i18n="settings.balanced">⚖️ Ausgeglichen</option>
+                        <option value="aggressive" data-i18n="settings.aggressive">⚔️ Aggressiv</option>
+                        <option value="defensive" data-i18n="settings.defensive">🛡️ Defensiv</option>
+                        <option value="positional" data-i18n="settings.positional">♟️ Positionell</option>
+                        <option value="trapper" data-i18n="settings.trapper">🪤 Der Fallensteller</option>
                       </select>
                     </div>
                     <div class="setting-row" style="margin-top: 10px">
-                      <label>KI-Mentor</label>
+                      <label data-i18n="settings.mentorLabel">KI-Mentor</label>
                       <select id="ki-mentor-level-select" class="menu-select" aria-label="KI-Mentor-Level" data-i18n-aria-label="settings.mentorLevel">
-                        <option value="OFF">Aus</option>
+                        <option value="OFF" data-i18n="tutorMode.off">Aus</option>
                         <option value="STANDARD" selected="" data-i18n="mentor.standard">Standard (Nur Patzer)</option>
                         <option value="STRICT" data-i18n="mentor.strict">Streng (Auch Fehler)</option>
                       </select>
