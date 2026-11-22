@@ -368,9 +368,14 @@ jobs:
       - name: Run npm audit
         run: |
           npm audit --audit-level=high --omit=dev --json > audit-report.json || true
+          npm audit --audit-level=high --json > audit-dev-report.json || true
           {
             echo "## Security Audit Summary"
+            echo "### Production dependencies"
             jq -r '.metadata.vulnerabilities | to_entries[] | "\(.key): \(.value)"' audit-report.json \
+              || echo "(could not parse audit report)"
+            echo "### All dependencies (incl. dev)"
+            jq -r '.metadata.vulnerabilities | to_entries[] | "\(.key): \(.value)"' audit-dev-report.json \
               || echo "(could not parse audit report)"
           } | tee audit-summary.txt >> "$GITHUB_STEP_SUMMARY"
 
@@ -386,6 +391,7 @@ jobs:
           name: security-audit-report
           path: |
             audit-report.json
+            audit-dev-report.json
             audit-summary.txt
             outdated.txt
           retention-days: 7
