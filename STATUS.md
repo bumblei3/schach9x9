@@ -1,8 +1,24 @@
-# schach9x9 — Status (Stand: 2026-11-20)
+# schach9x9 — Status (Stand: 2026-11-22)
 
 Laufender Zustand des Repos `bumblei3/schach9x9`.
-Release-Tag ist `v2.1.0`. `main` ist `21f85e2`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
+Release-Tag ist `v2.1.0`. `main` ist `6d238d0`. Akt IV (Kapitel 19–25) liegt auf `main`: stille Mattaufgaben, kein Stellungstext. Kapitel 26 gibt es nicht.
 `ROADMAP.md` ist die Planung, `bench/NEGATIVE_RESULTS.md` die verworfenen Hebel.
+
+**PR #294 ist gemerged (2026-11-22):** die i18n-Restgruppen und der zentrale
+DOM-Timer-Guard liegen jetzt auf `main` (Merge-Commit `6d238d0`, 53 Dateien).
+Alle Required Checks waren vor dem Merge grün (CI Gate, Lint/Type, Unit 24,
+E2E, Lighthouse, CodeQL, Security Audit); der Push auf `main` läuft separat
+nach. Damit ist der englische UI-Text auch auf der Live-Seite nicht mehr
+teilweise deutsch, und die `Errors 1`-Funde aus dem Node-26-/jsdom-Abriss
+haben ihren zentralen Guard im ausgelieferten Build.
+
+**Track B bei SF 1600 gemessen, Gate bleibt zu (2026-11-22):**
+`bench/sf_match_m5_elo1600_n40.log` (n=40, d5 vs SF d8/1600, `lite-single`):
+2–4–34, Score 0.100, ≈ −382 Elo, Intervall ≈ −860..−249, 0 `illegal-ours`.
+Das ist *kein* Engine-Regressionsfall — die Kanonik misst gegen SF 1400
+(0.575 / +52). Es bestätigt nur, dass die M5-Schwelle „SF 1600 erst bei Score
+≥ 0.30 gegen 1400" weiterhin nicht erreicht ist. Der Lauf bleibt als Datenpunkt
+im Repo, nicht als Hebel.
 
 **Timer-Klasse jetzt zentral geschuetzt (2026-11-21):** Nach dem
 `TutorUI`-Fix tauchte der Fehler sofort wieder, diesmal aus `StandardModeStrategy.startGame`
