@@ -197,7 +197,14 @@ export function reconstructBoardFromHash(hash: string): {
       }
       const color: 'white' | 'black' = colorChar === 'w' ? 'white' : 'black';
       const type = typeChar as Piece['type'];
-      row.push({ type, color, hasMoved: true });
+      // `hasMoved: false` für ALLE Figuren — nicht `true`. Das Buch wurde von
+      // der Integer-Engine erzeugt (`OpeningBookTrainer`), die `hasMoved` nicht
+      // führt; ihre UI-Zuordnung `boardToUi` setzt ebenfalls überall `false`.
+      // Mit `true` sind 48 der 1271 trainierbaren Buchstellungen unlösbar:
+      // ihr Buchzug ist ein Bauerndoppelschritt (z. B. (6,2)→(4,2)), den die
+      // RulesEngine bei `hasMoved: true` verbietet — der Trainer blieb dann
+      // still auf Streak 0 und das E2E-Spec schlug fehl.
+      row.push({ type, color, hasMoved: false });
     }
     board.push(row);
   }
