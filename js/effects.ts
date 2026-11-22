@@ -2,6 +2,8 @@
  * Particle Effects System for Schach 9x9
  */
 
+import { afterDom, frameDom } from './domTimer.js';
+
 export class ParticleSystem {
   particles: Array<{
     el: HTMLElement;
@@ -76,7 +78,7 @@ export class ParticleSystem {
 
     if (!this.animating) {
       this.animating = true;
-      requestAnimationFrame(() => this.update());
+      frameDom(() => this.update());
     }
   }
 
@@ -112,7 +114,7 @@ export class ParticleSystem {
 
     if (!this.animating) {
       this.animating = true;
-      requestAnimationFrame(() => this.update());
+      frameDom(() => this.update());
     }
   }
 
@@ -140,7 +142,7 @@ export class ParticleSystem {
       p.el.style.opacity = (p.life / p.maxLife).toString();
     }
 
-    requestAnimationFrame(() => this.update());
+    frameDom(() => this.update());
   }
 }
 
@@ -161,11 +163,11 @@ export class FloatingTextManager {
     this.container.appendChild(el);
 
     // Animation via CSS transitions/animations
-    setTimeout(() => {
+    afterDom(() => {
       el.classList.add('animate');
     }, 10);
 
-    setTimeout(() => {
+    afterDom(() => {
       el.remove();
     }, 1500);
   }
@@ -207,7 +209,7 @@ export function shakeScreen(intensity: number = 5, duration: number = 300): void
       const x = (Math.random() - 0.5) * intensity;
       const y = (Math.random() - 0.5) * intensity;
       container.style.transform = `translate(${x}px, ${y}px)`;
-      requestAnimationFrame(animate);
+      frameDom(animate);
     } else {
       container.style.transform = '';
       container.style.transition = originalTransition;
@@ -309,7 +311,7 @@ export class ConfettiSystem {
 
     if (!this.animating) {
       this.animating = true;
-      requestAnimationFrame(() => this.update());
+      frameDom(() => this.update());
     }
   }
 
@@ -341,7 +343,7 @@ export class ConfettiSystem {
       p.el.style.opacity = p.life.toString();
     }
 
-    requestAnimationFrame(() => this.update());
+    frameDom(() => this.update());
   }
 }
 

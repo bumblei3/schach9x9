@@ -3,6 +3,7 @@
  * Classifies moves based on evaluation changes and calculates accuracy.
  */
 import type { MoveHistoryEntry } from '../gameEngine.js';
+import { t, type I18nKey } from '../i18n.js';
 
 export const MOVE_QUALITY = {
   BRILLIANT: 'brilliant',
@@ -35,6 +36,27 @@ export const QUALITY_METADATA: Record<MoveQuality, QualityMetadata> = {
   [MOVE_QUALITY.BLUNDER]: { label: 'Patzer', symbol: '??', color: '#f87171' },
   [MOVE_QUALITY.BOOK]: { label: 'Buch', symbol: '📖', color: '#a78bfa' },
 };
+
+/**
+ * Qualitaets-Labels: Uebersetzung an der Setzstelle, nicht in den Daten.
+ * Die Map aus Literalen statt Template-String, damit der i18n-Audit die
+ * Schluessel als genutzt erkennt.
+ */
+const QUALITY_I18N: Record<MoveQuality, I18nKey> = {
+  [MOVE_QUALITY.BRILLIANT]: 'review.label.brilliant',
+  [MOVE_QUALITY.GREAT]: 'review.label.great',
+  [MOVE_QUALITY.BEST]: 'review.label.best',
+  [MOVE_QUALITY.EXCELLENT]: 'review.label.excellent',
+  [MOVE_QUALITY.GOOD]: 'review.label.good',
+  [MOVE_QUALITY.INACCURACY]: 'review.label.inaccuracy',
+  [MOVE_QUALITY.MISTAKE]: 'review.label.mistake',
+  [MOVE_QUALITY.BLUNDER]: 'review.label.blunder',
+  [MOVE_QUALITY.BOOK]: 'review.label.book',
+};
+
+export function qualityLabel(q: MoveQuality): string {
+  return t(QUALITY_I18N[q]);
+}
 
 /**
  * Classifies a move based on evaluation change.

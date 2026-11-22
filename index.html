@@ -724,7 +724,7 @@
                     data-tooltip="Hilfe / Tutorial"
                   >
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <span class="action-label">Hilfe / Tutorial</span>
+                    <span class="action-label" data-i18n="action.help">Hilfe / Tutorial</span>
                   </button>
                   <button
                     id="feedback-btn"
@@ -864,7 +864,7 @@
 
               <!-- Book Move Suggestion -->
               <div class="book-move-section">
-                <h4>Buchzug-Vorschlag</h4>
+                <h4 data-i18n="book.moveSuggestion">Buchzug-Vorschlag</h4>
                 <div id="book-moves-list" class="book-moves-list"></div>
               </div>
 
@@ -898,7 +898,7 @@
             <div class="shop-header">
               <h2 data-i18n="modes.hire">Truppen anheuern</h2>
               <div class="shop-points">
-                <span id="points-display" data-testid="points-display">15</span> Pkt
+                <span id="points-display" data-testid="points-display">15</span> <span data-i18n="shop.pointsUnit">Pkt</span>
               </div>
             </div>
 
@@ -959,7 +959,7 @@
             </div>
             <div id="selected-piece-display" class="shop-status" data-i18n="board.choosePiece">Wähle eine Figur</div>
 
-            <button id="finish-setup-btn" class="btn-primary full-width" disabled>Fertig</button>
+            <button id="finish-setup-btn" class="btn-primary full-width" disabled data-i18n="shop.finish">Fertig</button>
           </div>
         </div>
 
@@ -971,12 +971,12 @@
           <div id="info-overlay" class="fullscreen-overlay hidden">
             <div class="info-content">
               <div class="menu-header">
-                <h2>Spielinfo</h2>
+                <h2 data-i18n="info.title">Spielinfo</h2>
                 <button id="info-close-btn" class="close-icon-btn">×</button>
               </div>
               <div class="info-tabs">
-                <button class="tab-btn active" data-tab="history">Historie</button>
-                <button class="tab-btn" data-tab="log">Log</button>
+                <button class="tab-btn active" data-tab="history" data-i18n="info.history">Historie</button>
+                <button class="tab-btn" data-tab="log" data-i18n="info.log">Log</button>
               </div>
               <div id="tab-history" class="tab-pane active">
                 <div id="move-history" class="history-list"></div>
@@ -1119,7 +1119,7 @@
               </ul>
               <h4 data-i18n="setup.newPieces">2. Neue Figuren</h4>
               <ul>
-                <li><strong>Kanzler (C):</strong> Zieht wie Turm + Springer.</li>
+                <li data-i18n="setup.chancellorMoves"><strong>Kanzler (C):</strong> Zieht wie Turm + Springer.</li>
                 <li data-i18n="setup.movesLike"><strong data-i18n="setup.archbishopLabel">Erzbischof (A):</strong> Zieht wie Läufer + Springer.</li>
               </ul>
             </div>
@@ -1132,8 +1132,8 @@
             <h2 data-i18n="game.drawOffered">Remis angeboten</h2>
             <p id="draw-offer-message" data-i18n="game.opponentOffersDraw">Dein Gegner bietet ein Unentschieden an.</p>
             <div class="modal-buttons">
-              <button id="accept-draw-btn" class="btn-primary">Annehmen</button>
-              <button id="decline-draw-btn" class="btn-secondary">Ablehnen</button>
+              <button id="accept-draw-btn" class="btn-primary" data-i18n="draw.accept">Annehmen</button>
+              <button id="decline-draw-btn" class="btn-secondary" data-i18n="draw.decline">Ablehnen</button>
             </div>
           </div>
         </div>
@@ -1219,18 +1219,18 @@
           aria-labelledby="issue-report-title"
         >
           <div class="modal-content issue-report-content">
-            <h2 id="issue-report-title">Problem melden</h2>
+            <h2 id="issue-report-title" data-i18n="report.title">Problem melden</h2>
             <p class="issue-report-hint" data-i18n="feedback.hintModal">
               Rückmeldung zu schach9x9 ist ausdrücklich erwünscht. Es öffnet sich ein GitHub-Issue.
               Modus, Stellung und die letzten Fehler hängen an. Kein Name und kein Speicherinhalt.
             </p>
-            <label class="issue-report-label" for="issue-report-kind">Art</label>
+            <label class="issue-report-label" for="issue-report-kind" data-i18n="report.kindLabel">Art</label>
             <select id="issue-report-kind" class="menu-select">
               <option value="Fehler" data-i18n="error.label">Fehler</option>
-              <option value="Unklar">Unklar</option>
-              <option value="Vorschlag">Vorschlag</option>
+              <option value="Unklar" data-i18n="report.unclear">Unklar</option>
+              <option value="Vorschlag" data-i18n="report.suggestion">Vorschlag</option>
             </select>
-            <label class="issue-report-label" for="issue-report-summary">Kurz</label>
+            <label class="issue-report-label" for="issue-report-summary" data-i18n="report.shortLabel">Kurz</label>
             <input
               id="issue-report-summary"
               class="issue-report-input"
@@ -1238,7 +1238,7 @@
               maxlength="120"
               placeholder="z. B. Matt in Kapitel 19 zählt nicht" data-i18n-placeholder="feedback.example"
             />
-            <label class="issue-report-label" for="issue-report-detail">Was ist passiert?</label>
+            <label class="issue-report-label" for="issue-report-detail" data-i18n="report.whatHappenedLabel">Was ist passiert?</label>
             <textarea
               id="issue-report-detail"
               class="issue-report-input"
@@ -1248,7 +1248,7 @@
             <p id="issue-report-error" class="issue-report-error" hidden></p>
             <div class="modal-buttons issue-report-actions">
               <button type="button" id="issue-report-cancel" class="btn-secondary" data-i18n="cancel">Abbrechen</button>
-              <button type="button" id="issue-report-copy" class="btn-secondary">Kopieren</button>
+              <button type="button" id="issue-report-copy" class="btn-secondary" data-i18n="report.copy">Kopieren</button>
               <button type="button" id="issue-report-open" class="btn-primary" data-i18n="feedback.openOnGithub">Auf GitHub öffnen</button>
             </div>
           </div>
@@ -1280,10 +1280,10 @@
                 Schach 9x9
               </div>
               <div class="menu-nav">
-                <button class="menu-tab-btn active" data-tab="play">
+                <button class="menu-tab-btn active" data-tab="play" data-i18n="menu.play">
                   <span class="icon">🎮</span> Spielen
                 </button>
-                <button class="menu-tab-btn" data-tab="learn">
+                <button class="menu-tab-btn" data-tab="learn" data-i18n="menu.learn">
                   <span class="icon">🎓</span> Lernen
                 </button>
                 <button class="menu-tab-btn" data-tab="settings" data-i18n="settings.title">
@@ -1304,13 +1304,13 @@
               <!-- Play View -->
               <div id="view-play" class="menu-view active">
                 <h2 class="section-title" data-i18n="menu.newGame">Neues Spiel</h2>
-                <p class="section-subtitle">Starte schnell — oder entdecke weitere Modi.</p>
+                <p class="section-subtitle" data-i18n="menu.subtitle">Starte schnell — oder entdecke weitere Modi.</p>
 
                 <section
                   class="menu-section menu-section-featured"
                   aria-labelledby="featured-modes-label"
                 >
-                  <h3 id="featured-modes-label" class="menu-section-label">Empfohlen</h3>
+                  <h3 id="featured-modes-label" class="menu-section-label" data-i18n="modes.featured">Empfohlen</h3>
                   <div class="gamemode-grid gamemode-grid-featured">
                     <div class="gamemode-card hidden" id="main-menu-continue-btn">
                       <div class="card-icon">📂</div>
@@ -1567,9 +1567,9 @@
                   </div>
 
                   <div class="setting-group">
-                    <h3>Uhr</h3>
+                    <h3 data-i18n="settings.clockHeader">Uhr</h3>
                     <div class="setting-row">
-                      <label for="clock-toggle">Spieluhr</label>
+                      <label for="clock-toggle" data-i18n="settings.clockLabel">Spieluhr</label>
                       <label class="toggle-switch">
                         <input type="checkbox" id="clock-toggle" aria-label="Spieluhr an/aus" data-i18n-aria-label="a11y.clockToggle" />
                         <span class="toggle-slider"></span>
@@ -1640,7 +1640,7 @@
                     <p class="issue-report-hint" data-i18n="feedback.hintLong">
                       Rückmeldung zu schach9x9 ist ausdrücklich erwünscht. Die Meldung geht als GitHub-Issue raus, mit der aktuellen Partie.
                     </p>
-                    <button type="button" id="report-issue-btn" class="btn-secondary">Problem melden</button>
+                    <button type="button" id="report-issue-btn" class="btn-secondary" data-i18n="report.title">Problem melden</button>
                   </div>
                 </div>
               </div>
@@ -1648,7 +1648,7 @@
               <!-- Credits View -->
               <div id="view-credits" class="menu-view">
                 <h2 class="section-title">Credits</h2>
-                <p>Entwickelt mit ❤️ vom Google Deepmind Team</p>
+                <p data-i18n="credits.builtWith">Entwickelt mit ❤️ vom Google Deepmind Team</p>
               </div>
             </div>
           </div>

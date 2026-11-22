@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { logger } from './logger.js';
+import { afterDom, frameDom } from './domTimer.js';
 
 interface BattlePiece {
   type: string;
@@ -107,7 +108,7 @@ export class BattleAnimator {
         this.camera.lookAt(lookAt);
 
         if (progress < 1) {
-          requestAnimationFrame(animate);
+          frameDom(animate);
         } else {
           resolve();
         }
@@ -162,7 +163,7 @@ export class BattleAnimator {
   ): Promise<void> {
     const particles = this.createDustParticles(attackerPos);
     return new Promise(resolve => {
-      setTimeout(() => {
+      afterDom(() => {
         particles.forEach(p => this.scene.remove(p));
         resolve();
       }, 500);
@@ -178,7 +179,7 @@ export class BattleAnimator {
   ): Promise<void> {
     const flash = this.createFlashEffect(defenderPos);
     return new Promise(resolve => {
-      setTimeout(() => {
+      afterDom(() => {
         this.scene.remove(flash);
         resolve();
       }, 300);
@@ -198,7 +199,7 @@ export class BattleAnimator {
       (attackerPos.z + defenderPos.z) / 2
     );
     return new Promise(resolve => {
-      setTimeout(() => {
+      afterDom(() => {
         sparks.forEach(s => this.scene.remove(s));
         resolve();
       }, 600);
@@ -224,7 +225,7 @@ export class BattleAnimator {
           (shockwave.material as THREE.Material).opacity = 1 - progress;
         }
         if (progress < 1) {
-          requestAnimationFrame(animate);
+          frameDom(animate);
         } else {
           this.scene.remove(shockwave);
           resolve();
@@ -240,7 +241,7 @@ export class BattleAnimator {
   public async animateDefeat(defenderPos: THREE.Vector3 | { x: number; z: number }): Promise<void> {
     const smoke = this.createSmokeEffect(defenderPos);
     return new Promise(resolve => {
-      setTimeout(() => {
+      afterDom(() => {
         smoke.forEach(s => this.scene.remove(s));
         resolve();
       }, 800);

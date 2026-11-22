@@ -8,6 +8,7 @@ import { soundManager } from './sounds.js';
 import { t } from './i18n.js';
 
 import type { Player } from './types/core.js';
+import { everyDom } from './domTimer.js';
 
 export interface TimeControlMode {
   base: number;
@@ -78,7 +79,7 @@ export class TimeManager {
 
     this.stopClock();
     this.game.lastMoveTime = Date.now();
-    this.clockInterval = setInterval(() => this.tickClock(), 100);
+    this.clockInterval = everyDom(() => this.tickClock(), 100);
     this.updateClockUI();
   }
 

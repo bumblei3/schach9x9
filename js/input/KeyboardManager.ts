@@ -7,6 +7,7 @@ import { showToast, closeModal, renderBoard, updateStatus } from '../ui.js';
 import { t } from '../i18n.js';
 import type { App } from '../App.js';
 import type { Game, Piece } from '../gameEngine.js';
+import { afterDom } from '../domTimer.js';
 
 export class KeyboardManager {
   private app: App;
@@ -49,7 +50,7 @@ export class KeyboardManager {
       event.preventDefault();
       this.pendingFile = key;
       if (this.pendingFileTimer) clearTimeout(this.pendingFileTimer);
-      this.pendingFileTimer = setTimeout(() => {
+      this.pendingFileTimer = afterDom(() => {
         this.pendingFile = null;
         this.pendingFileTimer = null;
       }, 2000);

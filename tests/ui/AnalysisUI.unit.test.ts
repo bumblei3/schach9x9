@@ -14,6 +14,7 @@ vi.mock('../../js/tutor/PostGameAnalyzer.js', () => ({
   analyzeGame: vi.fn(),
   classifyMove: vi.fn(),
   QUALITY_METADATA: {},
+  qualityLabel: (q: string) => q,
 }));
 
 const { AnalysisUI } = await import('../../js/ui/AnalysisUI.js');

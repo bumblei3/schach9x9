@@ -901,7 +901,7 @@ function createMockHints(game: Game, turnColor: 'white' | 'black'): TutorHint[] 
       move: { from: move.from, to: move.to },
       score: 100 - index * 20,
       category: index === 0 ? 'best' : 'good',
-      qualityLabel: index === 0 ? '⭐ Bester Zug!' : '✅ Guter Zug',
+      qualityLabel: index === 0 ? t('tutor.hintBest') : t('tutor.hintGood'),
       summary: index === 0 ? t('tutor.quality.bestMove') : t('tutor.quality.normal'),
       betterMove: null,
       tacticalExplanations: [],

@@ -400,7 +400,10 @@ export function renderMaterialGraph(game: Game): void {
   points.forEach((p, i) => {
     const skip = Math.ceil(points.length / 50);
     if (i % skip === 0 || i === points.length - 1)
-      svgContent += `<circle cx="${p.x}" cy="${p.y}" r="3" class="eval-point" data-index="${p.index}"><title>Zug ${i}: ${p.score > 0 ? '+' : ''}${(p.score / 100).toFixed(2)} (weiß)</title></circle>`;
+      svgContent += `<circle cx="${p.x}" cy="${p.y}" r="3" class="eval-point" data-index="${p.index}"><title>${t('statistics.moveTooltip', {
+            i,
+            score: `${p.score > 0 ? '+' : ''}${(p.score / 100).toFixed(2)} (${t('statistics.evalWhite')})`,
+          })}</title></circle>`;
   });
   svg.innerHTML = svgContent;
 }

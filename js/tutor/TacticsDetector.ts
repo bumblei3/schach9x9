@@ -1,6 +1,7 @@
 import { BOARD_SIZE } from '../gameEngine.js';
 import * as aiEngine from '../aiEngine.js';
 import { isBlockedCell, type BoardShape } from '../config.js';
+import { t } from '../i18n.js';
 import type { GameLike, Piece } from '../types/core.js';
 
 /** Minimal interface for analyzer (provides getPieceName) */
@@ -127,8 +128,8 @@ export function detectTacticalPatterns(
       patterns.push({
         type: 'fork',
         severity: 'high',
-        explanation: `🍴 Gabelangriff! Bedroht: ${pieces}`,
-        question: 'Siehst du eine Möglichkeit, zwei wertvolle Figuren gleichzeitig zu bedrohen?',
+        explanation: t('tactic.fork', { pieces }),
+        question: t('tactic.forkQuestion'),
         targets: valuableThreatened.map((t: { pos: { r: number; c: number } }) => t.pos),
       });
     }
@@ -145,9 +146,9 @@ export function detectTacticalPatterns(
         type: 'capture',
         severity: isProfitable ? 'medium' : 'low',
         explanation: isProfitable
-          ? `⚔️ Schlägt ${pieceName} (Vorteilhaft)`
-          : `⚔️ Schlägt ${pieceName} (Riskant! Verlust möglich)`,
-        question: 'Gibt es eine gegnerische Figur, die du vorteilhaft schlagen kannst?',
+          ? t('tactic.captureGood', { piece: pieceName })
+          : t('tactic.captureRisky', { piece: pieceName }),
+        question: t('tactic.captureQuestion'),
         targets: [{ r: to.r, c: to.c }],
       });
     }
@@ -171,8 +172,8 @@ export function detectTacticalPatterns(
       patterns.push({
         type: 'check',
         severity: 'high',
-        explanation: '♔ Schach! Bedroht gegnerischen König',
-        question: 'Wie kannst du den gegnerischen König unter Druck setzen?',
+        explanation: t('tactic.check'),
+        question: t('tactic.checkQuestion'),
         targets: kingPos ? [kingPos] : [],
       });
     }
@@ -187,8 +188,8 @@ export function detectTacticalPatterns(
       patterns.push({
         type: 'pin',
         severity: 'high',
-        explanation: `📌 Fesselung! ${pinnedPiece.pinnedName} kann nicht ziehen`,
-        question: 'Kannst du eine gegnerische Figur an den König fesseln?',
+        explanation: t('tactic.pin', { piece: pinnedPiece.pinnedName }),
+        question: t('tactic.pinQuestion'),
         targets: targets,
       });
     }
@@ -200,9 +201,9 @@ export function detectTacticalPatterns(
       patterns.push({
         type: 'discovered',
         severity: 'high',
-        explanation: `🌟 Abzugsangriff auf ${target.name}!`,
+        explanation: t('tactic.discovered', { piece: target.name }),
         question:
-          'Kannst du durch das Wegziehen einer Figur einen Angriff auf eine andere freilegen?',
+          t('tactic.discoveredQuestion'),
         targets: target.targetPos ? [target.targetPos] : [],
       });
     }
@@ -218,8 +219,8 @@ export function detectTacticalPatterns(
         patterns.push({
           type: 'defense',
           severity: 'medium',
-          explanation: `🛡️ Verteidigt bedrohten ${defended.name}`,
-          question: 'Wie kannst du eine deiner bedrohten Figuren am besten schützen?',
+          explanation: t('tactic.defense', { piece: defended.name }),
+          question: t('tactic.defenseQuestion'),
           targets: [defended.pos],
         });
       }
@@ -231,9 +232,9 @@ export function detectTacticalPatterns(
       patterns.push({
         type: 'skewer',
         severity: 'high',
-        explanation: `🍢 Spieß! ${skewer.frontName} muss fliehen und entblößt ${skewer.behindName}`,
+        explanation: t('tactic.skewer', { front: skewer.frontName, behind: skewer.behindName }),
         question:
-          'Kannst du eine wertvolle Figur zwingen wegzuziehen, um eine dahinterstehende anzugreifen?',
+          t('tactic.skewerQuestion'),
         targets: [skewer.frontPos, skewer.behindPos], // For arrows
       });
     }
@@ -245,9 +246,9 @@ export function detectTacticalPatterns(
       patterns.push({
         type: 'battery',
         severity: 'medium',
-        explanation: `🔋 Batterie gebildet! ${b.frontName} und ${b.behindName} vereinen ihre Kraft.`,
+        explanation: t('tactic.battery', { front: b.frontName, behind: b.behindName }),
         question:
-          'Kannst du diese geballte Kraft nutzen, um in die gegnerische Stellung einzudringen?',
+          t('tactic.batteryQuestion'),
         targets: [b.behindPos], // Point to the supporting piece
       });
     }
@@ -260,8 +261,8 @@ export function detectTacticalPatterns(
         patterns.push({
           type: 'removing_guard',
           severity: 'medium',
-          explanation: `🔓 Zerstörung der Verteidigung! ${undefendedName} ist nun angreifbar`,
-          question: 'Kannst du einen Verteidiger ausschalten, um eine andere Figur zu schwächen?',
+          explanation: t('tactic.removingGuard', { piece: undefendedName }),
+          question: t('tactic.removingGuardQuestion'),
           targets: removingGuard.map(
             (rg: { undefendedPos: { r: number; c: number } }) => rg.undefendedPos
           ),
@@ -745,19 +746,27 @@ export function detectThreatsAfterMove(
 
           if (isPinned) {
             const pinTargetType =
-              pinThreats[0].xrayTargetType === aiEngine.PIECE_KING ? 'König' : 'Dame';
-            warning = `📌 ${pieceName} ist GEFESSELT an ${pinTargetType}! Ziehen nicht erlaubt.`;
+              pinThreats[0].xrayTargetType === aiEngine.PIECE_KING
+                ? t('piece.k')
+                : t('piece.q');
+            warning = t('tactic.pinnedTo', { piece: pieceName, target: pinTargetType });
           } else if (isDiscovered) {
-            warning = `🌟 ${pieceName} deckt Abzugsangriff auf! Gegner droht durch ${xrayAttacks[0].blockerSquare !== undefined ? 'Wegzug' : 'X-Ray'}.`;
+            warning = t('tactic.discoveredThreat', {
+              piece: pieceName,
+              via:
+                xrayAttacks[0].blockerSquare !== undefined
+                  ? t('tactic.viaMove')
+                  : t('tactic.viaXray'),
+            });
           } else if (isXray) {
-            warning = `🔍 ${pieceName} unter X-Ray-Angriff (verdeckt durch eigene Figur)!`;
+            warning = t('tactic.xray', { piece: pieceName });
           } else {
-            warning = `⚠️ ${pieceName} wird ungeschützt angegriffen!`;
+            warning = t('tactic.hanging', { piece: pieceName });
           }
 
           // Add move-specific context
           if (isPinned && isDirect) {
-            warning += ' (Direkt bedroht + Gefesselt)';
+            warning += t('tactic.directPinned');
           }
 
           threats.push({
@@ -783,13 +792,13 @@ export function detectThreatsAfterMove(
         threats.push({
           piece: { type: 'k', color: playerColor },
           pos: kingPos,
-          warning: '♔ SCHACH! Dein König wird direkt angegriffen!',
+          warning: t('tactic.kingInCheck'),
         });
       } else if (kingThreatsXray.length > 0) {
         threats.push({
           piece: { type: 'k', color: playerColor },
           pos: kingPos,
-          warning: '♔ Entdecktes Schach droht! Deine Figur deckt König ab.',
+          warning: t('tactic.discoveredCheck'),
         });
       }
     }
@@ -1096,7 +1105,7 @@ export function detectFairyPatterns(
           type: 'chancellor_skewer',
           pieceType,
           pieceName,
-          explanation: `🍢 Kanzler-Spieß! ${s.frontName} muss weichen und entblößt ${s.behindName}.`,
+          explanation: t('tactic.chancellorSkewer', { front: s.frontName, behind: s.behindName }),
           targets: [s.frontPos, s.behindPos],
         });
       }
@@ -1111,7 +1120,7 @@ export function detectFairyPatterns(
           type: 'angel_battery',
           pieceType,
           pieceName,
-          explanation: `🔋 Engel-Batterie! ${b.frontName} und ${b.behindName} verstärken sich gegenseitig.`,
+          explanation: t('tactic.angelBattery', { front: b.frontName, behind: b.behindName }),
           targets: [b.behindPos],
         });
       }
@@ -1126,7 +1135,7 @@ export function detectFairyPatterns(
           type: 'archbishop_skewer',
           pieceType,
           pieceName,
-          explanation: `🍢 Erzbischof-Spieß! ${s.frontName} muss weichen und entblößt ${s.behindName}.`,
+          explanation: t('tactic.archbishopSkewer', { front: s.frontName, behind: s.behindName }),
           targets: [s.frontPos, s.behindPos],
         });
       }

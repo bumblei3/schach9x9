@@ -9,6 +9,7 @@ import type { Player, Piece } from '../types/core.js';
 import type { GameLike, MoveRecord, Puzzle, ModalAction } from '../types/core.js';
 import { t } from '../i18n.js';
 import { puzzleTitle, puzzleDescription, puzzleDifficultyText } from '../puzzleManager.js';
+import { afterDom } from '../domTimer.js';
 
 /**
  * Zeigt ein modales Dialogfenster an.
@@ -290,7 +291,7 @@ export async function showCampaignVictoryModal(
   showModal('Sieg!', content, actions);
 
   // Trigger star animation after a short delay to let modal open
-  setTimeout(async () => {
+  afterDom(async () => {
     const { UIEffects } = await import('./ui_effects.js');
     const effects = new UIEffects();
     effects.animateStars(stars);

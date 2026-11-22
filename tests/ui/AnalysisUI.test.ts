@@ -38,6 +38,18 @@ vi.mock('../../js/tutor/PostGameAnalyzer.js', () => ({
     blunder: { label: 'Patzer', symbol: '??', color: '#f87171' },
     book: { label: 'Buch', symbol: '📖', color: '#a78bfa' },
   },
+  qualityLabel: (q: string) =>
+    ({
+      brilliant: 'Brillant!!',
+      great: 'Großartig',
+      best: 'Bester Zug',
+      excellent: 'Exzellent',
+      good: 'Gut',
+      inaccuracy: 'Ungelauigkeit',
+      mistake: 'Fehler',
+      blunder: 'Patzer',
+      book: 'Buch',
+    })[q] ?? q,
 }));
 
 // Mock logger

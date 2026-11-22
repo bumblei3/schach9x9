@@ -80,10 +80,10 @@ export function updateShopUI(game: GameLike): void {
     // Show button during upgrade phases or piece placement
     const phase = String(game.phase);
     if (phase === 'SETUP_WHITE_UPGRADES' || phase === 'SETUP_BLACK_UPGRADES') {
-      finishBtn.textContent = 'Fertig';
+      finishBtn.textContent = t('shop.finish');
       finishBtn.classList.remove('hidden');
     } else if (phase === 'SETUP_WHITE_PIECES' || phase === 'SETUP_BLACK_PIECES') {
-      finishBtn.textContent = 'Fertig'; // Or 'Start Game'
+      finishBtn.textContent = t('shop.finish');
       finishBtn.classList.remove('hidden');
     }
   }
@@ -96,14 +96,16 @@ export function updateShopUI(game: GameLike): void {
   const isUpgradePhase = phase === 'SETUP_WHITE_UPGRADES' || phase === 'SETUP_BLACK_UPGRADES';
 
   if (isUpgradePhase) {
-    if (shopHeader) shopHeader.textContent = 'Truppen verbessern';
+    if (shopHeader) shopHeader.textContent = t('shop.upgradeHeader');
     if (shopGrid) shopGrid.classList.add('hidden');
     if (tutorSection) tutorSection.classList.add('hidden');
     if (statusDisplay) {
       const diff = (from: string, to: string) => PIECE_VALUES[to] - PIECE_VALUES[from];
-      statusDisplay.textContent =
-        `Dame zum Engel ${diff('q', 'e')}, Läufer zum Erzbischof ${diff('b', 'a')}, ` +
-        `Bauer zum Engel ${diff('p', 'e')}. Klicke eine Figur auf dem Brett.`;
+      statusDisplay.textContent = t('shop.upgradeHint', {
+        qe: diff('q', 'e'),
+        ba: diff('b', 'a'),
+        pe: diff('p', 'e'),
+      });
     }
   } else {
     if (shopHeader) shopHeader.textContent = t('modes.hire');

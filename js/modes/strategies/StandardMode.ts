@@ -5,6 +5,7 @@ import * as UI from '../../ui.js';
 import { soundManager } from '../../sounds.js';
 import { logger } from '../../logger.js';
 import { t } from '../../i18n.js';
+import { afterDom } from '../../domTimer.js';
 
 export class StandardModeStrategy implements GameModeStrategy {
   init(game: GameExtended, controller: GameController, initialPoints: number): void {
@@ -56,7 +57,7 @@ export class StandardModeStrategy implements GameModeStrategy {
         game.log(t('log.whiteDoneBlackUpgrades'));
 
         if (game.isAI) {
-          setTimeout(() => controller.finishSetupPhase(), 500);
+          afterDom(() => controller.finishSetupPhase(), 500);
         }
         controller.autoSave();
       } else if (game.phase === PHASES.SETUP_BLACK_UPGRADES) {
@@ -75,11 +76,11 @@ export class StandardModeStrategy implements GameModeStrategy {
       }
 
       UI.showModal(
-        'Ungenutzte Punkte',
-        `Du hast noch ${game.points} Punkte übrig! Möchtest du wirklich fortfahren?`,
+        t('setup.unusedPoints'),
+        t('setup.unusedPointsMsg', { points: game.points }),
         [
-          { text: 'Abbrechen', class: 'btn-secondary', callback: () => {} },
-          { text: 'Fortfahren', class: 'btn-primary', callback: handleTransition },
+          { text: t('tutor.cancel'), class: 'btn-secondary', callback: () => {} },
+          { text: t('setup.continue'), class: 'btn-primary', callback: handleTransition },
         ]
       );
       return;
@@ -98,7 +99,7 @@ export class StandardModeStrategy implements GameModeStrategy {
     const actionBar = document.querySelector('.action-bar');
     if (actionBar) actionBar.classList.remove('hidden');
 
-    game.log('Spiel beginnt! Weiß ist am Zug.');
+    game.log(t('log.gameStarts'));
     if (game.updateBestMoves) game.updateBestMoves();
     controller.startClock();
     UI.updateStatistics(game);

@@ -4,6 +4,7 @@
  */
 
 import type { Square } from '../types/core.js';
+import { afterDom, frameDom } from '../domTimer.js';
 
 interface ArrowOptions {
   from: Square;
@@ -121,9 +122,9 @@ export function drawArrow(
     head.style.transition = 'opacity 0.2s ease 0.3s';
 
     // Trigger animation
-    requestAnimationFrame(() => {
+    frameDom(() => {
       path.style.strokeDashoffset = '0';
-      setTimeout(() => {
+      afterDom(() => {
         head.style.opacity = '1';
       }, 300);
     });
